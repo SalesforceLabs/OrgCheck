@@ -1,0 +1,87 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Custom Fields
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Custom Fields Dependency Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div id="datatable" />
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+                    controller.run({
+                        datasets: [ 'customFields', 'customObjects' ],
+                        dependencies: true,
+                        onRecords: function(map) {
+
+                            helper.html.datatable.create(
+                                'datatable',
+                                [
+                                    { name: 'Object', formula: (r) => { 
+                                        if (r.objectId) {
+                                            const objectItem = map.customObjects[r.objectId];
+                                            const objectName = objectItem ? objectItem.developerName : undefined;
+                                            return helper.html.render.link('/'+r.objectId, objectName);
+                                        }
+                                        return r.objectName;
+                                    }},
+                                    { name: 'Field', formula: (r) => { 
+                                        return helper.html.render.link('/'+r.id, r.fieldName); 
+                                    }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (!map.dependencies[r.id]) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Package', property: 'packageName' },
+                                    { name: 'Full API Name', property: 'fullName' },
+                                    { name: 'Dependencies', formula: (r) => { 
+                                        const dep = map.dependencies[r.id]; 
+                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        return helper.html.render.icon('redFlag') + ' No dependency.';
+                                    }}
+                                ],
+                                map.customFields,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (!map.dependencies[r.id]) 
+                                        return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );
+                        },
+                        actions: { 
+                            exportAsFile: { 
+                                filename: 'CustomFields',
+                                headers: ['Object Id', 'Object Name', 'Field Id', 'Field Name', 
+                                    'Package', 'Full API Name', 'Is there dependencies?'],
+                                appendRowsMethod: function(rows, map) {
+                                    helper.map.iterate2(map.customFields, function(d, i, s) {
+                                        rows.push([
+                                            d.objectId,
+                                            d.objectName,
+                                            d.id,
+                                            d.fieldName,
+                                            d.packageName,
+                                            d.fullName,
+                                            map.dependencies[d.id] ? true : false
+                                        ]);
+                                    });
+                                }
+                            }, 
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

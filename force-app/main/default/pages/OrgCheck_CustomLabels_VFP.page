@@ -1,0 +1,65 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Custom Labels
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Custom Labels Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div id="datatable" />
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+                    controller.run({
+                        datasets: [ 'customLabels' ],
+                        dependencies: true,
+                        onRecords: function(map) { 
+
+                            helper.html.datatable.create(
+                                'datatable',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (!map.dependencies[r.id]) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Namespace', property: 'namespace' },
+                                    { name: 'Master Label', property: 'masterLabel' },
+                                    { name: 'Category', property: 'category' },
+                                    { name: 'IsProtected', property: 'protected' },
+                                    { name: 'Language', property: 'language' },
+                                    { name: 'Value', formula: (r) => { 
+                                        return helper.html.render.shrinkText(r.value, 150); 
+                                    }},
+                                    { name: 'Dependencies', formula: (r) => { 
+                                        const dep = map.dependencies[r.id]; 
+                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        return helper.html.render.icon('redFlag') + ' No dependency.';
+                                    }}
+                                ],
+                                map.customLabels,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (!map.dependencies[r.id]) 
+                                        return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );                            
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

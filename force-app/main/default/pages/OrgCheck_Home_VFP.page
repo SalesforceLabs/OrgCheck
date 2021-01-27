@@ -1,0 +1,378 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Welcome in OrgCheck (<script>document.write(OrgCheck.version);</script>)
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Monitor your org seamlessly
+        </apex:define>
+        <apex:define name="html_actions" />
+        <apex:define name="html_content_core">
+            <div class="slds-brand-band slds-brand-band_cover slds-brand-band_medium slds-template_profile slds-brand-band_group">
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-opportunity" title="welcome">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Welcome</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Welcome!!!
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex">
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <img src="/file-asset/OrgCheck__OrgCheck_Logo2" /><br />
+                                Although invisible, Technical Debt has an impact on your project, your 
+                                IT budget, your Salesforce app, your end-users and... your business.<br />
+                                You may be interested in this <a target="_blank" 
+                                href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
+                                <br />
+                                You may have a <b>technical debt</b>, if you answer 'yes' to the following questions:
+                                <ul class="slds-list_dotted">
+                                    <li>Is the performance of your Salesforce app low?</li>
+                                    <li>Is the time to resolve a bug long with your support?</li>
+                                    <li>Is maintenance cost increasing?</li>
+                                    <li>Is documentation about your Salesforce org poor?</li>
+                                    <li>Is adding new features getting more complex?</li>
+                                    <li>Is testing and/or deploying your app a nightmare?</li>
+                                    <li>If yes, you may have a technical debt that you need to reduce.</li>
+                                </ul>
+                                <br />
+                                My vision of this tool was (and still is):
+                                <ul class="slds-list_dotted">
+                                    <li>The tool should run on a salesforce org: easy to install and easy to use</li>
+                                    <li>No additional software or platform</li>
+                                    <li>No need to have a Salesforce Employee with her/his magical access</li>
+                                    <li>Code of the application is available you can modify it, if you need it</li>
+                                </ul>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-account" title="preferences">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Preferences</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Preferences
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex"></div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner" id="div-preferences" />
+                        </article>
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-account" title="cache">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#account')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Metadata Cache</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Metadata Cache
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex">
+                                        <button class="slds-button slds-button_brand" id="button-lazy-load-cache">Load</button>
+                                        <button class="slds-button slds-button_destructive" id="button-clear-cache">Clear</button>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
+                                <div class="slds-progress slds-progress_vertical">
+                                    <ol class="slds-progress__list" id="list-loading-items" />
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Optimizer">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Salesforce Optimizer</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Salesforce Optimizer
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                Did you look at the <a href="/lightning/setup/SalesforceOptimizer/home" target="_blank">Salesforce Optimizer</a>?<br />
+                                This tool is complementary to <b>OrgCheck</b>!<br />
+                                <img src="/adoption/resources/optimizer/OptimizerSetup.png" />
+                            </div>
+                        </article>
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-visit-templates" title="Org Connection">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#visit_templates')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Org Connection</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Org Connection
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex"></div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-tabs_default">
+                                    <ul class="slds-tabs_default__nav" role="tablist">
+                                        <li class="slds-tabs_default__item slds-is-active" title="Local connection" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Local connection</a>
+                                        </li>
+                                        <li class="slds-tabs_default__item" title="Remote connection" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Remote connection</a>
+                                        </li>
+                                    </ul>
+                                    <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                                        <!-- By default, OrgCheck will scan the org where it has been installed. But you 
+                                        can specify another org!!<br />-->
+                                        OrgCheck scans the org where it has been installed<br />
+                                        <br />
+                                        On the top of each page, you will see a the org id (in a green badge) being 
+                                        used by OrgCheck. The org Id starts with <code>OOD</code>.<br />
+                                        <br />
+                                        OrgCheck is currently installed on <b>{!MID($Organization.Id, 1, 15)}</b>.<br />
+                                        <br />
+                                        <!--If you neet to reset the connection to this local org, click on the following button.<br />
+                                        <br />
+                                        <button id="button-orgauth-local" class="slds-button slds-button_brand">Check back my local org!</button><br />
+                                        <br />-->
+                                    </div>
+                                    <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                                        In the next versions, OrgCheck will be able to log to another org!!!<br />
+                                        <!--
+                                        OrgCheck can scan any other org (DE, Sandboxes and Production) as long as:
+                                        <ol class="slds-list_dotted">
+                                            <li>the <i>"My Domain"</i> feature is enabled on that remote org</li>
+                                            <li>a <i>"CORS"</i> setting is set to <code>https://*.visualforce.com</code> on that remote org</li>
+                                            <li>a <i>"connected app"</i> should be created on this local org</li>
+                                        </ol>
+                                        <br />
+                                        The <i>"My Domain"</i> feature let us distinguish the remote org you want to scan from the 
+                                        local org where you installed OrgCheck.<br />
+                                        For more information about this feature, please go to 
+                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank">this 
+                                        article</a> from the Salesforce official documentation.<br />
+                                        <br />
+                                        The <i>"CORS"</i> feature is necessary because it is very likely that your browser will require it
+                                        when OrgCheck (from your local org) tries to connect to another domain (to the remote org).<br />
+                                        As we do not encourage you to disable this feature in your browser, you will have to go to
+                                        the setup menu of your remote org and add a CORS setting to say that you accept outcoming request 
+                                        (from your local org) to the API (of your remote org).<br />
+                                        You can set <code>https://*.visualforce.com</code> which is more generic, or you can replace the 
+                                        <code>'*'</code> with the mydomain of the local org where you installed OrgCheck.<br />
+                                        For more information about this feature, please go to 
+                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank">this 
+                                        article</a> from the Salesforce official documentation.<br />
+                                        <br />
+                                        A <i>"ConnectedApp"</i> should be created in your local org. Please make sure you set the following information:
+                                        <ul class="slds-list_dotted">
+                                            <li>Icon URL: <code>https://login.salesforce.com/logos/Custom/Scope_Primary/icon.svg</code></li>
+                                            <li>Label: <code>OrgCheck</code></li>
+                                            <li>Logo URL: <code>https://login.salesforce.com/logos/Custom/Scope_Primary/logo.png</code></li>
+                                            <li>oAuth / Callback URL: <code><script>document.write(window.location.ancestorOrigins[0]);</script>/apex/OrgCheck_Authorization_VFP</code></li>
+                                            <li>oAuth / Is Admin Apporved: <code>False</code></li>
+                                            <li>oAuth / Scopes: <code>Api</code></li>
+                                        </ul>
+                                        Once created in the local org, get the <code>Consumer Key</code> of that connected app and 
+                                        paste it below (whatever remote org you want to scan).<br />
+                                        <br /><br />
+                                        <div class="slds-grid slds-gutters_xxx-small">
+                                            <div class="slds-col slds-size_1-of-5">
+                                                <span>Consumer</span>
+                                            </div>
+                                            <div class="slds-col slds-size_4-of-5">
+                                                <input type="text" id="consumer-key" size="20" class="slds-input" />
+                                            </div>
+                                        </div>
+                                        <div class="slds-grid slds-gutters_xxx-small">
+                                            <div class="slds-col slds-size_1-of-5">
+                                                <span>Check</span>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-5">
+                                                <input type="text" id="other-one-my-domain" size="5" class="slds-input" />
+                                            </div>
+                                            <div class="slds-col slds-col_bump-right slds-size_2-of-5">
+                                                <span>.my.salesforce.com</span>
+                                            </div>
+                                            <div class="slds-col slds-size_1-of-5">
+                                                <button id="button-orgauth-other" class="slds-button slds-button_outline-brand">Go!</button>
+                                            </div>
+                                        </div>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>                    
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // ========================================
+                    // PREFERENCES
+                    // ========================================
+                    const div = helper.html.element.get('div-preferences');
+                    [
+                        { 
+                            label: 'Roles',
+                            options: [
+                                { label: 'Hide external roles (from Community).', id: 'filter.HideExternalRoles' }
+                            ]
+                        }
+                    ].forEach(p => {
+                        const fieldset1 = helper.html.element.create('fieldset');
+                        helper.html.element.addClass(fieldset1, ['slds-form-element']);
+                        const legend1 = helper.html.element.create('legend');
+                        helper.html.element.addClass(legend1, ['slds-form-element__legend', 'slds-form-element__label']);
+                        helper.html.element.setText(legend1, p.label);
+                        const div1 = helper.html.element.create('div');
+                        helper.html.element.addClass(div1, ['slds-form-element__control']);
+                        const br1 = helper.html.element.create('br');
+                        p.options.forEach(o => {
+                            const div2 = helper.html.element.create('div');
+                            helper.html.element.addClass(div2, ['slds-checkbox']);
+                            const input1 = helper.html.element.create('input');
+                            helper.html.element.setAttribute(input1, 'type', 'checkbox');
+                            const value = helper.preferences.get(o.id);
+                            if (value) helper.html.element.setAttribute(input1, 'checked', '');
+                            helper.html.element.setAttribute(input1, 'id', o.id);
+                            input1.onclick = function(e) {
+                                helper.preferences.set(e.target.id, e.target.checked);
+                            }
+                            const label1 = helper.html.element.create('label');
+                            helper.html.element.addClass(label1, ['slds-checkbox__label']);
+                            helper.html.element.setAttribute(label1, 'for', o.id);
+                            const span1 = helper.html.element.create('span');
+                            helper.html.element.addClass(span1, ['slds-checkbox_faux']);
+                            const span2 = helper.html.element.create('span');
+                            helper.html.element.addClass(span2, ['slds-form-element__label']);
+                            helper.html.element.setText(span2, o.label);
+                            helper.html.element.appendChild(label1, span1);
+                            helper.html.element.appendChild(label1, span2);
+                            helper.html.element.appendChild(div2, input1);
+                            helper.html.element.appendChild(div2, label1);
+                            helper.html.element.appendChild(div1, div2);
+                        });
+                        helper.html.element.appendChild(fieldset1, legend1);
+                        helper.html.element.appendChild(fieldset1, div1);
+                        helper.html.element.appendChild(div, fieldset1);
+                        helper.html.element.appendChild(div, br1);
+                    });
+
+                    // ========================================
+                    // LOAD CACHE
+                    // ========================================
+                    const reset_items_in_list = function() {
+                        const items = helper.html.element.get('list-loading-items');
+                        helper.html.element.removeAllChild(items);
+                        const keys = helper.cache.metadata.keys().sort();
+                        for (let i=0; i<keys.length; i++) {
+                            const item = helper.html.element.create('li');
+                            helper.html.element.addClass(item, ['slds-progress__item', 'slds-is-completed']);
+                            helper.html.element.setAttribute(item, 'id', keys[i]);
+                            // add inner div #1
+                            const innerDiv1 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv1, ['slds-progress__marker']);
+                            helper.html.element.appendChild(item, innerDiv1);
+                            // add inner div #2
+                            const innerDiv2 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
+                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + helper.timestamp.to.date(helper.cache.metadata.timestamp(keys[i])) + ' - ' + helper.cache.metadata.version(keys[i]) + ')');
+                            helper.html.element.appendChild(item, innerDiv2);
+                            // add buttons
+                            const deleteButton = helper.html.element.create('button');
+                            deleteButton.onclick = function(e) {
+                                helper.cache.metadata.clear(keys[i]);
+                                helper.html.element.show(item, false);
+                            };
+                            helper.html.element.addClass(deleteButton, ['slds-button', 'slds-button_text-destructive']);
+                            helper.html.element.setText(deleteButton, 'x');
+                            helper.html.element.appendChild(item, deleteButton);
+                            // Add item in the list
+                            helper.html.element.appendChild(items, item);
+                        }
+                    };
+                    helper.html.element.get('button-clear-cache').onclick = function(e) { 
+                        helper.cache.metadata.clearAll(); 
+                        reset_items_in_list();
+                    };
+                    helper.html.element.get('button-lazy-load-cache').onclick = function(e) { 
+                        reset_items_in_list(); 
+                    };
+                    reset_items_in_list();
+
+                    // ========================================
+                    // Authentication part
+                    // ========================================
+                    /*helper.html.element.get('button-orgauth-local').onclick = function(e) {
+                        // Back to local org!!
+                        helper.information.switchToOrg();
+                        reset_items_in_list(); 
+                    }*/
+                    /*
+                    helper.html.element.get('button-orgauth-other').onclick = function(e) {
+                        // Redirect to oAuth flow to remote org!!
+                        const callbackURL = window.location.ancestorOrigins[0] + '/apex/OrgCheck_Authorization_VFP';
+                        const clientId = helper.html.element.get('consumer-key').value; 
+                        const mydomain = helper.html.element.get('other-one-my-domain').value;
+                        top.location.href = 'https://'+mydomain+'.my.salesforce.com/services/oauth2/authorize?'+
+                            'client_id='+clientId+'&response_type=token&redirect_uri='+callbackURL;
+                    }*/
+
+                    helper.information.showMainContent();
+
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

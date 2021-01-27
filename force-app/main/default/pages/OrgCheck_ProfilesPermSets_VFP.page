@@ -1,0 +1,182 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="text_page_title">
+            Profiles and Permissions
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Non User Specific Profile and Permissions Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Profiles</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Permission Sets</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Profile Login Restrictions" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">Profile Login Restrictions</a>
+                    </li>
+                </ul>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                    <div id="datatable-profiles" />
+                </div>
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                    <div id="datatable-permissionSets" />
+                </div>
+                <div id="tab-default-3" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
+                    <h1 class="slds-text-heading--small">Login Hour Restrictions</h1>
+                    <div id="datatable-profileLoginHours" />
+                    <h1 class="slds-text-heading--small">IP Range Restrictions</h1>
+                    <div id="datatable-profileRangeIPs" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // =================================
+                    // RUN CONTROLLER
+                    // =================================
+                    controller.run({
+                        datasets: [ 'profiles', 'permissionSets', 'profileLoginRestrictions' ],
+                        onRecords: function(map) { 
+
+                            // -------------------------------------------
+                            // PROFILES
+                            // -------------------------------------------
+                            helper.html.datatable.create(
+                                'datatable-profiles',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (r.isCustom && r.membersCount == 0) badnessScore++
+                                        if (r.isCustom && !r.description) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'License', property: 'license' },
+                                    { name: 'User Type', property: 'userType' },
+                                    { name: 'Package', property: 'package' },
+                                    { name: 'Number of users', formula: (r) => { 
+                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
+                                        return helper.html.render.icon('greenFlag') + ' More than 100 users';
+                                    }},
+                                    { name: 'Description', formula: (r) => {
+                                        if (r.isCustom && !r.description) {
+                                            return helper.html.render.icon('redFlag') + ' You should set a description to this custom profile!';
+                                        }
+                                        return r.description;
+                                    }}
+                                ],
+                                map.profiles,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );
+
+                            // -------------------------------------------
+                            // PROFILE LOGIN RESTRICTIONS
+                            // -------------------------------------------
+                            helper.html.datatable.create(
+                                'datatable-profileLoginHours',
+                                [
+                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Monday', formula: (r) => { return r.loginHours.monday ? r.loginHours.monday.from + ' to ' + r.loginHours.monday.to : '' }},
+                                    { name: 'Tuesday', formula: (r) => { return r.loginHours.tuesday ? r.loginHours.tuesday.from + ' to ' + r.loginHours.tuesday.to : '' }},
+                                    { name: 'Wednesday', formula: (r) => { return r.loginHours.wednesday ? r.loginHours.wednesday.from + ' to ' + r.loginHours.wednesday.to : '' }},
+                                    { name: 'Thursday', formula: (r) => { return r.loginHours.thursday ? r.loginHours.thursday.from + ' to ' + r.loginHours.thursday.to : '' }},
+                                    { name: 'Friday', formula: (r) => { return r.loginHours.friday ? r.loginHours.friday.from + ' to ' + r.loginHours.friday.to : '' }},
+                                    { name: 'Saturday', formula: (r) => { return r.loginHours.saturday ? r.loginHours.saturday.from + ' to ' + r.loginHours.saturday.to : '' }},
+                                    { name: 'Sunday', formula: (r) => { return r.loginHours.sunday ? r.loginHours.sunday.from + ' to ' + r.loginHours.sunday.to : '' }},
+                                ],
+                                map.profileLoginRestrictions,
+                                { name: 'Profile', order: 'asc' },
+                                {},
+                                { formula: (r) => { return r.loginHours ? true : false; }}
+                            );
+
+                            helper.html.datatable.create(
+                                'datatable-profileRangeIPs',
+                                [
+                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Description', formula: (r) => { 
+                                        let html = '';
+                                        r.loginIpRanges.forEach(i => html += i.description + '<br />');
+                                        return html;
+                                    }},
+                                    { name: 'Starts', formula: (r) => { 
+                                        let html = '';
+                                        r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
+                                        return html;
+                                    }},
+                                    { name: 'Ends', formula: (r) => { 
+                                        let html = '';
+                                        r.loginIpRanges.forEach(i => html += i.endAddress + '<br />');
+                                        return html;
+                                    }},
+                                ],
+                                map.profileLoginRestrictions,
+                                { name: 'Profile', order: 'asc' },
+                                {},
+                                { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }}
+                            );
+
+                            // -------------------------------------------
+                            // PERMISSION SETS
+                            // -------------------------------------------
+                            helper.html.datatable.create(
+                                'datatable-permissionSets',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (r.isCustom && r.membersCount == 0) badnessScore++
+                                        if (r.isCustom && !r.description) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'License', property: 'license' },
+                                    { name: 'Package', property: 'package' },
+                                    { name: 'Number of users', formula: (r) => { 
+                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
+                                        return helper.html.render.icon('greenFlag') + ' More than 100 users';
+                                    }},
+                                    { name: 'Description', formula: (r) => {
+                                        if (r.isCustom && !r.description) {
+                                            return helper.html.render.icon('redFlag') + ' You should set a description to this custom permission set!';
+                                        }
+                                        return r.description;
+                                    }}
+                                ],
+                                map.permissionSets,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,160 @@
+<apex:page docType="html-5.0" applyBodyTag="false" applyHtmlTag="false" showHeader="false">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <apex:slds />
+        <head>
+            <script src="{!URLFOR($Resource.OrgCheck_D3_SR)}"></script>
+            <script src="{!URLFOR($Resource.OrgCheck_JSForce_SR)}"></script>
+            <script src="{!URLFOR($Resource.OrgCheck_OrgCheck_SR)}"></script>
+            <apex:insert name="html_additional_scripttags" />
+        </head>
+        <body class="slds-scope">
+            <style type="text/css" media="screen">
+                h1.slds-text-heading--small {
+                    padding-top: 20px;
+                    padding-bottom: 10px;
+                    padding-left: 15px;
+                }
+                .OrgCheck-dependency-thumbnail :hover {
+                    opacity: 0.3;
+                    background-color: MidnightBlue;
+                    cursor: zoom-in;
+                }
+                .OrgCheck-dependency-thumbnail * :hover {
+                    opacity: initial;
+                    cursor: zoom-in;
+                }
+            </style>
+            <div id="modal" style="display: none;">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="document.getElementById('modal').style.display = 'none'">
+                                <svg class="slds-button__icon slds-button__icon_large" aria-hidden="true">
+                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+                                </svg>
+                                <span class="slds-assistive-text">Close</span>
+                            </button>
+                            <h2 id="modal-heading" class="slds-modal__title slds-hyphenate"></h2>
+                        </header>
+                        <div class="slds-modal__content slds-scrollable" id="modal-content-id" style="width: 100%; height: 100%; " />
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+            <div class="slds-page-header">
+                <div class="slds-page-header__row">
+                    <div class="slds-page-header__col-title">
+                        <div class="slds-media">
+                            <div class="slds-media__figure">
+                                <span class="slds-icon_container slds-icon-standard-opportunity">
+                                    <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
+                                        <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text"><apex:insert name="text_page_title" /></span>
+                                </span>
+                            </div>
+                            <div class="slds-media__body">
+                                <div class="slds-page-header__name">
+                                    <div class="slds-page-header__name-title">
+                                        <h1>
+                                            <span class="slds-page-header__title slds-truncate"><apex:insert name="text_page_title" /></span>
+                                        </h1>
+                                        <apex:insert name="text_page_subtitle" />
+                                     </div>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-page-header__col-actions">
+                        <div class="slds-page-header__controls">
+                            <apex:insert name="html_actions" />
+                            <div class="slds-page-header__control" style="display: none;">
+                                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Export" id="button-export">
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#share_mobile')}"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Export</span>
+                                </button>
+                            </div>
+                            <div class="slds-page-header__control" style="display: none;">
+                                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Refresh data" id="button-clear-page-cache">
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#refresh')}"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Refresh data</span>
+                                </button>
+                            </div>
+                            <div class="slds-page-header__control slds-align_absolute-center">
+                                <svg class="slds-button__icon" aria-hidden="true">
+                                    <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#threedots_vertical')}"></use>
+                                </svg>
+                            </div>
+                            <div class="slds-page-header__control slds-align_absolute-center">
+                                <span class="slds-badge slds-theme_success" id="org-id" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-progress-bar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" role="progressbar">
+                <span class="slds-progress-bar__value" style="width:0%;" id="progressbar">
+                    <span class="slds-assistive-text">Progress: 0%</span>
+                </span>
+            </div>
+            <div id="spinner" style="display: none;">
+                <div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand" style="z-index: 3;">
+                    <span class="slds-assistive-text">Loading</span>
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+                <div class="slds-notify_container slds-is-relative" style="z-index: 2;">
+                    <div class="slds-notify slds-notify_toast slds-theme_info" role="status">
+                        <span class="slds-assistive-text">Loading...</span>
+                        <img src="/file-asset/Orgcheck__OrgCheck_Mascot2" width="128" height="128" />
+                        <div class="slds-notify__content">
+                            <h2 class="slds-text-heading--small">
+                                <div class="slds-scrollable" id="spinner-message" style="width: 100%; height: 100%; " />
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="content" style="display: none;">
+                <apex:insert name="html_content_core" />
+            </div>
+            <apex:insert name="html_start_definition_script">
+                <script>
+                    function start2(controller, helper) { }
+                </script>
+            </apex:insert>
+            <script>
+
+                window.onload = function() {
+
+                    // ========================================================================
+                    // Initialization of OrgCheck main object called "core"
+                    // ========================================================================
+                    const core = new OrgCheck.Core({
+                        sfApiVersion: 48,
+                        sfLocalAccessToken: '{!$Api.Session_Id}',
+                        htmlProgressBarTagId: 'progressbar',
+                        htmlSpinnerTagId: 'spinner',
+                        htmlSpinnerMessageTagId: 'spinner-message',
+                        htmlModalContentTagId: 'modal-content-id',
+                        htmlModalTagId: 'modal',
+                        htmlModalTitleTagId: 'modal-heading',
+                        htmlMainContentTagId: 'content',
+                        formatDefaultDate: 'dd/MM/y',
+                        formatDefaultDatetime: 'dd/MM/y HH:mm:ss'
+                    });
+                    buildDatasets(core);
+
+                    // ========================================================================
+                    // Finally we call the start2 method for the page to use OrgCheck controller and helper
+                    // ========================================================================
+                    start2(core.getController(), core.getHelper());
+                }
+            </script>
+        </body>
+    </html>
+</apex:page>

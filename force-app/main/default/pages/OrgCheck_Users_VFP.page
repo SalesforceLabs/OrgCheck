@@ -1,0 +1,102 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="text_page_title">
+            Users
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Active Users Profile and Permissions Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div id="datatable" />
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    controller.run({
+                        datasets: [ 'users' ],
+                        onRecords: function(map) { 
+
+                            helper.html.datatable.create(
+                                'datatable',
+                                [
+                                    { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (r.onLightningExperience !== true) badnessScore++
+                                        if (!r.lastLogin) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Last login', formula: (r) => { 
+                                        if (r.lastLogin) return helper.html.render.icon('greenFlag') + ' ' + r.lastLogin;
+                                        return helper.html.render.icon('redFlag') + ' Never logged!'; 
+                                    }},
+                                    { name: 'Failed logins', property: 'numberFailedLogins' },
+                                    { name: 'Password change', property: 'lastPasswordChange' },
+                                    { name: 'On LEX?', formula: (r) => { 
+                                        if (r.onLightningExperience) return helper.html.render.icon('greenFlag') + ' LEX';
+                                        return helper.html.render.icon('redFlag') + ' Classic'; 
+                                    }},
+                                    { name: 'Key permissions', formula: (r) => {
+                                        let html = '';
+                                        if (r.permissions.apiEnabled) html += 'Api Enabled<br />';
+                                        if (r.permissions.viewSetup) html += 'View Setup<br />';
+                                        if (r.permissions.modifyAllData) html += 'Modify All Data<br />';
+                                        if (r.permissions.viewAllData) html += 'View All Data<br />';
+                                        return html;
+                                    }},
+                                    { name: 'Profile Name', formula: (r) => { return helper.html.render.link('/'+r.profile.id, r.profile.name); }},
+                                    { name: 'Permission Set Names', formula: (r) => {
+                                        let html = '';
+                                        r.permissionSets.forEach(ps => html += helper.html.render.link('/'+ps.id, ps.name) + '<br />');
+                                        return html;
+                                    }}
+                                ],
+                                map.users,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.onLightningExperience !== true || !r.lastLogin) 
+                                        return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );
+                        },
+                        actions: { 
+                            exportAsFile: { 
+                                filename: 'Users',
+                                headers: ['User Id', 'User Name', 'Last login', 'Failed logins', 
+                                    'Password change', 'On LEX?', 'Api Enabled', 
+                                    'View Setup', 'Modify All Data', 'View All Data', 
+                                    'Profile Id', 'Profile Name', 'Nb Permission Sets'],
+                                appendRowsMethod: function(rows, map) {
+                                    helper.map.iterate2(map.users, function(d, i, s) {
+                                        rows.push([
+                                            d.id,
+                                            d.name,
+                                            d.lastLogin,
+                                            d.numberFailedLogins,
+                                            d.lastPasswordChange,
+                                            d.onLightningExperience,
+                                            d.permissions.apiEnabled, 
+                                            d.permissions.viewSetup, 
+                                            d.permissions.modifyAllData,
+                                            d.permissions.viewAllData, 
+                                            d.profile.id, 
+                                            d.profile.name,
+                                            d.permissionSets.length
+                                        ]);
+                                    });
+                                }
+                            }, 
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,198 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Apex Classes and Triggers
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Apex Classes and Triggers Overview
+        </apex:define>
+        <apex:define name="html_actions">
+            <div class="slds-page-header__control">
+                <a href="/01p" target="_blank">
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                        <svg class="slds-button__icon" aria-hidden="true">
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Compile all</span>
+                    </button>
+                </a>
+            </div>
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Classes" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Classes</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Triggers" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Triggers</a>
+                    </li>
+                </ul>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                    <div id="datatable-classes" />
+                </div>
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                    <div id="datatable-triggers" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // RUN CONTROLLER
+                    controller.run({
+                        datasets: [ 'apexClasses', 'apexTriggers' ],
+                        dependencies: true,
+                        onRecords: function(map) { 
+
+                            // Render the Apex Classes data in a table
+                            helper.html.datatable.create(
+                                'datatable-classes',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (!map.dependencies[r.id]) badnessScore++;
+                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
+                                        if (r.isTest === false && r.isInterface === false && !r.specifiedSharing) badnessScore++;
+                                        if (r.isValid === false) badnessScore++;
+                                        return badnessScore;
+                                    }},
+                                    { name: 'API', formula: (r) => {
+                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
+                                        return r.apiVersion;
+                                    }},
+                                    { name: 'Package', property: 'namespace' },
+                                    { name: 'Status', formula: (r) => {
+                                        if (r.needsRecompilation === true)
+                                            return helper.html.render.icon('redFlag') + ' Recompile!';
+                                        if (r.isValid === false)
+                                            return helper.html.render.icon('redFlag') + ' Invalid!';
+                                        return helper.html.render.icon('greenFlag') + ' OK';
+                                    }},
+                                    { name: 'Access', property: 'specifiedAccess' },
+                                    { name: 'Abstract', formula: (r) => {
+                                        return helper.html.render.checkbox(r.isAbstract);
+                                    }},
+                                    { name: 'Type', formula: (r) => {
+                                        return r.isInterface === false ? 'Class' : 'Interface';
+                                    }},
+                                    { name: 'Interfaces', formula: (r) => {
+                                        let html = ''; 
+                                        if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
+                                        return html;
+                                    }},
+                                    { name: 'Size', property: 'length' },
+                                    { name: 'Methods', property: 'methodsCount' },
+                                    { name: 'Inner Classes', property: 'innerClassesCount' },
+                                    { name: 'Annotations', formula: (r) => {
+                                        let html = ''; 
+                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        return html;
+                                    }},
+                                    { name: 'Sharing', formula: (r) => {
+                                        if (r.isInterface === true)
+                                             return 'OK for interface.';
+                                        if (r.isTest === false && r.isInterface === false && !r.specifiedSharing)
+                                            return helper.html.render.icon('redFlag') + ' Not specified!';
+                                        return r.specifiedSharing;
+                                    }},
+                                    { name: 'Dependencies', formula: (r) => { 
+                                        const dep = map.dependencies[r.id]; 
+                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        return helper.html.render.icon('redFlag') + ' No dependency.';
+                                    }}
+                                ],
+                                map.apexClasses,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (!map.dependencies[r.id] ||
+                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
+                                        (r.isTest === false && r.isInterface === false && !r.specifiedSharing) ||
+                                        (r.isValid === false)) 
+                                        return helper.html.render.color('highlight');
+                                    return null;
+                                }},
+                                { formula: (r) => { 
+                                    if (r.length === -1) return false;
+                                 }}
+                            );
+
+                            // Render the Apex Triggers data in a table
+                            helper.html.datatable.create(
+                                'datatable-triggers',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (!map.dependencies[r.id]) badnessScore++;
+                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
+                                        if (r.isValid === false) badnessScore++;
+                                        if (r.isActive === false) badnessScore++;
+                                        return badnessScore;
+                                    }},
+                                    { name: 'API', formula: (r) => {
+                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
+                                        return r.apiVersion;
+                                    }},
+                                    { name: 'Package', property: 'namespace' },
+                                    { name: 'Active', formula: (r) => {
+                                        return helper.html.render.checkbox(r.isActive);
+                                    }},
+                                    { name: 'Status', formula: (r) => {
+                                        if (r.needsRecompilation === true)
+                                            return helper.html.render.icon('redFlag') + ' Recompile!';
+                                        if (r.isValid === false)
+                                            return helper.html.render.icon('redFlag') + ' Invalid!';
+                                        return helper.html.render.icon('greenFlag') + ' OK';
+                                    }},
+                                    { name: 'Size', property: 'length' },
+                                    { name: 'SObject', property: 'sobject' },
+                                    { name : '*Insert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
+                                    { name : 'Insert*', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
+                                    { name : '*Update', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
+                                    { name : 'Update*', formula: (r) => { return helper.html.render.checkbox(r.afterUpdate); }},
+                                    { name : '*Delete', formula: (r) => { return helper.html.render.checkbox(r.beforeDelete); }},
+                                    { name : 'Delete*', formula: (r) => { return helper.html.render.checkbox(r.afterDelete); }},
+                                    { name : 'Undelete*', formula: (r) => { return helper.html.render.checkbox(r.afterUndelete); }},
+                                    { name: 'Annotations', formula: (r) => {
+                                        let html = ''; 
+                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        return html;
+                                    }},
+                                    { name: 'Dependencies', formula: (r) => { 
+                                        const dep = map.dependencies[r.id]; 
+                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        return helper.html.render.icon('redFlag') + ' No dependency.';
+                                    }}
+                                ],
+                                map.apexTriggers,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (!map.dependencies[r.id] || 
+                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
+                                        (r.isValid === false) ||
+                                        (r.isActive === false))
+                                            return helper.html.render.color('highlight');
+                                    return null;
+                                }}
+                            );
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

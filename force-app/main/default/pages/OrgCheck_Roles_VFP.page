@@ -1,0 +1,396 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Role Hierarchy Advanced Tree
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Role Hierarchy Overview
+        </apex:define>
+        <apex:define name="html_actions">
+            <div class="slds-page-header__control">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                        <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomout ')}"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Zoom out</span>
+                </button>
+            </div>
+            <div class="slds-page-header__control">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                        <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#sync ')}"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Zoom 1:1</span>
+                </button>
+            </div>
+            <div class="slds-page-header__control">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button">
+                    <svg class="slds-button__icon" aria-hidden="true">
+                        <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomin')}"></use>
+                    </svg>
+                    <span class="slds-assistive-text">Zoom in</span>
+                </button>
+            </div>
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Role Explorer</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Role Listing</a>
+                    </li>
+                </ul>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                    <div class="slds-scrollable">
+                        <div id="chart-container" name="chart-container" />
+                    </div>
+                </div>
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                    <div id="datatable" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    const PREF_FILTER_EXTERNAL_ROLES = helper.preferences.get('filter.HideExternalRoles');
+
+                    // =================================
+                    // ZOOM METHODS
+                    // =================================
+                    let currenZoom = 100;
+                    const zoomOut = function() {
+                        if (currenZoom == 50) return;
+                        currenZoom -= 50;
+                        helper.html.element.get('chart-container').style.width = currenZoom + '%';
+                    }
+                    const zoomReset = function() {
+                        currenZoom = 100;
+                        helper.html.element.get('chart-container').style.width = currenZoom + '%';
+                    }
+                    const zoomIn = function() {
+                        if (currenZoom == 1500) return;
+                        currenZoom += 50;
+                        helper.html.element.get('chart-container').style.width = currenZoom + '%';
+                    }
+                    helper.html.element.get('zoom-out-button').onclick = function(event) { zoomOut(); }
+                    helper.html.element.get('zoom-reset-button').onclick = function(event) { zoomReset(); }
+                    helper.html.element.get('zoom-in-button').onclick = function(event) { zoomIn(); }
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+                    
+                    // ==================================
+                    // COMPUTE GRAPHIC FOR ROLES
+                    // ==================================
+                    const computeGraph = function(roles_map, node_click) {
+                        
+                        // Some constants
+                        const BOX_PADDING = 3;
+                        const BOX_HEIGHT = 24;
+                        const BOX_WIDTH = 100;
+                        const NOTIF_HEIGHT = 8;
+                        const NOTIF_WIDTH = 12;
+                        
+                        // Stratify the roles into a hierarchy structure
+                        const keys = helper.map.keys(roles_map);
+                        const root = d3.stratify()
+                            .id(d => roles_map[d].id)
+                            .parentId(d => roles_map[d].parentId)
+                            (keys);
+                        
+                        // Set size
+                        let mdepth = 0;
+                        root.each(function(d) {
+                            if (mdepth < d.depth) mdepth = d.depth;
+                        });
+                        const width = BOX_WIDTH * (mdepth * 2 + 4);
+                        root.dx = BOX_HEIGHT + BOX_PADDING;
+                        root.dy = width / (root.height + 1);
+                        
+                        // Generate tree
+                        const tree = d3.tree().nodeSize([root.dx, root.dy])(root);
+                        
+                        // Define x0 and x1
+                        let x0 = Infinity;
+                        let x1 = -x0;
+                        root.each(function(d) {
+                            if (d.x > x1) x1 = d.x;
+                            if (d.x < x0) x0 = d.x;
+                            if (mdepth < d.depth) mdepth = d.depth;
+                        });
+
+                        // Set some attributes that we use to render each nodes
+                        root.each(function(d) {
+                            const nodeData = roles_map[d.data];
+                            d.active_show_notif = false;
+                            d.inactive_show_notif = false;
+                            if (!d.parent) {
+                                // 'I am root...'
+                                d.popup_background_color = helper.html.render.color('gray');
+                                d.clickable = false;
+                            } else if (nodeData) {
+                                const activeCount = nodeData.activeMembersCount;
+                                d.active_count = activeCount;
+                                d.clickable = true;
+                                if (activeCount > 0) {
+                                    d.popup_background_color = helper.html.render.color('blue');
+                                    d.active_background_color = helper.html.render.color('dark-blue');
+                                    if (activeCount > 100) {
+                                        d.active_count = '99+';
+                                    }
+                                    d.active_show_notif = true;
+                                } else {
+                                    d.popup_background_color = helper.html.render.color('orange');
+                                    d.active_background_color = helper.html.render.color('dark-orange');
+                                }
+                                const inactiveCount = nodeData.inactiveMembersCount;
+                                d.inactive_count = inactiveCount;
+                                if (inactiveCount > 0) {
+                                    d.inactive_background_color = helper.html.render.color('gray');
+                                    if (inactiveCount > 100) {
+                                        d.inactive_count = '99+';
+                                    }
+                                    d.inactive_show_notif = true;
+                                } else {
+                                    d.inactive_background_color = helper.html.render.color('dark-gray');
+                                }
+                            }
+                        });
+                        
+                        // Construction of graph
+                        const svg = d3.create('svg')
+                            .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2]);
+                        
+                        const g = svg.append('g')
+                            .attr('font-family', 'Salesforce Sans,Arial,sans-serif')
+                            .attr('font-size', '6')
+                            .attr('transform', `translate(${root.dy / 2},${root.dx - x0})`);
+                        
+                        const link = g.append('g')
+                            .attr('fill', 'none')
+                            .attr('stroke', '#555')
+                            .attr('stroke-opacity', 0.4)
+                            .attr('stroke-width', 1.5)
+                            .selectAll('path')
+                            .data(root.links())
+                            .join('path')
+                            .attr('d', d3.linkHorizontal()
+                                  .x(function(d) { return d.y; } )
+                                  .y(function(d) { return d.x; } )
+                                 );
+                        
+                        const node = g.append('g')
+                            .attr('stroke-linejoin', 'round')
+                            .attr('stroke-width', 3)
+                            .attr("cursor", "pointer")
+                            .selectAll('g')
+                            .data(root.descendants())
+                            .join('g')
+                            .attr('transform', function(d) { return `translate(${d.y},${d.x})`; });
+                        
+                        // --------------------------------
+                        // NODE ZONE
+                        // --------------------------------
+                        node.append('rect')
+                            .attr('fill', function(d) { return d.popup_background_color; })
+                            .attr('rx', 6)
+                            .attr('ry', 6)
+                            .attr('x', 0)
+                            .attr('y', - BOX_HEIGHT / 2)
+                            .attr('width', BOX_WIDTH)
+                            .attr('height', BOX_HEIGHT)
+                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                        
+                        // --------------------------------
+                        // NOTIFICATION ZONE - ACTIVE USERS
+                        // --------------------------------
+                        node.filter(function(d) { return d.active_show_notif === true; })
+                            .append('rect')
+                            .attr('fill', function(d) { return d.active_background_color; })
+                            .attr('rx', 4)
+                            .attr('ry', 4)
+                            .attr('x', BOX_WIDTH - NOTIF_WIDTH + 2)
+                            .attr('y', - BOX_HEIGHT / 2 - 4)
+                            .attr('width', NOTIF_WIDTH)
+                            .attr('height', NOTIF_HEIGHT)
+                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                        
+                        // --------------------------------
+                        // NOTIFICATION ZONE - INACTIVE USERS
+                        // --------------------------------
+                        node.filter(function(d) { return d.inactive_show_notif === true; })
+                            .append('rect')
+                            .attr('fill', function(d) { return d.inactive_background_color; })
+                            .attr('rx', 4)
+                            .attr('ry', 4)
+                            .attr('x', BOX_WIDTH - 2*NOTIF_WIDTH + 2)
+                            .attr('y', - BOX_HEIGHT / 2 - 4)
+                            .attr('width', NOTIF_WIDTH)
+                            .attr('height', NOTIF_HEIGHT)
+                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+
+                        // --------------------------------
+                        // NODE CONTENT
+                        // --------------------------------
+                        node.append('foreignObject')
+                            .attr('x', BOX_PADDING)
+                            .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
+                            .attr('width', BOX_WIDTH-2*BOX_PADDING)
+                            .attr('height', BOX_HEIGHT-2*BOX_PADDING)
+                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  })
+                            .append('xhtml').html(function(d) {
+                                let html = '<center>';
+                                if (roles_map[d.data]) { 
+                                    if (roles_map[d.data].name) html += '<b>' + roles_map[d.data].name + '</b><br />';
+                                    if (roles_map[d.data].developerName) html += '<i>' + roles_map[d.data].developerName + '</i>'; 
+                                }
+                                html += '</center>';
+                                return html;
+                            });
+                        
+                        // --------------------------------
+                        // NOTIFICATION CONTENT - ACTIVE USERS
+                        // --------------------------------
+                        node.filter(function(d) { return d.active_show_notif === true; })
+                            .append('foreignObject')
+                            .attr('x', BOX_WIDTH - NOTIF_WIDTH + 2)
+                            .attr('y', - BOX_HEIGHT / 2 - 5)
+                            .attr('width', NOTIF_WIDTH)
+                            .attr('height', NOTIF_HEIGHT)
+                            .on('click', function(d) { if (d.clickable) node_click(map, d);  })
+                            .append('xhtml').html(function(d) { return '<center>' + d.active_count + '</center>'; });
+                        
+                        // --------------------------------
+                        // NOTIFICATION CONTENT - INACTIVE USERS
+                        // --------------------------------
+                        node.filter(function(d) { return d.inactive_show_notif === true; })
+                            .append('foreignObject')
+                            .attr('x', BOX_WIDTH - 2*NOTIF_WIDTH + 2)
+                            .attr('y', - BOX_HEIGHT / 2 - 5)
+                            .attr('width', NOTIF_WIDTH)
+                            .attr('height', NOTIF_HEIGHT)
+                            .on('click', function(d) { if (d.clickable) node_click(map, d); })
+                            .append('xhtml').html(function(d) { return '<center>' + d.inactive_count + '</center>'; });
+
+                        return svg.node();
+                    }
+
+                    // =================================
+                    // NODE SELECTION
+                    // =================================
+                    let nodeOnClick = function(roles_map, node) {
+
+                        let html = '';
+                        html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, roles_map[node.data].name) + '</b><br />';
+                        html += 'Salesforce Id: <b>'+node.id+'</b><br />';
+                        if (roles_map[node.data].developerName) {
+                            html += 'Developer Name: <b>'+roles_map[node.data].developerName+'</b><br />';
+                        }
+                        html += '<br />';
+                        if (roles_map[node.data].hasActiveMembers === true) {
+                            html += 'This role has '+roles_map[node.data].activeMembersCount+' active user'+(roles_map[node.data].activeMembersCount>1?'s':'')+'<br />';
+                            html += '<ul class="slds-list_dotted">';
+                            for (let i=0; i<roles_map[node.data].activeMembersCount; i++) {
+                                let member = roles_map[node.data].activeMembers[i];
+                                html += '<li>';
+                                html += '<img src="'+member.photourl+'" width="25" />&nbsp;&nbsp;';
+                                html += '<b><a href="/'+member.id+'" target="_blank">'+member.name+'</a></b>';
+                                html += '</li>';
+                            }
+                            html += '</ul>';
+                        } else {
+                            html += 'This role has 0 active user.<br />';
+                        }
+                        html += '<br />';
+                        if (roles_map[node.data].hasInactiveMembers === true) {
+                            html += 'This role has '+roles_map[node.data].inactiveMembersCount+' inactive user'+(roles_map[node.data].inactiveMembersCount>1?'s':'')+'<br />';
+                        } else {
+                            html += 'This role has 0 inactive user.<br />';
+                        }
+                        html += '<br />';
+                        if (node.parent) {
+                            html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, roles_map[node.parent.data].name) + '</a></b><br />';
+                            html += 'Parent Salesforce Id: <b>'+roles_map[node.parent.data].id+'</b><br />';
+                            if (roles_map[node.parent.data].developerName) {
+                                html += 'Parent Developer Name: <b>'+roles_map[node.parent.data].developerName+'</b><br />';
+                            }
+                        }
+                        helper.html.modal.show('Full information about this role', html);
+                    };
+                    
+                    // =================================
+                    // RUN CONTROLLER
+                    // =================================
+                    controller.run({
+                        datasets: [ 'roles' ],
+                        onRecords: function(map) { 
+
+                            helper.html.datatable.create(
+                                'datatable',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => {
+                                        let badnessScore = 0;
+                                        if (r.activeMembersCount == 0) badnessScore++
+                                        if (r.inactiveMembersCount > 0) badnessScore++
+                                        return badnessScore;
+                                    }},
+                                    { name: 'Developer Name', property: 'developerName' },
+                                    { name: 'Number of active members', formula: (r) => {
+                                        if (r.activeMembersCount == 0) return helper.html.render.icon('redFlag') + ' No active members!';                                
+                                        return helper.html.render.icon('greenFlag') + ' ' + r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
+                                    }},
+                                    { name: 'Number of inactive members', formula: (r) => {
+                                        if (r.inactiveMembersCount == 0) return helper.html.render.icon('greenFlag') + ' No inactive members!';                                
+                                        return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.activeMembersCount > 1 ? 's' : '');
+                                    }},
+                                    { name: 'Parent', formula: (r) => { 
+                                        if (r.hasParent === true) {
+                                            const parent = map.roles[r.parentId];
+                                            return helper.html.render.link('/'+parent.id, parent.name);
+                                        }
+                                        return 'No parent';
+                                    }},
+                                    { name: 'Parent Developer Name', formula: (r) => { 
+                                        if (r.hasParent === true) {
+                                            const parent = map.roles[r.parentId];
+                                            return parent.developerName;
+                                        }
+                                        return '';
+                                    }}
+                                ],
+                                map.roles,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.activeMembersCount == 0 || r.inactiveMembersCount > 0) return helper.html.render.color('highlight');
+                                    return null;
+                                }},
+                                { formula: (r) => { 
+                                    if (r.developerName === '###root###') return false;
+                                    if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
+                                 }}
+                            );
+                            
+                            // Render role graphic
+                            const graphSvg = computeGraph(map.roles, nodeOnClick);
+                            let container = helper.html.element.get('chart-container');
+                            container.innerHTML = '';
+                            container.appendChild(graphSvg);
+
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

@@ -1,0 +1,3051 @@
+/**
+ * OrgCheck main object
+ */
+const OrgCheck = {
+
+    /**
+     * OrgCheck Version
+     */
+    version: 'v1.8.3',
+
+    /**
+     * Handlers
+     */
+    handlers: {
+
+        /**
+         * Salesforce query handler
+         * @param configuration Object must contain 'version', 'instanceUrl' and 'accessToken'
+         */
+        SalesforceQueryHandler: function (configuration) {
+
+            /**
+             * Pivotable version number we use for connection and api age calculation
+             */
+            const API_VERSION = configuration.version;
+
+            /**
+             * Private connection to Salesforce using JsForce
+             */
+            //const BULK_CONNECTION = new jsforce.Connection({
+            //    accessToken: configuration.accessToken,
+            //    version: API_VERSION + ".0",
+            //    proxyUrl: '/services/proxy',
+            //    instanceUrl: 'https://eu29.salesforce.com'
+            //});
+            const CONNECTION = new jsforce.Connection({
+                accessToken: configuration.accessToken,
+                version: API_VERSION + ".0",
+                maxRequest: "10000",
+                instanceUrl: configuration.instanceUrl
+            });
+
+            /**
+             * Is an API version is old or not?
+             * @param version The given version number (should be an integer)
+             * @param definition_of_old in Years (by default 3 years)
+             */
+            this.isVersionOld = function(version, definition_of_old = 3) {
+                // Compute age version in Years
+                const age = (API_VERSION - version) / 3;
+                if (age >= definition_of_old) return true;
+                return false;
+            };
+
+            /**
+            * Helper to extract the package and developer name
+            * @param fullDeveloperName Developer Name
+            */
+            this.splitDeveloperName = function(fullDeveloperName) {
+                let package_name = '';
+                let short_dev_name = fullDeveloperName;
+                const full_name_splitted = fullDeveloperName.split('__');
+                if (full_name_splitted.length === 3) {
+                    package_name = full_name_splitted[0];
+                    short_dev_name = full_name_splitted[1];
+                }
+                return {
+                    package: package_name,
+                    shortName : short_dev_name
+                };
+            };
+
+            /**
+            * Do a global describe on the salesforce org
+            * @param onResultCallback Callback function to call with the results from global describe
+            * @param onErrorCallback Callback function to call if there is an error
+            */
+            this.doDescribeGlobal = function (
+                onResultCallback,
+                onErrorCallback
+            ) {
+                CONNECTION.describeGlobal(function (error, result) {
+                    if (error) {
+                        if (onErrorCallback) {
+                            onErrorCallback(error);
+                        }
+                    } else {
+                        if (onResultCallback) {
+                            onResultCallback(result.sobjects);
+                        }
+                    }
+                });
+            };
+
+            /**
+            * Do a describe for a specific object in the salesforce org
+            * @param developerName Developer name of the object to retrieve
+            * @param onResultCallback Callback function to call with the describe of this object
+            * @param onErrorCallback Callback function to call if there is an error
+            */
+            this.doDescribeObject = function (
+                developerName,
+                onResultCallback,
+                onErrorCallback
+            ) {
+                CONNECTION.sobject(developerName).describe$(function (error, object) {
+                    if (error) {
+                        if (onErrorCallback) {
+                            onErrorCallback(error);
+                        }
+                    } else {
+                        if (onResultCallback) {
+                            onResultCallback(object);
+                        }
+                    }
+                });
+            };
+
+            /**
+            * Do a metadata retrieve describe for a specific type and list of members
+            * @param types List of types of metadata to retrieve
+            * @param onResultCallback Callback function to call with the information
+            * @param onErrorCallback Callback function to call if there is an error
+            */
+            this.doMetadataRetrieve = function(
+                types, 
+                onResultCallback,
+                onErrorCallback
+            ) {
+                CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
+                    if (error) {
+                        if (onErrorCallback) {
+                            onErrorCallback(error);
+                        }
+                    } else {
+                        if (onResultCallback) {
+                            onResultCallback(metadata);
+                        }
+                    }
+                });
+            }
+
+            /**
+            * Do Salesforce SOQL queries from Tooling API or not
+            * @param queries Array of objects containing 'tooling', 'queryMore' and 'string'
+            * @param onEachRecordCallback Callback function for each record from database
+            * @param onEndCallback Callback function to call with all records (as a map)
+            * @param onErrorCallback Callback function to call if there is an error
+            */
+            this.doQueries = function (
+                queries,
+                onEachRecordCallback,
+                onEndCallback,
+                onErrorCallback
+            ) {
+                const promises = [];
+                queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
+                    private_query({
+                        index: i,
+                        queryString: q.string,
+                        queryMore: q.queryMore, 
+                        api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
+                        onEach: onEachRecordCallback,
+                        onEnd: function (map, size) {
+                            resolve({ d: map, l: size });
+                        },
+                        onError: function(error) {
+                            error.context = { 
+                                when: 'While creating a promise to call "private_query".',
+                                what: {
+                                    index: i,
+                                    queryMore: q.queryMore,
+                                    queryString: q.string,
+                                    queryUseTooling: q.tooling
+                                }
+                            };
+                            reject(error);
+                        }
+                    });
+                })));
+                Promise.all(promises)
+                    .then(function (results) {
+                        let data = {};
+                        let length = 0;
+                        results.forEach((v) => {
+                            data = Object.assign({}, data, v.d);
+                            length += v.l;
+                        });
+                        onEndCallback(data, length);
+                    })
+                    .catch(function (error) {
+                        onErrorCallback(error);
+                    });
+            };
+
+            function private_query(config) {
+                const data = { records: {}, size: 0 };
+                const wrap = function(record, totalSize) {
+                    const wrapper = (config.onEach ? config.onEach(record, config.index, data.size+1, totalSize) : record);
+                    if (wrapper && wrapper.id) {
+                        const oldValue = data.records[wrapper.id];
+                        if (!oldValue) data.size++;
+                        data.records[wrapper.id] = wrapper;
+                    }
+                }
+                try {
+                    switch (config.api) {
+                        case 'rest':
+                        case 'tooling':
+                            const api = (config.api === 'rest' ? CONNECTION : CONNECTION.tooling);
+                            const callback_api = function(error, result) {
+                                // Check errors
+                                if (error) {
+                                    config.onError(error);
+                                    return;
+                                }
+                                // Add results to data
+                                result.records.forEach((record) => wrap(record, result.totalSize));
+                                // Continue looping?
+                                if (result.done === true || (result.done === false && config.queryMore === false)) {
+                                    if (config.onEnd) {
+                                        config.onEnd(data.records, data.size);
+                                    }
+                                } else {
+                                    api.queryMore(result.nextRecordsUrl, callback_api);
+                                }
+                            }
+                            api.query(config.queryString, callback_api);
+                            break;
+
+                        case 'bulk':
+                            /* bug in jsforce for bulk api with more than one batch */
+                            //const query = config.queryString;
+                            //const start = query.toUpperCase().lastIndexOf('FROM ')+5;
+                            //const end = query.indexOf(' ', start);
+                            //const table = query.substring(start, end);
+                            //const job = BULK_CONNECTION.bulk.createJob(table, 'query');
+                            //const batch = job.createBatch();
+                            //batch.execute(query);
+                            //batch.on('error', err => config.onError(err));
+                            //batch.on('queue', info => { 
+                            //    console.log('queue ==> info: ', info);
+                            //    batch.poll(1000, 500000);
+                            //});
+                            //batch.on('response', responses => {
+                            //    console.log('response ==> responses: ', responses);
+                            //    responses.forEach(response => {
+                            //        const ebatch = BULK_CONNECTION.bulk.job(response.jobId).batch(response.batchId);
+                            //        ebatch.retrieve((error, results) => {
+                            //            // Check errors
+                            //            if (error) {
+                            //                config.onError(error);
+                            //                return;
+                            //            }
+                            //            // Add results to data
+                            //            console.log('response ==> results: ', results);
+                            //            results.forEach(result => ebatch.result(result.id)
+                            //                .on('data', d => {
+                            //                    console.log('record====', d);
+                            //                    wrap(d);
+                            //               })
+                            //                .on('end', function() {
+                            //                    if (config.onEnd) {
+                            //                        config.onEnd(data.records, data.size);
+                            //                    }
+                            //                    console.log('end====', data.records, data.size);
+                            //                })
+                            //            );
+                            //        });
+                            //    });
+                            //    // Close job
+                            //    job.close();
+                            //});
+                            break;
+                    }
+                } catch (error) {
+                    config.onError(error);  
+                }
+            }
+        },
+
+        /**
+        * Format handler
+        * @param configuration Object must contain 'defaultDateFormat' and 'defaultDatetimeFormat'
+        */
+        FormatterHandler: function (configuration) {
+            /**
+            * Returns systematically an ID15 based on the ID18
+            * @param id to simplify
+            */
+            this.salesforceIdFormat = function (id) {
+                if (id && id.length == 18) return id.substr(0, 15);
+                return id;
+            };
+
+            /**
+            * Returns the string representation of a given date using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.dateFormat = function (value) {
+                return private_date_format(
+                    value,
+                    UserContext.dateFormat,
+                    configuration.defaultDateFormat
+                );
+            };
+
+            /**
+            * Returns the string representation of a given datetime using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.datetimeFormat = function (value) {
+                return private_date_format(
+                    value,
+                    UserContext.dateTimeFormat,
+                    configuration.defaultDatetimeFormat
+                );
+            };
+
+            /**
+            * Private method to format data/time into a string representation
+            * @param value to format (number if a timestamp, string otherwise)
+            * @param format to use
+            * @param formatIfNull to use if the previous parameter was null or empty
+            */
+            function private_date_format(value, format, formatIfNull) {
+                if (value) {
+                    const timestamp = typeof value === "number" ? value : Date.parse(value);
+                    return DateUtil.formatDate(
+                        new Date(timestamp),
+                        format ? format : formatIfNull
+                    );
+                }
+                return "";
+            }
+        },
+
+        /**
+        * Message handler
+        * @param configuration Object must contain 'modalContentId', 'modalId'
+        */
+        MessageHandler: function (configuration) {
+
+            const private_errors = [];
+
+            /**
+            * Show error and clean other stuff in the page
+            * @param error
+            */
+            this.showError = function (error) {
+                if (error) {
+                    private_errors.push(error);
+                    let html = '<h1 class="slds-text-heading--small"></h1><br /><br />';
+                    html += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                            'target="_blank">here</a> and log an issue with the following information. <br /'+
+                            '><br />';
+                    html += '<b>OrgCheck Information</b><br />';
+                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available');
+                    html += '<br />';
+                    html += '<b>Navigation Information</b><br />';
+                    html += 'Page: ' + document.location.pathname + '<br />';
+                    html += '<br />';
+                    html += '<b>System Information</b><br />';
+                    html += 'User Agent: ' + navigator.userAgent + '<br />';
+                    html += 'Operating System: ' + navigator.platform + '<br />';
+                    html += 'Language: ' + navigator.language + '<br />';
+                    html += '<br />';
+                    private_errors.forEach((v, i) => {
+                        html += '<b>Error #' + i + ': ' + v.name + '</b><br />';
+                        if (v.context) {
+                            html += 'When: <code>' + v.context.when + '</code><br />';
+                            html += 'What:<br />';
+                            for (k in v.context.what) {
+                                html += k + ': <code>' + v.context.what[k] + '</code><br />';
+                            }
+                        }
+                        if (v.stack) {
+                            html += '<small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                        }
+                        html += '<br />';
+                    });
+                    private_show_modal('Oh no, OrgCheck had an error!', html);
+                }
+            };
+
+            /**
+            * Show dialog box with a title and content
+            * @param title String title
+            * @param content String html or NodeElement representing the content of the box
+            */
+            this.showModal = function (title, element) {
+                private_show_modal(title, element);
+            };
+
+            /**
+            * Show the modal dialog box
+            * @param element Html element to show in the modal box
+            */
+            function private_show_modal(title, element) {
+                const header = document.getElementById(configuration.modalTitleId);
+                const content = document.getElementById(configuration.modalContentId);
+                header.textContent = title;
+                if (content.firstElementChild) {
+                    content.removeChild(content.firstElementChild);
+                }
+                if (typeof element == 'string') {
+                    const span = document.createElement('span');
+                    span.innerHTML = element;
+                    content.appendChild(span);
+                } else {
+                    content.appendChild(element);
+                }
+                document.getElementById(configuration.modalId).style.display = 'block';
+            }
+        },
+
+        /**
+        * Caching handler
+        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey' and 'versionKey'
+        */
+        CacheHandler: function (configuration) {
+
+            /**
+            * Cache system to use. 
+            *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
+            *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
+            *              <b>Session storage</b> means data WILL be erased after closing the browser. 
+            *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
+            */
+            const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
+
+            /**
+             * Key for "timestamp" on every cache entry
+             */
+            const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
+            
+            /**
+             * Key for "version" on every cache entry
+             */
+            const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+            /**
+            * Method to clear all OrgCheck cached items
+            * @param section Name of the section (group of keys) in the cache. If undefined, any section
+            */
+            this.clearAll = function (section) {
+                let keys_to_remove = private_get_keys(section);
+                for (let i = 0; i < keys_to_remove.length; i++) {
+                    private_delete_item(section, keys_to_remove[i]);
+                }
+            };
+
+            /**
+            * Method to clear one OrgCheck cached item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the previous value that has been deleted
+            */
+            this.clear = function (section, key) {
+                const oldValue = private_delete_item(section, key);
+                return oldValue;
+            };
+
+            /**
+            * Method to get all keys of the WoldemOrg cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return All keys of the cache of the section.
+            */
+            this.keys = function (section) {
+                const keys = private_get_keys(section);
+                return keys;
+            };
+
+            /**
+            * Method to get an item from the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the value in cache (undefined if not found)
+            */
+            this.getItem = function (section, key) {
+                const value = private_get_item(section, key);
+                return value;
+            };
+
+            /**
+            * Method to get the timestamp of a specific cache item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the timestamp of the item in cache (undefined if not found)
+            */
+            this.timestamp = function (section, key) {
+                const value = private_get_item(section, key, false);
+                if (value) return value[TIMESTAMP_KEY];
+                return;
+            };
+
+            /**
+            * Method to get the version of a specific cache item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the version of the item in cache (undefined if not found)
+            */
+            this.version = function (section, key) {
+                const value = private_get_item(section, key, false);
+                if (value) return value[VERSION_KEY];
+                return;
+            };
+
+            /**
+            * Method to set an item into the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param value of the item to store in cache
+            */
+            this.setItem = function (section, key, value) {
+                try {
+                    private_set_item(section, key, value);
+                } catch (e) {
+                    private_log_error(e);
+                }
+            };
+
+            /**
+            * Method to cache error and clean other stuff in the page
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param retrieverCallback function that we call to get the value
+            * @param finalCallback function to call after the value was got
+            */
+            this.cache = function (section, key, retrieverCallback, finalCallback) {
+                // Query the cache first
+                const value = private_get_item(section, key);
+                // Is the cache available??
+                if (value) {
+                    // Yes, the cache is available
+                    // Call the onEnd method with data coming from cache
+                    finalCallback(value, true);
+                } else {
+                    // No, the cache is not available for this data
+                    retrieverCallback(function (newValue) {
+                        // check if data is undefined
+                        if (newValue) {
+                            // Update the cache
+                            try {
+                                private_set_item(section, key, newValue);
+                            } catch (e) {
+                                private_log_error(e);
+                            }
+                        }
+                        // Call the onEnd method with data not coming from cache
+                        finalCallback(newValue, false);
+                    });
+                }
+            };
+
+            /**
+            * Log actions from the cache
+            * @param e Error
+            */
+            function private_log_error(e) {
+                console.error("[OrgCheck:Cache]", { error: e });
+            }
+
+            /**
+            * Private method to generate the prefix used for keys in cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return Prefix generated from section name
+            */
+            function private_generate_prefix(section) {
+                return configuration.cachePrefix + "." + (section ? section + "." : "");
+            }
+
+            /**
+            * Returns all the OrgCheck keys in cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return All the keys of the OrgCheck cache for the given section
+            */
+            function private_get_keys(section) {
+                const prefix = private_generate_prefix(section);
+                let keys_to_remove = [];
+                for (let i = 0; i < CACHE_SYSTEM.length; i++) {
+                    const key = CACHE_SYSTEM.key(i);
+                    if (key && key.startsWith(prefix)) {
+                        keys_to_remove.push(key.substr(prefix.length));
+                    }
+                }
+                return keys_to_remove;
+            }
+
+            /**
+            * Private method to get an item from the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param deleteMetadata true by default
+            * @return the value in cache (undefined if not found)
+            */
+            function private_get_item(section, key, deleteMetadata = true) {
+                const value = CACHE_SYSTEM.getItem(
+                    private_generate_prefix(section) + key
+                );
+                if (value) {
+                    let jsonValue = JSON.parse(value);
+                    if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
+                        // console.error('Resetting the cache as you updated OrgCheck.');
+                        return;
+                    }
+                    if (deleteMetadata === true) {
+                        delete jsonValue[TIMESTAMP_KEY];
+                        delete jsonValue[VERSION_KEY];
+                    }
+                    return jsonValue;
+                }
+                return;
+            }
+
+            /**
+            * Private method to set an item into the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param value of the item to store in cache
+            */
+            function private_set_item(section, key, value) {
+                if (!value) return;
+                try {
+                    value[TIMESTAMP_KEY] = Date.now();
+                    value[VERSION_KEY] = OrgCheck.version;
+                    CACHE_SYSTEM.setItem(
+                        private_generate_prefix(section) + key,
+                        JSON.stringify(value)
+                    );
+                } catch (e) {
+                    throw Error("Failed to write in cache");
+                } finally {
+                    // Make sure to delete the timestamp even after error
+                    delete value[TIMESTAMP_KEY];
+                    delete value[VERSION_KEY];
+                }
+            }
+
+            /**
+            * Private method to clear one OrgCheck cached item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the previous value that has been deleted
+            */
+            function private_delete_item(section, key) {
+                return CACHE_SYSTEM.removeItem(private_generate_prefix(section) + key);
+            }
+        },
+
+        /**
+        * Manage a "map" in this context which is an object containing
+        *              Salesforce IDs as properties plus an extra property called
+        *              "size" which is the number of Salesforce IDs contained in the
+        *              object.
+        * @param configuration Object must contain 'keySize'
+        */
+        MapHandler: function (configuration) {
+            /**
+            * Iterative function for each key of the given map
+            * @param map Given map
+            * @param keyCallback function to call for each key of the given map
+            */
+            this.forEach = function (map, keyCallback) {
+                for (let key in map)
+                    if (map.hasOwnProperty(key) && key !== configuration.keySize) {
+                        keyCallback(key);
+                    }
+            };
+
+            /**
+            * Returns the size of the map (as stored)
+            * @param map Given map
+            */
+            this.getSize = function (map) {
+                return map[configuration.keySize];
+            };
+
+            /**
+            * Set the size of the map
+            * @param map Given map
+            * @param newSize
+            */
+            this.setSize = function (map, newSize) {
+                map[configuration.keySize] = newSize;
+            };
+
+            /**
+            * Returns the keys of the map (excluding the technical size key!)
+            * @param map Given map
+            * @return Keys of the map
+            */
+            this.keys = function (map) {
+                if (!map) return [];
+                const keys = Object.keys(map);
+                const index_of_size_property = keys.indexOf(configuration.keySize);
+                if (index_of_size_property !== -1) {
+                    keys.splice(index_of_size_property, 1);
+                }
+                return keys;
+            };
+        },
+
+        /**
+        * Array handler
+        */
+        ArrayHandler: function () {
+            /**
+            * Concatenate two arrays
+            * @param array1 First array (will not be modified)
+            * @param array2 Second array (will not be modified)
+            * @param prop Optionnal property to use in the arrays
+            * @return A new array containing uniq items from array1 and array2
+            */
+            this.concat = function (array1, array2, prop) {
+                if (prop) {
+                    let new_array = [];
+                    let array2_keys = [];
+                    if (array2) for (let i = 0; i < array2.length; i++) {
+                        const item2 = array2[i];
+                        array2_keys.push(item2[prop]);
+                        new_array.push(item2);
+                    }
+                    if (array1) for (let i = 0; i < array1.length; i++) {
+                        const item1 = array1[i];
+                        const key1 = item1[prop];
+                        if (array2_keys.indexOf(key1) < 0) {
+                            new_array.push(item1);
+                        }
+                    }
+                    return new_array;
+                } else {
+                    let uniq_items_to_add;
+                    if (array1) {
+                        uniq_items_to_add = array1.filter((item) => array2.indexOf(item) < 0);
+                    } else {
+                        uniq_items_to_add = [];
+                    }
+                    if (array2) {
+                        return array2.concat(uniq_items_to_add);
+                    } else {
+                        return uniq_items_to_add;
+                    }
+                }
+            };
+        },
+
+        /**
+        * Progress bar handler
+        * @param configuration Object must contain 'progressBarDivId' and 'spinnerDivId'
+        */
+        ProgressBarHandler: function (configuration) {
+
+            const PROGRESSBAR_DIV = document.getElementById(configuration.progressBarDivId);
+            const SPINNER_DIV = document.getElementById(configuration.spinnerDivId);
+            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessageId);
+
+            /**
+            * Reset the progress bar with current value at zero
+            * @param message Optionnal message to display
+            */
+            this.empty = function (message) {
+                private_set_progress_bar(0, 1);
+                private_set_message(message, false);
+            };
+
+            /**
+            * Reset the progress bar with maximum value
+            * @param message Optionnal message to display
+            */
+            this.full = function (message) {
+                private_set_progress_bar(1, 1);
+                private_set_message(message, true);
+            };
+
+            /**
+            * Set the progress bar with a given value
+            * @param value
+            * @param max
+            * @param message Optionnal message to display
+            */
+            this.set = function (value, max, message) {
+                private_set_progress_bar(value, max);
+                private_set_message(message, true);
+            };
+
+            /**
+            * Set the progress message with a given value
+            * @param message message to display
+            */
+            this.still = function (message) {
+                private_set_message(message, true);
+            };
+
+            /**
+            * Hide the spinner and toast
+            */
+            this.hide = function () {
+                SPINNER_DIV.style.display = 'none';
+                SPINNER_MSG_DIV.style.display = 'none';
+            };
+
+            /**
+            * Show the spinner and toast
+            */
+            this.show = function () {
+                SPINNER_DIV.style.display = 'block';
+                SPINNER_MSG_DIV.style.display = 'block';
+            };
+
+            /**
+            * Private method to set the message
+            * @param message Text to write in the div
+            * @param isAppended Reset the content or just append it
+            */
+            function private_set_message(message, isAppended) {
+                if (message) {
+                    if (isAppended === true) {
+                        SPINNER_MSG_DIV.innerHTML += message + '<br />';
+                    } else {
+                        SPINNER_MSG_DIV.innerHTML = message + '<br />';
+                    }
+                }
+            };
+
+            /**
+            * Private method to set the progress bar to the current
+            *              value and potentially stop the spinner if we reach
+            *              the maximum.
+            * @param currentValue
+            * @param maxValue
+            */
+            function private_set_progress_bar(currentValue, maxValue) {
+                if (!maxValue) {
+                    maxValue = 100;
+                    currentValue = currentValue % maxValue;
+                }
+                PROGRESSBAR_DIV.style.width = (currentValue / maxValue) * 100 + "%";
+            }
+        }
+    },
+
+    /**
+     * Dataset representation
+     * @param setup JSON configuration including:
+     *              <ol>
+     *                <li><code>name</code>: Technical name of this dataset (used in controller)</li>
+     *                <li><code>keycache</code>: Key used when caching the data in localStorage</li>
+     *                <li><code>retriever</code>: Retreiver function with success and error callback methods</li>
+     *              </ol>
+     */
+    Dataset: function (setup) {
+        const THAT = this;
+        this.getName = function() { return setup.name };
+        this.getKeyCache = function() { return setup.keycache };
+        this.getRetriever = function() { return function(s, e) { setup.retriever(THAT, s, e) } };
+    },
+
+    /**
+     * OrgCheck core
+     * @param setup JSON configuration including:
+     *              <ol>
+     *                <li><code>sfApiVersion</code>: Salesforce API version to use</li>
+     *                <li><code>sfLocalAccessToken</code>: Salesforce Access Token to access the local org</li> 
+     *                <li><code>sfLocalInstanceUrl</code>: Salesforce Endpoint to access the local org</li>
+     *                <li><code>htmlProgressBarTagId</code>: HTML Tag Id of the progress bar zone</li> 
+     *                <li><code>htmlSpinnerTagId</code>: HTML Tag Id of the spinner zone</li> 
+     *                <li><code>htmlSpinnerMessageTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
+     *                <li><code>htmlModalContentTagId</code>: HTML Tag Id of the content zone of the dialog box</li> 
+     *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
+     *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
+     *                <li><code>htmlMainContentTagId</code>: HTML Tag Id of the main content zone of the page</li> 
+     *                <li><code>formatDefaultDate</code>: Default date format (if not specified for the current user)</li> 
+     *                <li><code>formatDefaultDatetime</code>: Default datetime format (if not specified for the current user)</li> 
+     *              </ol>
+     */
+    Core: function(setup) {
+
+        // ======================================================
+        // INITIALIZATION OF HANDLERS
+        // ======================================================
+        
+        const CACHE_PREFIX = 'OrgCheck';
+        const CACHE_SECTION_METADATA = 'Metadata';
+        const CACHE_SECTION_PREFERENCE = 'Preference';
+        const CACHE_SECTION_AUTH = 'Autorization';
+        const MAP_KEYSIZE = '__51Z3__';
+
+        const PERSISTANT_CACHE_HANDLER = new OrgCheck.handlers.CacheHandler({
+            isPersistant: true,
+            cachePrefix: CACHE_PREFIX
+        });
+
+        const TEMPORARY_CACHE_HANDLER = new OrgCheck.handlers.CacheHandler({
+            isPersistant: false,
+            cachePrefix: CACHE_PREFIX
+        });
+
+        // Current org information set by default to the local org
+        const ORG_INFORMATION = {
+            id: setup.sfLocalAccessToken.split('!')[0],
+            version: setup.sfApiVersion,
+            accessToken: setup.sfLocalAccessToken
+        }
+
+        // Get the current Organization information
+        const currentOrgId = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'CurrentOrgId');
+        if (currentOrgId) {
+            const orgs = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'Organisations') || {};
+            if (orgs[currentOrgId] && orgs[currentOrgId].endpointUrl && orgs[currentOrgId].token) {
+                ORG_INFORMATION.id = currentOrgId;
+                ORG_INFORMATION.accessToken = orgs[currentOrgId].token;
+                ORG_INFORMATION.instanceUrl = orgs[currentOrgId].endpointUrl;
+                ORG_INFORMATION.proxyUrl = '/services/proxy';
+            }
+        }
+        TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, ORG_INFORMATION.id);
+        document.getElementById('org-id').textContent = ORG_INFORMATION.id;
+
+        const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
+
+        const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
+            keySize: MAP_KEYSIZE
+        });
+
+        const ARRAY_HANDLER = new OrgCheck.handlers.ArrayHandler();
+
+        const MSG_HANDLER = new OrgCheck.handlers.MessageHandler({
+            modalContentId: setup.htmlModalContentTagId,
+            modalId: setup.htmlModalTagId,
+            modalTitleId: setup.htmlModalTitleTagId
+        });
+
+        const PROGRESSBAR_HANDLER = new OrgCheck.handlers.ProgressBarHandler({
+            progressBarDivId: setup.htmlProgressBarTagId,
+            spinnerDivId: setup.htmlSpinnerTagId,
+            spinnerMessageId: setup.htmlSpinnerMessageTagId
+        });
+        
+        const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
+            defaultDateFormat: setup.formatDefaultDate,  
+            defaultDatetimeFormat: setup.formatDefaultDatetime 
+        });
+
+        // ======================================================
+        // DATASETS LAYER
+        // ======================================================
+
+        /**
+         * This is a collection of dataset
+         */
+        const private_datasets_collection = {};
+
+        /**
+         * Add a dataset in the internal list
+         * @param dataset Object of type OrgCheck.Dataset
+         */
+        this.addDataset = function(dataset) {
+            private_datasets_collection[dataset.getName()] = {
+                keycache: dataset.getKeyCache(),
+                retriever: dataset.getRetriever()
+            };
+        };
+
+        // ======================================================
+        // CACHE LAYER
+        // ======================================================
+
+        /**
+         * Get metadata item from cache
+         * @param key in cache
+         * @return the value in cache, undefined if not present in cache
+         */
+        this.getMetadataInCache = function(key) {
+            return PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_METADATA, key);
+        };
+        
+        // ======================================================
+        // CONTROLLER LAYER 
+        // ======================================================
+
+        /**
+         * The OrgCheck controller
+         */
+        this.getController = function() {
+            return {
+                /**
+                * Main function of the controller
+                * @param ctlSetup JSON configuration including:
+                *              <ol>
+                *                <li><code>datasets</code>: </li>
+                *                <li><code>onRecords</code>: </li> 
+                *                <li><code>dependencies</code>: </li> 
+                *                <li><code>actions.clearCache</code>: </li> 
+                *                <li><code>actions.exportAsFile</code>: </li> 
+                *              </ol>
+                */
+                run: function(ctlSetup) {
+
+                    // 0. Clean way to show errors
+                    const showError = function(error) {
+                        MSG_HANDLER.showError(error);
+                        PROGRESSBAR_HANDLER.empty('*** Error ***');
+                        PROGRESSBAR_HANDLER.hide();
+                        document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
+                    };
+
+                    // 1. Check properties of ctlSetup
+                    try {
+                        if (!ctlSetup.datasets) throw '"datasets" property is undefined';
+                        if (!Array.isArray(ctlSetup.datasets)) throw '"datasets" property is not an array';
+                        ctlSetup.datasets.forEach(dataset => {
+                            if (!dataset) throw '"datasets" property contains an undefined/null/empty value';
+                            if (typeof dataset !== 'string') throw '"datasets" property should contain only string values';
+                            const ds = private_datasets_collection[dataset];
+                            if (!ds || !ds.retriever || typeof ds.retriever !== 'function') throw '"datasets" property should point to a known data retreiver (dataset causing the issue is '+dataset+')';
+                        });
+                        if (!ctlSetup.onRecords) throw '"onRecords" property is undefined';
+                        if (typeof ctlSetup.onRecords !== 'function') throw '"onRecords" property is not a method';
+                        if (!ctlSetup.dependencies) ctlSetup.dependencies = false;
+                        if (typeof ctlSetup.dependencies !== 'boolean') throw '"dependencies" property is not a boolean'
+                    } catch (error) {
+                        showError(error);
+                        return;
+                    }
+
+                    // 2. Set the progress bar to 'EMPTY'
+                    PROGRESSBAR_HANDLER.show();
+                    PROGRESSBAR_HANDLER.empty('Starting...');
+                    document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
+
+                    // 3. Buttons actions based on the map (from datasets)
+                    const initActions = function(map) {
+                        // 3.1 Set the clear cache button (if specified)
+                        if (ctlSetup.actions && ctlSetup.actions.clearCache && ctlSetup.actions.clearCache.show === true) { 
+                            const buttonClearCache = document.getElementById('button-clear-page-cache');
+                            buttonClearCache.onclick = function(e) { 
+                                ctlSetup.datasets.forEach(dataset => {
+                                    const ds = private_datasets_collection[dataset];
+                                    PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, ds.keycache);
+                                });
+                                document.location.reload(false);
+                            };
+                            buttonClearCache.parentNode.style.display = 'block';
+                        }
+                        // 3.2 Set the export as file button (if specified)
+                        if (ctlSetup.actions && ctlSetup.actions.exportAsFile && ctlSetup.actions.exportAsFile.appendRowsMethod) { 
+                            const buttonExport = document.getElementById('button-export');
+                            buttonExport.onclick = function(e) { 
+                                const filename = ctlSetup.actions.exportAsFile.filename || 'Export';
+                                const headers  = ctlSetup.actions.exportAsFile.headers || [ 'id' ];
+                                const add_rows_function = ctlSetup.actions.exportAsFile.appendRowsMethod;
+                                const rows = [ headers ];
+                                add_rows_function(rows, map);
+                                const data = rows.map(e => {
+                                    e.forEach((v,i,a) => { if (v && v.toString().indexOf(',') != -1) a[i]='"'+v+'"'; } ); 
+                                    return e.join(',');
+                                }).join('\n');
+                                const link = document.createElement('a');
+                                link.style.visibility = 'hidden';
+                                document.body.appendChild(link);
+                                link.download = filename + '.csv';
+                                link.target = '_blank';
+                                link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data);
+                                link.click();
+                                document.body.removeChild(link);
+                            };
+                            buttonExport.parentNode.style.display = 'block';
+                        }
+                    }
+
+                    // 4. Method that calls the callback fonction and set the progress bar top 'FULL'
+                    const onEnd = function(map) {
+                        PROGRESSBAR_HANDLER.still('Records processing starting...');
+                        ctlSetup.onRecords(map);
+                        PROGRESSBAR_HANDLER.still('Records processing ended successfuly');
+                        PROGRESSBAR_HANDLER.still('Action buttons starting...');
+                        initActions(map);
+                        PROGRESSBAR_HANDLER.still('Action buttons ended successfuly');
+                        setTimeout(function() {
+                            PROGRESSBAR_HANDLER.hide();
+                            document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
+                        }, 1000);
+                    }
+
+                    // 5. Calling the dataset retreivers
+                    const onLoadPromises = [];
+                    ctlSetup.datasets.forEach(dataset => onLoadPromises.push(new Promise(function(s, e) { 
+                        PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] starting...');
+                        private_datasets_collection[dataset].retriever(
+                            function(m) {
+                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended successfuly');
+                                s(m);
+                            }, function(m) {
+                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended with an error');
+                                e(m);
+                            }
+                        ); 
+                    })));
+
+                    // 6. Calling the dataset retreivers
+                    Promise.all(onLoadPromises)
+                        .then(function(results) {
+                            PROGRESSBAR_HANDLER.still('All datasets ('+ctlSetup.datasets.length+') were retrieved');
+                            PROGRESSBAR_HANDLER.still('Mapping process starting...');
+                            // 7. When all datasets are retreived, we calculate keys and map
+                            const map = {};
+                            let keys = [];
+                            results.forEach((v, i) => {
+                                map[ctlSetup.datasets[i]] = v;
+                                keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(v));
+                            });
+                            PROGRESSBAR_HANDLER.still('Mapping process ended successfuly');
+                            return { m: map, k: keys };
+                        })
+                        .catch(function(error) {
+                            PROGRESSBAR_HANDLER.still('Mapping process ended with an error');
+                            showError(error);
+                        }) 
+                        .then(function(data) {
+                            // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
+                            if (ctlSetup.dependencies === true) {
+                                PROGRESSBAR_HANDLER.still('Dependencies process starting...');
+                                private_salesforce_dapi(
+                                    data.k, 
+                                    function(dependencies) { 
+                                        PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
+                                        // We are altering the map to include the dependencies
+                                        data.m['dependencies'] = dependencies || {};
+                                        // 9.1 And then call the method (with dependencies)
+                                        onEnd(data.m);
+                                    }, 
+                                    function(error) {
+                                        PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
+                                        showError(error);
+                                    }
+                                );
+                            } else {
+                                // 9.2 Calling the method (no dependencies)
+                                onEnd(data.m);
+                            }
+                        })
+                        .catch(function(error) {
+                            showError(error);
+                        });
+                }
+            };
+        }
+
+        // ======================================================
+        // HELPER LAYER
+        // ======================================================
+
+        /**
+         * The OrgCheck helper
+         */
+        this.getHelper = function() {
+            return {
+                salesforce: {
+                    describe: {
+                        object: function(pckg, obj, success, error) {
+                            private_salesforce_descrive_object({
+                                objectName: obj, 
+                                callbackSuccess: success,
+                                callbackError: error
+                            });
+                        }
+                    },
+                    version: {
+                        isOld: function(version) {
+                            return SALESFORCE_HANDLER.isVersionOld(version, 3);
+                        }
+                    }
+                },
+                cache: {
+                    metadata: {
+                        clearAll: function() {
+                            PERSISTANT_CACHE_HANDLER.clearAll(CACHE_SECTION_METADATA);
+                        },
+                        keys: function() {
+                            return PERSISTANT_CACHE_HANDLER.keys(CACHE_SECTION_METADATA);
+                        },
+                        timestamp: function(key) {
+                            return PERSISTANT_CACHE_HANDLER.timestamp(CACHE_SECTION_METADATA, key);
+                        },
+                        version: function(key) {
+                            return PERSISTANT_CACHE_HANDLER.version(CACHE_SECTION_METADATA, key);
+                        },
+                        clear: function(key) {
+                            return PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, key);
+                        }
+                    }
+                },
+                information: {
+                    showMainContent: function() {
+                        document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
+                    },
+                    switchToOrg: function(mydomain_url, id_url, access_token) {
+                        PERSISTANT_CACHE_HANDLER.clearAll(CACHE_SECTION_METADATA);
+                        var orgId = '';
+                        if (mydomain_url && id_url && access_token) {
+                            const arrSplit = id_url.split('/');
+                            orgId = arrSplit[4].substring(0, 15);
+                            const userId = arrSplit[5];
+                            const map = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'Organisations') || {};
+                            map[orgId] = { 
+                                'orgId': orgId,
+                                'userId': userId,
+                                'endpointUrl': mydomain_url,
+                                'token': access_token
+                            };
+                            TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, 'Organisations', map);
+                        } else {
+                            orgId = setup.sfLocalAccessToken.split('!')[0];
+                        }
+                        TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, 'CurrentOrgId', orgId);
+                        document.getElementById('org-id').textContent = orgId;
+                    }
+                },
+                preferences: {
+                    get: function(key) {
+                        const map = PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_PREFERENCE, 'Options') || {};
+                        const value = map[key];
+                        if (value === undefined) return true;
+                        return value;
+                    },
+                    set: function(key, value) {
+                        const map = PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_PREFERENCE, 'Options') || {};
+                        map[key] = value;
+                        PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_PREFERENCE, 'Options', map);
+                    }
+                },
+                progressbar: {
+                    empty: function(msg) {
+                        PROGRESSBAR_HANDLER.empty(msg);
+                    },
+                    full: function(msg) {
+                        PROGRESSBAR_HANDLER.full(msg);
+                    },
+                    set: function(value, max, msg) {
+                        PROGRESSBAR_HANDLER.set(value, max, msg);
+                    }
+                },
+                array: {
+                    concat: function(array1, array2, prop) {
+                        return ARRAY_HANDLER.concat(array1, array2, prop);
+                    }
+                },
+                map: {
+                    keys: function(map) {
+                        return MAP_HANDLER.keys(map);
+                    },
+                    index: function(map, compare_function, filter_function) {
+                        let keys = MAP_HANDLER.keys(map);
+                        if (filter_function) {
+                            keys = keys.filter(k => filter_function(map[k]));
+                        }
+                        keys.sort(function compare(a, b) {
+                            return compare_function(map[a], map[b]);
+                        });
+                        return keys;
+                    },
+                    iterate: function(map, indexes, for_each_item_function) {
+                        for (let i=0; i<indexes.length; i++) {
+                            let item = map[indexes[i]];
+                            for_each_item_function(item, i, indexes.length);
+                        }
+                    },
+                    iterate2: function(map, for_each_item_function) {
+                        const keys = MAP_HANDLER.keys(map);
+                        for (let i=0; i<keys.length; i++) {
+                            let item = map[keys[i]];
+                            for_each_item_function(item, i, keys.length);
+                        }
+                    }
+                },
+                timestamp: {
+                    to: {
+                        datetime: function(ts) {
+                            return FORMAT_HANDLER.datetimeFormat(ts);
+                        },
+                        date: function(ts) {
+                            return FORMAT_HANDLER.dateFormat(ts);
+                        }
+                    }
+                },
+                error: {
+                    show: function(error) {
+                        MSG_HANDLER.showError(error);
+                    }
+                },
+                html: {
+                    modal: {
+                        show: function(title, el) {
+                            MSG_HANDLER.showModal(title, el);
+                        }
+                    },
+                    datatable: {
+                        create: function(element, columns, data, sorting, coloring, filtering) {
+                            PROGRESSBAR_HANDLER.set(0, 1);
+                            const dt = document.getElementById(element);
+                            const table = dt.appendChild(document.createElement('table'));
+                            table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
+                            const thead = table.appendChild(document.createElement('thead'));
+                            const trHead = thead.appendChild(document.createElement('tr'));
+                            trHead.classList.add('slds-text-title_caps');
+                            const orderingImage = document.createElement('img');
+                            let firstSortCallback;
+                            columns.forEach((c, i) => {
+                                const thHead = trHead.appendChild(document.createElement('th'));
+                                thHead.setAttribute('scope', 'col');
+                                thHead.setAttribute('aria-label', c.name);
+                                thHead.classList.add('slds-is-sortable');
+                                const aHead = thHead.appendChild(document.createElement('a'));
+                                aHead.classList.add('slds-th__action', 'slds-text-link_reset');
+                                aHead.setAttribute('href', 'javascript:void(0);');
+                                aHead.setAttribute('role', 'button');
+                                aHead.setAttribute('tabindex', i);
+                                const assHead = aHead.appendChild(document.createElement('span'));
+                                assHead.classList.add('slds-assistive-text');
+                                assHead.textContent = 'Sort by: ';
+                                const grdHead = aHead.appendChild(document.createElement('div'));
+                                grdHead.classList.add('slds-grid', 'slds-grid_vertical-align-center', 'slds-has-flexi-truncate');
+                                const ttlHead = grdHead.appendChild(document.createElement('span'));
+                                ttlHead.classList.add('slds-truncate');
+                                ttlHead.setAttribute('title', c.name);
+                                ttlHead.textContent = c.name;
+                                aHead.onclick = function(e) { 
+                                    if (e) {
+                                        if (sorting.name === c.name) {
+                                            sorting.order = (sorting.order !== 'asc') ? 'asc' : 'desc';
+                                        } else {
+                                            sorting.name = c.name;
+                                            sorting.order = 'asc';
+                                        }
+                                        if (orderingImage.parentNode) {
+                                            orderingImage.parentNode.removeChild(orderingImage);
+                                        }
+                                    }
+                                    if (sorting.order === 'asc') {
+                                        thHead.setAttribute('aria-sort', 'ascending');
+                                        orderingImage.src = '/img/sort_asc_arrow.gif';
+                                    } else {
+                                        thHead.setAttribute('aria-sort', 'descending');
+                                        orderingImage.src = '/img/sort_desc_arrow.gif';
+                                    }
+                                    grdHead.appendChild(orderingImage);
+                                    const iOrder = sorting.order === 'asc' ? 1 : -1;
+                                    const items = [].slice.call(table.rows).slice(1);
+                                    items.sort(function compare(a, b) {
+                                        const valueA = a.getElementsByTagName('td')[i].textContent;
+                                        const valueB = b.getElementsByTagName('td')[i].textContent;
+                                        if (valueA < valueB) return -iOrder;
+                                        if (valueA > valueB) return iOrder;
+                                        return 0;
+                                    });
+                                    items.forEach(r => {
+                                        const parent = r.parentNode;
+                                        const detatchedItem = parent.removeChild(r);
+                                        parent.appendChild(detatchedItem);
+                                    });
+                                };
+                                if (sorting.name === c.name) {
+                                    firstSortCallback = function() { aHead.onclick(); }
+                                }
+                            });
+                            const tbody = table.appendChild(document.createElement('tbody'));
+                            const isArray = Array.isArray(data);
+                            const iterable = isArray ? data : MAP_HANDLER.keys(data);
+                            iterable.forEach(k => {
+                                if (filtering && filtering.formula && filtering.formula(data[k]) === false) return;
+                                const trBody = tbody.appendChild(document.createElement('tr'));
+                                if (coloring && coloring.formula) trBody.bgColor = coloring.formula(data[k]);
+                                columns.forEach(c => {
+                                    const tdBody = trBody.appendChild(document.createElement('td'));
+                                    let content = '';
+                                    const row = isArray ? k : data[k];
+                                    if (c.property) {
+                                        content = row[c.property];
+                                    } else if (c.formula) {
+                                        content = c.formula(row);
+                                    }
+                                    if (content) {
+                                        switch (typeof content) {
+                                            case 'object': tdBody.appendChild(content); break;
+                                            default: tdBody.innerHTML = content;
+                                        }
+                                    }
+                                });
+                            });
+                            if (firstSortCallback) { 
+                                firstSortCallback(); 
+                            }
+                            PROGRESSBAR_HANDLER.set(1, 1);
+                        },
+                        clean: function(element) {
+                            const dt = document.getElementById(element);
+                            while (dt.firstChild) {
+                                dt.removeChild(dt.lastChild);
+                            }
+                        }
+                    },
+                    tabs: {
+                        initialize: function(itemClass, contentClass, buttonClass) {
+                            const tabItems = document.getElementsByClassName(itemClass);
+                            const tabContents = document.getElementsByClassName(contentClass);
+                            const buttons = document.getElementsByClassName(buttonClass);
+                            for (let i=0; i<tabItems.length; i++) {
+                                tabItems[i].onclick = function(event) {
+                                    for (let j=0; j<tabItems.length; j++) {
+                                        if (tabItems[j] == event.target.parentElement) {
+                                            tabItems[j].classList.add('slds-is-active');
+                                        } else {
+                                            tabItems[j].classList.remove('slds-is-active');
+                                        }
+                                    }
+                                    let correspondingTabId = event.target.attributes['aria-controls'].value;
+                                    // Show buttons
+                                    for (let j=0; j<buttons.length; j++) {
+                                        const prop = buttons[j].attributes['aria-controlled-by'];
+                                        if (prop && prop.value) {
+                                            if ((',' + prop.value + ',').includes(',' + correspondingTabId + ',')) {
+                                                buttons[j].classList.add('slds-show');
+                                                buttons[j].classList.remove('slds-hide');
+                                            } else {
+                                                buttons[j].classList.remove('slds-show');
+                                                buttons[j].classList.add('slds-hide');
+                                            }
+                                        }
+                                    }
+                                    // show tab according to selection
+                                    for (let j=0; j<tabContents.length; j++) {
+                                        if (tabContents[j].id == correspondingTabId) {
+                                            tabContents[j].classList.add('slds-show');
+                                            tabContents[j].classList.remove('slds-hide');
+                                        } else {
+                                            tabContents[j].classList.remove('slds-show');
+                                            tabContents[j].classList.add('slds-hide');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    picklist: {
+                        addValue: function(l, value, label) {
+                            const o = document.createElement('option');
+                            o.value = value;
+                            o.text = label;
+                            l.add(o);
+                        },
+                        clear: function(l, length) {
+                            const i = length-1;
+                            while (l.options.length > i) { 
+                                l.options[i] = null; 
+                            }
+                        }
+                    },
+                    element: {
+                        show: function(el, visibility) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            el.style.display = (visibility ? 'block' : 'none');
+                        },
+                        setText: function(el, value) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            el.textContent = (value ? value : '');
+                        },
+                        setAttribute: function(el, key, value) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            el.setAttribute(key, value);
+                        },
+                        get: function(name) {
+                            return document.getElementById(name);
+                        },
+                        removeAllChild: function(el) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            while (el.firstChild) { el.removeChild(el.firstChild); }
+                        },
+                        create: function(type) {
+                            return document.createElement(type);
+                        },
+                        appendChild: function(el, child) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            el.appendChild(child);
+                        },
+                        addClass: function(el, classes) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            el.classList.add(...classes);
+                        }
+                    },
+                    render: {
+                        dependencies: function(id, name, data) {
+                            const svg = private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8');
+                            const div = document.createElement('div');
+                            div.classList.add('OrgCheck-dependency-thumbnail');
+                            div.onclick = function() {
+                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); //svg.clone(true));
+                            };
+                            div.setAttribute('id', 'chart-container-' + id);
+                            div.appendChild(svg);
+                            return div;
+                        },
+                        checkbox: function(b) {
+                            if (b) return '<img src="/img/checkbox_checked.gif" />';
+                            return '<img src="/img/checkbox_unchecked.gif" />';
+                        },
+                        link: function(uri, content) {
+                            const completeURL = (ORG_INFORMATION.instanceUrl ? ORG_INFORMATION.instanceUrl : '') + uri;
+                            return '<a href="' + completeURL + '" target="_blank">' + content + '</a>';
+                        },
+                        icon: function(name) {
+                            switch (name) {
+                                // img url check http://www.vermanshul.com/2017/10/quick-tips-salesforce-default-images.html
+                                case 'greenFlag':  return '<img src="/img/samples/flag_green.gif" alt="green flag" />';
+                                case 'redFlag':    return '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                case 'group':      return '<img src="/img/icon/groups24.png" alt="group" />';
+                                case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
+                                default:           return '';
+                            }
+                        },
+                        shrinkText: function(value, size=150, appendStr='...') {
+                            if (value && value.length > size) {
+                                return value.substr(0, size) + appendStr;
+                            }
+                            return value;
+                        },
+                        color: function(label) {
+                            switch (label) {
+                                case 'highlight':    return '#ffe099';
+                                case 'dark-blue':    return '#147efb';
+                                case 'blue':         return '#5fc9f8';
+                                case 'dark-orange':  return '#fd9426';
+                                case 'orange':       return '#fecb2e';
+                                case 'gray':         return '#555555';
+                                case 'dark-gray':    return '#6e7273';
+                                default:             return 'red';
+                            }
+                        }, 
+                    }
+                }
+            };
+        };
+
+        /**
+         * Returns systematically an ID15 based on the ID18
+         * @param id to simplify
+         */
+        this.doSimplifiySalesforceID = function(id) {
+            return FORMAT_HANDLER.salesforceIdFormat(id);
+        };
+
+        /**
+         * Returns the string representation of a given date using the user's preferences
+         * @param value to format (number if a timestamp, string otherwise)
+         */
+        this.doFormatDate = function(value) {
+            return FORMAT_HANDLER.dateFormat(value);
+        };
+
+        /**
+         * Returns the string representation of a given datetime using the user's preferences
+         * @param value to format (number if a timestamp, string otherwise)
+         */
+        this.doFormatDatetime = function(value) {
+            return FORMAT_HANDLER.datetimeFormat(value);
+        };
+
+        /**
+         * Data retriever with cache
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>mnemonic</code>: tag used for caching this data</li>
+         *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
+         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *              </ol>
+         */
+        this.doRetrieveDataWithCache = function(setup) {
+            try {
+                PERSISTANT_CACHE_HANDLER.cache(
+                    CACHE_SECTION_METADATA,
+                    setup.mnemonic, 
+                    setup.doDataRetriever, 
+                    function(records, isFromCache) {
+                        if (setup.onEachRecordFromCacheCallback) {
+                            MAP_HANDLER.forEach(records, function(id) {
+                                setup.onEachRecordFromCacheCallback(records[id]);
+                            });
+                        }
+                        if (setup.onEndFromCacheCallback) {
+                            setup.onEndFromCacheCallback(records);
+                        }
+                    }
+                );
+            } catch (error) {
+                if (setup.onErrorCallback) {
+                    setup.onErrorCallback(error);
+                }
+            }
+        };
+
+        /**
+         * Data retriever with cache for SOQL queries
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
+         *                <li><code>onEachRecordFromAPICallback</code>: function called for each record retrieved from database</li>
+         *                <li><code>mnemonic</code>: tag used for caching this data</li>
+         *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
+         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *              </ol>
+         */
+        this.doSalesforceQueriesWithCache = function(setup) {
+            this.doRetrieveDataWithCache({
+                mnemonic: setup.mnemonic,
+                doDataRetriever: function(callbackToSetTheCache) {
+                    SALESFORCE_HANDLER.doQueries(
+                        setup.queries, 
+                        function(record, index, dataSize, totalSize) {
+                            try {
+                                return setup.onEachRecordFromAPICallback(record, index, dataSize, totalSize);
+                            } catch(error) {
+                                setup.onErrorCallback(error);
+                            }
+                        }, 
+                        function(records, size) {
+                            try {
+                                MAP_HANDLER.setSize(records, size);
+                                callbackToSetTheCache(records);
+                            } catch(error) {
+                                setup.onErrorCallback(error);
+                            }
+                        },
+                        setup.onErrorCallback
+                    );
+                },
+                onEachRecordFromCacheCallback: setup.onEachRecordFromCacheCallback,
+                onEndFromCacheCallback: setup.onEndFromCacheCallback,
+                onErrorCallback: setup.onErrorCallback
+            });
+        };
+
+        /**
+         * Data retriever without cache for SOQL queries
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
+         *                <li><code>onEachRecord</code>: function called for each record retrieved from database</li>
+         *                <li><code>onEnd</code>: function called when all records were retrieved from database</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
+         *              </ol>
+         */
+        this.doSalesforceQueries = function(setup) {
+            SALESFORCE_HANDLER.doQueries(
+                setup.queries, 
+                function(record, index) {
+                    try {
+                        return setup.onEachRecord(record, index);
+                    } catch(error) {
+                        setup.onError(error);
+                    }
+                }, 
+                function(records, size) {
+                    try {
+                        return setup.onEnd(records, size);
+                    } catch(error) {
+                        setup.onError(error);
+                    }
+                },
+                setup.onError
+            );
+        }
+
+        /**
+         * Metadata retriever without cache
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>types</code>: List of types of metadata to retrieve</li> 
+         *                <li><code>onEnd</code>: function called when all records were retrieved from database</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
+         *              </ol>
+         */
+        this.doSalesforceMetadataRetrieve = function(setup) {
+            SALESFORCE_HANDLER.doMetadataRetrieve(
+                setup.types, 
+                setup.onEnd,
+                setup.onError
+            );
+        }
+
+        /**
+         * Helper to extract the package and developer name
+         * @param fullDeveloperName Developer Name
+        */
+        this.doSalesforceSplitDeveloperName = function(fullDeveloperName) {
+            return SALESFORCE_HANDLER.splitDeveloperName(fullDeveloperName);
+        };
+
+        /**
+         * Do a global describe on the salesforce org
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
+         *                <li><code>onError</code>: Callback function to call if there is an error</li>
+         *              </ol>
+         */
+        this.doSalesforceGlobalDescribe = function(setup) {
+            SALESFORCE_HANDLER.doDescribeGlobal(setup.onEnd, setup.onError);
+        };
+
+
+        /**
+         * Compute the dependencies graph as a SVG graph (with d3)
+         * @param tagId id of the entity
+         * @param name of the entity we want to analyze the dependencies
+         * @param data Returned by the doSalesforceDAPI method
+         * @param boxColor Color of each box
+         */
+        function private_compute_dependencies_graph(tagId, name, data, boxColor) {
+
+            // Some constants
+            const BOX_PADDING = 3;
+            const BOX_HEIGHT = 38;
+            const BOX_WIDTH = 100;
+            
+            // Hierarchical view of the data
+            const rootData = { 
+                name: name, 
+                children: [ 
+                    { name: 'Where Is It Used?', id: 'used', children: [] }, 
+                    { name: 'What Is It Using?', id: 'using', children: [] } 
+                ]
+            };
+            rootData.children.forEach(e => {
+                const d = data[e.id];
+                if (d) {
+                    for (const type in d) {
+                        const refs = d[type];
+                        const kidsForType = [];
+                        for (const rid in refs) {
+                            kidsForType.push({ id: rid, name: refs[rid].name });
+                        }
+                        e.children.push({ name: type, children: kidsForType });
+                    }
+                }
+            });
+            const root = d3.hierarchy(rootData);
+
+            // Set size
+            let mdepth = 0;
+            root.each(function(d) {
+                if (mdepth < d.depth) mdepth = d.depth;
+            });
+            const width = BOX_WIDTH * (mdepth * 2 + 4);
+            root.dx = BOX_HEIGHT + BOX_PADDING;
+            root.dy = width / (root.height + 1);
+
+            // Generate tree
+            const tree = d3.tree().nodeSize([root.dx, root.dy])(root);
+
+            // Define x0 and x1
+            let x0 = Infinity;
+            let x1 = -x0;
+            root.each(function(d) {
+                if (d.x > x1) x1 = d.x;
+                if (d.x < x0) x0 = d.x;
+                if (mdepth < d.depth) mdepth = d.depth;
+            });
+
+            // Construction of graph
+            const svg = d3.create('svg')
+                .attr('id', function(d, i) { return (tagId + 'svg' + i); })
+                .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2]);
+            
+            const g = svg.append('g')
+                .attr('id', function(d, i) { return (tagId + 'g' + i); })
+                .attr('font-family', 'Salesforce Sans,Arial,sans-serif')
+                .attr('font-size', '10')
+                .attr('transform', `translate(${root.dy / 2},${root.dx - x0})`);
+            
+            const link = g.append('g')
+                .attr('id', function(d, i) { return (tagId + 'link' + i); })
+                .attr('fill', 'none')
+                .attr('stroke', '#555')
+                .attr('stroke-opacity', 0.4)
+                .attr('stroke-width', 1.5)
+                .selectAll('path')
+                .data(root.links())
+                .join('path')
+                .attr('d', d3.linkHorizontal()
+                    .x(function(d) { return d.y; } )
+                    .y(function(d) { return d.x; } )
+                );
+            
+            const node = g.append('g')
+                .attr('id', function(d, i) { return (tagId + 'gnode' + i); })
+                .attr('stroke-linejoin', 'round')
+                .attr('stroke-width', 3)
+                .selectAll('g')
+                .data(root.descendants())
+                .join('g')
+                .attr('transform', function(d) { return `translate(${d.y},${d.x})`; });
+
+            // --------------------------------
+            // NODE ZONE
+            // --------------------------------
+            node.append('rect')
+                .attr('id', function(d, i) { return (tagId + 'zone' + i); })
+                .attr('fill', function(d) { return boxColor; })
+                .attr('rx', 6)
+                .attr('ry', 6)
+                .attr('x', 0)
+                .attr('y', - BOX_HEIGHT / 2)
+                .attr('width', BOX_WIDTH)
+                .attr('height', BOX_HEIGHT);
+
+            // --------------------------------
+            // NODE CONTENT
+            // --------------------------------
+            node.append('foreignObject')
+                .attr('id', function(d, i) { return (tagId + 'content' + i); })
+                .attr('x', BOX_PADDING)
+                .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
+                .attr('width', BOX_WIDTH-2*BOX_PADDING)
+                .attr('height', BOX_HEIGHT-2*BOX_PADDING)
+                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + d.data.name + '</span>');
+
+            return svg.node();
+        };
+
+        /**
+         * Call the Dependency API (synchronous version)
+         * @param ids Array of IDs that we are interested in
+         * @param callbackSuccess Callback method in case of a success with the resulting map
+         * @param callbackError Callback method in case of an error
+         */
+        function private_salesforce_dapi(ids, callbackSuccess, callbackError) {
+            const map = {};
+
+            if (ids.length == 0) {
+                callbackSuccess();
+                return;
+            }
+
+            const MAX_IDS_IN_QUERY = 50; // max is 2000 records, so avg of 40 dependencies for each id
+            const queries = [];
+            let subids = '';
+            ids.forEach((v, i, a) => {
+                const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
+                const lastItem = (i === a.length-1);
+                subids += '\'' + v + '\'';
+                if (batchFull === true || lastItem === true) { 
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                                'FROM MetadataComponentDependency '+
+                                'WHERE RefMetadataComponentId IN (' + subids + ') '+
+                                'OR MetadataComponentId IN (' + subids+ ')',
+                        queryMore: false
+                    });
+                    subids = '';
+                } else {
+                    subids += ',';
+                }
+            });
+
+            SALESFORCE_HANDLER.doQueries(
+                queries, 
+                function(record) {
+                    const aId = FORMAT_HANDLER.salesforceIdFormat(record.MetadataComponentId);
+                    const aType = record.MetadataComponentType;
+                    const aName = record.MetadataComponentName;
+                    const bId = FORMAT_HANDLER.salesforceIdFormat(record.RefMetadataComponentId);
+                    const bType = record.RefMetadataComponentType;
+                    const bName = record.RefMetadataComponentName;
+                    let b = map[bId];
+                    if (!b) b = map[bId] = {};
+                    if (!b.used) b.used = {};
+                    if (!b.used[aType]) b.used[aType] = [];
+                    b.used[aType][aId] = { name: aName };
+                    let a = map[aId];
+                    if (!a) a = map[aId] = {};
+                    if (!a.using) a.using = {};
+                    if (!a.using[bType]) a.using[bType] = [];
+                    a.using[bType][bId] = { name: bName };
+                    return {};
+                }, 
+                function() {
+                    callbackSuccess(map);
+                },
+                callbackError
+            );
+        };
+
+        /**
+         * Get description of an object (mix of JSForce and SOQL query in Tooling API)
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>objectName</code>: Name of the object to get the description</li>
+         *                <li><code>callbackSuccess</code>: function called in case of a successful describe query</li>
+         *                <li><code>callbackError</code>: function called in case of an error</li>
+         *              </ol>
+         */
+        function private_salesforce_descrive_object(setup) {
+            const s = SALESFORCE_HANDLER.splitDeveloperName(setup.objectName);
+            SALESFORCE_HANDLER.doDescribeObject(
+                setup.objectName, 
+                function(object) {
+                    SALESFORCE_HANDLER.doQueries(
+                        [ { 
+                            tooling: true, 
+                            string: 'SELECT Description, ExternalSharingModel, InternalSharingModel, '+
+                                        '(SELECT Id, Name FROM ApexTriggers), '+
+                                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                            'ValidationName FROM ValidationRules), '+
+                                        '(SELECT Id, Name FROM WebLinks) '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE DeveloperName = \''+s.shortName+'\' '+
+                                    (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
+                        } ], 
+                        function(record) {
+                            // 0. Generic information
+                            object.description = record.Description;
+                            object.externalSharingModel = record.ExternalSharingModel;
+                            object.internalSharingModel = record.InternalSharingModel;
+                            // 1. Apex Triggers
+                            if (record.ApexTriggers) {
+                                let apexTriggers = [];
+                                for (let i=0; i<record.ApexTriggers.records.length; i++) {
+                                    apexTriggers.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
+                                        name: record.ApexTriggers.records[i].Name
+                                    });
+                                }
+                                object.apexTriggers = apexTriggers;
+                            }
+                            // 2. FieldSets
+                            if (record.FieldSets) {
+                                let fieldSets = [];
+                                for (let i=0; i<record.FieldSets.records.length; i++) {
+                                    fieldSets.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
+                                        label: record.FieldSets.records[i].MasterLabel,
+                                        description: record.FieldSets.records[i].Description
+                                    });
+                                }
+                                object.fieldSets = fieldSets;
+                            }
+                            // 3. Page Layouts
+                            if (record.Layouts) {
+                                let layouts = [];
+                                for (let i=0; i<record.Layouts.records.length; i++) {
+                                    layouts.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
+                                        name: record.Layouts.records[i].Name,
+                                        type: record.Layouts.records[i].LayoutType
+                                    });
+                                }
+                                object.layouts = layouts;
+                            }
+                            // 4. Limits
+                            if (record.Limits) {
+                                let limits = [];
+                                for (let i=0; i<record.Limits.records.length; i++) {
+                                    limits.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
+                                        label: record.Limits.records[i].Label,
+                                        remaining: record.Limits.records[i].Remaining,
+                                        max: record.Limits.records[i].Max,
+                                        type: record.Limits.records[i].Type
+                                    });
+                                }
+                                object.limits = limits;
+                            }
+                            // 5. ValidationRules
+                            if (record.ValidationRules) {
+                                let validationRules = [];
+                                for (let i=0; i<record.ValidationRules.records.length; i++) {
+                                    validationRules.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
+                                        name: record.ValidationRules.records[i].ValidationName,
+                                        isActive: record.ValidationRules.records[i].Active,
+                                        description: record.ValidationRules.records[i].Description,
+                                        errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
+                                        errorMessage: record.ValidationRules.records[i].ErrorMessage
+                                    });
+                                }
+                                object.validationRules = validationRules;
+                            }
+                            // 6. WebLinks
+                            if (record.WebLinks) {
+                                let webLinks = [];
+                                for (let i=0; i<record.WebLinks.records.length; i++) {
+                                    webLinks.push({
+                                        id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
+                                        name: record.WebLinks.records[i].Name,
+                                    });
+                                }
+                                object.webLinks = webLinks;
+                            }
+                            setup.callbackSuccess(object);
+                        },
+                        function(records, size) { },
+                        setup.callbackError
+                    );
+                }, 
+                setup.callbackError
+            );
+        };
+    }
+};
+
+/**
+ * Let's define all the dataset that we have available for the pages.
+ *              Pages will activate the one they need when calling the controller
+ *              At this time, no data is yet retrieved from Salesforce.
+ * @param core The OrgCheck instance 
+ */
+function buildDatasets(core) {
+
+    // ========================================================================
+    // WORKFLOWS
+    // ========================================================================
+    /*
+    TODO: Implement workflows dataset here
+    */
+
+    // ========================================================================
+    // PACKAGES
+    // ------------------------------------------------------------------------
+    // List of Packages in Salesforce (metadata, using tooling API). 
+    // This includes the installed packages (with type="Installed"). And 
+    // also the local packages (with type="Local").
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'packages',
+        keycache: 'Packages',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
+                            'FROM InstalledSubscriberPackage ' 
+                }, { 
+                    tooling: false,
+                    string: 'SELECT NamespacePrefix '+
+                            'FROM Organization '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    if (i == 0) {
+                        return { 
+                            id: v.Id, 
+                            name: v.SubscriberPackage.Name,
+                            namespace: v.SubscriberPackage.NamespacePrefix,
+                            type: 'Installed'
+                        };
+                    } else {
+                        return { 
+                            id: v.NamespacePrefix, 
+                            name: v.NamespacePrefix,
+                            namespace: v.NamespacePrefix, 
+                            type: 'Local'
+                        };
+                    }
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // CUSTOM LABELS
+    // ------------------------------------------------------------------------
+    // List of Custom Labels in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'customLabels',
+        keycache: 'CustomLabels',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
+                            'FROM ExternalString '+
+                            'WHERE NamespacePrefix = NULL'
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        masterLabel: v.MasterLabel,
+                        namespace: v.NamespacePrefix,
+                        category: v.Category,
+                        protected: v.IsProtected,
+                        language: v.Language,
+                        value: v.Value
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // CUSTOM SETTINGS
+    // ------------------------------------------------------------------------
+    // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'customSettings',
+        keycache: 'CustomSettings',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
+                            'FROM EntityDefinition '+
+                            'WHERE IsCustomSetting = true ' + 
+                            'AND NamespacePrefix = NULL '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.DurableId),
+                        name: v.QualifiedApiName,
+                        namespace: v.NamespacePrefix
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // VISUAL FORCE PAGES (still alive!)
+    // ------------------------------------------------------------------------
+    // Get the list of Visualforce Pages in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'vfPages',
+        keycache: 'VisualforcePages',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch '+
+                            'FROM ApexPage '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        description: v.Description, 
+                        mobile: v.IsAvailableInTouch
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // VISUAL FORCE COMPONENTS (still alive!)
+    // ------------------------------------------------------------------------
+    // Get the list of Visualforce Components in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'vfComponents',
+        keycache: 'VisualforceComponents',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description '+
+                            'FROM ApexComponent '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // APEX CLASSES (UNIT TEST AND OTHERS)
+    // ------------------------------------------------------------------------
+    // Get the list of Apex Classes in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'apexClasses',
+        keycache: 'ApexClasses',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, IsValid, '+
+                                'Body, LengthWithoutComments, SymbolTable '+
+                            'FROM ApexClass '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const item = {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        isTest: false,
+                        isAbstract: false,
+                        isInterface: false,
+                        isValid: v.IsValid,
+                        length: v.LengthWithoutComments,
+                        needsRecompilation: (!v.SymbolTable ? true : false)
+                    };
+                    if (v.Body) {
+                        item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
+                    }
+                    if (v.SymbolTable) {
+                        item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                        item.interfaces = v.SymbolTable.interfaces;
+                        item.methodsCount = v.SymbolTable.methods.length || 0;
+                        if (v.SymbolTable.tableDeclaration) {
+                            item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                            if (v.SymbolTable.tableDeclaration.modifiers) {
+                                v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                    switch (m) {
+                                        case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                        case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                        case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                        case 'public':            item.specifiedAccess  = 'public';    break;
+                                        case 'global':            item.specifiedAccess  = 'global';    break;
+                                        case 'abstract':          item.isAbstract       = true;        break;
+                                        case 'testMethod':        item.isTest           = true;        break;
+                                    }
+                                });
+                            };
+                        }
+                    }
+                    return item;
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // APEX TRIGGERS
+    // ------------------------------------------------------------------------
+    // Get the list of Apex Triggers in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'apexTriggers',
+        keycache: 'ApexTriggers',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, ApiVersion, Status, '+
+                                'IsValid, NamespacePrefix, '+
+                                'UsageBeforeInsert, UsageAfterInsert, '+
+                                'UsageBeforeUpdate, UsageAfterUpdate, '+
+                                'UsageBeforeDelete, UsageAfterDelete, '+
+                                'UsageAfterUndelete, UsageIsBulk, '+
+                                'LengthWithoutComments, EntityDefinitionId '+
+                            'FROM ApexTrigger '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        isValid: v.IsValid,
+                        length: v.LengthWithoutComments,
+                        isActive: (v.Status === 'Active' ? true : false),
+                        beforeInsert: v.UsageBeforeInsert,
+                        afterInsert: v.UsageAfterInsert,
+                        beforeUpdate: v.UsageBeforeUpdate,
+                        afterUpdate: v.UsageAfterUpdate,
+                        beforeDelete: v.UsageBeforeDelete,
+                        afterDelete: v.UsageAfterDelete,
+                        afterUndelete: v.UsageAfterUndelete,
+                        sobject: v.EntityDefinitionId
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // STATIC RESOURCES
+    // ------------------------------------------------------------------------
+    // Get the list of Static Resources in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'stResources',
+        keycache: 'StaticResources',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, Name, NamespacePrefix '+
+                            'FROM StaticResource '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        namespace: v.NamespacePrefix
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));                    
+
+    // ========================================================================
+    // LIGHTNING PAGES
+    // ------------------------------------------------------------------------
+    // Get the list of Lightning Pages in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'auraPages',
+        keycache: 'LightningPages',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
+                                'Type, NamespacePrefix, Description ' +
+                            'FROM FlexiPage '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.MasterLabel,
+                        entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
+                        type: v.Type,
+                        namespace: v.NamespacePrefix,
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // FLOWS
+    // ------------------------------------------------------------------------
+    // Get the list of Flows in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'flows',
+        keycache: 'Flows',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
+                            'FROM FlowDefinition '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.DeveloperName,
+                        namespace: v.NamespacePrefix
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // LIGHTNING WEB COMPONENTS
+    // ------------------------------------------------------------------------
+    // Get the list of Lightning Web Components in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'lwComponents',
+        keycache: 'LightningWebComponents',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+ 
+                            'FROM LightningComponentBundle '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.MasterLabel,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // LIGHTNING AURA COMPONENTS
+    // ------------------------------------------------------------------------
+    // Get the list of Lightning Aura Components in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'auraComponents',
+        keycache: 'AuraComponents',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+
+                            'FROM AuraDefinitionBundle '+
+                            'WHERE ManageableState = \'unmanaged\' '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.MasterLabel,
+                        apiVersion: v.ApiVersion,
+                        namespace: v.NamespacePrefix,
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+                        
+    // ========================================================================
+    // USERS
+    // ------------------------------------------------------------------------
+    // Get the list of Users in Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'users',
+        keycache: 'Users',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, Name, SmallPhotoUrl, Profile.Id, Profile.Name, '+
+                                'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
+                                'UserPreferencesLightningExperiencePreferred, '+
+                                '(SELECT PermissionSet.Id, PermissionSet.Name, '+
+                                    'PermissionSet.PermissionsApiEnabled, '+
+                                    'PermissionSet.PermissionsViewSetup, '+
+                                    'PermissionSet.PermissionsModifyAllData, '+
+                                    'PermissionSet.PermissionsViewAllData '+
+                                    'FROM PermissionSetAssignments '+
+                                    'WHERE PermissionSet.isOwnedByProfile = false '+
+                                    'ORDER BY PermissionSet.Name) '+
+                            'FROM User '+
+                            'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
+                            'AND IsActive = true ', // we only want active users
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    let item = {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        photourl: v.SmallPhotoUrl,
+                        lastLogin: core.doFormatDatetime(v.LastLoginDate),
+                        neverLogged: (!v.LastLoginDate ? true : false),
+                        numberFailedLogins: v.NumberOfFailedLogins,
+                        lastPasswordChange: core.doFormatDatetime(v.LastPasswordChangeDate),
+                        onLightningExperience: v.UserPreferencesLightningExperiencePreferred,
+                        profile: {
+                            id: core.doSimplifiySalesforceID(v.Profile.Id),
+                            name: v.Profile.Name
+                        },
+                        permissionSets: [],
+                        permissions: {
+                            apiEnabled: false,
+                            viewSetup: false,
+                            modifyAllData: false,
+                            viewAllData: false
+                        }
+                    };
+                    if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
+                        for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
+                            let assignment = v.PermissionSetAssignments.records[i];
+                            if (assignment.PermissionSet.PermissionsApiEnabled === true) item.permissions.apiEnabled = true;
+                            if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
+                            if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
+                            if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
+                            item.permissionSets.push({
+                                id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
+                                name: assignment.PermissionSet.Name
+                            });
+                        }
+                    }
+                    return item;
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+    
+    // ========================================================================
+    // CUSTOM LABELS
+    // ------------------------------------------------------------------------
+    // Get the list of Profiles in Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'profiles',
+        keycache: 'Profiles',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
+                                'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
+                                '(SELECT Id FROM Assignments LIMIT 101) '+
+                            'FROM PermissionSet '+ // oh yes we are not mistaken!
+                            'WHERE isOwnedByProfile = true'
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.ProfileId),
+                        name: v.Profile.Name,
+                        description: v.Profile.Description,
+                        license: v.License.Name,
+                        userType: v.Profile.UserType,
+                        isCustom: v.IsCustom,
+                        package: v.NamespacePrefix,
+                        membersCount: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0,
+                        hasMembers: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+    
+    // ========================================================================
+    // PROFILE LOGIN RESTRICTIONS (IN PROFILE)
+    // ------------------------------------------------------------------------
+    // Get the list of Login Restrictions in Profiles
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'profileLoginRestrictions',
+        keycache: 'ProfileLoginRestrictions',
+        retriever: function(me, resolve, reject) {
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const queries = [];
+            core.doSalesforceQueries({
+                queries: [{ string: 'SELECT Id FROM Profile' }], 
+                onEachRecord: function(record, index) {
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT Id, Name, Metadata FROM Profile WHERE Id = \''+record.Id+'\''
+                    });
+                }, 
+                onEnd: function(records, size) { 
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: cache,
+                        queries,
+                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                loginIpRanges: v.Metadata.loginIpRanges
+                            };
+                            if (v.Metadata.loginHours) {
+                                const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                                days.forEach(d => {
+                                    const c1 = v.Metadata.loginHours[d + 'Start'];
+                                    const c2 = v.Metadata.loginHours[d + 'End'];
+                                    if (!item.loginHours) item.loginHours = {};
+                                    item.loginHours[d] = {
+                                        from: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
+                                        to:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
+                                    };
+                                });
+                            }
+                            return item;
+                        },
+                        onEndFromCacheCallback: resolve,
+                        onErrorCallback: reject
+                    });
+                },
+                onError: reject
+            });
+        }
+    }));
+                        
+    // ========================================================================
+    // PERMISSION SETS
+    // ------------------------------------------------------------------------
+    // Get the list of Permission Sets in Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'permissionSets',
+        keycache: 'PermissionSets',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, '+ 
+                                'NamespacePrefix, '+
+                                '(SELECT Id, AssigneeId, Assignee.ProfileId, '+
+                                    'Assignee.Profile.Name '+
+                                    'FROM Assignments) '+
+                            'FROM PermissionSet '+
+                            'WHERE IsOwnedByProfile = false' 
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    let item = {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        description: v.Description,
+                        hasLicense: (v.License ? 'yes' : 'no'),
+                        license: (v.License ? v.License.Name : ''),
+                        isCustom: v.IsCustom,
+                        package: v.NamespacePrefix,
+                        membersCount: 0, 
+                        hasMembers: false, 
+                        uniqueProfiles: []
+                    };
+                    if (v.Assignments && v.Assignments.records) {
+                        item.membersCount = v.Assignments.records.length;
+                        item.hasMembers = true;
+                        let pmap = {};
+                        for (let i=0; i<item.membersCount; i++) {
+                            const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
+                            if (pmap[pid]) {
+                                pmap[pid].count++;
+                            } else {
+                                const p = {
+                                    id: pid,
+                                    name: v.Assignments.records[i].Assignee.Profile.Name,
+                                    count: 1
+                                };
+                                pmap[pid] = p;
+                                item.uniqueProfiles.push(p);
+                            }
+                        }
+                    }
+                    return item;
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+                        
+    // ========================================================================
+    // ROLES
+    // ------------------------------------------------------------------------
+    // Get the list of Roles in Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'roles',
+        keycache: 'Roles',
+        retriever: function(me, resolve, reject) {
+            const ROOT_ID = '###root###';
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
+                                '(SELECT Id, Name, Username, Email, Phone, '+
+                                    'SmallPhotoUrl, IsActive FROM Users)'+
+                            ' FROM UserRole '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    let item = {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        name: v.Name,
+                        developerName: v.DeveloperName,
+                        parentId: v.ParentRoleId ? core.doSimplifiySalesforceID(v.ParentRoleId) : ROOT_ID,
+                        hasParent: v.ParentRoleId ? true : false,
+                        activeMembersCount: 0,
+                        activeMembers: [],
+                        hasActiveMembers: false,
+                        inactiveMembersCount: 0,
+                        isExternal: (v.PortalType !== 'None') ? true : false
+                    };
+                    if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
+                        let user = v.Users.records[i];
+                        if (user.IsActive) {
+                            item.activeMembers.push({
+                                id: core.doSimplifiySalesforceID(user.Id),
+                                name: user.Name,
+                                username: user.Username,
+                                email: user.Email,
+                                telephone: user.Phone,
+                                photourl: user.SmallPhotoUrl,
+                                isActive: user.IsActive
+                            });
+                        } else {
+                            item.inactiveMembersCount++;
+                        }
+                    }
+                    item.activeMembersCount = item.activeMembers.length;
+                    item.hasActiveMembers = item.activeMembers.length > 0;
+                    return item;
+                }, 
+                onEndFromCacheCallback: function(records) {
+                    records[ROOT_ID] = {
+                        id: ROOT_ID,
+                        name: 'Role Hierarchy',
+                        developerName: ROOT_ID,
+                        parentId: null
+                    };
+                    resolve(records);
+                },
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // PUBLIC GROUPS
+    // ------------------------------------------------------------------------
+    // Get the list of Public Groups in Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'publicGroups',
+        keycache: 'PublicGroups',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
+                                '(SELECT Id, UserOrGroupId FROM GroupMembers)'+
+                            'FROM Group ' 
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const item = {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        isPublicGroup: (v.Type === 'Regular'),
+                        isTechnical: (v.Type === 'AllCustomerPortal' || v.Type === 'Organization' || v.Type === 'PRMOrganization'),
+                        isRole: (v.Type === 'Role'),
+                        isQueue: (v.Type === 'Queue'),
+                        isRoleAndSubordinates: (v.Type === 'RoleAndSubordinates')
+                    };
+                    if (item.isPublicGroup || item.isQueue || item.isTechnical) {
+                        item.developerName = v.DeveloperName;
+                        item.name = v.Name;
+                        item.includeBosses = v.DoesIncludeBosses;
+                        item.directMembersCount = 0;
+                        item.directUsers = [];
+                        item.directGroups = [];
+                        if (!item.isTechnical && v.GroupMembers && v.GroupMembers.records) {
+                            item.directMembersCount = v.GroupMembers.records.length;
+                            for (let i=0; i<item.directMembersCount; i++) {
+                                const member_from_api = v.GroupMembers.records[i];
+                                const member_id = core.doSimplifiySalesforceID(member_from_api.UserOrGroupId);
+                                const member_is_a_user = member_id.startsWith('005');
+                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });
+                            }
+                        }
+                        
+                    } else {
+                        item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                    }
+                    return item;
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // SOBJECTS GLOBAL DESCRIBE
+    // ------------------------------------------------------------------------
+    // Get the list of sobjects in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'objects',
+        keycache: 'Objects',
+        retriever: function(me, resolve, reject) {
+            core.doRetrieveDataWithCache({
+                mnemonic: this.keycache, 
+                doDataRetriever: function(callbackToSetTheCache) {
+                    core.doSalesforceGlobalDescribe({
+                        onEnd: function(sobjects) {
+                            const map = {};
+                            if (sobjects) {
+                                sobjects.forEach(v => {
+                                    if (v.customSetting === false && 
+                                        v.keyPrefix &&
+                                        v.triggerable === true &&
+                                        v.layoutable === true) {
+                                        const object = {
+                                            id: v.name,
+                                            label: v.label,
+                                            developerName: v.name,
+                                            package: core.doSalesforceSplitDeveloperName(v.name).package
+                                        };
+                                        map[object.id] = object;
+                                    }
+                                });
+                            }
+                            callbackToSetTheCache(map);
+                        }, 
+                        onError: reject
+                    });
+                },
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // BATCHES
+    // ------------------------------------------------------------------------
+    // Get the list of failed batches and scheduled jobs in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'batches',
+        keycache: 'Batches',
+        retriever: function(me, resolve, reject) {
+            let artificial_id = 0;
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    // Batches
+                    tooling: false, 
+                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors ' +
+                            'FROM AsyncApexJob ' +
+                            'WHERE ExtendedStatus <> NULL ' +
+                            'OR Status = \'Failed\' ' +
+                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus' 
+                }, {
+                    // Scheduled Jobs
+                    tooling: false, 
+                    string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
+                                'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
+                                'EndTime, Id, LastModifiedById, NextFireTime, OwnerId, '+
+                                'PreviousFireTime, StartTime, State, TimesTriggered, '+
+                                'TimeZoneSidKey '+
+                            'FROM CronTrigger '+
+                            'WHERE State <> \'COMPLETE\''
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    if (i == 0) {
+                        return { 
+                            id: 'BATCH#'+artificial_id++,
+                            type: 'ApexJob ' + v.JobType,
+                            context: (v.ApexClass ? v.ApexClass.Name : 'anonymous') + '.' + v.MethodName,
+                            status: v.Status,
+                            message: v.ExtendedStatus,
+                            numIds: v.ids,
+                            numErrors: v.errors
+                        };
+                    } else {
+                        let jobTypeLabel = '';
+                        switch (v.CronJobDetail.JobType) {
+                            case '1': jobTypeLabel = 'Data Export'; break;
+                            case '3': jobTypeLabel = 'Dashboard Refresh'; break;
+                            case '4': jobTypeLabel = 'Reporting Snapshot'; break;
+                            case '6': jobTypeLabel = 'Scheduled Flow'; break;
+                            case '7': jobTypeLabel = 'Scheduled Apex'; break;
+                            case '8': jobTypeLabel = 'Report Run'; break;
+                            case '9': jobTypeLabel = 'Batch Job'; break;
+                            case 'A': jobTypeLabel = 'Reporting Notification'; break;
+                        }
+                        return { 
+                            id: 'JOB#'+artificial_id++,
+                            type: 'Scheduled ' + jobTypeLabel,
+                            context: v.CronJobDetail.Name,
+                            status: v.State,
+                            message: 'by user: ' + v.OwnerId + 
+                                ', start: ' + v.StartTime + 
+                                ', end: ' + v.EndTime + 
+                                ', timezone: ' + v.TimeZoneSidKey
+                        };
+                    }
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // CUSTOM OBJECTS
+    // ------------------------------------------------------------------------
+    // Get the list of custom objects in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'customObjects',
+        keycache: 'CustomObjects',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
+                            'FROM CustomObject '+
+                            'WHERE ManageableState = \'unmanaged\'  '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return { 
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        developerName: v.DeveloperName,
+                        packageName: v.NamespacePrefix
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // CUSTOM FIELDS
+    // ------------------------------------------------------------------------
+    // Get the list of custom fields in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'customFields',
+        keycache: 'CustomFields',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: true, 
+                    string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix '+
+                            'FROM CustomField '+
+                            'WHERE ManageableState = \'unmanaged\'  '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
+                    return { 
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        objectId: (isObjectId === true ? core.doSimplifiySalesforceID(v.TableEnumOrId) : ''),
+                        objectName: (isObjectId === false ? v.TableEnumOrId : ''),
+                        fieldName: v.DeveloperName,
+                        developerName: v.DeveloperName,
+                        packageName: v.NamespacePrefix,
+                        fullName: v.DeveloperName
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // ORG WIDE DEFAULTS
+    // ------------------------------------------------------------------------
+    // Get the list of all org wide default in this org
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'orgWideDefaults',
+        keycache: 'OrgWideDefaults',
+        retriever: function(me, resolve, reject) {
+            // We have some issue calling the Bulk API with jsforce
+            // As EntityDefinition does not accept querMore, we will trick the system
+            const MAX_COUNT_ENTITYDEF = 600;
+            const BATCH_SIZE = 200;
+            const NUM_LOOP = MAX_COUNT_ENTITYDEF/BATCH_SIZE;
+            const entityDefQueries = [];
+            for (let i=0; i<NUM_LOOP; i++) {
+                entityDefQueries.push({
+                    rest: true,
+                    string: 'SELECT DeveloperName, ExternalSharingModel, InternalSharingModel, '+
+                                'NamespacePrefix '+
+                            'FROM EntityDefinition '+
+                            'WHERE IsCustomSetting = false '+
+                            'AND IsApexTriggerable = true '+
+                            'AND IsCompactLayoutable = true '+
+                            'LIMIT ' + BATCH_SIZE + ' '+
+                            'OFFSET ' + (BATCH_SIZE*i),
+                    queryMore: false
+                });
+            }
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: entityDefQueries,
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return { 
+                        id: v.DeveloperName,
+                        name: v.DeveloperName,
+                        packageName: v.NamespacePrefix,
+                        external: v.ExternalSharingModel,
+                        internal: v.InternalSharingModel
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+}
+
+
+

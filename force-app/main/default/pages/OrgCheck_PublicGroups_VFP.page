@@ -1,0 +1,274 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Public Groups and Queues
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Public Groups and Queues Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Public Groups" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Public Groups</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Queues" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Queues</a>
+                    </li>
+                </ul>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                    <div id="datatable-publicGroups" />
+                </div>
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                    <div id="datatable-queues" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // --------------------------------------
+                    // Render a user information (photo and name)
+                    // --------------------------------------
+                    const renderUser = function(users, uid, show_photo) {
+                        const user = users[uid];
+                        let htmlContent = '';
+                        if (user) {
+                            htmlContent = 
+                                (show_photo === true? ('<img src="' + users[uid].photourl + '" width="25" /> ') : '')
+                                + users[uid].name;
+                        } else {
+                            htmlContent = uid + ' (inactive)';
+                        }
+                        return helper.html.render.link('/'+uid, htmlContent);
+                    }
+
+                    // --------------------------------------
+                    // Render a list of users information
+                    // --------------------------------------
+                    const renderUsers = function(users, uids, show_photo) {
+                        if (uids.length == 0) {
+                            return '(empty)';
+                        }
+                        let htmlContent = '<b>' + uids.length + ' user' + (uids.length > 1 ? 's' : '') + '</b><br />';
+                        htmlContent += '<ul class="slds-list_dotted">';
+                        for (let i=0; i<uids.length; i++) {
+                            htmlContent += '<li>' + renderUser(users, uids[i].id, show_photo) + '</li>';
+                        }
+                        htmlContent += '</ul>';
+                        return htmlContent;
+                    };
+
+                    // --------------------------------------
+                    // Render a list of groups/roles information
+                    // --------------------------------------
+                    const renderGroups = function(groups, roles, gids) {
+                        if (gids && gids.length == 0) {
+                            return '(empty)';
+                        }
+                        let htmlContent = '<b>' + gids.length + ' group' + (gids.length > 1 ? 's' : '') + '</b><br />';
+                        htmlContent += '<ul class="slds-list_dotted">';
+                        for (let i=0; i<gids.length; i++) {
+                            const directGroup = groups[gids[i].id];
+                            let link, name, type;
+                            if (directGroup.isPublicGroup === true) {
+                                link = '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+directGroup.id;
+                                name = directGroup.name;
+                                type = 'Public Group';
+                            } else if (directGroup.isTechnical === true) {
+                                name = directGroup.developerName;
+                                type = 'Technical Group';
+                            } else {
+                                link = '/'+directGroup.relatedId;
+                                name = roles[directGroup.relatedId].name;
+                                if (directGroup.isRole === true) type = 'Role';
+                                if (directGroup.isRoleAndSubordinates === true) type = 'Role &amp; Sub.';
+                            }
+                            htmlContent += '<li>' + type + ' ' + (link ? helper.html.render.link(link, name) : name);
+                            if (directGroup.isTechnical == false && (directGroup.directUsers.length > 0 || directGroup.indirectUsers.length > 0)) {
+                                htmlContent += ' with';
+                                if (directGroup.directUsers.length > 0)   htmlContent += ' ' + directGroup.directUsers.length   + ' direct user'   + (directGroup.directUsers.length   > 1 ? 's': '');
+                                if (directGroup.directUsers.length > 0 && directGroup.indirectUsers.length > 0) htmlContent += ' and';
+                                if (directGroup.indirectUsers.length > 0) htmlContent += ' ' + directGroup.indirectUsers.length + ' indirect user' + (directGroup.indirectUsers.length > 1 ? 's': '');
+                            }
+                            htmlContent += '</li>';
+                        }
+                        htmlContent += '</ul>';
+                        return htmlContent;
+                    }
+
+                    // --------------------------------------
+                    // Recursively set the number of users
+                    // --------------------------------------
+                    const recursive_set_number_of_indirect_users = function(groups, roles, group_id) {
+                        const group_information = groups[group_id];
+                        // If the list was already calculated by previous ancestors
+                        if (group_information.indirectUsers) {
+                            return;
+                        }
+                        // Let's store the indirect users of this group
+                        // At start it is an empty array of course
+                        let indirect_users = [];
+                        let includes_technical_group = false;
+                        // Then we iterate throught all the direct groups of this group
+                        const direct_groups_IDs = group_information.directGroups;
+                        if (direct_groups_IDs) {
+                            for (let j=0; j<direct_groups_IDs.length; j++) {
+                                // for each of the sub group we get:
+                                const direct_subgrp_id = direct_groups_IDs[j].id;
+                                const direct_subgrp = groups[direct_subgrp_id];
+                                // 0. set flag if this is a technical group
+                                if (direct_subgrp.isTechnical === true) includes_technical_group = true;
+                                //  1. we get its direct users
+                                const direct_subgrp_direct_users = direct_subgrp.directUsers;
+                                //  2. we call the recursive method to make sure we calculate the indirect Users list
+                                recursive_set_number_of_indirect_users(groups, roles, direct_subgrp_id);
+                                //  3. we get its indirect users
+                                const direct_subgrp_indirect_users = direct_subgrp.indirectUsers;
+                                //  4. add direct users to the global users (removing potential duplicates)
+                                indirect_users = helper.array.concat(indirect_users, direct_subgrp_direct_users, 'id');
+                                //  5. add indirect users to the global users (removing potential duplicates)
+                                indirect_users = helper.array.concat(indirect_users, direct_subgrp_indirect_users, 'id');
+                            }
+                        }
+                        // Alter the indirect members count of the current group
+                        group_information.indirectUsers = indirect_users;
+                        group_information.includesTechnicalGroup = includes_technical_group;
+                    };
+
+                    // --------------------------------------
+                    // Recursively add subordinates to "RoleAndSub" public groups
+                    // --------------------------------------
+                    const recursive_add_subordinates_as_direct_groups = function(groups, group_id) {
+                        const group_information = groups[group_id];
+                        if (group_information.parentId) {
+                            groups[group_information.parentId].directGroups.push({ id: group_id })
+                            recursive_add_subordinates_as_direct_groups(groups, group_information.parentId);
+                        }
+                    }
+                    
+                    controller.run({
+                        datasets: [ 'publicGroups', 'roles', 'users' ],
+                        onRecords: function(map) { 
+
+                            // Iterate over public groups
+                            let publicGroupIDsByRoleID = {}; // map of public group IDs that are Roles by role id
+                            let publicGroupIDsByRoleAndSubID = {}; // map of public group IDs that are Roles And Subordinates by role id
+                            helper.map.iterate2(map.publicGroups, function(d, i, s) {
+                                if (d.isRole === true) {
+                                    publicGroupIDsByRoleID[d.relatedId] = d.id;
+                                } else if (d.isRoleAndSubordinates === true) {
+                                    publicGroupIDsByRoleAndSubID[d.relatedId] = d.id;
+                                }
+                            });
+
+                            // Add information from roles to public groups that mimic the roles
+                            helper.map.iterate2(map.publicGroups, function(d, i, s) { 
+                                if (d.isRole || d.isRoleAndSubordinates) {
+                                    const role = map.roles[d.relatedId];
+                                    d.name = role.name;
+                                    d.developerName = role.developerName;
+                                    d.directMembersCount = role.activeMembersCount;
+                                    d.directUsers = role.activeMembers;
+                                    d.directGroups = [];
+                                    if (d.isRole) d.parentId = publicGroupIDsByRoleID[role.parentId];
+                                    if (d.isRoleAndSubordinates) d.parentId = publicGroupIDsByRoleAndSubID[role.parentId];
+                                }
+                            });
+
+                            // Add groups and users from subordinates
+                            helper.map.iterate2(map.publicGroups, function(d, i, s) { 
+                                if (d.isRoleAndSubordinates) {
+                                    recursive_add_subordinates_as_direct_groups(map.publicGroups, d.id);
+                                }
+                            });
+
+                            // Calculate the list of indirect users for each public groups
+                            helper.map.iterate2(map.publicGroups, function(d, i, s) { 
+                                recursive_set_number_of_indirect_users(map.publicGroups, map.roles, d.id);
+                            });
+
+                            helper.html.datatable.create(
+                                'datatable-publicGroups',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => { 
+                                        let badnessScore = 0;
+                                        if (r.includesTechnicalGroup === false) {
+                                            const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                            if (all_distinct_users.length == 0) badnessScore++;
+                                        }
+                                        return badnessScore;
+                                    }},
+                                    { name: 'With bosses?', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
+                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
+                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'All users', formula: (r) => { 
+                                        if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
+                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                        return renderUsers(map.users, all_distinct_users, true); 
+                                    }}
+                                ],
+                                map.publicGroups,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.includesTechnicalGroup === false) {
+                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                        if (all_distinct_users.length == 0) return helper.html.render.color('highlight');
+                                    }
+                                    return null;
+                                }},
+                                { formula: (r) => { return r.isPublicGroup; }}
+                            );
+
+                            helper.html.datatable.create(
+                                'datatable-queues',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Score', formula: (r) => { 
+                                        let badnessScore = 0;
+                                        if (r.includesTechnicalGroup === false) {
+                                            const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                            if (all_distinct_users.length == 0) badnessScore++;
+                                        }
+                                        return badnessScore;
+                                    }},
+                                    { name: 'With bosses?', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
+                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
+                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'All users', formula: (r) => { 
+                                        if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
+                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                        return renderUsers(map.users, all_distinct_users, true); 
+                                    }}
+                                ],
+                                map.publicGroups,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => { 
+                                    if (r.includesTechnicalGroup === false) {
+                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
+                                        if (all_distinct_users.length == 0) return helper.html.render.color('highlight');
+                                    }
+                                    return null;
+                                }},
+                                { formula: (r) => { return r.isQueue; }}
+                            );
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

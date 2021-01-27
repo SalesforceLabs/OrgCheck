@@ -1,0 +1,44 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Authorization Door
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Which org should be used to OrgCheck?
+        </apex:define>
+        <apex:define name="html_actions" />
+        <apex:define name="html_content_core">
+            <center>
+                <br />
+                <br />
+                You should be redirected to <b>OrgCheck's Home page</b> soon.
+                <br />
+                <br /> 
+                If not, please use the following button to do so manually:<br />
+                <br />
+                <button id="button-redirect" class="slds-button slds-button_brand">Redirect to OrgCheck's Home!</button>
+            </center>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+                    const redirection = function () {
+                        top.location.href = '/lightning/n/orgcheck__OrgCheck_Home_TAB';
+                    };
+                    helper.html.element.get('button-redirect').onclick = function (e) {
+                        redirection();
+                    }
+                    const hashMap = {};
+                    top.location.hash.substr(1).split('&').forEach(p => {
+                        const arr = p.split('=', 2);
+                        hashMap[arr[0]] = decodeURIComponent(arr[1]);
+                    });
+                    helper.information.switchToOrg(hashMap.instance_url, hashMap.id, hashMap.access_token);
+                    helper.information.showMainContent();
+                    setTimeout(redirection, 1000);
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

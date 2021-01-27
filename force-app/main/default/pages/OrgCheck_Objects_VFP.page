@@ -1,0 +1,594 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Object Documentation
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Object Configuration Overview
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Object Documentation" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Object Documentation</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Org Wide Default" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Org Wide Default</a>
+                    </li>
+                </ul>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                    <div class="slds-grid">
+                        <h1 class="slds-text-heading--small">Global Information</h1>
+                        <div class="slds-col_bump-left slds-form">
+                            <div class="slds-form__row">
+                                <div class="slds-form__item">
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select" id="object-namespace">
+                                                <option value="EMPTY">Please select a package...</option>
+                                                <option value="NO_PACKAGE">No package</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form__item">
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select" id="object-api-name">
+                                                <option value="EMPTY">Please select an object...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                        <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                            <div class="slds-panel__section">
+                                <div class="slds-form-element slds-hint-parent">
+                                    <span class="slds-form-element__label">Description</span>
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-form-element__static" id="global-description" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                    <div class="slds-panel__section">
+                                        <ul>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
+                                                <span class="slds-form-element__label">API Name</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-apiName" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Custom?</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-custom" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Singular Label</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-label" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Plural Label</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-labelPlural" />
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                    <div class="slds-panel__section">
+                                        <ul>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
+                                                <span class="slds-form-element__label">Key Prefix</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-keyPrefix" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Feed Enable?</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-feedEnabled" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Most Recent Enabled?</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-mruEnabled" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Global Search Enabled?</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-searchable" />
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                    <div class="slds-panel__section">
+                                        <ul>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
+                                                <span class="slds-form-element__label">Internal Sharing</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-internalSharingModel" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">External Sharing</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-externalSharingModel" />
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- APEX TRIGGER SECTION -->
+                    <div id="section-apexTriggers">
+                        <h1 class="slds-text-heading--small">Apex Triggers</h1>
+                        <div id="datatable-apexTriggers" />
+                    </div>
+                    
+                    <!-- FIELD SETS SECTION -->
+                    <div id="section-fieldSets">
+                        <h1 class="slds-text-heading--small">Field Sets</h1>
+                        <div id="datatable-fieldSets" />
+                    </div>
+                        
+                    <!-- LAYOUTS SECTION -->
+                    <div id="section-layouts">
+                        <h1 class="slds-text-heading--small">Layouts</h1>
+                        <div id="datatable-layouts" />
+                    </div>
+                    
+                    <!-- LIMITS SECTION -->
+                    <div id="section-limits">
+                        <h1 class="slds-text-heading--small">Limits</h1>
+                        <div id="datatable-limits" />
+                    </div>
+                    
+                    <!-- VALIDATION RULES SECTION -->
+                    <div id="section-validationRules">
+                        <h1 class="slds-text-heading--small">Validation Rules</h1>
+                        <div id="datatable-validationRules" />
+                    </div>
+                    
+                    <!-- WEB LINKS SECTION -->
+                    <div id="section-webLinks">
+                        <h1 class="slds-text-heading--small">Web Links</h1>
+                        <div id="datatable-webLinks" />
+                    </div>
+                    
+                    <!-- FIELDS SECTION -->
+                    <div id="section-fields">
+                        <h1 class="slds-text-heading--small">Fields</h1>
+                        <div id="datatable-fields" />
+                    </div>
+                    
+                    <!-- RECORD TYPES SECTION -->
+                    <div id="section-recordtypes">
+                        <h1 class="slds-text-heading--small">Record Types</h1>
+                        <div id="datatable-recordtypes" />
+                    </div>
+                    
+                    <!-- RELEATIONSHIPS SECTION -->
+                    <div id="section-relationships">
+                        <h1 class="slds-text-heading--small">Relationships</h1>
+                        <div id="datatable-relationships" />
+                    </div>
+                </div>
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                    <div id="datatable-orgWideDefaults" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // =================================
+                    // Reset the information in the page
+                    // =================================
+                    const initPage = function() {
+                        // Global description
+                        helper.html.element.setText('global-description', '');
+                        helper.html.element.setText('global-apiName', '');
+                        helper.html.element.setText('global-label', '');
+                        helper.html.element.setText('global-labelPlural', '');
+                        helper.html.element.setText('global-custom', '');
+                        helper.html.element.setText('global-keyPrefix', '');
+                        helper.html.element.setText('global-feedEnabled', '');
+                        helper.html.element.setText('global-mruEnabled', '');
+                        helper.html.element.setText('global-searchable', '');
+                        helper.html.element.setText('global-internalSharingModel', '');
+                        helper.html.element.setText('global-externalSharingModel', '');
+                        // Related lists
+                        helper.html.element.show('section-apexTriggers', false);     helper.html.datatable.clean('datatable-apexTriggers');
+                        helper.html.element.show('section-fieldSets', false);        helper.html.datatable.clean('datatable-fieldSets');
+                        helper.html.element.show('section-layouts', false);          helper.html.datatable.clean('datatable-layouts');
+                        helper.html.element.show('section-limits', false);           helper.html.datatable.clean('datatable-limits');
+                        helper.html.element.show('section-validationRules', false);  helper.html.datatable.clean('datatable-validationRules');
+                        helper.html.element.show('section-webLinks', false);         helper.html.datatable.clean('datatable-webLinks');                        
+                        helper.html.element.show('section-fields', false);           helper.html.datatable.clean('datatable-fields');
+                        helper.html.element.show('section-relationships', false);    helper.html.datatable.clean('datatable-relationships');
+                        helper.html.element.show('section-recordtypes', false);      helper.html.datatable.clean('datatable-recordtypes');
+                    }
+
+                    // =================================
+                    // Init the drop down to select the object
+                    // =================================
+                    const initDropDown = function(package) {
+                        // Get the reference of the select form
+                        const select = helper.html.element.get('object-api-name');
+                        
+                        // Remove previous options (except the first two which is the blank one)
+                        helper.html.picklist.clear(select, 2);
+
+                        if (package || package === '') {
+                            helper.map.iterate2(allObjects, function(d, i, s) {
+                                if (d.package === package) {
+                                    helper.html.picklist.addValue(select, d.developerName, d.label);
+                                }
+                            });
+                        }
+                    }
+
+                    // All objects
+                    let allObjects = {};
+
+                    // =================================
+                    // Describe the selected object
+                    // =================================
+                    let describeObject = function(packageName, objectName) {
+                        helper.progressbar.empty();
+                        helper.salesforce.describe.object(
+                            packageName, 
+                            objectName, 
+                            function(object) {
+
+                                const MAX_STEPS = 10;
+                                let currentStep = 0;
+
+                                // -------------------------
+                                // GLOBAL INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                helper.html.element.setText('global-description', object.description);
+                                helper.html.element.setText('global-apiName', object.name);
+                                helper.html.element.setText('global-label', object.label);
+                                helper.html.element.setText('global-labelPlural', object.labelPlural);
+                                helper.html.element.setText('global-custom', object.custom);
+                                helper.html.element.setText('global-keyPrefix', object.keyPrefix);
+                                helper.html.element.setText('global-feedEnabled', object.feedEnabled);
+                                helper.html.element.setText('global-mruEnabled', object.mruEnabled);
+                                helper.html.element.setText('global-searchable', object.searchable);
+                                helper.html.element.setText('global-internalSharingModel', object.internalSharingModel);
+                                helper.html.element.setText('global-externalSharingModel', object.externalSharingModel);
+
+                                // -------------------------
+                                // FIELDS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.fields && object.fields.length > 0) {
+                                    helper.html.element.show('section-fields', true);
+                                    helper.html.datatable.create(
+                                        'datatable-fields',
+                                        [
+                                            { name: 'Field Label', formula: (r) => { return r.id ? (helper.html.render.link('/'+r.id, r.label)) : r.label; }},
+                                            { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
+                                            { name: 'Full API Name', property: 'name' },
+                                            { name: 'Tooltip', property: 'inlineHelpText' },
+                                            { name: 'Type', formula: (r) => {
+                                                let type = r.type;
+                                                switch (r.type) {
+                                                    case 'int':
+                                                    case 'double':
+                                                    case 'currency':
+                                                        type += '(' + r.precision + ',' + r.scale + ')';
+                                                        break;
+                                                    case 'reference':
+                                                        type += '(' + r.referenceTo[0] + ')';
+                                                        break;
+                                                }
+                                                if (r.calculated) {
+                                                    type = 'Formula ('+ type + ')';
+                                                }
+                                                return type;
+                                            }},
+                                            { name: 'Length', property: 'length' },
+                                            { name: 'Encr.', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
+                                            { name: 'Unique', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
+                                            { name: 'ExtID', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: 'Default', property: 'defaultValue' },
+                                            { name: 'Formula', property: 'calculatedFormula' }
+                                        ],
+                                        object.fields,
+                                        { name: 'Field Label', order: 'asc' }
+                                    );
+                                }
+                                        
+                                // -------------------------
+                                // RELATIONSHIP FIELDS INFO
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.childRelationships && object.childRelationships.length > 0) {
+                                    helper.html.element.show('section-relationships', true);
+                                    helper.html.datatable.create(
+                                        'datatable-relationships',
+                                        [
+                                            { name: 'Relationship Name', property: 'relationshipName' },
+                                            { name: 'Child SObject', property: 'childSObject' },
+                                            { name: 'Field', property: 'field' },
+                                            { name: 'Cascade Delete', formula: (r) => { return helper.html.render.checkbox(r.cascadeDelete); }}
+                                        ],
+                                        object.childRelationships,
+                                        { name: 'Relationship Name', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // RT INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.recordTypeInfos && object.recordTypeInfos.length > 0) {
+                                    helper.html.element.show('section-recordtypes', true);
+                                    helper.html.datatable.create(
+                                        'datatable-recordtypes',
+                                        [
+                                            { name: 'Name', property: 'name' },
+                                            { name: 'Developer Name', property: 'developerName' },
+                                            { name: 'Master', property: 'master' },
+                                            { name: 'Record Type Id', property: 'recordTypeId' },
+                                            { name: 'IsActive', formula: (r) => { return helper.html.render.checkbox(r.active); }},
+                                            { name: 'Available', formula: (r) => { return helper.html.render.checkbox(r.available); }},
+                                            { name: 'Default Mapping', property: 'defaultRecordTypeMapping' }
+                                        ],
+                                        object.recordTypeInfos,
+                                        { name: 'Name', order: 'asc' }
+                                    );
+                                }
+                                
+                                // -------------------------
+                                // APEX TRIGGERS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.apexTriggers && object.apexTriggers.length > 0) {
+                                    helper.html.element.show('section-apexTriggers', true);
+                                    helper.html.datatable.create(
+                                        'datatable-apexTriggers',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Name', property: 'name' }
+                                        ],
+                                        object.apexTriggers,
+                                        { name: 'Name', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // FIELD SETS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.fieldSets && object.fieldSets.length > 0) {
+                                    helper.html.element.show('section-fieldSets', true);
+                                    helper.html.datatable.create(
+                                        'datatable-fieldSets',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Master Label', property: 'label' },
+                                            { name: 'Description', property: 'description' }
+                                        ],
+                                        object.fieldSets,
+                                        { name: 'Master Label', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // LAYOUTS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.layouts && object.layouts.length > 0) {
+                                    helper.html.element.show('section-layouts', true);
+                                    helper.html.datatable.create(
+                                        'datatable-layouts',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Name', property: 'name' },
+                                            { name: 'Type', property: 'type' }
+                                        ],
+                                        object.layouts,
+                                        { name: 'Name', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // LIMITS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.limits && object.limits.length > 0) {
+                                    helper.html.element.show('section-limits', true);
+                                    helper.html.datatable.create(
+                                        'datatable-limits',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Label', property: 'label' },
+                                            { name: 'Max', property: 'max' },
+                                            { name: 'Remaining', property: 'remaining' },
+                                            { name: 'Type', property: 'type' }
+                                        ],
+                                        object.limits,
+                                        { name: 'Label', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // VALIDATION RULES INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.validationRules && object.validationRules.length > 0) {
+                                    helper.html.element.show('section-validationRules', true);
+                                    helper.html.datatable.create(
+                                        'datatable-validationRules',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Name', property: 'name' },
+                                            { name: 'Active', property: 'isActive' },
+                                            { name: 'Description', property: 'description' },
+                                            { name: 'ErrorDisplayField', property: 'errorDisplayField' },
+                                            { name: 'ErrorMessage', property: 'errorMessage' }
+                                        ],
+                                        object.validationRules,
+                                        { name: 'Name', order: 'asc' }
+                                    );
+                                }
+
+                                // -------------------------
+                                // WEBLINKS INFORMATION
+                                // -------------------------
+                                helper.progressbar.set(currentStep++, MAX_STEPS);
+                                if (object.webLinks && object.webLinks.length > 0) {
+                                    helper.html.element.show('section-webLinks', true);
+                                    helper.html.datatable.create(
+                                        'datatable-webLinks',
+                                        [
+                                            { name: 'Id', property: 'id' },
+                                            { name: 'Name', property: 'name' }
+                                        ],
+                                        object.webLinks,
+                                        { name: 'Name', order: 'asc' }
+                                    );
+                                }
+
+                                helper.progressbar.full();
+                            }, 
+                            function(error) { 
+                                helper.error.show(error); 
+                            }
+                        );
+                    }
+
+                    // =================================
+                    // Init the drop down to select the package
+                    // =================================
+                    controller.run({
+                        datasets: [ 'packages', 'objects', 'orgWideDefaults' ],
+                        onRecords: function(map) { 
+
+                            // Get an index of the map using the specific compare function
+                            const indexesPackages = helper.map.index(map.packages, function compare(a, b) {
+                                if (a.name < b.name) return -1;
+                                if (a.name > b.name) return 1;
+                                return 0;
+                            });
+
+                            // Render the data in a table
+                            const selectPck = helper.html.element.get('object-namespace');
+                            helper.map.iterate(map.packages, indexesPackages, function(d, i, s) {
+                                helper.html.picklist.addValue(selectPck, d.namespace, d.name + ' (' + d.type + ')');
+                                helper.progressbar.set(i+1, s);
+                            });
+
+                            // Store all objects
+                            allObjects = map.objects;
+
+                            helper.html.datatable.create(
+                                'datatable-orgWideDefaults',
+                                [
+                                    { name: 'Object', property: 'name' },
+                                    { name: 'Package', property: 'packageName' },
+                                    { name: 'Internal', property: 'internal' },
+                                    { name: 'External', property: 'external' }
+                                ],
+                                map.orgWideDefaults,
+                                { name: 'Object', order: 'asc' }
+                            );
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+
+                    // =================================
+                    // When changing the package option
+                    // =================================
+                    const onChangePackage = function(package_name) {
+                        initPage();
+                        switch (package_name) {
+                            case 'EMPTY': 
+                                initDropDown();
+                                break;
+                            case 'NO_PACKAGE': 
+                                initDropDown('');
+                                break;
+                            default: 
+                                initDropDown(package_name);
+                        }
+                    }
+
+                    // =================================
+                    // Define the on change behavior
+                    // =================================
+                    const onChangeObjectName = function(package_name, object_name) {
+                        initPage();
+                        if (package_name !== 'EMPTY' && object_name !== 'EMPTY') {
+                            if (package_name === 'NO_PACKAGE') {
+                                describeObject('', object_name);
+                            } else {
+                                describeObject(package_name, object_name);
+                            }
+                        }
+                    };
+
+                    // =================================
+                    // Bind event to call the change method
+                    // =================================
+                    helper.html.element.get('object-api-name').onchange = function(event) {
+                        onChangeObjectName(helper.html.element.get('object-namespace').value, event.target.value);
+                    }
+                    helper.html.element.get('object-namespace').onchange = function(event) {
+                        onChangePackage(event.target.value);
+                    }
+                    
+                    // =================================
+                    // By default init the drop down with false
+                    // =================================
+                    initDropDown();      
+                    initPage();
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>
