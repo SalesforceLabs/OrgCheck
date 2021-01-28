@@ -77,28 +77,32 @@
                         htmlContent += '<ul class="slds-list_dotted">';
                         for (let i=0; i<gids.length; i++) {
                             const directGroup = groups[gids[i].id];
-                            let link, name, type;
-                            if (directGroup.isPublicGroup === true) {
-                                link = '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+directGroup.id;
-                                name = directGroup.name;
-                                type = 'Public Group';
-                            } else if (directGroup.isTechnical === true) {
-                                name = directGroup.developerName;
-                                type = 'Technical Group';
-                            } else {
-                                link = '/'+directGroup.relatedId;
-                                name = roles[directGroup.relatedId].name;
-                                if (directGroup.isRole === true) type = 'Role';
-                                if (directGroup.isRoleAndSubordinates === true) type = 'Role &amp; Sub.';
+                            if (directGroup) {
+                                let link, name, type;
+                                if (directGroup.isPublicGroup === true) {
+                                    link = '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+directGroup.id;
+                                    name = directGroup.name;
+                                    type = 'Public Group';
+                                } else if (directGroup.isTechnical === true) {
+                                    name = directGroup.developerName;
+                                    type = 'Technical Group';
+                                } else {
+                                    link = '/'+directGroup.relatedId;
+                                    name = roles[directGroup.relatedId].name;
+                                    if (directGroup.isRole === true) type = 'Role';
+                                    if (directGroup.isRoleAndSubordinates === true) type = 'Role &amp; Sub.';
+                                }
+                                htmlContent += '<li>' + type + ' ' + (link ? helper.html.render.link(link, name) : name);
+                                if (directGroup.isTechnical == false && 
+                                    ((directGroup.directUsers && directGroup.directUsers.length > 0) || 
+                                     (directGroup.indirectUsers && directGroup.indirectUsers.length > 0))) {
+                                    htmlContent += ' with';
+                                    if (directGroup.directUsers.length > 0)   htmlContent += ' ' + directGroup.directUsers.length   + ' direct user'   + (directGroup.directUsers.length   > 1 ? 's': '');
+                                    if (directGroup.directUsers.length > 0 && directGroup.indirectUsers.length > 0) htmlContent += ' and';
+                                    if (directGroup.indirectUsers.length > 0) htmlContent += ' ' + directGroup.indirectUsers.length + ' indirect user' + (directGroup.indirectUsers.length > 1 ? 's': '');
+                                }
+                                htmlContent += '</li>';
                             }
-                            htmlContent += '<li>' + type + ' ' + (link ? helper.html.render.link(link, name) : name);
-                            if (directGroup.isTechnical == false && (directGroup.directUsers.length > 0 || directGroup.indirectUsers.length > 0)) {
-                                htmlContent += ' with';
-                                if (directGroup.directUsers.length > 0)   htmlContent += ' ' + directGroup.directUsers.length   + ' direct user'   + (directGroup.directUsers.length   > 1 ? 's': '');
-                                if (directGroup.directUsers.length > 0 && directGroup.indirectUsers.length > 0) htmlContent += ' and';
-                                if (directGroup.indirectUsers.length > 0) htmlContent += ' ' + directGroup.indirectUsers.length + ' indirect user' + (directGroup.indirectUsers.length > 1 ? 's': '');
-                            }
-                            htmlContent += '</li>';
                         }
                         htmlContent += '</ul>';
                         return htmlContent;
