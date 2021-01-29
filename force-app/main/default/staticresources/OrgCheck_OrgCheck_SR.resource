@@ -379,7 +379,7 @@ const OrgCheck = {
                         }
                         html += '<br />';
                     });
-                    html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMISED_DOMAIN.');
+                    html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.');
                     private_show_modal('Oh no, OrgCheck had an error!', html);
                 }
             };
