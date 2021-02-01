@@ -1068,6 +1068,15 @@ const OrgCheck = {
                             };
                             buttonExport.parentNode.style.display = 'block';
                         }
+                        // 3.3 Set the help button (if specified)
+                        if (ctlSetup.actions && ctlSetup.actions.help && ctlSetup.actions.help.content) { 
+                            const buttonHelp = document.getElementById('button-help');
+                            buttonHelp.onclick = function(e) { 
+                                const content = ctlSetup.actions.help.content || 'No content!';
+                                MSG_HANDLER.showModal('Help', content);
+                            };
+                            buttonHelp.parentNode.style.display = 'block';
+                        }
                     }
 
                     // 4. Method that calls the callback fonction and set the progress bar top 'FULL'

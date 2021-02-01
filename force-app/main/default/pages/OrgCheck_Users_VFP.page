@@ -92,6 +92,25 @@
                             }, 
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: '<ul class="slds-list_dotted">'+
+                                            '<li>This page shows the Active Users.</li>'+
+                                            '<li>The <b>SCORE</b> column is computed with the following rules: '+
+                                            '<ul>'+
+                                                '<li><code>+1</code> if the user is no on Lightning Experience</li>'+
+                                                '<li><code>+1</code> if the user never logged</li>'+
+                                            '</ul>'+
+                                            '</li>'+
+                                            '<li>The <b>KEY PERMISSIONS</b> column is showing if a user has one '+
+                                            'of the following system permissions: '+
+                                            '<ul>'+
+                                                '<li><code>apiEnabled</code>: Api Enabled</li>'+
+                                                '<li><code>viewSetup</code>: View Setup</li>'+
+                                                '<li><code>modifyAllData</code>: Modify All Data</li>'+
+                                                '<li><code>viewAllData</code>: View All Data</li>'+
+                                            '</ul>'+
+                                         '</ul>'
                             }
                         }
                     });

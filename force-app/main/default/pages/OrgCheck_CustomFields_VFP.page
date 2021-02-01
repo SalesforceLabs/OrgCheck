@@ -77,6 +77,19 @@
                             }, 
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: '<ul class="slds-list_dotted">'+
+                                            '<li>This page shows the Custom Fields.</li>'+
+                                            '<li>The <b>SCORE</b> column is computed with the following rule: '+
+                                            '<ul>'+
+                                                '<li><code>+1</code> if the fields has no dependency</li>'+
+                                            '</ul>'+
+                                            '</li>'+
+                                            '<li>The <b>DEPENDENCIES</b> column is showing where the fields is '+
+                                            'used and what it is using. You can click on each diagram to have '+
+                                            'it shown in a dialog box.</li>'+
+                                         '</ul>'
                             }
                         }
                     });

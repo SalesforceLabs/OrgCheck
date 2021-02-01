@@ -67,6 +67,14 @@
                     </div>
                     <div class="slds-page-header__col-actions">
                         <div class="slds-page-header__controls">
+                            <div class="slds-page-header__control" style="display: none;">
+                                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Help" id="button-help">
+                                    <svg class="slds-button__icon" aria-hidden="true">
+                                        <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#trailhead')}"></use>
+                                    </svg>
+                                    <span class="slds-assistive-text">Help</span>
+                                </button>
+                            </div>
                             <apex:insert name="html_actions" />
                             <div class="slds-page-header__control" style="display: none;">
                                 <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Export" id="button-export">
