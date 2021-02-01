@@ -2731,6 +2731,7 @@ function buildDatasets(core) {
                         activeMembers: [],
                         hasActiveMembers: false,
                         inactiveMembersCount: 0,
+                        hasInactiveMembers: false,
                         isExternal: (v.PortalType !== 'None') ? true : false
                     };
                     if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
@@ -2751,6 +2752,7 @@ function buildDatasets(core) {
                     }
                     item.activeMembersCount = item.activeMembers.length;
                     item.hasActiveMembers = item.activeMembers.length > 0;
+                    item.hasInactiveMembers = item.inactiveMembersCount > 0;
                     return item;
                 }, 
                 onEndFromCacheCallback: function(records) {
