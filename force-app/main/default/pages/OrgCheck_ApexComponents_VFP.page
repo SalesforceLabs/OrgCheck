@@ -105,7 +105,7 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
@@ -169,7 +169,7 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
