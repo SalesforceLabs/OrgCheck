@@ -1072,8 +1072,11 @@ const OrgCheck = {
                         if (ctlSetup.actions && ctlSetup.actions.help && ctlSetup.actions.help.content) { 
                             const buttonHelp = document.getElementById('button-help');
                             buttonHelp.onclick = function(e) { 
-                                const content = ctlSetup.actions.help.content || 'No content!';
-                                MSG_HANDLER.showModal('Help', content);
+                                const lines = ctlSetup.actions.help.content || [];
+                                let html = '<ul class="slds-has-dividers_around-space">';
+                                lines.forEach(l => html += '<li class="slds-item" style="background-color: #f0f8ff;">'+l+'</li>');
+                                html += '</ul>';
+                                MSG_HANDLER.showModal('With A Little Help From My Friends', html);
                             };
                             buttonHelp.parentNode.style.display = 'block';
                         }

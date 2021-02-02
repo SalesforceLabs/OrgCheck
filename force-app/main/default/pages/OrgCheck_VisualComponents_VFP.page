@@ -254,6 +254,34 @@
                         actions: {  
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Visualforce Pages, Visualforce Components, Lightning Pages, '+
+                                        'Lightning Aura Components, Lightning Web Components.',
+                                    'The <b>SCORE</b> for visual force pages is computed with the following rule: '+
+                                        '<code>+1</code> if the page is not used (in other words it has no dependency), '+
+                                        '<code>+1</code> if the API version of the page is too old (3 years old), '+
+                                        '<code>+1</code> if the page has no description.',
+                                    'The <b>SCORE</b> for visual force components is computed with the following rule: '+
+                                        '<code>+1</code> if the component is not used (in other words it has no dependency), '+
+                                        '<code>+1</code> if the API version of the component is too old (3 years old), '+
+                                        '<code>+1</code> if the component has no description.',
+                                    'The <b>SCORE</b> for lightning pages is computed with the following rule: '+
+                                        '<code>+1</code> if the page is not used (in other words it has no dependency), '+
+                                        '<code>+1</code> if the page has no description.',
+                                    'The <b>SCORE</b> for lightning aura components is computed with the following rule: '+
+                                        '<code>+1</code> if the component is not used (in other words it has no dependency), '+
+                                        '<code>+1</code> if the API version of the component is too old (3 years old), '+
+                                        '<code>+1</code> if the component has no description.',
+                                    'The <b>SCORE</b> for lightning web components is computed with the following rule: '+
+                                        '<code>+1</code> if the component is not used (in other words it has no dependency), '+
+                                        '<code>+1</code> if the API version of the component is too old (3 years old), '+
+                                        '<code>+1</code> if the component has no description.',
+                                    'The <b>DEPENDENCIES</b> is showing where the component or page is used and '+
+                                        'what it is using. You can click on each diagram to have it shown in '+
+                                        'a dialog box.'
+                                ]
                             }
                         }
                     });

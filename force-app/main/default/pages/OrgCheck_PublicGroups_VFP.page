@@ -268,6 +268,17 @@
                         actions: {  
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Public Groups and the Queues.',
+                                    'The <b>SCORE</b> is computed with the following rule: <code>+1</code> if '+
+                                        'the public group or the queue contains no active user (direct nor '+
+                                        'indirect).',
+                                    'The <b>ALL USERS</b> is computed recurcively across all possible '+
+                                        'sub meta-groups (role, role and sub, groups, etc.) that are '+
+                                        'contained in the groups or queues.'
+                                ]
                             }
                         }
                     });
