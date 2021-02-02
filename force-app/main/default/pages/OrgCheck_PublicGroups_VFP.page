@@ -70,7 +70,7 @@
                     // Render a list of groups/roles information
                     // --------------------------------------
                     const renderGroups = function(groups, roles, gids) {
-                        if (gids && gids.length == 0) {
+                        if (!gids || (gids && gids.length == 0)) {
                             return '(empty)';
                         }
                         let htmlContent = '<b>' + gids.length + ' group' + (gids.length > 1 ? 's' : '') + '</b><br />';
