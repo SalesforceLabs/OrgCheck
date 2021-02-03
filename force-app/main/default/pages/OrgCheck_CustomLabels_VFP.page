@@ -53,6 +53,25 @@
                             );                            
                         },
                         actions: {  
+                            exportAsFile: { 
+                                filename: 'CustomLabels',
+                                headers: ['Label Id', 'Label Name', 'Namespace', 'Master Label', 
+                                    'Category', 'IsProtected', 'Language', 'Value'],
+                                appendRowsMethod: function(rows, map) {
+                                    helper.map.iterate2(map.users, function(d, i, s) {
+                                        rows.push([
+                                            d.id,
+                                            d.name,
+                                            d.namespace,
+                                            d.masterLabel,
+                                            d.category,
+                                            d.protected,
+                                            d.language,
+                                            d.value
+                                        ]);
+                                    });
+                                }
+                            }, 
                             clearCache: { 
                                 show: true 
                             },

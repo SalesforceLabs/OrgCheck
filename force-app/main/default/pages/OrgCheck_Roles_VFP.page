@@ -384,6 +384,23 @@
 
                         },
                         actions: {  
+                            exportAsFile: { 
+                                filename: 'Roles',
+                                headers: ['Role Id', 'Role Name', 'Developer Name', 'Number of active members', 
+                                    'Number of inactive members', 'Parent Role Id'],
+                                appendRowsMethod: function(rows, map) {
+                                    helper.map.iterate2(map.users, function(d, i, s) {
+                                        rows.push([
+                                            d.id,
+                                            d.name,
+                                            d.developerName,
+                                            d.activeMembersCount,
+                                            d.inactiveMembersCount,
+                                            d.parentId
+                                        ]);
+                                    });
+                                }
+                            }, 
                             clearCache: { 
                                 show: true 
                             },
