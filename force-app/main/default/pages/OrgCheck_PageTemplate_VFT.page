@@ -70,7 +70,7 @@
                             <div class="slds-page-header__control" style="display: none;">
                                 <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Help" id="button-help">
                                     <svg class="slds-button__icon" aria-hidden="true">
-                                        <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#trailhead')}"></use>
+                                        <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#help')}"></use>
                                     </svg>
                                     <span class="slds-assistive-text">Help</span>
                                 </button>

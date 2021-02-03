@@ -177,10 +177,9 @@
                                 content: [
                                     'This page shows the Profiles, the Permission Sets and the Profile Login '+
                                         'restrictions.',
-                                    'The <b>SCORE</b> is computed with the following rule: <code>+1</code> if '+
-                                        'the profile/permission set is custom and is not used by any active '+
-                                        'users, <code>+1</code> if the profile/permission set is custom and '+
-                                        'has no description.'
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the profile/permission set is custom and is not used by any active users, </li>'+
+                                        '<li><code>+1</code> if the profile/permission set is custom and has no description.</li></ul>'
                                 ]
                             }
                         }

@@ -96,13 +96,14 @@
                             help: {
                                 content: [
                                     'This page shows the Active Users.',
-                                    'The <b>SCORE</b> is computed with the following rules: <code>+1</code> if '+
-                                        'the user is no on Lightning Experience, <code>+1</code> if the user '+
-                                        'never logged',
-                                    'The <b>KEY PERMISSIONS</b> is showing if a user has one of the following '+
-                                        'system permissions: <code>apiEnabled</code>: Api Enabled, '+
-                                        '<code>viewSetup</code>: View Setup, <code>modifyAllData</code>: '+
-                                        'Modify All Data, <code>viewAllData</code>: View All Data'
+                                    'The <b>SCORE</b> is computed with the following rules: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the user is no on Lightning Experience, </li>'+
+                                        '<li><code>+1</code> if the user never logged.</li></ul>',
+                                    'The <b>KEY PERMISSIONS</b> is showing if a user has one of the following system permissions: '+
+                                        '<ul class="slds-list_dotted"><li><code>apiEnabled</code>: Api Enabled,</li>'+
+                                        '<li><code>viewSetup</code>: View Setup,</li>'+
+                                        '<li><code>modifyAllData</code>: Modify All Data,</li>'+
+                                        '<li><code>viewAllData</code>: View All Data.</li></ul>'
                                 ]
                             }
                         }

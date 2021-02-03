@@ -188,6 +188,24 @@
                         actions: {  
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Apex classes and triggers.',
+                                    'The <b>SCORE</b> for apex classes is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex class is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the class is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the <i>with or without sharing</i> option is not clearly specified (only if the class is not an interface and not a Test class,</li>'+
+                                        '<li><code>+1</code> if the class needs recompilation (that is what we meant by <i>Invalid</i>!).</li></ul>',
+                                    'The <b>SCORE</b> for apex triggers is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the trigger needs recompilation (that is what we meant by <i>Invalid</i>!),</li>'+
+                                        '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li></ul>',
+                                    'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
+                                        'what it is using. You can click on each diagram to have it shown in '+
+                                        'a dialog box.'
+                                ]
                             }
                         }
                     });

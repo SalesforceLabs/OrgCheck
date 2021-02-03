@@ -59,8 +59,8 @@
                             help: {
                                 content: [
                                     'This page shows the Custom Labels.',
-                                    'The <b>SCORE</b> is computed with the following rule: <code>+1</code> if '+
-                                        'the label is not used (in other words it has no dependency).',
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the label is not used (in other words it has no dependency).</li></ul>',
                                     'The <b>VALUE</b> is potentially trunkated (maximum characters is 150).',
                                     'The <b>DEPENDENCIES</b> is showing where the label is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+

@@ -81,8 +81,8 @@
                             help: {
                                 content: [
                                     'This page shows the Custom Fields.',
-                                    'The <b>SCORE</b> is computed with the following rule: <code>+1</code> if '+
-                                        'the fields has no dependency.',
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the fields has no dependency.</li></ul>',
                                     'The <b>DEPENDENCIES</b> is showing where the field is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+
                                         'a dialog box.'
