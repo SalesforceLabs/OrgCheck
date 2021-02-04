@@ -2105,7 +2105,7 @@ function buildDatasets(core) {
                     tooling: true, 
                     string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
                             'FROM ExternalString '+
-                            'WHERE NamespacePrefix = NULL'
+                            'WHERE ManageableState = \'unmanaged\' '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     return {
