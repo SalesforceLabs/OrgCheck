@@ -1804,7 +1804,7 @@ const OrgCheck = {
                 .data(root.links())
                 .join('path')
                 .attr('d', d3.linkHorizontal()
-                    .x(function(d) { return d.y; } )
+                    .x(function(d) { return d.y+BOX_WIDTH/2; } )
                     .y(function(d) { return d.x; } )
                 );
             
