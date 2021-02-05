@@ -33,7 +33,15 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <img src="/file-asset/OrgCheck__OrgCheck_Logo2" /><br />
+                                <center>
+                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="25%" height="25%">
+                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="25%" height="25%" />
+                                    </object>
+                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="50%" height="50%">
+                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="50%" height="50%" />
+                                    </object>
+                                    <br />
+                                </center>
                                 Although invisible, Technical Debt has an impact on your project, your 
                                 IT budget, your Salesforce app, your end-users and... your business.<br />
                                 You may be interested in this <a target="_blank" 

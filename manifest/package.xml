@@ -19,11 +19,6 @@
         <name>ApexPage</name>
     </types>
     <types>
-        <members>OrgCheck_Logo2</members>
-        <members>OrgCheck_Mascot2</members>
-        <name>ContentAsset</name>
-    </types>
-    <types>
         <members>OrgCheck_APP</members>
         <name>CustomApplication</name>
     </types>
@@ -49,6 +44,7 @@
         <members>OrgCheck_JSForce_SR</members>
         <members>OrgCheck_D3_SR</members>
         <members>OrgCheck_OrgCheck_SR</members>
+        <members>OrgCheck_Logos_SR</members>
         <name>StaticResource</name>
     </types>
     <version>48.0</version>
