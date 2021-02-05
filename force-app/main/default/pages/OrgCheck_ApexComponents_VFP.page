@@ -50,6 +50,9 @@
                         dependencies: true,
                         onRecords: function(map) { 
 
+                            let countInvalidApexClasses = 0;
+                            let countRecompileApexClasses = 0;
+
                             // Render the Apex Classes data in a table
                             helper.html.datatable.create(
                                 'datatable-classes',
@@ -60,7 +63,7 @@
                                         if (!map.dependencies[r.id]) badnessScore++;
                                         if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
                                         if (r.isTest === false && r.isInterface === false && !r.specifiedSharing) badnessScore++;
-                                        if (r.isValid === false) badnessScore++;
+                                        if (r.isValid === false || r.needsRecompilation === true) badnessScore++;
                                         return badnessScore;
                                     }},
                                     { name: 'API', formula: (r) => {
@@ -70,10 +73,14 @@
                                     }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Status', formula: (r) => {
-                                        if (r.needsRecompilation === true)
+                                        if (r.isValid === false) {
+                                            countInvalidApexClasses++;
+                                            return helper.html.render.icon('redFlag') + ' Review!';
+                                        }
+                                        if (r.needsRecompilation === true) {
+                                            countRecompileApexClasses++;
                                             return helper.html.render.icon('redFlag') + ' Recompile!';
-                                        if (r.isValid === false)
-                                            return helper.html.render.icon('redFlag') + ' Invalid!';
+                                        }
                                         return helper.html.render.icon('greenFlag') + ' OK';
                                     }},
                                     { name: 'Access', property: 'specifiedAccess' },
@@ -115,14 +122,35 @@
                                     if (!map.dependencies[r.id] ||
                                         (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
                                         (r.isTest === false && r.isInterface === false && !r.specifiedSharing) ||
-                                        (r.isValid === false)) 
+                                        (r.isValid === false || r.needsRecompilation === true)) 
                                         return helper.html.render.color('highlight');
                                     return null;
                                 }},
                                 { formula: (r) => { 
                                     if (r.length === -1) return false;
+
                                  }}
                             );
+
+                            // Show alert about recompilation
+                            if (countInvalidApexClasses + countRecompileApexClasses > 0) {
+                                let html = '';
+                                if (countInvalidApexClasses > 0) {
+                                    html += 'You have '+countInvalidApexClasses+' Apex classes that need to be <b>reviewed</b>.<br />';
+                                    html += '<br />';
+                                    html += 'You need to recompile all your classes in this org.<br />';
+                                    html += 'To do so, click on the <a href="/01p" target="_blank">power plug button</a> ';
+                                    html += 'in this page and then click on the link called <u>Compile all classes</u> ';
+                                    html += 'in Salesforce Setup!<br />';
+                                    html += '<br />';
+                                }
+                                if (countRecompileApexClasses > 0) {
+                                    html += 'You have '+countRecompileApexClasses+' Apex classes that need to be <b>recompiled</b>.<br />';
+                                    html += 'You need to review the classes that could not have been compiled in this org.<br />';
+                                    html += '<br />';
+                                }
+                                helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                            }
 
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create(
@@ -147,10 +175,8 @@
                                         return helper.html.render.checkbox(r.isActive);
                                     }},
                                     { name: 'Status', formula: (r) => {
-                                        if (r.needsRecompilation === true)
-                                            return helper.html.render.icon('redFlag') + ' Recompile!';
                                         if (r.isValid === false)
-                                            return helper.html.render.icon('redFlag') + ' Invalid!';
+                                            return helper.html.render.icon('redFlag') + ' Recompile!';
                                         return helper.html.render.icon('greenFlag') + ' OK';
                                     }},
                                     { name: 'Size', property: 'length' },
@@ -196,11 +222,11 @@
                                         '<ul class="slds-list_dotted"><li><code>+1</code> if the apex class is not used (in other words it has no dependency),</li>'+
                                         '<li><code>+1</code> if the API version of the class is too old (3 years old),</li>'+
                                         '<li><code>+1</code> if the <i>with or without sharing</i> option is not clearly specified (only if the class is not an interface and not a Test class,</li>'+
-                                        '<li><code>+1</code> if the class needs recompilation (that is what we meant by <i>Invalid</i>!).</li></ul>',
+                                        '<li><code>+1</code> if the class needs recompilation.</li></ul>',
                                     'The <b>SCORE</b> for apex triggers is computed with the following rule: '+
                                         '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
                                         '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the trigger needs recompilation (that is what we meant by <i>Invalid</i>!),</li>'+
+                                        '<li><code>+1</code> if the trigger needs recompilation,</li>'+
                                         '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li></ul>',
                                     'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+
