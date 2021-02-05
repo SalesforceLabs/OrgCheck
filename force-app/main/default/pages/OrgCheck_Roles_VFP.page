@@ -336,18 +336,18 @@
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let badnessScore = 0;
-                                        if (r.activeMembersCount == 0) badnessScore++
-                                        if (r.inactiveMembersCount > 0) badnessScore++
+                                        if (r.hasActiveMembers == false) badnessScore++
+                                        if (r.hasInactiveMembers === true) badnessScore++
                                         return badnessScore;
                                     }},
                                     { name: 'Developer Name', property: 'developerName' },
                                     { name: 'Number of active members', formula: (r) => {
-                                        if (r.activeMembersCount == 0) return helper.html.render.icon('redFlag') + ' No active members!';                                
+                                        if (r.hasActiveMembers == false) return helper.html.render.icon('redFlag') + ' No active member!';                                
                                         return helper.html.render.icon('greenFlag') + ' ' + r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
                                     }},
                                     { name: 'Number of inactive members', formula: (r) => {
-                                        if (r.inactiveMembersCount == 0) return helper.html.render.icon('greenFlag') + ' No inactive members!';                                
-                                        return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.activeMembersCount > 1 ? 's' : '');
+                                        if (r.hasInactiveMembers === true) return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
+                                        return helper.html.render.icon('greenFlag') + ' No inactive member!';                                
                                     }},
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
@@ -367,7 +367,7 @@
                                 map.roles,
                                 { name: 'Score', order: 'desc' },
                                 { formula: (r) => { 
-                                    if (r.activeMembersCount == 0 || r.inactiveMembersCount > 0) return helper.html.render.color('highlight');
+                                    if (r.hasActiveMembers == false || r.hasInactiveMembers === true) return helper.html.render.color('highlight');
                                     return null;
                                 }},
                                 { formula: (r) => { 
