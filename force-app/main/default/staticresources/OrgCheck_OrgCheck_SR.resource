@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.8.3',
+    version: 'v1.9.1',
 
     /**
      * Handlers
@@ -1687,6 +1687,12 @@ const OrgCheck = {
             );
         }
 
+        this.isVersionOld = function(setup) {
+            return SALESFORCE_HANDLER.isVersionOld(
+                setup.apiVersion
+            );
+        }
+
         /**
          * Metadata retriever without cache
          * @param setup JSON configuration including:
@@ -2178,6 +2184,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description, 
                         mobile: v.IsAvailableInTouch
@@ -2211,6 +2218,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };
@@ -2244,6 +2252,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         isTest: false,
                         isAbstract: false,
@@ -2312,6 +2321,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         isValid: v.IsValid,
                         length: v.LengthWithoutComments,
@@ -2448,6 +2458,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };
@@ -2480,6 +2491,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };

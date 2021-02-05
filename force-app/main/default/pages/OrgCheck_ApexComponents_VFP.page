@@ -61,13 +61,13 @@
                                     { name: 'Score', formula: (r) => {
                                         let badnessScore = 0;
                                         if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
+                                        if (r.isApiVersionOld === true) badnessScore++;
                                         if (r.isTest === false && r.isInterface === false && !r.specifiedSharing) badnessScore++;
                                         if (r.isValid === false || r.needsRecompilation === true) badnessScore++;
                                         return badnessScore;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
@@ -120,7 +120,7 @@
                                 { name: 'Score', order: 'desc' },
                                 { formula: (r) => { 
                                     if (!map.dependencies[r.id] ||
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
+                                        (r.isApiVersionOld === true) ||
                                         (r.isTest === false && r.isInterface === false && !r.specifiedSharing) ||
                                         (r.isValid === false || r.needsRecompilation === true)) 
                                         return helper.html.render.color('highlight');
@@ -160,13 +160,13 @@
                                     { name: 'Score', formula: (r) => {
                                         let badnessScore = 0;
                                         if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
+                                        if (r.isApiVersionOld === true) badnessScore++;
                                         if (r.isValid === false) badnessScore++;
                                         if (r.isActive === false) badnessScore++;
                                         return badnessScore;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
@@ -203,7 +203,7 @@
                                 { name: 'Score', order: 'desc' },
                                 { formula: (r) => { 
                                     if (!map.dependencies[r.id] || 
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
+                                        (r.isApiVersionOld === true) ||
                                         (r.isValid === false) ||
                                         (r.isActive === false))
                                             return helper.html.render.color('highlight');
