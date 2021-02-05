@@ -2258,6 +2258,7 @@ function buildDatasets(core) {
                         isAbstract: false,
                         isInterface: false,
                         isValid: v.IsValid,
+                        isSharingMissing: false,
                         length: v.LengthWithoutComments,
                         needsRecompilation: (!v.SymbolTable ? true : false)
                     };
@@ -2284,6 +2285,9 @@ function buildDatasets(core) {
                                 });
                             };
                         }
+                    }
+                    if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                        item.isSharingMissing = true;
                     }
                     return item;
                 }, 

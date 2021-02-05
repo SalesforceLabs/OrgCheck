@@ -62,7 +62,7 @@
                                         let badnessScore = 0;
                                         if (!map.dependencies[r.id]) badnessScore++;
                                         if (r.isApiVersionOld === true) badnessScore++;
-                                        if (r.isTest === false && r.isInterface === false && !r.specifiedSharing) badnessScore++;
+                                        if (r.isSharingMissing === true) badnessScore++;
                                         if (r.isValid === false || r.needsRecompilation === true) badnessScore++;
                                         return badnessScore;
                                     }},
@@ -104,9 +104,7 @@
                                         return html;
                                     }},
                                     { name: 'Sharing', formula: (r) => {
-                                        if (r.isInterface === true)
-                                             return 'OK for interface.';
-                                        if (r.isTest === false && r.isInterface === false && !r.specifiedSharing)
+                                        if (r.isSharingMissing === true)
                                             return helper.html.render.icon('redFlag') + ' Not specified!';
                                         return r.specifiedSharing;
                                     }},
@@ -121,7 +119,7 @@
                                 { formula: (r) => { 
                                     if (!map.dependencies[r.id] ||
                                         (r.isApiVersionOld === true) ||
-                                        (r.isTest === false && r.isInterface === false && !r.specifiedSharing) ||
+                                        (r.isSharingMissing === true) ||
                                         (r.isValid === false || r.needsRecompilation === true)) 
                                         return helper.html.render.color('highlight');
                                     return null;
