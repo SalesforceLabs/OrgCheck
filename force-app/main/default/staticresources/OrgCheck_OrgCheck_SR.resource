@@ -2597,6 +2597,7 @@ function buildDatasets(core) {
                             'WHERE isOwnedByProfile = true'
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                     return {
                         id: core.doSimplifiySalesforceID(v.ProfileId),
                         name: v.Profile.Name,
@@ -2604,9 +2605,11 @@ function buildDatasets(core) {
                         license: v.License.Name,
                         userType: v.Profile.UserType,
                         isCustom: v.IsCustom,
+                        isUnusedCustom: v.IsCustom && memberCounts == 0,
+                        isUndescribedCustom: v.IsCustom && !v.Profile.Description,
                         package: v.NamespacePrefix,
-                        membersCount: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0,
-                        hasMembers: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false
+                        membersCount: memberCounts,
+                        hasMembers: memberCounts > 0
                     };
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2691,6 +2694,7 @@ function buildDatasets(core) {
                             'WHERE IsOwnedByProfile = false' 
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2698,28 +2702,26 @@ function buildDatasets(core) {
                         hasLicense: (v.License ? 'yes' : 'no'),
                         license: (v.License ? v.License.Name : ''),
                         isCustom: v.IsCustom,
+                        isUnusedCustom: v.IsCustom && memberCounts == 0,
+                        isUndescribedCustom: v.IsCustom && !v.Description,
                         package: v.NamespacePrefix,
-                        membersCount: 0, 
-                        hasMembers: false, 
+                        membersCount: memberCounts, 
+                        hasMembers: memberCounts > 0, 
                         uniqueProfiles: []
                     };
-                    if (v.Assignments && v.Assignments.records) {
-                        item.membersCount = v.Assignments.records.length;
-                        item.hasMembers = true;
-                        let pmap = {};
-                        for (let i=0; i<item.membersCount; i++) {
-                            const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
-                            if (pmap[pid]) {
-                                pmap[pid].count++;
-                            } else {
-                                const p = {
+                    let pmap = {};
+                    for (let i=0; i<memberCounts; i++) {
+                        const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
+                        if (pmap[pid]) {
+                            pmap[pid].count++;
+                        } else {
+                            item.uniqueProfiles.push(
+                                pmap[pid] = {
                                     id: pid,
                                     name: v.Assignments.records[i].Assignee.Profile.Name,
                                     count: 1
-                                };
-                                pmap[pid] = p;
-                                item.uniqueProfiles.push(p);
-                            }
+                                }
+                            );
                         }
                     }
                     return item;

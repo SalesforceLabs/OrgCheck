@@ -58,8 +58,8 @@
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let badnessScore = 0;
-                                        if (r.isCustom && r.membersCount == 0) badnessScore++
-                                        if (r.isCustom && !r.description) badnessScore++
+                                        if (r.isUnusedCustom === true) badnessScore++
+                                        if (r.isUndescribedCustom === true) badnessScore++
                                         return badnessScore;
                                     }},
                                     { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
@@ -67,12 +67,14 @@
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of users', formula: (r) => { 
-                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.isUnusedCustom === true) {
+                                            return helper.html.render.icon('redFlag') + ' No user for this custom profile!'; 
+                                        }                               
                                         if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
                                         return helper.html.render.icon('greenFlag') + ' More than 100 users';
                                     }},
                                     { name: 'Description', formula: (r) => {
-                                        if (r.isCustom && !r.description) {
+                                        if (r.isUndescribedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' You should set a description to this custom profile!';
                                         }
                                         return r.description;
@@ -81,7 +83,7 @@
                                 map.profiles,
                                 { name: 'Score', order: 'desc' },
                                 { formula: (r) => { 
-                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
+                                    if (r.isUndescribedCustom === true || r.isUnusedCustom === true) return helper.html.render.color('highlight');
                                     return null;
                                 }}
                             );
@@ -142,20 +144,27 @@
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let badnessScore = 0;
-                                        if (r.isCustom && r.membersCount == 0) badnessScore++
-                                        if (r.isCustom && !r.description) badnessScore++
+                                        if (r.isUnusedCustom === true) badnessScore++
+                                        if (r.isUndescribedCustom === true) badnessScore++
                                         return badnessScore;
                                     }},
                                     { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of users', formula: (r) => { 
-                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.isUnusedCustom === true) {
+                                            return helper.html.render.icon('redFlag') + ' No user for this custom permission set!'; 
+                                        }                               
                                         if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
                                         return helper.html.render.icon('greenFlag') + ' More than 100 users';
                                     }},
+                                    { name: 'Assigned users\'s profiles', formula: (r) => { 
+                                        let html = '';
+                                        r.uniqueProfiles.forEach(i => html += helper.html.render.link('/'+i.id, i.name) + ' (' + i.count + ')<br />');
+                                        return html;
+                                    }},
                                     { name: 'Description', formula: (r) => {
-                                        if (r.isCustom && !r.description) {
+                                        if (r.isUndescribedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' You should set a description to this custom permission set!';
                                         }
                                         return r.description;
@@ -164,7 +173,7 @@
                                 map.permissionSets,
                                 { name: 'Score', order: 'desc' },
                                 { formula: (r) => { 
-                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
+                                    if (r.isUndescribedCustom === true || r.isUnusedCustom === true) return helper.html.render.color('highlight');
                                     return null;
                                 }}
                             );
