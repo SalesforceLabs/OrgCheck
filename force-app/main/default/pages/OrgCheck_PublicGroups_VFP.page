@@ -88,7 +88,12 @@
                                     type = 'Technical Group';
                                 } else {
                                     link = '/'+directGroup.relatedId;
-                                    name = roles[directGroup.relatedId].name;
+                                    const relatedRole = roles[directGroup.relatedId];
+                                    if (relatedRole) {
+                                        name = relatedRole.name;
+                                    } else {
+                                        name = 'Role #'+directGroup.relatedId;
+                                    }
                                     if (directGroup.isRole === true) type = 'Role';
                                     if (directGroup.isRoleAndSubordinates === true) type = 'Role &amp; Sub.';
                                 }
