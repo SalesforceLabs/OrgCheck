@@ -334,12 +334,7 @@
                                 'datatable',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.hasActiveMembers == false) badnessScore++
-                                        if (r.hasInactiveMembers === true) badnessScore++
-                                        return badnessScore;
-                                    }},
+                                    { name: 'Score', property: 'badnessScore' },
                                     { name: 'Developer Name', property: 'developerName' },
                                     { name: 'Number of active members', formula: (r) => {
                                         if (r.hasActiveMembers == false) return helper.html.render.icon('redFlag') + ' No active member!';                                
@@ -366,10 +361,7 @@
                                 ],
                                 map.roles,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.hasActiveMembers == false || r.hasInactiveMembers === true) return helper.html.render.color('highlight');
-                                    return null;
-                                }},
+                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null },
                                 { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;

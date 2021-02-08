@@ -23,12 +23,7 @@
                                 'datatable',
                                 [
                                     { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.onLightningExperience === false) badnessScore++
-                                        if (r.neverLogged === true) badnessScore++
-                                        return badnessScore;
-                                    }},
+                                    { name: 'Score', property: 'badnessScore' },
                                     { name: 'Last login', formula: (r) => { 
                                         if (r.neverLogged === false) return helper.html.render.icon('greenFlag') + ' ' + r.lastLogin;
                                         return helper.html.render.icon('redFlag') + ' Never logged!'; 
@@ -56,11 +51,7 @@
                                 ],
                                 map.users,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.onLightningExperience === false || r.neverLogged === true) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
                             );
                         },
                         actions: { 

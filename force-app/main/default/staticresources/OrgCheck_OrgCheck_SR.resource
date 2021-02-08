@@ -2554,7 +2554,8 @@ function buildDatasets(core) {
                             viewSetup: false,
                             modifyAllData: false,
                             viewAllData: false
-                        }
+                        },
+                        badnessScore: 0
                     };
                     if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
                         for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
@@ -2569,6 +2570,9 @@ function buildDatasets(core) {
                             });
                         }
                     }
+                    // Badness score
+                    if (item.onLightningExperience === false) item.badnessScore++;
+                    if (item.neverLogged === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2598,7 +2602,7 @@ function buildDatasets(core) {
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
-                    return {
+                    const item = {
                         id: core.doSimplifiySalesforceID(v.ProfileId),
                         name: v.Profile.Name,
                         description: v.Profile.Description,
@@ -2609,8 +2613,13 @@ function buildDatasets(core) {
                         isUndescribedCustom: v.IsCustom && !v.Profile.Description,
                         package: v.NamespacePrefix,
                         membersCount: memberCounts,
-                        hasMembers: memberCounts > 0
+                        hasMembers: memberCounts > 0,
+                        badnessScore: 0
                     };
+                    // Badness score
+                    if (item.isUnusedCustom === true) item.badnessScore++;
+                    if (item.isUndescribedCustom === true) item.badnessScore++;
+                    return item;
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
@@ -2707,7 +2716,8 @@ function buildDatasets(core) {
                         package: v.NamespacePrefix,
                         membersCount: memberCounts, 
                         hasMembers: memberCounts > 0, 
-                        uniqueProfiles: []
+                        uniqueProfiles: [],
+                        badnessScore: 0
                     };
                     let pmap = {};
                     for (let i=0; i<memberCounts; i++) {
@@ -2724,6 +2734,9 @@ function buildDatasets(core) {
                             );
                         }
                     }
+                    // Badness score
+                    if (item.isUnusedCustom === true) item.badnessScore++;
+                    if (item.isUndescribedCustom === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2762,7 +2775,8 @@ function buildDatasets(core) {
                         hasActiveMembers: false,
                         inactiveMembersCount: 0,
                         hasInactiveMembers: false,
-                        isExternal: (v.PortalType !== 'None') ? true : false
+                        isExternal: (v.PortalType !== 'None') ? true : false,
+                        badnessScore: 0
                     };
                     if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
                         let user = v.Users.records[i];
@@ -2783,6 +2797,9 @@ function buildDatasets(core) {
                     item.activeMembersCount = item.activeMembers.length;
                     item.hasActiveMembers = item.activeMembers.length > 0;
                     item.hasInactiveMembers = item.inactiveMembersCount > 0;
+                    // Badness score
+                    if (item.hasActiveMembers == false) item.badnessScore++;
+                    if (item.hasInactiveMembers === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: function(records) {
