@@ -1433,11 +1433,9 @@ const OrgCheck = {
                                         const prop = buttons[j].attributes['aria-controlled-by'];
                                         if (prop && prop.value) {
                                             if ((',' + prop.value + ',').includes(',' + correspondingTabId + ',')) {
-                                                buttons[j].classList.add('slds-show');
-                                                buttons[j].classList.remove('slds-hide');
+                                                buttons[j].parentNode.style.display = 'block';
                                             } else {
-                                                buttons[j].classList.remove('slds-show');
-                                                buttons[j].classList.add('slds-hide');
+                                                buttons[j].parentNode.style.display = 'none';
                                             }
                                         }
                                     }

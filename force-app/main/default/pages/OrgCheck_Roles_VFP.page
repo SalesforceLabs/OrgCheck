@@ -8,24 +8,24 @@
             Role Hierarchy Overview
         </apex:define>
         <apex:define name="html_actions">
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomout ')}"></use>
                     </svg>
                     <span class="slds-assistive-text">Zoom out</span>
                 </button>
             </div>
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#sync ')}"></use>
                     </svg>
                     <span class="slds-assistive-text">Zoom 1:1</span>
                 </button>
             </div>
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomin')}"></use>
                     </svg>
