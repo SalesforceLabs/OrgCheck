@@ -125,30 +125,6 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Optimizer">
-                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
-                                            </svg>
-                                            <span class="slds-assistive-text">Salesforce Optimizer</span>
-                                        </span>
-                                    </div>
-                                    <div class="slds-media__body">
-                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Salesforce Optimizer
-                                        </h2>
-                                    </div>
-                                </header>
-                            </div>
-                            <div class="slds-card__body slds-card__body_inner">
-                                Did you look at the <a href="/lightning/setup/SalesforceOptimizer/home" target="_blank">Salesforce Optimizer</a>?<br />
-                                This tool is complementary to <b>OrgCheck</b>!<br />
-                                <img src="/adoption/resources/optimizer/OptimizerSetup.png" />
-                            </div>
-                        </article>
-                        <article class="slds-card">
-                            <div class="slds-card__header slds-grid">
-                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                    <div class="slds-media__figure">
                                         <span class="slds-icon_container slds-icon-standard-visit-templates" title="Org Connection">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#visit_templates')}"></use>
@@ -253,6 +229,33 @@
                                         -->
                                     </div>
                                 </div>
+                            </div>
+                        </article>
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Alternatives">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Alternatives</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Alternatives
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                Did you look at the <a href="/lightning/setup/SalesforceOptimizer/home" target="_blank">Salesforce Optimizer</a>?<br />
+                                This tool is complementary to <b>OrgCheck</b>!<br />
+                                <br />
+                                Also if you want to scale up (specialy if you have a very LARGE org), you might consider using tools like Element Clouds.<br />
+                                <br />
+                                Want to analyze code quality, consultants often use Checkmarx or Codescan.<br />
                             </div>
                         </article>
                     </div>                    

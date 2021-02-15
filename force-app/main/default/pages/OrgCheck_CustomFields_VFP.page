@@ -57,24 +57,10 @@
                             );
                         },
                         actions: { 
-                            exportAsFile: { 
-                                filename: 'CustomFields',
-                                headers: ['Object Id', 'Object Name', 'Field Id', 'Field Name', 
-                                    'Package', 'Full API Name', 'Is there dependencies?'],
-                                appendRowsMethod: function(rows, map) {
-                                    helper.map.iterate2(map.customFields, function(d, i, s) {
-                                        rows.push([
-                                            d.objectId,
-                                            d.objectName,
-                                            d.id,
-                                            d.fieldName,
-                                            d.packageName,
-                                            d.fullName,
-                                            map.dependencies[d.id] ? true : false
-                                        ]);
-                                    });
-                                }
-                            }, 
+                            exportTable: [{
+                                table: 'datatable',
+                                filename: 'CustomFields'
+                            }],
                             clearCache: { 
                                 show: true 
                             },

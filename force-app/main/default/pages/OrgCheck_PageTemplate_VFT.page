@@ -14,14 +14,9 @@
                     padding-bottom: 10px;
                     padding-left: 15px;
                 }
-                .OrgCheck-dependency-thumbnail :hover {
-                    opacity: 0.3;
-                    background-color: MidnightBlue;
-                    cursor: zoom-in;
-                }
-                .OrgCheck-dependency-thumbnail * :hover {
-                    opacity: initial;
-                    cursor: zoom-in;
+                .slds-scope .slds-table th, .slds-scope .slds-table td {
+                    padding-right: 0.9rem;
+                    padding-left: 0.9rem;
                 }
             </style>
             <div id="modal" style="display: none;">

@@ -993,7 +993,7 @@ const OrgCheck = {
                 *                <li><code>onRecords</code>: </li> 
                 *                <li><code>dependencies</code>: </li> 
                 *                <li><code>actions.clearCache</code>: </li> 
-                *                <li><code>actions.exportAsFile</code>: </li> 
+                *                <li><code>actions.exportTable</code>: </li> 
                 *              </ol>
                 */
                 run: function(ctlSetup) {
@@ -1045,27 +1045,42 @@ const OrgCheck = {
                             buttonClearCache.parentNode.style.display = 'block';
                         }
                         // 3.2 Set the export as file button (if specified)
-                        if (ctlSetup.actions && ctlSetup.actions.exportAsFile && ctlSetup.actions.exportAsFile.appendRowsMethod) { 
+                        if (ctlSetup.actions && ctlSetup.actions.exportTable && Array.isArray(ctlSetup.actions.exportTable)) {
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
-                                const filename = ctlSetup.actions.exportAsFile.filename || 'Export';
-                                const headers  = ctlSetup.actions.exportAsFile.headers || [ 'id' ];
-                                const add_rows_function = ctlSetup.actions.exportAsFile.appendRowsMethod;
-                                const rows = [ headers ];
-                                add_rows_function(rows, map);
-                                const data = rows.map(e => {
-                                    e.forEach((v,i,a) => { if (v && v.toString().indexOf(',') != -1) a[i]='"'+v+'"'; } ); 
-                                    return e.join(',');
-                                }).join('\n');
-                                const link = document.createElement('a');
-                                link.style.visibility = 'hidden';
-                                document.body.appendChild(link);
-                                link.download = filename + '.csv';
-                                link.target = '_blank';
-                                link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data);
-                                link.click();
-                                document.body.removeChild(link);
-                            };
+                                ctlSetup.actions.exportTable.forEach(d => {
+                                    if (d.visibleTab) {
+                                        const tab = document.getElementById(d.visibleTab).parentNode;
+                                        if (tab.classList.contains('slds-is-active') === false) {
+                                            return;
+                                        }
+                                    }
+                                    const table = document.getElementById(d.table);
+                                    const rows = table.querySelectorAll('table tr');
+                                    const data = [];
+                                    for (let i=0; i<rows.length; i++) {
+                                        const row = [];
+                                        const cols = rows[i].querySelectorAll('td, th');
+                                        for (let j=0; j<cols.length; j++) {
+                                            const v = cols[j].attributes['aria-label']?.value || cols[j].textContent;
+                                            if (v && v.toString().indexOf(',') != -1) {
+                                                row.push('"'+v+'"');
+                                            } else {
+                                                row.push(v);
+                                            }
+                                        }
+                                        data.push(row.join(","));        
+                                    }
+                                    const link = document.createElement('a');
+                                    link.style.visibility = 'hidden';
+                                    document.body.appendChild(link);
+                                    link.download = d.filename + '.csv';
+                                    link.target = '_blank';
+                                    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data.join('\n'));
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                            }
                             buttonExport.parentNode.style.display = 'block';
                         }
                         // 3.3 Set the help button (if specified)
@@ -1501,14 +1516,13 @@ const OrgCheck = {
                     },
                     render: {
                         dependencies: function(id, name, data) {
-                            const svg = private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8');
                             const div = document.createElement('div');
-                            div.classList.add('OrgCheck-dependency-thumbnail');
+                            div.style.cursor = 'zoom-in';
                             div.onclick = function() {
                                 MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); //svg.clone(true));
                             };
                             div.setAttribute('id', 'chart-container-' + id);
-                            div.appendChild(svg);
+                            div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
                             return div;
                         },
                         checkbox: function(b) {

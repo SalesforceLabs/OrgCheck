@@ -23,16 +23,16 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Classes" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Classes</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">Classes</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Triggers" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Triggers</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">Triggers</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
                     <div id="datatable-classes" />
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-triggers" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-triggers__item">
                     <div id="datatable-triggers" />
                 </div>
             </div>
@@ -209,7 +209,16 @@
                                 }}
                             );
                         },
-                        actions: {  
+                        actions: { 
+                            exportTable: [{
+                                table: 'datatable-classes',
+                                visibleTab: 'tab-default-classes__item',
+                                filename: 'ApexClasses'
+                            }, {
+                                table: 'datatable-triggers',
+                                visibleTab: 'tab-default-triggers__item',
+                                filename: 'ApexTriggers'
+                            }],
                             clearCache: { 
                                 show: true 
                             },
