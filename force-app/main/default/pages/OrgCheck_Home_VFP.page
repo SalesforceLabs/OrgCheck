@@ -33,21 +33,21 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
+                                Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
+                                application in order to quickly analyze your org and its technical debt.<br />  
+                                <br />
                                 <center>
-                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="25%" height="25%">
-                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="25%" height="25%" />
+                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="40%" height="40%">
+                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="40%" height="40%" />
                                     </object>
-                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="50%" height="50%">
-                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="50%" height="50%" />
-                                    </object>
-                                    <br />
                                 </center>
-                                Although invisible, Technical Debt has an impact on your project, your 
+                                <br />
+                                Although invisible, <b>Technical Debt</b> has an impact on your project, your 
                                 IT budget, your Salesforce app, your end-users and... your business.<br />
                                 You may be interested in this <a target="_blank" 
                                 href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
                                 <br />
-                                You may have a <b>technical debt</b>, if you answer 'yes' to the following questions:
+                                You may have a <b>Technical Debt</b>, if you answer 'yes' to the following questions:
                                 <ul class="slds-list_dotted">
                                     <li>Is the performance of your Salesforce app low?</li>
                                     <li>Is the time to resolve a bug long with your support?</li>
@@ -121,6 +121,46 @@
                         </article>
                     </div>
                     <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-endorsement" title="Support and feedback">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#endorsement')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Support and feedback</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Support and feedback
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%">
+                                                <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%" />
+                                            </object>
+                                        </td>
+                                        <td>
+                                            <b>Issues or new ideas?</b><br />
+                                            Track them at <br />
+                                            <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a><br />
+                                            <br />
+                                            <b>Want to chat with other users?</b><br />
+                                            Please join us at <br />
+                                            <a href="https://orgcheck-ohana.slack.com/" target="_blank">https://orgcheck-ohana.slack.com/</a><br />
+                                            <br />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </article>
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
