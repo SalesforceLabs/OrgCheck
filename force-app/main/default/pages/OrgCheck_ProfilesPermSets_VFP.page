@@ -11,26 +11,29 @@
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Profiles</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="Profiles" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-profiles" id="tab-default-profiles__item">Profiles</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Permission Sets</a>
+                    <li class="slds-tabs_default__item" title="Permission Sets" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-permsets" id="tab-default-permsets__item">Permission Sets</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Profile Login Restrictions" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">Profile Login Restrictions</a>
+                    <li class="slds-tabs_default__item" title="Login Hours Restrictions" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-loginhours" id="tab-default-loginhours__item">Login Hours Restrictions</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
                     <div id="datatable-profiles" />
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-permsets" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-permsets__item">
                     <div id="datatable-permissionSets" />
                 </div>
-                <div id="tab-default-3" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
-                    <h1 class="slds-text-heading--small">Login Hour Restrictions</h1>
+                <div id="tab-default-loginhours" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-loginhours__item">
                     <div id="datatable-profileLoginHours" />
-                    <h1 class="slds-text-heading--small">IP Range Restrictions</h1>
+                </div>
+                <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
                 </div>
             </div>
@@ -57,7 +60,7 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', property: 'badnessScore' },
-                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
@@ -135,7 +138,7 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', property: 'badnessScore' },
-                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of users', formula: (r) => { 
@@ -166,6 +169,23 @@
                             clearCache: { 
                                 show: true 
                             },
+                            exportTable: [{
+                                table: 'datatable-profiles',
+                                visibleTab: 'tab-default-profiles__item',
+                                filename: 'Profiles'
+                            }, {
+                                table: 'datatable-permissionSets',
+                                visibleTab: 'tab-default-permsets__item',
+                                filename: 'PermissionSets'
+                            }, {
+                                table: 'datatable-profileLoginHours',
+                                visibleTab: 'tab-default-loginhours__item',
+                                filename: 'LoginHoursRestrictions'
+                            }, {
+                                table: 'datatable-profileRangeIPs',
+                                visibleTab: 'tab-default-ipranges__item',
+                                filename: 'IPRangesRestrictions'
+                            }],
                             help: {
                                 content: [
                                     'This page shows the Profiles, the Permission Sets and the Profile Login '+

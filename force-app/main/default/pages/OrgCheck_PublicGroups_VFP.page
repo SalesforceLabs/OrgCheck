@@ -13,16 +13,16 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Public Groups" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Public Groups</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-publicgroups" id="tab-default-publicgroups__item">Public Groups</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Queues" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Queues</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-queues" id="tab-default-queues__item">Queues</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-publicgroups" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-publicgroups__item">
                     <div id="datatable-publicGroups" />
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-queues" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-queues__item">
                     <div id="datatable-queues" />
                 </div>
             </div>
@@ -216,7 +216,7 @@
                                         }
                                         return badnessScore;
                                     }},
-                                    { name: 'With bosses?', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
                                     { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
                                     { name: 'All users', formula: (r) => { 
@@ -249,7 +249,7 @@
                                         }
                                         return badnessScore;
                                     }},
-                                    { name: 'With bosses?', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
                                     { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
                                     { name: 'All users', formula: (r) => { 
@@ -274,6 +274,15 @@
                             clearCache: { 
                                 show: true 
                             },
+                            exportTable: [{
+                                table: 'datatable-publicGroups',
+                                visibleTab: 'tab-default-publicgroups__item',
+                                filename: 'PublicGroups'
+                            }, {
+                                table: 'datatable-queues',
+                                visibleTab: 'tab-default-queues__item',
+                                filename: 'Queues'
+                            }],
                             help: {
                                 content: [
                                     'This page shows the Public Groups and the Queues.',

@@ -84,12 +84,8 @@
                                         return helper.html.render.icon('greenFlag') + ' OK';
                                     }},
                                     { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abstract', formula: (r) => {
-                                        return helper.html.render.checkbox(r.isAbstract);
-                                    }},
-                                    { name: 'Type', formula: (r) => {
-                                        return r.isInterface === false ? 'Class' : 'Interface';
-                                    }},
+                                    { name: 'Abstract', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
+                                    { name: 'Type', property: 'isInterface', formula: (r) => { return r.isInterface === false ? 'Class' : 'Interface'; }},
                                     { name: 'Interfaces', formula: (r) => {
                                         let html = ''; 
                                         if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
@@ -103,7 +99,7 @@
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
                                         return html;
                                     }},
-                                    { name: 'Sharing', formula: (r) => {
+                                    { name: 'Sharing', property: 'specifiedSharing', formula: (r) => {
                                         if (r.isSharingMissing === true)
                                             return helper.html.render.icon('redFlag') + ' Not specified!';
                                         return r.specifiedSharing;
@@ -169,9 +165,7 @@
                                         return r.apiVersion;
                                     }},
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Active', formula: (r) => {
-                                        return helper.html.render.checkbox(r.isActive);
-                                    }},
+                                    { name: 'Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'Status', formula: (r) => {
                                         if (r.isValid === false)
                                             return helper.html.render.icon('redFlag') + ' Recompile!';
@@ -179,13 +173,13 @@
                                     }},
                                     { name: 'Size', property: 'length' },
                                     { name: 'SObject', property: 'sobject' },
-                                    { name : '*Insert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
-                                    { name : 'Insert*', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
-                                    { name : '*Update', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
-                                    { name : 'Update*', formula: (r) => { return helper.html.render.checkbox(r.afterUpdate); }},
-                                    { name : '*Delete', formula: (r) => { return helper.html.render.checkbox(r.beforeDelete); }},
-                                    { name : 'Delete*', formula: (r) => { return helper.html.render.checkbox(r.afterDelete); }},
-                                    { name : 'Undelete*', formula: (r) => { return helper.html.render.checkbox(r.afterUndelete); }},
+                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
+                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
+                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
+                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { return helper.html.render.checkbox(r.afterUpdate); }},
+                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { return helper.html.render.checkbox(r.beforeDelete); }},
+                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { return helper.html.render.checkbox(r.afterDelete); }},
+                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { return helper.html.render.checkbox(r.afterUndelete); }},
                                     { name: 'Annotations', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }

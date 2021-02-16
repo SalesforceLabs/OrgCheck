@@ -306,7 +306,7 @@
                                         'datatable-fields',
                                         [
                                             { name: 'Field Label', formula: (r) => { return r.id ? (helper.html.render.link('/'+r.id, r.label)) : r.label; }},
-                                            { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
+                                            { name: 'Custom', property: 'custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
                                             { name: 'Full API Name', property: 'name' },
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: 'Type', formula: (r) => {
@@ -327,9 +327,9 @@
                                                 return type;
                                             }},
                                             { name: 'Length', property: 'length' },
-                                            { name: 'Encr.', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
-                                            { name: 'Unique', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
-                                            { name: 'ExtID', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: 'Encr.', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
+                                            { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
+                                            { name: 'ExtID', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
                                             { name: 'Default', property: 'defaultValue' },
                                             { name: 'Formula', property: 'calculatedFormula' }
                                         ],
@@ -350,7 +350,7 @@
                                             { name: 'Relationship Name', property: 'relationshipName' },
                                             { name: 'Child SObject', property: 'childSObject' },
                                             { name: 'Field', property: 'field' },
-                                            { name: 'Cascade Delete', formula: (r) => { return helper.html.render.checkbox(r.cascadeDelete); }}
+                                            { name: 'Cascade Delete', property: 'cascadeDelete', formula: (r) => { return helper.html.render.checkbox(r.cascadeDelete); }}
                                         ],
                                         object.childRelationships,
                                         { name: 'Relationship Name', order: 'asc' }
@@ -370,8 +370,8 @@
                                             { name: 'Developer Name', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: 'IsActive', formula: (r) => { return helper.html.render.checkbox(r.active); }},
-                                            { name: 'Available', formula: (r) => { return helper.html.render.checkbox(r.available); }},
+                                            { name: 'IsActive', property: 'active', formula: (r) => { return helper.html.render.checkbox(r.active); }},
+                                            { name: 'Available', property: 'available', formula: (r) => { return helper.html.render.checkbox(r.available); }},
                                             { name: 'Default Mapping', property: 'defaultRecordTypeMapping' }
                                         ],
                                         object.recordTypeInfos,

@@ -1062,12 +1062,10 @@ const OrgCheck = {
                                         const row = [];
                                         const cols = rows[i].querySelectorAll('td, th');
                                         for (let j=0; j<cols.length; j++) {
-                                            const v = cols[j].attributes['aria-label']?.value || cols[j].textContent;
-                                            if (v && v.toString().indexOf(',') != -1) {
-                                                row.push('"'+v+'"');
-                                            } else {
-                                                row.push(v);
-                                            }
+                                            let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
+                                            v = v.replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
+                                            if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
+                                            row.push(v);
                                         }
                                         data.push(row.join(","));        
                                     }
@@ -1401,18 +1399,17 @@ const OrgCheck = {
                                 if (coloring && coloring.formula) trBody.bgColor = coloring.formula(data[k]);
                                 columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
-                                    let content = '';
                                     const row = isArray ? k : data[k];
-                                    if (c.property) {
-                                        content = row[c.property];
-                                    } else if (c.formula) {
-                                        content = c.formula(row);
-                                    }
+                                    const content = (c.formula ? c.formula(row) : (c.property ? row[c.property] : ''));
                                     if (content) {
                                         switch (typeof content) {
                                             case 'object': tdBody.appendChild(content); break;
                                             default: tdBody.innerHTML = content;
                                         }
+                                    }
+                                    const alternative = (c.property && c.formula ? row[c.property] : '');
+                                    if (alternative !== '' || alternative === true || alternative === false) {
+                                        tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
                                 });
                             });
