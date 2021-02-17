@@ -18,6 +18,7 @@
     <tabs>OrgCheck_ProfilesPermSets_TAB</tabs>
     <tabs>OrgCheck_Roles_TAB</tabs>
     <tabs>OrgCheck_PublicGroups_TAB</tabs>
+    <tabs>OrgCheck_Automations_TAB</tabs>
     <tabs>OrgCheck_CustomLabels_TAB</tabs>
     <tabs>OrgCheck_VisualComponents_TAB</tabs>
     <tabs>OrgCheck_ApexComponents_TAB</tabs>

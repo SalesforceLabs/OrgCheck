@@ -1,0 +1,93 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Point&amp;Click Automations 
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Workflows, Process Builders and Flows Overview
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Workflows" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-workflows" id="tab-default-workflows__item">Workflows</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Flows" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="1" aria-controls="tab-default-flows" id="tab-default-flows__item">Flows &amp; Process Builders</a>
+                    </li>
+                </ul>
+                <div id="tab-default-workflows" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-workflows__item">
+                    <div id="datatable-workflows" />
+                </div>
+                <div id="tab-default-flows" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-flows__item">
+                    <div id="datatable-flows" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // =================================
+                    // RUN CONTROLLER
+                    // =================================
+                    controller.run({
+                        datasets: [ 'workflows', 'flows' ],
+                        dependencies: false,
+                        onRecords: function(map) { 
+
+                            helper.html.datatable.create(
+                                'datatable-workflows',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
+                                    { name: 'Direct actions', formula: (r) => { 
+                                        let html = '';
+                                        r.actions.forEach(a => html += a.name+' ('+a.type+')<br />'); 
+                                        return html;
+                                    }},
+                                    { name: 'Time-triggered actions', formula: (r) => { 
+                                        let html = '';
+                                        r.timeTriggers.forEach(tt => tt.actions.forEach(a => html += a.name+' ('+a.type+')<br />'));
+                                        return html;
+                                    }}
+                                ],
+                                map.workflows,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                            );
+
+                            helper.html.datatable.create(
+                                'datatable-flows',
+                                [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Type', property: 'type' },
+                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
+                                    { name: 'DML Creates', property: 'dmlCreates' },
+                                    { name: 'DML Deletes', property: 'dmlDeletes' },
+                                    { name: 'DML Updates', property: 'dmlUpdates' },
+                                    { name: 'Description', property: 'description' }
+                                ],
+                                map.flows,
+                                { name: 'Score', order: 'desc' },
+                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                            );
+
+                        },
+                        actions: { 
+                            clearCache: { 
+                                show: true 
+                            }
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>

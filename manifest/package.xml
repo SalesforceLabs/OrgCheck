@@ -13,6 +13,7 @@
         <members>OrgCheck_Users_VFP</members>
         <members>OrgCheck_Batches_VFP</members>
         <members>OrgCheck_CustomLabels_VFP</members>
+        <members>OrgCheck_Automations_VFP</members>
         <members>OrgCheck_VisualComponents_VFP</members>
         <members>OrgCheck_ApexComponents_VFP</members>
         <members>OrgCheck_Authorization_VFP</members>
@@ -32,6 +33,7 @@
         <members>OrgCheck_Users_TAB</members>
         <members>OrgCheck_Batches_TAB</members>
         <members>OrgCheck_CustomLabels_TAB</members>
+        <members>OrgCheck_Automations_TAB</members>
         <members>OrgCheck_VisualComponents_TAB</members>
         <members>OrgCheck_ApexComponents_TAB</members>
         <name>CustomTab</name>

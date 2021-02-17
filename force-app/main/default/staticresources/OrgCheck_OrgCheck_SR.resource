@@ -2056,9 +2056,107 @@ function buildDatasets(core) {
     // ========================================================================
     // WORKFLOWS
     // ========================================================================
-    /*
-    TODO: Implement workflows dataset here
-    */
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'workflows',
+        keycache: 'Workflows',
+        retriever: function(me, resolve, reject) {
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const queries = [];
+            core.doSalesforceQueries({
+                queries: [{ 
+                    string: 'SELECT Id FROM WorkflowRule',
+                    tooling: true
+                }], 
+                onEachRecord: function(record, index) {
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT Id, FullName, Metadata FROM WorkflowRule WHERE Id = \''+record.Id+'\''
+                    });
+                }, 
+                onEnd: function(records, size) { 
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: cache,
+                        queries,
+                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.FullName,
+                                actions: v.Metadata.actions || [],
+                                timeTriggers: v.Metadata.workflowTimeTriggers || [],
+                                isActive: v.Metadata.active,
+                                badnessScore: 0
+                            };
+                            if (item.isActive === false) item.badnessScore++;
+                            if (item.actions.length === 0 && item.futureActions.length === 0) item.badnessScore++;
+                            return item;
+                        },
+                        onEndFromCacheCallback: resolve,
+                        onErrorCallback: reject
+                    });
+                },
+                onError: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // FLOWS (and Process Builders)
+    // ------------------------------------------------------------------------
+    // Get the list of Flows and PB in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'flows',
+        keycache: 'Flows',
+        retriever: function(me, resolve, reject) {
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const queries = [];
+            core.doSalesforceQueries({
+                queries: [{ 
+                    string: 'SELECT Id FROM Flow',
+                    tooling: true
+                }], 
+                onEachRecord: function(record, index) {
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT Id, FullName, Status, Description, '+
+                                'ProcessType, Metadata FROM Flow WHERE Id = \''+record.Id+'\''
+                    });
+                }, 
+                onEnd: function(records, size) { 
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: cache,
+                        queries,
+                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.FullName,
+                                dmlCreates: v.Metadata.recordCreates?.length || 0,
+                                dmlDeletes: v.Metadata.recordDeletes?.length || 0,
+                                dmlUpdates: v.Metadata.recordUpdates?.length || 0,
+                                isActive: v.Status === 'Active',
+                                description: v.Description,
+                                type: v.ProcessType,
+                                badnessScore: 0
+                            };
+                            if (item.isActive === false) item.badnessScore++;
+                            if (item.dmlCreates > 0) item.badnessScore++;
+                            if (item.dmlDeletes > 0) item.badnessScore++;
+                            if (item.dmlUpdates > 0) item.badnessScore++;
+                            if (!item.description) item.badnessScore++;
+                            return item;
+                        },
+                        onEndFromCacheCallback: resolve,
+                        onErrorCallback: reject
+                    });
+                },
+                onError: reject
+            });
+        }
+    }));
 
     // ========================================================================
     // PACKAGES
@@ -2411,36 +2509,6 @@ function buildDatasets(core) {
                         type: v.Type,
                         namespace: v.NamespacePrefix,
                         description: v.Description
-                    };
-                }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
-            });
-        }
-    }));
-
-    // ========================================================================
-    // FLOWS
-    // ------------------------------------------------------------------------
-    // Get the list of Flows in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'flows',
-        keycache: 'Flows',
-        retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
-                            'FROM FlowDefinition '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.DeveloperName,
-                        namespace: v.NamespacePrefix
                     };
                 }, 
                 onEndFromCacheCallback: resolve,
