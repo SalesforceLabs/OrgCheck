@@ -2123,7 +2123,9 @@ function buildDatasets(core) {
                     queries.push({
                         tooling: true,
                         string: 'SELECT Id, FullName, Status, Description, '+
-                                'ProcessType, Metadata FROM Flow WHERE Id = \''+record.Id+'\''
+                                'ProcessType, Metadata FROM Flow '+
+                                'WHERE Id = \''+record.Id+'\' '+
+                                'AND Status != \'Obsolete\''
                     });
                 }, 
                 onEnd: function(records, size) { 
