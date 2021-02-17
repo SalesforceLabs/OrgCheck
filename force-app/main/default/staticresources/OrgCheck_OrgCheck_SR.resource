@@ -2089,7 +2089,7 @@ function buildDatasets(core) {
                                 badnessScore: 0
                             };
                             if (item.isActive === false) item.badnessScore++;
-                            if (item.actions.length === 0 && item.futureActions.length === 0) item.badnessScore++;
+                            if (item.actions?.length === 0 && item.futureActions?.length === 0) item.badnessScore++;
                             return item;
                         },
                         onEndFromCacheCallback: resolve,
