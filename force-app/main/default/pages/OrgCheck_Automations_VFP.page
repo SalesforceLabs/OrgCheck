@@ -65,8 +65,10 @@
                             helper.html.datatable.create(
                                 'datatable-flows',
                                 [
+                                    { name: 'Object', property: 'sobject' },
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Type', property: 'type' },
+                                    { name: 'Trigger', property: 'triggerType' },
                                     { name: 'Score', property: 'badnessScore' },
                                     { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'DML Creates', property: 'dmlCreates' },

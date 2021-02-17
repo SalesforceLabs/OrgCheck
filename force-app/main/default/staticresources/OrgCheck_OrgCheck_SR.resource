@@ -2142,6 +2142,10 @@ function buildDatasets(core) {
                                 type: v.ProcessType,
                                 badnessScore: 0
                             };
+                            v.Metadata.processMetadataValues.forEach(m => {
+                                if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
+                                if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
+                            });
                             if (item.isActive === false) item.badnessScore++;
                             if (item.dmlCreates > 0) item.badnessScore++;
                             if (item.dmlDeletes > 0) item.badnessScore++;
