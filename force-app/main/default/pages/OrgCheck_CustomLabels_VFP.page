@@ -25,9 +25,9 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++
+                                        return score;
                                     }},
                                     { name: 'Namespace', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
@@ -45,11 +45,7 @@
                                 ],
                                 map.customLabels,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id]) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );                            
                         },
                         actions: {  

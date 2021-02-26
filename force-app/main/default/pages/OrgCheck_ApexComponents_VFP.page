@@ -59,12 +59,12 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (r.isSharingMissing === true) badnessScore++;
-                                        if (r.isValid === false || r.needsRecompilation === true) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (r.isSharingMissing === true) score++;
+                                        if (r.isValid === false || r.needsRecompilation === true) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -112,14 +112,7 @@
                                 ],
                                 map.apexClasses,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.isApiVersionOld === true) ||
-                                        (r.isSharingMissing === true) ||
-                                        (r.isValid === false || r.needsRecompilation === true)) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }},
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 { formula: (r) => { 
                                     if (r.length === -1) return false;
 
@@ -152,12 +145,12 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (r.isValid === false) badnessScore++;
-                                        if (r.isActive === false) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (r.isValid === false) score++;
+                                        if (r.isActive === false) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -193,14 +186,7 @@
                                 ],
                                 map.apexTriggers,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] || 
-                                        (r.isApiVersionOld === true) ||
-                                        (r.isValid === false) ||
-                                        (r.isActive === false))
-                                            return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: { 

@@ -209,12 +209,12 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
-                                        let badnessScore = 0;
+                                        let score = 0;
                                         if (r.includesTechnicalGroup === false) {
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
-                                            if (all_distinct_users.length == 0) badnessScore++;
+                                            if (all_distinct_users.length == 0) score++;
                                         }
-                                        return badnessScore;
+                                        return score;
                                     }},
                                     { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
@@ -227,13 +227,7 @@
                                 ],
                                 map.publicGroups,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.includesTechnicalGroup === false) {
-                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
-                                        if (all_distinct_users.length == 0) return helper.html.render.color('highlight');
-                                    }
-                                    return null;
-                                }},
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 { formula: (r) => { return r.isPublicGroup; }}
                             );
 
@@ -242,12 +236,12 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
-                                        let badnessScore = 0;
+                                        let score = 0;
                                         if (r.includesTechnicalGroup === false) {
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
-                                            if (all_distinct_users.length == 0) badnessScore++;
+                                            if (all_distinct_users.length == 0) score++;
                                         }
-                                        return badnessScore;
+                                        return score;
                                     }},
                                     { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
@@ -260,13 +254,7 @@
                                 ],
                                 map.publicGroups,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.includesTechnicalGroup === false) {
-                                        const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
-                                        if (all_distinct_users.length == 0) return helper.html.render.color('highlight');
-                                    }
-                                    return null;
-                                }},
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 { formula: (r) => { return r.isQueue; }}
                             );
                         },

@@ -1396,7 +1396,6 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (filtering && filtering.formula && filtering.formula(data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                if (coloring && coloring.formula) trBody.bgColor = coloring.formula(data[k]);
                                 columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
                                     const row = isArray ? k : data[k];
@@ -1411,6 +1410,7 @@ const OrgCheck = {
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
+                                    if (coloring && coloring.name === c.name) trBody.bgColor = coloring.formula(content, alternative);
                                 });
                             });
                             if (firstSortCallback) { 
@@ -2085,11 +2085,8 @@ function buildDatasets(core) {
                                 name: v.FullName,
                                 actions: v.Metadata.actions || [],
                                 timeTriggers: v.Metadata.workflowTimeTriggers || [],
-                                isActive: v.Metadata.active,
-                                badnessScore: 0
+                                isActive: v.Metadata.active
                             };
-                            if (item.isActive === false) item.badnessScore++;
-                            if (item.actions?.length === 0 && item.futureActions?.length === 0) item.badnessScore++;
                             return item;
                         },
                         onEndFromCacheCallback: resolve,
@@ -2141,18 +2138,12 @@ function buildDatasets(core) {
                                 dmlUpdates: v.Metadata.recordUpdates?.length || 0,
                                 isActive: v.Status === 'Active',
                                 description: v.Description,
-                                type: v.ProcessType,
-                                badnessScore: 0
+                                type: v.ProcessType
                             };
                             v.Metadata.processMetadataValues.forEach(m => {
                                 if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
                                 if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
                             });
-                            if (item.isActive === false) item.badnessScore++;
-                            if (item.dmlCreates > 0) item.badnessScore++;
-                            if (item.dmlDeletes > 0) item.badnessScore++;
-                            if (item.dmlUpdates > 0) item.badnessScore++;
-                            if (!item.description) item.badnessScore++;
                             return item;
                         },
                         onEndFromCacheCallback: resolve,
@@ -2637,8 +2628,7 @@ function buildDatasets(core) {
                             viewSetup: false,
                             modifyAllData: false,
                             viewAllData: false
-                        },
-                        badnessScore: 0
+                        }
                     };
                     if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
                         for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
@@ -2653,9 +2643,6 @@ function buildDatasets(core) {
                             });
                         }
                     }
-                    // Badness score
-                    if (item.onLightningExperience === false) item.badnessScore++;
-                    if (item.neverLogged === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2665,7 +2652,7 @@ function buildDatasets(core) {
     }));
     
     // ========================================================================
-    // CUSTOM LABELS
+    // PROFILES
     // ------------------------------------------------------------------------
     // Get the list of Profiles in Salesforce (data, using REST API)
     // ========================================================================
@@ -2696,12 +2683,8 @@ function buildDatasets(core) {
                         isUndescribedCustom: v.IsCustom && !v.Profile.Description,
                         package: v.NamespacePrefix,
                         membersCount: memberCounts,
-                        hasMembers: memberCounts > 0,
-                        badnessScore: 0
+                        hasMembers: memberCounts > 0
                     };
-                    // Badness score
-                    if (item.isUnusedCustom === true) item.badnessScore++;
-                    if (item.isUndescribedCustom === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2799,8 +2782,7 @@ function buildDatasets(core) {
                         package: v.NamespacePrefix,
                         membersCount: memberCounts, 
                         hasMembers: memberCounts > 0, 
-                        uniqueProfiles: [],
-                        badnessScore: 0
+                        uniqueProfiles: []
                     };
                     let pmap = {};
                     for (let i=0; i<memberCounts; i++) {
@@ -2817,9 +2799,6 @@ function buildDatasets(core) {
                             );
                         }
                     }
-                    // Badness score
-                    if (item.isUnusedCustom === true) item.badnessScore++;
-                    if (item.isUndescribedCustom === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: resolve,
@@ -2858,8 +2837,7 @@ function buildDatasets(core) {
                         hasActiveMembers: false,
                         inactiveMembersCount: 0,
                         hasInactiveMembers: false,
-                        isExternal: (v.PortalType !== 'None') ? true : false,
-                        badnessScore: 0
+                        isExternal: (v.PortalType !== 'None') ? true : false
                     };
                     if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
                         let user = v.Users.records[i];
@@ -2880,9 +2858,6 @@ function buildDatasets(core) {
                     item.activeMembersCount = item.activeMembers.length;
                     item.hasActiveMembers = item.activeMembers.length > 0;
                     item.hasInactiveMembers = item.inactiveMembersCount > 0;
-                    // Badness score
-                    if (item.hasActiveMembers == false) item.badnessScore++;
-                    if (item.hasInactiveMembers === true) item.badnessScore++;
                     return item;
                 }, 
                 onEndFromCacheCallback: function(records) {

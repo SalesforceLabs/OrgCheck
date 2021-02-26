@@ -59,7 +59,12 @@
                                 'datatable-profiles',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isUnusedCustom === true) score++;
+                                        if (r.isUndescribedCustom === true) score++;
+                                        return score;
+                                    }},
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
@@ -80,7 +85,7 @@
                                 ],
                                 map.profiles,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
 
                             // -------------------------------------------
@@ -137,7 +142,12 @@
                                 'datatable-permissionSets',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isUnusedCustom === true) score++;
+                                        if (r.isUndescribedCustom === true) score++;
+                                        return score;
+                                    }},
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
@@ -162,7 +172,7 @@
                                 ],
                                 map.permissionSets,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: {  

@@ -44,7 +44,12 @@
                                 'datatable-workflows',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isActive === false) score++;
+                                        if (r.actions?.length === 0 && r.futureActions?.length === 0) score++;
+                                        return score;
+                                    }},
                                     { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'Direct actions', formula: (r) => { 
                                         let html = '';
@@ -59,7 +64,7 @@
                                 ],
                                 map.workflows,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
 
                             helper.html.datatable.create(
@@ -69,7 +74,15 @@
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Type', property: 'type' },
                                     { name: 'Trigger', property: 'triggerType' },
-                                    { name: 'Score', property: 'badnessScore' },
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isActive === false) score++;
+                                        if (r.dmlCreates > 0) score++;
+                                        if (r.dmlDeletes > 0) score++;
+                                        if (r.dmlUpdates > 0) score++;
+                                        if (!r.description) score++;
+                                        return score;
+                                    }},
                                     { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'DML Creates', property: 'dmlCreates' },
                                     { name: 'DML Deletes', property: 'dmlDeletes' },
@@ -78,10 +91,9 @@
                                 ],
                                 map.flows,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => r.badnessScore > 0 ? helper.html.render.color('highlight') : null }
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
-
-                        },
+                       },
                         actions: { 
                             clearCache: { 
                                 show: true 

@@ -66,11 +66,11 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -91,13 +91,7 @@
                                 ],
                                 map.vfPages,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.isApiVersionOld === true) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
 
                             // Render the Visual Force Components data in a table
@@ -106,11 +100,11 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -130,13 +124,7 @@
                                 ],
                                 map.vfComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.isApiVersionOld === true) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );   
 
                             // Render the Lighnting Pages data in a table
@@ -145,10 +133,10 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', formula: (r) => { 
@@ -163,12 +151,7 @@
                                 ],
                                 map.auraPages,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );   
                             
                             // Render the Lighnting Aura Components data in a table
@@ -177,11 +160,11 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -201,13 +184,7 @@
                                 ],
                                 map.auraComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.isApiVersionOld === true) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );  
 
                             // Render the Lighnting Web Components data in a table
@@ -216,11 +193,11 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.isApiVersionOld === true) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
                                         if (r.isApiVersionOld === true)
@@ -240,13 +217,7 @@
                                 ],
                                 map.lwComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.isApiVersionOld === true) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: {  
