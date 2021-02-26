@@ -2083,10 +2083,14 @@ function buildDatasets(core) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
-                                actions: v.Metadata.actions || [],
-                                timeTriggers: v.Metadata.workflowTimeTriggers || [],
+                                description: v.Metadata.description,
+                                actions: v.Metadata.actions,
+                                futureActions: v.Metadata.workflowTimeTriggers,
                                 isActive: v.Metadata.active
                             };
+                            if (!item.actions) item.actions = [];
+                            if (!item.futureActions) item.futureActions = [];
+                            item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
                             return item;
                         },
                         onEndFromCacheCallback: resolve,
@@ -2119,10 +2123,10 @@ function buildDatasets(core) {
                 onEachRecord: function(record, index) {
                     queries.push({
                         tooling: true,
-                        string: 'SELECT Id, FullName, Status, Description, '+
-                                'ProcessType, Metadata FROM Flow '+
-                                'WHERE Id = \''+record.Id+'\' '+
-                                'AND Status != \'Obsolete\''
+                        string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
+                                'VersionNumber, Metadata, Status, Description, '+
+                                'ProcessType FROM Flow '+
+                                'WHERE Id = \''+record.Id+'\' '
                     });
                 }, 
                 onEnd: function(records, size) { 
@@ -2133,6 +2137,9 @@ function buildDatasets(core) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
+                                definitionId: core.doSimplifiySalesforceID(v.DefinitionId),
+                                definitionName: v.MasterLabel,
+                                version: v.VersionNumber,
                                 dmlCreates: v.Metadata.recordCreates?.length || 0,
                                 dmlDeletes: v.Metadata.recordDeletes?.length || 0,
                                 dmlUpdates: v.Metadata.recordUpdates?.length || 0,

@@ -2,7 +2,7 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Point&amp;Click Automations 
+            Automations 
         </apex:define>
         <apex:define name="text_page_subtitle">
             Workflows, Process Builders and Flows Overview
@@ -13,12 +13,18 @@
                     <li class="slds-tabs_default__item slds-is-active" title="Workflows" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-workflows" id="tab-default-workflows__item">Workflows</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Process builders" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="1" aria-controls="tab-default-processbuilders" id="tab-default-processbuilders__item">Process Builders</a>
+                    </li>
                     <li class="slds-tabs_default__item" title="Flows" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="1" aria-controls="tab-default-flows" id="tab-default-flows__item">Flows &amp; Process Builders</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="2" aria-controls="tab-default-flows" id="tab-default-flows__item">Flows</a>
                     </li>
                 </ul>
                 <div id="tab-default-workflows" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-workflows__item">
                     <div id="datatable-workflows" />
+                </div>
+                <div id="tab-default-processbuilders" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-processbuilders__item">
+                    <div id="datatable-processbuilders" />
                 </div>
                 <div id="tab-default-flows" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-flows__item">
                     <div id="datatable-flows" />
@@ -47,18 +53,26 @@
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
                                         if (r.isActive === false) score++;
-                                        if (r.actions?.length === 0 && r.futureActions?.length === 0) score++;
+                                        if (!r.description) score++;
+                                        if (r.noAction === true) score++;
                                         return score;
                                     }},
-                                    { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
-                                    { name: 'Direct actions', formula: (r) => { 
-                                        let html = '';
-                                        r.actions.forEach(a => html += a.name+' ('+a.type+')<br />'); 
+                                    { name: 'Description', formula: (r) => {
+                                        if (r.description) return r.description;
+                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
+                                    }},
+                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
+                                        var html = helper.html.render.checkbox(r.isActive); 
+                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
                                         return html;
                                     }},
-                                    { name: 'Time-triggered actions', formula: (r) => { 
+                                    { name: 'Actions', formula: (r) => { 
+                                        if (r.noAction === true) {
+                                            return helper.html.render.icon('redFlag') + ' no direct action!<br />';
+                                        }
                                         let html = '';
-                                        r.timeTriggers.forEach(tt => tt.actions.forEach(a => html += a.name+' ('+a.type+')<br />'));
+                                        r.actions.forEach(a => html += 'Direct action: '+a.name+' ('+a.type+')<br />'); 
+                                        r.futureActions.forEach(tt => tt.actions.forEach(a => html += 'Future action: '+a.name+' ('+a.type+')<br />'));
                                         return html;
                                     }}
                                 ],
@@ -68,32 +82,66 @@
                             );
 
                             helper.html.datatable.create(
-                                'datatable-flows',
+                                'datatable-processbuilders',
                                 [
-                                    { name: 'Object', property: 'sobject' },
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Type', property: 'type' },
-                                    { name: 'Trigger', property: 'triggerType' },
+                                    { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
+                                    { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Version', property: 'version' },
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
                                         if (r.isActive === false) score++;
-                                        if (r.dmlCreates > 0) score++;
-                                        if (r.dmlDeletes > 0) score++;
-                                        if (r.dmlUpdates > 0) score++;
                                         if (!r.description) score++;
                                         return score;
                                     }},
-                                    { name: 'Is Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
+                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
+                                        var html = helper.html.render.checkbox(r.isActive); 
+                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
+                                        return html;
+                                    }},
+                                    { name: 'Object', property: 'sobject' },
+                                    { name: 'Trigger', property: 'triggerType' },
                                     { name: 'DML Creates', property: 'dmlCreates' },
                                     { name: 'DML Deletes', property: 'dmlDeletes' },
                                     { name: 'DML Updates', property: 'dmlUpdates' },
-                                    { name: 'Description', property: 'description' }
+                                    { name: 'Description', formula: (r) => {
+                                        if (r.description) return r.description;
+                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
+                                    }}
                                 ],
                                 map.flows,
                                 { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                { formula: (r) => { return r.type === 'Workflow' }}
                             );
-                       },
+
+                            helper.html.datatable.create(
+                                'datatable-flows',
+                                [
+                                    { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
+                                    { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Version', property: 'version' },
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isActive === false) score++;
+                                        if (!r.description) score++;
+                                        return score;
+                                    }},
+                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
+                                        var html = helper.html.render.checkbox(r.isActive); 
+                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
+                                        return html;
+                                    }},
+                                    { name: 'Description', formula: (r) => {
+                                        if (r.description) return r.description;
+                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
+                                    }}
+                                ],
+                                map.flows,
+                                { name: 'Score', order: 'desc' },
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                { formula: (r) => { return r.type === 'Flow' }}
+                            );
+                        },
                         actions: { 
                             clearCache: { 
                                 show: true 
