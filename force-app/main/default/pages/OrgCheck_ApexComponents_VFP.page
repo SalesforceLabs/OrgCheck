@@ -63,7 +63,7 @@
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (r.isSharingMissing === true) score++;
-                                        if (r.isValid === false || r.needsRecompilation === true) score++;
+                                        if (r.needsRecompilation === true) score++;
                                         return score;
                                     }},
                                     { name: 'API', formula: (r) => {
@@ -73,10 +73,6 @@
                                     }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Status', formula: (r) => {
-                                        if (r.isValid === false) {
-                                            countInvalidApexClasses++;
-                                            return helper.html.render.icon('redFlag') + ' Review!';
-                                        }
                                         if (r.needsRecompilation === true) {
                                             countRecompileApexClasses++;
                                             return helper.html.render.icon('redFlag') + ' Recompile!';

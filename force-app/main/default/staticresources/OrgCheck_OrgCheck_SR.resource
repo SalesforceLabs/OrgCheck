@@ -2353,7 +2353,7 @@ function buildDatasets(core) {
                 mnemonic: this.keycache, 
                 queries: [ { 
                     tooling: true, 
-                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, IsValid, '+
+                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
                                 'Body, LengthWithoutComments, SymbolTable '+
                             'FROM ApexClass '+
                             'WHERE ManageableState = \'unmanaged\' '
@@ -2368,7 +2368,6 @@ function buildDatasets(core) {
                         isTest: false,
                         isAbstract: false,
                         isInterface: false,
-                        isValid: v.IsValid,
                         isSharingMissing: false,
                         length: v.LengthWithoutComments,
                         needsRecompilation: (!v.SymbolTable ? true : false)
