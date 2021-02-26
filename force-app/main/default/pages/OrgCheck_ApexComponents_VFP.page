@@ -50,7 +50,6 @@
                         dependencies: true,
                         onRecords: function(map) { 
 
-                            let countInvalidApexClasses = 0;
                             let countRecompileApexClasses = 0;
 
                             // Render the Apex Classes data in a table
@@ -116,17 +115,8 @@
                             );
 
                             // Show alert about recompilation
-                            if (countInvalidApexClasses + countRecompileApexClasses > 0) {
+                            if (countRecompileApexClasses > 0) {
                                 let html = '';
-                                if (countInvalidApexClasses > 0) {
-                                    html += 'You have '+countInvalidApexClasses+' Apex classes that need to be <b>reviewed</b>.<br />';
-                                    html += '<br />';
-                                    html += 'You need to recompile all your classes in this org.<br />';
-                                    html += 'To do so, click on the <a href="/01p" target="_blank">power plug button</a> ';
-                                    html += 'in this page and then click on the link called <u>Compile all classes</u> ';
-                                    html += 'in Salesforce Setup!<br />';
-                                    html += '<br />';
-                                }
                                 if (countRecompileApexClasses > 0) {
                                     html += 'You have '+countRecompileApexClasses+' Apex classes that need to be <b>recompiled</b>.<br />';
                                     html += 'You need to review the classes that could not have been compiled in this org.<br />';
@@ -144,7 +134,6 @@
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
-                                        if (r.isValid === false) score++;
                                         if (r.isActive === false) score++;
                                         return score;
                                     }},
@@ -155,11 +144,7 @@
                                     }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
-                                    { name: 'Status', formula: (r) => {
-                                        if (r.isValid === false)
-                                            return helper.html.render.icon('redFlag') + ' Recompile!';
-                                        return helper.html.render.icon('greenFlag') + ' OK';
-                                    }},
+                                    { name: 'Status', formula: (r) => { return helper.html.render.icon('greenFlag') + ' OK'; }},
                                     { name: 'Size', property: 'length' },
                                     { name: 'SObject', property: 'sobject' },
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},

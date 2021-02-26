@@ -2421,7 +2421,7 @@ function buildDatasets(core) {
                 queries: [ { 
                     tooling: true, 
                     string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                'IsValid, NamespacePrefix, '+
+                                'NamespacePrefix, '+
                                 'UsageBeforeInsert, UsageAfterInsert, '+
                                 'UsageBeforeUpdate, UsageAfterUpdate, '+
                                 'UsageBeforeDelete, UsageAfterDelete, '+
@@ -2437,7 +2437,6 @@ function buildDatasets(core) {
                         apiVersion: v.ApiVersion,
                         isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
-                        isValid: v.IsValid,
                         length: v.LengthWithoutComments,
                         isActive: (v.Status === 'Active' ? true : false),
                         beforeInsert: v.UsageBeforeInsert,
