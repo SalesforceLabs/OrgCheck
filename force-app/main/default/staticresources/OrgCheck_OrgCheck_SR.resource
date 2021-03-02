@@ -976,6 +976,15 @@ const OrgCheck = {
             return PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_METADATA, key);
         };
         
+        /**
+         * Set metadata item from cache
+         * @param key in cache
+         * @param value in cache
+         */
+        this.setMetadataInCache = function(key, value) {
+            return PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_METADATA, key, value);
+        };
+
         // ======================================================
         // CONTROLLER LAYER 
         // ======================================================
@@ -1521,6 +1530,13 @@ const OrgCheck = {
                             div.setAttribute('id', 'chart-container-' + id);
                             div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
                             return div;
+                        },
+                        percentage: function(v) {
+                            if (v) {
+                                const vv = Number.parseFloat(v);
+                                if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
+                            }
+                            return '0 %';
                         },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" />';
@@ -2349,60 +2365,84 @@ function buildDatasets(core) {
         name: 'apexClasses',
         keycache: 'ApexClasses',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const classesMap = {};
+            const coverageMap = {};
+            core.doSalesforceQueries({
+                queries: [{
+                    string: 'SELECT ApexClassOrTriggerId, NumLinesCovered, '+
+                            'NumLinesUncovered FROM ApexCodeCoverage',
+                    tooling: true
+                }, { 
                     string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
-                                'Body, LengthWithoutComments, SymbolTable '+
+                            'Body, LengthWithoutComments, SymbolTable '+
                             'FROM ApexClass '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        isTest: false,
-                        isAbstract: false,
-                        isInterface: false,
-                        isSharingMissing: false,
-                        length: v.LengthWithoutComments,
-                        needsRecompilation: (!v.SymbolTable ? true : false)
-                    };
-                    if (v.Body) {
-                        item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
-                    }
-                    if (v.SymbolTable) {
-                        item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                        item.interfaces = v.SymbolTable.interfaces;
-                        item.methodsCount = v.SymbolTable.methods.length || 0;
-                        if (v.SymbolTable.tableDeclaration) {
-                            item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                            if (v.SymbolTable.tableDeclaration.modifiers) {
-                                v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                    switch (m) {
-                                        case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                        case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                        case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                        case 'public':            item.specifiedAccess  = 'public';    break;
-                                        case 'global':            item.specifiedAccess  = 'global';    break;
-                                        case 'abstract':          item.isAbstract       = true;        break;
-                                        case 'testMethod':        item.isTest           = true;        break;
-                                    }
-                                });
-                            };
+                            'WHERE ManageableState = \'unmanaged\' ',
+                    tooling: true
+                }], 
+                onEachRecord: function(v, index) {
+                    if (index == 0) { 
+                        // ApexCodeCoverage records
+                        const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
+                        const item = coverageMap[i] || { cov: 0, cnt: 0 };
+                        item.cov += v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered);
+                        item.cnt++;
+                        coverageMap[i] = item;
+                    } else {
+                        // ApexClasses records
+                        const item =  {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.Name,
+                            apiVersion: v.ApiVersion,
+                            isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                            namespace: v.NamespacePrefix,
+                            isTest: false,
+                            isAbstract: false,
+                            isInterface: false,
+                            isSharingMissing: false,
+                            size: v.LengthWithoutComments,
+                            needsRecompilation: (!v.SymbolTable ? true : false)
+                        };
+                        if (v.Body) {
+                            item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
                         }
+                        if (v.SymbolTable) {
+                            item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                            item.interfaces = v.SymbolTable.interfaces;
+                            item.methodsCount = v.SymbolTable.methods.length || 0;
+                            if (v.SymbolTable.tableDeclaration) {
+                                item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                                if (v.SymbolTable.tableDeclaration.modifiers) {
+                                    v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                        switch (m) {
+                                            case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                            case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                            case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                            case 'public':            item.specifiedAccess  = 'public';    break;
+                                            case 'global':            item.specifiedAccess  = 'global';    break;
+                                            case 'abstract':          item.isAbstract       = true;        break;
+                                            case 'testMethod':        item.isTest           = true;        break;
+                                        }
+                                    });
+                                };
+                            }
+                        }
+                        if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                            item.isSharingMissing = true;
+                        }
+                        classesMap[item.id] = item;
                     }
-                    if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
-                        item.isSharingMissing = true;
-                    }
-                    return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEnd: function(records, size) { 
+                    for (const [key, value] of Object.entries(classesMap)) {
+                        if (coverageMap[key]) value.fastCoverage = coverageMap[key].cov / coverageMap[key].cnt;
+                    }
+                    core.setMetadataInCache(cache, classesMap);
+                    resolve(classesMap);
+                },
+                onError: reject
             });
         }
     }));
