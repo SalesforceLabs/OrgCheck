@@ -18,6 +18,16 @@
                     </button>
                 </a>
             </div>
+            <div class="slds-page-header__control">
+                <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank">
+                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
+                        <svg class="slds-button__icon" aria-hidden="true">
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#checkout')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Unit Tests</span>
+                    </button>
+                </a>
+            </div>
         </apex:define>
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
@@ -63,6 +73,7 @@
                                         if (r.isApiVersionOld === true) score++;
                                         if (r.isSharingMissing === true) score++;
                                         if (r.needsRecompilation === true) score++;
+                                        if (!r.fastCoverage || r.fastCoverage < 0.85) score++;
                                         return score;
                                     }},
                                     { name: 'API', formula: (r) => {
@@ -79,17 +90,17 @@
                                         return helper.html.render.icon('greenFlag') + ' OK';
                                     }},
                                     { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abstract', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
+                                    { name: 'Abst.', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
                                     { name: 'Type', property: 'isInterface', formula: (r) => { return r.isInterface === false ? 'Class' : 'Interface'; }},
-                                    { name: 'Interfaces', formula: (r) => {
+                                    { name: 'Intf.', formula: (r) => {
                                         let html = ''; 
                                         if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
                                         return html;
                                     }},
                                     { name: 'Size', property: 'length' },
                                     { name: 'Methods', property: 'methodsCount' },
-                                    { name: 'Inner Classes', property: 'innerClassesCount' },
-                                    { name: 'Annotations', formula: (r) => {
+                                    { name: 'Inner Cls.', property: 'innerClassesCount' },
+                                    { name: 'Annot.', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
                                         return html;
@@ -98,6 +109,12 @@
                                         if (r.isSharingMissing === true)
                                             return helper.html.render.icon('redFlag') + ' Not specified!';
                                         return r.specifiedSharing;
+                                    }},
+                                    { name: 'Coverage', property: 'fastCoverage', formula: (r) => { 
+                                        let html = '';
+                                        if (!r.fastCoverage || r.fastCoverage < 0.85) html += helper.html.render.icon('redFlag') + ' ';
+                                        html += helper.html.render.percentage(r.fastCoverage); 
+                                        return html;
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
@@ -108,10 +125,7 @@
                                 map.apexClasses,
                                 { name: 'Score', order: 'desc' },
                                 { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { 
-                                    if (r.length === -1) return false;
-
-                                 }}
+                                { formula: (r) => { return r.size !== -1 && r.isTest === false; }}
                             );
 
                             // Show alert about recompilation
@@ -190,7 +204,8 @@
                                         '<ul class="slds-list_dotted"><li><code>+1</code> if the apex class is not used (in other words it has no dependency),</li>'+
                                         '<li><code>+1</code> if the API version of the class is too old (3 years old),</li>'+
                                         '<li><code>+1</code> if the <i>with or without sharing</i> option is not clearly specified (only if the class is not an interface and not a Test class,</li>'+
-                                        '<li><code>+1</code> if the class needs recompilation.</li></ul>',
+                                        '<li><code>+1</code> if the class needs recompilation.</li>'+
+                                        '<li><code>+1</code> if the class needs has no coverage or less than 85% code coverage.</li></ul>',
                                     'The <b>SCORE</b> for apex triggers is computed with the following rule: '+
                                         '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
                                         '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
