@@ -9,6 +9,11 @@ const OrgCheck = {
     version: 'v1.9.1',
 
     /**
+     * Organization Id where OrgCheck is currently installed
+     */
+    localOrgId: '',
+
+    /**
      * Handlers
      */
     handlers: {
@@ -355,7 +360,8 @@ const OrgCheck = {
                             'target="_blank">here</a> and log an issue with the following information. <br /'+
                             '><br />';
                     html += '<b>OrgCheck Information</b><br />';
-                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available');
+                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
+                    html += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
                     html += '<br />';
                     html += '<b>Navigation Information</b><br />';
                     html += 'Page: ' + document.location.pathname + '<br />';
@@ -904,6 +910,9 @@ const OrgCheck = {
             accessToken: setup.sfLocalAccessToken
         }
 
+        // Set global information about org (in case of showError mainly)
+        OrgCheck.localOrgId = ORG_INFORMATION.id;
+
         // Get the current Organization information
         const currentOrgId = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'CurrentOrgId');
         if (currentOrgId) {
@@ -1204,6 +1213,12 @@ const OrgCheck = {
                     version: {
                         isOld: function(version) {
                             return SALESFORCE_HANDLER.isVersionOld(version, 3);
+                        }
+                    },
+                    information: function() {
+                        return { 
+                            organizationId: ORG_INFORMATION.id,
+                            apiVersion: ORG_INFORMATION.version
                         }
                     }
                 },
