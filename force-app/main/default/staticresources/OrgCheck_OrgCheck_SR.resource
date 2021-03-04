@@ -6,7 +6,12 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.8.3',
+    version: 'v1.9.1',
+
+    /**
+     * Organization Id where OrgCheck is currently installed
+     */
+    localOrgId: '',
 
     /**
      * Handlers
@@ -355,7 +360,8 @@ const OrgCheck = {
                             'target="_blank">here</a> and log an issue with the following information. <br /'+
                             '><br />';
                     html += '<b>OrgCheck Information</b><br />';
-                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available');
+                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
+                    html += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
                     html += '<br />';
                     html += '<b>Navigation Information</b><br />';
                     html += 'Page: ' + document.location.pathname + '<br />';
@@ -379,6 +385,7 @@ const OrgCheck = {
                         }
                         html += '<br />';
                     });
+                    html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.');
                     private_show_modal('Oh no, OrgCheck had an error!', html);
                 }
             };
@@ -903,6 +910,9 @@ const OrgCheck = {
             accessToken: setup.sfLocalAccessToken
         }
 
+        // Set global information about org (in case of showError mainly)
+        OrgCheck.localOrgId = ORG_INFORMATION.id;
+
         // Get the current Organization information
         const currentOrgId = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'CurrentOrgId');
         if (currentOrgId) {
@@ -975,6 +985,15 @@ const OrgCheck = {
             return PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_METADATA, key);
         };
         
+        /**
+         * Set metadata item from cache
+         * @param key in cache
+         * @param value in cache
+         */
+        this.setMetadataInCache = function(key, value) {
+            return PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_METADATA, key, value);
+        };
+
         // ======================================================
         // CONTROLLER LAYER 
         // ======================================================
@@ -992,7 +1011,7 @@ const OrgCheck = {
                 *                <li><code>onRecords</code>: </li> 
                 *                <li><code>dependencies</code>: </li> 
                 *                <li><code>actions.clearCache</code>: </li> 
-                *                <li><code>actions.exportAsFile</code>: </li> 
+                *                <li><code>actions.exportTable</code>: </li> 
                 *              </ol>
                 */
                 run: function(ctlSetup) {
@@ -1044,28 +1063,53 @@ const OrgCheck = {
                             buttonClearCache.parentNode.style.display = 'block';
                         }
                         // 3.2 Set the export as file button (if specified)
-                        if (ctlSetup.actions && ctlSetup.actions.exportAsFile && ctlSetup.actions.exportAsFile.appendRowsMethod) { 
+                        if (ctlSetup.actions && ctlSetup.actions.exportTable && Array.isArray(ctlSetup.actions.exportTable)) {
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
-                                const filename = ctlSetup.actions.exportAsFile.filename || 'Export';
-                                const headers  = ctlSetup.actions.exportAsFile.headers || [ 'id' ];
-                                const add_rows_function = ctlSetup.actions.exportAsFile.appendRowsMethod;
-                                const rows = [ headers ];
-                                add_rows_function(rows, map);
-                                const data = rows.map(e => {
-                                    e.forEach((v,i,a) => { if (v && v.toString().indexOf(',') != -1) a[i]='"'+v+'"'; } ); 
-                                    return e.join(',');
-                                }).join('\n');
-                                const link = document.createElement('a');
-                                link.style.visibility = 'hidden';
-                                document.body.appendChild(link);
-                                link.download = filename + '.csv';
-                                link.target = '_blank';
-                                link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data);
-                                link.click();
-                                document.body.removeChild(link);
-                            };
+                                ctlSetup.actions.exportTable.forEach(d => {
+                                    if (d.visibleTab) {
+                                        const tab = document.getElementById(d.visibleTab).parentNode;
+                                        if (tab.classList.contains('slds-is-active') === false) {
+                                            return;
+                                        }
+                                    }
+                                    const table = document.getElementById(d.table);
+                                    const rows = table.querySelectorAll('table tr');
+                                    const data = [];
+                                    for (let i=0; i<rows.length; i++) {
+                                        const row = [];
+                                        const cols = rows[i].querySelectorAll('td, th');
+                                        for (let j=0; j<cols.length; j++) {
+                                            let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
+                                            v = v.replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
+                                            if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
+                                            row.push(v);
+                                        }
+                                        data.push(row.join(","));        
+                                    }
+                                    const link = document.createElement('a');
+                                    link.style.visibility = 'hidden';
+                                    document.body.appendChild(link);
+                                    link.download = d.filename + '.csv';
+                                    link.target = '_blank';
+                                    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data.join('\n'));
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                            }
                             buttonExport.parentNode.style.display = 'block';
+                        }
+                        // 3.3 Set the help button (if specified)
+                        if (ctlSetup.actions && ctlSetup.actions.help && ctlSetup.actions.help.content) { 
+                            const buttonHelp = document.getElementById('button-help');
+                            buttonHelp.onclick = function(e) { 
+                                const lines = ctlSetup.actions.help.content || [];
+                                let html = '<ul class="slds-has-dividers_around-space">';
+                                lines.forEach(l => html += '<li class="slds-item" style="background-color: #f0f8ff;">'+l+'</li>');
+                                html += '</ul>';
+                                MSG_HANDLER.showModal('With A Little Help From My Friends', html);
+                            };
+                            buttonHelp.parentNode.style.display = 'block';
                         }
                     }
 
@@ -1169,6 +1213,12 @@ const OrgCheck = {
                     version: {
                         isOld: function(version) {
                             return SALESFORCE_HANDLER.isVersionOld(version, 3);
+                        }
+                    },
+                    information: function() {
+                        return { 
+                            organizationId: ORG_INFORMATION.id,
+                            apiVersion: ORG_INFORMATION.version
                         }
                     }
                 },
@@ -1370,22 +1420,21 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (filtering && filtering.formula && filtering.formula(data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                if (coloring && coloring.formula) trBody.bgColor = coloring.formula(data[k]);
                                 columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
-                                    let content = '';
                                     const row = isArray ? k : data[k];
-                                    if (c.property) {
-                                        content = row[c.property];
-                                    } else if (c.formula) {
-                                        content = c.formula(row);
-                                    }
+                                    const content = (c.formula ? c.formula(row) : (c.property ? row[c.property] : ''));
                                     if (content) {
                                         switch (typeof content) {
                                             case 'object': tdBody.appendChild(content); break;
                                             default: tdBody.innerHTML = content;
                                         }
                                     }
+                                    const alternative = (c.property && c.formula ? row[c.property] : '');
+                                    if (alternative !== '' || alternative === true || alternative === false) {
+                                        tdBody.setAttribute('aria-label', alternative?.toString());
+                                    }
+                                    if (coloring && coloring.name === c.name) trBody.bgColor = coloring.formula(content, alternative);
                                 });
                             });
                             if (firstSortCallback) { 
@@ -1420,11 +1469,9 @@ const OrgCheck = {
                                         const prop = buttons[j].attributes['aria-controlled-by'];
                                         if (prop && prop.value) {
                                             if ((',' + prop.value + ',').includes(',' + correspondingTabId + ',')) {
-                                                buttons[j].classList.add('slds-show');
-                                                buttons[j].classList.remove('slds-hide');
+                                                buttons[j].parentNode.style.display = 'block';
                                             } else {
-                                                buttons[j].classList.remove('slds-show');
-                                                buttons[j].classList.add('slds-hide');
+                                                buttons[j].parentNode.style.display = 'none';
                                             }
                                         }
                                     }
@@ -1490,15 +1537,21 @@ const OrgCheck = {
                     },
                     render: {
                         dependencies: function(id, name, data) {
-                            const svg = private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8');
                             const div = document.createElement('div');
-                            div.classList.add('OrgCheck-dependency-thumbnail');
+                            div.style.cursor = 'zoom-in';
                             div.onclick = function() {
                                 MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); //svg.clone(true));
                             };
                             div.setAttribute('id', 'chart-container-' + id);
-                            div.appendChild(svg);
+                            div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
                             return div;
+                        },
+                        percentage: function(v) {
+                            if (v) {
+                                const vv = Number.parseFloat(v);
+                                if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
+                            }
+                            return '0 %';
                         },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" />';
@@ -1674,6 +1727,12 @@ const OrgCheck = {
             );
         }
 
+        this.isVersionOld = function(setup) {
+            return SALESFORCE_HANDLER.isVersionOld(
+                setup.apiVersion
+            );
+        }
+
         /**
          * Metadata retriever without cache
          * @param setup JSON configuration including:
@@ -1791,7 +1850,7 @@ const OrgCheck = {
                 .data(root.links())
                 .join('path')
                 .attr('d', d3.linkHorizontal()
-                    .x(function(d) { return d.y; } )
+                    .x(function(d) { return d.y+BOX_WIDTH/2; } )
                     .y(function(d) { return d.x; } )
                 );
             
@@ -2028,9 +2087,111 @@ function buildDatasets(core) {
     // ========================================================================
     // WORKFLOWS
     // ========================================================================
-    /*
-    TODO: Implement workflows dataset here
-    */
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'workflows',
+        keycache: 'Workflows',
+        retriever: function(me, resolve, reject) {
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const queries = [];
+            core.doSalesforceQueries({
+                queries: [{ 
+                    string: 'SELECT Id FROM WorkflowRule',
+                    tooling: true
+                }], 
+                onEachRecord: function(record, index) {
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT Id, FullName, Metadata FROM WorkflowRule WHERE Id = \''+record.Id+'\''
+                    });
+                }, 
+                onEnd: function(records, size) { 
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: cache,
+                        queries,
+                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.FullName,
+                                description: v.Metadata.description,
+                                actions: v.Metadata.actions,
+                                futureActions: v.Metadata.workflowTimeTriggers,
+                                isActive: v.Metadata.active
+                            };
+                            if (!item.actions) item.actions = [];
+                            if (!item.futureActions) item.futureActions = [];
+                            item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
+                            return item;
+                        },
+                        onEndFromCacheCallback: resolve,
+                        onErrorCallback: reject
+                    });
+                },
+                onError: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // FLOWS (and Process Builders)
+    // ------------------------------------------------------------------------
+    // Get the list of Flows and PB in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'flows',
+        keycache: 'Flows',
+        retriever: function(me, resolve, reject) {
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const queries = [];
+            core.doSalesforceQueries({
+                queries: [{ 
+                    string: 'SELECT Id FROM Flow',
+                    tooling: true
+                }], 
+                onEachRecord: function(record, index) {
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
+                                'VersionNumber, Metadata, Status, Description, '+
+                                'ProcessType FROM Flow '+
+                                'WHERE Id = \''+record.Id+'\' '
+                    });
+                }, 
+                onEnd: function(records, size) { 
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: cache,
+                        queries,
+                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.FullName,
+                                definitionId: core.doSimplifiySalesforceID(v.DefinitionId),
+                                definitionName: v.MasterLabel,
+                                version: v.VersionNumber,
+                                dmlCreates: v.Metadata.recordCreates?.length || 0,
+                                dmlDeletes: v.Metadata.recordDeletes?.length || 0,
+                                dmlUpdates: v.Metadata.recordUpdates?.length || 0,
+                                isActive: v.Status === 'Active',
+                                description: v.Description,
+                                type: v.ProcessType
+                            };
+                            v.Metadata.processMetadataValues.forEach(m => {
+                                if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
+                                if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
+                            });
+                            return item;
+                        },
+                        onEndFromCacheCallback: resolve,
+                        onErrorCallback: reject
+                    });
+                },
+                onError: reject
+            });
+        }
+    }));
 
     // ========================================================================
     // PACKAGES
@@ -2092,7 +2253,7 @@ function buildDatasets(core) {
                     tooling: true, 
                     string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
                             'FROM ExternalString '+
-                            'WHERE NamespacePrefix = NULL'
+                            'WHERE ManageableState = \'unmanaged\' '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     return {
@@ -2165,6 +2326,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description, 
                         mobile: v.IsAvailableInTouch
@@ -2198,6 +2360,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };
@@ -2217,56 +2380,84 @@ function buildDatasets(core) {
         name: 'apexClasses',
         keycache: 'ApexClasses',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, IsValid, '+
-                                'Body, LengthWithoutComments, SymbolTable '+
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const classesMap = {};
+            const coverageMap = {};
+            core.doSalesforceQueries({
+                queries: [{
+                    string: 'SELECT ApexClassOrTriggerId, NumLinesCovered, '+
+                            'NumLinesUncovered FROM ApexCodeCoverage',
+                    tooling: true
+                }, { 
+                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
+                            'Body, LengthWithoutComments, SymbolTable '+
                             'FROM ApexClass '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        apiVersion: v.ApiVersion,
-                        namespace: v.NamespacePrefix,
-                        isTest: false,
-                        isAbstract: false,
-                        isInterface: false,
-                        isValid: v.IsValid,
-                        length: v.LengthWithoutComments,
-                        needsRecompilation: (!v.SymbolTable ? true : false)
-                    };
-                    if (v.Body) {
-                        item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
-                    }
-                    if (v.SymbolTable) {
-                        item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                        item.interfaces = v.SymbolTable.interfaces;
-                        item.methodsCount = v.SymbolTable.methods.length || 0;
-                        if (v.SymbolTable.tableDeclaration) {
-                            item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                            if (v.SymbolTable.tableDeclaration.modifiers) {
-                                v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                    switch (m) {
-                                        case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                        case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                        case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                        case 'public':            item.specifiedAccess  = 'public';    break;
-                                        case 'global':            item.specifiedAccess  = 'global';    break;
-                                        case 'abstract':          item.isAbstract       = true;        break;
-                                        case 'testMethod':        item.isTest           = true;        break;
-                                    }
-                                });
-                            };
+                            'WHERE ManageableState = \'unmanaged\' ',
+                    tooling: true
+                }], 
+                onEachRecord: function(v, index) {
+                    if (index == 0) { 
+                        // ApexCodeCoverage records
+                        const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
+                        const item = coverageMap[i] || { cov: 0, cnt: 0 };
+                        item.cov += v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered);
+                        item.cnt++;
+                        coverageMap[i] = item;
+                    } else {
+                        // ApexClasses records
+                        const item =  {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.Name,
+                            apiVersion: v.ApiVersion,
+                            isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                            namespace: v.NamespacePrefix,
+                            isTest: false,
+                            isAbstract: false,
+                            isInterface: false,
+                            isSharingMissing: false,
+                            size: v.LengthWithoutComments,
+                            needsRecompilation: (!v.SymbolTable ? true : false)
+                        };
+                        if (v.Body) {
+                            item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
                         }
+                        if (v.SymbolTable) {
+                            item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                            item.interfaces = v.SymbolTable.interfaces;
+                            item.methodsCount = v.SymbolTable.methods.length || 0;
+                            if (v.SymbolTable.tableDeclaration) {
+                                item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                                if (v.SymbolTable.tableDeclaration.modifiers) {
+                                    v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                        switch (m) {
+                                            case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                            case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                            case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                            case 'public':            item.specifiedAccess  = 'public';    break;
+                                            case 'global':            item.specifiedAccess  = 'global';    break;
+                                            case 'abstract':          item.isAbstract       = true;        break;
+                                            case 'testMethod':        item.isTest           = true;        break;
+                                        }
+                                    });
+                                };
+                            }
+                        }
+                        if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                            item.isSharingMissing = true;
+                        }
+                        classesMap[item.id] = item;
                     }
-                    return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEnd: function(records, size) { 
+                    for (const [key, value] of Object.entries(classesMap)) {
+                        if (coverageMap[key]) value.fastCoverage = coverageMap[key].cov / coverageMap[key].cnt;
+                    }
+                    core.setMetadataInCache(cache, classesMap);
+                    resolve(classesMap);
+                },
+                onError: reject
             });
         }
     }));
@@ -2285,7 +2476,7 @@ function buildDatasets(core) {
                 queries: [ { 
                     tooling: true, 
                     string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                'IsValid, NamespacePrefix, '+
+                                'NamespacePrefix, '+
                                 'UsageBeforeInsert, UsageAfterInsert, '+
                                 'UsageBeforeUpdate, UsageAfterUpdate, '+
                                 'UsageBeforeDelete, UsageAfterDelete, '+
@@ -2299,8 +2490,8 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
-                        isValid: v.IsValid,
                         length: v.LengthWithoutComments,
                         isActive: (v.Status === 'Active' ? true : false),
                         beforeInsert: v.UsageBeforeInsert,
@@ -2384,36 +2575,6 @@ function buildDatasets(core) {
     }));
 
     // ========================================================================
-    // FLOWS
-    // ------------------------------------------------------------------------
-    // Get the list of Flows in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'flows',
-        keycache: 'Flows',
-        retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
-                            'FROM FlowDefinition '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.DeveloperName,
-                        namespace: v.NamespacePrefix
-                    };
-                }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
-            });
-        }
-    }));
-
-    // ========================================================================
     // LIGHTNING WEB COMPONENTS
     // ------------------------------------------------------------------------
     // Get the list of Lightning Web Components in Salesforce (metadata, using tooling API)
@@ -2435,6 +2596,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };
@@ -2467,6 +2629,7 @@ function buildDatasets(core) {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
                         apiVersion: v.ApiVersion,
+                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                         namespace: v.NamespacePrefix,
                         description: v.Description
                     };
@@ -2549,7 +2712,7 @@ function buildDatasets(core) {
     }));
     
     // ========================================================================
-    // CUSTOM LABELS
+    // PROFILES
     // ------------------------------------------------------------------------
     // Get the list of Profiles in Salesforce (data, using REST API)
     // ========================================================================
@@ -2568,17 +2731,21 @@ function buildDatasets(core) {
                             'WHERE isOwnedByProfile = true'
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    return {
+                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
+                    const item = {
                         id: core.doSimplifiySalesforceID(v.ProfileId),
                         name: v.Profile.Name,
                         description: v.Profile.Description,
                         license: v.License.Name,
                         userType: v.Profile.UserType,
                         isCustom: v.IsCustom,
+                        isUnusedCustom: v.IsCustom && memberCounts == 0,
+                        isUndescribedCustom: v.IsCustom && !v.Profile.Description,
                         package: v.NamespacePrefix,
-                        membersCount: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0,
-                        hasMembers: (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false
+                        membersCount: memberCounts,
+                        hasMembers: memberCounts > 0
                     };
+                    return item;
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
@@ -2662,6 +2829,7 @@ function buildDatasets(core) {
                             'WHERE IsOwnedByProfile = false' 
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2669,28 +2837,26 @@ function buildDatasets(core) {
                         hasLicense: (v.License ? 'yes' : 'no'),
                         license: (v.License ? v.License.Name : ''),
                         isCustom: v.IsCustom,
+                        isUnusedCustom: v.IsCustom && memberCounts == 0,
+                        isUndescribedCustom: v.IsCustom && !v.Description,
                         package: v.NamespacePrefix,
-                        membersCount: 0, 
-                        hasMembers: false, 
+                        membersCount: memberCounts, 
+                        hasMembers: memberCounts > 0, 
                         uniqueProfiles: []
                     };
-                    if (v.Assignments && v.Assignments.records) {
-                        item.membersCount = v.Assignments.records.length;
-                        item.hasMembers = true;
-                        let pmap = {};
-                        for (let i=0; i<item.membersCount; i++) {
-                            const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
-                            if (pmap[pid]) {
-                                pmap[pid].count++;
-                            } else {
-                                const p = {
+                    let pmap = {};
+                    for (let i=0; i<memberCounts; i++) {
+                        const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
+                        if (pmap[pid]) {
+                            pmap[pid].count++;
+                        } else {
+                            item.uniqueProfiles.push(
+                                pmap[pid] = {
                                     id: pid,
                                     name: v.Assignments.records[i].Assignee.Profile.Name,
                                     count: 1
-                                };
-                                pmap[pid] = p;
-                                item.uniqueProfiles.push(p);
-                            }
+                                }
+                            );
                         }
                     }
                     return item;
@@ -2730,6 +2896,7 @@ function buildDatasets(core) {
                         activeMembers: [],
                         hasActiveMembers: false,
                         inactiveMembersCount: 0,
+                        hasInactiveMembers: false,
                         isExternal: (v.PortalType !== 'None') ? true : false
                     };
                     if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
@@ -2750,6 +2917,7 @@ function buildDatasets(core) {
                     }
                     item.activeMembersCount = item.activeMembers.length;
                     item.hasActiveMembers = item.activeMembers.length > 0;
+                    item.hasInactiveMembers = item.inactiveMembersCount > 0;
                     return item;
                 }, 
                 onEndFromCacheCallback: function(records) {

@@ -11,26 +11,29 @@
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Profiles</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="Profiles" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-profiles" id="tab-default-profiles__item">Profiles</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Permission Sets</a>
+                    <li class="slds-tabs_default__item" title="Permission Sets" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-permsets" id="tab-default-permsets__item">Permission Sets</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Profile Login Restrictions" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">Profile Login Restrictions</a>
+                    <li class="slds-tabs_default__item" title="Login Hours Restrictions" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-loginhours" id="tab-default-loginhours__item">Login Hours Restrictions</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
                     <div id="datatable-profiles" />
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-permsets" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-permsets__item">
                     <div id="datatable-permissionSets" />
                 </div>
-                <div id="tab-default-3" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
-                    <h1 class="slds-text-heading--small">Login Hour Restrictions</h1>
+                <div id="tab-default-loginhours" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-loginhours__item">
                     <div id="datatable-profileLoginHours" />
-                    <h1 class="slds-text-heading--small">IP Range Restrictions</h1>
+                </div>
+                <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
                 </div>
             </div>
@@ -56,23 +59,25 @@
                                 'datatable-profiles',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.isCustom && r.membersCount == 0) badnessScore++
-                                        if (r.isCustom && !r.description) badnessScore++
-                                        return badnessScore;
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isUnusedCustom === true) score++;
+                                        if (r.isUndescribedCustom === true) score++;
+                                        return score;
                                     }},
-                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of users', formula: (r) => { 
-                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.isUnusedCustom === true) {
+                                            return helper.html.render.icon('redFlag') + ' No user for this custom profile!'; 
+                                        }                               
                                         if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
                                         return helper.html.render.icon('greenFlag') + ' More than 100 users';
                                     }},
                                     { name: 'Description', formula: (r) => {
-                                        if (r.isCustom && !r.description) {
+                                        if (r.isUndescribedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' You should set a description to this custom profile!';
                                         }
                                         return r.description;
@@ -80,10 +85,7 @@
                                 ],
                                 map.profiles,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
 
                             // -------------------------------------------
@@ -140,22 +142,29 @@
                                 'datatable-permissionSets',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.isCustom && r.membersCount == 0) badnessScore++
-                                        if (r.isCustom && !r.description) badnessScore++
-                                        return badnessScore;
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.isUnusedCustom === true) score++;
+                                        if (r.isUndescribedCustom === true) score++;
+                                        return score;
                                     }},
-                                    { name: 'Custom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of users', formula: (r) => { 
-                                        if (r.membersCount == 0) return helper.html.render.icon('redFlag') + ' No user!';                                
+                                        if (r.isUnusedCustom === true) {
+                                            return helper.html.render.icon('redFlag') + ' No user for this custom permission set!'; 
+                                        }                               
                                         if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
                                         return helper.html.render.icon('greenFlag') + ' More than 100 users';
                                     }},
+                                    { name: 'Assigned users\'s profiles', formula: (r) => { 
+                                        let html = '';
+                                        r.uniqueProfiles.forEach(i => html += helper.html.render.link('/'+i.id, i.name) + ' (' + i.count + ')<br />');
+                                        return html;
+                                    }},
                                     { name: 'Description', formula: (r) => {
-                                        if (r.isCustom && !r.description) {
+                                        if (r.isUndescribedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' You should set a description to this custom permission set!';
                                         }
                                         return r.description;
@@ -163,15 +172,38 @@
                                 ],
                                 map.permissionSets,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.isCustom && (r.membersCount == 0 || !r.description)) return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: {  
                             clearCache: { 
                                 show: true 
+                            },
+                            exportTable: [{
+                                table: 'datatable-profiles',
+                                visibleTab: 'tab-default-profiles__item',
+                                filename: 'Profiles'
+                            }, {
+                                table: 'datatable-permissionSets',
+                                visibleTab: 'tab-default-permsets__item',
+                                filename: 'PermissionSets'
+                            }, {
+                                table: 'datatable-profileLoginHours',
+                                visibleTab: 'tab-default-loginhours__item',
+                                filename: 'LoginHoursRestrictions'
+                            }, {
+                                table: 'datatable-profileRangeIPs',
+                                visibleTab: 'tab-default-ipranges__item',
+                                filename: 'IPRangesRestrictions'
+                            }],
+                            help: {
+                                content: [
+                                    'This page shows the Profiles, the Permission Sets and the Profile Login '+
+                                        'restrictions.',
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the profile/permission set is custom and is not used by any active users, </li>'+
+                                        '<li><code>+1</code> if the profile/permission set is custom and has no description.</li></ul>'
+                                ]
                             }
                         }
                     });

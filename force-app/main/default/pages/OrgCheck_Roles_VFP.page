@@ -8,24 +8,24 @@
             Role Hierarchy Overview
         </apex:define>
         <apex:define name="html_actions">
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomout ')}"></use>
                     </svg>
                     <span class="slds-assistive-text">Zoom out</span>
                 </button>
             </div>
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#sync ')}"></use>
                     </svg>
                     <span class="slds-assistive-text">Zoom 1:1</span>
                 </button>
             </div>
-            <div class="slds-page-header__control">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button">
+            <div class="slds-page-header__control" style="display: block;">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomin')}"></use>
                     </svg>
@@ -334,20 +334,20 @@
                                 'datatable',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.activeMembersCount == 0) badnessScore++
-                                        if (r.inactiveMembersCount > 0) badnessScore++
-                                        return badnessScore;
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.hasActiveMembers == false) score++;
+                                        if (r.hasInactiveMembers === true) score++;
+                                        return score; 
                                     }},
                                     { name: 'Developer Name', property: 'developerName' },
                                     { name: 'Number of active members', formula: (r) => {
-                                        if (r.activeMembersCount == 0) return helper.html.render.icon('redFlag') + ' No active members!';                                
+                                        if (r.hasActiveMembers == false) return helper.html.render.icon('redFlag') + ' No active member!';                                
                                         return helper.html.render.icon('greenFlag') + ' ' + r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
                                     }},
                                     { name: 'Number of inactive members', formula: (r) => {
-                                        if (r.inactiveMembersCount == 0) return helper.html.render.icon('greenFlag') + ' No inactive members!';                                
-                                        return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.activeMembersCount > 1 ? 's' : '');
+                                        if (r.hasInactiveMembers === true) return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
+                                        return helper.html.render.icon('greenFlag') + ' No inactive member!';                                
                                     }},
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
@@ -366,10 +366,7 @@
                                 ],
                                 map.roles,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.activeMembersCount == 0 || r.inactiveMembersCount > 0) return helper.html.render.color('highlight');
-                                    return null;
-                                }},
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
@@ -384,8 +381,26 @@
 
                         },
                         actions: {  
+                            exportTable: [{
+                                table: 'datatable',
+                                filename: 'Roles'
+                            }],
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Role hierarchy and the list of Roles.',
+                                    'On the role explorer tab, here are the graphical conventions: '+
+                                        '<ul class="slds-list_dotted"><li>the <b>yellow</b> boxes represent roles without any active users in it,</li>'+
+                                        '<li>the <b>blue</b> boxes represent roles with active users,</li>'+
+                                        '<li>the <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+),</li>'+
+                                        '<li>the <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+).</li></ul>',
+                                    'You can click on each node to get more details about this role.',
+                                    'On the role list tab, the <b>SCORE</b> is computed with the following rules: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the role contains no active user,</li>'+
+                                        '<li><code>+1</code> if the role contains more than one inactive user.</li></ul>'
+                                ]
                             }
                         }
                     });

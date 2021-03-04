@@ -13,15 +13,11 @@
         <members>OrgCheck_Users_VFP</members>
         <members>OrgCheck_Batches_VFP</members>
         <members>OrgCheck_CustomLabels_VFP</members>
+        <members>OrgCheck_Automations_VFP</members>
         <members>OrgCheck_VisualComponents_VFP</members>
         <members>OrgCheck_ApexComponents_VFP</members>
         <members>OrgCheck_Authorization_VFP</members>
         <name>ApexPage</name>
-    </types>
-    <types>
-        <members>OrgCheck_Logo2</members>
-        <members>OrgCheck_Mascot2</members>
-        <name>ContentAsset</name>
     </types>
     <types>
         <members>OrgCheck_APP</members>
@@ -37,6 +33,7 @@
         <members>OrgCheck_Users_TAB</members>
         <members>OrgCheck_Batches_TAB</members>
         <members>OrgCheck_CustomLabels_TAB</members>
+        <members>OrgCheck_Automations_TAB</members>
         <members>OrgCheck_VisualComponents_TAB</members>
         <members>OrgCheck_ApexComponents_TAB</members>
         <name>CustomTab</name>
@@ -49,6 +46,7 @@
         <members>OrgCheck_JSForce_SR</members>
         <members>OrgCheck_D3_SR</members>
         <members>OrgCheck_OrgCheck_SR</members>
+        <members>OrgCheck_Logos_SR</members>
         <name>StaticResource</name>
     </types>
     <version>48.0</version>

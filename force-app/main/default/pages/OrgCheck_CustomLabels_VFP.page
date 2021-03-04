@@ -25,9 +25,9 @@
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++
+                                        return score;
                                     }},
                                     { name: 'Namespace', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
@@ -39,22 +39,33 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.customLabels,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id]) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );                            
                         },
                         actions: {  
+                            exportTable: [{
+                                table: 'datatable',
+                                filename: 'CustomLabels'
+                            }],
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Custom Labels.',
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the label is not used (in other words it has no dependency).</li></ul>',
+                                    'The <b>VALUE</b> is potentially trunkated (maximum characters is 150).',
+                                    'The <b>DEPENDENCIES</b> is showing where the label is used and '+
+                                        'what it is using. You can click on each diagram to have it shown in '+
+                                        'a dialog box.'
+                                ]
                             }
                         }
                     });

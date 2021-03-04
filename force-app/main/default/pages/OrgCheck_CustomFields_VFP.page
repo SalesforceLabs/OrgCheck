@@ -35,9 +35,9 @@
                                         return helper.html.render.link('/'+r.id, r.fieldName); 
                                     }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++
+                                        return score;
                                     }},
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
@@ -49,34 +49,26 @@
                                 ],
                                 map.customFields,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id]) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: { 
-                            exportAsFile: { 
-                                filename: 'CustomFields',
-                                headers: ['Object Id', 'Object Name', 'Field Id', 'Field Name', 
-                                    'Package', 'Full API Name', 'Is there dependencies?'],
-                                appendRowsMethod: function(rows, map) {
-                                    helper.map.iterate2(map.customFields, function(d, i, s) {
-                                        rows.push([
-                                            d.objectId,
-                                            d.objectName,
-                                            d.id,
-                                            d.fieldName,
-                                            d.packageName,
-                                            d.fullName,
-                                            map.dependencies[d.id] ? true : false
-                                        ]);
-                                    });
-                                }
-                            }, 
+                            exportTable: [{
+                                table: 'datatable',
+                                filename: 'CustomFields'
+                            }],
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Custom Fields.',
+                                    'The <b>SCORE</b> is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the fields has no dependency.</li></ul>',
+                                    'The <b>DEPENDENCIES</b> is showing where the field is used and '+
+                                        'what it is using. You can click on each diagram to have it shown in '+
+                                        'a dialog box.'
+                                ]
                             }
                         }
                     });

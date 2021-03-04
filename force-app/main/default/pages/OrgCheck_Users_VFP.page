@@ -23,20 +23,20 @@
                                 'datatable',
                                 [
                                     { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (r.onLightningExperience !== true) badnessScore++
-                                        if (!r.lastLogin) badnessScore++
-                                        return badnessScore;
+                                    { name: 'Score', formula: (r) => { 
+                                        let score = 0;
+                                        if (r.onLightningExperience === false) score++;
+                                        if (r.neverLogged === true) score++;
+                                        return score; 
                                     }},
                                     { name: 'Last login', formula: (r) => { 
-                                        if (r.lastLogin) return helper.html.render.icon('greenFlag') + ' ' + r.lastLogin;
+                                        if (r.neverLogged === false) return helper.html.render.icon('greenFlag') + ' ' + r.lastLogin;
                                         return helper.html.render.icon('redFlag') + ' Never logged!'; 
                                     }},
                                     { name: 'Failed logins', property: 'numberFailedLogins' },
                                     { name: 'Password change', property: 'lastPasswordChange' },
                                     { name: 'On LEX?', formula: (r) => { 
-                                        if (r.onLightningExperience) return helper.html.render.icon('greenFlag') + ' LEX';
+                                        if (r.onLightningExperience === true) return helper.html.render.icon('greenFlag') + ' LEX';
                                         return helper.html.render.icon('redFlag') + ' Classic'; 
                                     }},
                                     { name: 'Key permissions', formula: (r) => {
@@ -56,42 +56,29 @@
                                 ],
                                 map.users,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (r.onLightningExperience !== true || !r.lastLogin) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: { 
-                            exportAsFile: { 
-                                filename: 'Users',
-                                headers: ['User Id', 'User Name', 'Last login', 'Failed logins', 
-                                    'Password change', 'On LEX?', 'Api Enabled', 
-                                    'View Setup', 'Modify All Data', 'View All Data', 
-                                    'Profile Id', 'Profile Name', 'Nb Permission Sets'],
-                                appendRowsMethod: function(rows, map) {
-                                    helper.map.iterate2(map.users, function(d, i, s) {
-                                        rows.push([
-                                            d.id,
-                                            d.name,
-                                            d.lastLogin,
-                                            d.numberFailedLogins,
-                                            d.lastPasswordChange,
-                                            d.onLightningExperience,
-                                            d.permissions.apiEnabled, 
-                                            d.permissions.viewSetup, 
-                                            d.permissions.modifyAllData,
-                                            d.permissions.viewAllData, 
-                                            d.profile.id, 
-                                            d.profile.name,
-                                            d.permissionSets.length
-                                        ]);
-                                    });
-                                }
-                            }, 
+                            exportTable: [{
+                                table: 'datatable',
+                                filename: 'Users'
+                            }],
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'This page shows the Active Users.',
+                                    'The <b>SCORE</b> is computed with the following rules: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the user is no on Lightning Experience, </li>'+
+                                        '<li><code>+1</code> if the user never logged.</li></ul>',
+                                    'The <b>KEY PERMISSIONS</b> is showing if a user has one of the following system permissions: '+
+                                        '<ul class="slds-list_dotted"><li><code>apiEnabled</code>: Api Enabled,</li>'+
+                                        '<li><code>viewSetup</code>: View Setup,</li>'+
+                                        '<li><code>modifyAllData</code>: Modify All Data,</li>'+
+                                        '<li><code>viewAllData</code>: View All Data.</li></ul>'
+                                ]
                             }
                         }
                     });

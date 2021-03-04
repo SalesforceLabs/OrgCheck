@@ -13,35 +13,35 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Visual Force Pages" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Visual Force Pages</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-vfps" id="tab-default-vfps__item">Visual Force Pages</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Visual Force Components" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Visual Force Components</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-vfcs" id="tab-default-vfcs__item">Visual Force Components</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Lightning Pages" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-3" id="tab-default-3__item">Lightning Pages</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-lps" id="tab-default-lps__item">Lightning Pages</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Lightning Aura Components" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-4" id="tab-default-4__item">Lightning Aura Components</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-lacs" id="tab-default-lacs__item">Lightning Aura Components</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Lightning Web Components" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-5" id="tab-default-5__item">Lightning Web Components</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-lwcs" id="tab-default-lwcs__item">Lightning Web Components</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
-                    <div id="datatable-vfp" />
+                <div id="tab-default-vfps" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-vfps__item">
+                    <div id="datatable-vfps" />
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
-                    <div id="datatable-vfc" />
+                <div id="tab-default-vfcs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-vfcs__item">
+                    <div id="datatable-vfcs" />
                 </div>
-                <div id="tab-default-3" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3__item">
-                    <div id="datatable-lp" />
+                <div id="tab-default-lps" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-lps__item">
+                    <div id="datatable-lps" />
                 </div>
-                <div id="tab-default-4" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-4__item">
-                    <div id="datatable-lac" />
+                <div id="tab-default-lacs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-lacs__item">
+                    <div id="datatable-lacs" />
                 </div>
-                <div id="tab-default-5" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-5__item">
-                    <div id="datatable-lwc" />
+                <div id="tab-default-lwcs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-lwcs__item">
+                    <div id="datatable-lwcs" />
                 </div>
             </div>
         </apex:define>
@@ -62,24 +62,22 @@
 
                             // Render the Visual Force Pages data in a table
                             helper.html.datatable.create(
-                                'datatable-vfp',
+                                'datatable-vfps',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
-                                    { name: 'Mobile', formula: (r) => {
-                                        return helper.html.render.checkbox(r.mobile);
-                                    }},
+                                    { name: 'Mobile', property: 'mobile', formula: (r) => { return helper.html.render.checkbox(r.mobile); }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', formula: (r) => { 
                                         if (r.description) return r.description;
@@ -87,35 +85,29 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.vfPages,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
 
                             // Render the Visual Force Components data in a table
                             helper.html.datatable.create(
-                                'datatable-vfc',
+                                'datatable-vfcs',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
@@ -126,31 +118,25 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.vfComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );   
 
                             // Render the Lighnting Pages data in a table
                             helper.html.datatable.create(
-                                'datatable-lp',
+                                'datatable-lps',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', formula: (r) => { 
@@ -159,34 +145,29 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.auraPages,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );   
                             
                             // Render the Lighnting Aura Components data in a table
                             helper.html.datatable.create(
-                                'datatable-lac',
+                                'datatable-lacs',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
@@ -197,35 +178,29 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.auraComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );  
 
                             // Render the Lighnting Web Components data in a table
                             helper.html.datatable.create(
-                                'datatable-lwc',
+                                'datatable-lwcs',
                                 [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
-                                        let badnessScore = 0;
-                                        if (!map.dependencies[r.id]) badnessScore++;
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) badnessScore++;
-                                        if (!r.description) badnessScore++;
-                                        return badnessScore;
+                                        let score = 0;
+                                        if (!map.dependencies[r.id]) score++;
+                                        if (r.isApiVersionOld === true) score++;
+                                        if (!r.description) score++;
+                                        return score;
                                     }},
                                     { name: 'API', formula: (r) => {
-                                        if (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion))
+                                        if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
                                     }},
@@ -236,24 +211,67 @@
                                     }},
                                     { name: 'Dependencies', formula: (r) => { 
                                         const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
                                 map.lwComponents,
                                 { name: 'Score', order: 'desc' },
-                                { formula: (r) => { 
-                                    if (!map.dependencies[r.id] ||
-                                        (r.apiVersion && helper.salesforce.version.isOld(r.apiVersion)) ||
-                                        !r.description) 
-                                        return helper.html.render.color('highlight');
-                                    return null;
-                                }}
+                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
                             );
                         },
                         actions: {  
                             clearCache: { 
                                 show: true 
+                            },
+                            exportTable: [{
+                                table: 'datatable-vfps',
+                                visibleTab: 'tab-default-vfps__item',
+                                filename: 'VisualForcePages'
+                            }, {
+                                table: 'datatable-vfcs',
+                                visibleTab: 'tab-default-vfcs__item',
+                                filename: 'VisualForceComponents'
+                            }, {
+                                table: 'datatable-lps',
+                                visibleTab: 'tab-default-lps__item',
+                                filename: 'LightningPages'
+                            }, {
+                                table: 'datatable-lacs',
+                                visibleTab: 'tab-default-lacs__item',
+                                filename: 'LightningAuraComponents'
+                            }, {
+                                table: 'datatable-lwcs',
+                                visibleTab: 'tab-default-lwcs__item',
+                                filename: 'LightningWebComponents'
+                            }],
+                            help: {
+                                content: [
+                                    'This page shows the Visualforce Pages, Visualforce Components, Lightning Pages, '+
+                                        'Lightning Aura Components, Lightning Web Components.',
+                                    'The <b>SCORE</b> for visual force pages is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the page is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the page is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the page has no description.</li></ul>',
+                                    'The <b>SCORE</b> for visual force components is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the component has no description.</li></ul>',
+                                    'The <b>SCORE</b> for lightning pages is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the page is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the page has no description.</li></ul>',
+                                    'The <b>SCORE</b> for lightning aura components is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the component has no description.</li></ul>',
+                                    'The <b>SCORE</b> for lightning web components is computed with the following rule: '+
+                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
+                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
+                                        '<li><code>+1</code> if the component has no description.</li></ul>',
+                                    'The <b>DEPENDENCIES</b> is showing where the component or page is used and '+
+                                        'what it is using. You can click on each diagram to have it shown in '+
+                                        'a dialog box.'
+                                ]
                             }
                         }
                     });
