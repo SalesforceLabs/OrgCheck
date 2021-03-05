@@ -382,7 +382,7 @@
                             const innerDiv2 = helper.html.element.create('div');
                             helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
                             const timestamp = helper.timestamp.to.date(sideValues.timestamp);
-                            const nbItems = (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : '')));
+                            const nbItems = (sideValues.size ? (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : ''))):'N/A');
                             helper.html.element.setText(innerDiv2, keys[i] + ' (' + timestamp + ' - ' + nbItems + ')');
                             helper.html.element.appendChild(item, innerDiv2);
                             // add buttons

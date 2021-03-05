@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.1',
+    version: 'v1.9.2',
 
     /**
      * Organization Id where OrgCheck is currently installed
@@ -1619,6 +1619,10 @@ const OrgCheck = {
             return FORMAT_HANDLER.datetimeFormat(value);
         };
 
+        this.doSetSizeInMap = function(map, size) {
+            MAP_HANDLER.setSize(map, size);
+        };
+
         /**
          * Data retriever with cache
          * @param setup JSON configuration including:
@@ -3005,6 +3009,7 @@ function buildDatasets(core) {
                     core.doSalesforceGlobalDescribe({
                         onEnd: function(sobjects) {
                             const map = {};
+                            let size = 0;
                             if (sobjects) {
                                 sobjects.forEach(v => {
                                     if (v.customSetting === false && 
@@ -3018,9 +3023,11 @@ function buildDatasets(core) {
                                             package: core.doSalesforceSplitDeveloperName(v.name).package
                                         };
                                         map[object.id] = object;
+                                        size++;
                                     }
                                 });
                             }
+                            core.doSetSizeInMap(map, size);
                             callbackToSetTheCache(map);
                         }, 
                         onError: reject
