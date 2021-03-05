@@ -65,9 +65,20 @@ const OrgCheck = {
                 let package_name = '';
                 let short_dev_name = fullDeveloperName;
                 const full_name_splitted = fullDeveloperName.split('__');
-                if (full_name_splitted.length === 3) {
-                    package_name = full_name_splitted[0];
-                    short_dev_name = full_name_splitted[1];
+                switch (full_name_splitted.length)
+                    case 3: {
+                        // Use case #1: Custom object in a package
+                        // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
+                        package_name = full_name_splitted[0];
+                        short_dev_name = full_name_splitted[1];
+                        break;
+                    }
+                    case 2: {
+                        // Use case #2: Custom object in the org (no namespace)
+                        // Note: package_name is already set to ''
+                        short_dev_name = full_name_splitted[0];
+                        break;
+                    }
                 }
                 return {
                     package: package_name,
@@ -1540,7 +1551,7 @@ const OrgCheck = {
                             const div = document.createElement('div');
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
-                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); //svg.clone(true));
+                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); 
                             };
                             div.setAttribute('id', 'chart-container-' + id);
                             div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
@@ -1832,7 +1843,8 @@ const OrgCheck = {
             // Construction of graph
             const svg = d3.create('svg')
                 .attr('id', function(d, i) { return (tagId + 'svg' + i); })
-                .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2]);
+                .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2])
+                .attr('xmlns', 'http://www.w3.org/2000/svg');
             
             const g = svg.append('g')
                 .attr('id', function(d, i) { return (tagId + 'g' + i); })
