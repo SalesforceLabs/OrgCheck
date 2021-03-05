@@ -65,7 +65,7 @@ const OrgCheck = {
                 let package_name = '';
                 let short_dev_name = fullDeveloperName;
                 const full_name_splitted = fullDeveloperName.split('__');
-                switch (full_name_splitted.length)
+                switch (full_name_splitted.length) {
                     case 3: {
                         // Use case #1: Custom object in a package
                         // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
