@@ -434,7 +434,7 @@ const OrgCheck = {
 
         /**
         * Caching handler
-        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey' and 'versionKey'
+        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
         */
         CacheHandler: function (configuration) {
 
@@ -456,6 +456,11 @@ const OrgCheck = {
              * Key for "version" on every cache entry
              */
             const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+            /**
+             * Key for "size" on every cache entry
+             */
+            const SIZE_KEY = configuration.sizeKey || "__51Z3__";
 
             /**
             * Method to clear all OrgCheck cached items
@@ -501,26 +506,20 @@ const OrgCheck = {
             };
 
             /**
-            * Method to get the timestamp of a specific cache item
+            * Method to get the timestamp and version of a specific cache item
             * @param section Name of the section (group of keys) in the cache.
             * @param key in cache (without the prefix) to use
-            * @return the timestamp of the item in cache (undefined if not found)
+            * @return the side values of the item in cache (undefined if not found)
             */
-            this.timestamp = function (section, key) {
-                const value = private_get_item(section, key, false);
-                if (value) return value[TIMESTAMP_KEY];
-                return;
-            };
-
-            /**
-            * Method to get the version of a specific cache item
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the version of the item in cache (undefined if not found)
-            */
-            this.version = function (section, key) {
-                const value = private_get_item(section, key, false);
-                if (value) return value[VERSION_KEY];
+            this.sideValues = function (section, key) {
+                const value = private_get_item(section, key);
+                if (value) {
+                    return {
+                        timestamp: value[TIMESTAMP_KEY],
+                        version: value[VERSION_KEY],
+                        size: value[SIZE_KEY]
+                    };
+                }
                 return;
             };
 
@@ -609,22 +608,16 @@ const OrgCheck = {
             * Private method to get an item from the cache
             * @param section Name of the section (group of keys) in the cache.
             * @param key in cache (without the prefix) to use
-            * @param deleteMetadata true by default
             * @return the value in cache (undefined if not found)
             */
-            function private_get_item(section, key, deleteMetadata = true) {
-                const value = CACHE_SYSTEM.getItem(
-                    private_generate_prefix(section) + key
-                );
+            function private_get_item(section, key) {
+                const k = private_generate_prefix(section) + key;
+                const value = CACHE_SYSTEM.getItem(k);
                 if (value) {
                     let jsonValue = JSON.parse(value);
                     if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
-                        // console.error('Resetting the cache as you updated OrgCheck.');
+                        CACHE_SYSTEM.removeItem(k);
                         return;
-                    }
-                    if (deleteMetadata === true) {
-                        delete jsonValue[TIMESTAMP_KEY];
-                        delete jsonValue[VERSION_KEY];
                     }
                     return jsonValue;
                 }
@@ -1241,11 +1234,8 @@ const OrgCheck = {
                         keys: function() {
                             return PERSISTANT_CACHE_HANDLER.keys(CACHE_SECTION_METADATA);
                         },
-                        timestamp: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.timestamp(CACHE_SECTION_METADATA, key);
-                        },
-                        version: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.version(CACHE_SECTION_METADATA, key);
+                        sideValues: function(key) {
+                            return PERSISTANT_CACHE_HANDLER.sideValues(CACHE_SECTION_METADATA, key);
                         },
                         clear: function(key) {
                             return PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, key);
