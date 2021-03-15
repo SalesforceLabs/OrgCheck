@@ -396,8 +396,10 @@ const OrgCheck = {
                         }
                         html += '<br />';
                     });
-                    html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.');
-                    private_show_modal('Oh no, OrgCheck had an error!', html);
+                    private_show_modal(
+                        'Oh no, OrgCheck had an error!', 
+                        html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.')
+                    );
                 }
             };
 
