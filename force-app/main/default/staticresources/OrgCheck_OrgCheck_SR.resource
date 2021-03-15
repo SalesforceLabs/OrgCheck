@@ -2859,7 +2859,7 @@ function buildDatasets(core) {
                             item.uniqueProfiles.push(
                                 pmap[pid] = {
                                     id: pid,
-                                    name: v.Assignments.records[i].Assignee.Profile.Name,
+                                    name: v.Assignments.records[i].Assignee.Profile?.Name,
                                     count: 1
                                 }
                             );
