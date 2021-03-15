@@ -443,8 +443,14 @@
                                         [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Label', property: 'label' },
-                                            { name: 'Max', property: 'max' },
-                                            { name: 'Remaining', property: 'remaining' },
+                                            { name: '% used', formula: (r) => { 
+                                                const percentageUsed = (r.max - r.remaining) / r.max;
+                                                const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
+                                                return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
+                                            }},
+                                            { name: 'Used', formula: (r) => { return r.max - r.remaining;} },
+                                            { name: 'Maximum', property: 'max' },
+                                            { name: 'Left', property: 'remaining' },
                                             { name: 'Type', property: 'type' }
                                         ],
                                         object.limits,
