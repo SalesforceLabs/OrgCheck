@@ -3057,8 +3057,8 @@ function buildDatasets(core) {
                     string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
                             'FROM AsyncApexJob '+
                             'WHERE CompletedDate = YESTERDAY '+
-                            'AND ((Status = 'Completed' AND ExtendedStatus <> NULL) '+
-                            'OR Status = 'Failed') '+
+                            'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
+                            'OR Status = \'Failed\') '+
                             'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
                             'LIMIT 10000 '
                 }, {
