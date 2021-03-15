@@ -3054,11 +3054,13 @@ function buildDatasets(core) {
                 queries: [ { 
                     // Batches
                     tooling: false, 
-                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors ' +
-                            'FROM AsyncApexJob ' +
-                            'WHERE ExtendedStatus <> NULL ' +
-                            'OR Status = \'Failed\' ' +
-                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus' 
+                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
+                            'FROM AsyncApexJob '+
+                            'WHERE CompletedDate = YESTERDAY '+
+                            'AND ((Status = 'Completed' AND ExtendedStatus <> NULL) '+
+                            'OR Status = 'Failed') '+
+                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
+                            'LIMIT 10000 '
                 }, {
                     // Scheduled Jobs
                     tooling: false, 
@@ -3068,7 +3070,8 @@ function buildDatasets(core) {
                                 'PreviousFireTime, StartTime, State, TimesTriggered, '+
                                 'TimeZoneSidKey '+
                             'FROM CronTrigger '+
-                            'WHERE State <> \'COMPLETE\''
+                            'WHERE StartTime = YESTERDAY '+
+                            'AND State <> \'COMPLETE\''
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     if (i == 0) {
