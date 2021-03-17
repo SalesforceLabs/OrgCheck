@@ -385,14 +385,15 @@ const OrgCheck = {
                     private_errors.forEach((v, i) => {
                         html += '<b>Error #' + i + ': ' + v.name + '</b><br />';
                         if (v.context) {
-                            html += 'When: <code>' + v.context.when + '</code><br />';
-                            html += 'What:<br />';
+                            html += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            html += 'What:<ul class="slds-list_dotted">';
                             for (k in v.context.what) {
-                                html += k + ': <code>' + v.context.what[k] + '</code><br />';
+                                html += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
                             }
+                            html += '</ul>';
                         }
                         if (v.stack) {
-                            html += '<small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            html += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                         }
                         html += '<br />';
                     });
@@ -666,7 +667,7 @@ const OrgCheck = {
         *              Salesforce IDs as properties plus an extra property called
         *              "size" which is the number of Salesforce IDs contained in the
         *              object.
-        * @param configuration Object must contain 'keySize'
+        * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
         */
         MapHandler: function (configuration) {
             /**
@@ -676,7 +677,8 @@ const OrgCheck = {
             */
             this.forEach = function (map, keyCallback) {
                 for (let key in map)
-                    if (map.hasOwnProperty(key) && key !== configuration.keySize) {
+                    if (map.hasOwnProperty(key) && key !== configuration.keySize 
+                            && !key.startsWith(configuration.keyExcludePrefix)) {
                         keyCallback(key);
                     }
             };
@@ -706,11 +708,7 @@ const OrgCheck = {
             this.keys = function (map) {
                 if (!map) return [];
                 const keys = Object.keys(map);
-                const index_of_size_property = keys.indexOf(configuration.keySize);
-                if (index_of_size_property !== -1) {
-                    keys.splice(index_of_size_property, 1);
-                }
-                return keys;
+                return keys.filter(key => key !== configuration.keySize && !key.startsWith(configuration.keyExcludePrefix));
             };
         },
 
@@ -936,7 +934,8 @@ const OrgCheck = {
         const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
 
         const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
-            keySize: MAP_KEYSIZE
+            keySize: MAP_KEYSIZE,
+            keyExcludePrefix: '__'            
         });
 
         const ARRAY_HANDLER = new OrgCheck.handlers.ArrayHandler();
@@ -1426,7 +1425,25 @@ const OrgCheck = {
                                 columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
                                     const row = isArray ? k : data[k];
-                                    const content = (c.formula ? c.formula(row) : (c.property ? row[c.property] : ''));
+                                    let content = '';
+                                    try {
+                                        if (c.formula) {
+                                            content = c.formula(row);
+                                        } else if (c.property) {
+                                            content = row[c.property];
+                                        }
+                                    } catch (e) {
+                                        e.context = {
+                                            'when': 'Datatable: calling formula to render the content of a cell in the table',
+                                            'what': {
+                                                'Column': c.name,
+                                                'Formula': c.formula,
+                                                'Property': c.property,
+                                                'Data': row
+                                            }
+                                        }
+                                        throw e;
+                                    }
                                     if (content) {
                                         switch (typeof content) {
                                             case 'object': tdBody.appendChild(content); break;
@@ -2734,7 +2751,7 @@ function buildDatasets(core) {
                     tooling: false, 
                     string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
                                 'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
-                                '(SELECT Id FROM Assignments LIMIT 101) '+
+                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
                             'WHERE isOwnedByProfile = true'
                 } ],
@@ -2832,7 +2849,9 @@ function buildDatasets(core) {
                                 'NamespacePrefix, '+
                                 '(SELECT Id, AssigneeId, Assignee.ProfileId, '+
                                     'Assignee.Profile.Name '+
-                                    'FROM Assignments) '+
+                                    'FROM Assignments '+
+                                    'WHERE Assignee.IsActive = TRUE '+
+                                    'LIMIT 101) '+
                             'FROM PermissionSet '+
                             'WHERE IsOwnedByProfile = false' 
                 } ],

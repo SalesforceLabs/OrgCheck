@@ -69,7 +69,7 @@
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
-                                    { name: 'Number of users', formula: (r) => { 
+                                    { name: 'Number of active users', formula: (r) => { 
                                         if (r.isUnusedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' No user for this custom profile!'; 
                                         }                               
@@ -151,7 +151,7 @@
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
-                                    { name: 'Number of users', formula: (r) => { 
+                                    { name: 'Number of active users', formula: (r) => { 
                                         if (r.isUnusedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' No user for this custom permission set!'; 
                                         }                               
