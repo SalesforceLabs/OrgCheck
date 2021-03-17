@@ -2685,9 +2685,9 @@ function buildDatasets(core) {
                                     'PermissionSet.PermissionsApiEnabled, '+
                                     'PermissionSet.PermissionsViewSetup, '+
                                     'PermissionSet.PermissionsModifyAllData, '+
-                                    'PermissionSet.PermissionsViewAllData '+
+                                    'PermissionSet.PermissionsViewAllData, '+
+                                    'PermissionSet.IsOwnedByProfile '+
                                     'FROM PermissionSetAssignments '+
-                                    'WHERE PermissionSet.isOwnedByProfile = false '+
                                     'ORDER BY PermissionSet.Name) '+
                             'FROM User '+
                             'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
@@ -2722,10 +2722,12 @@ function buildDatasets(core) {
                             if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
                             if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
                             if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
-                            item.permissionSets.push({
-                                id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
-                                name: assignment.PermissionSet.Name
-                            });
+                            if (assignment.PermissionSet.IsOwnedByProfile == false) {
+                                item.permissionSets.push({
+                                    id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
+                                    name: assignment.PermissionSet.Name
+                                });
+                            }
                         }
                     }
                     return item;
