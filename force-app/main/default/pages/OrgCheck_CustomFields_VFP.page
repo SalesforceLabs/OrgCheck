@@ -24,15 +24,13 @@
                                 'datatable',
                                 [
                                     { name: 'Object', formula: (r) => { 
-                                        if (r.objectId) {
-                                            const objectItem = map.customObjects[r.objectId];
-                                            const objectName = objectItem ? objectItem.developerName : undefined;
-                                            return helper.html.render.link('/'+r.objectId, objectName);
-                                        }
-                                        return r.objectName;
+                                        let objectId = r.objectId ? r.objectId : r.objectName;
+                                        let objectName = r.objectId ? map.customObjects[r.objectId]?.developerName : r.objectName;
+                                        return helper.html.render.link('/lightning/setup/ObjectManager/'+objectId+'/Details/view', objectName);
                                     }},
                                     { name: 'Field', formula: (r) => { 
-                                        return helper.html.render.link('/'+r.id, r.fieldName); 
+                                        const objectId = r.objectId ? r.objectId : r.objectName;
+                                        return helper.html.render.link('/lightning/setup/ObjectManager/'+objectId+'/FieldsAndRelationships/'+r.id+'/view', r.fieldName); 
                                     }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;

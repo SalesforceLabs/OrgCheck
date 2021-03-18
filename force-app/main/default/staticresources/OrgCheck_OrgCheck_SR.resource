@@ -1995,9 +1995,10 @@ const OrgCheck = {
                 setup.objectName, 
                 function(object) {
                     SALESFORCE_HANDLER.doQueries(
-                        [ { 
+                        [{ 
                             tooling: true, 
-                            string: 'SELECT Description, ExternalSharingModel, InternalSharingModel, '+
+                            string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
+                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
                                         '(SELECT Id, Name FROM ApexTriggers), '+
                                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -2008,9 +2009,10 @@ const OrgCheck = {
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = \''+s.shortName+'\' '+
                                     (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
-                        } ], 
+                        }], 
                         function(record) {
                             // 0. Generic information
+                            object.id = record.DurableId;
                             object.description = record.Description;
                             object.externalSharingModel = record.ExternalSharingModel;
                             object.internalSharingModel = record.InternalSharingModel;
@@ -2089,9 +2091,30 @@ const OrgCheck = {
                                 }
                                 object.webLinks = webLinks;
                             }
-                            setup.callbackSuccess(object);
+                            // 7. If any fields, add field dependencies
+                            if (record.Fields) {
+                                const mapFields = {};
+                                const fieldIds = [];
+                                for (let i=0; i<record.Fields.records.length; i++) {
+                                    const f = record.Fields.records[i];
+                                    const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
+                                    fieldIds.push(id);
+                                    mapFields[f.QualifiedApiName] = id;
+                                }
+                                object.fields.forEach(f => f.id = mapFields[f.name]);
+                                private_salesforce_dapi(
+                                    fieldIds, 
+                                    function(fieldDependencies) {
+                                        object.fieldDependencies = fieldDependencies;
+                                        setup.callbackSuccess(object);
+                                    }, 
+                                    setup.callbackError
+                                );
+                            } else {
+                                setup.callbackSuccess(object);
+                            }
                         },
-                        function(records, size) { },
+                        function(records, size) {},
                         setup.callbackError
                     );
                 }, 

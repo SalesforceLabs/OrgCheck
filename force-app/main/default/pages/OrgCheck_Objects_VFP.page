@@ -305,9 +305,17 @@
                                     helper.html.datatable.create(
                                         'datatable-fields',
                                         [
-                                            { name: 'Field Label', formula: (r) => { return r.id ? (helper.html.render.link('/'+r.id, r.label)) : r.label; }},
+                                            { name: 'Field Label', formula: (r) => { return helper.html.render.link('/lightning/setup/ObjectManager/'+(object.id ? object.id : object.name)+'/FieldsAndRelationships/'+(r.id ? r.id : r.name)+'/view', r.label); }},
                                             { name: 'Custom', property: 'custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
                                             { name: 'Full API Name', property: 'name' },
+                                            { name: 'Dependencies', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const dep = object.fieldDependencies[r.id]; 
+                                                    if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                                    return helper.html.render.icon('redFlag') + ' No dependency.';
+                                                }
+                                                return '';
+                                            }},
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: 'Type', formula: (r) => {
                                                 let type = r.type;
