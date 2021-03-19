@@ -1167,26 +1167,28 @@ const OrgCheck = {
                             showError(error);
                         }) 
                         .then(function(data) {
-                            // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
-                            if (ctlSetup.dependencies === true) {
-                                PROGRESSBAR_HANDLER.still('Dependencies process starting...');
-                                private_salesforce_dapi(
-                                    data.k, 
-                                    function(dependencies) { 
-                                        PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
-                                        // We are altering the map to include the dependencies
-                                        data.m['dependencies'] = dependencies || {};
-                                        // 9.1 And then call the method (with dependencies)
-                                        onEnd(data.m);
-                                    }, 
-                                    function(error) {
-                                        PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
-                                        showError(error);
-                                    }
-                                );
-                            } else {
-                                // 9.2 Calling the method (no dependencies)
-                                onEnd(data.m);
+                            if (data) { // check if no error during mapping
+                                // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
+                                if (ctlSetup.dependencies === true) {
+                                    PROGRESSBAR_HANDLER.still('Dependencies process starting...');
+                                    private_salesforce_dapi(
+                                        data.k, 
+                                        function(dependencies) { 
+                                            PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
+                                            // We are altering the map to include the dependencies
+                                            data.m['dependencies'] = dependencies || {};
+                                            // 9.1 And then call the method (with dependencies)
+                                            onEnd(data.m);
+                                        }, 
+                                        function(error) {
+                                            PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
+                                            showError(error);
+                                        }
+                                    );
+                                } else {
+                                    // 9.2 Calling the method (no dependencies)
+                                    onEnd(data.m);
+                                }
                             }
                         })
                         .catch(function(error) {
