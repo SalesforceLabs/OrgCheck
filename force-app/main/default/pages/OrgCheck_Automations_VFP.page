@@ -46,9 +46,9 @@
                         dependencies: false,
                         onRecords: function(map) { 
 
-                            helper.html.datatable.create(
-                                'datatable-workflows',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-workflows',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -76,14 +76,15 @@
                                         return html;
                                     }}
                                 ],
-                                map.workflows,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.workflows,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
 
-                            helper.html.datatable.create(
-                                'datatable-processbuilders',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-processbuilders',
+                                columns: [
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
                                     { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Version', property: 'version' },
@@ -108,15 +109,16 @@
                                         return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
                                     }}
                                 ],
-                                map.flows,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.type === 'Workflow' }}
-                            );
+                                data: map.flows,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.type === 'Workflow' }},
+                                showSearch: true
+                            });
 
-                            helper.html.datatable.create(
-                                'datatable-flows',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-flows',
+                                columns: [
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
                                     { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Version', property: 'version' },
@@ -136,11 +138,12 @@
                                         return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
                                     }}
                                 ],
-                                map.flows,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.type === 'Flow' }}
-                            );
+                                data: map.flows,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.type === 'Flow' }},
+                                showSearch: true
+                            });
                         },
                         actions: { 
                             clearCache: { 

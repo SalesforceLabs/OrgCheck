@@ -63,9 +63,9 @@
                             let countRecompileApexClasses = 0;
 
                             // Render the Apex Classes data in a table
-                            helper.html.datatable.create(
-                                'datatable-classes',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-classes',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -122,11 +122,12 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.apexClasses,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.size !== -1 && r.isTest === false; }}
-                            );
+                                data: map.apexClasses,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
+                                showSearch: true
+                            });
 
                             // Show alert about recompilation
                             if (countRecompileApexClasses > 0) {
@@ -140,9 +141,9 @@
                             }
 
                             // Render the Apex Triggers data in a table
-                            helper.html.datatable.create(
-                                'datatable-triggers',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-triggers',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -184,10 +185,11 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.apexTriggers,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.apexTriggers,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
                         },
                         actions: { 
                             exportTable: [{

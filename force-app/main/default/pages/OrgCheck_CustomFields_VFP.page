@@ -20,9 +20,9 @@
                         dependencies: true,
                         onRecords: function(map) {
 
-                            helper.html.datatable.create(
-                                'datatable',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable',
+                                columns: [
                                     { name: 'Object', formula: (r) => { 
                                         let objectId = r.objectId ? r.objectId : r.objectName;
                                         let objectName = r.objectId ? map.customObjects[r.objectId]?.developerName : r.objectName;
@@ -45,10 +45,11 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.customFields,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.customFields,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
                         },
                         actions: { 
                             exportTable: [{

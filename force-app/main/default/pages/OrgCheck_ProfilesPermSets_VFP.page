@@ -55,9 +55,9 @@
                             // -------------------------------------------
                             // PROFILES
                             // -------------------------------------------
-                            helper.html.datatable.create(
-                                'datatable-profiles',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-profiles',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -83,17 +83,18 @@
                                         return r.description;
                                     }}
                                 ],
-                                map.profiles,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.profiles,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
 
                             // -------------------------------------------
                             // PROFILE LOGIN RESTRICTIONS
                             // -------------------------------------------
-                            helper.html.datatable.create(
-                                'datatable-profileLoginHours',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-profileLoginHours',
+                                columns: [
                                     { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Monday', formula: (r) => { return r.loginHours.monday ? r.loginHours.monday.from + ' to ' + r.loginHours.monday.to : '' }},
                                     { name: 'Tuesday', formula: (r) => { return r.loginHours.tuesday ? r.loginHours.tuesday.from + ' to ' + r.loginHours.tuesday.to : '' }},
@@ -103,15 +104,15 @@
                                     { name: 'Saturday', formula: (r) => { return r.loginHours.saturday ? r.loginHours.saturday.from + ' to ' + r.loginHours.saturday.to : '' }},
                                     { name: 'Sunday', formula: (r) => { return r.loginHours.sunday ? r.loginHours.sunday.from + ' to ' + r.loginHours.sunday.to : '' }},
                                 ],
-                                map.profileLoginRestrictions,
-                                { name: 'Profile', order: 'asc' },
-                                {},
-                                { formula: (r) => { return r.loginHours ? true : false; }}
-                            );
+                                data: map.profileLoginRestrictions,
+                                sorting: { name: 'Profile', order: 'asc' },
+                                filtering: { formula: (r) => { return r.loginHours ? true : false; }},
+                                showSearch: false
+                            });
 
-                            helper.html.datatable.create(
-                                'datatable-profileRangeIPs',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-profileRangeIPs',
+                                columns: [
                                     { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Description', formula: (r) => { 
                                         let html = '';
@@ -129,18 +130,18 @@
                                         return html;
                                     }},
                                 ],
-                                map.profileLoginRestrictions,
-                                { name: 'Profile', order: 'asc' },
-                                {},
-                                { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }}
-                            );
+                                data: map.profileLoginRestrictions,
+                                sorting: { name: 'Profile', order: 'asc' },
+                                filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
+                                showSearch: false
+                            });
 
                             // -------------------------------------------
                             // PERMISSION SETS
                             // -------------------------------------------
-                            helper.html.datatable.create(
-                                'datatable-permissionSets',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-permissionSets',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -170,10 +171,11 @@
                                         return r.description;
                                     }}
                                 ],
-                                map.permissionSets,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.permissionSets,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
                         },
                         actions: {  
                             clearCache: { 

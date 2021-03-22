@@ -204,9 +204,9 @@
                                 recursive_set_number_of_indirect_users(map.publicGroups, map.roles, d.id);
                             });
 
-                            helper.html.datatable.create(
-                                'datatable-publicGroups',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-publicGroups',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -225,15 +225,16 @@
                                         return renderUsers(map.users, all_distinct_users, true); 
                                     }}
                                 ],
-                                map.publicGroups,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.isPublicGroup; }}
-                            );
+                                data: map.publicGroups,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.isPublicGroup; }},
+                                showSearch: true
+                            });
 
-                            helper.html.datatable.create(
-                                'datatable-queues',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-queues',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -252,11 +253,12 @@
                                         return renderUsers(map.users, all_distinct_users, true); 
                                     }}
                                 ],
-                                map.publicGroups,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.isQueue; }}
-                            );
+                                data: map.publicGroups,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.isQueue; }},
+                                showSearch: true
+                            });
                         },
                         actions: {  
                             clearCache: { 

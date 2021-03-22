@@ -1350,17 +1350,48 @@ const OrgCheck = {
                         }
                     },
                     datatable: {
-                        create: function(element, columns, data, sorting, coloring, filtering) {
+                        create: function(config) {
                             PROGRESSBAR_HANDLER.set(0, 1);
-                            const dt = document.getElementById(element);
+                            const dt = document.getElementById(config.element);
                             const table = dt.appendChild(document.createElement('table'));
+                            if (config.showSearch === true) {
+                                const searchBox = dt.insertBefore(document.createElement('div'), table);
+                                const searchIcon = searchBox.appendChild(document.createElement('img'));
+                                const search = searchBox.appendChild(document.createElement('input'));
+                                searchBox.classList.add('slds-input-has-icon', 'slds-input-has-icon_left');
+                                searchIcon.classList.add('slds-icon','slds-input__icon','slds-input__icon_left','slds-icon-text-default');
+                                searchIcon.setAttribute('src', '/img/chatter/lookupSearchHover.png');
+                                search.classList.add('slds-input');
+                                search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
+                                search.onkeydown = function(e) {
+                                    if (e.code === 'Enter') {
+                                        const searchValue = e.target.value;
+                                        const items = [].slice.call(table.rows).slice(1);
+                                        items.forEach(tr => {
+                                            if (!searchValue) {
+                                                tr.hidden = false;
+                                            } else {
+                                                let hidden = true;
+                                                for (let i=0; i<tr.children.length; i++) {
+                                                    const v = tr.children[i].innerText;
+                                                    if (v && v.includes && v.includes(searchValue)) {
+                                                        hidden = false;
+                                                        break;
+                                                    }
+                                                }
+                                                tr.hidden = hidden;
+                                            }
+                                        });
+                                    }
+                                };
+                            }
                             table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
                             const thead = table.appendChild(document.createElement('thead'));
                             const trHead = thead.appendChild(document.createElement('tr'));
                             trHead.classList.add('slds-text-title_caps');
                             const orderingImage = document.createElement('img');
                             let firstSortCallback;
-                            columns.forEach((c, i) => {
+                            config.columns.forEach((c, i) => {
                                 const thHead = trHead.appendChild(document.createElement('th'));
                                 thHead.setAttribute('scope', 'col');
                                 thHead.setAttribute('aria-label', c.name);
@@ -1381,17 +1412,17 @@ const OrgCheck = {
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
                                     if (e) {
-                                        if (sorting.name === c.name) {
-                                            sorting.order = (sorting.order !== 'asc') ? 'asc' : 'desc';
+                                        if (config.sorting.name === c.name) {
+                                            config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
-                                            sorting.name = c.name;
-                                            sorting.order = 'asc';
+                                            config.sorting.name = c.name;
+                                            config.sorting.order = 'asc';
                                         }
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
                                     }
-                                    if (sorting.order === 'asc') {
+                                    if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
                                         orderingImage.src = '/img/sort_asc_arrow.gif';
                                     } else {
@@ -1399,7 +1430,7 @@ const OrgCheck = {
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
                                     }
                                     grdHead.appendChild(orderingImage);
-                                    const iOrder = sorting.order === 'asc' ? 1 : -1;
+                                    const iOrder = config.sorting.order === 'asc' ? 1 : -1;
                                     const items = [].slice.call(table.rows).slice(1);
                                     items.sort(function compare(a, b) {
                                         const valueA = a.getElementsByTagName('td')[i].textContent;
@@ -1414,19 +1445,19 @@ const OrgCheck = {
                                         parent.appendChild(detatchedItem);
                                     });
                                 };
-                                if (sorting.name === c.name) {
+                                if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
                                 }
                             });
                             const tbody = table.appendChild(document.createElement('tbody'));
-                            const isArray = Array.isArray(data);
-                            const iterable = isArray ? data : MAP_HANDLER.keys(data);
+                            const isArray = Array.isArray(config.data);
+                            const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
                             iterable.forEach(k => {
-                                if (filtering && filtering.formula && filtering.formula(data[k]) === false) return;
+                                if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                columns.forEach(c => {
+                                config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
-                                    const row = isArray ? k : data[k];
+                                    const row = isArray ? k : config.data[k];
                                     let content = '';
                                     try {
                                         if (c.formula) {
@@ -1456,7 +1487,7 @@ const OrgCheck = {
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
-                                    if (coloring && coloring.name === c.name) trBody.bgColor = coloring.formula(content, alternative);
+                                    if (config.coloring && config.coloring.name === c.name) trBody.bgColor = config.coloring.formula(content, alternative);
                                 });
                             });
                             if (firstSortCallback) { 
