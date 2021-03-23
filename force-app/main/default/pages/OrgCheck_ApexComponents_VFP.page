@@ -56,7 +56,7 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'apexClasses', 'apexTriggers' ],
+                        datasets: [ 'apexClasses', 'apexTriggers', 'customObjects' ],
                         dependencies: true,
                         onRecords: function(map) { 
 
@@ -166,7 +166,10 @@
                                             return helper.html.render.icon('redFlag') + ' ' + r.length;
                                         return r.length;
                                     }},
-                                    { name: 'SObject', property: 'sobject' },
+                                    { name: 'SObject', formula: (r) => { 
+                                        const objName = map.customObjects[r.sobject];
+                                        return objName ? objName.developerName : r.sobject;
+                                    }},
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
                                     { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
                                     { name : '*Update', property: 'beforeUpdate', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
