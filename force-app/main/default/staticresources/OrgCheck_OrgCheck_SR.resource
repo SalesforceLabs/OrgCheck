@@ -1351,7 +1351,6 @@ const OrgCheck = {
                     },
                     datatable: {
                         create: function(config) {
-                            PROGRESSBAR_HANDLER.set(0, 1);
                             const dt = document.getElementById(config.element);
                             const table = dt.appendChild(document.createElement('table'));
                             if (config.showSearch === true) {
@@ -1365,25 +1364,33 @@ const OrgCheck = {
                                 search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
                                 search.onkeydown = function(e) {
                                     if (e.code === 'Enter') {
-                                        PROGRESSBAR_HANDLER.set(0, 1);
+                                        PROGRESSBAR_HANDLER.show();
+                                        PROGRESSBAR_HANDLER.empty('Filtering...');
                                         const searchValue = e.target.value;
+                                        PROGRESSBAR_HANDLER.still('Search value: '+searchValue);
                                         const items = [].slice.call(table.rows).slice(1);
+                                        PROGRESSBAR_HANDLER.still('All data size: '+items.length);
+                                        let nbVisible = 0;
                                         items.forEach(tr => {
                                             if (!searchValue) {
                                                 tr.hidden = false;
+                                                nbVisible++;
                                             } else {
                                                 let hidden = true;
                                                 for (let i=0; i<tr.children.length; i++) {
                                                     const v = tr.children[i].innerText;
                                                     if (v && v.includes && v.includes(searchValue)) {
                                                         hidden = false;
+                                                        nbVisible++;
                                                         break;
                                                     }
                                                 }
                                                 tr.hidden = hidden;
                                             }
                                         });
-                                        PROGRESSBAR_HANDLER.set(1, 1);
+                                        PROGRESSBAR_HANDLER.still('Number of rows visible: '+nbVisible);
+                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.hide();
                                     }
                                 };
                             }
@@ -1413,8 +1420,9 @@ const OrgCheck = {
                                 ttlHead.setAttribute('title', c.name);
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
-                                    PROGRESSBAR_HANDLER.set(0, 1);
                                     if (e) {
+                                        PROGRESSBAR_HANDLER.show();
+                                        PROGRESSBAR_HANDLER.empty('Sorting...');
                                         if (config.sorting.name === c.name) {
                                             config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
@@ -1424,6 +1432,8 @@ const OrgCheck = {
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
+                                        PROGRESSBAR_HANDLER.still('Name: '+config.sorting.name);
+                                        PROGRESSBAR_HANDLER.still('Order: '+config.sorting.order);
                                     }
                                     if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
@@ -1431,6 +1441,9 @@ const OrgCheck = {
                                     } else {
                                         thHead.setAttribute('aria-sort', 'descending');
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
+                                    }
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.still('Sorting data...');
                                     }
                                     grdHead.appendChild(orderingImage);
                                     const iOrder = config.sorting.order === 'asc' ? 1 : -1;
@@ -1442,12 +1455,18 @@ const OrgCheck = {
                                         if (valueA > valueB) return iOrder;
                                         return 0;
                                     });
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.still('Reordering rows...');
+                                    }
                                     items.forEach(r => {
                                         const parent = r.parentNode;
                                         const detatchedItem = parent.removeChild(r);
                                         parent.appendChild(detatchedItem);
                                     });
-                                    PROGRESSBAR_HANDLER.set(1, 1);
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.hide();
+                                    }
                                 };
                                 if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
@@ -1497,15 +1516,12 @@ const OrgCheck = {
                             if (firstSortCallback) { 
                                 firstSortCallback(); 
                             }
-                            PROGRESSBAR_HANDLER.set(1, 1);
                         },
                         clean: function(element) {
-                            PROGRESSBAR_HANDLER.set(0, 1);
                             const dt = document.getElementById(element);
                             while (dt.firstChild) {
                                 dt.removeChild(dt.lastChild);
                             }
-                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     tabs: {
