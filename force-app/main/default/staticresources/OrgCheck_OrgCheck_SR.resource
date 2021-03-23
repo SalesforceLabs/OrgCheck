@@ -1365,6 +1365,7 @@ const OrgCheck = {
                                 search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
                                 search.onkeydown = function(e) {
                                     if (e.code === 'Enter') {
+                                        PROGRESSBAR_HANDLER.set(0, 1);
                                         const searchValue = e.target.value;
                                         const items = [].slice.call(table.rows).slice(1);
                                         items.forEach(tr => {
@@ -1382,6 +1383,7 @@ const OrgCheck = {
                                                 tr.hidden = hidden;
                                             }
                                         });
+                                        PROGRESSBAR_HANDLER.set(1, 1);
                                     }
                                 };
                             }
@@ -1411,6 +1413,7 @@ const OrgCheck = {
                                 ttlHead.setAttribute('title', c.name);
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
+                                    PROGRESSBAR_HANDLER.set(0, 1);
                                     if (e) {
                                         if (config.sorting.name === c.name) {
                                             config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
@@ -1444,6 +1447,7 @@ const OrgCheck = {
                                         const detatchedItem = parent.removeChild(r);
                                         parent.appendChild(detatchedItem);
                                     });
+                                    PROGRESSBAR_HANDLER.set(1, 1);
                                 };
                                 if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
@@ -1496,14 +1500,17 @@ const OrgCheck = {
                             PROGRESSBAR_HANDLER.set(1, 1);
                         },
                         clean: function(element) {
+                            PROGRESSBAR_HANDLER.set(0, 1);
                             const dt = document.getElementById(element);
                             while (dt.firstChild) {
                                 dt.removeChild(dt.lastChild);
                             }
+                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     tabs: {
                         initialize: function(itemClass, contentClass, buttonClass) {
+                            PROGRESSBAR_HANDLER.set(0, 1);
                             const tabItems = document.getElementsByClassName(itemClass);
                             const tabContents = document.getElementsByClassName(contentClass);
                             const buttons = document.getElementsByClassName(buttonClass);
@@ -1540,6 +1547,7 @@ const OrgCheck = {
                                     }
                                 }
                             }
+                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     picklist: {
