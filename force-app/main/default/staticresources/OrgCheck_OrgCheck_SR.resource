@@ -1371,6 +1371,7 @@ const OrgCheck = {
                                         const items = [].slice.call(table.rows).slice(1);
                                         PROGRESSBAR_HANDLER.still('All data size: '+items.length);
                                         let nbVisible = 0;
+                                        table.hidden = true; // make table invisible while manipulating the DOM
                                         items.forEach(tr => {
                                             if (!searchValue) {
                                                 tr.hidden = false;
@@ -1388,6 +1389,7 @@ const OrgCheck = {
                                                 tr.hidden = hidden;
                                             }
                                         });
+                                        table.hidden = false; // make table visible again
                                         PROGRESSBAR_HANDLER.still('Number of rows visible: '+nbVisible);
                                         PROGRESSBAR_HANDLER.full('Good job!');
                                         PROGRESSBAR_HANDLER.hide();
@@ -1458,11 +1460,13 @@ const OrgCheck = {
                                     if (e) {
                                         PROGRESSBAR_HANDLER.still('Reordering rows...');
                                     }
+                                    table.hidden = true; // make table invisible while manipulating the DOM
                                     items.forEach(r => {
                                         const parent = r.parentNode;
                                         const detatchedItem = parent.removeChild(r);
                                         parent.appendChild(detatchedItem);
                                     });
+                                    table.hidden = false; // make table visible again
                                     if (e) {
                                         PROGRESSBAR_HANDLER.full('Good job!');
                                         PROGRESSBAR_HANDLER.hide();
@@ -1475,6 +1479,7 @@ const OrgCheck = {
                             const tbody = table.appendChild(document.createElement('tbody'));
                             const isArray = Array.isArray(config.data);
                             const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
+                            table.hidden = true; // make table invisible while manipulating the DOM
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
@@ -1513,6 +1518,7 @@ const OrgCheck = {
                                     if (config.coloring && config.coloring.name === c.name) trBody.bgColor = config.coloring.formula(content, alternative);
                                 });
                             });
+                            table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
                                 firstSortCallback(); 
                             }
