@@ -61,9 +61,9 @@
                         onRecords: function(map) { 
 
                             // Render the Visual Force Pages data in a table
-                            helper.html.datatable.create(
-                                'datatable-vfps',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-vfps',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -89,15 +89,16 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.vfPages,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.vfPages,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
 
                             // Render the Visual Force Components data in a table
-                            helper.html.datatable.create(
-                                'datatable-vfcs',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-vfcs',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -122,15 +123,16 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.vfComponents,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );   
+                                data: map.vfComponents,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });   
 
                             // Render the Lighnting Pages data in a table
-                            helper.html.datatable.create(
-                                'datatable-lps',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-lps',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -149,15 +151,16 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.auraPages,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );   
+                                data: map.auraPages,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });   
                             
                             // Render the Lighnting Aura Components data in a table
-                            helper.html.datatable.create(
-                                'datatable-lacs',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-lacs',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -182,15 +185,16 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.auraComponents,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );  
+                                data: map.auraComponents,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });  
 
                             // Render the Lighnting Web Components data in a table
-                            helper.html.datatable.create(
-                                'datatable-lwcs',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-lwcs',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -215,10 +219,11 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.lwComponents,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.lwComponents,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
                         },
                         actions: {  
                             clearCache: { 

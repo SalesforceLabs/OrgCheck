@@ -368,6 +368,9 @@
                         helper.html.element.removeAllChild(items);
                         const keys = helper.cache.metadata.keys().sort();
                         for (let i=0; i<keys.length; i++) {
+                            // Get side information (timestamp and version) about each keys
+                            const sideValues = helper.cache.metadata.sideValues(keys[i]);
+                            if (! sideValues) continue;
                             const item = helper.html.element.create('li');
                             helper.html.element.addClass(item, ['slds-progress__item', 'slds-is-completed']);
                             helper.html.element.setAttribute(item, 'id', keys[i]);
@@ -378,7 +381,9 @@
                             // add inner div #2
                             const innerDiv2 = helper.html.element.create('div');
                             helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
-                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + helper.timestamp.to.date(helper.cache.metadata.timestamp(keys[i])) + ' - ' + helper.cache.metadata.version(keys[i]) + ')');
+                            const timestamp = helper.timestamp.to.date(sideValues.timestamp);
+                            const nbItems = (sideValues.size ? (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : ''))):'N/A');
+                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + timestamp + ' - ' + nbItems + ')');
                             helper.html.element.appendChild(item, innerDiv2);
                             // add buttons
                             const deleteButton = helper.html.element.create('button');

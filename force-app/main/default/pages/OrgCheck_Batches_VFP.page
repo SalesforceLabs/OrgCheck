@@ -20,17 +20,18 @@
                         onRecords: function(map) { 
 
                             // Render the data in a table
-                            helper.html.datatable.create(
-                                'datatable',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable',
+                                columns: [
                                     { name: 'Context', property: 'context' },
                                     { name: 'Type', property: 'type' },
                                     { name: 'Status', property: 'status' },
                                     { name: 'Message', property: 'message' }
                                 ],
-                                map.apexTriggers,
-                                { name: 'Context', order: 'asc' }
-                            );
+                                data: map.apexTriggers,
+                                sorting: { name: 'Context', order: 'asc' },
+                                showSearch: true
+                            });
                         },
                         actions: {  
                             clearCache: { 

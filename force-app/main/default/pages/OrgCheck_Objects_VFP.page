@@ -302,12 +302,20 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.fields && object.fields.length > 0) {
                                     helper.html.element.show('section-fields', true);
-                                    helper.html.datatable.create(
-                                        'datatable-fields',
-                                        [
-                                            { name: 'Field Label', formula: (r) => { return r.id ? (helper.html.render.link('/'+r.id, r.label)) : r.label; }},
+                                    helper.html.datatable.create({
+                                        element: 'datatable-fields',
+                                        columns: [
+                                            { name: 'Field Label', formula: (r) => { return helper.html.render.link('/lightning/setup/ObjectManager/'+(object.id ? object.id : object.name)+'/FieldsAndRelationships/'+(r.id ? r.id : r.name)+'/view', r.label); }},
                                             { name: 'Custom', property: 'custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
                                             { name: 'Full API Name', property: 'name' },
+                                            { name: 'Dependencies', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const dep = object.fieldDependencies[r.id]; 
+                                                    if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                                    return helper.html.render.icon('redFlag') + ' No dependency.';
+                                                }
+                                                return '';
+                                            }},
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: 'Type', formula: (r) => {
                                                 let type = r.type;
@@ -333,9 +341,10 @@
                                             { name: 'Default', property: 'defaultValue' },
                                             { name: 'Formula', property: 'calculatedFormula' }
                                         ],
-                                        object.fields,
-                                        { name: 'Field Label', order: 'asc' }
-                                    );
+                                        data: object.fields,
+                                        sorting: { name: 'Field Label', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
                                         
                                 // -------------------------
@@ -344,17 +353,18 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.childRelationships && object.childRelationships.length > 0) {
                                     helper.html.element.show('section-relationships', true);
-                                    helper.html.datatable.create(
-                                        'datatable-relationships',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-relationships',
+                                        columns: [
                                             { name: 'Relationship Name', property: 'relationshipName' },
                                             { name: 'Child SObject', property: 'childSObject' },
                                             { name: 'Field', property: 'field' },
                                             { name: 'Cascade Delete', property: 'cascadeDelete', formula: (r) => { return helper.html.render.checkbox(r.cascadeDelete); }}
                                         ],
-                                        object.childRelationships,
-                                        { name: 'Relationship Name', order: 'asc' }
-                                    );
+                                        data: object.childRelationships,
+                                        sorting: { name: 'Relationship Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -363,9 +373,9 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.recordTypeInfos && object.recordTypeInfos.length > 0) {
                                     helper.html.element.show('section-recordtypes', true);
-                                    helper.html.datatable.create(
-                                        'datatable-recordtypes',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-recordtypes',
+                                        columns: [
                                             { name: 'Name', property: 'name' },
                                             { name: 'Developer Name', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
@@ -374,9 +384,10 @@
                                             { name: 'Available', property: 'available', formula: (r) => { return helper.html.render.checkbox(r.available); }},
                                             { name: 'Default Mapping', property: 'defaultRecordTypeMapping' }
                                         ],
-                                        object.recordTypeInfos,
-                                        { name: 'Name', order: 'asc' }
-                                    );
+                                        data: object.recordTypeInfos,
+                                        sorting: { name: 'Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
                                 
                                 // -------------------------
@@ -385,15 +396,16 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.apexTriggers && object.apexTriggers.length > 0) {
                                     helper.html.element.show('section-apexTriggers', true);
-                                    helper.html.datatable.create(
-                                        'datatable-apexTriggers',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-apexTriggers',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Name', property: 'name' }
                                         ],
-                                        object.apexTriggers,
-                                        { name: 'Name', order: 'asc' }
-                                    );
+                                        data: object.apexTriggers,
+                                        sorting: { name: 'Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -402,16 +414,17 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.fieldSets && object.fieldSets.length > 0) {
                                     helper.html.element.show('section-fieldSets', true);
-                                    helper.html.datatable.create(
-                                        'datatable-fieldSets',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-fieldSets',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Master Label', property: 'label' },
                                             { name: 'Description', property: 'description' }
                                         ],
-                                        object.fieldSets,
-                                        { name: 'Master Label', order: 'asc' }
-                                    );
+                                        data: object.fieldSets,
+                                        sorting: { name: 'Master Label', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -420,16 +433,17 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.layouts && object.layouts.length > 0) {
                                     helper.html.element.show('section-layouts', true);
-                                    helper.html.datatable.create(
-                                        'datatable-layouts',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-layouts',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Name', property: 'name' },
                                             { name: 'Type', property: 'type' }
                                         ],
-                                        object.layouts,
-                                        { name: 'Name', order: 'asc' }
-                                    );
+                                        data: object.layouts,
+                                        sorting: { name: 'Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -438,18 +452,25 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.limits && object.limits.length > 0) {
                                     helper.html.element.show('section-limits', true);
-                                    helper.html.datatable.create(
-                                        'datatable-limits',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-limits',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Label', property: 'label' },
-                                            { name: 'Max', property: 'max' },
-                                            { name: 'Remaining', property: 'remaining' },
+                                            { name: '% used', formula: (r) => { 
+                                                const percentageUsed = (r.max - r.remaining) / r.max;
+                                                const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
+                                                return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
+                                            }},
+                                            { name: 'Used', formula: (r) => { return r.max - r.remaining;} },
+                                            { name: 'Maximum', property: 'max' },
+                                            { name: 'Left', property: 'remaining' },
                                             { name: 'Type', property: 'type' }
                                         ],
-                                        object.limits,
-                                        { name: 'Label', order: 'asc' }
-                                    );
+                                        data: object.limits,
+                                        sorting: { name: 'Label', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -458,9 +479,9 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.validationRules && object.validationRules.length > 0) {
                                     helper.html.element.show('section-validationRules', true);
-                                    helper.html.datatable.create(
-                                        'datatable-validationRules',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-validationRules',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Name', property: 'name' },
                                             { name: 'Active', property: 'isActive' },
@@ -468,9 +489,10 @@
                                             { name: 'ErrorDisplayField', property: 'errorDisplayField' },
                                             { name: 'ErrorMessage', property: 'errorMessage' }
                                         ],
-                                        object.validationRules,
-                                        { name: 'Name', order: 'asc' }
-                                    );
+                                        data: object.validationRules,
+                                        sorting: { name: 'Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 // -------------------------
@@ -479,15 +501,16 @@
                                 helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.webLinks && object.webLinks.length > 0) {
                                     helper.html.element.show('section-webLinks', true);
-                                    helper.html.datatable.create(
-                                        'datatable-webLinks',
-                                        [
+                                    helper.html.datatable.create({
+                                        element: 'datatable-webLinks',
+                                        columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Name', property: 'name' }
                                         ],
-                                        object.webLinks,
-                                        { name: 'Name', order: 'asc' }
-                                    );
+                                        data: object.webLinks,
+                                        sorting: { name: 'Name', order: 'asc' },
+                                        showSearch: false
+                                    });
                                 }
 
                                 helper.progressbar.full();
@@ -522,17 +545,18 @@
                             // Store all objects
                             allObjects = map.objects;
 
-                            helper.html.datatable.create(
-                                'datatable-orgWideDefaults',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-orgWideDefaults',
+                                columns: [
                                     { name: 'Object', property: 'name' },
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Internal', property: 'internal' },
                                     { name: 'External', property: 'external' }
                                 ],
-                                map.orgWideDefaults,
-                                { name: 'Object', order: 'asc' }
-                            );
+                                data: map.orgWideDefaults,
+                                sorting: { name: 'Object', order: 'asc' },
+                                showSearch: false
+                            });
                         },
                         actions: {  
                             clearCache: { 

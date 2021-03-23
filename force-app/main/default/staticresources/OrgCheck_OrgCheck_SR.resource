@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.1',
+    version: 'v1.9.2',
 
     /**
      * Organization Id where OrgCheck is currently installed
@@ -65,9 +65,20 @@ const OrgCheck = {
                 let package_name = '';
                 let short_dev_name = fullDeveloperName;
                 const full_name_splitted = fullDeveloperName.split('__');
-                if (full_name_splitted.length === 3) {
-                    package_name = full_name_splitted[0];
-                    short_dev_name = full_name_splitted[1];
+                switch (full_name_splitted.length) {
+                    case 3: {
+                        // Use case #1: Custom object in a package
+                        // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
+                        package_name = full_name_splitted[0];
+                        short_dev_name = full_name_splitted[1];
+                        break;
+                    }
+                    case 2: {
+                        // Use case #2: Custom object in the org (no namespace)
+                        // Note: package_name is already set to ''
+                        short_dev_name = full_name_splitted[0];
+                        break;
+                    }
                 }
                 return {
                     package: package_name,
@@ -374,19 +385,22 @@ const OrgCheck = {
                     private_errors.forEach((v, i) => {
                         html += '<b>Error #' + i + ': ' + v.name + '</b><br />';
                         if (v.context) {
-                            html += 'When: <code>' + v.context.when + '</code><br />';
-                            html += 'What:<br />';
+                            html += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            html += 'What:<ul class="slds-list_dotted">';
                             for (k in v.context.what) {
-                                html += k + ': <code>' + v.context.what[k] + '</code><br />';
+                                html += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
                             }
+                            html += '</ul>';
                         }
                         if (v.stack) {
-                            html += '<small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            html += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                         }
                         html += '<br />';
                     });
-                    html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.');
-                    private_show_modal('Oh no, OrgCheck had an error!', html);
+                    private_show_modal(
+                        'Oh no, OrgCheck had an error!', 
+                        html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.')
+                    );
                 }
             };
 
@@ -423,7 +437,7 @@ const OrgCheck = {
 
         /**
         * Caching handler
-        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey' and 'versionKey'
+        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
         */
         CacheHandler: function (configuration) {
 
@@ -445,6 +459,11 @@ const OrgCheck = {
              * Key for "version" on every cache entry
              */
             const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+            /**
+             * Key for "size" on every cache entry
+             */
+            const SIZE_KEY = configuration.sizeKey || "__51Z3__";
 
             /**
             * Method to clear all OrgCheck cached items
@@ -490,26 +509,20 @@ const OrgCheck = {
             };
 
             /**
-            * Method to get the timestamp of a specific cache item
+            * Method to get the timestamp and version of a specific cache item
             * @param section Name of the section (group of keys) in the cache.
             * @param key in cache (without the prefix) to use
-            * @return the timestamp of the item in cache (undefined if not found)
+            * @return the side values of the item in cache (undefined if not found)
             */
-            this.timestamp = function (section, key) {
-                const value = private_get_item(section, key, false);
-                if (value) return value[TIMESTAMP_KEY];
-                return;
-            };
-
-            /**
-            * Method to get the version of a specific cache item
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the version of the item in cache (undefined if not found)
-            */
-            this.version = function (section, key) {
-                const value = private_get_item(section, key, false);
-                if (value) return value[VERSION_KEY];
+            this.sideValues = function (section, key) {
+                const value = private_get_item(section, key);
+                if (value) {
+                    return {
+                        timestamp: value[TIMESTAMP_KEY],
+                        version: value[VERSION_KEY],
+                        size: value[SIZE_KEY]
+                    };
+                }
                 return;
             };
 
@@ -598,22 +611,16 @@ const OrgCheck = {
             * Private method to get an item from the cache
             * @param section Name of the section (group of keys) in the cache.
             * @param key in cache (without the prefix) to use
-            * @param deleteMetadata true by default
             * @return the value in cache (undefined if not found)
             */
-            function private_get_item(section, key, deleteMetadata = true) {
-                const value = CACHE_SYSTEM.getItem(
-                    private_generate_prefix(section) + key
-                );
+            function private_get_item(section, key) {
+                const k = private_generate_prefix(section) + key;
+                const value = CACHE_SYSTEM.getItem(k);
                 if (value) {
                     let jsonValue = JSON.parse(value);
                     if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
-                        // console.error('Resetting the cache as you updated OrgCheck.');
+                        CACHE_SYSTEM.removeItem(k);
                         return;
-                    }
-                    if (deleteMetadata === true) {
-                        delete jsonValue[TIMESTAMP_KEY];
-                        delete jsonValue[VERSION_KEY];
                     }
                     return jsonValue;
                 }
@@ -660,7 +667,7 @@ const OrgCheck = {
         *              Salesforce IDs as properties plus an extra property called
         *              "size" which is the number of Salesforce IDs contained in the
         *              object.
-        * @param configuration Object must contain 'keySize'
+        * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
         */
         MapHandler: function (configuration) {
             /**
@@ -670,7 +677,8 @@ const OrgCheck = {
             */
             this.forEach = function (map, keyCallback) {
                 for (let key in map)
-                    if (map.hasOwnProperty(key) && key !== configuration.keySize) {
+                    if (map.hasOwnProperty(key) && key !== configuration.keySize 
+                            && !key.startsWith(configuration.keyExcludePrefix)) {
                         keyCallback(key);
                     }
             };
@@ -700,11 +708,7 @@ const OrgCheck = {
             this.keys = function (map) {
                 if (!map) return [];
                 const keys = Object.keys(map);
-                const index_of_size_property = keys.indexOf(configuration.keySize);
-                if (index_of_size_property !== -1) {
-                    keys.splice(index_of_size_property, 1);
-                }
-                return keys;
+                return keys.filter(key => key !== configuration.keySize && !key.startsWith(configuration.keyExcludePrefix));
             };
         },
 
@@ -930,7 +934,8 @@ const OrgCheck = {
         const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
 
         const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
-            keySize: MAP_KEYSIZE
+            keySize: MAP_KEYSIZE,
+            keyExcludePrefix: '__'            
         });
 
         const ARRAY_HANDLER = new OrgCheck.handlers.ArrayHandler();
@@ -1162,26 +1167,28 @@ const OrgCheck = {
                             showError(error);
                         }) 
                         .then(function(data) {
-                            // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
-                            if (ctlSetup.dependencies === true) {
-                                PROGRESSBAR_HANDLER.still('Dependencies process starting...');
-                                private_salesforce_dapi(
-                                    data.k, 
-                                    function(dependencies) { 
-                                        PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
-                                        // We are altering the map to include the dependencies
-                                        data.m['dependencies'] = dependencies || {};
-                                        // 9.1 And then call the method (with dependencies)
-                                        onEnd(data.m);
-                                    }, 
-                                    function(error) {
-                                        PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
-                                        showError(error);
-                                    }
-                                );
-                            } else {
-                                // 9.2 Calling the method (no dependencies)
-                                onEnd(data.m);
+                            if (data) { // check if no error during mapping
+                                // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
+                                if (ctlSetup.dependencies === true) {
+                                    PROGRESSBAR_HANDLER.still('Dependencies process starting...');
+                                    private_salesforce_dapi(
+                                        data.k, 
+                                        function(dependencies) { 
+                                            PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
+                                            // We are altering the map to include the dependencies
+                                            data.m['dependencies'] = dependencies || {};
+                                            // 9.1 And then call the method (with dependencies)
+                                            onEnd(data.m);
+                                        }, 
+                                        function(error) {
+                                            PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
+                                            showError(error);
+                                        }
+                                    );
+                                } else {
+                                    // 9.2 Calling the method (no dependencies)
+                                    onEnd(data.m);
+                                }
                             }
                         })
                         .catch(function(error) {
@@ -1230,11 +1237,8 @@ const OrgCheck = {
                         keys: function() {
                             return PERSISTANT_CACHE_HANDLER.keys(CACHE_SECTION_METADATA);
                         },
-                        timestamp: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.timestamp(CACHE_SECTION_METADATA, key);
-                        },
-                        version: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.version(CACHE_SECTION_METADATA, key);
+                        sideValues: function(key) {
+                            return PERSISTANT_CACHE_HANDLER.sideValues(CACHE_SECTION_METADATA, key);
                         },
                         clear: function(key) {
                             return PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, key);
@@ -1346,17 +1350,59 @@ const OrgCheck = {
                         }
                     },
                     datatable: {
-                        create: function(element, columns, data, sorting, coloring, filtering) {
-                            PROGRESSBAR_HANDLER.set(0, 1);
-                            const dt = document.getElementById(element);
+                        create: function(config) {
+                            const dt = document.getElementById(config.element);
                             const table = dt.appendChild(document.createElement('table'));
+                            if (config.showSearch === true) {
+                                const searchBox = dt.insertBefore(document.createElement('div'), table);
+                                const searchIcon = searchBox.appendChild(document.createElement('img'));
+                                const search = searchBox.appendChild(document.createElement('input'));
+                                searchBox.classList.add('slds-input-has-icon', 'slds-input-has-icon_left');
+                                searchIcon.classList.add('slds-icon','slds-input__icon','slds-input__icon_left','slds-icon-text-default');
+                                searchIcon.setAttribute('src', '/img/chatter/lookupSearchHover.png');
+                                search.classList.add('slds-input');
+                                search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
+                                search.onkeydown = function(e) {
+                                    if (e.code === 'Enter') {
+                                        PROGRESSBAR_HANDLER.show();
+                                        PROGRESSBAR_HANDLER.empty('Filtering...');
+                                        const searchValue = e.target.value;
+                                        PROGRESSBAR_HANDLER.still('Search value: '+searchValue);
+                                        const items = [].slice.call(table.rows).slice(1);
+                                        PROGRESSBAR_HANDLER.still('All data size: '+items.length);
+                                        let nbVisible = 0;
+                                        table.hidden = true; // make table invisible while manipulating the DOM
+                                        items.forEach(tr => {
+                                            if (!searchValue) {
+                                                tr.hidden = false;
+                                                nbVisible++;
+                                            } else {
+                                                let hidden = true;
+                                                for (let i=0; i<tr.children.length; i++) {
+                                                    const v = tr.children[i].innerText;
+                                                    if (v && v.includes && v.includes(searchValue)) {
+                                                        hidden = false;
+                                                        nbVisible++;
+                                                        break;
+                                                    }
+                                                }
+                                                tr.hidden = hidden;
+                                            }
+                                        });
+                                        table.hidden = false; // make table visible again
+                                        PROGRESSBAR_HANDLER.still('Number of rows visible: '+nbVisible);
+                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.hide();
+                                    }
+                                };
+                            }
                             table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
                             const thead = table.appendChild(document.createElement('thead'));
                             const trHead = thead.appendChild(document.createElement('tr'));
                             trHead.classList.add('slds-text-title_caps');
                             const orderingImage = document.createElement('img');
                             let firstSortCallback;
-                            columns.forEach((c, i) => {
+                            config.columns.forEach((c, i) => {
                                 const thHead = trHead.appendChild(document.createElement('th'));
                                 thHead.setAttribute('scope', 'col');
                                 thHead.setAttribute('aria-label', c.name);
@@ -1377,25 +1423,32 @@ const OrgCheck = {
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
                                     if (e) {
-                                        if (sorting.name === c.name) {
-                                            sorting.order = (sorting.order !== 'asc') ? 'asc' : 'desc';
+                                        PROGRESSBAR_HANDLER.show();
+                                        PROGRESSBAR_HANDLER.empty('Sorting...');
+                                        if (config.sorting.name === c.name) {
+                                            config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
-                                            sorting.name = c.name;
-                                            sorting.order = 'asc';
+                                            config.sorting.name = c.name;
+                                            config.sorting.order = 'asc';
                                         }
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
+                                        PROGRESSBAR_HANDLER.still('Name: '+config.sorting.name);
+                                        PROGRESSBAR_HANDLER.still('Order: '+config.sorting.order);
                                     }
-                                    if (sorting.order === 'asc') {
+                                    if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
                                         orderingImage.src = '/img/sort_asc_arrow.gif';
                                     } else {
                                         thHead.setAttribute('aria-sort', 'descending');
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
                                     }
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.still('Sorting data...');
+                                    }
                                     grdHead.appendChild(orderingImage);
-                                    const iOrder = sorting.order === 'asc' ? 1 : -1;
+                                    const iOrder = config.sorting.order === 'asc' ? 1 : -1;
                                     const items = [].slice.call(table.rows).slice(1);
                                     items.sort(function compare(a, b) {
                                         const valueA = a.getElementsByTagName('td')[i].textContent;
@@ -1404,26 +1457,54 @@ const OrgCheck = {
                                         if (valueA > valueB) return iOrder;
                                         return 0;
                                     });
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.still('Reordering rows...');
+                                    }
+                                    table.hidden = true; // make table invisible while manipulating the DOM
                                     items.forEach(r => {
                                         const parent = r.parentNode;
                                         const detatchedItem = parent.removeChild(r);
                                         parent.appendChild(detatchedItem);
                                     });
+                                    table.hidden = false; // make table visible again
+                                    if (e) {
+                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.hide();
+                                    }
                                 };
-                                if (sorting.name === c.name) {
+                                if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
                                 }
                             });
                             const tbody = table.appendChild(document.createElement('tbody'));
-                            const isArray = Array.isArray(data);
-                            const iterable = isArray ? data : MAP_HANDLER.keys(data);
+                            const isArray = Array.isArray(config.data);
+                            const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
+                            table.hidden = true; // make table invisible while manipulating the DOM
                             iterable.forEach(k => {
-                                if (filtering && filtering.formula && filtering.formula(data[k]) === false) return;
+                                if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                columns.forEach(c => {
+                                config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
-                                    const row = isArray ? k : data[k];
-                                    const content = (c.formula ? c.formula(row) : (c.property ? row[c.property] : ''));
+                                    const row = isArray ? k : config.data[k];
+                                    let content = '';
+                                    try {
+                                        if (c.formula) {
+                                            content = c.formula(row);
+                                        } else if (c.property) {
+                                            content = row[c.property];
+                                        }
+                                    } catch (e) {
+                                        e.context = {
+                                            'when': 'Datatable: calling formula to render the content of a cell in the table',
+                                            'what': {
+                                                'Column': c.name,
+                                                'Formula': c.formula,
+                                                'Property': c.property,
+                                                'Data': row
+                                            }
+                                        }
+                                        throw e;
+                                    }
                                     if (content) {
                                         switch (typeof content) {
                                             case 'object': tdBody.appendChild(content); break;
@@ -1434,13 +1515,13 @@ const OrgCheck = {
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
-                                    if (coloring && coloring.name === c.name) trBody.bgColor = coloring.formula(content, alternative);
+                                    if (config.coloring && config.coloring.name === c.name) trBody.bgColor = config.coloring.formula(content, alternative);
                                 });
                             });
+                            table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
                                 firstSortCallback(); 
                             }
-                            PROGRESSBAR_HANDLER.set(1, 1);
                         },
                         clean: function(element) {
                             const dt = document.getElementById(element);
@@ -1451,6 +1532,7 @@ const OrgCheck = {
                     },
                     tabs: {
                         initialize: function(itemClass, contentClass, buttonClass) {
+                            PROGRESSBAR_HANDLER.set(0, 1);
                             const tabItems = document.getElementsByClassName(itemClass);
                             const tabContents = document.getElementsByClassName(contentClass);
                             const buttons = document.getElementsByClassName(buttonClass);
@@ -1487,6 +1569,7 @@ const OrgCheck = {
                                     }
                                 }
                             }
+                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     picklist: {
@@ -1540,7 +1623,7 @@ const OrgCheck = {
                             const div = document.createElement('div');
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
-                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); //svg.clone(true));
+                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); 
                             };
                             div.setAttribute('id', 'chart-container-' + id);
                             div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
@@ -1616,6 +1699,10 @@ const OrgCheck = {
          */
         this.doFormatDatetime = function(value) {
             return FORMAT_HANDLER.datetimeFormat(value);
+        };
+
+        this.doSetSizeInMap = function(map, size) {
+            MAP_HANDLER.setSize(map, size);
         };
 
         /**
@@ -1832,7 +1919,8 @@ const OrgCheck = {
             // Construction of graph
             const svg = d3.create('svg')
                 .attr('id', function(d, i) { return (tagId + 'svg' + i); })
-                .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2]);
+                .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2])
+                .attr('xmlns', 'http://www.w3.org/2000/svg');
             
             const g = svg.append('g')
                 .attr('id', function(d, i) { return (tagId + 'g' + i); })
@@ -1970,9 +2058,10 @@ const OrgCheck = {
                 setup.objectName, 
                 function(object) {
                     SALESFORCE_HANDLER.doQueries(
-                        [ { 
+                        [{ 
                             tooling: true, 
-                            string: 'SELECT Description, ExternalSharingModel, InternalSharingModel, '+
+                            string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
+                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
                                         '(SELECT Id, Name FROM ApexTriggers), '+
                                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -1983,9 +2072,10 @@ const OrgCheck = {
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = \''+s.shortName+'\' '+
                                     (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
-                        } ], 
+                        }], 
                         function(record) {
                             // 0. Generic information
+                            object.id = record.DurableId;
                             object.description = record.Description;
                             object.externalSharingModel = record.ExternalSharingModel;
                             object.internalSharingModel = record.InternalSharingModel;
@@ -2064,9 +2154,30 @@ const OrgCheck = {
                                 }
                                 object.webLinks = webLinks;
                             }
-                            setup.callbackSuccess(object);
+                            // 7. If any fields, add field dependencies
+                            if (record.Fields) {
+                                const mapFields = {};
+                                const fieldIds = [];
+                                for (let i=0; i<record.Fields.records.length; i++) {
+                                    const f = record.Fields.records[i];
+                                    const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
+                                    fieldIds.push(id);
+                                    mapFields[f.QualifiedApiName] = id;
+                                }
+                                object.fields.forEach(f => f.id = mapFields[f.name]);
+                                private_salesforce_dapi(
+                                    fieldIds, 
+                                    function(fieldDependencies) {
+                                        object.fieldDependencies = fieldDependencies;
+                                        setup.callbackSuccess(object);
+                                    }, 
+                                    setup.callbackError
+                                );
+                            } else {
+                                setup.callbackSuccess(object);
+                            }
                         },
-                        function(records, size) { },
+                        function(records, size) {},
                         setup.callbackError
                     );
                 }, 
@@ -2660,9 +2771,9 @@ function buildDatasets(core) {
                                     'PermissionSet.PermissionsApiEnabled, '+
                                     'PermissionSet.PermissionsViewSetup, '+
                                     'PermissionSet.PermissionsModifyAllData, '+
-                                    'PermissionSet.PermissionsViewAllData '+
+                                    'PermissionSet.PermissionsViewAllData, '+
+                                    'PermissionSet.IsOwnedByProfile '+
                                     'FROM PermissionSetAssignments '+
-                                    'WHERE PermissionSet.isOwnedByProfile = false '+
                                     'ORDER BY PermissionSet.Name) '+
                             'FROM User '+
                             'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
@@ -2697,10 +2808,12 @@ function buildDatasets(core) {
                             if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
                             if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
                             if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
-                            item.permissionSets.push({
-                                id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
-                                name: assignment.PermissionSet.Name
-                            });
+                            if (assignment.PermissionSet.IsOwnedByProfile == false) {
+                                item.permissionSets.push({
+                                    id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
+                                    name: assignment.PermissionSet.Name
+                                });
+                            }
                         }
                     }
                     return item;
@@ -2726,7 +2839,7 @@ function buildDatasets(core) {
                     tooling: false, 
                     string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
                                 'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
-                                '(SELECT Id FROM Assignments LIMIT 101) '+
+                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
                             'WHERE isOwnedByProfile = true'
                 } ],
@@ -2824,7 +2937,9 @@ function buildDatasets(core) {
                                 'NamespacePrefix, '+
                                 '(SELECT Id, AssigneeId, Assignee.ProfileId, '+
                                     'Assignee.Profile.Name '+
-                                    'FROM Assignments) '+
+                                    'FROM Assignments '+
+                                    'WHERE Assignee.IsActive = TRUE '+
+                                    'LIMIT 101) '+
                             'FROM PermissionSet '+
                             'WHERE IsOwnedByProfile = false' 
                 } ],
@@ -2853,7 +2968,7 @@ function buildDatasets(core) {
                             item.uniqueProfiles.push(
                                 pmap[pid] = {
                                     id: pid,
-                                    name: v.Assignments.records[i].Assignee.Profile.Name,
+                                    name: v.Assignments.records[i].Assignee.Profile?.Name,
                                     count: 1
                                 }
                             );
@@ -3003,6 +3118,7 @@ function buildDatasets(core) {
                     core.doSalesforceGlobalDescribe({
                         onEnd: function(sobjects) {
                             const map = {};
+                            let size = 0;
                             if (sobjects) {
                                 sobjects.forEach(v => {
                                     if (v.customSetting === false && 
@@ -3016,9 +3132,11 @@ function buildDatasets(core) {
                                             package: core.doSalesforceSplitDeveloperName(v.name).package
                                         };
                                         map[object.id] = object;
+                                        size++;
                                     }
                                 });
                             }
+                            core.doSetSizeInMap(map, size);
                             callbackToSetTheCache(map);
                         }, 
                         onError: reject
@@ -3045,11 +3163,13 @@ function buildDatasets(core) {
                 queries: [ { 
                     // Batches
                     tooling: false, 
-                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors ' +
-                            'FROM AsyncApexJob ' +
-                            'WHERE ExtendedStatus <> NULL ' +
-                            'OR Status = \'Failed\' ' +
-                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus' 
+                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
+                            'FROM AsyncApexJob '+
+                            'WHERE CompletedDate = YESTERDAY '+
+                            'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
+                            'OR Status = \'Failed\') '+
+                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
+                            'LIMIT 10000 '
                 }, {
                     // Scheduled Jobs
                     tooling: false, 
@@ -3059,7 +3179,8 @@ function buildDatasets(core) {
                                 'PreviousFireTime, StartTime, State, TimesTriggered, '+
                                 'TimeZoneSidKey '+
                             'FROM CronTrigger '+
-                            'WHERE State <> \'COMPLETE\''
+                            'WHERE StartTime = YESTERDAY '+
+                            'AND State <> \'COMPLETE\''
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     if (i == 0) {

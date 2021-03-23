@@ -330,9 +330,9 @@
                         datasets: [ 'roles' ],
                         onRecords: function(map) { 
 
-                            helper.html.datatable.create(
-                                'datatable',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => { 
                                         let score = 0;
@@ -364,14 +364,15 @@
                                         return '';
                                     }}
                                 ],
-                                map.roles,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { 
+                                data: map.roles,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
-                                 }}
-                            );
+                                }},
+                                showSearch: true
+                            });
                             
                             // Render role graphic
                             const graphSvg = computeGraph(map.roles, nodeOnClick);

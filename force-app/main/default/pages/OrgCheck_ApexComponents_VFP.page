@@ -56,16 +56,16 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'apexClasses', 'apexTriggers' ],
+                        datasets: [ 'apexClasses', 'apexTriggers', 'customObjects' ],
                         dependencies: true,
                         onRecords: function(map) { 
 
                             let countRecompileApexClasses = 0;
 
                             // Render the Apex Classes data in a table
-                            helper.html.datatable.create(
-                                'datatable-classes',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-classes',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
@@ -122,11 +122,12 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.apexClasses,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                { formula: (r) => { return r.size !== -1 && r.isTest === false; }}
-                            );
+                                data: map.apexClasses,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
+                                showSearch: true
+                            });
 
                             // Show alert about recompilation
                             if (countRecompileApexClasses > 0) {
@@ -140,15 +141,16 @@
                             }
 
                             // Render the Apex Triggers data in a table
-                            helper.html.datatable.create(
-                                'datatable-triggers',
-                                [
+                            helper.html.datatable.create({
+                                element: 'datatable-triggers',
+                                columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (r.isActive === false) score++;
+                                        if (r.length > 5000) score++;
                                         return score;
                                     }},
                                     { name: 'API', formula: (r) => {
@@ -159,8 +161,15 @@
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'Status', formula: (r) => { return helper.html.render.icon('greenFlag') + ' OK'; }},
-                                    { name: 'Size', property: 'length' },
-                                    { name: 'SObject', property: 'sobject' },
+                                    { name: 'Size', property: 'length', formula: (r) => { 
+                                        if (r.length > 5000) 
+                                            return helper.html.render.icon('redFlag') + ' ' + r.length;
+                                        return r.length;
+                                    }},
+                                    { name: 'SObject', formula: (r) => { 
+                                        const objName = map.customObjects[r.sobject];
+                                        return objName ? objName.developerName : r.sobject;
+                                    }},
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
                                     { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
                                     { name : '*Update', property: 'beforeUpdate', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
@@ -179,10 +188,11 @@
                                         return helper.html.render.icon('redFlag') + ' No dependency.';
                                     }}
                                 ],
-                                map.apexTriggers,
-                                { name: 'Score', order: 'desc' },
-                                { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }}
-                            );
+                                data: map.apexTriggers,
+                                sorting: { name: 'Score', order: 'desc' },
+                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
+                                showSearch: true
+                            });
                         },
                         actions: { 
                             exportTable: [{
@@ -210,7 +220,8 @@
                                         '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
                                         '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
                                         '<li><code>+1</code> if the trigger needs recompilation,</li>'+
-                                        '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li></ul>',
+                                        '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li>'+
+                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</ul>',
                                     'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+
                                         'a dialog box.'
