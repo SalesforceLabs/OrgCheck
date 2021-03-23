@@ -343,7 +343,7 @@
                                         ],
                                         data: object.fields,
                                         sorting: { name: 'Field Label', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
                                         
@@ -363,7 +363,7 @@
                                         ],
                                         data: object.childRelationships,
                                         sorting: { name: 'Relationship Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -386,7 +386,7 @@
                                         ],
                                         data: object.recordTypeInfos,
                                         sorting: { name: 'Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
                                 
@@ -404,7 +404,7 @@
                                         ],
                                         data: object.apexTriggers,
                                         sorting: { name: 'Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -423,7 +423,7 @@
                                         ],
                                         data: object.fieldSets,
                                         sorting: { name: 'Master Label', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -442,7 +442,7 @@
                                         ],
                                         data: object.layouts,
                                         sorting: { name: 'Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -469,7 +469,7 @@
                                         ],
                                         data: object.limits,
                                         sorting: { name: 'Label', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -491,7 +491,7 @@
                                         ],
                                         data: object.validationRules,
                                         sorting: { name: 'Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -509,7 +509,7 @@
                                         ],
                                         data: object.webLinks,
                                         sorting: { name: 'Name', order: 'asc' },
-                                        showSearch: true
+                                        showSearch: false
                                     });
                                 }
 
@@ -555,7 +555,7 @@
                                 ],
                                 data: map.orgWideDefaults,
                                 sorting: { name: 'Object', order: 'asc' },
-                                showSearch: true
+                                showSearch: false
                             });
                         },
                         actions: {  
