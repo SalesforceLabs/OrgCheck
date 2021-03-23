@@ -11,11 +11,11 @@ OrgCheck is an easy-to-install and easy-to-use Salesforce application in order t
 
 ### Custom Field tab
 
-![screenshot 1.9.1 #2](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.1-Screenshot2.png)
+![screenshot 1.9.1 #2](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.2-Screenshot2.png)
 
 ### Dependency tree 
 
-![screenshot 1.9.1 #3](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.1-Screenshot3.png)
+![screenshot 1.9.1 #3](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.2-Screenshot3.png)
 
 ### Role Hierarchy tab
 
