@@ -3236,15 +3236,31 @@ function buildDatasets(core) {
                 mnemonic: this.keycache, 
                 queries: [ { 
                     tooling: true, 
-                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
-                            'FROM CustomObject '+
-                            'WHERE ManageableState = \'unmanaged\'  '
+                    string: 'SELECT DurableId, DeveloperName, IsCustomSetting, QualifiedApiName, NamespacePrefix '+
+                            'FROM EntityDefinition '+
+                            'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    let entityType = 'Other';
+                    if (v.IsCustomSetting == true) 
+                        entityType = 'CustomSetting';
+                    else {
+                        const pp = v.QualifiedApiName.split('__');
+                        const prefix = pp[pp.length-1];
+                        switch (prefix) {
+                            case 'c':   entityType = 'CustomObject';  break;
+                            case 'e':   entityType = 'CustomEvent';  break;
+                            case 'ka':  entityType = 'KnowledgeArticle';  break;
+                            case 'x':   entityType = 'ExternalObject';  break;
+                            case 'b':   entityType = 'BigObject';  break;
+                            case 'mdt': entityType = 'CustomMetadataType';  break;
+                        }
+                    }
                     return { 
-                        id: core.doSimplifiySalesforceID(v.Id),
+                        id: core.doSimplifiySalesforceID(v.DurableId),
                         developerName: v.DeveloperName,
-                        packageName: v.NamespacePrefix
+                        packageName: v.NamespacePrefix,
+                        type: entityType
                     };
                 }, 
                 onEndFromCacheCallback: resolve,
