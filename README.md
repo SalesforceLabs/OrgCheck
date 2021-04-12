@@ -7,19 +7,19 @@ OrgCheck is an easy-to-install and easy-to-use Salesforce application in order t
 
 ### Home Page tab
 
-![screenshot 1.9.1 #1](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.1-Screenshot1.png)
+![screenshot 1.9.1 #1](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot1.png)
 
 ### Custom Field tab
 
-![screenshot 1.9.1 #2](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.2-Screenshot2.png)
+![screenshot 1.9.1 #2](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot2.png)
 
 ### Dependency tree 
 
-![screenshot 1.9.1 #3](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.2-Screenshot3.png)
+![screenshot 1.9.1 #3](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot3.png)
 
 ### Role Hierarchy tab
 
-![screenshot 1.9.1 #4](https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.1-Screenshot4.png)
+![screenshot 1.9.1 #4](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot4.png)
 
 
 ## Installation
@@ -33,7 +33,7 @@ PLEASE install it in sandbox or dev orgs ONLY!!!
 If already installed, just go to the same link and it will update the application (no need anymore to unassigned users from the permission set).
 
 For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
-<p><img src="https://github.com/VinceFINET/OrgCheck/blob/main/Screenshots/OrgCheck-v1.9.1-Screenshot5.png" alt="screenshot 1.9.1 #5" width="50%" /></p>
+<p><img src="https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot5.png" alt="screenshot 1.9.1 #5" width="50%" /></p>
 
 
 ## Issues
