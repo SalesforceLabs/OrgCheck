@@ -1378,9 +1378,10 @@ const OrgCheck = {
                                                 nbVisible++;
                                             } else {
                                                 let hidden = true;
+                                                const lowerCaseSearchValue = searchValue.toLowerCase();
                                                 for (let i=0; i<tr.children.length; i++) {
-                                                    const v = tr.children[i].innerText;
-                                                    if (v && v.includes && v.includes(searchValue)) {
+                                                    const v = tr.children[i].innerText?.toLowerCase();
+                                                    if (v && v.includes && v.includes(lowerCaseSearchValue)) {
                                                         hidden = false;
                                                         nbVisible++;
                                                         break;
