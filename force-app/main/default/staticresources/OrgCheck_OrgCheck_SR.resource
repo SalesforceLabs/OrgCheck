@@ -2289,7 +2289,7 @@ function buildDatasets(core) {
                                 description: v.Description,
                                 type: v.ProcessType
                             };
-                            v.Metadata.processMetadataValues.forEach(m => {
+                            v.Metadata.processMetadataValues?.forEach(m => {
                                 if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
                                 if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
                             });
