@@ -2006,8 +2006,10 @@ const OrgCheck = {
                         string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                                     'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                                 'FROM MetadataComponentDependency '+
-                                'WHERE RefMetadataComponentId IN (' + subids + ') '+
-                                'OR MetadataComponentId IN (' + subids+ ')',
+                                'WHERE (RefMetadataComponentId IN (' + subids + ') '+
+                                'OR MetadataComponentId IN (' + subids+ ')) '+
+                                'AND MetadataComponentType != \'ReportType\' '+
+                                'AND RefMetadataComponentType != \'ReportType\' ',
                         queryMore: false
                     });
                     subids = '';
