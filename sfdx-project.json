@@ -4,8 +4,8 @@
             "path": "force-app",
             "default": true,
             "package": "OrgCheck",
-            "versionName": "Version 1.8",
-            "versionNumber": "1.8.3.NEXT",
+            "versionName": "Version 1.9",
+            "versionNumber": "1.9.3.NEXT",
             "versionDescription": "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
@@ -15,18 +15,8 @@
     "packageAliases": {
         "OrgCheck": "0Ho2X000000KyjaSAC",
         "OrgCheck@1.7.0-8": "04t2X0000011QEvQAM",
-        "OrgCheck@1.8.0-1": "04t2X000000F1X2QAK",
-        "OrgCheck@1.8.0-2": "04t2X000000F1YyQAK",
-        "OrgCheck@1.8.1-1": "04t2X000000F1Z3QAK",
-        "OrgCheck@1.8.1-2": "04t7R000001u5owQAA",
-        "OrgCheck@1.8.1-3": "04t7R000001u5tdQAA",
         "OrgCheck@1.8.1-4": "04t7R000001u5tiQAA",
-        "OrgCheck@1.8.1-5": "04t7R000001u639QAA",
-        "OrgCheck@1.8.1-6": "04t7R000001u63EQAQ",
-        "OrgCheck@1.8.1-7": "04t7R000001u63JQAQ",
-        "OrgCheck@1.8.1-8": "04t7R000001u63OQAQ",
-        "OrgCheck@1.8.1-9": "04t7R000001u63TQAQ",
-        "OrgCheck@1.8.2-1": "04t7R000001u63YQAQ",
-        "OrgCheck@1.8.3-1": "04t7R000001u63dQAA"
+        "OrgCheck@1.9.1-7": "04t7R000000km9AQAQ",
+        "OrgCheck@1.9.2-4": "04t7R000000kmHZQAY"
     }
 }

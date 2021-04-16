@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.2',
+    version: 'v1.9.3',
 
     /**
      * Organization Id where OrgCheck is currently installed
