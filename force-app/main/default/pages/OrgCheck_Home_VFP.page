@@ -33,15 +33,70 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
-                                application in order to quickly analyze your org and its technical debt.<br />  
-                                <br />
-                                <center>
-                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="40%" height="40%">
-                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="40%" height="40%" />
-                                    </object>
-                                </center>
-                                <br />
+                                <table>
+                                    <tr>
+                                        <td width="50%">
+                                            <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%">
+                                                <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%" />
+                                            </object>
+                                        </td>
+                                        <td width="50%">
+                                            Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
+                                            application in order to quickly analyze your org and its technical debt.
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </article>
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="Legal terms">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#observation_component')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Legal terms</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Legal terms
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex">
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <b>OrgCheck is free to use, but is not an official Salesforce product. </b> OrgCheck has not been officially 
+                                tested or documented. Salesforce support is not available for OrgCheck. Support requests for OrgCheck 
+                                should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a>. 
+                                Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank">https://github.com/VinceFINET/OrgCheck</a> 
+                                under separate and different license terms.
+                            </div>
+                        </article>
+                        <article class="slds-card">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                    <div class="slds-media__figure">
+                                        <span class="slds-icon_container slds-icon-standard-number-input" title="welcome">
+                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#number_input')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Welcome</span>
+                                        </span>
+                                    </div>
+                                    <div class="slds-media__body">
+                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                            Technical Debt
+                                        </h2>
+                                    </div>
+                                    <div class="slds-no-flex">
+                                    </div>
+                                </header>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
                                 Although invisible, <b>Technical Debt</b> has an impact on your project, your 
                                 IT budget, your Salesforce app, your end-users and... your business.<br />
                                 You may be interested in this <a target="_blank" 
@@ -142,12 +197,12 @@
                             <div class="slds-card__body slds-card__body_inner">
                                 <table>
                                     <tr>
-                                        <td>
+                                        <td width="30%">
                                             <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%">
                                                 <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%" />
                                             </object>
                                         </td>
-                                        <td>
+                                        <td width="70%">
                                             <b>Issues or new ideas?</b><br />
                                             Track them at <br />
                                             <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a><br />
