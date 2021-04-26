@@ -23,14 +23,29 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Object', formula: (r) => { 
-                                        let objectId = r.objectId ? r.objectId : r.objectName;
-                                        let objectName = r.objectId ? map.customObjects[r.objectId]?.developerName : r.objectName;
-                                        return helper.html.render.link('/lightning/setup/ObjectManager/'+objectId+'/Details/view', objectName);
+                                    { name: 'Object Name', formula: (r) => { 
+                                        let entityUrl = '/lightning/setup/ObjectManager/'+r.objectName+'/Details/view';
+                                        let entityName = r.objectName;
+                                        if (r.objectId) {
+                                            switch (map.customObjects[r.objectId]?.type) {
+                                                case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
+                                                case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
+                                                case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
+                                                case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
+                                                case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
+                                                case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
+                                                case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
+                                                default:                   entityUrl = '/'+r.objectId;
+                                            }
+                                            entityName = map.customObjects[r.objectId]?.developerName;
+                                        }
+                                        return helper.html.render.link(entityUrl, entityName);
+                                    }},
+                                    { name: 'Object Type', formula: (r) => { 
+                                        return r.objectId ? map.customObjects[r.objectId]?.type : 'Standard';
                                     }},
                                     { name: 'Field', formula: (r) => { 
-                                        const objectId = r.objectId ? r.objectId : r.objectName;
-                                        return helper.html.render.link('/lightning/setup/ObjectManager/'+objectId+'/FieldsAndRelationships/'+r.id+'/view', r.fieldName); 
+                                        return helper.html.render.link('/'+r.id, r.fieldName); 
                                     }},
                                     { name: 'Score', formula: (r) => {
                                         let score = 0;

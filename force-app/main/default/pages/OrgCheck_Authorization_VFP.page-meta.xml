@@ -3,5 +3,6 @@
     <apiVersion>50.0</apiVersion>
     <availableInTouch>false</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <label>OrgCheck_Authorization_VFP</label>
+    <description>OrgCheck Authorization Page</description>
+    <label>OrgCheck Authorization Page</label>
 </ApexPage>

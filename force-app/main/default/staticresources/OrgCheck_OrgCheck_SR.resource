@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.2',
+    version: 'v1.9.3',
 
     /**
      * Organization Id where OrgCheck is currently installed
@@ -366,40 +366,40 @@ const OrgCheck = {
             this.showError = function (error) {
                 if (error) {
                     private_errors.push(error);
-                    let html = '<h1 class="slds-text-heading--small"></h1><br /><br />';
-                    html += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                    let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
+                    commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
                             'target="_blank">here</a> and log an issue with the following information. <br /'+
                             '><br />';
-                    html += '<b>OrgCheck Information</b><br />';
-                    html += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
-                    html += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
-                    html += '<br />';
-                    html += '<b>Navigation Information</b><br />';
-                    html += 'Page: ' + document.location.pathname + '<br />';
-                    html += '<br />';
-                    html += '<b>System Information</b><br />';
-                    html += 'User Agent: ' + navigator.userAgent + '<br />';
-                    html += 'Operating System: ' + navigator.platform + '<br />';
-                    html += 'Language: ' + navigator.language + '<br />';
-                    html += '<br />';
+                    let informationHTML = '<b>OrgCheck Information</b><br />';
+                    informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
+                    informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
+                    informationHTML += '<br />';
+                    informationHTML += '<b>Navigation Information</b><br />';
+                    informationHTML += 'Page: ' + document.location.pathname + '<br />';
+                    informationHTML += '<br />';
+                    informationHTML += '<b>System Information</b><br />';
+                    informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
+                    informationHTML += 'Operating System: ' + navigator.platform + '<br />';
+                    informationHTML += 'Language: ' + navigator.language + '<br />';
+                    informationHTML += '<br />';
                     private_errors.forEach((v, i) => {
-                        html += '<b>Error #' + i + ': ' + v.name + '</b><br />';
+                        informationHTML += '<b>Error #' + i + ': ' + v.name + '</b><br />';
                         if (v.context) {
-                            html += 'When: <small><code>' + v.context.when + '</code></small><br />';
-                            html += 'What:<ul class="slds-list_dotted">';
+                            informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            informationHTML += 'What:<ul class="slds-list_dotted">';
                             for (k in v.context.what) {
-                                html += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
+                                informationHTML += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
                             }
-                            html += '</ul>';
+                            informationHTML += '</ul>';
                         }
                         if (v.stack) {
-                            html += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                         }
-                        html += '<br />';
+                        informationHTML += '<br />';
                     });
                     private_show_modal(
                         'Oh no, OrgCheck had an error!', 
-                        html.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.')
+                        commonHTML + informationHTML.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.')
                     );
                 }
             };
@@ -3239,15 +3239,31 @@ function buildDatasets(core) {
                 mnemonic: this.keycache, 
                 queries: [ { 
                     tooling: true, 
-                    string: 'SELECT Id, DeveloperName, NamespacePrefix '+
-                            'FROM CustomObject '+
-                            'WHERE ManageableState = \'unmanaged\'  '
+                    string: 'SELECT DurableId, DeveloperName, IsCustomSetting, QualifiedApiName, NamespacePrefix '+
+                            'FROM EntityDefinition '+
+                            'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    let entityType = 'Other';
+                    if (v.IsCustomSetting == true) 
+                        entityType = 'CustomSetting';
+                    else {
+                        const pp = v.QualifiedApiName.split('__');
+                        const prefix = pp[pp.length-1];
+                        switch (prefix) {
+                            case 'c':   entityType = 'CustomObject';  break;
+                            case 'e':   entityType = 'CustomEvent';  break;
+                            case 'ka':  entityType = 'KnowledgeArticle';  break;
+                            case 'x':   entityType = 'ExternalObject';  break;
+                            case 'b':   entityType = 'BigObject';  break;
+                            case 'mdt': entityType = 'CustomMetadataType';  break;
+                        }
+                    }
                     return { 
-                        id: core.doSimplifiySalesforceID(v.Id),
+                        id: core.doSimplifiySalesforceID(v.DurableId),
                         developerName: v.DeveloperName,
-                        packageName: v.NamespacePrefix
+                        packageName: v.NamespacePrefix,
+                        type: entityType
                     };
                 }, 
                 onEndFromCacheCallback: resolve,
