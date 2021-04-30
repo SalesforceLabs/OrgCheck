@@ -1456,6 +1456,7 @@ const OrgCheck = {
                                     items.sort(function compare(a, b) {
                                         const valueA = a.getElementsByTagName('td')[i].textContent;
                                         const valueB = b.getElementsByTagName('td')[i].textContent;
+                                        if (c.type === 'numeric') return (valueA - valueB) * iOrder;
                                         if (valueA < valueB) return -iOrder;
                                         if (valueA > valueB) return iOrder;
                                         return 0;

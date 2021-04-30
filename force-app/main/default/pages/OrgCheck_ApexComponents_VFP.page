@@ -67,7 +67,7 @@
                                 element: 'datatable-classes',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
@@ -76,7 +76,7 @@
                                         if (!r.fastCoverage || r.fastCoverage < 0.85) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
@@ -97,9 +97,9 @@
                                         if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
                                         return html;
                                     }},
-                                    { name: 'Size', property: 'length' },
-                                    { name: 'Methods', property: 'methodsCount' },
-                                    { name: 'Inner Cls.', property: 'innerClassesCount' },
+                                    { name: 'Size', type: 'numeric', property: 'length' },
+                                    { name: 'Methods', type: 'numeric', property: 'methodsCount' },
+                                    { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
                                     { name: 'Annot.', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
@@ -110,7 +110,7 @@
                                             return helper.html.render.icon('redFlag') + ' Not specified!';
                                         return r.specifiedSharing;
                                     }},
-                                    { name: 'Coverage', property: 'fastCoverage', formula: (r) => { 
+                                    { name: 'Coverage', type: 'numeric', property: 'fastCoverage', formula: (r) => { 
                                         let html = '';
                                         if (!r.fastCoverage || r.fastCoverage < 0.85) html += helper.html.render.icon('redFlag') + ' ';
                                         html += helper.html.render.percentage(r.fastCoverage); 
@@ -145,7 +145,7 @@
                                 element: 'datatable-triggers',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
@@ -153,7 +153,7 @@
                                         if (r.length > 5000) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
@@ -161,7 +161,7 @@
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
                                     { name: 'Status', formula: (r) => { return helper.html.render.icon('greenFlag') + ' OK'; }},
-                                    { name: 'Size', property: 'length', formula: (r) => { 
+                                    { name: 'Size', type: 'numeric', property: 'length', formula: (r) => { 
                                         if (r.length > 5000) 
                                             return helper.html.render.icon('redFlag') + ' ' + r.length;
                                         return r.length;
