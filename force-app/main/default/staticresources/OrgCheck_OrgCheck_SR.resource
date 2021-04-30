@@ -1316,15 +1316,17 @@ const OrgCheck = {
                     },
                     iterate: function(map, indexes, for_each_item_function) {
                         for (let i=0; i<indexes.length; i++) {
-                            let item = map[indexes[i]];
-                            for_each_item_function(item, i, indexes.length);
+                            const key = indexes[i];
+                            const item = map[key];
+                            for_each_item_function(item, i, indexes.length, key);
                         }
                     },
                     iterate2: function(map, for_each_item_function) {
                         const keys = MAP_HANDLER.keys(map);
                         for (let i=0; i<keys.length; i++) {
-                            let item = map[keys[i]];
-                            for_each_item_function(item, i, keys.length);
+                            const key = keys[i];
+                            const item = map[key];
+                            for_each_item_function(item, i, keys.length, key);
                         }
                     }
                 },
@@ -2825,8 +2827,8 @@ function buildDatasets(core) {
                 onErrorCallback: reject
             });
         }
-    }));
-    
+    }));    
+
     // ========================================================================
     // PROFILES
     // ------------------------------------------------------------------------
@@ -2844,7 +2846,7 @@ function buildDatasets(core) {
                                 'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
                                 '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
-                            'WHERE isOwnedByProfile = true'
+                            'WHERE isOwnedByProfile = TRUE'
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
@@ -2936,55 +2938,65 @@ function buildDatasets(core) {
                 mnemonic: this.keycache, 
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, '+ 
-                                'NamespacePrefix, '+
-                                '(SELECT Id, AssigneeId, Assignee.ProfileId, '+
-                                    'Assignee.Profile.Name '+
-                                    'FROM Assignments '+
-                                    'WHERE Assignee.IsActive = TRUE '+
-                                    'LIMIT 101) '+
+                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, '+
+                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
                             'FROM PermissionSet '+
-                            'WHERE IsOwnedByProfile = false' 
+                            'WHERE IsOwnedByProfile = FALSE' 
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
-                    let item = {
+                    const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
+                    return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         description: v.Description,
                         hasLicense: (v.License ? 'yes' : 'no'),
                         license: (v.License ? v.License.Name : ''),
                         isCustom: v.IsCustom,
-                        isUnusedCustom: v.IsCustom && memberCounts == 0,
                         isUndescribedCustom: v.IsCustom && !v.Description,
                         package: v.NamespacePrefix,
-                        membersCount: memberCounts, 
-                        hasMembers: memberCounts > 0, 
-                        uniqueProfiles: []
+                        isUnusedCustom: v.IsCustom && !hasMembers,
+                        hasMembers: hasMembers
                     };
-                    let pmap = {};
-                    for (let i=0; i<memberCounts; i++) {
-                        const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
-                        if (pmap[pid]) {
-                            pmap[pid].count++;
-                        } else {
-                            item.uniqueProfiles.push(
-                                pmap[pid] = {
-                                    id: pid,
-                                    name: v.Assignments.records[i].Assignee.Profile?.Name,
-                                    count: 1
-                                }
-                            );
-                        }
-                    }
-                    return item;
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
             });
         }
     }));
-                        
+
+    // ========================================================================
+    // PERMISSION SETS ASSIGNMENTS
+    // ------------------------------------------------------------------------
+    // Get the list of user assignements to permission sets in 
+    //      Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'permissionSetAssignments',
+        keycache: 'PermissionSetAssignments',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
+                            'FROM PermissionSetAssignment '+
+                            'WHERE Assignee.IsActive = TRUE '+
+                            'AND PermissionSet.IsOwnedByProfile = FALSE '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
+                        assigneeProfileId: core.doSimplifiySalesforceID(v.Assignee.ProfileId),
+                        permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+ 
     // ========================================================================
     // ROLES
     // ------------------------------------------------------------------------
@@ -3354,6 +3366,3 @@ function buildDatasets(core) {
         }
     }));
 }
-
-
-

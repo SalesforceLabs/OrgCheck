@@ -49,7 +49,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'profileLoginRestrictions' ],
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ],
                         onRecords: function(map) { 
 
                             // -------------------------------------------
@@ -114,11 +114,6 @@
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
                                     { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Description', formula: (r) => { 
-                                        let html = '';
-                                        r.loginIpRanges.forEach(i => html += i.description + '<br />');
-                                        return html;
-                                    }},
                                     { name: 'Starts', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
@@ -129,6 +124,11 @@
                                         r.loginIpRanges.forEach(i => html += i.endAddress + '<br />');
                                         return html;
                                     }},
+                                    { name: 'Description', formula: (r) => { 
+                                        let html = '';
+                                        r.loginIpRanges.forEach(i => html += i.description + '<br />');
+                                        return html;
+                                    }}
                                 ],
                                 data: map.profileLoginRestrictions,
                                 sorting: { name: 'Profile', order: 'asc' },
@@ -139,6 +139,19 @@
                             // -------------------------------------------
                             // PERMISSION SETS
                             // -------------------------------------------
+                            const assignmentsPerPS = {};
+                            helper.map.iterate2(map.permissionSetAssignments, function(p, i, s) {
+                                let assignments = assignmentsPerPS[p.permissionSetId];
+                                if (!assignments) {
+                                    assignments = assignmentsPerPS[p.permissionSetId] = { assignees: [], uniqueProfiles: {} };
+                                }
+                                assignments.assignees.push(p.assigneeId);
+                                if (!assignments.uniqueProfiles[p.assigneeProfileId]) {
+                                    assignments.uniqueProfiles[p.assigneeProfileId] = { count: 1 };
+                                } else {
+                                    assignments.uniqueProfiles[p.assigneeProfileId].count++;
+                                }
+                            });
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
                                 columns: [
@@ -155,13 +168,16 @@
                                     { name: 'Number of active users', formula: (r) => { 
                                         if (r.isUnusedCustom === true) {
                                             return helper.html.render.icon('redFlag') + ' No user for this custom permission set!'; 
-                                        }                               
-                                        if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
+                                        }
+                                        const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
+                                        if (membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + membersCount + ' user' + (membersCount>1?'s':'');
                                         return helper.html.render.icon('greenFlag') + ' More than 100 users';
                                     }},
                                     { name: 'Assigned users\'s profiles', formula: (r) => { 
                                         let html = '';
-                                        r.uniqueProfiles.forEach(i => html += helper.html.render.link('/'+i.id, i.name) + ' (' + i.count + ')<br />');
+                                        helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
+                                            html += helper.html.render.link('/'+pid, map.profiles[pid]?.name) + ' (' + v.count + ')<br />';
+                                        });
                                         return html;
                                     }},
                                     { name: 'Description', formula: (r) => {
