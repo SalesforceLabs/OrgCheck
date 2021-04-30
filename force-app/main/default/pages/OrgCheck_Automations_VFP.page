@@ -50,7 +50,7 @@
                                 element: 'datatable-workflows',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.isActive === false) score++;
                                         if (!r.description) score++;
@@ -86,9 +86,9 @@
                                 element: 'datatable-processbuilders',
                                 columns: [
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
-                                    { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Version', property: 'version' },
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Version', type: 'numeric', property: 'version' },
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.isActive === false) score++;
                                         if (!r.description) score++;
@@ -120,9 +120,9 @@
                                 element: 'datatable-flows',
                                 columns: [
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
-                                    { name: 'FlowVersion', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Version', property: 'version' },
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Version', type: 'numeric', property: 'version' },
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.isActive === false) score++;
                                         if (!r.description) score++;
