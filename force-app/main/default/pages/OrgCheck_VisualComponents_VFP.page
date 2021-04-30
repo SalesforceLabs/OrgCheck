@@ -65,14 +65,14 @@
                                 element: 'datatable-vfps',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (!r.description) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
@@ -100,14 +100,14 @@
                                 element: 'datatable-vfcs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (!r.description) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
@@ -134,7 +134,7 @@
                                 element: 'datatable-lps',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (!r.description) score++;
@@ -162,14 +162,14 @@
                                 element: 'datatable-lacs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (!r.description) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;
@@ -196,14 +196,14 @@
                                 element: 'datatable-lwcs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++;
                                         if (r.isApiVersionOld === true) score++;
                                         if (!r.description) score++;
                                         return score;
                                     }},
-                                    { name: 'API', formula: (r) => {
+                                    { name: 'API', type: 'numeric', formula: (r) => {
                                         if (r.isApiVersionOld === true)
                                             return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
                                         return r.apiVersion;

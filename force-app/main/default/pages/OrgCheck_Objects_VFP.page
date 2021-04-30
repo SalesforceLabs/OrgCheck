@@ -334,7 +334,7 @@
                                                 }
                                                 return type;
                                             }},
-                                            { name: 'Length', property: 'length' },
+                                            { name: 'Length', type: 'numeric', property: 'length' },
                                             { name: 'Encr.', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
                                             { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
                                             { name: 'ExtID', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
@@ -457,14 +457,14 @@
                                         columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Label', property: 'label' },
-                                            { name: '% used', formula: (r) => { 
+                                            { name: '% used', type: 'numeric', formula: (r) => { 
                                                 const percentageUsed = (r.max - r.remaining) / r.max;
                                                 const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
                                                 return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
                                             }},
-                                            { name: 'Used', formula: (r) => { return r.max - r.remaining;} },
-                                            { name: 'Maximum', property: 'max' },
-                                            { name: 'Left', property: 'remaining' },
+                                            { name: 'Used', type: 'numeric', formula: (r) => { return r.max - r.remaining;} },
+                                            { name: 'Maximum', type: 'numeric', property: 'max' },
+                                            { name: 'Left', type: 'numeric', property: 'remaining' },
                                             { name: 'Type', property: 'type' }
                                         ],
                                         data: object.limits,

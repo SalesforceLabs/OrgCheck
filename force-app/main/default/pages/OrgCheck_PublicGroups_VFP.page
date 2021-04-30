@@ -208,7 +208,7 @@
                                 element: 'datatable-publicGroups',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.includesTechnicalGroup === false) {
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
@@ -236,7 +236,7 @@
                                 element: 'datatable-queues',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.includesTechnicalGroup === false) {
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');

@@ -23,7 +23,7 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
-                                    { name: 'Score', formula: (r) => { 
+                                    { name: 'Score', type: 'numeric', formula: (r) => { 
                                         let score = 0;
                                         if (r.onLightningExperience === false) score++;
                                         if (r.neverLogged === true) score++;
@@ -33,7 +33,7 @@
                                         if (r.neverLogged === false) return helper.html.render.icon('greenFlag') + ' ' + r.lastLogin;
                                         return helper.html.render.icon('redFlag') + ' Never logged!'; 
                                     }},
-                                    { name: 'Failed logins', property: 'numberFailedLogins' },
+                                    { name: 'Failed logins', type: 'numeric', property: 'numberFailedLogins' },
                                     { name: 'Password change', property: 'lastPasswordChange' },
                                     { name: 'On LEX?', formula: (r) => { 
                                         if (r.onLightningExperience === true) return helper.html.render.icon('greenFlag') + ' LEX';

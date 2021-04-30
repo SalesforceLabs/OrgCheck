@@ -47,7 +47,7 @@
                                     { name: 'Field', formula: (r) => { 
                                         return helper.html.render.link('/'+r.id, r.fieldName); 
                                     }},
-                                    { name: 'Score', formula: (r) => {
+                                    { name: 'Score', type: 'numeric', formula: (r) => {
                                         let score = 0;
                                         if (!map.dependencies[r.id]) score++
                                         return score;
