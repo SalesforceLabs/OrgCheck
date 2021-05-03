@@ -1,5 +1,6 @@
 ---
-layout: home
+layout: page
+title: Welcome to OrgCheck
 ---
 
 ## Welcome to OrgCheck
