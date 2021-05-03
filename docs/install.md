@@ -38,7 +38,7 @@ Just like an AppExchange application you have to:
 - Click on "Install" (or "Upgrade")
 
 For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
-![Installation Notice screenshot](/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
+![Installation Notice screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
 
 
 ## C) Permission Set assignment
