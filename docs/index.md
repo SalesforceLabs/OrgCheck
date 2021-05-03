@@ -27,16 +27,16 @@ What do you expect from this reduction?
 Let customers have an application within their Salesforce org to reduce their technical debt continuously.
 
 Use cases of the application are:
-    - **Full SObject documentation** from the data model
-    - **Custom fields** created by the customer and their dependencies
-    - **Active users** with their profile and permission sets
-    - **Profiles** and **Permission Sets**
-    - **Roles** table and diagram
-    - **Public Groups**: recursive list of users
-    - **Automations**: workflows, process builders and flow
-    - **Visual Components**: Visual Force Page, Visual Force Component, Lightning Page, Lightning Aura Component and Lightning Web Component
-    - **Apex Components**: Classes and Triggers
-    - **Batches**: Failed jobs
+- **Full SObject documentation** from the data model
+- **Custom fields** created by the customer and their dependencies
+- **Active users** with their profile and permission sets
+- **Profiles** and **Permission Sets**
+- **Roles** table and diagram
+- **Public Groups**: recursive list of users
+- **Automations**: workflows, process builders and flow
+- **Visual Components**: Visual Force Page, Visual Force Component, Lightning Page, Lightning Aura Component and Lightning Web Component
+- **Apex Components**: Classes and Triggers
+- **Batches**: Failed jobs
 
 A complementary tool for the awesome **Salesforce Optimizer**.
 
