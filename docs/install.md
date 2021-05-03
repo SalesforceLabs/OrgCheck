@@ -47,6 +47,7 @@ Once installed, go to your org and assign your Salesforce user to the Permission
 
 And you are done!
 
+![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot1.png)
 
 
 ## The benefits of unlocked package
