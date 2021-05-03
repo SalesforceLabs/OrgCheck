@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Legal terms
+permalink: /legal/
 ---
 
 # Legal terms
