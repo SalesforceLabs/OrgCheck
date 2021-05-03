@@ -42,13 +42,10 @@ A complementary tool for the awesome **Salesforce Optimizer**.
 
 
 
-## Installation
-[How to install OrgCheck in your org?](installation)
-
-
-
-## My vision of this tool
-[Why did I create this tool?](vision)
+## Enjoy your ride with Checky (our mascot!)
+- [How to install OrgCheck in your org?](installation)
+- [Why did I create this tool?](vision)
+- [Legal terms: OrgCheck is not a Salesforce product](legal)
 
 
 
