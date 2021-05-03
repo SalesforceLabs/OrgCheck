@@ -1,6 +1,8 @@
+---
 layout: page
 title: "How to install OrgCheck in your org?"
 permalink: /installation/
+---
 
 # Installation
 
