@@ -1,1 +1,7 @@
+title: OrgCheck
+email: vfinet@salesforce.com
+description: OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
+baseurl: "/OrgCheck"
+twitter_username: VinceFINET
+github_username:  VinceFINET
 theme: jekyll-theme-slate
