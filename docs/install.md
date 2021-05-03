@@ -9,11 +9,7 @@ permalink: /installation/
 
 ## Easy to install
 
-**OrgCheck** is a Salesforce application which can be installed on **any** Salesforce organization **very easily**.
-
-No additional infrastructure is required. No additional license.
-
-Simple as A.B.C.
+**OrgCheck** is a Salesforce application which can be installed on **any** Salesforce organization **very easily**. No additional infrastructure is required. No additional license. Simple as A.B.C.
 
 
 ## A) URLs for the installation
@@ -38,6 +34,7 @@ Just like an AppExchange application you have to:
 - Click on "Install" (or "Upgrade")
 
 For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
+
 ![Installation Notice screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
 
 
