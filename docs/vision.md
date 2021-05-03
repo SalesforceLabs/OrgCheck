@@ -1,6 +1,7 @@
 ---
 layout: default
 title: My vision of this tool
+permalink: /vision/
 ---
 
 # My vision of this tool
