@@ -3,7 +3,6 @@ layout: default
 title: Welcome to OrgCheck
 ---
 
-## Welcome to OrgCheck
+# Welcome to OrgCheck
 
-### Installation
-[Installation](installation)
+- [How to install OrgCheck in your org?](installation)
