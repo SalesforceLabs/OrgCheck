@@ -4,7 +4,7 @@ title: How to install OrgCheck in your org?
 permalink: /installation/
 ---
 
-# Installation
+# How to install OrgCheck in your org?
 
 
 ## Easy to install
