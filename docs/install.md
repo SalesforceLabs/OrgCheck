@@ -4,9 +4,7 @@ title: How to install OrgCheck in your org?
 permalink: /installation/
 ---
 
-
 # Installation
-
 
 
 ## Easy to install
@@ -18,41 +16,47 @@ No additional infrastructure is required. No additional license.
 Simple as A.B.C.
 
 
+## A) URLs for the installation
 
-## The benefits of unlocked package
-
-- The application is delivered to you as an **unlocked package**.
-- This means the installation is pretty much like the installation of a simple AppExchange application.
-- We are also able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
-- We made the choice to use a specific **namespace** for this package, which is __OrgCheck__ of course, so that you can identify faster components of this package when browsing the metadata of your org (additionally to the naming convention).
-- Finally, the content of the application can be modified in your org (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence.
-
-
-
-## URLs for the installation
-
-There are two URLs available for installing the application on sandboxes or developer edition orgs:
+Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
 
 | Environment            | URL                                        |
 | ---------------------- | ------------------------------------------ |
 | Sandboxes              | http://sfdc.co/OrgCheck-Install-1_9-SDB    |
 | Developer Edition Orgs | http://sfdc.co/OrgCheck-Install-1_9-DevOrg |
 
-**Why two URLs?** <br />
-*Because Sandboxes are under the test.salesforce.com domain and Developer Orgs are under the login.salesforce.com.*
+URLs to install Salesforce packages contain the Salesforce ID of the current version of the package. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
 
-**Why a redirection?** <br />
-*The final URL contains the Salesforce ID of the current version of the package. To insure you always point to the newest version, we are masking you this detail by using this redirection.*
-
+After selecting the previous URL, you were redirected to Salesforce servers.
+If you were not yet authenticated, you will have to sign on using your credentials.
 
 
-## Authentication
+## B) Install the package
 
-After you are redirected to the final URL, you will need to authenticate to your Salesforce org.
-Keep in mind that installing a package implies having a system adminitrator rights on the specified org.
+Just like an AppExchange application you have to:
+- Select the profiles -- we recommand to select **Admins Only**
+- Click on "Install" (or "Upgrade")
 
-## I cannot authenticate to my org. Why?
-Maybe you are on the wrong link, trying to connect to a sandbox with your credential but with the login.salesforce.com
-Maybe your org is set to allow authentication only from you my domain? if so replace "login." with you my domain name.
+For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
+![Installation Notice screenshot](/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
 
 
+## C) Permission Set assignment
+
+Once installed, go to your org and assign your Salesforce user to the Permission Set called "OrgCheck Users".
+
+And you are done!
+
+
+
+## The benefits of unlocked package
+
+The application is delivered to you as an **unlocked package**.
+
+This means the installation is pretty much like the installation of a simple AppExchange application.
+
+We are also able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
+
+We made the choice to use a specific **namespace** for this package, which is __OrgCheck__ of course, so that you can identify faster components of this package when browsing the metadata of your org (additionally to the naming convention).
+
+Finally, the content of the application can be modified in your org (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence.
