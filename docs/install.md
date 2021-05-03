@@ -1,5 +1,5 @@
 ---
-layout: page
+layout: default
 title: How to install OrgCheck in your org?
 permalink: /installation/
 ---
