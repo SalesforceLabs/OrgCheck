@@ -1,6 +1,6 @@
 layout: page
 title: "How to install OrgCheck in your org?"
-permalink: /URL-PATH/
+permalink: /installation.html
 
 # Installation
 
