@@ -65,10 +65,7 @@ A complementary tool for the awesome **Salesforce Optimizer**.
 - Support on a public Slack
 - One day on the AppExchange?
 
-
-
-## What this application contains
-
+### What this application contains?
 - 1 Permission Set for users to see the app
 - 1 Custom App
 - 12 Tabs
@@ -76,12 +73,7 @@ A complementary tool for the awesome **Salesforce Optimizer**.
 - 13 Visualforce Pages
 - 4 StaticResource including “jsforce.min.js” and “d3.v5.min.js”
 
-No more!
-
-Visualforce Pages contain Javascript code which uses JsForce library to connect to the REST API and the Tooling API of the current org.
-
-Warning: the app may increase the Daily API Request limit (although it uses a caching mechanism on the local browser)! So this application should be used in sandbox only.
-
+**No more!**
 
 
 ## How to get help and support?
