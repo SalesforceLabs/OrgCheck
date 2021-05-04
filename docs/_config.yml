@@ -5,3 +5,9 @@ twitter_username: VinceFINET
 github_username:  VinceFINET
 theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
+
+page_home: / 
+page_preview: preview
+page_install: installation
+page_vision: vision
+page_legal: legal
