@@ -6,7 +6,7 @@ github_username:  VinceFINET
 theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
 
-page_home: / 
+page_home: /OrgCheck/
 page_preview: /OrgCheck/preview
 page_install: /OrgCheck/installation
 page_vision: /OrgCheck/vision
