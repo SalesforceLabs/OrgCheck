@@ -1,7 +1,7 @@
 <div align="center">
   <img src="docs/assets/pngs/Logo.png" width="256" alt="OrgCheck Logo" />
   <h1>OrgCheck Salesforce Application</h1>
-  <h3>OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.</h3>
+  <b>OrgCheck</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
   <a href="https://github.com/VinceFINET/OrgCheck/network/members">
     <img alt="forks on github" src="https://img.shields.io/github/forks/VinceFINET/OrgCheck?style=flat-square&logoColor=blue">
   </a>
