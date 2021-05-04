@@ -30,13 +30,14 @@
         <p class="view"><a href="{{ site.github.owner_url }}">View My GitHub Profile</a></p>
         {% endif %}
 
-        <ul>
-          <li><a href="{{ site.page_home }}">Home</a></li>
-          <li><a href="{{ site.page_preview }}">Preview</a></li>
-          <li><a href="{{ site.page_install }}">Install</a></li>
-          <li><a href="{{ site.page_vision }}">Vision</a></li>
-          <li><a href="{{ site.page_legal }}">Legal terms</a></li>
-        </ul>
+        <p>
+          <strong>Menu:</strong><br />
+          <a href="{{ site.page_home }}">Home</a><br />
+          <a href="{{ site.page_preview }}">Preview</a><br />
+          <a href="{{ site.page_install }}">Install</a><br />
+          <a href="{{ site.page_vision }}">Vision</a><br />
+          <a href="{{ site.page_legal }}">Legal terms</a><br />
+        </p>
         
         {% if site.show_downloads %}
         <ul class="downloads">
