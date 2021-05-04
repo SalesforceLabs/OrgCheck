@@ -21,45 +21,16 @@
   </a>
 </div>
 
-## Screenshots
 
-### Home Page tab
-![Home Page tab screenshot](/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot1.png)
-
-### Custom Fields tab
-![Custom Fields tab screenshot](/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot2.png)
-
-### Dependency tree 
-![Dependency tree screenshot](/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot3.png)
-
-### Role Hierarchy tab
-![Role Hierarchy tab screenshot](/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot4.png)
+## More information about OrgCheck:
+- Home: https://vincefinet.github.io/OrgCheck/
+- Preview: https://vincefinet.github.io/OrgCheck/preview/
+- Installation: https://vincefinet.github.io/OrgCheck/installation/
 
 
-## Installation
+## Issues or new ideas?
 
-Here is the links of OrgCheck's unlocked packages v1.9:
-- for Sandboxes: http://sfdc.co/OrgCheck-Install-1_9-SDB
-- for Developer Orgs: http://sfdc.co/OrgCheck-Install-1_9-DevOrg
-
-PLEASE install it in sandbox or dev orgs ONLY!!!
-
-If already installed, just go to the same link and it will update the application (no need anymore to unassigned users from the permission set).
-
-For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
-![Installation Notice screenshot](/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
-
-
-## Issues
-
-You can log any issues in here:
-https://github.com/VinceFINET/OrgCheck/issues
-
-
-## Project
-
-My priorisations is shown here:
-https://github.com/VinceFINET/OrgCheck/projects
+You can log any issues and new ideas in our tracker: https://github.com/VinceFINET/OrgCheck/issues
 
 
 ## License
