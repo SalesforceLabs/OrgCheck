@@ -1,24 +1,23 @@
-# OrgCheck Salesforce Application
-
-![OrgCheck Logo](/docs/assets/pngs/Logo.png)
-
-OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
-
-<a href="https://github.com/VinceFINET/OrgCheck/network/members">
-  <img alt="forks on github" src="https://img.shields.io/github/forks/VinceFINET/OrgCheck?style=flat-square&logoColor=blue">
-</a>
-<a href="https://github.com/VinceFINET/OrgCheck/stargazers">
-  <img alt="stars on github" src="https://img.shields.io/github/stars/VinceFINET/OrgCheck?style=flat-square">
-</a>
-<a href="https://github.com/VinceFINET/OrgCheck/watchers">
-  <img alt="watchers" src="https://img.shields.io/github/watchers/VinceFINET/OrgCheck?style=flat-square">
-</a>
-<a href="https://github.com/VinceFINET/OrgCheck/issues">
-  <img alt="issues" src="https://img.shields.io/github/issues-raw/VinceFINET/OrgCheck?style=flat-square">
-</a>
-<a href="https://opensource.org/licenses/MIT">
-  <img alt="licenses" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-</a>
+<div align="center">
+  <img src="docs/assets/pngs/Logo.png" width="256" alt="OrgCheck Logo" />
+  <h1>OrgCheck Salesforce Application</h1>
+  <h3>OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.</h3>
+  <a href="https://github.com/VinceFINET/OrgCheck/network/members">
+    <img alt="forks on github" src="https://img.shields.io/github/forks/VinceFINET/OrgCheck?style=flat-square&logoColor=blue">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/stargazers">
+    <img alt="stars on github" src="https://img.shields.io/github/stars/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/watchers">
+    <img alt="watchers" src="https://img.shields.io/github/watchers/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/issues">
+    <img alt="issues" src="https://img.shields.io/github/issues-raw/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img alt="licenses" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+</div>
 
 ## Screenshots
 
