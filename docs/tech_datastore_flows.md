@@ -20,7 +20,9 @@ FROM Flow
 Get the metadata information for each Flow based on the previous IDs from the Tooling API:
 
 ```SQL
-SELECT Id, FullName, DefinitionId, MasterLabel, VersionNumber, Metadata, Status, Description, ProcessType 
+SELECT Id, FullName, DefinitionId, MasterLabel, 
+   VersionNumber, Metadata, Status, Description, 
+   ProcessType 
 FROM Flow 
 WHERE Id = <ID>
 ```
