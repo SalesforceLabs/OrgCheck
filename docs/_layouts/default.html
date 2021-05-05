@@ -37,9 +37,9 @@
           &rsaquo; &nbsp; <a href="{{ site.page_install }}">Install</a><br />
           &rsaquo; &nbsp; <a href="{{ site.page_vision }}">Vision</a><br />
           &rsaquo; &nbsp; Knowledge Sharing<br />
-          &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="/OrgCheck/technical/datastores/">Data Stores in OrgCheck</a><br />
-          {% for o in [ {n:'flows', l:'Flows'}, {n:'packages', l:'Packages'}, {n:'workflowrules', l:'Workflow Rules' } ] %}
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="/OrgCheck/technical/datastores/{{ o.n }}">{{ o.l }}</a><br />
+          &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_datastores }}">Data Stores in OrgCheck</a><br />
+          {% for o in site.page_datastores_pages %}
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ o.u }}">{{ o.l }}</a><br />
           {% endfor %}
           &rsaquo; &nbsp; <a href="{{ site.page_legal }}">Legal terms</a><br />
         </p>
