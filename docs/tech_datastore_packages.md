@@ -9,7 +9,9 @@ permalink: /technical/datastores/packages/
 ## Approach
 
 Currently, the information about **Packages** is retrieved from two sources.
+
 One source is the installed packages (using the **Tooling API**).
+
 Another source is the current namespace setup in the org (using the **REST API**). 
 Most of the time, the namespace of the org is empty, unless you specifically set it.
 
