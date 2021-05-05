@@ -8,7 +8,7 @@ permalink: /technical/datastores/flows/
 
 ## Approach
 
-Currently, the information about **Flows** are retrieved using the **Tooling API**.
+Currently, the information about **Flows** is retrieved using the **Tooling API**.
 
 As specified in the documentation, the fields **FullName** and **Metadata** from the object **Flow**,
 can be retrieved only if the query is returning one unique record.
