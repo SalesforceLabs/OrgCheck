@@ -8,7 +8,7 @@ permalink: /technical/datastores/workflowrules/
 
 ## Approach
 
-Currently, the information about **Workflow Rules** are retrieved using the **Tooling API**.
+Currently, the information about **Workflow Rules** is retrieved using the **Tooling API**.
 
 As specified in the documentation, the fields **FullName** and **Metadata** from the object **WorkflowRule**,
 can be retrieved only if the query is returning one unique record.
