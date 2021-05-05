@@ -6,6 +6,16 @@ permalink: /technical/datastores/flows/
 
 # Data Store "Flows"
 
+## Approach
+
+Currently, the information about **Flows** are retrieved using the **Tooling API**.
+
+As specified in the documentation, the fields **FullName** and **Metadata** from the object **Flow**,
+can be retrieved only if the query is returning one unique record.
+
+So the only way to do this (with that API) is to get all the IDs first and then to query the object one by
+one.
+
 ## Step 1: List of Salesforce ID
 
 Get the list of Salesforce ID of all Flows in the org from the Tooling API:
