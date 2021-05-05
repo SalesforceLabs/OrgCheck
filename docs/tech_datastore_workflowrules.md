@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Data Store "Workflow Rules" in OrgCheck  
-permalink: /technical/datastores/workflowrules
+permalink: /technical/datastores/workflowrules/
 ---
 
 # Data Store "WorkflowRules"
