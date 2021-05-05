@@ -11,6 +11,7 @@ page_preview: /OrgCheck/preview
 page_install: /OrgCheck/installation
 page_vision: /OrgCheck/vision
 page_legal: /OrgCheck/legal
-page_datastores: [{ u:'/OrgCheck/technical/datastores/flows',         l:'Flows' }, 
-                  { u:'/OrgCheck/technical/datastores/packages',      l:'Packages' }, 
-                  { u:'/OrgCheck/technical/datastores/workflowrules', l:'Workflow Rules' }]
+page_datastores: /OrgCheck/technical/datastores
+page_datastores_pages: [{ u:'/OrgCheck/technical/datastores/flows',         l:'Flows' }, 
+                        { u:'/OrgCheck/technical/datastores/packages',      l:'Packages' }, 
+                        { u:'/OrgCheck/technical/datastores/workflowrules', l:'Workflow Rules' }]
