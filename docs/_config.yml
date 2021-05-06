@@ -6,19 +6,16 @@ github_username:  VinceFINET
 theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
 
-page_home: /OrgCheck/
-page_preview: /OrgCheck/preview
-page_install: /OrgCheck/installation
-page_vision: /OrgCheck/vision
-page_legal: /OrgCheck/legal
-page_datastores: /OrgCheck/technical/datastores
-page_datastores_pages: 
-  1: 
-    label: Flows
-    url: /OrgCheck/technical/datastores/flows
-  2: 
-    label: Packages'
-    url: /OrgCheck/technical/datastores/packages
-  3: 
-    label: "Workflow Rules"
-    url: /OrgCheck/technical/datastores/workflowrules
+pages:
+  home: Home
+  preview: Preview
+  installation: Install
+  vision: Vision
+  legal: Legal Terms
+  technical:
+    datastores: Data Stores in OrgCheck
+      flows: Flows
+      packages: Packages
+      workflowrules: Workflow Rules
+
+
