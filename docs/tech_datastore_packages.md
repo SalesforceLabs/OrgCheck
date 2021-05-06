@@ -36,12 +36,12 @@ FROM Organization
 ## Step 3: Mapping
 
 | Step # | Extract                           | Transformation         | Load       |
-| ------ | --------------------------------- | ---------------------- | ---------- |
-| :  1 : | Id                                |                        | id         |
-| :  1 : | SubscriberPackage.Name            |                        | name       |
-| :  1 : | SubscriberPackage.NamespacePrefix |                        | namespace  |
-| :  1 : |                                   | ="Installed"           | type       |
-| :  2 : | NamespacePrefix                   |                        | id         |
-| :  2 : | NamespacePrefix                   |                        | name       |
-| :  2 : | NamespacePrefix                   |                        | namespace  |
-| :  2 : |                                   | ="Local"               | type       |
+| :-----:| --------------------------------- | ---------------------- | ---------- |
+|   1    | Id                                |                        | id         |
+|   1    | SubscriberPackage.Name            |                        | name       |
+|   1    | SubscriberPackage.NamespacePrefix |                        | namespace  |
+|   1    |                                   | ="Installed"           | type       |
+|   2    | NamespacePrefix                   |                        | id         |
+|   2    | NamespacePrefix                   |                        | name       |
+|   2    | NamespacePrefix                   |                        | namespace  |
+|   2    |                                   | ="Local"               | type       |
