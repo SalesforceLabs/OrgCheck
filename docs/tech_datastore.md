@@ -12,28 +12,28 @@ That information is called **Data Stores** and is cached in your browser local c
 
 Currently the different datastores are as follow:
 
-- [ApexClasses](./todo/)
-- [ApexTriggers](./todo/)
-- [AuraComponents](./todo/)
-- [Batches](./todo/)
-- [CustomFields](./todo/)
-- [CustomLabels](./todo/)
-- [CustomObjects](./todo/)
-- [CustomSettings](./todo/)
-- [Flows](./flows/)
-- [LightningPages](./todo/)
-- [LightningWebComponents](./todo/)
-- [Objects](./todo/)
-- [OrgWideDefaults](./todo/)
-- [Packages](./todo/)
-- [PermissionSetAssignments](./todo/)
-- [PermissionSets](./todo/)
-- [ProfileLoginRestrictions](./todo/)
-- [Profiles](./todo/)
-- [PublicGroups](./todo/)
-- [Roles](./todo/)
-- [StaticResources](./todo/)
-- [Users](./todo/)
-- [VisualforceComponents](./todo/)
-- [VisualforcePages](./todo/)
-- [Workflow Rules](./workflowrules/)
+- ApexClasses
+- ApexTriggers
+- AuraComponents
+- Batches
+- CustomFields
+- CustomLabels
+- CustomObjects
+- CustomSettings
+- [{{ site.page_tech_ds_flows_label }}]({{ site.page_tech_ds_flows_url | absolute_url }})
+- LightningPages
+- LightningWebComponents
+- Objects
+- OrgWideDefaults
+- [{{ site.page_tech_ds_packages_label }}]({{ site.page_tech_ds_packages_url | absolute_url }})
+- PermissionSetAssignments
+- PermissionSets
+- ProfileLoginRestrictions
+- Profiles
+- PublicGroups
+- Roles
+- StaticResources
+- Users
+- VisualforceComponents
+- VisualforcePages 
+- [{{ site.page_tech_ds_workflowrules_label }}]({{ site.page_tech_ds_workflowrules_url | absolute_url }})
