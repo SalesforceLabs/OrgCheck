@@ -18,6 +18,8 @@ page_legal_label: Legal Terms
 page_legal_url: /legal
 page_tech_datastores_label: Data Stores in OrgCheck
 page_tech_datastores_url: /technical/datastores
+page_tech_ds_apexclasses_label: Apex Classes
+page_tech_ds_apexclasses_url: /technical/datastores/apexclasses
 page_tech_ds_flows_label: Flows
 page_tech_ds_flows_url: /technical/datastores/flows
 page_tech_ds_packages_label: Packages
