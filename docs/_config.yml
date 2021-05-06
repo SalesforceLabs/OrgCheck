@@ -14,8 +14,6 @@ pages:
   legal: Legal Terms
   technical:
     datastores: Data Stores in OrgCheck
-      flows: Flows
-      packages: Packages
-      workflowrules: Workflow Rules
-
-
+    ds_flows: Flows
+    ds_packages: Packages
+    ds_workflowrules: Workflow Rules
