@@ -7,13 +7,13 @@ theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
 
 pages:
-  home: Home
-  preview: Preview
-  installation: Install
-  vision: Vision
-  legal: Legal Terms
-  technical:
-    datastores: Data Stores in OrgCheck
-    ds_flows: Flows
-    ds_packages: Packages
-    ds_workflowrules: Workflow Rules
+  - home: Home
+  - preview: Preview
+  - installation: Install
+  - vision: Vision
+  - legal: Legal Terms
+  - technical:
+    - datastores: Data Stores in OrgCheck
+    - ds_flows: Flows
+    - ds_packages: Packages
+    - ds_workflowrules: Workflow Rules
