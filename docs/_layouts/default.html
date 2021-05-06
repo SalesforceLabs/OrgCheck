@@ -32,16 +32,16 @@
 
         <p>
           <strong>Menu:</strong><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_home }}">Home</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_preview }}">Preview</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_install }}">Install</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_vision }}">Vision</a><br />
+          &rsaquo; &nbsp; <a href="{{ "/home" | absolute_url }}">{{ site.pages.home }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ "/preview" | absolute_url }}">{{ site.pages.preview }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ "/installation" | absolute_url }}">{{ site.pages.installation }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ "/vision" | absolute_url }}">{{ site.pages.vision }}</a><br />
           &rsaquo; &nbsp; Knowledge Sharing<br />
-          &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_datastores }}">Data Stores in OrgCheck</a><br />
-          {% for o in site.page_datastores_pages %}
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ o.url }}"> {{ o }} {{ o.label }}</a><br />
-          {% endfor %}
-          &rsaquo; &nbsp; <a href="{{ site.page_legal }}">Legal terms</a><br />
+          &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores" | absolute_url }}">{{ site.pages.technical.datastores }}</a><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores/flows" | absolute_url }}">{{ site.pages.technical.datastores.flows }}</a><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores/packages" | absolute_url }}">{{ site.pages.technical.datastores.packages }}</a><br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores/workflowrules" | absolute_url }}">{{ site.pages.technical.datastores.workflowrules }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ "/legal" | absolute_url }}">{{ site.pages.legal }}</a><br />
         </p>
 
         {% if site.show_downloads %}
