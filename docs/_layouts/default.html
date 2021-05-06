@@ -32,10 +32,10 @@
 
         <p>
           <strong>Menu:</strong><br />
-          &rsaquo; &nbsp; <a href="{{ "/home" | absolute_url }}">{{ site.pages.home }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ "/preview" | absolute_url }}">{{ site.pages.preview }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ "/installation" | absolute_url }}">{{ site.pages.installation }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ "/vision" | absolute_url }}">{{ site.pages.vision }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ site.page_home.url | absolute_url }}">{{ site.page_home.label }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ site.page_preview.url | absolute_url }}">{{ site.page_preview.label }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ site.page_install.url | absolute_url }}">{{ site.page_install.label }}</a><br />
+          &rsaquo; &nbsp; <a href="{{ site.page_vision.url | absolute_url }}">{{ site.page_vision.label }}</a><br />
           &rsaquo; &nbsp; Knowledge Sharing<br />
           &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores" | absolute_url }}">{{ site.pages.technical.datastores }}</a><br />
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ "/technical/datastores/flows" | absolute_url }}">{{ site.pages.technical.ds_flows }}</a><br />
