@@ -12,7 +12,7 @@ That information is called **Data Stores** and is cached in your browser local c
 
 Currently the different datastores are as follow:
 
-- ApexClasses
+- [{{ site.page_tech_ds_apexclasses_label }}]({{ site.page_tech_ds_apexclasses_url | absolute_url }})
 - ApexTriggers
 - AuraComponents
 - Batches
