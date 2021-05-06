@@ -6,14 +6,30 @@ github_username:  VinceFINET
 theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
 
-pages:
-  - home: Home
-  - preview: Preview
-  - installation: Install
-  - vision: Vision
-  - legal: Legal Terms
-  - technical:
-    - datastores: Data Stores in OrgCheck
-    - ds_flows: Flows
-    - ds_packages: Packages
-    - ds_workflowrules: Workflow Rules
+page_home: 
+  - label: Home
+  - url: /home
+page_preview:  
+  - label: Preview
+  - url: /preview
+page_installation:  
+  - label: Install
+  - url: /installation
+page_vision:  
+  - label: Vision
+  - url: /vision
+page_legal:  
+  - label: Legal Terms
+  - url: /legal
+page_tech_datastores:  
+  - label: Data Stores in OrgCheck
+  - url: /technical/datastores
+page_tech_ds_flows:  
+  - label: Flows
+  - url: /technical/datastores/flows
+page_tech_ds_packages:  
+  - label: Packages
+  - url: /technical/datastores/packages
+page_tech_ds_workflowrules:  
+  - label: Workflow Rules
+  - url: /technical/datastores/workflowrules
