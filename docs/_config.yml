@@ -7,7 +7,7 @@ theme: jekyll-theme-minimal
 logo: assets/pngs/Logo+Mascot-2.png
 
 page_home_label: Home
-page_home_url: /home
+page_home_url: /
 page_preview_label: Preview
 page_preview_url: /preview
 page_installation_label: Install
