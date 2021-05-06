@@ -14,8 +14,9 @@ permalink: /technical/datastores/apexclasses/
 
 Currently, the information about **Apex Classes** is retrieved using the **Tooling API**.
 
-We run two queries in parallel to get (1) the **metadata information** for each apex class
-and (2) the **code coverage** for each apex class
+We run two queries in parallel to get:
+1. the **metadata information** for each apex class
+2. the **code coverage** for each apex class
 
 
 
