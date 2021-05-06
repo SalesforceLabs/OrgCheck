@@ -77,12 +77,8 @@ For each record that returns this query, we will do the following mapping:
 | interfaces                               | **SymbolTable.interfaces**                                                                 |
 | methodsCount                             | **SymbolTable.methods.length** (0 if the object is null)                                   |
 | annotations                              | **SymbolTable.tableDeclaration.annotations**                                               |
-| specifiedSharing                         | switch(**SymbolTable.tableDeclaration.modifiers**) <br />
-                                                case 'with sharing': 'with'<br />
-                                                case 'without sharing': 'without'<br />
-                                                case 'inherited sharing': 'inherit'                                                     |
-| isSharingMissing                         | false by default. true if ***isTest***=false AND ***isInterface***=false AND
-                                                                       ***specifiedSharing*** is null                                   | 
+| specifiedSharing                         | switch(**SymbolTable.tableDeclaration.modifiers**) <br />case 'with sharing': 'with'<br />case 'without sharing': 'without'<br />case 'inherited sharing': 'inherit' |
+| isSharingMissing                         | false by default. true if ***isTest***=false AND ***isInterface***=false AND ***specifiedSharing*** is null | 
 
 ## Code coverage
 
