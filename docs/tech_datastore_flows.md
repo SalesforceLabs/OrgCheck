@@ -16,18 +16,17 @@ can be retrieved only if the query is returning one unique record.
 So the only way to do this (with that API) is to get all the IDs first and then to query the object one by
 one.
 
-## Step 1: List of Salesforce ID
+In the future we will challenge this by using the **Metadata API**.
 
-Get the list of Salesforce ID of all Flows in the org from the Tooling API:
+## Metadata information of Flows
 
-```SQL
-SELECT Id
-FROM Flow
-```
+### Where is the information in Salesforce?
 
-## Step 2: Get information for each previous Salesforce ID
+In the Tooling API, the metadata information for Flows is located on the object **Flow**.
 
-Get the metadata information for each Flow based on the previous IDs from the Tooling API:
+### How OrgCheck is retreiving the information?
+
+In OrgCheck we will run the following query on the **Tooling API**:
 
 ```SQL
 SELECT Id, FullName, DefinitionId, MasterLabel, 
@@ -37,20 +36,25 @@ FROM Flow
 WHERE Id = <ID>
 ```
 
-## Step 3: Mapping
+Additionaly to the fields described in the SOQL query, we will use the following information 
+in the **Metadata** field:
+- Metadata.recordCreates
+- Metadata.processMetadataValues
 
-| Extract                          | Transformation                                       | Load           |
-| -------------------------------- | ---------------------------------------------------- | -------------- |
-| Id                               | simplifySalesforceId()                               | id             |
-| FullName                         |                                                      | name           |
-| DefinitionId                     | simplifySalesforceId()                               | definitionId   |
-| MasterLabel                      |                                                      | definitionName |
-| Metadata.recordCreates.length    | 0 by default (if null)                               | dmlCreates     |
-| Metadata.recordDeletes.length    | 0 by default (if null)                               | dmlDeletes     |
-| Metadata.recordUpdates.length    | 0 by default (if null)                               | dmlUpdates     |
-| Status                           | === 'Active' ?                                       | isActive       |
-| Description                      |                                                      | description    |
-| ProcessType                      |                                                      | type           |
-| Metadata.processMetadataValues[] | forEach(if(name==='ObjectType') return stringValue)  | sobject        |
-| Metadata.processMetadataValues[] | forEach(if(name==='TriggerType') return stringValue) | triggerType    |
+For each record that returns this query, we will do the following mapping:
+
+| OrgCheck field                   | Formula                                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| id                               | simplifySalesforceId(**Id**)                                                             |
+| name                             | **FullName**                                                                             |
+| definitionId                     | simplifySalesforceId(**DefinitionId**)                                                   |
+| definitionName                   | **MasterLabel**                                                                          |
+| dmlCreates                       | **Metadata.recordCreates.length** (0 if the object is null)                              |
+| dmlDeletes                       | **Metadata.recordDeletes.length**0 by default (if null)                                  |
+| dmlUpdates                       | **Metadata.recordUpdates.length**0 by default (if null)                                  |
+| isActive                         | true if Status = 'Active', false otherwise                                               |
+| description                      | **Description**                                                                          |
+| type                             | **ProcessType**                                                                          |
+| sobject                          | **Metadata.processMetadataValues[]** filter(e.name = 'ObjectType') return e.stringValue  |
+| triggerType                      | **Metadata.processMetadataValues[]** filter(e.name = 'TriggerType') return e.stringValue |
 
