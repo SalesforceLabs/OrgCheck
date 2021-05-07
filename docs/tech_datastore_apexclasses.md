@@ -24,7 +24,20 @@ We run two queries in parallel to get:
 
 ### Where is the information in Salesforce?
 
-The metadata information for Apex Classes is located on the object **ApexClass**. 
+The metadata information for Apex Classes is located in multiple places:
+- as the entity called **ApexClass** that can be retrieved and deployed via 
+  the **Metadata API**. 
+  See (https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_classes.htm)
+- as the sObject called **ApexClass** that can be queried in SOQL via the 
+  **SOAP API** and **REST API**. 
+  See https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_apexclass.htm
+- as the object called **ApexClass** that can be queried via the 
+  **Tooling API**. 
+  See https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_apexclass.htm 
+
+In this section we choose to use the **Tooling API** because we will have more 
+information about classes, especially data that is available after the 
+**compilation** of the class.
 
 The information that does not require compilation is available as simple fields 
 (like **ApiVersion**, **Body**, ...). 
