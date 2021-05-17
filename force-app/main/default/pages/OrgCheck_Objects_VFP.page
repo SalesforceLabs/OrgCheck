@@ -13,13 +13,13 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Object Documentation" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Object Documentation</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-objectdoc__item">Object Documentation</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Org Wide Default" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Org Wide Default</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-owd__item">Org Wide Default</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-objectdoc__item">
                     <div class="slds-grid">
                         <h1 class="slds-text-heading--small">Global Information</h1>
                         <div class="slds-col_bump-left slds-form">
@@ -205,7 +205,7 @@
                         <div id="datatable-relationships" />
                     </div>
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-owd__item">
                     <div id="datatable-orgWideDefaults" />
                 </div>
             </div>
@@ -548,7 +548,8 @@
                             helper.html.datatable.create({
                                 element: 'datatable-orgWideDefaults',
                                 columns: [
-                                    { name: 'Object', property: 'name' },
+                                    { name: 'Label', property: 'label' },
+                                    { name: 'Name', property: 'name' },
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Internal', property: 'internal' },
                                     { name: 'External', property: 'external' }
@@ -559,6 +560,11 @@
                             });
                         },
                         actions: {  
+                            exportTable: [{
+                                visibleTab: 'tab-default-owd__item',
+                                table: 'datatable-orgWideDefaults',
+                                filename: 'Org Wide Defaults'
+                            }],
                             clearCache: { 
                                 show: true 
                             }

@@ -3338,7 +3338,7 @@ function buildDatasets(core) {
             for (let i=0; i<NUM_LOOP; i++) {
                 entityDefQueries.push({
                     rest: true,
-                    string: 'SELECT DeveloperName, ExternalSharingModel, InternalSharingModel, '+
+                    string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
                                 'NamespacePrefix '+
                             'FROM EntityDefinition '+
                             'WHERE IsCustomSetting = false '+
@@ -3354,8 +3354,9 @@ function buildDatasets(core) {
                 queries: entityDefQueries,
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     return { 
-                        id: v.DeveloperName,
-                        name: v.DeveloperName,
+                        id: v.DurableId,
+                        name: v.QualifiedApiName,
+                        label: v.MasterLabel,
                         packageName: v.NamespacePrefix,
                         external: v.ExternalSharingModel,
                         internal: v.InternalSharingModel
