@@ -235,6 +235,17 @@
                             .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
 
                         // --------------------------------
+                        // LEVEL ZONE
+                        // --------------------------------
+                        node.filter(function(d) { return d.depth > 0; })
+                            .append('foreignObject')
+                            .attr('x', BOX_PADDING)
+                            .attr('y', - BOX_HEIGHT / 2 - 5)
+                            .attr('width', NOTIF_WIDTH)
+                            .attr('height', NOTIF_HEIGHT)
+                            .append('xhtml').html(function(d) { return '<center><b>' + d.depth + '</b></center>'; });
+
+                        // --------------------------------
                         // NODE CONTENT
                         // --------------------------------
                         node.append('foreignObject')
@@ -291,6 +302,8 @@
                         if (roles_map[node.data].developerName) {
                             html += 'Developer Name: <b>'+roles_map[node.data].developerName+'</b><br />';
                         }
+                        html += '<br />';
+                        html += 'Level in hierarchy: '+ node.depth +'<br />';
                         html += '<br />';
                         if (roles_map[node.data].hasActiveMembers === true) {
                             html += 'This role has '+roles_map[node.data].activeMembersCount+' active user'+(roles_map[node.data].activeMembersCount>1?'s':'')+'<br />';
