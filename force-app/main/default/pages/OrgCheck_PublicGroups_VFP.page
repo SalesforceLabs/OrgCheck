@@ -54,7 +54,7 @@
                     // Render a list of users information
                     // --------------------------------------
                     const renderUsers = function(users, uids, show_photo) {
-                        if (uids.length == 0) {
+                        if (!uids || (uids && uids.length == 0)) {
                             return '(empty)';
                         }
                         let htmlContent = '<b>' + uids.length + ' user' + (uids.length > 1 ? 's' : '') + '</b><br />';
@@ -79,26 +79,32 @@
                             const directGroup = groups[gids[i].id];
                             if (directGroup) {
                                 let link, name, type;
-                                if (directGroup.isPublicGroup === true) {
-                                    link = '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+directGroup.id;
-                                    name = directGroup.name;
-                                    type = 'Public Group';
-                                } else if (directGroup.isTechnical === true) {
-                                    name = directGroup.developerName;
-                                    type = 'Technical Group';
-                                } else {
-                                    link = '/'+directGroup.relatedId;
-                                    const relatedRole = roles[directGroup.relatedId];
-                                    if (relatedRole) {
-                                        name = relatedRole.name;
-                                    } else {
-                                        name = 'Role #'+directGroup.relatedId;
-                                    }
-                                    if (directGroup.isRole === true) type = 'Role';
-                                    if (directGroup.isRoleAndSubordinates === true) type = 'Role &amp; Sub.';
+                                switch (directGroup.type) {
+                                    case 'publicGroup':
+                                        link = '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+directGroup.id;
+                                        name = directGroup.name;
+                                        type = 'Public Group';
+                                        break;
+                                    case 'technical':
+                                        name = directGroup.developerName;
+                                        type = 'Technical Group';
+                                        break;
+                                    // case 'role':
+                                    // case 'queue':
+                                    // case 'roleAndSub':
+                                    default:
+                                        link = '/'+directGroup.relatedId;
+                                        const relatedRole = roles[directGroup.relatedId];
+                                        if (relatedRole) {
+                                            name = relatedRole.name;
+                                        } else {
+                                            name = 'Role #'+directGroup.relatedId;
+                                        }
+                                        if (directGroup.type === 'role') type = 'Role';
+                                        if (directGroup.type === 'roleAndSub') type = 'Role &amp; Sub.';
                                 }
                                 htmlContent += '<li>' + type + ' ' + (link ? helper.html.render.link(link, name) : name);
-                                if (directGroup.isTechnical == false && 
+                                if (directGroup.type !== 'technical' && 
                                     ((directGroup.directUsers && directGroup.directUsers.length > 0) || 
                                      (directGroup.indirectUsers && directGroup.indirectUsers.length > 0))) {
                                     htmlContent += ' with';
@@ -118,6 +124,10 @@
                     // --------------------------------------
                     const recursive_set_number_of_indirect_users = function(groups, roles, group_id) {
                         const group_information = groups[group_id];
+                        // If for some reason the id was not found
+                        if (!group_information) {
+                            return;
+                        }
                         // If the list was already calculated by previous ancestors
                         if (group_information.indirectUsers) {
                             return;
@@ -157,7 +167,7 @@
                     // --------------------------------------
                     const recursive_add_subordinates_as_direct_groups = function(groups, group_id) {
                         const group_information = groups[group_id];
-                        if (group_information.parentId) {
+                        if (group_information && group_information.parentId) {
                             groups[group_information.parentId].directGroups.push({ id: group_id })
                             recursive_add_subordinates_as_direct_groups(groups, group_information.parentId);
                         }
@@ -171,30 +181,30 @@
                             let publicGroupIDsByRoleID = {}; // map of public group IDs that are Roles by role id
                             let publicGroupIDsByRoleAndSubID = {}; // map of public group IDs that are Roles And Subordinates by role id
                             helper.map.iterate2(map.publicGroups, function(d, i, s) {
-                                if (d.isRole === true) {
+                                if (d.type === 'role') {
                                     publicGroupIDsByRoleID[d.relatedId] = d.id;
-                                } else if (d.isRoleAndSubordinates === true) {
+                                } else if (d.type === 'roleAndSub') {
                                     publicGroupIDsByRoleAndSubID[d.relatedId] = d.id;
                                 }
                             });
 
                             // Add information from roles to public groups that mimic the roles
                             helper.map.iterate2(map.publicGroups, function(d, i, s) { 
-                                if (d.isRole || d.isRoleAndSubordinates) {
+                                if (d.type === 'role' || d.type === 'roleAndSub') {
                                     const role = map.roles[d.relatedId];
                                     d.name = role.name;
                                     d.developerName = role.developerName;
                                     d.directMembersCount = role.activeMembersCount;
                                     d.directUsers = role.activeMembers;
                                     d.directGroups = [];
-                                    if (d.isRole) d.parentId = publicGroupIDsByRoleID[role.parentId];
-                                    if (d.isRoleAndSubordinates) d.parentId = publicGroupIDsByRoleAndSubID[role.parentId];
+                                    if (d.type === 'role') d.parentId = publicGroupIDsByRoleID[role.parentId];
+                                    if (d.type === 'roleAndSub') d.parentId = publicGroupIDsByRoleAndSubID[role.parentId];
                                 }
                             });
 
                             // Add groups and users from subordinates
                             helper.map.iterate2(map.publicGroups, function(d, i, s) { 
-                                if (d.isRoleAndSubordinates) {
+                                if (d.type === 'roleAndSub') {
                                     recursive_add_subordinates_as_direct_groups(map.publicGroups, d.id);
                                 }
                             });
@@ -219,7 +229,7 @@
                                     { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
                                     { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
-                                    { name: 'All users', formula: (r) => { 
+                                    { name: 'All active users', formula: (r) => { 
                                         if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
                                         const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                         return renderUsers(map.users, all_distinct_users, true); 
@@ -228,7 +238,7 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                filtering: { formula: (r) => { return r.isPublicGroup; }},
+                                filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
                                 showSearch: true
                             });
 
@@ -247,7 +257,7 @@
                                     { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
                                     { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
                                     { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
-                                    { name: 'All users', formula: (r) => { 
+                                    { name: 'All active users', formula: (r) => { 
                                         if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
                                         const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                         return renderUsers(map.users, all_distinct_users, true); 
@@ -256,7 +266,7 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
-                                filtering: { formula: (r) => { return r.isQueue; }},
+                                filtering: { formula: (r) => { return r.type === 'queue'; }},
                                 showSearch: true
                             });
                         },

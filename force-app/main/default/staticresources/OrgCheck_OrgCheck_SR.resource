@@ -3074,46 +3074,75 @@ function buildDatasets(core) {
         name: 'publicGroups',
         keycache: 'PublicGroups',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const publicGroupsMap = {};
+            const pgAssignmentsMap = {};
+            core.doSalesforceQueries({
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
-                                '(SELECT Id, UserOrGroupId FROM GroupMembers)'+
+                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
                             'FROM Group ' 
+                }, { 
+                    tooling: false, 
+                    string: 'SELECT Id, GroupId, UserOrGroupId FROM GroupMember '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        isPublicGroup: (v.Type === 'Regular'),
-                        isTechnical: (v.Type === 'AllCustomerPortal' || v.Type === 'Organization' || v.Type === 'PRMOrganization'),
-                        isRole: (v.Type === 'Role'),
-                        isQueue: (v.Type === 'Queue'),
-                        isRoleAndSubordinates: (v.Type === 'RoleAndSubordinates')
-                    };
-                    if (item.isPublicGroup || item.isQueue || item.isTechnical) {
-                        item.developerName = v.DeveloperName;
-                        item.name = v.Name;
-                        item.includeBosses = v.DoesIncludeBosses;
-                        item.directMembersCount = 0;
-                        item.directUsers = [];
-                        item.directGroups = [];
-                        if (!item.isTechnical && v.GroupMembers && v.GroupMembers.records) {
-                            item.directMembersCount = v.GroupMembers.records.length;
-                            for (let i=0; i<item.directMembersCount; i++) {
-                                const member_from_api = v.GroupMembers.records[i];
-                                const member_id = core.doSimplifiySalesforceID(member_from_api.UserOrGroupId);
-                                const member_is_a_user = member_id.startsWith('005');
-                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });
-                            }
+                onEachRecord: function(v, i, l, ts) {
+                    if (i === 0) {
+                        const item = { id: core.doSimplifiySalesforceID(v.Id) };
+                        switch (v.Type) {
+                            case 'Regular':              item.type = 'publicGroup'; break;
+                            case 'Role':                 item.type = 'role';        break;
+                            case 'Queue':                item.type = 'queue';       break;
+                            case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
+                            // case 'AllCustomerPortal':
+                            // case 'Organization':
+                            // case 'PRMOrganization':
+                            default: item.type = 'technical';
                         }
-                        
+                        if (item.type === 'role' || item.type === 'roleAndSub') {
+                            item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                        } else {
+                            item.developerName = v.DeveloperName;
+                            item.name = v.Name;
+                            item.includeBosses = v.DoesIncludeBosses;
+                            item.directMembersCount = 0;
+                            item.directUsers = [];
+                            item.directGroups = [];                            
+                        }
+                        publicGroupsMap[item.id] = item;
                     } else {
-                        item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                        const groupId = core.doSimplifiySalesforceID(v.GroupId);
+                        let item = pgAssignmentsMap[groupId];
+                        if (!item) {
+                            // no assignment yet for this group
+                            item = { 
+                                directMembersCount: 0,
+                                directUsers: [],
+                                directGroups: []
+                            };
+                        }
+                        item.directMembersCount++;
+                        const member_id = core.doSimplifiySalesforceID(v.UserOrGroupId);
+                        const member_is_a_user = member_id.startsWith('005');
+                        (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
+                        pgAssignmentsMap[groupId] = item;
                     }
-                    return item;
                 }, 
-                onEndFromCacheCallback: resolve,
+                onEnd: function(records, size) {
+                    // Merge publicGroupsMap and pgAssignmentsMap
+                    for (const [key, value] of Object.entries(publicGroupsMap)) {
+                        if (pgAssignmentsMap[key]) {
+                            value.directMembersCount = pgAssignmentsMap[key].directMembersCount;
+                            value.directUsers = pgAssignmentsMap[key].directUsers;
+                            value.directGroups = pgAssignmentsMap[key].directGroups;
+                            delete pgAssignmentsMap[key];
+                        }
+                    }
+                    core.setMetadataInCache(cache, publicGroupsMap);
+                    resolve(publicGroupsMap);
+                },
                 onErrorCallback: reject
             });
         }
