@@ -131,7 +131,7 @@
                             d.inactive_show_notif = false;
                             if (!d.parent) {
                                 // 'I am root...'
-                                d.popup_background_color = helper.html.render.color('gray');
+                                d.popup_background_color = helper.html.render.color('light-gray');
                                 d.clickable = false;
                             } else if (nodeData) {
                                 const activeCount = nodeData.activeMembersCount;
@@ -151,13 +151,13 @@
                                 const inactiveCount = nodeData.inactiveMembersCount;
                                 d.inactive_count = inactiveCount;
                                 if (inactiveCount > 0) {
-                                    d.inactive_background_color = helper.html.render.color('gray');
+                                    d.inactive_background_color = helper.html.render.color('light-gray');
                                     if (inactiveCount > 100) {
                                         d.inactive_count = '99+';
                                     }
                                     d.inactive_show_notif = true;
                                 } else {
-                                    d.inactive_background_color = helper.html.render.color('dark-gray');
+                                    d.inactive_background_color = helper.html.render.color('gray');
                                 }
                             }
                         });
@@ -239,11 +239,11 @@
                         // --------------------------------
                         node.filter(function(d) { return d.depth > 0; })
                             .append('foreignObject')
-                            .attr('x', BOX_PADDING)
-                            .attr('y', - BOX_HEIGHT / 2 - 5)
-                            .attr('width', NOTIF_WIDTH)
+                            .attr('x', -25)
+                            .attr('y', -7)
+                            .attr('width', NOTIF_WIDTH + 35)
                             .attr('height', NOTIF_HEIGHT)
-                            .append('xhtml').html(function(d) { return '<center><b>' + d.depth + '</b></center>'; });
+                            .append('xhtml').html(function(d) { return 'Level #' + d.depth; });
 
                         // --------------------------------
                         // NODE CONTENT

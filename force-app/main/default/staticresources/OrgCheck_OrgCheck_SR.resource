@@ -1671,8 +1671,8 @@ const OrgCheck = {
                                 case 'blue':         return '#5fc9f8';
                                 case 'dark-orange':  return '#fd9426';
                                 case 'orange':       return '#fecb2e';
+                                case 'light-gray':   return '#bfc9ca';
                                 case 'gray':         return '#555555';
-                                case 'dark-gray':    return '#6e7273';
                                 default:             return 'red';
                             }
                         }, 
