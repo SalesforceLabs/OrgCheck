@@ -3143,7 +3143,7 @@ function buildDatasets(core) {
                     core.setMetadataInCache(cache, publicGroupsMap);
                     resolve(publicGroupsMap);
                 },
-                onErrorCallback: reject
+                onError: reject
             });
         }
     }));
