@@ -37,18 +37,18 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Role Explorer</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-explorer__item">Role Explorer</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Role Listing</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">Role Listing</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-explorer__item">
                     <div class="slds-scrollable">
                         <div id="chart-container" name="chart-container" />
                     </div>
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-table__item">
                     <div id="datatable" />
                 </div>
             </div>
@@ -124,6 +124,18 @@
                             if (mdepth < d.depth) mdepth = d.depth;
                         });
 
+                        // Show alert about too many number of levels in the hierarchy
+                        const MAX_LEVEL_DEPTH_ROLES = 7;
+                        if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
+                            let html = '';
+                            html += 'You have more than '+MAX_LEVEL_DEPTH_ROLES+' levels of roles in your Role Hierarchy ';
+                            html += '(exactly '+mdepth+' levels).<br /><br />';
+                            html += 'The Role Hierarchy is not there to mimic the hierarchy of your ';
+                            html += 'company, it is there for visibility purpose.<br /><br />';
+                            html += 'Please reduce it!<br />';
+                            helper.html.modal.show('Too many levels in your Role Hierarchy!', html);
+                        }
+                        
                         // Set some attributes that we use to render each nodes
                         root.each(function(d) {
                             const nodeData = roles_map[d.data];
@@ -396,6 +408,7 @@
                         },
                         actions: {  
                             exportTable: [{
+                                visibleTab: 'tab-default-table__item',
                                 table: 'datatable',
                                 filename: 'Roles'
                             }],
