@@ -1487,10 +1487,17 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
+                                let trScore = 0;
+                                let tdScore = null;
                                 config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
+                                    if (c.property === '##score##') {
+                                        tdScore = tdBody;
+                                        return;
+                                    }
                                     const row = isArray ? k : config.data[k];
                                     let content = '';
+                                    let additiveScore = 0;
                                     try {
                                         if (c.formula) {
                                             content = c.formula(row);
@@ -1509,18 +1516,51 @@ const OrgCheck = {
                                         }
                                         throw e;
                                     }
+                                    try {
+                                        if (c.scoreFormula) {
+                                            additiveScore = c.scoreFormula(row);
+                                            if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
+                                                trScore += additiveScore;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        e.context = {
+                                            'when': 'Datatable: calling scoreFormula to calculate the score of a cell in the table',
+                                            'what': {
+                                                'Column': c.name,
+                                                'Formula': c.scoreFormula,
+                                                'Current Score': trScore,
+                                                'Data': row
+                                            }
+                                        }
+                                        throw e;
+                                    }
                                     if (content) {
                                         switch (typeof content) {
-                                            case 'object': tdBody.appendChild(content); break;
-                                            default: tdBody.innerHTML = content;
+                                            case 'object': 
+                                                if (additiveScore > 0) {
+                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                                }       
+                                                tdBody.appendChild(content); 
+                                                break;
+                                            default: 
+                                                if (additiveScore > 0) {
+                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />'+content;
+                                                } else {
+                                                    tdBody.innerHTML = content;
+                                                }
+                                                
                                         }
                                     }
                                     const alternative = (c.property && c.formula ? row[c.property] : '');
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
-                                    if (config.coloring && config.coloring.name === c.name) trBody.bgColor = config.coloring.formula(content, alternative);
                                 });
+                                if (tdScore && trScore > 0) {
+                                    tdScore.innerHTML = trScore;
+                                    trBody.bgColor = '#ffe099';
+                                }
                             });
                             table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
@@ -2534,7 +2574,7 @@ function buildDatasets(core) {
                             isAbstract: false,
                             isInterface: false,
                             isSharingMissing: false,
-                            size: v.LengthWithoutComments,
+                            length: v.LengthWithoutComments,
                             needsRecompilation: (!v.SymbolTable ? true : false)
                         };
                         if (v.Body) {

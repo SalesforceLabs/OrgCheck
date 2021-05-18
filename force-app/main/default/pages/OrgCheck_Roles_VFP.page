@@ -359,21 +359,26 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', type: 'numeric', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.hasActiveMembers == false) score++;
-                                        if (r.hasInactiveMembers === true) score++;
-                                        return score; 
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Developer Name', property: 'developerName' },
-                                    { name: 'Number of active members', type: 'numeric', formula: (r) => {
-                                        if (r.hasActiveMembers == false) return helper.html.render.icon('redFlag') + ' No active member!';                                
-                                        return helper.html.render.icon('greenFlag') + ' ' + r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
-                                    }},
-                                    { name: 'Number of inactive members', type: 'numeric', formula: (r) => {
-                                        if (r.hasInactiveMembers === true) return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
-                                        return helper.html.render.icon('greenFlag') + ' No inactive member!';                                
-                                    }},
+                                    { name: 'Number of active members', type: 'numeric', 
+                                        formula: (r) => {
+                                            if (r.hasActiveMembers == false) return 'No active member!';                                
+                                            return r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
+                                        },
+                                        scoreFormula: (r) => {
+                                            if (r.hasActiveMembers == false) return 1;
+                                        }
+                                    },
+                                    { name: 'Number of inactive members', type: 'numeric', 
+                                        formula: (r) => {
+                                            if (r.hasInactiveMembers === true) return r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
+                                            return 'No inactive member!';                                
+                                        },
+                                        scoreFormula: (r) => {
+                                            if (r.hasInactiveMembers === true) return 1;
+                                        }
+                                    },
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
@@ -391,7 +396,6 @@
                                 ],
                                 data: map.roles,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;

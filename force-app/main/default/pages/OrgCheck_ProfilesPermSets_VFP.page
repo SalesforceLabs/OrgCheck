@@ -59,33 +59,33 @@
                                 element: 'datatable-profiles',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.isUnusedCustom === true) score++;
-                                        if (r.isUndescribedCustom === true) score++;
-                                        return score;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
-                                    { name: 'Number of active users', formula: (r) => { 
-                                        if (r.isUnusedCustom === true) {
-                                            return helper.html.render.icon('redFlag') + ' No user for this custom profile!'; 
-                                        }                               
-                                        if (r.membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + r.membersCount + ' user' + (r.membersCount>1?'s':'');
-                                        return helper.html.render.icon('greenFlag') + ' More than 100 users';
-                                    }},
-                                    { name: 'Description', formula: (r) => {
-                                        if (r.isUndescribedCustom === true) {
-                                            return helper.html.render.icon('redFlag') + ' You should set a description to this custom profile!';
+                                    { name: 'Number of active users', 
+                                        formula: (r) => { 
+                                            if (r.isUnusedCustom === true) return 'No user for this custom profile!'; 
+                                            if (r.membersCount < 101) return r.membersCount + ' user' + (r.membersCount>1?'s':'');
+                                            return 'More than 100 users';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isUnusedCustom === true) return 1;
                                         }
-                                        return r.description;
-                                    }}
+                                    },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.isUndescribedCustom === true) return 'You should set a description to this custom profile!';
+                                            return r.description;
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isUndescribedCustom === true) return 1;
+                                        }
+                                    }
                                 ],
                                 data: map.profiles,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
 
@@ -156,23 +156,22 @@
                                 element: 'datatable-permissionSets',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.isUnusedCustom === true) score++;
-                                        if (r.isUndescribedCustom === true) score++;
-                                        return score;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
-                                    { name: 'Number of active users', formula: (r) => { 
-                                        if (r.isUnusedCustom === true) {
-                                            return helper.html.render.icon('redFlag') + ' No user for this custom permission set!'; 
+                                    { name: 'Number of active users', 
+                                        formula: (r) => { 
+                                            if (r.isUnusedCustom === true) return 'No user for this custom permission set!'; 
+                                            const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
+                                            if (membersCount < 101) return membersCount + ' user' + (membersCount>1?'s':'');
+                                            return 'More than 100 users';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isUnusedCustom === true) return 1;
                                         }
-                                        const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
-                                        if (membersCount < 101) return helper.html.render.icon('greenFlag') + ' ' + membersCount + ' user' + (membersCount>1?'s':'');
-                                        return helper.html.render.icon('greenFlag') + ' More than 100 users';
-                                    }},
+                                    },
+
                                     { name: 'Assigned users\'s profiles', formula: (r) => { 
                                         let html = '';
                                         helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
@@ -180,16 +179,18 @@
                                         });
                                         return html;
                                     }},
-                                    { name: 'Description', formula: (r) => {
-                                        if (r.isUndescribedCustom === true) {
-                                            return helper.html.render.icon('redFlag') + ' You should set a description to this custom permission set!';
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.isUndescribedCustom === true) return 'You should set a description to this custom permission set!';
+                                            return r.description;
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isUndescribedCustom === true) return 1;
                                         }
-                                        return r.description;
-                                    }}
+                                    }
                                 ],
                                 data: map.permissionSets,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
                         },

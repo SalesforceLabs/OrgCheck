@@ -308,14 +308,19 @@
                                             { name: 'Field Label', formula: (r) => { return helper.html.render.link('/lightning/setup/ObjectManager/'+(object.id ? object.id : object.name)+'/FieldsAndRelationships/'+(r.id ? r.id : r.name)+'/view', r.label); }},
                                             { name: 'Custom', property: 'custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
                                             { name: 'Full API Name', property: 'name' },
-                                            { name: 'Dependencies', formula: (r) => { 
-                                                if (r.custom === true) {
-                                                    const dep = object.fieldDependencies[r.id]; 
-                                                    if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                                    return helper.html.render.icon('redFlag') + ' No dependency.';
+                                            { name: 'Dependencies', 
+                                                formula: (r) => { 
+                                                    if (r.custom === true) {
+                                                        const dep = object.fieldDependencies[r.id]; 
+                                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                                        return 'No dependency';
+                                                    }
+                                                    return '';
+                                                }, 
+                                                scoreFormula: (r) => { 
+                                                    if (r.custom === true && !object.fieldDependencies[r.id]) return 1; 
                                                 }
-                                                return '';
-                                            }},
+                                            },
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: 'Type', formula: (r) => {
                                                 let type = r.type;

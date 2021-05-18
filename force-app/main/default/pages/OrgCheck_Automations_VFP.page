@@ -50,35 +50,41 @@
                                 element: 'datatable-workflows',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', type: 'numeric', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.isActive === false) score++;
-                                        if (!r.description) score++;
-                                        if (r.noAction === true) score++;
-                                        return score;
-                                    }},
-                                    { name: 'Description', formula: (r) => {
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
-                                    }},
-                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
-                                        var html = helper.html.render.checkbox(r.isActive); 
-                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
-                                        return html;
-                                    }},
-                                    { name: 'Actions', formula: (r) => { 
-                                        if (r.noAction === true) {
-                                            return helper.html.render.icon('redFlag') + ' no direct action!<br />';
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Workflow!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
                                         }
-                                        let html = '';
-                                        r.actions.forEach(a => html += 'Direct action: '+a.name+' ('+a.type+')<br />'); 
-                                        r.futureActions.forEach(tt => tt.actions.forEach(a => html += 'Future action: '+a.name+' ('+a.type+')<br />'));
-                                        return html;
-                                    }}
+                                    },
+                                    { name: 'Active', property: 'isActive', 
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.isActive); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isActive === false) return 1; 
+                                        }
+                                    },
+                                    { name: 'Actions', 
+                                        formula: (r) => { 
+                                            if (r.noAction === true) {
+                                                return 'No direct action!<br />';
+                                            }
+                                            let html = '';
+                                            r.actions.forEach(a => html += 'Direct action: '+a.name+' ('+a.type+')<br />'); 
+                                            r.futureActions.forEach(tt => tt.actions.forEach(a => html += 'Future action: '+a.name+' ('+a.type+')<br />'));
+                                            return html;
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.noAction === true) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.workflows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
 
@@ -88,30 +94,32 @@
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
                                     { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Version', type: 'numeric', property: 'version' },
-                                    { name: 'Score', type: 'numeric', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.isActive === false) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
-                                        var html = helper.html.render.checkbox(r.isActive); 
-                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
-                                        return html;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Active', property: 'isActive', 
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.isActive); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isActive === false) return 1; 
+                                        }
+                                    },
                                     { name: 'Object', property: 'sobject' },
                                     { name: 'Trigger', property: 'triggerType' },
                                     { name: 'DML Creates', property: 'dmlCreates' },
                                     { name: 'DML Deletes', property: 'dmlDeletes' },
                                     { name: 'DML Updates', property: 'dmlUpdates' },
-                                    { name: 'Description', formula: (r) => {
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Process Builder!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.flows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 filtering: { formula: (r) => { return r.type === 'Workflow' }},
                                 showSearch: true
                             });
@@ -122,25 +130,27 @@
                                     { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
                                     { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Version', type: 'numeric', property: 'version' },
-                                    { name: 'Score', type: 'numeric', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.isActive === false) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'Is Active', property: 'isActive', formula: (r) => { 
-                                        var html = helper.html.render.checkbox(r.isActive); 
-                                        if (r.isActive === false) html += ' ' + helper.html.render.icon('redFlag');
-                                        return html;
-                                    }},
-                                    { name: 'Description', formula: (r) => {
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' You should set a description to this Workflow!';
-                                    }}
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Active', property: 'isActive', 
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.isActive); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isActive === false) return 1; 
+                                        }
+                                    },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Flow!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.flows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 filtering: { formula: (r) => { return r.type === 'Flow' }},
                                 showSearch: true
                             });

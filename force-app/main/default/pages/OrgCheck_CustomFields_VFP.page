@@ -47,22 +47,22 @@
                                     { name: 'Field', formula: (r) => { 
                                         return helper.html.render.link('/'+r.id, r.fieldName); 
                                     }},
-                                    { name: 'Score', type: 'numeric', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++
-                                        return score;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.customFields,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
                         },
