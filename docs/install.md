@@ -16,10 +16,8 @@ permalink: /installation/
 
 Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
 
-| Environment            | URL                                        |
-| ---------------------- | ------------------------------------------ |
-| Sandboxes              | http://sfdc.co/OrgCheck-Install-1_9-SDB    |
-| Developer Edition Orgs | http://sfdc.co/OrgCheck-Install-1_9-DevOrg |
+- for Sandboxes: http://sfdc.co/OrgCheck-Install-1_9-SDB
+- for Developer Edition Orgs: http://sfdc.co/OrgCheck-Install-1_9-DevOrg
 
 URLs to install Salesforce packages contain the Salesforce ID of the current version of the package. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
 
