@@ -20,6 +20,6 @@ permalink: /preview/
 
 ## Install today!
 <table>
-  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-SDB"><img width="120px" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a></td></tr>
-  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-DevOrg"><img width="120px" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a></td></tr>
+  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-SDB"><img width="120" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a></td></tr>
+  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-DevOrg"><img width="120" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a></td></tr>
 </table>
