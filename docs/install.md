@@ -18,8 +18,8 @@ Go to one of the following URLs depending on the nature of the organization you 
 
 | Environment            | URL                                                                                | Button |
 | ---------------------- | ---------------------------------------------------------------------------------- | ------ |
-| Sandboxes              | [sfdc.co/OrgCheck-Install-1_9-SDB](https://sfdc.co/OrgCheck-Install-1_9-SDB)       | ![sfdc.co/OrgCheck-Install-1_9-SDB](../docs/assets/pngs/Install-SDBX.png) |
-| Developer Edition Orgs | [sfdc.co/OrgCheck-Install-1_9-DevOrg](https://sfdc.co/OrgCheck-Install-1_9-DevOrg) | ![sfdc.co/OrgCheck-Install-1_9-DevOrg](../docs/assets/pngs/Install-DevEdition.png) |
+| Sandboxes              | [sfdc.co/OrgCheck-Install-1_9-SDB](https://sfdc.co/OrgCheck-Install-1_9-SDB)       | ![sfdc.co/OrgCheck-Install-1_9-SDB](../assets/pngs/Install-SDBX.png) |
+| Developer Edition Orgs | [sfdc.co/OrgCheck-Install-1_9-DevOrg](https://sfdc.co/OrgCheck-Install-1_9-DevOrg) | ![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png) |
 
 URLs to install Salesforce packages contain the Salesforce ID of the current version of the package. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
 
