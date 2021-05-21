@@ -41,9 +41,13 @@ Use cases of the application are:
 A complementary tool for the awesome **Salesforce Optimizer**.
 
 
+
+## Install today!
+
 ![sfdc.co/OrgCheck-Install-1_9-SDB](../assets/pngs/Install-SDBX.png)
 
-![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png) |
+![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png)
+
 
 
 ## Enjoy your ride with Checky (our mascot!)
