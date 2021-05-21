@@ -19,7 +19,8 @@ permalink: /preview/
 ![Role Hierarchy tab screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot4.png)
 
 ## Install today!
+# Install today!
 <table>
-  <tr><td>![sfdc.co/OrgCheck-Install-1_9-SDB](../assets/pngs/Install-SDBX.png)</td></tr>
-  <tr><td>![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png)</td></tr>
+  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-SDB"><img src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a></td></tr>
+  <tr><td><a href="https://sfdc.co/OrgCheck-Install-1_9-DevOrg"><img src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a></td></tr>
 </table>
