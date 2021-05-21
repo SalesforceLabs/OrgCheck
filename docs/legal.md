@@ -15,3 +15,9 @@ Salesforce support is not available for OrgCheck.
 Support requests for OrgCheck should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a>. 
 
 Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank">https://github.com/VinceFINET/OrgCheck</a> under separate and different license terms.
+
+
+
+![sfdc.co/OrgCheck-Install-1_9-SDB](../assets/pngs/Install-SDBX.png)
+
+![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png)
