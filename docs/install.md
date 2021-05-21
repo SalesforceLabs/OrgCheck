@@ -16,7 +16,7 @@ permalink: /installation/
 
 Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
 
-| Environment            | URL                                                                                | Button |
+| Environment            | URL                                                                                | Action |
 | ---------------------- | ---------------------------------------------------------------------------------- | ------ |
 | Sandboxes              | [sfdc.co/OrgCheck-Install-1_9-SDB](https://sfdc.co/OrgCheck-Install-1_9-SDB)       | ![sfdc.co/OrgCheck-Install-1_9-SDB](../assets/pngs/Install-SDBX.png) |
 | Developer Edition Orgs | [sfdc.co/OrgCheck-Install-1_9-DevOrg](https://sfdc.co/OrgCheck-Install-1_9-DevOrg) | ![sfdc.co/OrgCheck-Install-1_9-DevOrg](../assets/pngs/Install-DevEdition.png) |
