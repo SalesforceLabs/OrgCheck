@@ -1316,15 +1316,17 @@ const OrgCheck = {
                     },
                     iterate: function(map, indexes, for_each_item_function) {
                         for (let i=0; i<indexes.length; i++) {
-                            let item = map[indexes[i]];
-                            for_each_item_function(item, i, indexes.length);
+                            const key = indexes[i];
+                            const item = map[key];
+                            for_each_item_function(item, i, indexes.length, key);
                         }
                     },
                     iterate2: function(map, for_each_item_function) {
                         const keys = MAP_HANDLER.keys(map);
                         for (let i=0; i<keys.length; i++) {
-                            let item = map[keys[i]];
-                            for_each_item_function(item, i, keys.length);
+                            const key = keys[i];
+                            const item = map[key];
+                            for_each_item_function(item, i, keys.length, key);
                         }
                     }
                 },
@@ -1454,6 +1456,7 @@ const OrgCheck = {
                                     items.sort(function compare(a, b) {
                                         const valueA = a.getElementsByTagName('td')[i].textContent;
                                         const valueB = b.getElementsByTagName('td')[i].textContent;
+                                        if (c.type === 'numeric') return (valueA - valueB) * iOrder;
                                         if (valueA < valueB) return -iOrder;
                                         if (valueA > valueB) return iOrder;
                                         return 0;
@@ -1484,10 +1487,17 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
+                                let trScore = 0;
+                                let tdScore = null;
                                 config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
+                                    if (c.property === '##score##') {
+                                        tdScore = tdBody;
+                                        return;
+                                    }
                                     const row = isArray ? k : config.data[k];
                                     let content = '';
+                                    let additiveScore = 0;
                                     try {
                                         if (c.formula) {
                                             content = c.formula(row);
@@ -1506,18 +1516,51 @@ const OrgCheck = {
                                         }
                                         throw e;
                                     }
+                                    try {
+                                        if (c.scoreFormula) {
+                                            additiveScore = c.scoreFormula(row);
+                                            if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
+                                                trScore += additiveScore;
+                                            }
+                                        }
+                                    } catch (e) {
+                                        e.context = {
+                                            'when': 'Datatable: calling scoreFormula to calculate the score of a cell in the table',
+                                            'what': {
+                                                'Column': c.name,
+                                                'Formula': c.scoreFormula,
+                                                'Current Score': trScore,
+                                                'Data': row
+                                            }
+                                        }
+                                        throw e;
+                                    }
                                     if (content) {
                                         switch (typeof content) {
-                                            case 'object': tdBody.appendChild(content); break;
-                                            default: tdBody.innerHTML = content;
+                                            case 'object': 
+                                                if (additiveScore > 0) {
+                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                                }       
+                                                tdBody.appendChild(content); 
+                                                break;
+                                            default: 
+                                                if (additiveScore > 0) {
+                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />'+content;
+                                                } else {
+                                                    tdBody.innerHTML = content;
+                                                }
+                                                
                                         }
                                     }
                                     const alternative = (c.property && c.formula ? row[c.property] : '');
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
-                                    if (config.coloring && config.coloring.name === c.name) trBody.bgColor = config.coloring.formula(content, alternative);
                                 });
+                                if (tdScore && trScore > 0) {
+                                    tdScore.innerHTML = trScore;
+                                    trBody.bgColor = '#ffe099';
+                                }
                             });
                             table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
@@ -1668,8 +1711,8 @@ const OrgCheck = {
                                 case 'blue':         return '#5fc9f8';
                                 case 'dark-orange':  return '#fd9426';
                                 case 'orange':       return '#fecb2e';
+                                case 'light-gray':   return '#bfc9ca';
                                 case 'gray':         return '#555555';
-                                case 'dark-gray':    return '#6e7273';
                                 default:             return 'red';
                             }
                         }, 
@@ -2531,7 +2574,7 @@ function buildDatasets(core) {
                             isAbstract: false,
                             isInterface: false,
                             isSharingMissing: false,
-                            size: v.LengthWithoutComments,
+                            length: v.LengthWithoutComments,
                             needsRecompilation: (!v.SymbolTable ? true : false)
                         };
                         if (v.Body) {
@@ -2825,8 +2868,8 @@ function buildDatasets(core) {
                 onErrorCallback: reject
             });
         }
-    }));
-    
+    }));    
+
     // ========================================================================
     // PROFILES
     // ------------------------------------------------------------------------
@@ -2844,7 +2887,7 @@ function buildDatasets(core) {
                                 'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
                                 '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
-                            'WHERE isOwnedByProfile = true'
+                            'WHERE isOwnedByProfile = TRUE'
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
@@ -2936,55 +2979,65 @@ function buildDatasets(core) {
                 mnemonic: this.keycache, 
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, '+ 
-                                'NamespacePrefix, '+
-                                '(SELECT Id, AssigneeId, Assignee.ProfileId, '+
-                                    'Assignee.Profile.Name '+
-                                    'FROM Assignments '+
-                                    'WHERE Assignee.IsActive = TRUE '+
-                                    'LIMIT 101) '+
+                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, '+
+                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
                             'FROM PermissionSet '+
-                            'WHERE IsOwnedByProfile = false' 
+                            'WHERE IsOwnedByProfile = FALSE' 
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
-                    let item = {
+                    const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
+                    return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         description: v.Description,
                         hasLicense: (v.License ? 'yes' : 'no'),
                         license: (v.License ? v.License.Name : ''),
                         isCustom: v.IsCustom,
-                        isUnusedCustom: v.IsCustom && memberCounts == 0,
                         isUndescribedCustom: v.IsCustom && !v.Description,
                         package: v.NamespacePrefix,
-                        membersCount: memberCounts, 
-                        hasMembers: memberCounts > 0, 
-                        uniqueProfiles: []
+                        isUnusedCustom: v.IsCustom && !hasMembers,
+                        hasMembers: hasMembers
                     };
-                    let pmap = {};
-                    for (let i=0; i<memberCounts; i++) {
-                        const pid = core.doSimplifiySalesforceID(v.Assignments.records[i].Assignee.ProfileId);
-                        if (pmap[pid]) {
-                            pmap[pid].count++;
-                        } else {
-                            item.uniqueProfiles.push(
-                                pmap[pid] = {
-                                    id: pid,
-                                    name: v.Assignments.records[i].Assignee.Profile?.Name,
-                                    count: 1
-                                }
-                            );
-                        }
-                    }
-                    return item;
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
             });
         }
     }));
-                        
+
+    // ========================================================================
+    // PERMISSION SETS ASSIGNMENTS
+    // ------------------------------------------------------------------------
+    // Get the list of user assignements to permission sets in 
+    //      Salesforce (data, using REST API)
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'permissionSetAssignments',
+        keycache: 'PermissionSetAssignments',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
+                            'FROM PermissionSetAssignment '+
+                            'WHERE Assignee.IsActive = TRUE '+
+                            'AND PermissionSet.IsOwnedByProfile = FALSE '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: core.doSimplifiySalesforceID(v.Id),
+                        assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
+                        assigneeProfileId: core.doSimplifiySalesforceID(v.Assignee.ProfileId),
+                        permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+ 
     // ========================================================================
     // ROLES
     // ------------------------------------------------------------------------
@@ -3061,47 +3114,76 @@ function buildDatasets(core) {
         name: 'publicGroups',
         keycache: 'PublicGroups',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+            const publicGroupsMap = {};
+            const pgAssignmentsMap = {};
+            core.doSalesforceQueries({
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
-                                '(SELECT Id, UserOrGroupId FROM GroupMembers)'+
+                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
                             'FROM Group ' 
+                }, { 
+                    tooling: false, 
+                    string: 'SELECT Id, GroupId, UserOrGroupId FROM GroupMember '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        isPublicGroup: (v.Type === 'Regular'),
-                        isTechnical: (v.Type === 'AllCustomerPortal' || v.Type === 'Organization' || v.Type === 'PRMOrganization'),
-                        isRole: (v.Type === 'Role'),
-                        isQueue: (v.Type === 'Queue'),
-                        isRoleAndSubordinates: (v.Type === 'RoleAndSubordinates')
-                    };
-                    if (item.isPublicGroup || item.isQueue || item.isTechnical) {
-                        item.developerName = v.DeveloperName;
-                        item.name = v.Name;
-                        item.includeBosses = v.DoesIncludeBosses;
-                        item.directMembersCount = 0;
-                        item.directUsers = [];
-                        item.directGroups = [];
-                        if (!item.isTechnical && v.GroupMembers && v.GroupMembers.records) {
-                            item.directMembersCount = v.GroupMembers.records.length;
-                            for (let i=0; i<item.directMembersCount; i++) {
-                                const member_from_api = v.GroupMembers.records[i];
-                                const member_id = core.doSimplifiySalesforceID(member_from_api.UserOrGroupId);
-                                const member_is_a_user = member_id.startsWith('005');
-                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });
-                            }
+                onEachRecord: function(v, i, l, ts) {
+                    if (i === 0) {
+                        const item = { id: core.doSimplifiySalesforceID(v.Id) };
+                        switch (v.Type) {
+                            case 'Regular':              item.type = 'publicGroup'; break;
+                            case 'Role':                 item.type = 'role';        break;
+                            case 'Queue':                item.type = 'queue';       break;
+                            case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
+                            // case 'AllCustomerPortal':
+                            // case 'Organization':
+                            // case 'PRMOrganization':
+                            default: item.type = 'technical';
                         }
-                        
+                        if (item.type === 'role' || item.type === 'roleAndSub') {
+                            item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                        } else {
+                            item.developerName = v.DeveloperName;
+                            item.name = v.Name;
+                            item.includeBosses = v.DoesIncludeBosses;
+                            item.directMembersCount = 0;
+                            item.directUsers = [];
+                            item.directGroups = [];                            
+                        }
+                        publicGroupsMap[item.id] = item;
                     } else {
-                        item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                        const groupId = core.doSimplifiySalesforceID(v.GroupId);
+                        let item = pgAssignmentsMap[groupId];
+                        if (!item) {
+                            // no assignment yet for this group
+                            item = { 
+                                directMembersCount: 0,
+                                directUsers: [],
+                                directGroups: []
+                            };
+                        }
+                        item.directMembersCount++;
+                        const member_id = core.doSimplifiySalesforceID(v.UserOrGroupId);
+                        const member_is_a_user = member_id.startsWith('005');
+                        (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
+                        pgAssignmentsMap[groupId] = item;
                     }
-                    return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEnd: function(records, size) {
+                    // Merge publicGroupsMap and pgAssignmentsMap
+                    for (const [key, value] of Object.entries(publicGroupsMap)) {
+                        if (pgAssignmentsMap[key]) {
+                            value.directMembersCount = pgAssignmentsMap[key].directMembersCount;
+                            value.directUsers = pgAssignmentsMap[key].directUsers;
+                            value.directGroups = pgAssignmentsMap[key].directGroups;
+                            delete pgAssignmentsMap[key];
+                        }
+                    }
+                    core.setMetadataInCache(cache, publicGroupsMap);
+                    resolve(publicGroupsMap);
+                },
+                onError: reject
             });
         }
     }));
@@ -3325,7 +3407,7 @@ function buildDatasets(core) {
             for (let i=0; i<NUM_LOOP; i++) {
                 entityDefQueries.push({
                     rest: true,
-                    string: 'SELECT DeveloperName, ExternalSharingModel, InternalSharingModel, '+
+                    string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
                                 'NamespacePrefix '+
                             'FROM EntityDefinition '+
                             'WHERE IsCustomSetting = false '+
@@ -3341,8 +3423,9 @@ function buildDatasets(core) {
                 queries: entityDefQueries,
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
                     return { 
-                        id: v.DeveloperName,
-                        name: v.DeveloperName,
+                        id: v.DurableId,
+                        name: v.QualifiedApiName,
+                        label: v.MasterLabel,
                         packageName: v.NamespacePrefix,
                         external: v.ExternalSharingModel,
                         internal: v.InternalSharingModel
@@ -3354,6 +3437,3 @@ function buildDatasets(core) {
         }
     }));
 }
-
-
-

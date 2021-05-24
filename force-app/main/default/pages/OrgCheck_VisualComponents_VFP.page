@@ -65,33 +65,36 @@
                                 element: 'datatable-vfps',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => {
+                                            if (r.isApiVersionOld === true) return 1;
+                                        }
+                                    },
                                     { name: 'Mobile', property: 'mobile', formula: (r) => { return helper.html.render.checkbox(r.mobile); }},
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', formula: (r) => { 
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' No description!';
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Visual Force Page!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.vfPages,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
 
@@ -100,32 +103,35 @@
                                 element: 'datatable-vfcs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => {
+                                            if (r.isApiVersionOld === true) return 1;
+                                        }
+                                    },
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', formula: (r) => { 
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' No description!';
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Visual Force Component!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.vfComponents,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });   
 
@@ -134,26 +140,30 @@
                                 element: 'datatable-lps',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', formula: (r) => { 
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' No description!';
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Lightning Page!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.auraPages,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });   
                             
@@ -162,32 +172,35 @@
                                 element: 'datatable-lacs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => {
+                                            if (r.isApiVersionOld === true) return 1;
+                                        }
+                                    },
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', formula: (r) => { 
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' No description!';
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Aura Component!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.auraComponents,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });  
 
@@ -196,32 +209,35 @@
                                 element: 'datatable-lwcs',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (!r.description) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => {
+                                            if (r.isApiVersionOld === true) return 1;
+                                        }
+                                    },
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', formula: (r) => { 
-                                        if (r.description) return r.description;
-                                        return helper.html.render.icon('redFlag') + ' No description!';
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return r.description;
+                                            return 'You should set a description to this Web Component!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.lwComponents,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
                         },

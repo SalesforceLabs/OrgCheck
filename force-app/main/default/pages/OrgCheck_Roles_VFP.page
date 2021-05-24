@@ -37,18 +37,18 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Role Explorer</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-explorer__item">Role Explorer</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Role Listing</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">Role Listing</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-explorer__item">
                     <div class="slds-scrollable">
                         <div id="chart-container" name="chart-container" />
                     </div>
                 </div>
-                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-table__item">
                     <div id="datatable" />
                 </div>
             </div>
@@ -124,6 +124,18 @@
                             if (mdepth < d.depth) mdepth = d.depth;
                         });
 
+                        // Show alert about too many number of levels in the hierarchy
+                        const MAX_LEVEL_DEPTH_ROLES = 7;
+                        if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
+                            let html = '';
+                            html += 'You have more than '+MAX_LEVEL_DEPTH_ROLES+' levels of roles in your Role Hierarchy ';
+                            html += '(exactly '+mdepth+' levels).<br /><br />';
+                            html += 'The Role Hierarchy is not there to mimic the hierarchy of your ';
+                            html += 'company, it is there for visibility purpose.<br /><br />';
+                            html += 'Please reduce it!<br />';
+                            helper.html.modal.show('Too many levels in your Role Hierarchy!', html);
+                        }
+                        
                         // Set some attributes that we use to render each nodes
                         root.each(function(d) {
                             const nodeData = roles_map[d.data];
@@ -131,7 +143,7 @@
                             d.inactive_show_notif = false;
                             if (!d.parent) {
                                 // 'I am root...'
-                                d.popup_background_color = helper.html.render.color('gray');
+                                d.popup_background_color = helper.html.render.color('light-gray');
                                 d.clickable = false;
                             } else if (nodeData) {
                                 const activeCount = nodeData.activeMembersCount;
@@ -151,13 +163,13 @@
                                 const inactiveCount = nodeData.inactiveMembersCount;
                                 d.inactive_count = inactiveCount;
                                 if (inactiveCount > 0) {
-                                    d.inactive_background_color = helper.html.render.color('gray');
+                                    d.inactive_background_color = helper.html.render.color('light-gray');
                                     if (inactiveCount > 100) {
                                         d.inactive_count = '99+';
                                     }
                                     d.inactive_show_notif = true;
                                 } else {
-                                    d.inactive_background_color = helper.html.render.color('dark-gray');
+                                    d.inactive_background_color = helper.html.render.color('gray');
                                 }
                             }
                         });
@@ -235,6 +247,17 @@
                             .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
 
                         // --------------------------------
+                        // LEVEL ZONE
+                        // --------------------------------
+                        node.filter(function(d) { return d.depth > 0; })
+                            .append('foreignObject')
+                            .attr('x', -25)
+                            .attr('y', -7)
+                            .attr('width', NOTIF_WIDTH + 35)
+                            .attr('height', NOTIF_HEIGHT)
+                            .append('xhtml').html(function(d) { return 'Level #' + d.depth; });
+
+                        // --------------------------------
                         // NODE CONTENT
                         // --------------------------------
                         node.append('foreignObject')
@@ -292,6 +315,8 @@
                             html += 'Developer Name: <b>'+roles_map[node.data].developerName+'</b><br />';
                         }
                         html += '<br />';
+                        html += 'Level in hierarchy: '+ node.depth +'<br />';
+                        html += '<br />';
                         if (roles_map[node.data].hasActiveMembers === true) {
                             html += 'This role has '+roles_map[node.data].activeMembersCount+' active user'+(roles_map[node.data].activeMembersCount>1?'s':'')+'<br />';
                             html += '<ul class="slds-list_dotted">';
@@ -334,21 +359,26 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => { 
-                                        let score = 0;
-                                        if (r.hasActiveMembers == false) score++;
-                                        if (r.hasInactiveMembers === true) score++;
-                                        return score; 
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Developer Name', property: 'developerName' },
-                                    { name: 'Number of active members', formula: (r) => {
-                                        if (r.hasActiveMembers == false) return helper.html.render.icon('redFlag') + ' No active member!';                                
-                                        return helper.html.render.icon('greenFlag') + ' ' + r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
-                                    }},
-                                    { name: 'Number of inactive members', formula: (r) => {
-                                        if (r.hasInactiveMembers === true) return helper.html.render.icon('redFlag') + ' ' + r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
-                                        return helper.html.render.icon('greenFlag') + ' No inactive member!';                                
-                                    }},
+                                    { name: 'Number of active members', type: 'numeric', 
+                                        formula: (r) => {
+                                            if (r.hasActiveMembers == false) return 'No active member!';                                
+                                            return r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
+                                        },
+                                        scoreFormula: (r) => {
+                                            if (r.hasActiveMembers == false) return 1;
+                                        }
+                                    },
+                                    { name: 'Number of inactive members', type: 'numeric', 
+                                        formula: (r) => {
+                                            if (r.hasInactiveMembers === true) return r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
+                                            return 'No inactive member!';                                
+                                        },
+                                        scoreFormula: (r) => {
+                                            if (r.hasInactiveMembers === true) return 1;
+                                        }
+                                    },
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
@@ -366,7 +396,6 @@
                                 ],
                                 data: map.roles,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
@@ -383,6 +412,7 @@
                         },
                         actions: {  
                             exportTable: [{
+                                visibleTab: 'tab-default-table__item',
                                 table: 'datatable',
                                 filename: 'Roles'
                             }],

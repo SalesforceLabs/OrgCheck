@@ -24,11 +24,7 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++
-                                        return score;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Namespace', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
                                     { name: 'Category', property: 'category' },
@@ -37,15 +33,19 @@
                                     { name: 'Value', formula: (r) => { 
                                         return helper.html.render.shrinkText(r.value, 150); 
                                     }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.customLabels,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });                            
                         },

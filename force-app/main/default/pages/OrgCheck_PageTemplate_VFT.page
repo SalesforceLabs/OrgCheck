@@ -151,7 +151,7 @@
                     // Initialization of OrgCheck main object called "core"
                     // ========================================================================
                     const core = new OrgCheck.Core({
-                        sfApiVersion: 48,
+                        sfApiVersion: 51,
                         sfLocalAccessToken: '{!$Api.Session_Id}',
                         htmlProgressBarTagId: 'progressbar',
                         htmlSpinnerTagId: 'spinner',

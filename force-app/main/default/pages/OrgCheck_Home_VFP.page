@@ -255,7 +255,7 @@
                                         can specify another org!!<br />-->
                                         OrgCheck scans the org where it has been installed<br />
                                         <br />
-                                        On the top of each page, you will see a the org id (in a green badge) being 
+                                        On the top of each page, you will see the org id (in a green badge) being 
                                         used by OrgCheck. The org Id starts with <code>OOD</code>.<br />
                                         <br />
                                         OrgCheck is currently installed on <b>{!MID($Organization.Id, 1, 15)}</b>.<br />

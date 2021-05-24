@@ -67,28 +67,25 @@
                                 element: 'datatable-classes',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (r.isSharingMissing === true) score++;
-                                        if (r.needsRecompilation === true) score++;
-                                        if (!r.fastCoverage || r.fastCoverage < 0.85) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Status', formula: (r) => {
-                                        if (r.needsRecompilation === true) {
-                                            countRecompileApexClasses++;
-                                            return helper.html.render.icon('redFlag') + ' Recompile!';
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
                                         }
-                                        return helper.html.render.icon('greenFlag') + ' OK';
-                                    }},
+                                    },
+                                    { name: 'Package', property: 'namespace' },
+                                    { name: 'Status', 
+                                        formula: (r) => {
+                                            if (r.needsRecompilation === true) {
+                                                countRecompileApexClasses++;
+                                                return 'Recompile!';
+                                            }
+                                            return 'OK';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.needsRecompilation === true) return 1; 
+                                        }
+                                    },
                                     { name: 'Access', property: 'specifiedAccess' },
                                     { name: 'Abst.', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
                                     { name: 'Type', property: 'isInterface', formula: (r) => { return r.isInterface === false ? 'Class' : 'Interface'; }},
@@ -97,34 +94,44 @@
                                         if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
                                         return html;
                                     }},
-                                    { name: 'Size', property: 'length' },
-                                    { name: 'Methods', property: 'methodsCount' },
-                                    { name: 'Inner Cls.', property: 'innerClassesCount' },
+                                    { name: 'Size', type: 'numeric', property: 'length' },
+                                    { name: 'Methods', type: 'numeric', property: 'methodsCount' },
+                                    { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
                                     { name: 'Annot.', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
                                         return html;
                                     }},
-                                    { name: 'Sharing', property: 'specifiedSharing', formula: (r) => {
-                                        if (r.isSharingMissing === true)
-                                            return helper.html.render.icon('redFlag') + ' Not specified!';
-                                        return r.specifiedSharing;
-                                    }},
-                                    { name: 'Coverage', property: 'fastCoverage', formula: (r) => { 
-                                        let html = '';
-                                        if (!r.fastCoverage || r.fastCoverage < 0.85) html += helper.html.render.icon('redFlag') + ' ';
-                                        html += helper.html.render.percentage(r.fastCoverage); 
-                                        return html;
-                                    }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Sharing', property: 'specifiedSharing', 
+                                        formula: (r) => {
+                                            if (r.isSharingMissing === true) return 'Not specified!';
+                                            return r.specifiedSharing;
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isSharingMissing === true) return 1; 
+                                        }
+                                    },
+                                    { name: 'Coverage', type: 'numeric', property: 'fastCoverage', 
+                                        formula: (r) => { 
+                                            return helper.html.render.percentage(r.fastCoverage);
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.fastCoverage || r.fastCoverage < 0.85) return 1;
+                                        }
+                                    },
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
                                 showSearch: true
                             });
@@ -145,27 +152,26 @@
                                 element: 'datatable-triggers',
                                 columns: [
                                     { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', formula: (r) => {
-                                        let score = 0;
-                                        if (!map.dependencies[r.id]) score++;
-                                        if (r.isApiVersionOld === true) score++;
-                                        if (r.isActive === false) score++;
-                                        if (r.length > 5000) score++;
-                                        return score;
-                                    }},
-                                    { name: 'API', formula: (r) => {
-                                        if (r.isApiVersionOld === true)
-                                            return helper.html.render.icon('redFlag') + ' ' + r.apiVersion;
-                                        return r.apiVersion;
-                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
+                                        }
+                                    },
                                     { name: 'Package', property: 'namespace' },
-                                    { name: 'Active', property: 'isActive', formula: (r) => { return helper.html.render.checkbox(r.isActive); }},
-                                    { name: 'Status', formula: (r) => { return helper.html.render.icon('greenFlag') + ' OK'; }},
-                                    { name: 'Size', property: 'length', formula: (r) => { 
-                                        if (r.length > 5000) 
-                                            return helper.html.render.icon('redFlag') + ' ' + r.length;
-                                        return r.length;
-                                    }},
+                                    { name: 'Active', property: 'isActive', 
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.isActive); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isActive === false) return 1; 
+                                        }
+                                    },
+                                    { name: 'Size', type: 'numeric', property: 'length',
+                                        scoreFormula: (r) => { 
+                                            if (r.length > 5000) return 1;
+                                        }
+                                    },
                                     { name: 'SObject', formula: (r) => { 
                                         const objName = map.customObjects[r.sobject];
                                         return objName ? objName.developerName : r.sobject;
@@ -182,15 +188,19 @@
                                         if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
                                         return html;
                                     }},
-                                    { name: 'Dependencies', formula: (r) => { 
-                                        const dep = map.dependencies[r.id]; 
-                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                        return helper.html.render.icon('redFlag') + ' No dependency.';
-                                    }}
+                                    { name: 'Dependencies', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return 'No dependency';
+                                        }, 
+                                        scoreFormula: (r) => { 
+                                            if (!map.dependencies[r.id]) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.apexTriggers,
                                 sorting: { name: 'Score', order: 'desc' },
-                                coloring: { name: 'Score', formula: (s) => { return s > 0 ? helper.html.render.color('highlight') : ''; }},
                                 showSearch: true
                             });
                         },
