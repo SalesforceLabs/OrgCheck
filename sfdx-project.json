@@ -5,7 +5,7 @@
             "default": true,
             "package": "OrgCheck",
             "versionName": "Version 1.9",
-            "versionNumber": "1.9.3.NEXT",
+            "versionNumber": "1.9.4.NEXT",
             "versionDescription": "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
@@ -18,6 +18,7 @@
         "OrgCheck@1.8.1-4": "04t7R000001u5tiQAA",
         "OrgCheck@1.9.1-7": "04t7R000000km9AQAQ",
         "OrgCheck@1.9.2-4": "04t7R000000kmHZQAY",
-        "OrgCheck@1.9.3-3": "04t7R000000kmLCQAY"
+        "OrgCheck@1.9.3-3": "04t7R000000kmLCQAY",
+        "OrgCheck@1.9.4-2": "04t7R000000kmZdQAI"
     }
 }
