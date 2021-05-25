@@ -2634,10 +2634,7 @@ function buildDatasets(core) {
                 onEnd: function(records, size) { 
                     for (const [key, value] of Object.entries(classesMap)) {
                         if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
-                        if (relatedTestClassesMap[key]) {
-                            value.relatedTestClasses = '';
-                            relatedTestClassesMap[key].forEach((r, i, a) => value.relatedTestClasses += classesMap[r].name+(i<a.length-1?', ':''));
-                        }
+                        if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
                     }
                     core.setMetadataInCache(cache, classesMap);
                     resolve(classesMap);

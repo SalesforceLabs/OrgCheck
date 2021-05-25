@@ -119,7 +119,15 @@
                                             if (!r.coverage || r.coverage < 0.85) return 1;
                                         }
                                     },
-                                    { name: 'Related Tests', property: 'relatedTestClasses' },
+                                    { name: 'Related Tests',
+                                        formula: (r) => {
+                                            let html = ''; 
+                                            if (r.relatedTestClasses) { r.relatedTestClasses.forEach(e => {
+                                                html += helper.html.render.link('/'+e, map.apexClasses[e]?.name) + '<br />';
+                                            }); }
+                                            return html;
+                                        }
+                                    },
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
