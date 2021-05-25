@@ -1536,20 +1536,23 @@ const OrgCheck = {
                                         throw e;
                                     }
                                     if (content) {
-                                        switch (typeof content) {
-                                            case 'object': 
-                                                if (additiveScore > 0) {
-                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
-                                                }       
-                                                tdBody.appendChild(content); 
-                                                break;
-                                            default: 
-                                                if (additiveScore > 0) {
-                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />'+content;
-                                                } else {
-                                                    tdBody.innerHTML = content;
-                                                }
-                                                
+                                        const isArray = (Array.isArray(content) === true);
+                                        if (typeof content === 'object' && isArray === false) {
+                                            if (additiveScore > 0) {
+                                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                            }       
+                                            tdBody.appendChild(content);
+                                        } else {
+                                            let html = '';
+                                            if (additiveScore > 0) {
+                                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                            }
+                                            if (isArray === true) {
+                                                content.forEach(cnt => html += cnt+'<br />');
+                                            } else {
+                                                html += content;
+                                            }
+                                            tdBody.innerHTML = html;
                                         }
                                     }
                                     const alternative = (c.property && c.formula ? row[c.property] : '');
@@ -2541,11 +2544,17 @@ function buildDatasets(core) {
             const value = core.getMetadataInCache(cache);
             if (value) resolve(value);
             const classesMap = {};
-            const coverageMap = {};
+            const relatedTestClassesMap = {};
+            const classesCoverageMap = {};
             core.doSalesforceQueries({
                 queries: [{
-                    string: 'SELECT ApexClassOrTriggerId, NumLinesCovered, '+
-                            'NumLinesUncovered FROM ApexCodeCoverage',
+                    string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
+                            'FROM ApexCodeCoverage',
+                    tooling: true
+                }, {
+                    string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
+                            'NumLinesUncovered, Coverage '+
+                            'FROM ApexCodeCoverageAggregate',
                     tooling: true
                 }, { 
                     string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
@@ -2555,61 +2564,80 @@ function buildDatasets(core) {
                     tooling: true
                 }], 
                 onEachRecord: function(v, index) {
-                    if (index == 0) { 
-                        // ApexCodeCoverage records
-                        const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
-                        const item = coverageMap[i] || { cov: 0, cnt: 0 };
-                        item.cov += v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered);
-                        item.cnt++;
-                        coverageMap[i] = item;
-                    } else {
-                        // ApexClasses records
-                        const item =  {
-                            id: core.doSimplifiySalesforceID(v.Id),
-                            name: v.Name,
-                            apiVersion: v.ApiVersion,
-                            isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                            namespace: v.NamespacePrefix,
-                            isTest: false,
-                            isAbstract: false,
-                            isInterface: false,
-                            isSharingMissing: false,
-                            length: v.LengthWithoutComments,
-                            needsRecompilation: (!v.SymbolTable ? true : false)
-                        };
-                        if (v.Body) {
-                            item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
+                    switch (index) {
+                        case 0: {
+                            // ApexCodeCoverage records
+                            const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
+                            const t = core.doSimplifiySalesforceID(v.ApexTestClassId);
+                            const item = relatedTestClassesMap[i] || new Set();
+                            item.add(t);
+                            relatedTestClassesMap[i] = item;
+                            break;
                         }
-                        if (v.SymbolTable) {
-                            item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                            item.interfaces = v.SymbolTable.interfaces;
-                            item.methodsCount = v.SymbolTable.methods.length || 0;
-                            if (v.SymbolTable.tableDeclaration) {
-                                item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                                if (v.SymbolTable.tableDeclaration.modifiers) {
-                                    v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                        switch (m) {
-                                            case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                            case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                            case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                            case 'public':            item.specifiedAccess  = 'public';    break;
-                                            case 'global':            item.specifiedAccess  = 'global';    break;
-                                            case 'abstract':          item.isAbstract       = true;        break;
-                                            case 'testMethod':        item.isTest           = true;        break;
-                                        }
-                                    });
-                                };
+                        case 1: {
+                            // ApexCodeCoverageAggregate records
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.ApexClassOrTriggerId),
+                                covered: v.NumLinesCovered,
+                                uncovered: v.NumLinesUncovered,
+                                coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
+                            };
+                            classesCoverageMap[item.id] = item;
+                            break; 
+                        }
+                        default: {
+                            // ApexClasses records
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                isTest: false,
+                                isAbstract: false,
+                                isInterface: false,
+                                isSharingMissing: false,
+                                length: v.LengthWithoutComments,
+                                needsRecompilation: (!v.SymbolTable ? true : false)
+                            };
+                            if (v.Body) {
+                                item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
                             }
+                            if (v.SymbolTable) {
+                                item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                                item.interfaces = v.SymbolTable.interfaces;
+                                item.methodsCount = v.SymbolTable.methods.length || 0;
+                                if (v.SymbolTable.tableDeclaration) {
+                                    item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                                    if (v.SymbolTable.tableDeclaration.modifiers) {
+                                        v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                            switch (m) {
+                                                case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                                case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                                case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                                case 'public':            item.specifiedAccess  = 'public';    break;
+                                                case 'global':            item.specifiedAccess  = 'global';    break;
+                                                case 'abstract':          item.isAbstract       = true;        break;
+                                                case 'testMethod':        item.isTest           = true;        break;
+                                            }
+                                        });
+                                    };
+                                }
+                            }
+                            if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                                item.isSharingMissing = true;
+                            }
+                            classesMap[item.id] = item;
                         }
-                        if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
-                            item.isSharingMissing = true;
-                        }
-                        classesMap[item.id] = item;
                     }
                 }, 
                 onEnd: function(records, size) { 
                     for (const [key, value] of Object.entries(classesMap)) {
-                        if (coverageMap[key]) value.fastCoverage = coverageMap[key].cov / coverageMap[key].cnt;
+                        if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
+                        if (relatedTestClassesMap[key]) {
+                            value.relatedTestClasses = '';
+                            relatedTestClassesMap[key].forEach((r, i, a) => value.relatedTestClasses += classesMap[r].name+(i<a.length-1?', ':''));
+                        }
                     }
                     core.setMetadataInCache(cache, classesMap);
                     resolve(classesMap);

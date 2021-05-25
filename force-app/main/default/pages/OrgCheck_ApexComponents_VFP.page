@@ -111,14 +111,15 @@
                                             if (r.isSharingMissing === true) return 1; 
                                         }
                                     },
-                                    { name: 'Coverage', type: 'numeric', property: 'fastCoverage', 
+                                    { name: 'Coverage', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
-                                            return helper.html.render.percentage(r.fastCoverage);
+                                            return helper.html.render.percentage(r.coverage);
                                         },
                                         scoreFormula: (r) => { 
-                                            if (!r.fastCoverage || r.fastCoverage < 0.85) return 1;
+                                            if (!r.coverage || r.coverage < 0.85) return 1;
                                         }
                                     },
+                                    { name: 'Related Tests', property: 'relatedTestClasses' },
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
