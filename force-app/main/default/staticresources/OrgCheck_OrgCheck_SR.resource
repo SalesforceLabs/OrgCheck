@@ -1555,7 +1555,7 @@ const OrgCheck = {
                                             tdBody.innerHTML = html;
                                         }
                                     }
-                                    const alternative = (c.property && c.formula ? row[c.property] : '');
+                                    const alternative = (c.property && c.formula ? row[c.property] : '') || '';
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
