@@ -120,7 +120,7 @@ For each record that returns this query, we will do the following mapping:
 | namespace                                | **NamespacePrefix**                                                                        |
 | isTest                                   | false by default, true if **SymbolTable.tableDeclaration.modifiers** contains 'testMethod' |
 | isAbstract                               | false by default. true if **SymbolTable.tableDeclaration.modifiers** contains 'abstract'   |
-| isInterface                              | false by default. true if **Body** matches regex "public|global interface"                 |
+| isInterface                              | false by default. true if **Body** matches regex "public OR global interface"              |
 | size                                     | **LengthWithoutComments**                                                                  |
 | needsRecompilation                       | true if **SymbolTable** is not null, false otherwise.                                      |
 | size                                     | **LengthWithoutComments**                                                                  |
