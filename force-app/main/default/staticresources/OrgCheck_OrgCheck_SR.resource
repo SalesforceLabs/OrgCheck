@@ -2598,7 +2598,8 @@ function buildDatasets(core) {
                                 isInterface: false,
                                 isSharingMissing: false,
                                 length: v.LengthWithoutComments,
-                                needsRecompilation: (!v.SymbolTable ? true : false)
+                                needsRecompilation: (!v.SymbolTable ? true : false),
+                                coverage: 0 // by default no coverage!
                             };
                             if (v.Body) {
                                 item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
