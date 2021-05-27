@@ -1521,6 +1521,7 @@ const OrgCheck = {
                                             additiveScore = c.scoreFormula(row);
                                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
                                                 trScore += additiveScore;
+                                                tdBody.bgColor = '#ffe099';
                                             }
                                         }
                                     } catch (e) {
@@ -1562,7 +1563,7 @@ const OrgCheck = {
                                 });
                                 if (tdScore && trScore > 0) {
                                     tdScore.innerHTML = trScore;
-                                    trBody.bgColor = '#ffe099';
+                                    tdScore.bgColor = '#ffe099';
                                 }
                             });
                             table.hidden = false; // make table visible again
