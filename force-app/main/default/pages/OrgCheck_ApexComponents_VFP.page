@@ -181,6 +181,22 @@
                                             if (r.length > 5000) return 1;
                                         }
                                     },
+                                    { name: 'Contains SOQL', property: 'hasSOQL',
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.hasSOQL); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.hasSOQL === true) return 1;
+                                        }
+                                    },
+                                    { name: 'Contains DML', property: 'hasDML',
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.hasDML); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.hasDML === true) return 1;
+                                        }
+                                    },
                                     { name: 'SObject', formula: (r) => { 
                                         const objName = map.customObjects[r.sobject];
                                         return objName ? objName.developerName : r.sobject;
@@ -240,7 +256,9 @@
                                         '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
                                         '<li><code>+1</code> if the trigger needs recompilation,</li>'+
                                         '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li>'+
-                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</ul>',
+                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</li>'+
+                                        '<li><code>+1</code> if the trigger contains a direct SOQL or DML statement (we do not consider indirect SOQL or DML included in the call of other classes!!).</li>'+
+                                        '</ul>',
                                     'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+
                                         'a dialog box.'

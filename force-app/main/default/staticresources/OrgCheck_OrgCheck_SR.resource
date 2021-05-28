@@ -2661,7 +2661,7 @@ function buildDatasets(core) {
                 queries: [ { 
                     tooling: true, 
                     string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                'NamespacePrefix, '+
+                                'NamespacePrefix, Body, '+
                                 'UsageBeforeInsert, UsageAfterInsert, '+
                                 'UsageBeforeUpdate, UsageAfterUpdate, '+
                                 'UsageBeforeDelete, UsageAfterDelete, '+
@@ -2671,7 +2671,7 @@ function buildDatasets(core) {
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    return {
+                    const item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
@@ -2686,8 +2686,15 @@ function buildDatasets(core) {
                         beforeDelete: v.UsageBeforeDelete,
                         afterDelete: v.UsageAfterDelete,
                         afterUndelete: v.UsageAfterUndelete,
-                        sobject: v.EntityDefinitionId
+                        sobject: v.EntityDefinitionId,
+                        hasSOQL: false,
+                        hasDML: false
                     };
+                    if (v.Body) {
+                        item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
+                        item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                    }
+                    return item;
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
