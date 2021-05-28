@@ -11,24 +11,74 @@
         </apex:define>
         <apex:define name="html_content_core">
             <div id="datatable" />
+
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Apex Jobs" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-apexjobs" id="tab-default-apexjobs__item">Apex Jobs</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Scheduled Jobs" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-scheduledjobs" id="tab-default-scheduledjobs__item">Scheduled Jobs</a>
+                    </li>
+                </ul>
+                <div id="tab-default-apexjobs" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-apexjobs__item">
+                    <div id="datatable-apexjobs" />
+                </div>
+                <div id="tab-default-scheduledjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scheduledjobs__item">
+                    <div id="datatable-scheduledjobs" />
+                </div>
+            </div>
         </apex:define>
         <apex:define name="html_start_definition_script">
             <script>
                 function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'batches' ],
+                        datasets: [ 'batchesApexJobs', 'batchesScheduledJobs', 'users' ],
                         onRecords: function(map) { 
 
-                            // Render the data in a table
+                            // Render the data in a table for failed Apex Jobs
                             helper.html.datatable.create({
-                                element: 'datatable',
+                                element: 'datatable-apexjobs',
                                 columns: [
-                                    { name: 'Context', property: 'context' },
                                     { name: 'Type', property: 'type' },
-                                    { name: 'Status', property: 'status' },
-                                    { name: 'Message', property: 'message' }
+                                    { name: 'Apex Context', property: 'context' },
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Status', property: 'status',
+                                        scoreFormula: (r) => { 
+                                            if (r.status === 'Failed') return 1; 
+                                        }
+                                    },
+                                    { name: 'Message', property: 'message' },
+                                    { name: 'Count', type: 'numeric', property: 'numIds' },
+                                    { name: 'Errors', type: 'numeric', property: 'numErrors' }
                                 ],
-                                data: map.apexTriggers,
+                                data: map.batchesApexJobs,
+                                sorting: { name: 'Context', order: 'asc' },
+                                showSearch: true
+                            });
+
+                            // Render the data in a table for Scheduled Jobs
+                            helper.html.datatable.create({
+                                element: 'datatable-scheduledjobs',
+                                columns: [
+                                    { name: 'Name', property: 'name' },
+                                    { name: 'Type', property: 'type' },
+                                    { name: 'Status', property: 'status',
+                                        scoreFormula: (r) => { 
+                                            if (r.status !== 'WAITING') return 1; 
+                                        }
+                                    },
+                                    { name: 'user', formula: (r) => { return helper.html.render.link('/'+r.userid, (map.users[r.userid]?.name || r.userid)); }},
+                                    { name: 'start', property: 'start' },
+                                    { name: 'end', property: 'end' },
+                                    { name: 'timezone', property: 'timezone' }
+                                ],
+                                data: map.batchesScheduledJobs,
                                 sorting: { name: 'Context', order: 'asc' },
                                 showSearch: true
                             });

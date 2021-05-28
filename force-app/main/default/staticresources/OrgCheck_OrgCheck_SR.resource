@@ -1564,6 +1564,7 @@ const OrgCheck = {
                                 if (tdScore && trScore > 0) {
                                     tdScore.innerHTML = trScore;
                                     tdScore.bgColor = '#ffe099';
+                                    trBody.style.fontWeight = 'bolder';
                                 }
                             });
                             table.hidden = false; // make table visible again
@@ -3266,24 +3267,47 @@ function buildDatasets(core) {
     // Get the list of failed batches and scheduled jobs in Salesforce 
     // ========================================================================
     core.addDataset(new OrgCheck.Dataset({
-        name: 'batches',
-        keycache: 'Batches',
+        name: 'batchesApexJobs',
+        keycache: 'BatchesApexJobs',
         retriever: function(me, resolve, reject) {
             let artificial_id = 0;
             core.doSalesforceQueriesWithCache({
                 mnemonic: this.keycache, 
                 queries: [ { 
-                    // Batches
                     tooling: false, 
                     string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
                             'FROM AsyncApexJob '+
-                            'WHERE CompletedDate = YESTERDAY '+
+                            'WHERE CreatedDate >= YESTERDAY '+
                             'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
                             'OR Status = \'Failed\') '+
                             'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
                             'LIMIT 10000 '
-                }, {
-                    // Scheduled Jobs
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
+                    return { 
+                        id: 'APXJOBS-'+artificial_id++,
+                        type: v.JobType,
+                        context: apexClass,
+                        status: v.Status,
+                        message: v.ExtendedStatus,
+                        numIds: v.ids,
+                        numErrors: v.errors
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'batchesScheduledJobs',
+        keycache: 'BatchesScheduledJobs',
+        retriever: function(me, resolve, reject) {
+            let artificial_id = 0;
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
                     tooling: false, 
                     string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
                                 'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
@@ -3291,43 +3315,33 @@ function buildDatasets(core) {
                                 'PreviousFireTime, StartTime, State, TimesTriggered, '+
                                 'TimeZoneSidKey '+
                             'FROM CronTrigger '+
-                            'WHERE StartTime = YESTERDAY '+
-                            'AND State <> \'COMPLETE\''
+                            'WHERE StartTime >= YESTERDAY '+
+                            'AND State <> \'COMPLETE\' ' +
+                            'LIMIT 10000 '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    if (i == 0) {
-                        return { 
-                            id: 'BATCH#'+artificial_id++,
-                            type: 'ApexJob ' + v.JobType,
-                            context: (v.ApexClass ? v.ApexClass.Name : 'anonymous') + '.' + v.MethodName,
-                            status: v.Status,
-                            message: v.ExtendedStatus,
-                            numIds: v.ids,
-                            numErrors: v.errors
-                        };
-                    } else {
-                        let jobTypeLabel = '';
-                        switch (v.CronJobDetail.JobType) {
-                            case '1': jobTypeLabel = 'Data Export'; break;
-                            case '3': jobTypeLabel = 'Dashboard Refresh'; break;
-                            case '4': jobTypeLabel = 'Reporting Snapshot'; break;
-                            case '6': jobTypeLabel = 'Scheduled Flow'; break;
-                            case '7': jobTypeLabel = 'Scheduled Apex'; break;
-                            case '8': jobTypeLabel = 'Report Run'; break;
-                            case '9': jobTypeLabel = 'Batch Job'; break;
-                            case 'A': jobTypeLabel = 'Reporting Notification'; break;
-                        }
-                        return { 
-                            id: 'JOB#'+artificial_id++,
-                            type: 'Scheduled ' + jobTypeLabel,
-                            context: v.CronJobDetail.Name,
-                            status: v.State,
-                            message: 'by user: ' + v.OwnerId + 
-                                ', start: ' + v.StartTime + 
-                                ', end: ' + v.EndTime + 
-                                ', timezone: ' + v.TimeZoneSidKey
-                        };
+                    let jobTypeLabel = '';
+                    switch (v.CronJobDetail.JobType) {
+                        case '1': jobTypeLabel = 'Data Export'; break;
+                        case '3': jobTypeLabel = 'Dashboard Refresh'; break;
+                        case '4': jobTypeLabel = 'Reporting Snapshot'; break;
+                        case '6': jobTypeLabel = 'Scheduled Flow'; break;
+                        case '7': jobTypeLabel = 'Scheduled Apex'; break;
+                        case '8': jobTypeLabel = 'Report Run'; break;
+                        case '9': jobTypeLabel = 'Batch Job'; break;
+                        case 'A': jobTypeLabel = 'Reporting Notification'; break;
+                        default:  jobTypeLabel = 'Unknown type ('+v.CronJobDetail.JobType+')'; break;
                     }
+                    return { 
+                        id: 'SCHJOBS-'+artificial_id++,
+                        name: v.CronJobDetail.Name,
+                        type: jobTypeLabel,
+                        status: v.State,
+                        userid: core.doSimplifiySalesforceID(v.OwnerId),
+                        start: v.StartTime,
+                        end: v.EndTime,
+                        timezone: v.TimeZoneSidKey
+                    };
                 }, 
                 onEndFromCacheCallback: resolve,
                 onErrorCallback: reject
