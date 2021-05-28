@@ -1487,12 +1487,12 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                let trScore = 0;
-                                let tdScore = null;
+                                let rowScore = 0;
+                                let tdBodyScore = null;
                                 config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
                                     if (c.property === '##score##') {
-                                        tdScore = tdBody;
+                                        tdBodyScore = tdBody;
                                         return;
                                     }
                                     const row = isArray ? k : config.data[k];
@@ -1520,8 +1520,8 @@ const OrgCheck = {
                                         if (c.scoreFormula) {
                                             additiveScore = c.scoreFormula(row);
                                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
-                                                trScore += additiveScore;
-                                                tdBody.bgColor = '#ffe099';
+                                                rowScore += additiveScore;
+                                                tdBody.bgColor = '#ffd079';
                                             }
                                         }
                                     } catch (e) {
@@ -1530,7 +1530,7 @@ const OrgCheck = {
                                             'what': {
                                                 'Column': c.name,
                                                 'Formula': c.scoreFormula,
-                                                'Current Score': trScore,
+                                                'Current Score': rowScore,
                                                 'Data': row
                                             }
                                         }
@@ -1540,13 +1540,13 @@ const OrgCheck = {
                                         const isArray = (Array.isArray(content) === true);
                                         if (typeof content === 'object' && isArray === false) {
                                             if (additiveScore > 0) {
-                                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
                                             }       
                                             tdBody.appendChild(content);
                                         } else {
                                             let html = '';
                                             if (additiveScore > 0) {
-                                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />';
+                                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
                                             }
                                             if (isArray === true) {
                                                 content.forEach(cnt => html += cnt+'<br />');
@@ -1561,10 +1561,10 @@ const OrgCheck = {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
                                 });
-                                if (tdScore && trScore > 0) {
-                                    tdScore.innerHTML = trScore;
-                                    tdScore.bgColor = '#ffe099';
-                                    trBody.style.fontWeight = 'bolder';
+                                if (tdBodyScore && rowScore > 0) {
+                                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
+                                    tdBodyScore.bgColor = '#ffd079';
+                                    trBody.bgColor = '#ffe099';
                                 }
                             });
                             table.hidden = false; // make table visible again
