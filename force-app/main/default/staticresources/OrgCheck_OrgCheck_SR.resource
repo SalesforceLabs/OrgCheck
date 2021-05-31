@@ -1086,7 +1086,8 @@ const OrgCheck = {
                                         const cols = rows[i].querySelectorAll('td, th');
                                         for (let j=0; j<cols.length; j++) {
                                             let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
-                                            v = v.replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
+                                            v = v.trim() // trim will delete extra spaces (including &nbsp;)
+                                                 .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
                                             if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
                                             row.push(v);
                                         }

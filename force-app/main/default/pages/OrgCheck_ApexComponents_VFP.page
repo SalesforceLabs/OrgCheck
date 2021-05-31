@@ -38,12 +38,18 @@
                     <li class="slds-tabs_default__item" title="Triggers" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">Triggers</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Object's triggers count" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">Object's triggers count</a>
+                    </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
                     <div id="datatable-classes" />
                 </div>
                 <div id="tab-default-triggers" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-triggers__item">
                     <div id="datatable-triggers" />
+                </div>
+                <div id="tab-default-objtriggercounts" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objtriggercounts__item">
+                    <div id="datatable-objtriggercounts" />
                 </div>
             </div>
         </apex:define>
@@ -156,6 +162,8 @@
                                 helper.html.modal.show('Action needed on Apex classes in the Org!', html);
                             }
 
+                            const objectTriggersCountMap = {};
+                            
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
@@ -198,8 +206,20 @@
                                         }
                                     },
                                     { name: 'SObject', formula: (r) => { 
-                                        const objName = map.customObjects[r.sobject];
-                                        return objName ? objName.developerName : r.sobject;
+                                        const objId = r.sobject;
+                                        const objName = map.customObjects[objId]?.developerName || objId;
+                                        // ---
+                                        // let's calculate (on the fly) the number of active triggers per object!!
+                                        const otc = objectTriggersCountMap[objName] || { 
+                                            object: objName, 
+                                            activeTriggerCount: 0, 
+                                            deactiveTriggerCount: 0 
+                                        };
+                                        if (r.isActive === true) otc.activeTriggerCount++;
+                                        else if (r.isActive === false) otc.deactiveTriggerCount++;
+                                        objectTriggersCountMap[objName] = otc;
+                                        // ---
+                                        return objName;
                                     }},
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
                                     { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
@@ -228,6 +248,25 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true
                             });
+
+                            // Render the Apex Triggers data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-objtriggercounts',
+                                columns: [
+                                    { name: 'Name', property: 'object' },
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Active triggers', type: 'numeric', property: 'activeTriggerCount', 
+                                        scoreFormula: (r) => { 
+                                            if (r.activeTriggerCount > 1) return 1; 
+                                        }
+                                    },
+                                    { name: 'Deactive triggers', type: 'numeric', property: 'deactiveTriggerCount' }                                            
+                                ],
+                                data: objectTriggersCountMap,
+                                sorting: { name: 'Score', order: 'desc' },
+                                showSearch: true
+                            });
+                            
                         },
                         actions: { 
                             exportTable: [{
@@ -238,6 +277,10 @@
                                 table: 'datatable-triggers',
                                 visibleTab: 'tab-default-triggers__item',
                                 filename: 'ApexTriggers'
+                            }, {
+                                table: 'datatable-objtriggercounts',
+                                visibleTab: 'tab-default-objtriggercounts__item',
+                                filename: 'ObjectTriggersCount'
                             }],
                             clearCache: { 
                                 show: true 
