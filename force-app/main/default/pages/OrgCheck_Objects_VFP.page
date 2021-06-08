@@ -133,6 +133,12 @@
                                     <div class="slds-panel__section">
                                         <ul>
                                             <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
+                                                <span class="slds-form-element__label">Record Count</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-recordCount" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
                                                 <span class="slds-form-element__label">Internal Sharing</span>
                                                 <div class="slds-form-element__control">
                                                     <div class="slds-form-element__static" id="global-internalSharingModel" />
@@ -231,6 +237,7 @@
                         helper.html.element.setText('global-feedEnabled', '');
                         helper.html.element.setText('global-mruEnabled', '');
                         helper.html.element.setText('global-searchable', '');
+                        helper.html.element.setText('global-recordCount', '');
                         helper.html.element.setText('global-internalSharingModel', '');
                         helper.html.element.setText('global-externalSharingModel', '');
                         // Related lists
@@ -293,6 +300,7 @@
                                 helper.html.element.setText('global-feedEnabled', object.feedEnabled);
                                 helper.html.element.setText('global-mruEnabled', object.mruEnabled);
                                 helper.html.element.setText('global-searchable', object.searchable);
+                                helper.html.element.setText('global-recordCount', object.recordCount);
                                 helper.html.element.setText('global-internalSharingModel', object.internalSharingModel);
                                 helper.html.element.setText('global-externalSharingModel', object.externalSharingModel);
 

@@ -157,6 +157,37 @@ const OrgCheck = {
             }
 
             /**
+            * Call REST api endpoint in HTTP direclty with GET method
+            * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
+            * @param onEndCallback Callback function to call with all records (as a map)
+            * @param onErrorCallback Callback function to call if there is an error
+            */
+            this.doHttpCall = function(partialUrl, onEndCallback, onErrorCallback) {
+                const request = { 
+                    url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
+                    method: 'GET' 
+                };
+                CONNECTION.request(
+                    request, 
+                    function(error, response) {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling "connection.request".',
+                                what: {
+                                    partialUrl: partialUrl,
+                                    url: request.url,
+                                    method: request.method
+                                }
+                            };
+                            onErrorCallback(error);
+                        } else {
+                            onEndCallback(response);
+                        }
+                    }
+                );
+            }
+
+            /**
             * Do Salesforce SOQL queries from Tooling API or not
             * @param queries Array of objects containing 'tooling', 'queryMore' and 'string'
             * @param onEachRecordCallback Callback function for each record from database
@@ -2106,133 +2137,142 @@ const OrgCheck = {
          */
         function private_salesforce_descrive_object(setup) {
             const s = SALESFORCE_HANDLER.splitDeveloperName(setup.objectName);
-            SALESFORCE_HANDLER.doDescribeObject(
-                setup.objectName, 
-                function(object) {
-                    SALESFORCE_HANDLER.doQueries(
-                        [{ 
-                            tooling: true, 
-                            string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
-                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
-                                        '(SELECT Id, Name FROM ApexTriggers), '+
-                                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
-                                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
-                                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
-                                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
-                                            'ValidationName FROM ValidationRules), '+
-                                        '(SELECT Id, Name FROM WebLinks) '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE DeveloperName = \''+s.shortName+'\' '+
-                                    (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
-                        }], 
-                        function(record) {
-                            // 0. Generic information
-                            object.id = record.DurableId;
-                            object.description = record.Description;
-                            object.externalSharingModel = record.ExternalSharingModel;
-                            object.internalSharingModel = record.InternalSharingModel;
-                            // 1. Apex Triggers
-                            if (record.ApexTriggers) {
-                                let apexTriggers = [];
-                                for (let i=0; i<record.ApexTriggers.records.length; i++) {
-                                    apexTriggers.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
-                                        name: record.ApexTriggers.records[i].Name
-                                    });
-                                }
-                                object.apexTriggers = apexTriggers;
-                            }
-                            // 2. FieldSets
-                            if (record.FieldSets) {
-                                let fieldSets = [];
-                                for (let i=0; i<record.FieldSets.records.length; i++) {
-                                    fieldSets.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
-                                        label: record.FieldSets.records[i].MasterLabel,
-                                        description: record.FieldSets.records[i].Description
-                                    });
-                                }
-                                object.fieldSets = fieldSets;
-                            }
-                            // 3. Page Layouts
-                            if (record.Layouts) {
-                                let layouts = [];
-                                for (let i=0; i<record.Layouts.records.length; i++) {
-                                    layouts.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
-                                        name: record.Layouts.records[i].Name,
-                                        type: record.Layouts.records[i].LayoutType
-                                    });
-                                }
-                                object.layouts = layouts;
-                            }
-                            // 4. Limits
-                            if (record.Limits) {
-                                let limits = [];
-                                for (let i=0; i<record.Limits.records.length; i++) {
-                                    limits.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
-                                        label: record.Limits.records[i].Label,
-                                        remaining: record.Limits.records[i].Remaining,
-                                        max: record.Limits.records[i].Max,
-                                        type: record.Limits.records[i].Type
-                                    });
-                                }
-                                object.limits = limits;
-                            }
-                            // 5. ValidationRules
-                            if (record.ValidationRules) {
-                                let validationRules = [];
-                                for (let i=0; i<record.ValidationRules.records.length; i++) {
-                                    validationRules.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
-                                        name: record.ValidationRules.records[i].ValidationName,
-                                        isActive: record.ValidationRules.records[i].Active,
-                                        description: record.ValidationRules.records[i].Description,
-                                        errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
-                                        errorMessage: record.ValidationRules.records[i].ErrorMessage
-                                    });
-                                }
-                                object.validationRules = validationRules;
-                            }
-                            // 6. WebLinks
-                            if (record.WebLinks) {
-                                let webLinks = [];
-                                for (let i=0; i<record.WebLinks.records.length; i++) {
-                                    webLinks.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
-                                        name: record.WebLinks.records[i].Name,
-                                    });
-                                }
-                                object.webLinks = webLinks;
-                            }
-                            // 7. If any fields, add field dependencies
-                            if (record.Fields) {
-                                const mapFields = {};
-                                const fieldIds = [];
-                                for (let i=0; i<record.Fields.records.length; i++) {
-                                    const f = record.Fields.records[i];
-                                    const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
-                                    fieldIds.push(id);
-                                    mapFields[f.QualifiedApiName] = id;
-                                }
-                                object.fields.forEach(f => f.id = mapFields[f.name]);
-                                private_salesforce_dapi(
-                                    fieldIds, 
-                                    function(fieldDependencies) {
-                                        object.fieldDependencies = fieldDependencies;
+            // Get records count for this object
+            SALESFORCE_HANDLER.doHttpCall(
+                '/limits/recordCount?sObjects='+setup.objectName,
+                function(result) {
+                    const recordCount = (Array.isArray(result?.sObjects) && result?.sObjects.length == 1) ? result?.sObjects[0].count : 0;
+                    SALESFORCE_HANDLER.doDescribeObject(
+                        setup.objectName, 
+                        function(object) {
+                            SALESFORCE_HANDLER.doQueries(
+                                [{ 
+                                    tooling: true, 
+                                    string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
+                                                '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
+                                                '(SELECT Id, Name FROM ApexTriggers), '+
+                                                '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                                                '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                                                '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                                                '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                                    'ValidationName FROM ValidationRules), '+
+                                                '(SELECT Id, Name FROM WebLinks) '+
+                                            'FROM EntityDefinition '+
+                                            'WHERE DeveloperName = \''+s.shortName+'\' '+
+                                            (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
+                                }], 
+                                function(record) {
+                                    // 0. Generic information
+                                    object.id = record.DurableId;
+                                    object.description = record.Description;
+                                    object.externalSharingModel = record.ExternalSharingModel;
+                                    object.internalSharingModel = record.InternalSharingModel;
+                                    object.recordCount = recordCount;
+                                    // 1. Apex Triggers
+                                    if (record.ApexTriggers) {
+                                        let apexTriggers = [];
+                                        for (let i=0; i<record.ApexTriggers.records.length; i++) {
+                                            apexTriggers.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
+                                                name: record.ApexTriggers.records[i].Name
+                                            });
+                                        }
+                                        object.apexTriggers = apexTriggers;
+                                    }
+                                    // 2. FieldSets
+                                    if (record.FieldSets) {
+                                        let fieldSets = [];
+                                        for (let i=0; i<record.FieldSets.records.length; i++) {
+                                            fieldSets.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
+                                                label: record.FieldSets.records[i].MasterLabel,
+                                                description: record.FieldSets.records[i].Description
+                                            });
+                                        }
+                                        object.fieldSets = fieldSets;
+                                    }
+                                    // 3. Page Layouts
+                                    if (record.Layouts) {
+                                        let layouts = [];
+                                        for (let i=0; i<record.Layouts.records.length; i++) {
+                                            layouts.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
+                                                name: record.Layouts.records[i].Name,
+                                                type: record.Layouts.records[i].LayoutType
+                                            });
+                                        }
+                                        object.layouts = layouts;
+                                    }
+                                    // 4. Limits
+                                    if (record.Limits) {
+                                        let limits = [];
+                                        for (let i=0; i<record.Limits.records.length; i++) {
+                                            limits.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
+                                                label: record.Limits.records[i].Label,
+                                                remaining: record.Limits.records[i].Remaining,
+                                                max: record.Limits.records[i].Max,
+                                                type: record.Limits.records[i].Type
+                                            });
+                                        }
+                                        object.limits = limits;
+                                    }
+                                    // 5. ValidationRules
+                                    if (record.ValidationRules) {
+                                        let validationRules = [];
+                                        for (let i=0; i<record.ValidationRules.records.length; i++) {
+                                            validationRules.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
+                                                name: record.ValidationRules.records[i].ValidationName,
+                                                isActive: record.ValidationRules.records[i].Active,
+                                                description: record.ValidationRules.records[i].Description,
+                                                errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
+                                                errorMessage: record.ValidationRules.records[i].ErrorMessage
+                                            });
+                                        }
+                                        object.validationRules = validationRules;
+                                    }
+                                    // 6. WebLinks
+                                    if (record.WebLinks) {
+                                        let webLinks = [];
+                                        for (let i=0; i<record.WebLinks.records.length; i++) {
+                                            webLinks.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
+                                                name: record.WebLinks.records[i].Name,
+                                            });
+                                        }
+                                        object.webLinks = webLinks;
+                                    }
+                                    // 7. If any fields, add field dependencies
+                                    if (record.Fields) {
+                                        const mapFields = {};
+                                        const fieldIds = [];
+                                        for (let i=0; i<record.Fields.records.length; i++) {
+                                            const f = record.Fields.records[i];
+                                            const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
+                                            fieldIds.push(id);
+                                            mapFields[f.QualifiedApiName] = id;
+                                        }
+                                        object.fields.forEach(f => f.id = mapFields[f.name]);
+                                        private_salesforce_dapi(
+                                            fieldIds, 
+                                            function(fieldDependencies) {
+                                                object.fieldDependencies = fieldDependencies;
+                                                setup.callbackSuccess(object);
+                                            }, 
+                                            setup.callbackError
+                                        );
+                                    } else {
                                         setup.callbackSuccess(object);
-                                    }, 
-                                    setup.callbackError
-                                );
-                            } else {
-                                setup.callbackSuccess(object);
-                            }
-                        },
-                        function(records, size) {},
+                                    }
+                                },
+                                function(records, size) {},
+                                setup.callbackError
+                            );
+                        }, 
                         setup.callbackError
                     );
-                }, 
+                },
                 setup.callbackError
             );
         };
