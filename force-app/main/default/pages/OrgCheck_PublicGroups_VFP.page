@@ -144,7 +144,7 @@
                                 const direct_subgrp_id = direct_groups_IDs[j].id;
                                 const direct_subgrp = groups[direct_subgrp_id];
                                 // 0. set flag if this is a technical group
-                                if (direct_subgrp.isTechnical === true) includes_technical_group = true;
+                                if (direct_subgrp.type === 'technical') includes_technical_group = true;
                                 //  1. we get its direct users
                                 const direct_subgrp_direct_users = direct_subgrp.directUsers;
                                 //  2. we call the recursive method to make sure we calculate the indirect Users list
