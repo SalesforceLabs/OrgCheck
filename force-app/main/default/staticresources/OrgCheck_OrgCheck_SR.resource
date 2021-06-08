@@ -1718,8 +1718,8 @@ const OrgCheck = {
                             return '0 %';
                         },
                         checkbox: function(b) {
-                            if (b) return '<img src="/img/checkbox_checked.gif" />';
-                            return '<img src="/img/checkbox_unchecked.gif" />';
+                            if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
+                            return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
                         },
                         link: function(uri, content) {
                             const completeURL = (ORG_INFORMATION.instanceUrl ? ORG_INFORMATION.instanceUrl : '') + uri;
@@ -3051,31 +3051,63 @@ function buildDatasets(core) {
         name: 'permissionSets',
         keycache: 'PermissionSets',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+
+            const psMap = {};
+            const psgByName1 = {};
+            const psgByName2 = {};
+            core.doSalesforceQueries({
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, '+
+                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                 '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
                             'FROM PermissionSet '+
                             'WHERE IsOwnedByProfile = FALSE' 
+                }, {
+                    tooling: false,
+                    string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
+                            'FROM PermissionSetGroup ' 
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        description: v.Description,
-                        hasLicense: (v.License ? 'yes' : 'no'),
-                        license: (v.License ? v.License.Name : ''),
-                        isCustom: v.IsCustom,
-                        isUndescribedCustom: v.IsCustom && !v.Description,
-                        package: v.NamespacePrefix,
-                        isUnusedCustom: v.IsCustom && !hasMembers,
-                        hasMembers: hasMembers
-                    };
+                onEachRecord: function(v, i) {
+                    if (i === 0) {
+                        const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
+                        const item = {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.Name,
+                            description: v.Description,
+                            hasLicense: (v.License ? 'yes' : 'no'),
+                            license: (v.License ? v.License.Name : ''),
+                            isCustom: v.IsCustom,
+                            isUndescribedCustom: v.IsCustom && !v.Description,
+                            package: v.NamespacePrefix,
+                            isUnusedCustom: v.IsCustom && !hasMembers,
+                            hasMembers: hasMembers,
+                            isGroup: (v.Type === 'Group')     // other values can be 'Regular', 'Standard', 'Session
+                        };
+                        if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                        psMap[item.id] = item;
+                    } else {
+                        const item = {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.DeveloperName,
+                            description: v.Description,
+                            package: v.NamespacePrefix
+                        }
+                        psgByName2[item.package+'--'+item.name] = item;
+                    }
                 }, 
-                onEndFromCacheCallback: resolve,
+                onEnd: function() { 
+                    for (const [key, value] of Object.entries(psgByName1)) {
+                        value.groupId = psgByName2[key].id;
+                        value.description = psgByName2[key].description;
+                        value.isUndescribedCustom = value.isCustom && !value.description;
+                        psMap[value.id] = value;
+                    };
+                    core.setMetadataInCache(cache, psMap);
+                    resolve(psMap);
+                },
                 onErrorCallback: reject
             });
         }

@@ -155,7 +155,13 @@
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', 
+                                        formula: (r) => { 
+                                            if (r.isGroup) return helper.html.render.link('/'+r.groupId, r.name); 
+                                            return helper.html.render.link('/'+r.id, r.name); 
+                                        }
+                                    },
+                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { return helper.html.render.checkbox(r.isGroup); }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
