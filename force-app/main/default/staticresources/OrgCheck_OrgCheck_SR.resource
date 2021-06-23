@@ -2989,6 +2989,49 @@ function buildDatasets(core) {
     }));
     
     // ========================================================================
+    // Object CRUD (Profile and Permission Set)
+    // ------------------------------------------------------------------------
+    // Get the Object and Fields CRUDs in Profiles and Permission Sets
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'objectCRUDs',
+        keycache: 'ObjectCRUDs',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
+                                   'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                   'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                            'FROM ObjectPermissions '
+                } ],
+                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                    return {
+                        id: v.ParentId + v.SobjectType,
+                        sobject: v.SobjectType,
+                        type: (v.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
+                        parent: { 
+                            id: (v.Parent.IsOwnedByProfile ? v.Parent.ProfileId : v.ParentId), 
+                            name: (v.Parent.IsOwnedByProfile ? v.Parent.Profile.Name : v.Parent.Label) 
+                        },
+                        permissions: {
+                            create: v.PermissionsCreate,
+                            read: v.PermissionsRead,
+                            update: v.PermissionsEdit,
+                            delete: v.PermissionsDelete,
+                            viewAll: v.PermissionsViewAllRecords,
+                            modifyAll: v.PermissionsModifyAllRecords
+                        }
+                    };
+                }, 
+                onEndFromCacheCallback: resolve,
+                onErrorCallback: reject
+            });
+        }
+    }));
+
+    // ========================================================================
     // PROFILE LOGIN RESTRICTIONS (IN PROFILE)
     // ------------------------------------------------------------------------
     // Get the list of Login Restrictions in Profiles

@@ -23,6 +23,9 @@
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Object CRUDs" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objcruds" id="tab-default-objcruds__item">Object CRUDs</a>
+                    </li>
                 </ul>
                 <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
                     <div id="datatable-profiles" />
@@ -35,6 +38,10 @@
                 </div>
                 <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
+                </div>
+                <div id="tab-default-objcruds" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objcruds__item">
+                    Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                    <div id="datatable-objectCRUDs" />
                 </div>
             </div>
         </apex:define>
@@ -49,7 +56,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ],
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions', 'objectCRUDs' ],
                         onRecords: function(map) { 
 
                             // -------------------------------------------
@@ -110,6 +117,9 @@
                                 showSearch: false
                             });
 
+                            // -------------------------------------------
+                            // PROFILE RANGE IP
+                            // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
@@ -199,6 +209,32 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true
                             });
+
+                            // -------------------------------------------
+                            // PROFILE OBJECT CRUDs
+                            // -------------------------------------------
+                            helper.html.datatable.create({
+                                element: 'datatable-objectCRUDs',
+                                columns: [
+                                    { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
+                                    { name: 'Object', property: 'sobject' },
+                                    { name: 'Type', property: 'type' },
+                                    { name: 'Permissions', formula: (r) => { 
+                                        let html = '';
+                                        if (r.permissions.create === true) html += 'C';
+                                        if (r.permissions.read === true) html += 'R';
+                                        if (r.permissions.update === true) html += 'U';
+                                        if (r.permissions.delete === true) html += 'D';
+                                        if (r.permissions.viewAll === true) html += ' V';
+                                        if (r.permissions.modifyAll === true) html += ' M';
+                                        return html;
+                                    }}
+                                ],
+                                data: map.objectCRUDs,
+                                sorting: { name: 'Object', order: 'asc' },
+                                showSearch: true
+                            });
+
                         },
                         actions: {  
                             clearCache: { 
