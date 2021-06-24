@@ -789,49 +789,46 @@ const OrgCheck = {
 
         /**
         * Progress bar handler
-        * @param configuration Object must contain 'progressBarDivId' and 'spinnerDivId'
+        * @param configuration Object must contain 'spinnerDivId' and 'spinnerMessagesId'
         */
         ProgressBarHandler: function (configuration) {
 
-            const PROGRESSBAR_DIV = document.getElementById(configuration.progressBarDivId);
             const SPINNER_DIV = document.getElementById(configuration.spinnerDivId);
-            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessageId);
+            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessagesId);
 
             /**
-            * Reset the progress bar with current value at zero
-            * @param message Optionnal message to display
+            * Reset the progress bar with current value at zero and an empty message
             */
-            this.empty = function (message) {
-                private_set_progress_bar(0, 1);
-                private_set_message(message, false);
-            };
-
-            /**
-            * Reset the progress bar with maximum value
-            * @param message Optionnal message to display
-            */
-            this.full = function (message) {
-                private_set_progress_bar(1, 1);
-                private_set_message(message, true);
-            };
-
-            /**
-            * Set the progress bar with a given value
-            * @param value
-            * @param max
-            * @param message Optionnal message to display
-            */
-            this.set = function (value, max, message) {
-                private_set_progress_bar(value, max);
-                private_set_message(message, true);
+            this.reset = function () {
+                SPINNER_MSG_DIV.innerHTML = '';
             };
 
             /**
             * Set the progress message with a given value
             * @param message message to display
+            * @param status 'failed', 'ended', 'started'
+            * @param section optional section name
             */
-            this.still = function (message) {
-                private_set_message(message, true);
+            this.addMessage = function (message, status, section) {
+                const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
+                const classMarker = (status === 'failed' ? 'slds-has-error' : (status === 'ended' || !status ? 'slds-is-completed' : ''));
+                if (section) {
+                    const li = document.getElementById(section);
+                    if (li) {
+                        li.classList.remove('slds-has-error','slds-is-completed');
+                        if (classMarker) li.classList.add(classMarker);
+                        const liContent = li.children[1];
+                        if (liContent) liContent.innerHTML = message;
+                    }
+                } else {
+                    section = 'spinner-message-'+(sections.length+1);
+                    SPINNER_MSG_DIV.innerHTML += 
+                        '<li class="slds-progress__item ' + classMarker + '" id="'+section+'">'+
+                            '<div class="slds-progress__marker"></div>'+
+                            '<div class="slds-progress__item_content slds-grid slds-grid_align-spread">'+message+'</div>'+
+                        '</li>';
+                }
+                return section;
             };
 
             /**
@@ -839,7 +836,6 @@ const OrgCheck = {
             */
             this.hide = function () {
                 SPINNER_DIV.style.display = 'none';
-                SPINNER_MSG_DIV.style.display = 'none';
             };
 
             /**
@@ -847,38 +843,54 @@ const OrgCheck = {
             */
             this.show = function () {
                 SPINNER_DIV.style.display = 'block';
-                SPINNER_MSG_DIV.style.display = 'block';
             };
 
             /**
             * Private method to set the message
             * @param message Text to write in the div
             * @param isAppended Reset the content or just append it
+            * @param section Name of the section (optionnal)
             */
-            function private_set_message(message, isAppended) {
-                if (message) {
+            function private_set_message(message, isAppended, section) {
+                /*
+                if (message) { 
+                    if (section) {
+                        const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
+                        for (let i=0; i<sections.length; i++) {
+                            if (sections.item(i))
+                        }
+                        document.getElementById(SPINNER_MSG_DIV.)
+                        if (SPINNER_MSG_DIV.;
+
+                            const item = helper.html.element.create('li');
+                            helper.html.element.addClass(item, ['slds-progress__item', 'slds-is-completed']);
+                            helper.html.element.setAttribute(item, 'id', keys[i]);
+                            // add inner div #1
+                            const innerDiv1 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv1, ['slds-progress__marker']);
+                            helper.html.element.appendChild(item, innerDiv1);
+                            // add inner div #2
+                            const innerDiv2 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
+                            const timestamp = helper.timestamp.to.date(sideValues.timestamp);
+                            const nbItems = (sideValues.size ? (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : ''))):'N/A');
+                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + timestamp + ' - ' + nbItems + ')');
+                            helper.html.element.appendChild(item, innerDiv2);
+                    }
                     if (isAppended === true) {
+                        let sectionNode = null;
+                        for (let i=0; i<SPINNER_MSG_DIV.children.length; i++) {
+                            const SPINNER_MSG_DIV.children.item(i)
+                            sectionNode = 
+                        }
+
                         SPINNER_MSG_DIV.innerHTML += message + '<br />';
                     } else {
                         SPINNER_MSG_DIV.innerHTML = message + '<br />';
                     }
                 }
+                */
             };
-
-            /**
-            * Private method to set the progress bar to the current
-            *              value and potentially stop the spinner if we reach
-            *              the maximum.
-            * @param currentValue
-            * @param maxValue
-            */
-            function private_set_progress_bar(currentValue, maxValue) {
-                if (!maxValue) {
-                    maxValue = 100;
-                    currentValue = currentValue % maxValue;
-                }
-                PROGRESSBAR_DIV.style.width = (currentValue / maxValue) * 100 + "%";
-            }
         }
     },
 
@@ -907,7 +919,7 @@ const OrgCheck = {
      *                <li><code>sfLocalInstanceUrl</code>: Salesforce Endpoint to access the local org</li>
      *                <li><code>htmlProgressBarTagId</code>: HTML Tag Id of the progress bar zone</li> 
      *                <li><code>htmlSpinnerTagId</code>: HTML Tag Id of the spinner zone</li> 
-     *                <li><code>htmlSpinnerMessageTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
+     *                <li><code>htmlSpinnerMessagesTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
      *                <li><code>htmlModalContentTagId</code>: HTML Tag Id of the content zone of the dialog box</li> 
      *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
      *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
@@ -978,9 +990,8 @@ const OrgCheck = {
         });
 
         const PROGRESSBAR_HANDLER = new OrgCheck.handlers.ProgressBarHandler({
-            progressBarDivId: setup.htmlProgressBarTagId,
             spinnerDivId: setup.htmlSpinnerTagId,
-            spinnerMessageId: setup.htmlSpinnerMessageTagId
+            spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
         const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
@@ -1055,7 +1066,7 @@ const OrgCheck = {
                     // 0. Clean way to show errors
                     const showError = function(error) {
                         MSG_HANDLER.showError(error);
-                        PROGRESSBAR_HANDLER.empty('*** Error ***');
+                        PROGRESSBAR_HANDLER.reset();
                         PROGRESSBAR_HANDLER.hide();
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
                     };
@@ -1081,7 +1092,8 @@ const OrgCheck = {
 
                     // 2. Set the progress bar to 'EMPTY'
                     PROGRESSBAR_HANDLER.show();
-                    PROGRESSBAR_HANDLER.empty('Starting...');
+                    PROGRESSBAR_HANDLER.reset();
+                    PROGRESSBAR_HANDLER.addMessage('Starting...');
                     document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
 
                     // 3. Buttons actions based on the map (from datasets)
@@ -1152,12 +1164,12 @@ const OrgCheck = {
 
                     // 4. Method that calls the callback fonction and set the progress bar top 'FULL'
                     const onEnd = function(map) {
-                        PROGRESSBAR_HANDLER.still('Records processing starting...');
+                        PROGRESSBAR_HANDLER.addMessage('Records processing starting...');
                         ctlSetup.onRecords(map);
-                        PROGRESSBAR_HANDLER.still('Records processing ended successfuly');
-                        PROGRESSBAR_HANDLER.still('Action buttons starting...');
+                        PROGRESSBAR_HANDLER.addMessage('Records processing ended successfuly');
+                        PROGRESSBAR_HANDLER.addMessage('Action buttons starting...');
                         initActions(map);
-                        PROGRESSBAR_HANDLER.still('Action buttons ended successfuly');
+                        PROGRESSBAR_HANDLER.addMessage('Action buttons ended successfuly');
                         setTimeout(function() {
                             PROGRESSBAR_HANDLER.hide();
                             document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
@@ -1167,13 +1179,13 @@ const OrgCheck = {
                     // 5. Calling the dataset retreivers
                     const onLoadPromises = [];
                     ctlSetup.datasets.forEach(dataset => onLoadPromises.push(new Promise(function(s, e) { 
-                        PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] starting...');
+                        const section = PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] starting...', 'started');
                         private_datasets_collection[dataset].retriever(
                             function(m) {
-                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended successfuly');
+                                PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] ended successfuly', 'ended', section);
                                 s(m);
                             }, function(m) {
-                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended with an error');
+                                PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] ended with an error', 'failed', section);
                                 e(m);
                             }
                         ); 
@@ -1182,8 +1194,8 @@ const OrgCheck = {
                     // 6. Calling the dataset retreivers
                     Promise.all(onLoadPromises)
                         .then(function(results) {
-                            PROGRESSBAR_HANDLER.still('All datasets ('+ctlSetup.datasets.length+') were retrieved');
-                            PROGRESSBAR_HANDLER.still('Mapping process starting...');
+                            PROGRESSBAR_HANDLER.addMessage('All datasets ('+ctlSetup.datasets.length+') were retrieved');
+                            PROGRESSBAR_HANDLER.addMessage('Mapping process starting...');
                             // 7. When all datasets are retreived, we calculate keys and map
                             const map = {};
                             let keys = [];
@@ -1191,29 +1203,29 @@ const OrgCheck = {
                                 map[ctlSetup.datasets[i]] = v;
                                 keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(v));
                             });
-                            PROGRESSBAR_HANDLER.still('Mapping process ended successfuly');
+                            PROGRESSBAR_HANDLER.addMessage('Mapping process ended successfuly');
                             return { m: map, k: keys };
                         })
                         .catch(function(error) {
-                            PROGRESSBAR_HANDLER.still('Mapping process ended with an error');
+                            PROGRESSBAR_HANDLER.addMessage('Mapping process ended with an error');
                             showError(error);
                         }) 
                         .then(function(data) {
                             if (data) { // check if no error during mapping
                                 // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
                                 if (ctlSetup.dependencies === true) {
-                                    PROGRESSBAR_HANDLER.still('Dependencies process starting...');
+                                    const section = PROGRESSBAR_HANDLER.addMessage('Dependencies process starting...', 'started');
                                     private_salesforce_dapi(
                                         data.k, 
                                         function(dependencies) { 
-                                            PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
+                                            PROGRESSBAR_HANDLER.addMessage('Dependencies process ended successfuly', 'ended', section);
                                             // We are altering the map to include the dependencies
                                             data.m['dependencies'] = dependencies || {};
                                             // 9.1 And then call the method (with dependencies)
                                             onEnd(data.m);
                                         }, 
                                         function(error) {
-                                            PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
+                                            PROGRESSBAR_HANDLER.addMessage('Dependencies process ended with an error', 'failed', section);
                                             showError(error);
                                         }
                                     );
@@ -1316,17 +1328,6 @@ const OrgCheck = {
                         PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_PREFERENCE, 'Options', map);
                     }
                 },
-                progressbar: {
-                    empty: function(msg) {
-                        PROGRESSBAR_HANDLER.empty(msg);
-                    },
-                    full: function(msg) {
-                        PROGRESSBAR_HANDLER.full(msg);
-                    },
-                    set: function(value, max, msg) {
-                        PROGRESSBAR_HANDLER.set(value, max, msg);
-                    }
-                },
                 array: {
                     concat: function(array1, array2, prop) {
                         return ARRAY_HANDLER.concat(array1, array2, prop);
@@ -1399,11 +1400,12 @@ const OrgCheck = {
                                 search.onkeydown = function(e) {
                                     if (e.code === 'Enter') {
                                         PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.empty('Filtering...');
+                                        PROGRESSBAR_HANDLER.reset();
+                                        PROGRESSBAR_HANDLER.addMessage('Filtering...');
                                         const searchValue = e.target.value;
-                                        PROGRESSBAR_HANDLER.still('Search value: '+searchValue);
+                                        PROGRESSBAR_HANDLER.addMessage('Search value: '+searchValue);
                                         const items = [].slice.call(table.rows).slice(1);
-                                        PROGRESSBAR_HANDLER.still('All data size: '+items.length);
+                                        PROGRESSBAR_HANDLER.addMessage('All data size: '+items.length);
                                         let nbVisible = 0;
                                         table.hidden = true; // make table invisible while manipulating the DOM
                                         items.forEach(tr => {
@@ -1425,8 +1427,8 @@ const OrgCheck = {
                                             }
                                         });
                                         table.hidden = false; // make table visible again
-                                        PROGRESSBAR_HANDLER.still('Number of rows visible: '+nbVisible);
-                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.addMessage('Number of rows visible: '+nbVisible);
+                                        PROGRESSBAR_HANDLER.addMessage('Good job!');
                                         PROGRESSBAR_HANDLER.hide();
                                     }
                                 };
@@ -1459,7 +1461,8 @@ const OrgCheck = {
                                 aHead.onclick = function(e) { 
                                     if (e) {
                                         PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.empty('Sorting...');
+                                        PROGRESSBAR_HANDLER.reset();
+                                        PROGRESSBAR_HANDLER.addMessage('Sorting...');
                                         if (config.sorting.name === c.name) {
                                             config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
@@ -1469,8 +1472,8 @@ const OrgCheck = {
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
-                                        PROGRESSBAR_HANDLER.still('Name: '+config.sorting.name);
-                                        PROGRESSBAR_HANDLER.still('Order: '+config.sorting.order);
+                                        PROGRESSBAR_HANDLER.addMessage('Name: '+config.sorting.name);
+                                        PROGRESSBAR_HANDLER.addMessage('Order: '+config.sorting.order);
                                     }
                                     if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
@@ -1480,7 +1483,7 @@ const OrgCheck = {
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
                                     }
                                     if (e) {
-                                        PROGRESSBAR_HANDLER.still('Sorting data...');
+                                        PROGRESSBAR_HANDLER.addMessage('Sorting data...');
                                     }
                                     grdHead.appendChild(orderingImage);
                                     const iOrder = config.sorting.order === 'asc' ? 1 : -1;
@@ -1494,7 +1497,7 @@ const OrgCheck = {
                                         return 0;
                                     });
                                     if (e) {
-                                        PROGRESSBAR_HANDLER.still('Reordering rows...');
+                                        PROGRESSBAR_HANDLER.addMessage('Reordering rows...');
                                     }
                                     table.hidden = true; // make table invisible while manipulating the DOM
                                     items.forEach(r => {
@@ -1504,7 +1507,7 @@ const OrgCheck = {
                                     });
                                     table.hidden = false; // make table visible again
                                     if (e) {
-                                        PROGRESSBAR_HANDLER.full('Good job!');
+                                        PROGRESSBAR_HANDLER.addMessage('Good job!');
                                         PROGRESSBAR_HANDLER.hide();
                                     }
                                 };
@@ -1613,7 +1616,6 @@ const OrgCheck = {
                     },
                     tabs: {
                         initialize: function(itemClass, contentClass, buttonClass) {
-                            PROGRESSBAR_HANDLER.set(0, 1);
                             const tabItems = document.getElementsByClassName(itemClass);
                             const tabContents = document.getElementsByClassName(contentClass);
                             const buttons = document.getElementsByClassName(buttonClass);
@@ -1650,7 +1652,6 @@ const OrgCheck = {
                                     }
                                 }
                             }
-                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     picklist: {
