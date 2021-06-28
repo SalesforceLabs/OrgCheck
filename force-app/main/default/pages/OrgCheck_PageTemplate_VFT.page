@@ -120,7 +120,7 @@
                                     <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot+Animated.svg')}" width="256" height="256" />
                                 </object>
                                 <div class="slds-notify__content">
-                                    <div class="slds-progress slds-progress_vertical" style="width: 100%; height: 100%;" width="100%" height="100%">
+                                    <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;" width="100%" height="100%">
                                         <ol class="slds-progress__list" id="spinner-messages" />
                                     </div>
                                 </div>

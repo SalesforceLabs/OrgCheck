@@ -803,32 +803,51 @@ const OrgCheck = {
                 SPINNER_MSG_DIV.innerHTML = '';
             };
 
+            this.addSection = function(sectionName, message) {
+                SPINNER_MSG_DIV.innerHTML += 
+                    '<li class="slds-progress__item" id="spinner-section-'+sectionName+'">'+
+                        '<div class="slds-progress__marker"></div>'+
+                        '<div class="slds-progress__item_content slds-grid slds-grid_align-spread" id="spinner-section-msg-'+sectionName+'">'+message+'</div>'+
+                    '</li>';
+            };
+
             /**
             * Set the progress message with a given value
             * @param message message to display
-            * @param status 'failed', 'ended', 'started'
+            * @param status 'initialized', 'started', 'failed', 'ended'
             * @param section optional section name
             */
-            this.addMessage = function (message, status, section) {
+            this.setSection = function (sectionName, message, status) {
                 const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
-                const classMarker = (status === 'failed' ? 'slds-has-error' : (status === 'ended' || !status ? 'slds-is-completed' : ''));
-                if (section) {
-                    const li = document.getElementById(section);
-                    if (li) {
-                        li.classList.remove('slds-has-error','slds-is-completed');
-                        if (classMarker) li.classList.add(classMarker);
-                        const liContent = li.children[1];
-                        if (liContent) liContent.innerHTML = message;
+                const sectionId = 'spinner-section-'+sectionName;
+                const li = document.getElementById('spinner-section-'+sectionName);
+                if (li) {
+                    li.classList.remove('slds-has-error','slds-is-completed','slds-is-active');
+                    switch (status) {
+                        case 'started': 
+                            li.classList.add('slds-is-completed');
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/loading.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'ended': 
+                            li.classList.add('slds-is-completed'); 
+                            li.children[0].style['border-color'] = 'green';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/util/checkmark16.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'failed': 
+                            li.classList.add('slds-has-error'); 
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/remove12_on.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
                     }
-                } else {
-                    section = 'spinner-message-'+(sections.length+1);
-                    SPINNER_MSG_DIV.innerHTML += 
-                        '<li class="slds-progress__item ' + classMarker + '" id="'+section+'">'+
-                            '<div class="slds-progress__marker"></div>'+
-                            '<div class="slds-progress__item_content slds-grid slds-grid_align-spread">'+message+'</div>'+
-                        '</li>';
                 }
-                return section;
+                const msg = document.getElementById('spinner-section-msg-'+sectionName);
+                if (msg) {
+                    msg.innerText = message;
+                }
             };
 
             /**
@@ -1091,9 +1110,19 @@ const OrgCheck = {
                     }
 
                     // 2. Set the progress bar to 'EMPTY'
-                    PROGRESSBAR_HANDLER.show();
                     PROGRESSBAR_HANDLER.reset();
-                    PROGRESSBAR_HANDLER.addMessage('Starting...');
+                    ctlSetup.datasets.forEach(d => {
+                        PROGRESSBAR_HANDLER.addSection('dataset-'+d, 'Dataset ['+d+']: initialize...', 'initialized');
+                    });
+                    if (ctlSetup.dependencies) {
+                        PROGRESSBAR_HANDLER.addSection('dependencies', 'Dependencies: initialize...', 'initialized');
+                    }
+                    PROGRESSBAR_HANDLER.addSection('mapping', 'Mapping: initialize...', 'initialized');
+                    PROGRESSBAR_HANDLER.addSection('records', 'Records: initialize...', 'initialized');
+                    if (ctlSetup.actions) {
+                        PROGRESSBAR_HANDLER.addSection('actions', 'Actions: initialize...', 'initialized');
+                    }
+                    PROGRESSBAR_HANDLER.show();
                     document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
 
                     // 3. Buttons actions based on the map (from datasets)
@@ -1164,12 +1193,12 @@ const OrgCheck = {
 
                     // 4. Method that calls the callback fonction and set the progress bar top 'FULL'
                     const onEnd = function(map) {
-                        PROGRESSBAR_HANDLER.addMessage('Records processing starting...');
+                        PROGRESSBAR_HANDLER.setSection('records', 'Records processing starting...', 'started');
                         ctlSetup.onRecords(map);
-                        PROGRESSBAR_HANDLER.addMessage('Records processing ended successfuly');
-                        PROGRESSBAR_HANDLER.addMessage('Action buttons starting...');
+                        PROGRESSBAR_HANDLER.setSection('records', 'Records processing ended successfuly', 'ended');
+                        PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons starting...', 'started');
                         initActions(map);
-                        PROGRESSBAR_HANDLER.addMessage('Action buttons ended successfuly');
+                        PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons ended successfuly', 'ended');
                         setTimeout(function() {
                             PROGRESSBAR_HANDLER.hide();
                             document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
@@ -1178,14 +1207,14 @@ const OrgCheck = {
 
                     // 5. Calling the dataset retreivers
                     const onLoadPromises = [];
-                    ctlSetup.datasets.forEach(dataset => onLoadPromises.push(new Promise(function(s, e) { 
-                        const section = PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] starting...', 'started');
-                        private_datasets_collection[dataset].retriever(
+                    ctlSetup.datasets.forEach(d => onLoadPromises.push(new Promise(function(s, e) { 
+                        PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: starting...', 'started');
+                        private_datasets_collection[d].retriever(
                             function(m) {
-                                PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] ended successfuly', 'ended', section);
+                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended successfuly', 'ended');
                                 s(m);
                             }, function(m) {
-                                PROGRESSBAR_HANDLER.addMessage('Dataset ['+dataset+'] ended with an error', 'failed', section);
+                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended with an error', 'failed');
                                 e(m);
                             }
                         ); 
@@ -1194,8 +1223,7 @@ const OrgCheck = {
                     // 6. Calling the dataset retreivers
                     Promise.all(onLoadPromises)
                         .then(function(results) {
-                            PROGRESSBAR_HANDLER.addMessage('All datasets ('+ctlSetup.datasets.length+') were retrieved');
-                            PROGRESSBAR_HANDLER.addMessage('Mapping process starting...');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started');
                             // 7. When all datasets are retreived, we calculate keys and map
                             const map = {};
                             let keys = [];
@@ -1203,29 +1231,29 @@ const OrgCheck = {
                                 map[ctlSetup.datasets[i]] = v;
                                 keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(v));
                             });
-                            PROGRESSBAR_HANDLER.addMessage('Mapping process ended successfuly');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended');
                             return { m: map, k: keys };
                         })
                         .catch(function(error) {
-                            PROGRESSBAR_HANDLER.addMessage('Mapping process ended with an error');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed');
                             showError(error);
                         }) 
                         .then(function(data) {
                             if (data) { // check if no error during mapping
                                 // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
                                 if (ctlSetup.dependencies === true) {
-                                    const section = PROGRESSBAR_HANDLER.addMessage('Dependencies process starting...', 'started');
+                                    PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started');
                                     private_salesforce_dapi(
                                         data.k, 
                                         function(dependencies) { 
-                                            PROGRESSBAR_HANDLER.addMessage('Dependencies process ended successfuly', 'ended', section);
+                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended');
                                             // We are altering the map to include the dependencies
                                             data.m['dependencies'] = dependencies || {};
                                             // 9.1 And then call the method (with dependencies)
                                             onEnd(data.m);
                                         }, 
                                         function(error) {
-                                            PROGRESSBAR_HANDLER.addMessage('Dependencies process ended with an error', 'failed', section);
+                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed');
                                             showError(error);
                                         }
                                     );
@@ -1399,13 +1427,8 @@ const OrgCheck = {
                                 search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
                                 search.onkeydown = function(e) {
                                     if (e.code === 'Enter') {
-                                        PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.reset();
-                                        PROGRESSBAR_HANDLER.addMessage('Filtering...');
                                         const searchValue = e.target.value;
-                                        PROGRESSBAR_HANDLER.addMessage('Search value: '+searchValue);
                                         const items = [].slice.call(table.rows).slice(1);
-                                        PROGRESSBAR_HANDLER.addMessage('All data size: '+items.length);
                                         let nbVisible = 0;
                                         table.hidden = true; // make table invisible while manipulating the DOM
                                         items.forEach(tr => {
@@ -1427,9 +1450,6 @@ const OrgCheck = {
                                             }
                                         });
                                         table.hidden = false; // make table visible again
-                                        PROGRESSBAR_HANDLER.addMessage('Number of rows visible: '+nbVisible);
-                                        PROGRESSBAR_HANDLER.addMessage('Good job!');
-                                        PROGRESSBAR_HANDLER.hide();
                                     }
                                 };
                             }
@@ -1460,9 +1480,6 @@ const OrgCheck = {
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
                                     if (e) {
-                                        PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.reset();
-                                        PROGRESSBAR_HANDLER.addMessage('Sorting...');
                                         if (config.sorting.name === c.name) {
                                             config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
@@ -1472,8 +1489,6 @@ const OrgCheck = {
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
-                                        PROGRESSBAR_HANDLER.addMessage('Name: '+config.sorting.name);
-                                        PROGRESSBAR_HANDLER.addMessage('Order: '+config.sorting.order);
                                     }
                                     if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
@@ -1481,9 +1496,6 @@ const OrgCheck = {
                                     } else {
                                         thHead.setAttribute('aria-sort', 'descending');
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
-                                    }
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.addMessage('Sorting data...');
                                     }
                                     grdHead.appendChild(orderingImage);
                                     const iOrder = config.sorting.order === 'asc' ? 1 : -1;
@@ -1496,9 +1508,6 @@ const OrgCheck = {
                                         if (valueA > valueB) return iOrder;
                                         return 0;
                                     });
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.addMessage('Reordering rows...');
-                                    }
                                     table.hidden = true; // make table invisible while manipulating the DOM
                                     items.forEach(r => {
                                         const parent = r.parentNode;
@@ -1506,10 +1515,6 @@ const OrgCheck = {
                                         parent.appendChild(detatchedItem);
                                     });
                                     table.hidden = false; // make table visible again
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.addMessage('Good job!');
-                                        PROGRESSBAR_HANDLER.hide();
-                                    }
                                 };
                                 if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
