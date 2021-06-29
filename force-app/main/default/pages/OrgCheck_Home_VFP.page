@@ -379,6 +379,12 @@
                             options: [
                                 { label: 'Hide external roles (from Community).', id: 'filter.HideExternalRoles' }
                             ]
+                        },
+                        { 
+                            label: 'Profiles and Permission Sets',
+                            options: [
+                                { label: 'Do not fetch the CRUDs on profiles and permission sets.', id: 'filter.HideCRUDsProfilesPermSets' }
+                            ]
                         }
                     ].forEach(p => {
                         const fieldset1 = helper.html.element.create('fieldset');

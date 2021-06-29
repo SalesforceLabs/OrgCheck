@@ -40,7 +40,9 @@
                     <div id="datatable-profileRangeIPs" />
                 </div>
                 <div id="tab-default-objcruds" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objcruds__item">
-                    Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                    <div id="legend-objectCRUDs">
+                        Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                    </div>
                     <div id="datatable-objectCRUDs" />
                 </div>
             </div>
@@ -49,6 +51,11 @@
             <script>
                 function start2(controller, helper) {
 
+                    const PREF_HIDE_CRUDS = helper.preferences.get('filter.HideCRUDsProfilesPermSets');
+
+                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ];
+                    if (PREF_HIDE_CRUDS === false) profileDatasets.push('objectCRUDs');
+
                     // Initialize TABS bindings
                     helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
 
@@ -56,7 +63,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions', 'objectCRUDs' ],
+                        datasets: profileDatasets,
                         onRecords: function(map) { 
 
                             // -------------------------------------------
@@ -213,27 +220,39 @@
                             // -------------------------------------------
                             // PROFILE OBJECT CRUDs
                             // -------------------------------------------
-                            helper.html.datatable.create({
-                                element: 'datatable-objectCRUDs',
-                                columns: [
-                                    { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
-                                    { name: 'Object', property: 'sobject' },
-                                    { name: 'Type', property: 'type' },
-                                    { name: 'Permissions', formula: (r) => { 
-                                        let html = '';
-                                        if (r.permissions.create === true) html += 'C';
-                                        if (r.permissions.read === true) html += 'R';
-                                        if (r.permissions.update === true) html += 'U';
-                                        if (r.permissions.delete === true) html += 'D';
-                                        if (r.permissions.viewAll === true) html += ' V';
-                                        if (r.permissions.modifyAll === true) html += ' M';
-                                        return html;
-                                    }}
-                                ],
-                                data: map.objectCRUDs,
-                                sorting: { name: 'Object', order: 'asc' },
-                                showSearch: true
-                            });
+                            if (PREF_HIDE_CRUDS === true) {
+                                const divCRUDs = helper.html.element.get('legend-objectCRUDs');
+                                divCRUDs.innerHTML = '<br /><br />This page is showing (as a first <b>beta</b> version) a tabular view of all '+
+                                                        'CRUDs for each Profile/PermSet and Objects.<br /><br />'+
+                                                     'As this (beta) approach could be time consuming when loading the page, we disabled '+
+                                                        'this feature by default.<br /><br />'+
+                                                     'If you want to test this feature, go to the home page and unselect the preference '+
+                                                        '<b><code>Do not fetch the CRUDs on profiles and permission sets</code></b>.<br /><br />'+
+                                                     'In the future, this page will let you select the profile/permission set and/or the objects '+
+                                                        'before retrieving the data.<br /><br />';
+                            } else {
+                                helper.html.datatable.create({
+                                    element: 'datatable-objectCRUDs',
+                                    columns: [
+                                        { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
+                                        { name: 'Object', property: 'sobject' },
+                                        { name: 'Type', property: 'type' },
+                                        { name: 'Permissions', formula: (r) => { 
+                                            let html = '';
+                                            if (r.permissions.create === true) html += 'C';
+                                            if (r.permissions.read === true) html += 'R';
+                                            if (r.permissions.update === true) html += 'U';
+                                            if (r.permissions.delete === true) html += 'D';
+                                            if (r.permissions.viewAll === true) html += ' V';
+                                            if (r.permissions.modifyAll === true) html += ' M';
+                                            return html;
+                                        }}
+                                    ],
+                                    data: map.objectCRUDs,
+                                    sorting: { name: 'Object', order: 'asc' },
+                                    showSearch: true
+                                });
+                            }
 
                         },
                         actions: {  
