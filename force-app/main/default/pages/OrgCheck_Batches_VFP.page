@@ -20,12 +20,18 @@
                     <li class="slds-tabs_default__item" title="Scheduled Jobs" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-scheduledjobs" id="tab-default-scheduledjobs__item">Scheduled Jobs</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Schedulable classes not yet scheduled" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-notscheduledjobs" id="tab-default-notscheduledjobs__item">Schedulable classes not yet scheduled</a>
+                    </li>
                 </ul>
                 <div id="tab-default-apexjobs" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-apexjobs__item">
                     <div id="datatable-apexjobs" />
                 </div>
                 <div id="tab-default-scheduledjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scheduledjobs__item">
                     <div id="datatable-scheduledjobs" />
+                </div>
+                <div id="tab-default-notscheduledjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-notscheduledjobs__item">
+                    <div id="datatable-notscheduledjobs" />
                 </div>
             </div>
         </apex:define>
@@ -38,7 +44,7 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'batchesApexJobs', 'batchesScheduledJobs', 'users' ],
+                        datasets: [ 'batchesApexJobs', 'batchesScheduledJobs', 'users', 'apexClasses' ],
                         onRecords: function(map) { 
 
                             // Render the data in a table for failed Apex Jobs
@@ -80,6 +86,24 @@
                                 ],
                                 data: map.batchesScheduledJobs,
                                 sorting: { name: 'Context', order: 'asc' },
+                                showSearch: true
+                            });
+
+                            // Render the data in a table for Not Scheduled Jobs
+                            helper.html.datatable.create({
+                                element: 'datatable-notscheduledjobs',
+                                columns: [
+                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Is Scheduled?', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.isScheduled === true); },
+                                        scoreFormula: (r) => { if (r.isScheduled !== true) return 1; }
+                                    },
+                                    { name: 'Package', property: 'namespace' }
+                                ],
+                                data: map.apexClasses,
+                                sorting: { name: 'Score', order: 'desc' },
+                                filtering: { formula: (r) => { return (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
                                 showSearch: true
                             });
                         },

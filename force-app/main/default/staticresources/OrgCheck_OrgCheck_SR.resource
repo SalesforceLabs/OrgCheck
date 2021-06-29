@@ -2595,6 +2595,7 @@ function buildDatasets(core) {
             const classesMap = {};
             const relatedTestClassesMap = {};
             const classesCoverageMap = {};
+            const schedulableMap = {};
             core.doSalesforceQueries({
                 queries: [{
                     string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
@@ -2611,6 +2612,11 @@ function buildDatasets(core) {
                             'FROM ApexClass '+
                             'WHERE ManageableState = \'unmanaged\' ',
                     tooling: true
+                }, {
+                    string: 'SELECT ApexClassId '+
+                            'FROM AsyncApexJob '+
+                            'WHERE JobType = \'ScheduledApex\' ',
+                    tooling: false
                 }], 
                 onEachRecord: function(v, index) {
                     switch (index) {
@@ -2634,7 +2640,7 @@ function buildDatasets(core) {
                             classesCoverageMap[item.id] = item;
                             break; 
                         }
-                        default: {
+                        case 2: {
                             // ApexClasses records
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
@@ -2678,6 +2684,10 @@ function buildDatasets(core) {
                                 item.isSharingMissing = true;
                             }
                             classesMap[item.id] = item;
+                            break;
+                        }
+                        default: {
+                            schedulableMap[core.doSimplifiySalesforceID(v.ApexClassId)] = true;
                         }
                     }
                 }, 
@@ -2685,6 +2695,7 @@ function buildDatasets(core) {
                     for (const [key, value] of Object.entries(classesMap)) {
                         if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
                         if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
+                        if (schedulableMap[key]) value.isScheduled = true;
                     }
                     core.setMetadataInCache(cache, classesMap);
                     resolve(classesMap);
@@ -3444,8 +3455,7 @@ function buildDatasets(core) {
                                 'PreviousFireTime, StartTime, State, TimesTriggered, '+
                                 'TimeZoneSidKey '+
                             'FROM CronTrigger '+
-                            'WHERE StartTime >= YESTERDAY '+
-                            'AND State <> \'COMPLETE\' ' +
+                            'WHERE State <> \'COMPLETE\' ' +
                             'LIMIT 10000 '
                 } ],
                 onEachRecordFromAPICallback: function(v, i, l, ts) {
@@ -3459,7 +3469,7 @@ function buildDatasets(core) {
                         case '8': jobTypeLabel = 'Report Run'; break;
                         case '9': jobTypeLabel = 'Batch Job'; break;
                         case 'A': jobTypeLabel = 'Reporting Notification'; break;
-                        default:  jobTypeLabel = 'Unknown type ('+v.CronJobDetail.JobType+')'; break;
+                        default:  return; // skip if type is not supported
                     }
                     return { 
                         id: 'SCHJOBS-'+artificial_id++,
