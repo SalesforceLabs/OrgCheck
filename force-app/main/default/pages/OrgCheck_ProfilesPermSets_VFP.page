@@ -23,6 +23,9 @@
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Object CRUDs" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objcruds" id="tab-default-objcruds__item">Object CRUDs</a>
+                    </li>
                 </ul>
                 <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
                     <div id="datatable-profiles" />
@@ -36,11 +39,22 @@
                 <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
                 </div>
+                <div id="tab-default-objcruds" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objcruds__item">
+                    <div id="legend-objectCRUDs">
+                        Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                    </div>
+                    <div id="datatable-objectCRUDs" />
+                </div>
             </div>
         </apex:define>
         <apex:define name="html_start_definition_script">
             <script>
                 function start2(controller, helper) {
+
+                    const PREF_HIDE_CRUDS = helper.preferences.get('filter.HideCRUDsProfilesPermSets');
+
+                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ];
+                    if (PREF_HIDE_CRUDS === false) profileDatasets.push('objectCRUDs');
 
                     // Initialize TABS bindings
                     helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
@@ -49,7 +63,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ],
+                        datasets: profileDatasets,
                         onRecords: function(map) { 
 
                             // -------------------------------------------
@@ -110,6 +124,9 @@
                                 showSearch: false
                             });
 
+                            // -------------------------------------------
+                            // PROFILE RANGE IP
+                            // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
@@ -155,7 +172,13 @@
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', 
+                                        formula: (r) => { 
+                                            if (r.isGroup) return helper.html.render.link('/'+r.groupId, r.name); 
+                                            return helper.html.render.link('/'+r.id, r.name); 
+                                        }
+                                    },
+                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { return helper.html.render.checkbox(r.isGroup); }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
                                     { name: 'License', property: 'license' },
@@ -193,6 +216,44 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true
                             });
+
+                            // -------------------------------------------
+                            // PROFILE OBJECT CRUDs
+                            // -------------------------------------------
+                            if (PREF_HIDE_CRUDS === true) {
+                                const divCRUDs = helper.html.element.get('legend-objectCRUDs');
+                                divCRUDs.innerHTML = '<br /><br />This page is showing (as a first <b>beta</b> version) a tabular view of all '+
+                                                        'CRUDs for each Profile/PermSet and Objects.<br /><br />'+
+                                                     'As this (beta) approach could be time consuming when loading the page, we disabled '+
+                                                        'this feature by default.<br /><br />'+
+                                                     'If you want to test this feature, go to the home page and unselect the preference '+
+                                                        '<b><code>Do not fetch the CRUDs on profiles and permission sets</code></b>.<br /><br />'+
+                                                     'In the future, this page will let you select the profile/permission set and/or the objects '+
+                                                        'before retrieving the data.<br /><br />';
+                            } else {
+                                helper.html.datatable.create({
+                                    element: 'datatable-objectCRUDs',
+                                    columns: [
+                                        { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
+                                        { name: 'Object', property: 'sobject' },
+                                        { name: 'Type', property: 'type' },
+                                        { name: 'Permissions', formula: (r) => { 
+                                            let html = '';
+                                            if (r.permissions.create === true) html += 'C';
+                                            if (r.permissions.read === true) html += 'R';
+                                            if (r.permissions.update === true) html += 'U';
+                                            if (r.permissions.delete === true) html += 'D';
+                                            if (r.permissions.viewAll === true) html += ' V';
+                                            if (r.permissions.modifyAll === true) html += ' M';
+                                            return html;
+                                        }}
+                                    ],
+                                    data: map.objectCRUDs,
+                                    sorting: { name: 'Object', order: 'asc' },
+                                    showSearch: true
+                                });
+                            }
+
                         },
                         actions: {  
                             clearCache: { 

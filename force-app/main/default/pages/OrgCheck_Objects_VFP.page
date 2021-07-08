@@ -133,6 +133,12 @@
                                     <div class="slds-panel__section">
                                         <ul>
                                             <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
+                                                <span class="slds-form-element__label">Record Count</span>
+                                                <div class="slds-form-element__control">
+                                                    <div class="slds-form-element__static" id="global-recordCount" />
+                                                </div>
+                                            </li>
+                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
                                                 <span class="slds-form-element__label">Internal Sharing</span>
                                                 <div class="slds-form-element__control">
                                                     <div class="slds-form-element__static" id="global-internalSharingModel" />
@@ -231,6 +237,7 @@
                         helper.html.element.setText('global-feedEnabled', '');
                         helper.html.element.setText('global-mruEnabled', '');
                         helper.html.element.setText('global-searchable', '');
+                        helper.html.element.setText('global-recordCount', '');
                         helper.html.element.setText('global-internalSharingModel', '');
                         helper.html.element.setText('global-externalSharingModel', '');
                         // Related lists
@@ -271,7 +278,6 @@
                     // Describe the selected object
                     // =================================
                     let describeObject = function(packageName, objectName) {
-                        helper.progressbar.empty();
                         helper.salesforce.describe.object(
                             packageName, 
                             objectName, 
@@ -283,7 +289,6 @@
                                 // -------------------------
                                 // GLOBAL INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 helper.html.element.setText('global-description', object.description);
                                 helper.html.element.setText('global-apiName', object.name);
                                 helper.html.element.setText('global-label', object.label);
@@ -293,13 +298,13 @@
                                 helper.html.element.setText('global-feedEnabled', object.feedEnabled);
                                 helper.html.element.setText('global-mruEnabled', object.mruEnabled);
                                 helper.html.element.setText('global-searchable', object.searchable);
+                                helper.html.element.setText('global-recordCount', object.recordCount);
                                 helper.html.element.setText('global-internalSharingModel', object.internalSharingModel);
                                 helper.html.element.setText('global-externalSharingModel', object.externalSharingModel);
 
                                 // -------------------------
                                 // FIELDS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.fields && object.fields.length > 0) {
                                     helper.html.element.show('section-fields', true);
                                     helper.html.datatable.create({
@@ -355,7 +360,6 @@
                                 // -------------------------
                                 // RELATIONSHIP FIELDS INFO
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.childRelationships && object.childRelationships.length > 0) {
                                     helper.html.element.show('section-relationships', true);
                                     helper.html.datatable.create({
@@ -375,7 +379,6 @@
                                 // -------------------------
                                 // RT INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.recordTypeInfos && object.recordTypeInfos.length > 0) {
                                     helper.html.element.show('section-recordtypes', true);
                                     helper.html.datatable.create({
@@ -398,7 +401,6 @@
                                 // -------------------------
                                 // APEX TRIGGERS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.apexTriggers && object.apexTriggers.length > 0) {
                                     helper.html.element.show('section-apexTriggers', true);
                                     helper.html.datatable.create({
@@ -416,7 +418,6 @@
                                 // -------------------------
                                 // FIELD SETS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.fieldSets && object.fieldSets.length > 0) {
                                     helper.html.element.show('section-fieldSets', true);
                                     helper.html.datatable.create({
@@ -435,7 +436,6 @@
                                 // -------------------------
                                 // LAYOUTS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.layouts && object.layouts.length > 0) {
                                     helper.html.element.show('section-layouts', true);
                                     helper.html.datatable.create({
@@ -454,7 +454,6 @@
                                 // -------------------------
                                 // LIMITS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.limits && object.limits.length > 0) {
                                     helper.html.element.show('section-limits', true);
                                     helper.html.datatable.create({
@@ -481,7 +480,6 @@
                                 // -------------------------
                                 // VALIDATION RULES INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.validationRules && object.validationRules.length > 0) {
                                     helper.html.element.show('section-validationRules', true);
                                     helper.html.datatable.create({
@@ -503,7 +501,6 @@
                                 // -------------------------
                                 // WEBLINKS INFORMATION
                                 // -------------------------
-                                helper.progressbar.set(currentStep++, MAX_STEPS);
                                 if (object.webLinks && object.webLinks.length > 0) {
                                     helper.html.element.show('section-webLinks', true);
                                     helper.html.datatable.create({
@@ -517,8 +514,6 @@
                                         showSearch: false
                                     });
                                 }
-
-                                helper.progressbar.full();
                             }, 
                             function(error) { 
                                 helper.error.show(error); 
@@ -544,7 +539,6 @@
                             const selectPck = helper.html.element.get('object-namespace');
                             helper.map.iterate(map.packages, indexesPackages, function(d, i, s) {
                                 helper.html.picklist.addValue(selectPck, d.namespace, d.name + ' (' + d.type + ')');
-                                helper.progressbar.set(i+1, s);
                             });
 
                             // Store all objects

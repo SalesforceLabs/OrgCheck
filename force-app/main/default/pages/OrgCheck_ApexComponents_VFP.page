@@ -38,12 +38,18 @@
                     <li class="slds-tabs_default__item" title="Triggers" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">Triggers</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Object's triggers count" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">Object's triggers count</a>
+                    </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
                     <div id="datatable-classes" />
                 </div>
                 <div id="tab-default-triggers" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-triggers__item">
                     <div id="datatable-triggers" />
+                </div>
+                <div id="tab-default-objtriggercounts" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objtriggercounts__item">
+                    <div id="datatable-objtriggercounts" />
                 </div>
             </div>
         </apex:define>
@@ -111,12 +117,21 @@
                                             if (r.isSharingMissing === true) return 1; 
                                         }
                                     },
-                                    { name: 'Coverage', type: 'numeric', property: 'fastCoverage', 
+                                    { name: 'Coverage', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
-                                            return helper.html.render.percentage(r.fastCoverage);
+                                            return helper.html.render.percentage(r.coverage);
                                         },
                                         scoreFormula: (r) => { 
-                                            if (!r.fastCoverage || r.fastCoverage < 0.85) return 1;
+                                            if (!r.coverage || r.coverage < 0.85) return 1;
+                                        }
+                                    },
+                                    { name: 'Related Tests',
+                                        formula: (r) => {
+                                            let html = ''; 
+                                            if (r.relatedTestClasses) { r.relatedTestClasses.forEach(e => {
+                                                html += helper.html.render.link('/'+e, map.apexClasses[e]?.name) + '<br />';
+                                            }); }
+                                            return html;
                                         }
                                     },
                                     { name: 'Dependencies', 
@@ -147,6 +162,8 @@
                                 helper.html.modal.show('Action needed on Apex classes in the Org!', html);
                             }
 
+                            const objectTriggersCountMap = {};
+                            
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
@@ -172,9 +189,37 @@
                                             if (r.length > 5000) return 1;
                                         }
                                     },
+                                    { name: 'Contains SOQL', property: 'hasSOQL',
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.hasSOQL); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.hasSOQL === true) return 1;
+                                        }
+                                    },
+                                    { name: 'Contains DML', property: 'hasDML',
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.hasDML); 
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.hasDML === true) return 1;
+                                        }
+                                    },
                                     { name: 'SObject', formula: (r) => { 
-                                        const objName = map.customObjects[r.sobject];
-                                        return objName ? objName.developerName : r.sobject;
+                                        const objId = r.sobject;
+                                        const objName = map.customObjects[objId]?.developerName || objId;
+                                        // ---
+                                        // let's calculate (on the fly) the number of active triggers per object!!
+                                        const otc = objectTriggersCountMap[objName] || { 
+                                            object: objName, 
+                                            activeTriggerCount: 0, 
+                                            deactiveTriggerCount: 0 
+                                        };
+                                        if (r.isActive === true) otc.activeTriggerCount++;
+                                        else if (r.isActive === false) otc.deactiveTriggerCount++;
+                                        objectTriggersCountMap[objName] = otc;
+                                        // ---
+                                        return objName;
                                     }},
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
                                     { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
@@ -203,6 +248,25 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true
                             });
+
+                            // Render the Apex Triggers data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-objtriggercounts',
+                                columns: [
+                                    { name: 'Name', property: 'object' },
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Active triggers', type: 'numeric', property: 'activeTriggerCount', 
+                                        scoreFormula: (r) => { 
+                                            if (r.activeTriggerCount > 1) return 1; 
+                                        }
+                                    },
+                                    { name: 'Deactive triggers', type: 'numeric', property: 'deactiveTriggerCount' }                                            
+                                ],
+                                data: objectTriggersCountMap,
+                                sorting: { name: 'Score', order: 'desc' },
+                                showSearch: true
+                            });
+                            
                         },
                         actions: { 
                             exportTable: [{
@@ -213,6 +277,10 @@
                                 table: 'datatable-triggers',
                                 visibleTab: 'tab-default-triggers__item',
                                 filename: 'ApexTriggers'
+                            }, {
+                                table: 'datatable-objtriggercounts',
+                                visibleTab: 'tab-default-objtriggercounts__item',
+                                filename: 'ObjectTriggersCount'
                             }],
                             clearCache: { 
                                 show: true 
@@ -231,7 +299,9 @@
                                         '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
                                         '<li><code>+1</code> if the trigger needs recompilation,</li>'+
                                         '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li>'+
-                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</ul>',
+                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</li>'+
+                                        '<li><code>+1</code> if the trigger contains a direct SOQL or DML statement (we do not consider indirect SOQL or DML included in the call of other classes!!).</li>'+
+                                        '</ul>',
                                     'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
                                         'what it is using. You can click on each diagram to have it shown in '+
                                         'a dialog box.'

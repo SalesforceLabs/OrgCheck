@@ -6,7 +6,7 @@ const OrgCheck = {
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.3',
+    version: 'v1.9.5',
 
     /**
      * Organization Id where OrgCheck is currently installed
@@ -88,21 +88,21 @@ const OrgCheck = {
 
             /**
             * Do a global describe on the salesforce org
-            * @param onResultCallback Callback function to call with the results from global describe
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onResult Callback function to call with the results from global describe
+            * @param onError Callback function to call if there is an error
             */
             this.doDescribeGlobal = function (
-                onResultCallback,
-                onErrorCallback
+                onResult,
+                onError
             ) {
                 CONNECTION.describeGlobal(function (error, result) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(result.sobjects);
+                        if (onResult) {
+                            onResult(result.sobjects);
                         }
                     }
                 });
@@ -111,22 +111,22 @@ const OrgCheck = {
             /**
             * Do a describe for a specific object in the salesforce org
             * @param developerName Developer name of the object to retrieve
-            * @param onResultCallback Callback function to call with the describe of this object
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onResult Callback function to call with the describe of this object
+            * @param onError Callback function to call if there is an error
             */
             this.doDescribeObject = function (
                 developerName,
-                onResultCallback,
-                onErrorCallback
+                onResult,
+                onError
             ) {
                 CONNECTION.sobject(developerName).describe$(function (error, object) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(object);
+                        if (onResult) {
+                            onResult(object);
                         }
                     }
                 });
@@ -135,39 +135,70 @@ const OrgCheck = {
             /**
             * Do a metadata retrieve describe for a specific type and list of members
             * @param types List of types of metadata to retrieve
-            * @param onResultCallback Callback function to call with the information
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onResult Callback function to call with the information
+            * @param onError Callback function to call if there is an error
             */
             this.doMetadataRetrieve = function(
                 types, 
-                onResultCallback,
-                onErrorCallback
+                onResult,
+                onError
             ) {
                 CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(metadata);
+                        if (onResult) {
+                            onResult(metadata);
                         }
                     }
                 });
             }
 
             /**
+            * Call REST api endpoint in HTTP direclty with GET method
+            * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
+            * @param onEnd Callback function to call with all records (as a map)
+            * @param onError Callback function to call if there is an error
+            */
+            this.doHttpCall = function(partialUrl, onEnd, onError) {
+                const request = { 
+                    url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
+                    method: 'GET' 
+                };
+                CONNECTION.request(
+                    request, 
+                    function(error, response) {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling "connection.request".',
+                                what: {
+                                    partialUrl: partialUrl,
+                                    url: request.url,
+                                    method: request.method
+                                }
+                            };
+                            onError(error);
+                        } else {
+                            onEnd(response);
+                        }
+                    }
+                );
+            }
+
+            /**
             * Do Salesforce SOQL queries from Tooling API or not
-            * @param queries Array of objects containing 'tooling', 'queryMore' and 'string'
-            * @param onEachRecordCallback Callback function for each record from database
-            * @param onEndCallback Callback function to call with all records (as a map)
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param queries Array of objects containing 'tooling', 'queryMore', 'byPasses' (array of strings) and 'string'
+            * @param onEach Callback function for each record from database
+            * @param onEnd Callback function to call with all records (as a map)
+            * @param onError Callback function to call if there is an error
             */
             this.doQueries = function (
                 queries,
-                onEachRecordCallback,
-                onEndCallback,
-                onErrorCallback
+                onEach,
+                onEnd,
+                onError
             ) {
                 const promises = [];
                 queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
@@ -176,11 +207,15 @@ const OrgCheck = {
                         queryString: q.string,
                         queryMore: q.queryMore, 
                         api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
-                        onEach: onEachRecordCallback,
+                        onEach: onEach,
                         onEnd: function (map, size) {
                             resolve({ d: map, l: size });
                         },
                         onError: function(error) {
+                            if (q.byPasses && q.byPasses.includes(error["errorCode"])) {
+                                resolve({ d: {}, l: 0 });
+                                return;
+                            }
                             error.context = { 
                                 when: 'While creating a promise to call "private_query".',
                                 what: {
@@ -202,10 +237,10 @@ const OrgCheck = {
                             data = Object.assign({}, data, v.d);
                             length += v.l;
                         });
-                        onEndCallback(data, length);
+                        onEnd(data, length);
                     })
                     .catch(function (error) {
-                        onErrorCallback(error);
+                        onError(error);
                     });
             };
 
@@ -758,49 +793,65 @@ const OrgCheck = {
 
         /**
         * Progress bar handler
-        * @param configuration Object must contain 'progressBarDivId' and 'spinnerDivId'
+        * @param configuration Object must contain 'spinnerDivId' and 'spinnerMessagesId'
         */
         ProgressBarHandler: function (configuration) {
 
-            const PROGRESSBAR_DIV = document.getElementById(configuration.progressBarDivId);
             const SPINNER_DIV = document.getElementById(configuration.spinnerDivId);
-            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessageId);
+            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessagesId);
 
             /**
-            * Reset the progress bar with current value at zero
-            * @param message Optionnal message to display
+            * Reset the progress bar with current value at zero and an empty message
             */
-            this.empty = function (message) {
-                private_set_progress_bar(0, 1);
-                private_set_message(message, false);
+            this.reset = function () {
+                SPINNER_MSG_DIV.innerHTML = '';
             };
 
-            /**
-            * Reset the progress bar with maximum value
-            * @param message Optionnal message to display
-            */
-            this.full = function (message) {
-                private_set_progress_bar(1, 1);
-                private_set_message(message, true);
-            };
-
-            /**
-            * Set the progress bar with a given value
-            * @param value
-            * @param max
-            * @param message Optionnal message to display
-            */
-            this.set = function (value, max, message) {
-                private_set_progress_bar(value, max);
-                private_set_message(message, true);
+            this.addSection = function(sectionName, message) {
+                SPINNER_MSG_DIV.innerHTML += 
+                    '<li class="slds-progress__item" id="spinner-section-'+sectionName+'">'+
+                        '<div class="slds-progress__marker"></div>'+
+                        '<div class="slds-progress__item_content slds-grid slds-grid_align-spread" id="spinner-section-msg-'+sectionName+'">'+message+'</div>'+
+                    '</li>';
             };
 
             /**
             * Set the progress message with a given value
             * @param message message to display
+            * @param status 'initialized', 'started', 'failed', 'ended'
+            * @param section optional section name
             */
-            this.still = function (message) {
-                private_set_message(message, true);
+            this.setSection = function (sectionName, message, status) {
+                const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
+                const sectionId = 'spinner-section-'+sectionName;
+                const li = document.getElementById('spinner-section-'+sectionName);
+                if (li) {
+                    li.classList.remove('slds-has-error','slds-is-completed','slds-is-active');
+                    switch (status) {
+                        case 'started': 
+                            li.classList.add('slds-is-completed');
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/loading.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'ended': 
+                            li.classList.add('slds-is-completed'); 
+                            li.children[0].style['border-color'] = 'green';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/util/checkmark16.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'failed': 
+                            li.classList.add('slds-has-error'); 
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/remove12_on.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                    }
+                }
+                const msg = document.getElementById('spinner-section-msg-'+sectionName);
+                if (msg) {
+                    msg.innerText = message;
+                }
             };
 
             /**
@@ -808,7 +859,6 @@ const OrgCheck = {
             */
             this.hide = function () {
                 SPINNER_DIV.style.display = 'none';
-                SPINNER_MSG_DIV.style.display = 'none';
             };
 
             /**
@@ -816,38 +866,54 @@ const OrgCheck = {
             */
             this.show = function () {
                 SPINNER_DIV.style.display = 'block';
-                SPINNER_MSG_DIV.style.display = 'block';
             };
 
             /**
             * Private method to set the message
             * @param message Text to write in the div
             * @param isAppended Reset the content or just append it
+            * @param section Name of the section (optionnal)
             */
-            function private_set_message(message, isAppended) {
-                if (message) {
+            function private_set_message(message, isAppended, section) {
+                /*
+                if (message) { 
+                    if (section) {
+                        const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
+                        for (let i=0; i<sections.length; i++) {
+                            if (sections.item(i))
+                        }
+                        document.getElementById(SPINNER_MSG_DIV.)
+                        if (SPINNER_MSG_DIV.;
+
+                            const item = helper.html.element.create('li');
+                            helper.html.element.addClass(item, ['slds-progress__item', 'slds-is-completed']);
+                            helper.html.element.setAttribute(item, 'id', keys[i]);
+                            // add inner div #1
+                            const innerDiv1 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv1, ['slds-progress__marker']);
+                            helper.html.element.appendChild(item, innerDiv1);
+                            // add inner div #2
+                            const innerDiv2 = helper.html.element.create('div');
+                            helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
+                            const timestamp = helper.timestamp.to.date(sideValues.timestamp);
+                            const nbItems = (sideValues.size ? (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : ''))):'N/A');
+                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + timestamp + ' - ' + nbItems + ')');
+                            helper.html.element.appendChild(item, innerDiv2);
+                    }
                     if (isAppended === true) {
+                        let sectionNode = null;
+                        for (let i=0; i<SPINNER_MSG_DIV.children.length; i++) {
+                            const SPINNER_MSG_DIV.children.item(i)
+                            sectionNode = 
+                        }
+
                         SPINNER_MSG_DIV.innerHTML += message + '<br />';
                     } else {
                         SPINNER_MSG_DIV.innerHTML = message + '<br />';
                     }
                 }
+                */
             };
-
-            /**
-            * Private method to set the progress bar to the current
-            *              value and potentially stop the spinner if we reach
-            *              the maximum.
-            * @param currentValue
-            * @param maxValue
-            */
-            function private_set_progress_bar(currentValue, maxValue) {
-                if (!maxValue) {
-                    maxValue = 100;
-                    currentValue = currentValue % maxValue;
-                }
-                PROGRESSBAR_DIV.style.width = (currentValue / maxValue) * 100 + "%";
-            }
         }
     },
 
@@ -876,7 +942,7 @@ const OrgCheck = {
      *                <li><code>sfLocalInstanceUrl</code>: Salesforce Endpoint to access the local org</li>
      *                <li><code>htmlProgressBarTagId</code>: HTML Tag Id of the progress bar zone</li> 
      *                <li><code>htmlSpinnerTagId</code>: HTML Tag Id of the spinner zone</li> 
-     *                <li><code>htmlSpinnerMessageTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
+     *                <li><code>htmlSpinnerMessagesTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
      *                <li><code>htmlModalContentTagId</code>: HTML Tag Id of the content zone of the dialog box</li> 
      *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
      *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
@@ -947,9 +1013,8 @@ const OrgCheck = {
         });
 
         const PROGRESSBAR_HANDLER = new OrgCheck.handlers.ProgressBarHandler({
-            progressBarDivId: setup.htmlProgressBarTagId,
             spinnerDivId: setup.htmlSpinnerTagId,
-            spinnerMessageId: setup.htmlSpinnerMessageTagId
+            spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
         const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
@@ -1024,7 +1089,7 @@ const OrgCheck = {
                     // 0. Clean way to show errors
                     const showError = function(error) {
                         MSG_HANDLER.showError(error);
-                        PROGRESSBAR_HANDLER.empty('*** Error ***');
+                        PROGRESSBAR_HANDLER.reset();
                         PROGRESSBAR_HANDLER.hide();
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
                     };
@@ -1049,8 +1114,19 @@ const OrgCheck = {
                     }
 
                     // 2. Set the progress bar to 'EMPTY'
+                    PROGRESSBAR_HANDLER.reset();
+                    ctlSetup.datasets.forEach(d => {
+                        PROGRESSBAR_HANDLER.addSection('dataset-'+d, 'Dataset ['+d+']: initialize...', 'initialized');
+                    });
+                    if (ctlSetup.dependencies) {
+                        PROGRESSBAR_HANDLER.addSection('dependencies', 'Dependencies: initialize...', 'initialized');
+                    }
+                    PROGRESSBAR_HANDLER.addSection('mapping', 'Mapping: initialize...', 'initialized');
+                    PROGRESSBAR_HANDLER.addSection('records', 'Records: initialize...', 'initialized');
+                    if (ctlSetup.actions) {
+                        PROGRESSBAR_HANDLER.addSection('actions', 'Actions: initialize...', 'initialized');
+                    }
                     PROGRESSBAR_HANDLER.show();
-                    PROGRESSBAR_HANDLER.empty('Starting...');
                     document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
 
                     // 3. Buttons actions based on the map (from datasets)
@@ -1086,7 +1162,8 @@ const OrgCheck = {
                                         const cols = rows[i].querySelectorAll('td, th');
                                         for (let j=0; j<cols.length; j++) {
                                             let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
-                                            v = v.replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
+                                            v = v.trim() // trim will delete extra spaces (including &nbsp;)
+                                                 .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
                                             if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
                                             row.push(v);
                                         }
@@ -1120,12 +1197,12 @@ const OrgCheck = {
 
                     // 4. Method that calls the callback fonction and set the progress bar top 'FULL'
                     const onEnd = function(map) {
-                        PROGRESSBAR_HANDLER.still('Records processing starting...');
+                        PROGRESSBAR_HANDLER.setSection('records', 'Records processing starting...', 'started');
                         ctlSetup.onRecords(map);
-                        PROGRESSBAR_HANDLER.still('Records processing ended successfuly');
-                        PROGRESSBAR_HANDLER.still('Action buttons starting...');
+                        PROGRESSBAR_HANDLER.setSection('records', 'Records processing ended successfuly', 'ended');
+                        PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons starting...', 'started');
                         initActions(map);
-                        PROGRESSBAR_HANDLER.still('Action buttons ended successfuly');
+                        PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons ended successfuly', 'ended');
                         setTimeout(function() {
                             PROGRESSBAR_HANDLER.hide();
                             document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
@@ -1134,14 +1211,14 @@ const OrgCheck = {
 
                     // 5. Calling the dataset retreivers
                     const onLoadPromises = [];
-                    ctlSetup.datasets.forEach(dataset => onLoadPromises.push(new Promise(function(s, e) { 
-                        PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] starting...');
-                        private_datasets_collection[dataset].retriever(
+                    ctlSetup.datasets.forEach(d => onLoadPromises.push(new Promise(function(s, e) { 
+                        PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: starting...', 'started');
+                        private_datasets_collection[d].retriever(
                             function(m) {
-                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended successfuly');
+                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended successfuly', 'ended');
                                 s(m);
                             }, function(m) {
-                                PROGRESSBAR_HANDLER.still('Dataset ['+dataset+'] ended with an error');
+                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended with an error', 'failed');
                                 e(m);
                             }
                         ); 
@@ -1150,8 +1227,7 @@ const OrgCheck = {
                     // 6. Calling the dataset retreivers
                     Promise.all(onLoadPromises)
                         .then(function(results) {
-                            PROGRESSBAR_HANDLER.still('All datasets ('+ctlSetup.datasets.length+') were retrieved');
-                            PROGRESSBAR_HANDLER.still('Mapping process starting...');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started');
                             // 7. When all datasets are retreived, we calculate keys and map
                             const map = {};
                             let keys = [];
@@ -1159,29 +1235,29 @@ const OrgCheck = {
                                 map[ctlSetup.datasets[i]] = v;
                                 keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(v));
                             });
-                            PROGRESSBAR_HANDLER.still('Mapping process ended successfuly');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended');
                             return { m: map, k: keys };
                         })
                         .catch(function(error) {
-                            PROGRESSBAR_HANDLER.still('Mapping process ended with an error');
+                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed');
                             showError(error);
                         }) 
                         .then(function(data) {
                             if (data) { // check if no error during mapping
                                 // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
                                 if (ctlSetup.dependencies === true) {
-                                    PROGRESSBAR_HANDLER.still('Dependencies process starting...');
+                                    PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started');
                                     private_salesforce_dapi(
                                         data.k, 
                                         function(dependencies) { 
-                                            PROGRESSBAR_HANDLER.still('Dependencies process ended successfuly');
+                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended');
                                             // We are altering the map to include the dependencies
                                             data.m['dependencies'] = dependencies || {};
                                             // 9.1 And then call the method (with dependencies)
                                             onEnd(data.m);
                                         }, 
                                         function(error) {
-                                            PROGRESSBAR_HANDLER.still('Dependencies process ended with an error');
+                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed');
                                             showError(error);
                                         }
                                     );
@@ -1284,17 +1360,6 @@ const OrgCheck = {
                         PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_PREFERENCE, 'Options', map);
                     }
                 },
-                progressbar: {
-                    empty: function(msg) {
-                        PROGRESSBAR_HANDLER.empty(msg);
-                    },
-                    full: function(msg) {
-                        PROGRESSBAR_HANDLER.full(msg);
-                    },
-                    set: function(value, max, msg) {
-                        PROGRESSBAR_HANDLER.set(value, max, msg);
-                    }
-                },
                 array: {
                     concat: function(array1, array2, prop) {
                         return ARRAY_HANDLER.concat(array1, array2, prop);
@@ -1366,12 +1431,8 @@ const OrgCheck = {
                                 search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
                                 search.onkeydown = function(e) {
                                     if (e.code === 'Enter') {
-                                        PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.empty('Filtering...');
                                         const searchValue = e.target.value;
-                                        PROGRESSBAR_HANDLER.still('Search value: '+searchValue);
                                         const items = [].slice.call(table.rows).slice(1);
-                                        PROGRESSBAR_HANDLER.still('All data size: '+items.length);
                                         let nbVisible = 0;
                                         table.hidden = true; // make table invisible while manipulating the DOM
                                         items.forEach(tr => {
@@ -1393,9 +1454,6 @@ const OrgCheck = {
                                             }
                                         });
                                         table.hidden = false; // make table visible again
-                                        PROGRESSBAR_HANDLER.still('Number of rows visible: '+nbVisible);
-                                        PROGRESSBAR_HANDLER.full('Good job!');
-                                        PROGRESSBAR_HANDLER.hide();
                                     }
                                 };
                             }
@@ -1426,8 +1484,6 @@ const OrgCheck = {
                                 ttlHead.textContent = c.name;
                                 aHead.onclick = function(e) { 
                                     if (e) {
-                                        PROGRESSBAR_HANDLER.show();
-                                        PROGRESSBAR_HANDLER.empty('Sorting...');
                                         if (config.sorting.name === c.name) {
                                             config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
                                         } else {
@@ -1437,8 +1493,6 @@ const OrgCheck = {
                                         if (orderingImage.parentNode) {
                                             orderingImage.parentNode.removeChild(orderingImage);
                                         }
-                                        PROGRESSBAR_HANDLER.still('Name: '+config.sorting.name);
-                                        PROGRESSBAR_HANDLER.still('Order: '+config.sorting.order);
                                     }
                                     if (config.sorting.order === 'asc') {
                                         thHead.setAttribute('aria-sort', 'ascending');
@@ -1446,9 +1500,6 @@ const OrgCheck = {
                                     } else {
                                         thHead.setAttribute('aria-sort', 'descending');
                                         orderingImage.src = '/img/sort_desc_arrow.gif';
-                                    }
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.still('Sorting data...');
                                     }
                                     grdHead.appendChild(orderingImage);
                                     const iOrder = config.sorting.order === 'asc' ? 1 : -1;
@@ -1461,9 +1512,6 @@ const OrgCheck = {
                                         if (valueA > valueB) return iOrder;
                                         return 0;
                                     });
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.still('Reordering rows...');
-                                    }
                                     table.hidden = true; // make table invisible while manipulating the DOM
                                     items.forEach(r => {
                                         const parent = r.parentNode;
@@ -1471,10 +1519,6 @@ const OrgCheck = {
                                         parent.appendChild(detatchedItem);
                                     });
                                     table.hidden = false; // make table visible again
-                                    if (e) {
-                                        PROGRESSBAR_HANDLER.full('Good job!');
-                                        PROGRESSBAR_HANDLER.hide();
-                                    }
                                 };
                                 if (config.sorting.name === c.name) {
                                     firstSortCallback = function() { aHead.onclick(); }
@@ -1487,12 +1531,12 @@ const OrgCheck = {
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
-                                let trScore = 0;
-                                let tdScore = null;
+                                let rowScore = 0;
+                                let tdBodyScore = null;
                                 config.columns.forEach(c => {
                                     const tdBody = trBody.appendChild(document.createElement('td'));
                                     if (c.property === '##score##') {
-                                        tdScore = tdBody;
+                                        tdBodyScore = tdBody;
                                         return;
                                     }
                                     const row = isArray ? k : config.data[k];
@@ -1520,7 +1564,8 @@ const OrgCheck = {
                                         if (c.scoreFormula) {
                                             additiveScore = c.scoreFormula(row);
                                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
-                                                trScore += additiveScore;
+                                                rowScore += additiveScore;
+                                                tdBody.bgColor = '#ffd079';
                                             }
                                         }
                                     } catch (e) {
@@ -1529,36 +1574,40 @@ const OrgCheck = {
                                             'what': {
                                                 'Column': c.name,
                                                 'Formula': c.scoreFormula,
-                                                'Current Score': trScore,
+                                                'Current Score': rowScore,
                                                 'Data': row
                                             }
                                         }
                                         throw e;
                                     }
                                     if (content) {
-                                        switch (typeof content) {
-                                            case 'object': 
-                                                if (additiveScore > 0) {
-                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />';
-                                                }       
-                                                tdBody.appendChild(content); 
-                                                break;
-                                            default: 
-                                                if (additiveScore > 0) {
-                                                    tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />'+content;
-                                                } else {
-                                                    tdBody.innerHTML = content;
-                                                }
-                                                
+                                        const isArray = (Array.isArray(content) === true);
+                                        if (typeof content === 'object' && isArray === false) {
+                                            if (additiveScore > 0) {
+                                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
+                                            }       
+                                            tdBody.appendChild(content);
+                                        } else {
+                                            let html = '';
+                                            if (additiveScore > 0) {
+                                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
+                                            }
+                                            if (isArray === true) {
+                                                content.forEach(cnt => html += cnt+'<br />');
+                                            } else {
+                                                html += content;
+                                            }
+                                            tdBody.innerHTML = html;
                                         }
                                     }
-                                    const alternative = (c.property && c.formula ? row[c.property] : '');
+                                    const alternative = (c.property && c.formula ? row[c.property] : '') || '';
                                     if (alternative !== '' || alternative === true || alternative === false) {
                                         tdBody.setAttribute('aria-label', alternative?.toString());
                                     }
                                 });
-                                if (tdScore && trScore > 0) {
-                                    tdScore.innerHTML = trScore;
+                                if (tdBodyScore && rowScore > 0) {
+                                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
+                                    tdBodyScore.bgColor = '#ffd079';
                                     trBody.bgColor = '#ffe099';
                                 }
                             });
@@ -1576,7 +1625,6 @@ const OrgCheck = {
                     },
                     tabs: {
                         initialize: function(itemClass, contentClass, buttonClass) {
-                            PROGRESSBAR_HANDLER.set(0, 1);
                             const tabItems = document.getElementsByClassName(itemClass);
                             const tabContents = document.getElementsByClassName(contentClass);
                             const buttons = document.getElementsByClassName(buttonClass);
@@ -1613,7 +1661,6 @@ const OrgCheck = {
                                     }
                                 }
                             }
-                            PROGRESSBAR_HANDLER.set(1, 1);
                         }
                     },
                     picklist: {
@@ -1681,8 +1728,8 @@ const OrgCheck = {
                             return '0 %';
                         },
                         checkbox: function(b) {
-                            if (b) return '<img src="/img/checkbox_checked.gif" />';
-                            return '<img src="/img/checkbox_unchecked.gif" />';
+                            if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
+                            return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
                         },
                         link: function(uri, content) {
                             const completeURL = (ORG_INFORMATION.instanceUrl ? ORG_INFORMATION.instanceUrl : '') + uri;
@@ -1755,9 +1802,9 @@ const OrgCheck = {
          *              <ol>
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
          */
         this.doRetrieveDataWithCache = function(setup) {
@@ -1767,19 +1814,19 @@ const OrgCheck = {
                     setup.mnemonic, 
                     setup.doDataRetriever, 
                     function(records, isFromCache) {
-                        if (setup.onEachRecordFromCacheCallback) {
+                        if (setup.onEachFromCache) {
                             MAP_HANDLER.forEach(records, function(id) {
-                                setup.onEachRecordFromCacheCallback(records[id]);
+                                setup.onEachFromCache(records[id]);
                             });
                         }
-                        if (setup.onEndFromCacheCallback) {
-                            setup.onEndFromCacheCallback(records);
+                        if (setup.onEndFromCache) {
+                            setup.onEndFromCache(records);
                         }
                     }
                 );
             } catch (error) {
-                if (setup.onErrorCallback) {
-                    setup.onErrorCallback(error);
+                if (setup.onError) {
+                    setup.onError(error);
                 }
             }
         };
@@ -1789,12 +1836,12 @@ const OrgCheck = {
          * @param setup JSON configuration including:
          *              <ol>
          *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
-         *                <li><code>onEachRecordFromAPICallback</code>: function called for each record retrieved from database</li>
+         *                <li><code>onEachRecordFromAPI</code>: function called for each record retrieved from database</li>
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
          */
         this.doSalesforceQueriesWithCache = function(setup) {
@@ -1805,9 +1852,9 @@ const OrgCheck = {
                         setup.queries, 
                         function(record, index, dataSize, totalSize) {
                             try {
-                                return setup.onEachRecordFromAPICallback(record, index, dataSize, totalSize);
+                                return setup.onEachRecordFromAPI(record, index, dataSize, totalSize);
                             } catch(error) {
-                                setup.onErrorCallback(error);
+                                setup.onError(error);
                             }
                         }, 
                         function(records, size) {
@@ -1815,15 +1862,15 @@ const OrgCheck = {
                                 MAP_HANDLER.setSize(records, size);
                                 callbackToSetTheCache(records);
                             } catch(error) {
-                                setup.onErrorCallback(error);
+                                setup.onError(error);
                             }
                         },
-                        setup.onErrorCallback
+                        setup.onError
                     );
                 },
-                onEachRecordFromCacheCallback: setup.onEachRecordFromCacheCallback,
-                onEndFromCacheCallback: setup.onEndFromCacheCallback,
-                onErrorCallback: setup.onErrorCallback
+                onEachFromCache: setup.onEachFromCache,
+                onEndFromCache: setup.onEndFromCache,
+                onError: setup.onError
             });
         };
 
@@ -2100,133 +2147,142 @@ const OrgCheck = {
          */
         function private_salesforce_descrive_object(setup) {
             const s = SALESFORCE_HANDLER.splitDeveloperName(setup.objectName);
-            SALESFORCE_HANDLER.doDescribeObject(
-                setup.objectName, 
-                function(object) {
-                    SALESFORCE_HANDLER.doQueries(
-                        [{ 
-                            tooling: true, 
-                            string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
-                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
-                                        '(SELECT Id, Name FROM ApexTriggers), '+
-                                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
-                                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
-                                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
-                                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
-                                            'ValidationName FROM ValidationRules), '+
-                                        '(SELECT Id, Name FROM WebLinks) '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE DeveloperName = \''+s.shortName+'\' '+
-                                    (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
-                        }], 
-                        function(record) {
-                            // 0. Generic information
-                            object.id = record.DurableId;
-                            object.description = record.Description;
-                            object.externalSharingModel = record.ExternalSharingModel;
-                            object.internalSharingModel = record.InternalSharingModel;
-                            // 1. Apex Triggers
-                            if (record.ApexTriggers) {
-                                let apexTriggers = [];
-                                for (let i=0; i<record.ApexTriggers.records.length; i++) {
-                                    apexTriggers.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
-                                        name: record.ApexTriggers.records[i].Name
-                                    });
-                                }
-                                object.apexTriggers = apexTriggers;
-                            }
-                            // 2. FieldSets
-                            if (record.FieldSets) {
-                                let fieldSets = [];
-                                for (let i=0; i<record.FieldSets.records.length; i++) {
-                                    fieldSets.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
-                                        label: record.FieldSets.records[i].MasterLabel,
-                                        description: record.FieldSets.records[i].Description
-                                    });
-                                }
-                                object.fieldSets = fieldSets;
-                            }
-                            // 3. Page Layouts
-                            if (record.Layouts) {
-                                let layouts = [];
-                                for (let i=0; i<record.Layouts.records.length; i++) {
-                                    layouts.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
-                                        name: record.Layouts.records[i].Name,
-                                        type: record.Layouts.records[i].LayoutType
-                                    });
-                                }
-                                object.layouts = layouts;
-                            }
-                            // 4. Limits
-                            if (record.Limits) {
-                                let limits = [];
-                                for (let i=0; i<record.Limits.records.length; i++) {
-                                    limits.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
-                                        label: record.Limits.records[i].Label,
-                                        remaining: record.Limits.records[i].Remaining,
-                                        max: record.Limits.records[i].Max,
-                                        type: record.Limits.records[i].Type
-                                    });
-                                }
-                                object.limits = limits;
-                            }
-                            // 5. ValidationRules
-                            if (record.ValidationRules) {
-                                let validationRules = [];
-                                for (let i=0; i<record.ValidationRules.records.length; i++) {
-                                    validationRules.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
-                                        name: record.ValidationRules.records[i].ValidationName,
-                                        isActive: record.ValidationRules.records[i].Active,
-                                        description: record.ValidationRules.records[i].Description,
-                                        errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
-                                        errorMessage: record.ValidationRules.records[i].ErrorMessage
-                                    });
-                                }
-                                object.validationRules = validationRules;
-                            }
-                            // 6. WebLinks
-                            if (record.WebLinks) {
-                                let webLinks = [];
-                                for (let i=0; i<record.WebLinks.records.length; i++) {
-                                    webLinks.push({
-                                        id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
-                                        name: record.WebLinks.records[i].Name,
-                                    });
-                                }
-                                object.webLinks = webLinks;
-                            }
-                            // 7. If any fields, add field dependencies
-                            if (record.Fields) {
-                                const mapFields = {};
-                                const fieldIds = [];
-                                for (let i=0; i<record.Fields.records.length; i++) {
-                                    const f = record.Fields.records[i];
-                                    const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
-                                    fieldIds.push(id);
-                                    mapFields[f.QualifiedApiName] = id;
-                                }
-                                object.fields.forEach(f => f.id = mapFields[f.name]);
-                                private_salesforce_dapi(
-                                    fieldIds, 
-                                    function(fieldDependencies) {
-                                        object.fieldDependencies = fieldDependencies;
+            // Get records count for this object
+            SALESFORCE_HANDLER.doHttpCall(
+                '/limits/recordCount?sObjects='+setup.objectName,
+                function(result) {
+                    const recordCount = (Array.isArray(result?.sObjects) && result?.sObjects.length == 1) ? result?.sObjects[0].count : 0;
+                    SALESFORCE_HANDLER.doDescribeObject(
+                        setup.objectName, 
+                        function(object) {
+                            SALESFORCE_HANDLER.doQueries(
+                                [{ 
+                                    tooling: true, 
+                                    string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
+                                                '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
+                                                '(SELECT Id, Name FROM ApexTriggers), '+
+                                                '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                                                '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                                                '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                                                '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                                    'ValidationName FROM ValidationRules), '+
+                                                '(SELECT Id, Name FROM WebLinks) '+
+                                            'FROM EntityDefinition '+
+                                            'WHERE DeveloperName = \''+s.shortName+'\' '+
+                                            (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
+                                }], 
+                                function(record) {
+                                    // 0. Generic information
+                                    object.id = record.DurableId;
+                                    object.description = record.Description;
+                                    object.externalSharingModel = record.ExternalSharingModel;
+                                    object.internalSharingModel = record.InternalSharingModel;
+                                    object.recordCount = recordCount;
+                                    // 1. Apex Triggers
+                                    if (record.ApexTriggers) {
+                                        let apexTriggers = [];
+                                        for (let i=0; i<record.ApexTriggers.records.length; i++) {
+                                            apexTriggers.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
+                                                name: record.ApexTriggers.records[i].Name
+                                            });
+                                        }
+                                        object.apexTriggers = apexTriggers;
+                                    }
+                                    // 2. FieldSets
+                                    if (record.FieldSets) {
+                                        let fieldSets = [];
+                                        for (let i=0; i<record.FieldSets.records.length; i++) {
+                                            fieldSets.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
+                                                label: record.FieldSets.records[i].MasterLabel,
+                                                description: record.FieldSets.records[i].Description
+                                            });
+                                        }
+                                        object.fieldSets = fieldSets;
+                                    }
+                                    // 3. Page Layouts
+                                    if (record.Layouts) {
+                                        let layouts = [];
+                                        for (let i=0; i<record.Layouts.records.length; i++) {
+                                            layouts.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
+                                                name: record.Layouts.records[i].Name,
+                                                type: record.Layouts.records[i].LayoutType
+                                            });
+                                        }
+                                        object.layouts = layouts;
+                                    }
+                                    // 4. Limits
+                                    if (record.Limits) {
+                                        let limits = [];
+                                        for (let i=0; i<record.Limits.records.length; i++) {
+                                            limits.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
+                                                label: record.Limits.records[i].Label,
+                                                remaining: record.Limits.records[i].Remaining,
+                                                max: record.Limits.records[i].Max,
+                                                type: record.Limits.records[i].Type
+                                            });
+                                        }
+                                        object.limits = limits;
+                                    }
+                                    // 5. ValidationRules
+                                    if (record.ValidationRules) {
+                                        let validationRules = [];
+                                        for (let i=0; i<record.ValidationRules.records.length; i++) {
+                                            validationRules.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
+                                                name: record.ValidationRules.records[i].ValidationName,
+                                                isActive: record.ValidationRules.records[i].Active,
+                                                description: record.ValidationRules.records[i].Description,
+                                                errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
+                                                errorMessage: record.ValidationRules.records[i].ErrorMessage
+                                            });
+                                        }
+                                        object.validationRules = validationRules;
+                                    }
+                                    // 6. WebLinks
+                                    if (record.WebLinks) {
+                                        let webLinks = [];
+                                        for (let i=0; i<record.WebLinks.records.length; i++) {
+                                            webLinks.push({
+                                                id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
+                                                name: record.WebLinks.records[i].Name,
+                                            });
+                                        }
+                                        object.webLinks = webLinks;
+                                    }
+                                    // 7. If any fields, add field dependencies
+                                    if (record.Fields) {
+                                        const mapFields = {};
+                                        const fieldIds = [];
+                                        for (let i=0; i<record.Fields.records.length; i++) {
+                                            const f = record.Fields.records[i];
+                                            const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
+                                            fieldIds.push(id);
+                                            mapFields[f.QualifiedApiName] = id;
+                                        }
+                                        object.fields.forEach(f => f.id = mapFields[f.name]);
+                                        private_salesforce_dapi(
+                                            fieldIds, 
+                                            function(fieldDependencies) {
+                                                object.fieldDependencies = fieldDependencies;
+                                                setup.callbackSuccess(object);
+                                            }, 
+                                            setup.callbackError
+                                        );
+                                    } else {
                                         setup.callbackSuccess(object);
-                                    }, 
-                                    setup.callbackError
-                                );
-                            } else {
-                                setup.callbackSuccess(object);
-                            }
-                        },
-                        function(records, size) {},
+                                    }
+                                },
+                                function(records, size) {},
+                                setup.callbackError
+                            );
+                        }, 
                         setup.callbackError
                     );
-                }, 
+                },
                 setup.callbackError
             );
         };
@@ -2267,7 +2323,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
@@ -2281,8 +2337,8 @@ function buildDatasets(core) {
                             item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -2321,7 +2377,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
@@ -2341,8 +2397,8 @@ function buildDatasets(core) {
                             });
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -2372,7 +2428,7 @@ function buildDatasets(core) {
                     string: 'SELECT NamespacePrefix '+
                             'FROM Organization '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     if (i == 0) {
                         return { 
                             id: v.Id, 
@@ -2389,8 +2445,8 @@ function buildDatasets(core) {
                         };
                     }
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2412,7 +2468,7 @@ function buildDatasets(core) {
                             'FROM ExternalString '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2424,8 +2480,8 @@ function buildDatasets(core) {
                         value: v.Value
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2448,15 +2504,15 @@ function buildDatasets(core) {
                             'WHERE IsCustomSetting = true ' + 
                             'AND NamespacePrefix = NULL '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.DurableId),
                         name: v.QualifiedApiName,
                         namespace: v.NamespacePrefix
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2478,7 +2534,7 @@ function buildDatasets(core) {
                             'FROM ApexPage '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2489,8 +2545,8 @@ function buildDatasets(core) {
                         mobile: v.IsAvailableInTouch
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2512,7 +2568,7 @@ function buildDatasets(core) {
                             'FROM ApexComponent '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2522,8 +2578,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2541,11 +2597,18 @@ function buildDatasets(core) {
             const value = core.getMetadataInCache(cache);
             if (value) resolve(value);
             const classesMap = {};
-            const coverageMap = {};
+            const relatedTestClassesMap = {};
+            const classesCoverageMap = {};
+            const schedulableMap = {};
             core.doSalesforceQueries({
                 queries: [{
-                    string: 'SELECT ApexClassOrTriggerId, NumLinesCovered, '+
-                            'NumLinesUncovered FROM ApexCodeCoverage',
+                    string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
+                            'FROM ApexCodeCoverage',
+                    tooling: true
+                }, {
+                    string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
+                            'NumLinesUncovered, Coverage '+
+                            'FROM ApexCodeCoverageAggregate',
                     tooling: true
                 }, { 
                     string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
@@ -2553,63 +2616,90 @@ function buildDatasets(core) {
                             'FROM ApexClass '+
                             'WHERE ManageableState = \'unmanaged\' ',
                     tooling: true
+                }, {
+                    string: 'SELECT ApexClassId '+
+                            'FROM AsyncApexJob '+
+                            'WHERE JobType = \'ScheduledApex\' ',
+                    tooling: false
                 }], 
                 onEachRecord: function(v, index) {
-                    if (index == 0) { 
-                        // ApexCodeCoverage records
-                        const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
-                        const item = coverageMap[i] || { cov: 0, cnt: 0 };
-                        item.cov += v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered);
-                        item.cnt++;
-                        coverageMap[i] = item;
-                    } else {
-                        // ApexClasses records
-                        const item =  {
-                            id: core.doSimplifiySalesforceID(v.Id),
-                            name: v.Name,
-                            apiVersion: v.ApiVersion,
-                            isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                            namespace: v.NamespacePrefix,
-                            isTest: false,
-                            isAbstract: false,
-                            isInterface: false,
-                            isSharingMissing: false,
-                            length: v.LengthWithoutComments,
-                            needsRecompilation: (!v.SymbolTable ? true : false)
-                        };
-                        if (v.Body) {
-                            item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
+                    switch (index) {
+                        case 0: {
+                            // ApexCodeCoverage records
+                            const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
+                            const t = core.doSimplifiySalesforceID(v.ApexTestClassId);
+                            const item = relatedTestClassesMap[i] || new Set();
+                            item.add(t);
+                            relatedTestClassesMap[i] = item;
+                            break;
                         }
-                        if (v.SymbolTable) {
-                            item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                            item.interfaces = v.SymbolTable.interfaces;
-                            item.methodsCount = v.SymbolTable.methods.length || 0;
-                            if (v.SymbolTable.tableDeclaration) {
-                                item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                                if (v.SymbolTable.tableDeclaration.modifiers) {
-                                    v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                        switch (m) {
-                                            case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                            case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                            case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                            case 'public':            item.specifiedAccess  = 'public';    break;
-                                            case 'global':            item.specifiedAccess  = 'global';    break;
-                                            case 'abstract':          item.isAbstract       = true;        break;
-                                            case 'testMethod':        item.isTest           = true;        break;
-                                        }
-                                    });
-                                };
+                        case 1: {
+                            // ApexCodeCoverageAggregate records
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.ApexClassOrTriggerId),
+                                covered: v.NumLinesCovered,
+                                uncovered: v.NumLinesUncovered,
+                                coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
+                            };
+                            classesCoverageMap[item.id] = item;
+                            break; 
+                        }
+                        case 2: {
+                            // ApexClasses records
+                            const item =  {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                isTest: false,
+                                isAbstract: false,
+                                isInterface: false,
+                                isSharingMissing: false,
+                                length: v.LengthWithoutComments,
+                                needsRecompilation: (!v.SymbolTable ? true : false),
+                                coverage: 0 // by default no coverage!
+                            };
+                            if (v.Body) {
+                                item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
                             }
+                            if (v.SymbolTable) {
+                                item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                                item.interfaces = v.SymbolTable.interfaces;
+                                item.methodsCount = v.SymbolTable.methods.length || 0;
+                                if (v.SymbolTable.tableDeclaration) {
+                                    item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                                    if (v.SymbolTable.tableDeclaration.modifiers) {
+                                        v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                            switch (m) {
+                                                case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                                case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                                case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                                case 'public':            item.specifiedAccess  = 'public';    break;
+                                                case 'global':            item.specifiedAccess  = 'global';    break;
+                                                case 'abstract':          item.isAbstract       = true;        break;
+                                                case 'testMethod':        item.isTest           = true;        break;
+                                            }
+                                        });
+                                    };
+                                }
+                            }
+                            if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                                item.isSharingMissing = true;
+                            }
+                            classesMap[item.id] = item;
+                            break;
                         }
-                        if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
-                            item.isSharingMissing = true;
+                        default: {
+                            schedulableMap[core.doSimplifiySalesforceID(v.ApexClassId)] = true;
                         }
-                        classesMap[item.id] = item;
                     }
                 }, 
                 onEnd: function(records, size) { 
                     for (const [key, value] of Object.entries(classesMap)) {
-                        if (coverageMap[key]) value.fastCoverage = coverageMap[key].cov / coverageMap[key].cnt;
+                        if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
+                        if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
+                        if (schedulableMap[key]) value.isScheduled = true;
                     }
                     core.setMetadataInCache(cache, classesMap);
                     resolve(classesMap);
@@ -2633,7 +2723,7 @@ function buildDatasets(core) {
                 queries: [ { 
                     tooling: true, 
                     string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                'NamespacePrefix, '+
+                                'NamespacePrefix, Body, '+
                                 'UsageBeforeInsert, UsageAfterInsert, '+
                                 'UsageBeforeUpdate, UsageAfterUpdate, '+
                                 'UsageBeforeDelete, UsageAfterDelete, '+
@@ -2642,8 +2732,8 @@ function buildDatasets(core) {
                             'FROM ApexTrigger '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    return {
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    const item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         apiVersion: v.ApiVersion,
@@ -2658,11 +2748,18 @@ function buildDatasets(core) {
                         beforeDelete: v.UsageBeforeDelete,
                         afterDelete: v.UsageAfterDelete,
                         afterUndelete: v.UsageAfterUndelete,
-                        sobject: v.EntityDefinitionId
+                        sobject: v.EntityDefinitionId,
+                        hasSOQL: false,
+                        hasDML: false
                     };
+                    if (v.Body) {
+                        item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
+                        item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                    }
+                    return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2684,15 +2781,15 @@ function buildDatasets(core) {
                             'FROM StaticResource '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
                         namespace: v.NamespacePrefix
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));                    
@@ -2715,7 +2812,7 @@ function buildDatasets(core) {
                             'FROM FlexiPage '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2725,8 +2822,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2748,7 +2845,7 @@ function buildDatasets(core) {
                             'FROM LightningComponentBundle '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2758,8 +2855,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2781,7 +2878,7 @@ function buildDatasets(core) {
                             'FROM AuraDefinitionBundle '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2791,8 +2888,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2825,7 +2922,7 @@ function buildDatasets(core) {
                             'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
                             'AND IsActive = true ', // we only want active users
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2864,8 +2961,8 @@ function buildDatasets(core) {
                     }
                     return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));    
@@ -2889,7 +2986,7 @@ function buildDatasets(core) {
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
                             'WHERE isOwnedByProfile = TRUE'
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                     const item = {
                         id: core.doSimplifiySalesforceID(v.ProfileId),
@@ -2906,12 +3003,55 @@ function buildDatasets(core) {
                     };
                     return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
     
+    // ========================================================================
+    // Object CRUD (Profile and Permission Set)
+    // ------------------------------------------------------------------------
+    // Get the Object and Fields CRUDs in Profiles and Permission Sets
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'objectCRUDs',
+        keycache: 'ObjectCRUDs',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
+                                   'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                   'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                            'FROM ObjectPermissions '
+                } ],
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    return {
+                        id: v.ParentId + v.SobjectType,
+                        sobject: v.SobjectType,
+                        type: (v.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
+                        parent: { 
+                            id: (v.Parent.IsOwnedByProfile ? v.Parent.ProfileId : v.ParentId), 
+                            name: (v.Parent.IsOwnedByProfile ? v.Parent.Profile.Name : v.Parent.Label) 
+                        },
+                        permissions: {
+                            create: v.PermissionsCreate,
+                            read: v.PermissionsRead,
+                            update: v.PermissionsEdit,
+                            delete: v.PermissionsDelete,
+                            viewAll: v.PermissionsViewAllRecords,
+                            modifyAll: v.PermissionsModifyAllRecords
+                        }
+                    };
+                }, 
+                onEndFromCache: resolve,
+                onError: reject
+            });
+        }
+    }));
+
     // ========================================================================
     // PROFILE LOGIN RESTRICTIONS (IN PROFILE)
     // ------------------------------------------------------------------------
@@ -2937,7 +3077,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.Name,
@@ -2957,8 +3097,8 @@ function buildDatasets(core) {
                             }
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -2975,32 +3115,65 @@ function buildDatasets(core) {
         name: 'permissionSets',
         keycache: 'PermissionSets',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
+            const cache = this.keycache;
+            const value = core.getMetadataInCache(cache);
+            if (value) resolve(value);
+
+            const psMap = {};
+            const psgByName1 = {};
+            const psgByName2 = {};
+            core.doSalesforceQueries({
                 queries: [ { 
                     tooling: false, 
-                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, '+
+                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                 '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
                             'FROM PermissionSet '+
                             'WHERE IsOwnedByProfile = FALSE' 
+                }, {
+                    tooling: false,
+                    byPasses: [ 'INVALID_TYPE' ],
+                    string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
+                            'FROM PermissionSetGroup ' 
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        description: v.Description,
-                        hasLicense: (v.License ? 'yes' : 'no'),
-                        license: (v.License ? v.License.Name : ''),
-                        isCustom: v.IsCustom,
-                        isUndescribedCustom: v.IsCustom && !v.Description,
-                        package: v.NamespacePrefix,
-                        isUnusedCustom: v.IsCustom && !hasMembers,
-                        hasMembers: hasMembers
-                    };
+                onEachRecord: function(v, i) {
+                    if (i === 0) {
+                        const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
+                        const item = {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.Name,
+                            description: v.Description,
+                            hasLicense: (v.License ? 'yes' : 'no'),
+                            license: (v.License ? v.License.Name : ''),
+                            isCustom: v.IsCustom,
+                            isUndescribedCustom: v.IsCustom && !v.Description,
+                            package: v.NamespacePrefix,
+                            isUnusedCustom: v.IsCustom && !hasMembers,
+                            hasMembers: hasMembers,
+                            isGroup: (v.Type === 'Group')     // other values can be 'Regular', 'Standard', 'Session
+                        };
+                        if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                        psMap[item.id] = item;
+                    } else {
+                        const item = {
+                            id: core.doSimplifiySalesforceID(v.Id),
+                            name: v.DeveloperName,
+                            description: v.Description,
+                            package: v.NamespacePrefix
+                        }
+                        psgByName2[item.package+'--'+item.name] = item;
+                    }
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEnd: function() { 
+                    for (const [key, value] of Object.entries(psgByName1)) {
+                        value.groupId = psgByName2[key].id;
+                        value.description = psgByName2[key].description;
+                        value.isUndescribedCustom = value.isCustom && !value.description;
+                        psMap[value.id] = value;
+                    };
+                    core.setMetadataInCache(cache, psMap);
+                    resolve(psMap);
+                },
+                onError: reject
             });
         }
     }));
@@ -3024,7 +3197,7 @@ function buildDatasets(core) {
                             'WHERE Assignee.IsActive = TRUE '+
                             'AND PermissionSet.IsOwnedByProfile = FALSE '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
@@ -3032,8 +3205,8 @@ function buildDatasets(core) {
                         permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3056,7 +3229,7 @@ function buildDatasets(core) {
                                     'SmallPhotoUrl, IsActive FROM Users)'+
                             ' FROM UserRole '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -3091,7 +3264,7 @@ function buildDatasets(core) {
                     item.hasInactiveMembers = item.inactiveMembersCount > 0;
                     return item;
                 }, 
-                onEndFromCacheCallback: function(records) {
+                onEndFromCache: function(records) {
                     records[ROOT_ID] = {
                         id: ROOT_ID,
                         name: 'Role Hierarchy',
@@ -3100,7 +3273,7 @@ function buildDatasets(core) {
                     };
                     resolve(records);
                 },
-                onErrorCallback: reject
+                onError: reject
             });
         }
     }));
@@ -3227,8 +3400,8 @@ function buildDatasets(core) {
                         onError: reject
                     });
                 },
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3239,24 +3412,47 @@ function buildDatasets(core) {
     // Get the list of failed batches and scheduled jobs in Salesforce 
     // ========================================================================
     core.addDataset(new OrgCheck.Dataset({
-        name: 'batches',
-        keycache: 'Batches',
+        name: 'batchesApexJobs',
+        keycache: 'BatchesApexJobs',
         retriever: function(me, resolve, reject) {
             let artificial_id = 0;
             core.doSalesforceQueriesWithCache({
                 mnemonic: this.keycache, 
                 queries: [ { 
-                    // Batches
                     tooling: false, 
                     string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
                             'FROM AsyncApexJob '+
-                            'WHERE CompletedDate = YESTERDAY '+
+                            'WHERE CreatedDate >= YESTERDAY '+
                             'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
                             'OR Status = \'Failed\') '+
                             'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
                             'LIMIT 10000 '
-                }, {
-                    // Scheduled Jobs
+                } ],
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
+                    return { 
+                        id: 'APXJOBS-'+artificial_id++,
+                        type: v.JobType,
+                        context: apexClass,
+                        status: v.Status,
+                        message: v.ExtendedStatus,
+                        numIds: v.ids,
+                        numErrors: v.errors
+                    };
+                }, 
+                onEndFromCache: resolve,
+                onError: reject
+            });
+        }
+    }));
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'batchesScheduledJobs',
+        keycache: 'BatchesScheduledJobs',
+        retriever: function(me, resolve, reject) {
+            let artificial_id = 0;
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
                     tooling: false, 
                     string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
                                 'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
@@ -3264,46 +3460,35 @@ function buildDatasets(core) {
                                 'PreviousFireTime, StartTime, State, TimesTriggered, '+
                                 'TimeZoneSidKey '+
                             'FROM CronTrigger '+
-                            'WHERE StartTime = YESTERDAY '+
-                            'AND State <> \'COMPLETE\''
+                            'WHERE State <> \'COMPLETE\' ' +
+                            'LIMIT 10000 '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
-                    if (i == 0) {
-                        return { 
-                            id: 'BATCH#'+artificial_id++,
-                            type: 'ApexJob ' + v.JobType,
-                            context: (v.ApexClass ? v.ApexClass.Name : 'anonymous') + '.' + v.MethodName,
-                            status: v.Status,
-                            message: v.ExtendedStatus,
-                            numIds: v.ids,
-                            numErrors: v.errors
-                        };
-                    } else {
-                        let jobTypeLabel = '';
-                        switch (v.CronJobDetail.JobType) {
-                            case '1': jobTypeLabel = 'Data Export'; break;
-                            case '3': jobTypeLabel = 'Dashboard Refresh'; break;
-                            case '4': jobTypeLabel = 'Reporting Snapshot'; break;
-                            case '6': jobTypeLabel = 'Scheduled Flow'; break;
-                            case '7': jobTypeLabel = 'Scheduled Apex'; break;
-                            case '8': jobTypeLabel = 'Report Run'; break;
-                            case '9': jobTypeLabel = 'Batch Job'; break;
-                            case 'A': jobTypeLabel = 'Reporting Notification'; break;
-                        }
-                        return { 
-                            id: 'JOB#'+artificial_id++,
-                            type: 'Scheduled ' + jobTypeLabel,
-                            context: v.CronJobDetail.Name,
-                            status: v.State,
-                            message: 'by user: ' + v.OwnerId + 
-                                ', start: ' + v.StartTime + 
-                                ', end: ' + v.EndTime + 
-                                ', timezone: ' + v.TimeZoneSidKey
-                        };
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    let jobTypeLabel = '';
+                    switch (v.CronJobDetail.JobType) {
+                        case '1': jobTypeLabel = 'Data Export'; break;
+                        case '3': jobTypeLabel = 'Dashboard Refresh'; break;
+                        case '4': jobTypeLabel = 'Reporting Snapshot'; break;
+                        case '6': jobTypeLabel = 'Scheduled Flow'; break;
+                        case '7': jobTypeLabel = 'Scheduled Apex'; break;
+                        case '8': jobTypeLabel = 'Report Run'; break;
+                        case '9': jobTypeLabel = 'Batch Job'; break;
+                        case 'A': jobTypeLabel = 'Reporting Notification'; break;
+                        default:  return; // skip if type is not supported
                     }
+                    return { 
+                        id: 'SCHJOBS-'+artificial_id++,
+                        name: v.CronJobDetail.Name,
+                        type: jobTypeLabel,
+                        status: v.State,
+                        userid: core.doSimplifiySalesforceID(v.OwnerId),
+                        start: v.StartTime,
+                        end: v.EndTime,
+                        timezone: v.TimeZoneSidKey
+                    };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3325,7 +3510,7 @@ function buildDatasets(core) {
                             'FROM EntityDefinition '+
                             'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let entityType = 'Other';
                     if (v.IsCustomSetting == true) 
                         entityType = 'CustomSetting';
@@ -3348,8 +3533,8 @@ function buildDatasets(core) {
                         type: entityType
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3371,7 +3556,7 @@ function buildDatasets(core) {
                             'FROM CustomField '+
                             'WHERE ManageableState = \'unmanaged\'  '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
                     return { 
                         id: core.doSimplifiySalesforceID(v.Id),
@@ -3383,8 +3568,8 @@ function buildDatasets(core) {
                         fullName: v.DeveloperName
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3421,7 +3606,7 @@ function buildDatasets(core) {
             core.doSalesforceQueriesWithCache({
                 mnemonic: this.keycache, 
                 queries: entityDefQueries,
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return { 
                         id: v.DurableId,
                         name: v.QualifiedApiName,
@@ -3431,8 +3616,8 @@ function buildDatasets(core) {
                         internal: v.InternalSharingModel
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
