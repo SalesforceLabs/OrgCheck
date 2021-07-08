@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/assets/pngs/LogoPride.png" width="256" alt="OrgCheck Logo" />
+  <img src="docs/assets/pngs/Logo+Mascot-v2.png" width="256" alt="OrgCheck Logo" />
   <h1>OrgCheck Salesforce Application</h1>
   <p>
     <b>OrgCheck</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
