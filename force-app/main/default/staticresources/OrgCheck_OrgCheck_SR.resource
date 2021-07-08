@@ -3131,6 +3131,7 @@ function buildDatasets(core) {
                             'WHERE IsOwnedByProfile = FALSE' 
                 }, {
                     tooling: false,
+                    byPasses: [ 'INVALID_TYPE' ],
                     string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
                             'FROM PermissionSetGroup ' 
                 } ],
