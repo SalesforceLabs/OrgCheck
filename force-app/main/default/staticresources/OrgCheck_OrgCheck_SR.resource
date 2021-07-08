@@ -88,11 +88,11 @@ const OrgCheck = {
 
             /**
             * Do a global describe on the salesforce org
-            * @param onResultCallback Callback function to call with the results from global describe
+            * @param onResult Callback function to call with the results from global describe
             * @param onError Callback function to call if there is an error
             */
             this.doDescribeGlobal = function (
-                onResultCallback,
+                onResult,
                 onError
             ) {
                 CONNECTION.describeGlobal(function (error, result) {
@@ -101,8 +101,8 @@ const OrgCheck = {
                             onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(result.sobjects);
+                        if (onResult) {
+                            onResult(result.sobjects);
                         }
                     }
                 });
@@ -111,12 +111,12 @@ const OrgCheck = {
             /**
             * Do a describe for a specific object in the salesforce org
             * @param developerName Developer name of the object to retrieve
-            * @param onResultCallback Callback function to call with the describe of this object
+            * @param onResult Callback function to call with the describe of this object
             * @param onError Callback function to call if there is an error
             */
             this.doDescribeObject = function (
                 developerName,
-                onResultCallback,
+                onResult,
                 onError
             ) {
                 CONNECTION.sobject(developerName).describe$(function (error, object) {
@@ -125,8 +125,8 @@ const OrgCheck = {
                             onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(object);
+                        if (onResult) {
+                            onResult(object);
                         }
                     }
                 });
@@ -135,12 +135,12 @@ const OrgCheck = {
             /**
             * Do a metadata retrieve describe for a specific type and list of members
             * @param types List of types of metadata to retrieve
-            * @param onResultCallback Callback function to call with the information
+            * @param onResult Callback function to call with the information
             * @param onError Callback function to call if there is an error
             */
             this.doMetadataRetrieve = function(
                 types, 
-                onResultCallback,
+                onResult,
                 onError
             ) {
                 CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
@@ -149,8 +149,8 @@ const OrgCheck = {
                             onError(error);
                         }
                     } else {
-                        if (onResultCallback) {
-                            onResultCallback(metadata);
+                        if (onResult) {
+                            onResult(metadata);
                         }
                     }
                 });
@@ -159,10 +159,10 @@ const OrgCheck = {
             /**
             * Call REST api endpoint in HTTP direclty with GET method
             * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
-            * @param onEndCallback Callback function to call with all records (as a map)
+            * @param onEnd Callback function to call with all records (as a map)
             * @param onError Callback function to call if there is an error
             */
-            this.doHttpCall = function(partialUrl, onEndCallback, onError) {
+            this.doHttpCall = function(partialUrl, onEnd, onError) {
                 const request = { 
                     url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
                     method: 'GET' 
@@ -181,7 +181,7 @@ const OrgCheck = {
                             };
                             onError(error);
                         } else {
-                            onEndCallback(response);
+                            onEnd(response);
                         }
                     }
                 );
@@ -189,15 +189,15 @@ const OrgCheck = {
 
             /**
             * Do Salesforce SOQL queries from Tooling API or not
-            * @param queries Array of objects containing 'tooling', 'queryMore' and 'string'
-            * @param onEachRecordCallback Callback function for each record from database
-            * @param onEndCallback Callback function to call with all records (as a map)
+            * @param queries Array of objects containing 'tooling', 'queryMore', 'byPasses' (array of strings) and 'string'
+            * @param onEach Callback function for each record from database
+            * @param onEnd Callback function to call with all records (as a map)
             * @param onError Callback function to call if there is an error
             */
             this.doQueries = function (
                 queries,
-                onEachRecordCallback,
-                onEndCallback,
+                onEach,
+                onEnd,
                 onError
             ) {
                 const promises = [];
@@ -207,11 +207,15 @@ const OrgCheck = {
                         queryString: q.string,
                         queryMore: q.queryMore, 
                         api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
-                        onEach: onEachRecordCallback,
+                        onEach: onEach,
                         onEnd: function (map, size) {
                             resolve({ d: map, l: size });
                         },
                         onError: function(error) {
+                            if (q.byPasses && q.byPasses.includes(error["errorCode"])) {
+                                resolve({ d: {}, l: 0 });
+                                return;
+                            }
                             error.context = { 
                                 when: 'While creating a promise to call "private_query".',
                                 what: {
@@ -233,7 +237,7 @@ const OrgCheck = {
                             data = Object.assign({}, data, v.d);
                             length += v.l;
                         });
-                        onEndCallback(data, length);
+                        onEnd(data, length);
                     })
                     .catch(function (error) {
                         onError(error);
@@ -1798,7 +1802,7 @@ const OrgCheck = {
          *              <ol>
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
          *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
          *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
@@ -1810,9 +1814,9 @@ const OrgCheck = {
                     setup.mnemonic, 
                     setup.doDataRetriever, 
                     function(records, isFromCache) {
-                        if (setup.onEachRecordFromCacheCallback) {
+                        if (setup.onEachFromCache) {
                             MAP_HANDLER.forEach(records, function(id) {
-                                setup.onEachRecordFromCacheCallback(records[id]);
+                                setup.onEachFromCache(records[id]);
                             });
                         }
                         if (setup.onEndFromCache) {
@@ -1832,10 +1836,10 @@ const OrgCheck = {
          * @param setup JSON configuration including:
          *              <ol>
          *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
-         *                <li><code>onEachRecordFromAPICallback</code>: function called for each record retrieved from database</li>
+         *                <li><code>onEachRecordFromAPI</code>: function called for each record retrieved from database</li>
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
+         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
          *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
          *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
@@ -1848,7 +1852,7 @@ const OrgCheck = {
                         setup.queries, 
                         function(record, index, dataSize, totalSize) {
                             try {
-                                return setup.onEachRecordFromAPICallback(record, index, dataSize, totalSize);
+                                return setup.onEachRecordFromAPI(record, index, dataSize, totalSize);
                             } catch(error) {
                                 setup.onError(error);
                             }
@@ -1864,7 +1868,7 @@ const OrgCheck = {
                         setup.onError
                     );
                 },
-                onEachRecordFromCacheCallback: setup.onEachRecordFromCacheCallback,
+                onEachFromCache: setup.onEachFromCache,
                 onEndFromCache: setup.onEndFromCache,
                 onError: setup.onError
             });
@@ -2319,7 +2323,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
@@ -2373,7 +2377,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.FullName,
@@ -2424,7 +2428,7 @@ function buildDatasets(core) {
                     string: 'SELECT NamespacePrefix '+
                             'FROM Organization '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     if (i == 0) {
                         return { 
                             id: v.Id, 
@@ -2464,7 +2468,7 @@ function buildDatasets(core) {
                             'FROM ExternalString '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2500,7 +2504,7 @@ function buildDatasets(core) {
                             'WHERE IsCustomSetting = true ' + 
                             'AND NamespacePrefix = NULL '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.DurableId),
                         name: v.QualifiedApiName,
@@ -2530,7 +2534,7 @@ function buildDatasets(core) {
                             'FROM ApexPage '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2564,7 +2568,7 @@ function buildDatasets(core) {
                             'FROM ApexComponent '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2728,7 +2732,7 @@ function buildDatasets(core) {
                             'FROM ApexTrigger '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2777,7 +2781,7 @@ function buildDatasets(core) {
                             'FROM StaticResource '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2808,7 +2812,7 @@ function buildDatasets(core) {
                             'FROM FlexiPage '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2841,7 +2845,7 @@ function buildDatasets(core) {
                             'FROM LightningComponentBundle '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2874,7 +2878,7 @@ function buildDatasets(core) {
                             'FROM AuraDefinitionBundle '+
                             'WHERE ManageableState = \'unmanaged\' '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.MasterLabel,
@@ -2918,7 +2922,7 @@ function buildDatasets(core) {
                             'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
                             'AND IsActive = true ', // we only want active users
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -2982,7 +2986,7 @@ function buildDatasets(core) {
                             'FROM PermissionSet '+ // oh yes we are not mistaken!
                             'WHERE isOwnedByProfile = TRUE'
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                     const item = {
                         id: core.doSimplifiySalesforceID(v.ProfileId),
@@ -3023,7 +3027,7 @@ function buildDatasets(core) {
                                    'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
                             'FROM ObjectPermissions '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: v.ParentId + v.SobjectType,
                         sobject: v.SobjectType,
@@ -3073,7 +3077,7 @@ function buildDatasets(core) {
                     core.doSalesforceQueriesWithCache({
                         mnemonic: cache,
                         queries,
-                        onEachRecordFromAPICallback: function(v, i, l, ts) {
+                        onEachRecordFromAPI: function(v, i, l, ts) {
                             const item =  {
                                 id: core.doSimplifiySalesforceID(v.Id),
                                 name: v.Name,
@@ -3192,7 +3196,7 @@ function buildDatasets(core) {
                             'WHERE Assignee.IsActive = TRUE '+
                             'AND PermissionSet.IsOwnedByProfile = FALSE '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return {
                         id: core.doSimplifiySalesforceID(v.Id),
                         assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
@@ -3224,7 +3228,7 @@ function buildDatasets(core) {
                                     'SmallPhotoUrl, IsActive FROM Users)'+
                             ' FROM UserRole '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let item = {
                         id: core.doSimplifiySalesforceID(v.Id),
                         name: v.Name,
@@ -3423,7 +3427,7 @@ function buildDatasets(core) {
                             'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
                             'LIMIT 10000 '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
                     return { 
                         id: 'APXJOBS-'+artificial_id++,
@@ -3458,7 +3462,7 @@ function buildDatasets(core) {
                             'WHERE State <> \'COMPLETE\' ' +
                             'LIMIT 10000 '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let jobTypeLabel = '';
                     switch (v.CronJobDetail.JobType) {
                         case '1': jobTypeLabel = 'Data Export'; break;
@@ -3505,7 +3509,7 @@ function buildDatasets(core) {
                             'FROM EntityDefinition '+
                             'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     let entityType = 'Other';
                     if (v.IsCustomSetting == true) 
                         entityType = 'CustomSetting';
@@ -3551,7 +3555,7 @@ function buildDatasets(core) {
                             'FROM CustomField '+
                             'WHERE ManageableState = \'unmanaged\'  '
                 } ],
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
                     return { 
                         id: core.doSimplifiySalesforceID(v.Id),
@@ -3601,7 +3605,7 @@ function buildDatasets(core) {
             core.doSalesforceQueriesWithCache({
                 mnemonic: this.keycache, 
                 queries: entityDefQueries,
-                onEachRecordFromAPICallback: function(v, i, l, ts) {
+                onEachRecordFromAPI: function(v, i, l, ts) {
                     return { 
                         id: v.DurableId,
                         name: v.QualifiedApiName,
