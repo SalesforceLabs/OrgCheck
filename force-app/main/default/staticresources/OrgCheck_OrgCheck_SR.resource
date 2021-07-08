@@ -89,16 +89,16 @@ const OrgCheck = {
             /**
             * Do a global describe on the salesforce org
             * @param onResultCallback Callback function to call with the results from global describe
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onError Callback function to call if there is an error
             */
             this.doDescribeGlobal = function (
                 onResultCallback,
-                onErrorCallback
+                onError
             ) {
                 CONNECTION.describeGlobal(function (error, result) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
                         if (onResultCallback) {
@@ -112,17 +112,17 @@ const OrgCheck = {
             * Do a describe for a specific object in the salesforce org
             * @param developerName Developer name of the object to retrieve
             * @param onResultCallback Callback function to call with the describe of this object
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onError Callback function to call if there is an error
             */
             this.doDescribeObject = function (
                 developerName,
                 onResultCallback,
-                onErrorCallback
+                onError
             ) {
                 CONNECTION.sobject(developerName).describe$(function (error, object) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
                         if (onResultCallback) {
@@ -136,17 +136,17 @@ const OrgCheck = {
             * Do a metadata retrieve describe for a specific type and list of members
             * @param types List of types of metadata to retrieve
             * @param onResultCallback Callback function to call with the information
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onError Callback function to call if there is an error
             */
             this.doMetadataRetrieve = function(
                 types, 
                 onResultCallback,
-                onErrorCallback
+                onError
             ) {
                 CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
                     if (error) {
-                        if (onErrorCallback) {
-                            onErrorCallback(error);
+                        if (onError) {
+                            onError(error);
                         }
                     } else {
                         if (onResultCallback) {
@@ -160,9 +160,9 @@ const OrgCheck = {
             * Call REST api endpoint in HTTP direclty with GET method
             * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
             * @param onEndCallback Callback function to call with all records (as a map)
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onError Callback function to call if there is an error
             */
-            this.doHttpCall = function(partialUrl, onEndCallback, onErrorCallback) {
+            this.doHttpCall = function(partialUrl, onEndCallback, onError) {
                 const request = { 
                     url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
                     method: 'GET' 
@@ -179,7 +179,7 @@ const OrgCheck = {
                                     method: request.method
                                 }
                             };
-                            onErrorCallback(error);
+                            onError(error);
                         } else {
                             onEndCallback(response);
                         }
@@ -192,13 +192,13 @@ const OrgCheck = {
             * @param queries Array of objects containing 'tooling', 'queryMore' and 'string'
             * @param onEachRecordCallback Callback function for each record from database
             * @param onEndCallback Callback function to call with all records (as a map)
-            * @param onErrorCallback Callback function to call if there is an error
+            * @param onError Callback function to call if there is an error
             */
             this.doQueries = function (
                 queries,
                 onEachRecordCallback,
                 onEndCallback,
-                onErrorCallback
+                onError
             ) {
                 const promises = [];
                 queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
@@ -236,7 +236,7 @@ const OrgCheck = {
                         onEndCallback(data, length);
                     })
                     .catch(function (error) {
-                        onErrorCallback(error);
+                        onError(error);
                     });
             };
 
@@ -1799,8 +1799,8 @@ const OrgCheck = {
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
          *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
          */
         this.doRetrieveDataWithCache = function(setup) {
@@ -1815,14 +1815,14 @@ const OrgCheck = {
                                 setup.onEachRecordFromCacheCallback(records[id]);
                             });
                         }
-                        if (setup.onEndFromCacheCallback) {
-                            setup.onEndFromCacheCallback(records);
+                        if (setup.onEndFromCache) {
+                            setup.onEndFromCache(records);
                         }
                     }
                 );
             } catch (error) {
-                if (setup.onErrorCallback) {
-                    setup.onErrorCallback(error);
+                if (setup.onError) {
+                    setup.onError(error);
                 }
             }
         };
@@ -1836,8 +1836,8 @@ const OrgCheck = {
          *                <li><code>mnemonic</code>: tag used for caching this data</li>
          *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
          *                <li><code>onEachRecordFromCacheCallback</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCacheCallback</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onErrorCallback</code>: function called if an error happens</li> 
+         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
+         *                <li><code>onError</code>: function called if an error happens</li> 
          *              </ol>
          */
         this.doSalesforceQueriesWithCache = function(setup) {
@@ -1850,7 +1850,7 @@ const OrgCheck = {
                             try {
                                 return setup.onEachRecordFromAPICallback(record, index, dataSize, totalSize);
                             } catch(error) {
-                                setup.onErrorCallback(error);
+                                setup.onError(error);
                             }
                         }, 
                         function(records, size) {
@@ -1858,15 +1858,15 @@ const OrgCheck = {
                                 MAP_HANDLER.setSize(records, size);
                                 callbackToSetTheCache(records);
                             } catch(error) {
-                                setup.onErrorCallback(error);
+                                setup.onError(error);
                             }
                         },
-                        setup.onErrorCallback
+                        setup.onError
                     );
                 },
                 onEachRecordFromCacheCallback: setup.onEachRecordFromCacheCallback,
-                onEndFromCacheCallback: setup.onEndFromCacheCallback,
-                onErrorCallback: setup.onErrorCallback
+                onEndFromCache: setup.onEndFromCache,
+                onError: setup.onError
             });
         };
 
@@ -2333,8 +2333,8 @@ function buildDatasets(core) {
                             item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -2393,8 +2393,8 @@ function buildDatasets(core) {
                             });
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -2441,8 +2441,8 @@ function buildDatasets(core) {
                         };
                     }
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2476,8 +2476,8 @@ function buildDatasets(core) {
                         value: v.Value
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2507,8 +2507,8 @@ function buildDatasets(core) {
                         namespace: v.NamespacePrefix
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2541,8 +2541,8 @@ function buildDatasets(core) {
                         mobile: v.IsAvailableInTouch
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2574,8 +2574,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2754,8 +2754,8 @@ function buildDatasets(core) {
                     }
                     return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2784,8 +2784,8 @@ function buildDatasets(core) {
                         namespace: v.NamespacePrefix
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));                    
@@ -2818,8 +2818,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2851,8 +2851,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2884,8 +2884,8 @@ function buildDatasets(core) {
                         description: v.Description
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -2957,8 +2957,8 @@ function buildDatasets(core) {
                     }
                     return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));    
@@ -2999,8 +2999,8 @@ function buildDatasets(core) {
                     };
                     return item;
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3042,8 +3042,8 @@ function buildDatasets(core) {
                         }
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3093,8 +3093,8 @@ function buildDatasets(core) {
                             }
                             return item;
                         },
-                        onEndFromCacheCallback: resolve,
-                        onErrorCallback: reject
+                        onEndFromCache: resolve,
+                        onError: reject
                     });
                 },
                 onError: reject
@@ -3168,7 +3168,7 @@ function buildDatasets(core) {
                     core.setMetadataInCache(cache, psMap);
                     resolve(psMap);
                 },
-                onErrorCallback: reject
+                onError: reject
             });
         }
     }));
@@ -3200,8 +3200,8 @@ function buildDatasets(core) {
                         permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3259,7 +3259,7 @@ function buildDatasets(core) {
                     item.hasInactiveMembers = item.inactiveMembersCount > 0;
                     return item;
                 }, 
-                onEndFromCacheCallback: function(records) {
+                onEndFromCache: function(records) {
                     records[ROOT_ID] = {
                         id: ROOT_ID,
                         name: 'Role Hierarchy',
@@ -3268,7 +3268,7 @@ function buildDatasets(core) {
                     };
                     resolve(records);
                 },
-                onErrorCallback: reject
+                onError: reject
             });
         }
     }));
@@ -3395,8 +3395,8 @@ function buildDatasets(core) {
                         onError: reject
                     });
                 },
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3435,8 +3435,8 @@ function buildDatasets(core) {
                         numErrors: v.errors
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3482,8 +3482,8 @@ function buildDatasets(core) {
                         timezone: v.TimeZoneSidKey
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3528,8 +3528,8 @@ function buildDatasets(core) {
                         type: entityType
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3563,8 +3563,8 @@ function buildDatasets(core) {
                         fullName: v.DeveloperName
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
@@ -3611,8 +3611,8 @@ function buildDatasets(core) {
                         internal: v.InternalSharingModel
                     };
                 }, 
-                onEndFromCacheCallback: resolve,
-                onErrorCallback: reject
+                onEndFromCache: resolve,
+                onError: reject
             });
         }
     }));
