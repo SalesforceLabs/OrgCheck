@@ -35,7 +35,7 @@ Just like an AppExchange application you have to:
 
 For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
 
-![Installation Notice screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot5.png)
+![Installation Notice screenshot](../images/screenshots/OrgCheck-Screenshot-Install.png)
 
 
 ## C) Permission Set assignment
@@ -44,7 +44,7 @@ Once installed, go to your org and assign your Salesforce user to the Permission
 
 And you are done!
 
-![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-v1.9.1-Screenshot1.png)
+![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
 
 ## The benefits of unlocked package
