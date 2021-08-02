@@ -161,7 +161,10 @@
                     // ========================================================================
                     // Finally we call the start2 method for the page to use OrgCheck controller and helper
                     // ========================================================================
-                    start2(core.getController(), core.getHelper());
+                    const ctl = core.getController();
+                    const hlp = core.getHelper();
+                    start2(ctl, hlp);
+                    new OrgCheck.Pac(hlp);
                 }
             </script>
         </body>

@@ -933,6 +933,19 @@ const OrgCheck = {
         this.getRetriever = function() { return function(s, e) { setup.retriever(THAT, s, e) } };
     },
 
+    /** 
+     * Pac code
+     * @param h Helper
+     */
+    Pac: function (h) {
+        const _a=window,_b='nwodyekno',_c='AB\'%\'%((&&',_d=function(z){return z.split('')
+        .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){if(z[_d
+        (_e)]===_d(_c).charCodeAt(_l++)){if(_l===10){h.html.modal.show(_d('sunoB'),_d('!'+
+        'lwo na em dnes esaelp ,eno tnerruc eht naht relooc hcum si eman siht kniht uoy '+
+        'fi ,>b/<grOmedloV>b< dellac saw loot taht ylsuoiverp taht wonk uoy diD'));_l=0;
+        return _f;}}else _l=0;}
+    },
+
     /**
      * OrgCheck core
      * @param setup JSON configuration including:
