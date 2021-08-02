@@ -164,7 +164,10 @@
                     const ctl = core.getController();
                     const hlp = core.getHelper();
                     start2(ctl, hlp);
-                    new OrgCheck.Pac(hlp);
+
+                    new OrgCheck.ShortcutManager(hlp, {
+                        '27': function() { document.getElementById('modal').style.display = 'none'; }
+                    });
                 }
             </script>
         </body>

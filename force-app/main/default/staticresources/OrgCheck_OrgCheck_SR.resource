@@ -934,16 +934,17 @@ const OrgCheck = {
     },
 
     /** 
-     * Pac code
+     * Shortcut Manager
      * @param h Helper
+     * @param m Mapping
      */
-    Pac: function (h) {
+    ShortcutManager: function (h, m) {
         const _a=window,_b='nwodyekno',_c='AB\'%\'%((&&',_d=function(z){return z.split('')
-        .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){if(z[_d
-        (_e)]===_d(_c).charCodeAt(_l++)){if(_l===10){h.html.modal.show(_d('sunoB'),_d('!'+
-        'lwo na em dnes esaelp ,eno tnerruc eht naht relooc hcum si eman siht kniht uoy '+
-        'fi ,>b/<grOmedloV>b< dellac saw loot taht ylsuoiverp taht wonk uoy diD'));_l=0;
-        return _f;}}else _l=0;}
+        .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){const 
+        x=z[_d(_e)];if(x===_d(_c).charCodeAt(_l++)){if(_l===10){h.html.modal.show(_d('su'+
+        'noB'),_d('!lwo na em dnes esaelp ,eno tnerruc eht naht relooc hcum si eman siht'+
+        ' kniht uoy fi ,>b/<grOmedloV>b< dellac saw loot taht ylsuoiverp taht wonk uoy d'+
+        'iD'));_l=0;return _f;}}else _l=0;if(m[x]){m[x]();}}
     },
 
     /**
