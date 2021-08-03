@@ -1433,6 +1433,8 @@ const OrgCheck = {
                     datatable: {
                         create: function(config) {
                             const dt = document.getElementById(config.element);
+                            const counters = dt.appendChild(document.createElement('span'));
+                            const filterCounters = dt.appendChild(document.createElement('span'));
                             const table = dt.appendChild(document.createElement('table'));
                             if (config.showSearch === true) {
                                 const searchBox = dt.insertBefore(document.createElement('div'), table);
@@ -1467,6 +1469,11 @@ const OrgCheck = {
                                                 tr.hidden = hidden;
                                             }
                                         });
+                                        if (searchValue) {
+                                            filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
+                                        } else {
+                                            filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
+                                        }
                                         table.hidden = false; // make table visible again
                                     }
                                 };
@@ -1542,8 +1549,10 @@ const OrgCheck = {
                             const isArray = Array.isArray(config.data);
                             const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
                             table.hidden = true; // make table invisible while manipulating the DOM
+                            let nbRows = 0, nbBadRows = 0, sumScore = 0;
                             iterable.forEach(k => {
                                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
+                                nbRows++;
                                 const trBody = tbody.appendChild(document.createElement('tr'));
                                 let rowScore = 0;
                                 let tdBodyScore = null;
@@ -1623,8 +1632,13 @@ const OrgCheck = {
                                     tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
                                     tdBodyScore.bgColor = '#ffd079';
                                     trBody.bgColor = '#ffe099';
+                                    sumScore += rowScore;
+                                    nbBadRows++;
                                 }
                             });
+                            console.error(nbRows, nbBadRows, sumScore);
+                            counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
+                                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
                             table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
                                 firstSortCallback(); 
