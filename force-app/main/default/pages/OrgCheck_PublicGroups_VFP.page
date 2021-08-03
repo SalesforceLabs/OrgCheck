@@ -239,7 +239,8 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             helper.html.datatable.create({
@@ -267,7 +268,8 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'queue'; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: {  

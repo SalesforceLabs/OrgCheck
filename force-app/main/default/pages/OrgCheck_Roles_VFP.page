@@ -400,7 +400,8 @@
                                     if (r.developerName === '###root###') return false;
                                     if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
                                 }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                             
                             // Render role graphic

@@ -100,7 +100,8 @@
                                 ],
                                 data: map.profiles,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // -------------------------------------------
@@ -121,7 +122,8 @@
                                 data: map.profileLoginRestrictions,
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
-                                showSearch: false
+                                showSearch: false,
+                                showStatistics: false
                             });
 
                             // -------------------------------------------
@@ -150,7 +152,8 @@
                                 data: map.profileLoginRestrictions,
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
-                                showSearch: false
+                                showSearch: false,
+                                showStatistics: false
                             });
 
                             // -------------------------------------------
@@ -214,7 +217,8 @@
                                 ],
                                 data: map.permissionSets,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // -------------------------------------------
@@ -250,7 +254,8 @@
                                     ],
                                     data: map.objectCRUDs,
                                     sorting: { name: 'Object', order: 'asc' },
-                                    showSearch: true
+                                    showSearch: true,
+                                showStatistics: true
                                 });
                             }
 

@@ -1469,10 +1469,12 @@ const OrgCheck = {
                                                 tr.hidden = hidden;
                                             }
                                         });
-                                        if (searchValue) {
-                                            filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
-                                        } else {
-                                            filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
+                                        if (config.showStatistics === true) {
+                                            if (searchValue) {
+                                                filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
+                                            } else {
+                                                filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
+                                            }
                                         }
                                         table.hidden = false; // make table visible again
                                     }
@@ -1636,9 +1638,10 @@ const OrgCheck = {
                                     nbBadRows++;
                                 }
                             });
-                            console.error(nbRows, nbBadRows, sumScore);
-                            counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
+                            if (config.showStatistics === true) {
+                                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
                                                     nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
+                            }
                             table.hidden = false; // make table visible again
                             if (firstSortCallback) { 
                                 firstSortCallback(); 

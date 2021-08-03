@@ -148,7 +148,8 @@
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Show alert about recompilation
@@ -246,7 +247,8 @@
                                 ],
                                 data: map.apexTriggers,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Render the Apex Triggers data in a table
@@ -264,7 +266,8 @@
                                 ],
                                 data: objectTriggersCountMap,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                             
                         },
