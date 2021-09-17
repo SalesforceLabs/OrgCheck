@@ -324,7 +324,7 @@
                                 let member = roles_map[node.data].activeMembers[i];
                                 html += '<li>';
                                 html += '<img src="'+member.photourl+'" width="25" />&nbsp;&nbsp;';
-                                html += '<b><a href="/'+member.id+'" target="_blank">'+member.name+'</a></b>';
+                                html += '<b><a href="/'+member.id+'" target="_blank" rel="external">'+member.name+'</a></b>';
                                 html += '</li>';
                             }
                             html += '</ul>';
