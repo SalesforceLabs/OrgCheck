@@ -434,7 +434,7 @@ const OrgCheck = {
                     });
                     private_show_modal(
                         'Oh no, OrgCheck had an error!', 
-                        commonHTML + informationHTML.replace(/https:\/\/[a-zA-Z0-9_-]*\./g, 'https://ANONYMIZED_MYDOMAIN.')
+                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
                     );
                 }
             };
