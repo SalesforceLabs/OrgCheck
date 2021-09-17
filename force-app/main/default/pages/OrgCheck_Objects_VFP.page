@@ -338,6 +338,8 @@
                                                     case 'reference':
                                                         type += '(' + r.referenceTo[0] + ')';
                                                         break;
+                                                    default: 
+                                                        // Type stays as it is.
                                                 }
                                                 if (r.calculated) {
                                                     type = 'Formula ('+ type + ')';
