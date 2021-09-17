@@ -2189,7 +2189,7 @@ const OrgCheck = {
                             SALESFORCE_HANDLER.doQueries(
                                 [{ 
                                     tooling: true, 
-                                    string: 'SELECT DurableId, Description, ExternalSharingModel, InternalSharingModel, '+
+                                    string: 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
                                                 '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
                                                 '(SELECT Id, Name FROM ApexTriggers), '+
                                                 '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
@@ -2203,6 +2203,9 @@ const OrgCheck = {
                                             (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
                                 }], 
                                 function(record) {
+                                    if ((record.NamespacePrefix && record.NamespacePrefix !== s.package) ||
+                                        (!record.NamespacePrefix && s.package !== '')) return;
+
                                     // 0. Generic information
                                     object.id = record.DurableId;
                                     object.description = record.Description;
