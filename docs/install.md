@@ -63,19 +63,20 @@ Finally, the content of the application can be modified in your org (using the S
 ## Known issues
 
 ### I can't install the package because some Apex class are not compiling
-Our package does not include ANY Apex class.
-It is more likely a existing Apex class in the org you want to analyze that does not compile (it happens!).
-In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the advanced setting when installing the app.
+ - Our package does **NOT include ANY Apex class**.
+ - It is more likely a **existing Apex class** in the org you want to analyze that **does not compile** (it happens!).
+ - In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the **advanced setting when installing the app**.
 
 ### I can't see the OrgCheck application, even if I am SysAdmin and/or are assigned the OrgCheck Permission set
-Double check that you are assigned to the permission set (just in case you missed that part).
-You should see the application definitly!
-The app is called "OrgCheck" obviously.
+ - The app is called "**OrgCheck**" obviously, maybe you spell it wrong?
+ - Double check that you are assigned to the **permission set** (just in case you missed that part).
+ - You should see the application definitly!
 
 ### I have the same error on EVERY tabs when the tool is accessing the API: INVALID_SESSION_ID: This session is not valid for use with the REST API 
-In case you have enabled the "API Client Whitelisting" feature, you will need to create another permission set (don't modify the OrgCheck permission because on the next release your setting will be overwritten).
-That additional permission set needs to have checked the system permission called "Use any API Client" (which appears ONLY if you activate the "API CLient Whitelisting" feature -- that's why we can't add it to everybody).
-And assign your user to this additional permission set.
+In case you have enabled the "**API Client Whitelisting**" feature, you will need to:
+ - Create another permission set (don't modify the OrgCheck permission because on the next release your setting will be overwritten).
+ - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API CLient Whitelisting**" feature -- that's why we can't add it to everybody).
+ - And assign your user to this additional permission set.
 For more information, you can check that closed issue: https://github.com/VinceFINET/OrgCheck/issues/118
 
 
