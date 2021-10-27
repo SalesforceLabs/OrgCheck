@@ -27,16 +27,6 @@
                                 <div class="slds-form__item">
                                     <div class="slds-form-element__control">
                                         <div class="slds-select_container">
-                                            <select class="slds-select" id="object-namespace">
-                                                <option value="EMPTY">Please select a package...</option>
-                                                <option value="NO_PACKAGE">No package</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="slds-form__item">
-                                    <div class="slds-form-element__control">
-                                        <div class="slds-select_container">
                                             <select class="slds-select" id="object-type">
                                                 <option value="ALL">All types</option>
                                                 <option value="STANDARD_SOBJECTS">Standard objects</option>
@@ -44,6 +34,16 @@
                                                 <option value="CUSTOM_EXTERNAL_SOBJECTS">External Objects</option>
                                                 <option value="CUSTOM_SETTINGS">Custom Settings</option>
                                                 <option value="CUSTOM_METADATA_TYPES">Custom Metadata Types</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form__item">
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
+                                            <select class="slds-select" id="object-namespace">
+                                                <option value="EMPTY">Please select a package...</option>
+                                                <option value="NO_PACKAGE">No package</option>
                                             </select>
                                         </div>
                                     </div>
