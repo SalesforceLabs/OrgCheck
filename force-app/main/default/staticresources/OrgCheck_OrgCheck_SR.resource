@@ -3413,23 +3413,26 @@ function buildDatasets(core) {
                             let size = 0;
                             if (sobjects) {
                                 sobjects.forEach(v => {
-                                    if (v.keyPrefix &&
-                                        v.triggerable === true &&
-                                        v.layoutable === true) {
-                                        const object = {
-                                            id: v.name,
-                                            label: v.label,
-                                            developerName: v.name,
-                                            package: core.doSalesforceSplitDeveloperName(v.name).package
-                                        };
-                                        object.isCustomSetting = (v.customSetting === true);
-                                        object.isCustomObject = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
-                                        object.isStandardObject = (v.customSetting === false && v.custom === false);
-                                        object.isExternalObject = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
-                                        object.isCustomMetadataType = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
-                                        map[object.id] = object;
-                                        size++;
-                                    }
+                                    if (!v.keyPrefix) return;
+                                    const isCS = (v.customSetting === true);
+                                    const isCO = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
+                                    const isSO = (v.customSetting === false && v.custom === false);
+                                    const isEO = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
+                                    const isCMDT = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
+                                    if (!isCS && !isCO && !isSO && !isEO && !isCMDT) return;
+                                    const object = {
+                                        id: v.name,
+                                        label: v.label,
+                                        developerName: v.name,
+                                        package: core.doSalesforceSplitDeveloperName(v.name).package,
+                                        isCustomSetting: isCS,
+                                        isCustomObject: isCO,
+                                        isStandardObject: isSO,
+                                        isExternalObject: isEO,
+                                        isCustomMetadataType: isCMDT
+                                    };
+                                    map[object.id] = object;
+                                    size++;
                                 });
                             }
                             core.doSetSizeInMap(map, size);
