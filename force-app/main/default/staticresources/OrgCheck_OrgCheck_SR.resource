@@ -3413,8 +3413,7 @@ function buildDatasets(core) {
                             let size = 0;
                             if (sobjects) {
                                 sobjects.forEach(v => {
-                                    if (v.customSetting === false && 
-                                        v.keyPrefix &&
+                                    if (v.keyPrefix &&
                                         v.triggerable === true &&
                                         v.layoutable === true) {
                                         const object = {
@@ -3423,6 +3422,11 @@ function buildDatasets(core) {
                                             developerName: v.name,
                                             package: core.doSalesforceSplitDeveloperName(v.name).package
                                         };
+                                        object.isCustomSetting = (v.customSetting === true);
+                                        object.isCustomObject = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
+                                        object.isStandardObject = (v.customSetting === false && v.custom === false);
+                                        object.isExternalObject = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
+                                        object.isCustomMetadataType = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
                                         map[object.id] = object;
                                         size++;
                                     }

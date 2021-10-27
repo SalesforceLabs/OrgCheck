@@ -37,6 +37,20 @@
                                 <div class="slds-form__item">
                                     <div class="slds-form-element__control">
                                         <div class="slds-select_container">
+                                            <select class="slds-select" id="object-type">
+                                                <option value="ALL">All types</option>
+                                                <option value="STANDARD_SOBJECTS">Standard objects</option>
+                                                <option value="CUSTOM_SOBJECTS">Custom Objects</option>
+                                                <option value="CUSTOM_EXTERNAL_SOBJECTS">External Objects</option>
+                                                <option value="CUSTOM_SETTINGS">Custom Settings</option>
+                                                <option value="CUSTOM_METADATA_TYPES">Custom Metadata Types</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="slds-form__item">
+                                    <div class="slds-form-element__control">
+                                        <div class="slds-select_container">
                                             <select class="slds-select" id="object-api-name">
                                                 <option value="EMPTY">Please select an object...</option>
                                             </select>
@@ -255,18 +269,28 @@
                     // =================================
                     // Init the drop down to select the object
                     // =================================
-                    const initDropDown = function(package) {
+                    const initDropDown = function(namespace, type) {
+
+                        if (namespace === 'EMPTY') namespace = null;
+                        else if (namespace === 'NO_PACKAGE') namespace = '';
+
                         // Get the reference of the select form
                         const select = helper.html.element.get('object-api-name');
                         
                         // Remove previous options (except the first two which is the blank one)
                         helper.html.picklist.clear(select, 2);
 
-                        if (package || package === '') {
+                        if (namespace || namespace === '') {
                             helper.map.iterate2(allObjects, function(d, i, s) {
-                                if (d.package === package) {
-                                    helper.html.picklist.addValue(select, d.developerName, d.label);
+                                if (d.package !== namespace) return;
+                                if (type !== 'ALL') {
+                                    if (type === 'CUSTOM_SOBJECTS' && d.isCustomObject === false) return;
+                                    if (type === 'STANDARD_SOBJECTS' && d.isStandardObject === false) return;
+                                    if (type === 'CUSTOM_EXTERNAL_SOBJECTS' && d.isExternalObject === false) return;
+                                    if (type === 'CUSTOM_SETTINGS' && d.isCustomSetting === false) return;
+                                    if (type === 'CUSTOM_METADATA_TYPES' && d.isCustomMetadataType === false) return;
                                 }
+                                helper.html.picklist.addValue(select, d.developerName, d.label);
                             });
                         }
                     }
@@ -586,17 +610,24 @@
                     // When changing the package option
                     // =================================
                     const onChangePackage = function(package_name) {
+                        
+                        // Get the reference of the select form
+                        const type_name = helper.html.element.get('object-type').value;
+
                         initPage();
-                        switch (package_name) {
-                            case 'EMPTY': 
-                                initDropDown();
-                                break;
-                            case 'NO_PACKAGE': 
-                                initDropDown('');
-                                break;
-                            default: 
-                                initDropDown(package_name);
-                        }
+                        initDropDown(package_name, type_name);
+                    }
+
+                    // =================================
+                    // When changing the type option
+                    // =================================
+                    const onChangeType = function(type_name) {
+
+                        // Get the reference of the select form
+                        let package_name = helper.html.element.get('object-namespace').value;
+
+                        initPage();
+                        initDropDown(package_name, type_name);
                     }
 
                     // =================================
@@ -621,6 +652,9 @@
                     }
                     helper.html.element.get('object-namespace').onchange = function(event) {
                         onChangePackage(event.target.value);
+                    }
+                    helper.html.element.get('object-type').onchange = function(event) {
+                        onChangeType(event.target.value);
                     }
                     
                     // =================================
