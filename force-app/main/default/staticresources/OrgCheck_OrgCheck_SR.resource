@@ -2350,6 +2350,7 @@ function buildDatasets(core) {
                 onEachRecord: function(record, index) {
                     queries.push({
                         tooling: true,
+                        byPasses: [ 'UNKNOWN_EXCEPTION' ],
                         string: 'SELECT Id, FullName, Metadata FROM WorkflowRule WHERE Id = \''+record.Id+'\''
                     });
                 }, 
