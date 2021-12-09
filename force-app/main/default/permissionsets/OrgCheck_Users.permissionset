@@ -52,6 +52,10 @@
         <apexPage>OrgCheck_VisualComponents_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
+    <pageAccesses>
+        <apexPage>OrgCheck_Automations_VFP</apexPage>
+    <enabled>true</enabled>
+    </pageAccesses>
     <tabSettings>
         <tab>OrgCheck_ApexComponents_TAB</tab>
         <visibility>Visible</visibility>
@@ -66,6 +70,10 @@
     </tabSettings>
     <tabSettings>
         <tab>OrgCheck_CustomLabels_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>OrgCheck_Automations_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
