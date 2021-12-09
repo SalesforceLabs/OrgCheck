@@ -2,6 +2,6 @@
 <CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>OrgCheck Apex Components Tab</description>
     <label>Apex</label>
-    <motif>Custom15: People</motif>
+    <motif>Custom11: Star</motif>
     <page>OrgCheck_ApexComponents_VFP</page>
 </CustomTab>
