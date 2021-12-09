@@ -3449,6 +3449,71 @@ function buildDatasets(core) {
     }));
 
     // ========================================================================
+    // REPORTS
+    // ------------------------------------------------------------------------
+    // Get the list of failed reports in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'reports',
+        keycache: 'Reports',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, Name, NamespacePrefix, DeveloperName, FolderName, Format, Description '+
+                            'FROM Report '
+                } ],
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    return { 
+                        id: v.Id,
+                        name: v.Name,
+                        package: v.NamespacePrefix,
+                        developerName: v.DeveloperName,
+                        folder: { name: v.FolderName },
+                        format: v.Format,
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCache: resolve,
+                onError: reject
+            });
+        }
+    }));
+
+    // ========================================================================
+    // DASHBOARDS
+    // ------------------------------------------------------------------------
+    // Get the list of failed dashboards in Salesforce 
+    // ========================================================================
+    core.addDataset(new OrgCheck.Dataset({
+        name: 'dashboards',
+        keycache: 'Dashboards',
+        retriever: function(me, resolve, reject) {
+            core.doSalesforceQueriesWithCache({
+                mnemonic: this.keycache, 
+                queries: [ { 
+                    tooling: false, 
+                    string: 'SELECT Id, Title, NamespacePrefix, DeveloperName, FolderId, FolderName, Description '+
+                            'FROM Dashboard '
+                } ],
+                onEachRecordFromAPI: function(v, i, l, ts) {
+                    return { 
+                        id: v.Id,
+                        name: v.Title,
+                        package: v.NamespacePrefix,
+                        developerName: v.DeveloperName,
+                        folder: { id: v.FolderId, name: v.FolderName },
+                        description: v.Description
+                    };
+                }, 
+                onEndFromCache: resolve,
+                onError: reject
+            });
+        }
+    }));
+
+    // ========================================================================
     // BATCHES
     // ------------------------------------------------------------------------
     // Get the list of failed batches and scheduled jobs in Salesforce 

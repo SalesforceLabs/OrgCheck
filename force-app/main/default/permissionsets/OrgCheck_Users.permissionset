@@ -96,6 +96,10 @@
         <tab>OrgCheck_VisualComponents_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>OrgCheck_Analytics_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <userPermissions>
         <enabled>true</enabled>
         <name>ApiEnabled</name>

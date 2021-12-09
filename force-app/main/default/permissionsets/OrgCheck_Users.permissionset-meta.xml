@@ -25,10 +25,6 @@
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>
-        <apexPage>OrgCheck_Automations_VFP</apexPage>
-        <enabled>true</enabled>
-    </pageAccesses>
-    <pageAccesses>
         <apexPage>OrgCheck_CustomLabels_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
@@ -55,6 +51,10 @@
     <pageAccesses>
         <apexPage>OrgCheck_VisualComponents_VFP</apexPage>
         <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>OrgCheck_Automations_VFP</apexPage>
+    <enabled>true</enabled>
     </pageAccesses>
     <tabSettings>
         <tab>OrgCheck_ApexComponents_TAB</tab>
@@ -102,6 +102,10 @@
     </tabSettings>
     <tabSettings>
         <tab>OrgCheck_VisualComponents_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>OrgCheck_Analytics_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <userPermissions>

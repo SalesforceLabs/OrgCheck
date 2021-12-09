@@ -22,6 +22,7 @@
     <tabs>OrgCheck_CustomLabels_TAB</tabs>
     <tabs>OrgCheck_VisualComponents_TAB</tabs>
     <tabs>OrgCheck_ApexComponents_TAB</tabs>
+    <tabs>OrgCheck_Analytics_TAB</tabs>
     <tabs>OrgCheck_Batches_TAB</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
