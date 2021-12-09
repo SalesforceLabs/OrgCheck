@@ -9,11 +9,19 @@
     <label>OrgCheck Users</label>
     <license>Salesforce</license>
     <pageAccesses>
-        <apexPage>OrgCheck_Authorization_VFP</apexPage>
+        <apexPage>OrgCheck_Analytics_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>
         <apexPage>OrgCheck_ApexComponents_VFP</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>OrgCheck_Authorization_VFP</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>OrgCheck_Automations_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>
@@ -30,6 +38,10 @@
     </pageAccesses>
     <pageAccesses>
         <apexPage>OrgCheck_Home_VFP</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
+    <pageAccesses>
+        <apexPage>OrgCheck_Objects_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
     <pageAccesses>
@@ -52,12 +64,16 @@
         <apexPage>OrgCheck_VisualComponents_VFP</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
-    <pageAccesses>
-        <apexPage>OrgCheck_Automations_VFP</apexPage>
-    <enabled>true</enabled>
-    </pageAccesses>
+    <tabSettings>
+        <tab>OrgCheck_Analytics_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <tabSettings>
         <tab>OrgCheck_ApexComponents_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>OrgCheck_Automations_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
@@ -70,10 +86,6 @@
     </tabSettings>
     <tabSettings>
         <tab>OrgCheck_CustomLabels_TAB</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>OrgCheck_Automations_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
@@ -102,10 +114,6 @@
     </tabSettings>
     <tabSettings>
         <tab>OrgCheck_VisualComponents_TAB</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <tabSettings>
-        <tab>OrgCheck_Analytics_TAB</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <userPermissions>
