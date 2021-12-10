@@ -133,6 +133,7 @@
                                     { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: 'Version', type: 'numeric', property: 'version' },
                                     { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Type', property: 'type' }, 
                                     { name: 'Active', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
@@ -153,7 +154,7 @@
                                 ],
                                 data: map.flows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                filtering: { formula: (r) => { return r.type === 'Flow' }},
+                                filtering: { formula: (r) => { return r.type !== 'Workflow' }},
                                 showSearch: true,
                                 showStatistics: true
                             });
@@ -161,6 +162,11 @@
                         actions: { 
                             clearCache: { 
                                 show: true 
+                            },
+                            help: {
+                                content: [
+                                    'For more information about Flow types, check https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_flow.htm'
+                                ]
                             }
                         }
                     });
