@@ -18,6 +18,9 @@
                     padding-right: 0.9rem;
                     padding-left: 0.9rem;
                 }
+                .slds-scope table {
+                    width: auto;
+                }
             </style>
             <div id="modal" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
