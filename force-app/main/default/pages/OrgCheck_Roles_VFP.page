@@ -355,6 +355,12 @@
                         datasets: [ 'roles' ],
                         onRecords: function(map) { 
 
+                            if (PREF_FILTER_EXTERNAL_ROLES === true) {
+                                helper.map.iterate2(map.roles, function(d, i, s, k) {
+                                    if (d.isExternal === true) delete map.roles[k];
+                                });
+                            }
+
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
@@ -398,7 +404,6 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
-                                    if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
                                 }},
                                 showSearch: true,
                                 showStatistics: true
