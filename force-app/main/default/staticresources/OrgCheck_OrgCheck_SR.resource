@@ -1756,13 +1756,25 @@ const OrgCheck = {
                     },
                     render: {
                         dependencies: function(id, name, data) {
-                            const div = document.createElement('div');
-                            div.style.cursor = 'zoom-in';
-                            div.onclick = function() {
-                                MSG_HANDLER.showModal('Dependencies Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); 
+                            const dText = document.createElement('span');
+                            dText.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' ';
+                            const action1 = document.createElement('img');
+                            action1.style.cursor = 'zoom-in';
+                            action1.src = '/img/icon/sites24.png';
+                            action1.onclick = function() {
+                                MSG_HANDLER.showModal('Dependencies Graphical Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); 
                             };
+                            const action2 = document.createElement('img');
+                            action2.style.cursor = 'zoom-in';
+                            action2.src = '/img/icon/tables24.png';
+                            action2.onclick = function() {
+                                MSG_HANDLER.showModal('Dependencies Tabular Information', private_compute_dependencies_tabular('dep2'+id, name, data)); 
+                            };
+                            const div = document.createElement('div');
                             div.setAttribute('id', 'chart-container-' + id);
-                            div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/chatter/lookupSearchHover.png" />';
+                            div.appendChild(dText);
+                            div.appendChild(action1);
+                            div.appendChild(action2);
                             return div;
                         },
                         percentage: function(v) {
@@ -1993,6 +2005,15 @@ const OrgCheck = {
             SALESFORCE_HANDLER.doDescribeGlobal(setup.onEnd, setup.onError);
         };
 
+        /**
+         * Compute the dependencies tabular view
+         * @param tagId id of the entity
+         * @param name of the entity we want to analyze the dependencies
+         * @param data Returned by the doSalesforceDAPI method
+         */
+        function private_compute_dependencies_tabular(tagId, name, data) {
+            return 'Hello World!!';
+        };
 
         /**
          * Compute the dependencies graph as a SVG graph (with d3)
