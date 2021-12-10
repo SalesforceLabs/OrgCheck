@@ -19,9 +19,9 @@
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-owd__item">Org Wide Default</a>
                     </li>
                 </ul>
-                <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-objectdoc__item">
-                    <div class="slds-grid">
-                        <h1 class="slds-text-heading--small">Global Information</h1>
+                <div id="tab-default-1" class="slds-tabs_default__content slds-show" style="padding-top: 0;" role="tabpanel" aria-labelledby="tab-default-objectdoc__item">
+                    <div class="slds-grid slds-border_bottom slds-theme_shade">
+                        <h1 class="slds-text-heading--small" style="padding-top: 5px;">On which entity do you wish to have information?</h1>
                         <div class="slds-col_bump-left slds-form">
                             <div class="slds-form__row">
                                 <div class="slds-form__item">
@@ -60,169 +60,65 @@
                             </div>
                         </div>
                     </div>
-                    <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
-                        <div class="slds-form--stacked slds-grow slds-scrollable--y">
-                            <div class="slds-panel__section">
-                                <div class="slds-form-element slds-hint-parent">
-                                    <span class="slds-form-element__label">Description</span>
-                                    <div class="slds-form-element__control">
-                                        <div class="slds-form-element__static" id="global-description" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="slds-grid slds-gutters">
-                        <div class="slds-col">
-                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
-                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
-                                    <div class="slds-panel__section">
-                                        <ul>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
-                                                <span class="slds-form-element__label">API Name</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-apiName" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Custom?</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-custom" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Singular Label</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-label" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Plural Label</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-labelPlural" />
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>
-                        <div class="slds-col">
-                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
-                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
-                                    <div class="slds-panel__section">
-                                        <ul>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
-                                                <span class="slds-form-element__label">Key Prefix</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-keyPrefix" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Feed Enable?</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-feedEnabled" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Most Recent Enabled?</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-mruEnabled" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">Global Search Enabled?</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-searchable" />
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="slds-col">
-                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
-                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
-                                    <div class="slds-panel__section">
-                                        <ul>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
-                                                <span class="slds-form-element__label">Record Count</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-recordCount" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom slds-has-divider--top">
-                                                <span class="slds-form-element__label">Internal Sharing</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-internalSharingModel" />
-                                                </div>
-                                            </li>
-                                            <li class="slds-form-element slds-hint-parent slds-has-divider--bottom">
-                                                <span class="slds-form-element__label">External Sharing</span>
-                                                <div class="slds-form-element__control">
-                                                    <div class="slds-form-element__static" id="global-externalSharingModel" />
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
         
+                    <!-- GENERAL SECTION -->
+                    <div id="section-general">
+                        <h1 class="slds-text-heading--small">General information</h1>
+                        <div id="datatable-general" data-title="General information" />
+                    </div>
+
                     <!-- APEX TRIGGER SECTION -->
                     <div id="section-apexTriggers">
                         <h1 class="slds-text-heading--small">Apex Triggers</h1>
-                        <div id="datatable-apexTriggers" />
+                        <div id="datatable-apexTriggers" data-title="Apex Triggers" />
                     </div>
                     
                     <!-- FIELD SETS SECTION -->
                     <div id="section-fieldSets">
                         <h1 class="slds-text-heading--small">Field Sets</h1>
-                        <div id="datatable-fieldSets" />
+                        <div id="datatable-fieldSets" data-title="Field Sets" />
                     </div>
                         
                     <!-- LAYOUTS SECTION -->
                     <div id="section-layouts">
                         <h1 class="slds-text-heading--small">Layouts</h1>
-                        <div id="datatable-layouts" />
+                        <div id="datatable-layouts" data-title="Layouts" />
                     </div>
                     
                     <!-- LIMITS SECTION -->
                     <div id="section-limits">
                         <h1 class="slds-text-heading--small">Limits</h1>
-                        <div id="datatable-limits" />
+                        <div id="datatable-limits" data-title="Limits" />
                     </div>
                     
                     <!-- VALIDATION RULES SECTION -->
                     <div id="section-validationRules">
                         <h1 class="slds-text-heading--small">Validation Rules</h1>
-                        <div id="datatable-validationRules" />
+                        <div id="datatable-validationRules" data-title="Validation Rules" />
                     </div>
                     
                     <!-- WEB LINKS SECTION -->
                     <div id="section-webLinks">
                         <h1 class="slds-text-heading--small">Web Links</h1>
-                        <div id="datatable-webLinks" />
+                        <div id="datatable-webLinks" data-title="Web Links" />
                     </div>
                     
                     <!-- FIELDS SECTION -->
                     <div id="section-fields">
                         <h1 class="slds-text-heading--small">Fields</h1>
-                        <div id="datatable-fields" />
+                        <div id="datatable-fields" data-title="Fields" />
                     </div>
                     
                     <!-- RECORD TYPES SECTION -->
                     <div id="section-recordtypes">
                         <h1 class="slds-text-heading--small">Record Types</h1>
-                        <div id="datatable-recordtypes" />
+                        <div id="datatable-recordtypes" data-title="Record Types" />
                     </div>
                     
                     <!-- RELEATIONSHIPS SECTION -->
                     <div id="section-relationships">
                         <h1 class="slds-text-heading--small">Relationships</h1>
-                        <div id="datatable-relationships" />
+                        <div id="datatable-relationships" data-title="Relationships" />
                     </div>
                 </div>
                 <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-owd__item">
@@ -241,20 +137,7 @@
                     // Reset the information in the page
                     // =================================
                     const initPage = function() {
-                        // Global description
-                        helper.html.element.setText('global-description', '');
-                        helper.html.element.setText('global-apiName', '');
-                        helper.html.element.setText('global-label', '');
-                        helper.html.element.setText('global-labelPlural', '');
-                        helper.html.element.setText('global-custom', '');
-                        helper.html.element.setText('global-keyPrefix', '');
-                        helper.html.element.setText('global-feedEnabled', '');
-                        helper.html.element.setText('global-mruEnabled', '');
-                        helper.html.element.setText('global-searchable', '');
-                        helper.html.element.setText('global-recordCount', '');
-                        helper.html.element.setText('global-internalSharingModel', '');
-                        helper.html.element.setText('global-externalSharingModel', '');
-                        // Related lists
+                        helper.html.element.show('section-general', false);          helper.html.datatable.clean('datatable-general');
                         helper.html.element.show('section-apexTriggers', false);     helper.html.datatable.clean('datatable-apexTriggers');
                         helper.html.element.show('section-fieldSets', false);        helper.html.datatable.clean('datatable-fieldSets');
                         helper.html.element.show('section-layouts', false);          helper.html.datatable.clean('datatable-layouts');
@@ -313,18 +196,29 @@
                                 // -------------------------
                                 // GLOBAL INFORMATION
                                 // -------------------------
-                                helper.html.element.setText('global-description', object.description);
-                                helper.html.element.setText('global-apiName', object.name);
-                                helper.html.element.setText('global-label', object.label);
-                                helper.html.element.setText('global-labelPlural', object.labelPlural);
-                                helper.html.element.setText('global-custom', object.custom);
-                                helper.html.element.setText('global-keyPrefix', object.keyPrefix);
-                                helper.html.element.setText('global-feedEnabled', object.feedEnabled);
-                                helper.html.element.setText('global-mruEnabled', object.mruEnabled);
-                                helper.html.element.setText('global-searchable', object.searchable);
-                                helper.html.element.setText('global-recordCount', object.recordCount);
-                                helper.html.element.setText('global-internalSharingModel', object.internalSharingModel);
-                                helper.html.element.setText('global-externalSharingModel', object.externalSharingModel);
+                                helper.html.element.show('section-general', true);
+                                helper.html.datatable.create({
+                                    element: 'datatable-general',
+                                    columns: [
+                                        { name: 'Information', property: 'key' },
+                                        { name: 'Value', property: 'value' }
+                                    ],
+                                    data: [
+                                        { key: 'Description', value: object.description },
+                                        { key: 'API Name', value: object.name },
+                                        { key: 'Singular Label', value: object.label },
+                                        { key: 'Plural Label ', value: object.labelPlural },
+                                        { key: 'Is Custom?', value: object.custom },
+                                        { key: 'Key Prefix', value: object.keyPrefix },
+                                        { key: 'Feed Enable?', value: object.feedEnabled },
+                                        { key: 'Most Recent Enabled?', value: object.mruEnabled },
+                                        { key: 'Global Search Enabled?', value: object.searchable },
+                                        { key: 'Record Count (including deleted ones)', value: object.recordCount },
+                                        { key: 'Internal Sharing', value: object.internalSharingModel },
+                                        { key: 'External Sharing', value: object.externalSharingModel }
+                                    ],
+                                    showSearch: false
+                                });
 
                                 // -------------------------
                                 // FIELDS INFORMATION
@@ -599,6 +493,16 @@
                                 visibleTab: 'tab-default-owd__item',
                                 table: 'datatable-orgWideDefaults',
                                 filename: 'Org Wide Defaults'
+                            }, {
+                                visibleTab: 'tab-default-objectdoc__item',
+                                tables: [
+                                    'datatable-general', 'datatable-apexTriggers', 
+                                    'datatable-fieldSets', 'datatable-layouts',
+                                    'datatable-limits', 'datatable-validationRules', 
+                                    'datatable-webLinks', 'datatable-fields', 
+                                    'datatable-recordtypes', 'datatable-relationships'
+                                ],
+                                filename: 'Object Documentation'
                             }],
                             clearCache: { 
                                 show: true 

@@ -1162,6 +1162,7 @@ const OrgCheck = {
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
                                 let isSomethingToExport = false;
+                                let reasonNoExport = '';
                                 ctlSetup.actions.exportTable.forEach(d => {
                                     if (d.visibleTab) {
                                         const tab = document.getElementById(d.visibleTab).parentNode;
@@ -1169,21 +1170,27 @@ const OrgCheck = {
                                             return;
                                         }
                                     }
-                                    const table = document.getElementById(d.table);
-                                    const rows = table.querySelectorAll('table tr');
+                                    const tables = d.tables || [ d.table ];
                                     const data = [];
-                                    for (let i=0; i<rows.length; i++) {
-                                        const row = [];
-                                        const cols = rows[i].querySelectorAll('td, th');
-                                        for (let j=0; j<cols.length; j++) {
-                                            let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
-                                            v = v.trim() // trim will delete extra spaces (including &nbsp;)
-                                                 .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
-                                            if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
-                                            row.push(v);
+                                    tables.forEach(t => {
+                                        const div = document.getElementById(t);
+                                        const title = div.getAttribute('data-title');
+                                        const rows = div.querySelectorAll('table tr');
+                                        if (title) data.push('### ' + title + ' ###');
+                                        for (let i=0; i<rows.length; i++) {
+                                            const row = [];
+                                            const cols = rows[i].querySelectorAll('td, th');
+                                            for (let j=0; j<cols.length; j++) {
+                                                let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
+                                                v = v.trim() // trim will delete extra spaces (including &nbsp;)
+                                                    .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
+                                                if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
+                                                row.push(v);
+                                            }
+                                            data.push(row.join(","));        
                                         }
-                                        data.push(row.join(","));        
-                                    }
+                                        data.push('');
+                                    });
                                     const link = document.createElement('a');
                                     link.style.visibility = 'hidden';
                                     document.body.appendChild(link);
@@ -1510,46 +1517,48 @@ const OrgCheck = {
                                 ttlHead.classList.add('slds-truncate');
                                 ttlHead.setAttribute('title', c.name);
                                 ttlHead.textContent = c.name;
-                                aHead.onclick = function(e) { 
-                                    if (e) {
-                                        if (config.sorting.name === c.name) {
-                                            config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
+                                if (config.sorting) {
+                                    aHead.onclick = function(e) { 
+                                        if (e) {
+                                            if (config.sorting.name === c.name) {
+                                                config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
+                                            } else {
+                                                config.sorting.name = c.name;
+                                                config.sorting.order = 'asc';
+                                            }
+                                            if (orderingImage.parentNode) {
+                                                orderingImage.parentNode.removeChild(orderingImage);
+                                            }
+                                        }
+                                        if (config.sorting.order === 'asc') {
+                                            thHead.setAttribute('aria-sort', 'ascending');
+                                            orderingImage.src = '/img/sort_asc_arrow.gif';
                                         } else {
-                                            config.sorting.name = c.name;
-                                            config.sorting.order = 'asc';
+                                            thHead.setAttribute('aria-sort', 'descending');
+                                            orderingImage.src = '/img/sort_desc_arrow.gif';
                                         }
-                                        if (orderingImage.parentNode) {
-                                            orderingImage.parentNode.removeChild(orderingImage);
-                                        }
+                                        grdHead.appendChild(orderingImage);
+                                        const iOrder = config.sorting.order === 'asc' ? 1 : -1;
+                                        const items = [].slice.call(table.rows).slice(1);
+                                        items.sort(function compare(a, b) {
+                                            const valueA = a.getElementsByTagName('td')[i].textContent;
+                                            const valueB = b.getElementsByTagName('td')[i].textContent;
+                                            if (c.type === 'numeric') return (valueA - valueB) * iOrder;
+                                            if (valueA < valueB) return -iOrder;
+                                            if (valueA > valueB) return iOrder;
+                                            return 0;
+                                        });
+                                        table.hidden = true; // make table invisible while manipulating the DOM
+                                        items.forEach(r => {
+                                            const parent = r.parentNode;
+                                            const detatchedItem = parent.removeChild(r);
+                                            parent.appendChild(detatchedItem);
+                                        });
+                                        table.hidden = false; // make table visible again
+                                    };
+                                    if (config.sorting.name === c.name) {
+                                        firstSortCallback = function() { aHead.onclick(); }
                                     }
-                                    if (config.sorting.order === 'asc') {
-                                        thHead.setAttribute('aria-sort', 'ascending');
-                                        orderingImage.src = '/img/sort_asc_arrow.gif';
-                                    } else {
-                                        thHead.setAttribute('aria-sort', 'descending');
-                                        orderingImage.src = '/img/sort_desc_arrow.gif';
-                                    }
-                                    grdHead.appendChild(orderingImage);
-                                    const iOrder = config.sorting.order === 'asc' ? 1 : -1;
-                                    const items = [].slice.call(table.rows).slice(1);
-                                    items.sort(function compare(a, b) {
-                                        const valueA = a.getElementsByTagName('td')[i].textContent;
-                                        const valueB = b.getElementsByTagName('td')[i].textContent;
-                                        if (c.type === 'numeric') return (valueA - valueB) * iOrder;
-                                        if (valueA < valueB) return -iOrder;
-                                        if (valueA > valueB) return iOrder;
-                                        return 0;
-                                    });
-                                    table.hidden = true; // make table invisible while manipulating the DOM
-                                    items.forEach(r => {
-                                        const parent = r.parentNode;
-                                        const detatchedItem = parent.removeChild(r);
-                                        parent.appendChild(detatchedItem);
-                                    });
-                                    table.hidden = false; // make table visible again
-                                };
-                                if (config.sorting.name === c.name) {
-                                    firstSortCallback = function() { aHead.onclick(); }
                                 }
                             });
                             const tbody = table.appendChild(document.createElement('tbody'));
