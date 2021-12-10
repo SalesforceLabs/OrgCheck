@@ -201,18 +201,23 @@
                                     element: 'datatable-general',
                                     columns: [
                                         { name: 'Information', property: 'key' },
-                                        { name: 'Value', property: 'value' }
+                                        { name: 'Value', formula: (r) => { 
+                                            if (r.type === 'checkbox') {
+                                                return helper.html.render.checkbox(r.value);
+                                            }
+                                            return r.value;
+                                        }}
                                     ],
                                     data: [
                                         { key: 'Description', value: object.description },
                                         { key: 'API Name', value: object.name },
                                         { key: 'Singular Label', value: object.label },
                                         { key: 'Plural Label ', value: object.labelPlural },
-                                        { key: 'Is Custom?', value: object.custom },
+                                        { key: 'Is Custom?', value: object.custom, type: 'checkbox' },
                                         { key: 'Key Prefix', value: object.keyPrefix },
-                                        { key: 'Feed Enable?', value: object.feedEnabled },
-                                        { key: 'Most Recent Enabled?', value: object.mruEnabled },
-                                        { key: 'Global Search Enabled?', value: object.searchable },
+                                        { key: 'Feed Enable?', value: object.feedEnabled, type: 'checkbox' },
+                                        { key: 'Most Recent Enabled?', value: object.mruEnabled, type: 'checkbox' },
+                                        { key: 'Global Search Enabled?', value: object.searchable, type: 'checkbox' },
                                         { key: 'Record Count (including deleted ones)', value: object.recordCount },
                                         { key: 'Internal Sharing', value: object.internalSharingModel },
                                         { key: 'External Sharing', value: object.externalSharingModel }
