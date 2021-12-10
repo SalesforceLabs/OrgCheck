@@ -1161,6 +1161,7 @@ const OrgCheck = {
                         if (ctlSetup.actions && ctlSetup.actions.exportTable && Array.isArray(ctlSetup.actions.exportTable)) {
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
+                                let isSomethingToExport = false;
                                 ctlSetup.actions.exportTable.forEach(d => {
                                     if (d.visibleTab) {
                                         const tab = document.getElementById(d.visibleTab).parentNode;
@@ -1191,7 +1192,11 @@ const OrgCheck = {
                                     link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(data.join('\n'));
                                     link.click();
                                     document.body.removeChild(link);
+                                    isSomethingToExport = true;
                                 });
+                                if (isSomethingToExport === false) {
+                                    MSG_HANDLER.showModal('Export feature', 'Exporting data for this tab is not yet implemented!');
+                                }
                             }
                             buttonExport.parentNode.style.display = 'block';
                         }
