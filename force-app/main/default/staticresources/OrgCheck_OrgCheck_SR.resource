@@ -1540,7 +1540,7 @@ const OrgCheck = {
                     render: {
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
-                            div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/icon/sites24.png" />';
+                            div.innerHTML = 'Dependencies <img src="/img/chatter/lookupSearchHover.png" />';
                             div.setAttribute('id', 'chart-container-' + id);
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
@@ -2044,6 +2044,7 @@ const OrgCheck = {
                 columns: [
                     { name: 'TargetName', property: 'target' }, 
                     { name: 'Relation', formula:  (r) => { return (r.relation === 'used') ? 'is used by' : 'is using' ; }},
+                    { name: 'Reference Type', property: 'refType' },
                     { name: 'Reference Name', property: 'refName' },
                     { name: 'Reference Id', property: 'refId' }
                 ]
