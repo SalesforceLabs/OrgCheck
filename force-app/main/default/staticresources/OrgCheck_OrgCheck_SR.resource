@@ -1439,227 +1439,12 @@ const OrgCheck = {
                 html: {
                     modal: {
                         show: function(title, el) {
-                            MSG_HANDLER.showModal(title, el);
+                            MSG_HANDLER.showModal([ title, el ]);
                         }
                     },
                     datatable: {
                         create: function(config) {
-                            const dt = document.getElementById(config.element);
-                            const counters = dt.appendChild(document.createElement('span'));
-                            const filterCounters = dt.appendChild(document.createElement('span'));
-                            const table = dt.appendChild(document.createElement('table'));
-                            if (config.showSearch === true) {
-                                const searchBox = dt.insertBefore(document.createElement('div'), table);
-                                const searchIcon = searchBox.appendChild(document.createElement('img'));
-                                const search = searchBox.appendChild(document.createElement('input'));
-                                searchBox.classList.add('slds-input-has-icon', 'slds-input-has-icon_left');
-                                searchIcon.classList.add('slds-icon','slds-input__icon','slds-input__icon_left','slds-icon-text-default');
-                                searchIcon.setAttribute('src', '/img/chatter/lookupSearchHover.png');
-                                search.classList.add('slds-input');
-                                search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
-                                search.onkeydown = function(e) {
-                                    if (e.code === 'Enter') {
-                                        const searchValue = e.target.value;
-                                        const items = [].slice.call(table.rows).slice(1);
-                                        let nbVisible = 0;
-                                        table.hidden = true; // make table invisible while manipulating the DOM
-                                        items.forEach(tr => {
-                                            if (!searchValue) {
-                                                tr.hidden = false;
-                                                nbVisible++;
-                                            } else {
-                                                let hidden = true;
-                                                const lowerCaseSearchValue = searchValue.toLowerCase();
-                                                for (let i=0; i<tr.children.length; i++) {
-                                                    const v = tr.children[i].innerText?.toLowerCase();
-                                                    if (v && v.includes && v.includes(lowerCaseSearchValue)) {
-                                                        hidden = false;
-                                                        nbVisible++;
-                                                        break;
-                                                    }
-                                                }
-                                                tr.hidden = hidden;
-                                            }
-                                        });
-                                        if (config.showStatistics === true) {
-                                            if (searchValue) {
-                                                filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
-                                            } else {
-                                                filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
-                                            }
-                                        }
-                                        table.hidden = false; // make table visible again
-                                    }
-                                };
-                            }
-                            table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
-                            const thead = table.appendChild(document.createElement('thead'));
-                            const trHead = thead.appendChild(document.createElement('tr'));
-                            trHead.classList.add('slds-text-title_caps');
-                            const orderingImage = document.createElement('img');
-                            let firstSortCallback;
-                            config.columns.forEach((c, i) => {
-                                const thHead = trHead.appendChild(document.createElement('th'));
-                                thHead.setAttribute('scope', 'col');
-                                thHead.setAttribute('aria-label', c.name);
-                                thHead.classList.add('slds-is-sortable');
-                                const aHead = thHead.appendChild(document.createElement('a'));
-                                aHead.classList.add('slds-th__action', 'slds-text-link_reset');
-                                aHead.setAttribute('href', 'javascript:void(0);');
-                                aHead.setAttribute('role', 'button');
-                                aHead.setAttribute('tabindex', i);
-                                const assHead = aHead.appendChild(document.createElement('span'));
-                                assHead.classList.add('slds-assistive-text');
-                                assHead.textContent = 'Sort by: ';
-                                const grdHead = aHead.appendChild(document.createElement('div'));
-                                grdHead.classList.add('slds-grid', 'slds-grid_vertical-align-center', 'slds-has-flexi-truncate');
-                                const ttlHead = grdHead.appendChild(document.createElement('span'));
-                                ttlHead.classList.add('slds-truncate');
-                                ttlHead.setAttribute('title', c.name);
-                                ttlHead.textContent = c.name;
-                                if (config.sorting) {
-                                    aHead.onclick = function(e) { 
-                                        if (e) {
-                                            if (config.sorting.name === c.name) {
-                                                config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
-                                            } else {
-                                                config.sorting.name = c.name;
-                                                config.sorting.order = 'asc';
-                                            }
-                                            if (orderingImage.parentNode) {
-                                                orderingImage.parentNode.removeChild(orderingImage);
-                                            }
-                                        }
-                                        if (config.sorting.order === 'asc') {
-                                            thHead.setAttribute('aria-sort', 'ascending');
-                                            orderingImage.src = '/img/sort_asc_arrow.gif';
-                                        } else {
-                                            thHead.setAttribute('aria-sort', 'descending');
-                                            orderingImage.src = '/img/sort_desc_arrow.gif';
-                                        }
-                                        grdHead.appendChild(orderingImage);
-                                        const iOrder = config.sorting.order === 'asc' ? 1 : -1;
-                                        const items = [].slice.call(table.rows).slice(1);
-                                        items.sort(function compare(a, b) {
-                                            const valueA = a.getElementsByTagName('td')[i].textContent;
-                                            const valueB = b.getElementsByTagName('td')[i].textContent;
-                                            if (c.type === 'numeric') return (valueA - valueB) * iOrder;
-                                            if (valueA < valueB) return -iOrder;
-                                            if (valueA > valueB) return iOrder;
-                                            return 0;
-                                        });
-                                        table.hidden = true; // make table invisible while manipulating the DOM
-                                        items.forEach(r => {
-                                            const parent = r.parentNode;
-                                            const detatchedItem = parent.removeChild(r);
-                                            parent.appendChild(detatchedItem);
-                                        });
-                                        table.hidden = false; // make table visible again
-                                    };
-                                    if (config.sorting.name === c.name) {
-                                        firstSortCallback = function() { aHead.onclick(); }
-                                    }
-                                }
-                            });
-                            const tbody = table.appendChild(document.createElement('tbody'));
-                            const isArray = Array.isArray(config.data);
-                            const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
-                            table.hidden = true; // make table invisible while manipulating the DOM
-                            let nbRows = 0, nbBadRows = 0, sumScore = 0;
-                            iterable.forEach(k => {
-                                if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
-                                nbRows++;
-                                const trBody = tbody.appendChild(document.createElement('tr'));
-                                let rowScore = 0;
-                                let tdBodyScore = null;
-                                config.columns.forEach(c => {
-                                    const tdBody = trBody.appendChild(document.createElement('td'));
-                                    if (c.property === '##score##') {
-                                        tdBodyScore = tdBody;
-                                        return;
-                                    }
-                                    const row = isArray ? k : config.data[k];
-                                    let content = '';
-                                    let additiveScore = 0;
-                                    try {
-                                        if (c.formula) {
-                                            content = c.formula(row);
-                                        } else if (c.property) {
-                                            content = row[c.property];
-                                        }
-                                    } catch (e) {
-                                        e.context = {
-                                            'when': 'Datatable: calling formula to render the content of a cell in the table',
-                                            'what': {
-                                                'Column': c.name,
-                                                'Formula': c.formula,
-                                                'Property': c.property,
-                                                'Data': row
-                                            }
-                                        }
-                                        throw e;
-                                    }
-                                    try {
-                                        if (c.scoreFormula) {
-                                            additiveScore = c.scoreFormula(row);
-                                            if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
-                                                rowScore += additiveScore;
-                                                tdBody.bgColor = '#ffd079';
-                                            }
-                                        }
-                                    } catch (e) {
-                                        e.context = {
-                                            'when': 'Datatable: calling scoreFormula to calculate the score of a cell in the table',
-                                            'what': {
-                                                'Column': c.name,
-                                                'Formula': c.scoreFormula,
-                                                'Current Score': rowScore,
-                                                'Data': row
-                                            }
-                                        }
-                                        throw e;
-                                    }
-                                    if (content) {
-                                        const isArray = (Array.isArray(content) === true);
-                                        if (typeof content === 'object' && isArray === false) {
-                                            if (additiveScore > 0) {
-                                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                                            }       
-                                            tdBody.appendChild(content);
-                                        } else {
-                                            let html = '';
-                                            if (additiveScore > 0) {
-                                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                                            }
-                                            if (isArray === true) {
-                                                content.forEach(cnt => html += cnt+'<br />');
-                                            } else {
-                                                html += content;
-                                            }
-                                            tdBody.innerHTML = html;
-                                        }
-                                    }
-                                    const alternative = (c.property && c.formula ? row[c.property] : '') || '';
-                                    if (alternative !== '' || alternative === true || alternative === false) {
-                                        tdBody.setAttribute('aria-label', alternative?.toString());
-                                    }
-                                });
-                                if (tdBodyScore && rowScore > 0) {
-                                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
-                                    tdBodyScore.bgColor = '#ffd079';
-                                    trBody.bgColor = '#ffe099';
-                                    sumScore += rowScore;
-                                    nbBadRows++;
-                                }
-                            });
-                            if (config.showStatistics === true) {
-                                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
-                                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
-                            }
-                            table.hidden = false; // make table visible again
-                            if (firstSortCallback) { 
-                                firstSortCallback(); 
-                            }
+                            private_create_datatable(config);
                         },
                         clean: function(element) {
                             const dt = document.getElementById(element);
@@ -1756,25 +1541,16 @@ const OrgCheck = {
                     },
                     render: {
                         dependencies: function(id, name, data) {
-                            const dText = document.createElement('span');
-                            dText.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' ';
-                            const action1 = document.createElement('img');
-                            action1.style.cursor = 'zoom-in';
-                            action1.src = '/img/icon/sites24.png';
-                            action1.onclick = function() {
-                                MSG_HANDLER.showModal('Dependencies Graphical Information', private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8')); 
-                            };
-                            const action2 = document.createElement('img');
-                            action2.style.cursor = 'zoom-in';
-                            action2.src = '/img/icon/tables24.png';
-                            action2.onclick = function() {
-                                MSG_HANDLER.showModal('Dependencies Tabular Information', private_compute_dependencies_tabular('dep2'+id, name, data)); 
-                            };
                             const div = document.createElement('div');
+                            div.innerHTML = (data.using?'<b>Using</b>':'Not using')+' / '+(data.used?'<b>Used</b>':'Not used')+' <img src="/img/icon/sites24.png" />';
                             div.setAttribute('id', 'chart-container-' + id);
-                            div.appendChild(dText);
-                            div.appendChild(action1);
-                            div.appendChild(action2);
+                            div.style.cursor = 'zoom-in';
+                            div.onclick = function() {
+                                const information = document.createElement('div');
+                                information.appendChild(private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8'));
+                                information.appendChild(private_compute_dependencies_tabular('dep2'+id, name, data));
+                                MSG_HANDLER.showModal('Dependencies Graphical and Tabular Information', information); 
+                            };
                             return div;
                         },
                         percentage: function(v) {
@@ -2006,13 +1782,276 @@ const OrgCheck = {
         };
 
         /**
+         * Create a datatable in HTML from a map and a set of configuration
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>element</code>: name of the root element where the table will be added as a child node.</li>
+         *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
+         *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
+         *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
+         *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
+         *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
+         *                <li><code>filtering</code>: JSON, description of an optional filter to apply to the visual representation.</li>
+         *              </ol>
+         */
+        function private_create_datatable(config) {
+            const dt = (typeof config.element === 'string') ? document.getElementById(config.element) : config.element;
+            const counters = dt.appendChild(document.createElement('span'));
+            const filterCounters = dt.appendChild(document.createElement('span'));
+            const table = dt.appendChild(document.createElement('table'));
+            if (config.showSearch === true) {
+                const searchBox = dt.insertBefore(document.createElement('div'), table);
+                const searchIcon = searchBox.appendChild(document.createElement('img'));
+                const search = searchBox.appendChild(document.createElement('input'));
+                searchBox.classList.add('slds-input-has-icon', 'slds-input-has-icon_left');
+                searchIcon.classList.add('slds-icon','slds-input__icon','slds-input__icon_left','slds-icon-text-default');
+                searchIcon.setAttribute('src', '/img/chatter/lookupSearchHover.png');
+                search.classList.add('slds-input');
+                search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
+                search.onkeydown = function(e) {
+                    if (e.code === 'Enter') {
+                        const searchValue = e.target.value;
+                        const items = [].slice.call(table.rows).slice(1);
+                        let nbVisible = 0;
+                        table.hidden = true; // make table invisible while manipulating the DOM
+                        items.forEach(tr => {
+                            if (!searchValue) {
+                                tr.hidden = false;
+                                nbVisible++;
+                            } else {
+                                let hidden = true;
+                                const lowerCaseSearchValue = searchValue.toLowerCase();
+                                for (let i=0; i<tr.children.length; i++) {
+                                    const v = tr.children[i].innerText?.toLowerCase();
+                                    if (v && v.includes && v.includes(lowerCaseSearchValue)) {
+                                        hidden = false;
+                                        nbVisible++;
+                                        break;
+                                    }
+                                }
+                                tr.hidden = hidden;
+                            }
+                        });
+                        if (config.showStatistics === true) {
+                            if (searchValue) {
+                                filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
+                            } else {
+                                filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
+                            }
+                        }
+                        table.hidden = false; // make table visible again
+                    }
+                };
+            }
+            table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
+            const thead = table.appendChild(document.createElement('thead'));
+            const trHead = thead.appendChild(document.createElement('tr'));
+            trHead.classList.add('slds-text-title_caps');
+            const orderingImage = document.createElement('img');
+            let firstSortCallback;
+            config.columns.forEach((c, i) => {
+                const thHead = trHead.appendChild(document.createElement('th'));
+                thHead.setAttribute('scope', 'col');
+                thHead.setAttribute('aria-label', c.name);
+                thHead.classList.add('slds-is-sortable');
+                const aHead = thHead.appendChild(document.createElement('a'));
+                aHead.classList.add('slds-th__action', 'slds-text-link_reset');
+                aHead.setAttribute('href', 'javascript:void(0);');
+                aHead.setAttribute('role', 'button');
+                aHead.setAttribute('tabindex', i);
+                const assHead = aHead.appendChild(document.createElement('span'));
+                assHead.classList.add('slds-assistive-text');
+                assHead.textContent = 'Sort by: ';
+                const grdHead = aHead.appendChild(document.createElement('div'));
+                grdHead.classList.add('slds-grid', 'slds-grid_vertical-align-center', 'slds-has-flexi-truncate');
+                const ttlHead = grdHead.appendChild(document.createElement('span'));
+                ttlHead.classList.add('slds-truncate');
+                ttlHead.setAttribute('title', c.name);
+                ttlHead.textContent = c.name;
+                if (config.sorting) {
+                    aHead.onclick = function(e) { 
+                        if (e) {
+                            if (config.sorting.name === c.name) {
+                                config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
+                            } else {
+                                config.sorting.name = c.name;
+                                config.sorting.order = 'asc';
+                            }
+                            if (orderingImage.parentNode) {
+                                orderingImage.parentNode.removeChild(orderingImage);
+                            }
+                        }
+                        if (config.sorting.order === 'asc') {
+                            thHead.setAttribute('aria-sort', 'ascending');
+                            orderingImage.src = '/img/sort_asc_arrow.gif';
+                        } else {
+                            thHead.setAttribute('aria-sort', 'descending');
+                            orderingImage.src = '/img/sort_desc_arrow.gif';
+                        }
+                        grdHead.appendChild(orderingImage);
+                        const iOrder = config.sorting.order === 'asc' ? 1 : -1;
+                        const items = [].slice.call(table.rows).slice(1);
+                        items.sort(function compare(a, b) {
+                            const valueA = a.getElementsByTagName('td')[i].textContent;
+                            const valueB = b.getElementsByTagName('td')[i].textContent;
+                            if (c.type === 'numeric') return (valueA - valueB) * iOrder;
+                            if (valueA < valueB) return -iOrder;
+                            if (valueA > valueB) return iOrder;
+                            return 0;
+                        });
+                        table.hidden = true; // make table invisible while manipulating the DOM
+                        items.forEach(r => {
+                            const parent = r.parentNode;
+                            const detatchedItem = parent.removeChild(r);
+                            parent.appendChild(detatchedItem);
+                        });
+                        table.hidden = false; // make table visible again
+                    };
+                    if (config.sorting.name === c.name) {
+                        firstSortCallback = function() { aHead.onclick(); }
+                    }
+                }
+            });
+            const tbody = table.appendChild(document.createElement('tbody'));
+            const isArray = Array.isArray(config.data);
+            const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
+            table.hidden = true; // make table invisible while manipulating the DOM
+            let nbRows = 0, nbBadRows = 0, sumScore = 0;
+            iterable.forEach(k => {
+                if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
+                nbRows++;
+                const trBody = tbody.appendChild(document.createElement('tr'));
+                let rowScore = 0;
+                let tdBodyScore = null;
+                config.columns.forEach(c => {
+                    const tdBody = trBody.appendChild(document.createElement('td'));
+                    if (c.property === '##score##') {
+                        tdBodyScore = tdBody;
+                        return;
+                    }
+                    const row = isArray ? k : config.data[k];
+                    let content = '';
+                    let additiveScore = 0;
+                    try {
+                        if (c.formula) {
+                            content = c.formula(row);
+                        } else if (c.property) {
+                            content = row[c.property];
+                        }
+                    } catch (e) {
+                        e.context = {
+                            'when': 'Datatable: calling formula to render the content of a cell in the table',
+                            'what': {
+                                'Column': c.name,
+                                'Formula': c.formula,
+                                'Property': c.property,
+                                'Data': row
+                            }
+                        }
+                        throw e;
+                    }
+                    try {
+                        if (c.scoreFormula) {
+                            additiveScore = c.scoreFormula(row);
+                            if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
+                                rowScore += additiveScore;
+                                tdBody.bgColor = '#ffd079';
+                            }
+                        }
+                    } catch (e) {
+                        e.context = {
+                            'when': 'Datatable: calling scoreFormula to calculate the score of a cell in the table',
+                            'what': {
+                                'Column': c.name,
+                                'Formula': c.scoreFormula,
+                                'Current Score': rowScore,
+                                'Data': row
+                            }
+                        }
+                        throw e;
+                    }
+                    if (content) {
+                        const isArray = (Array.isArray(content) === true);
+                        if (typeof content === 'object' && isArray === false) {
+                            if (additiveScore > 0) {
+                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
+                            }       
+                            tdBody.appendChild(content);
+                        } else {
+                            let html = '';
+                            if (additiveScore > 0) {
+                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
+                            }
+                            if (isArray === true) {
+                                content.forEach(cnt => html += cnt+'<br />');
+                            } else {
+                                html += content;
+                            }
+                            tdBody.innerHTML = html;
+                        }
+                    }
+                    const alternative = (c.property && c.formula ? row[c.property] : '') || '';
+                    if (alternative !== '' || alternative === true || alternative === false) {
+                        tdBody.setAttribute('aria-label', alternative?.toString());
+                    }
+                });
+                if (tdBodyScore && rowScore > 0) {
+                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
+                    tdBodyScore.bgColor = '#ffd079';
+                    trBody.bgColor = '#ffe099';
+                    sumScore += rowScore;
+                    nbBadRows++;
+                }
+            });
+            if (config.showStatistics === true) {
+                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
+                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
+            }
+            table.hidden = false; // make table visible again
+            if (firstSortCallback) { 
+                firstSortCallback(); 
+            }
+        };
+
+        /**
          * Compute the dependencies tabular view
          * @param tagId id of the entity
          * @param name of the entity we want to analyze the dependencies
          * @param data Returned by the doSalesforceDAPI method
          */
         function private_compute_dependencies_tabular(tagId, name, data) {
-            return 'Hello World!!';
+            const tabularView = [];
+            ['used', 'using'].forEach(category => {
+                const types = data[category];
+                if (types) for (const type in types) {
+                    const references = types[type];
+                    for (const referenceId in references) {
+                        tabularView.push({ 
+                            target: name, 
+                            relation: category, 
+                            refId: referenceId, 
+                            refName: references[referenceId].name,
+                            refType: type
+                        });
+                    }
+                }
+            });
+            
+            const div = document.createElement('div');
+            div.id = tagId;
+            
+            private_create_datatable({
+                element: div,
+                data: tabularView,
+                columns: [
+                    { name: 'TargetName', property: 'target' }, 
+                    { name: 'Relation', formula:  (r) => { return (r.relation === 'used') ? 'is used by' : 'is using' ; }},
+                    { name: 'Reference Name', property: 'refName' },
+                    { name: 'Reference Id', property: 'refId' }
+                ]
+            });
+
+            return div;
         };
 
         /**
