@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>OrgCheck Batches Tab</description>
-    <label>Batches</label>
+    <label>🚢  Batches</label>
     <motif>Custom100: TV Widescreen</motif>
     <page>OrgCheck_Batches_VFP</page>
 </CustomTab>

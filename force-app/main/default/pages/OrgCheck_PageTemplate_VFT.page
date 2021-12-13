@@ -18,6 +18,9 @@
                     padding-right: 0.9rem;
                     padding-left: 0.9rem;
                 }
+                .slds-scope table {
+                    width: auto;
+                }
             </style>
             <div id="modal" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
@@ -33,7 +36,7 @@
                         </header>
                         <div class="slds-modal__content slds-scrollable" id="modal-content-id" style="width: 100%; height: 100%;" width="100%" height="100%" />
                         <footer class="slds-modal__footer">
-                            <a style="visibility: hidden" target="_blank" id="modal-content-a"></a>
+                            <a style="visibility: hidden" target="_blank" rel="next" id="modal-content-a"></a>
                             <button class="slds-button slds-button_neutral" title="Export" 
                                 onclick="const a = document.getElementById('modal-content-a'); a.href='data:text/html;charset=utf-8,'+encodeURIComponent(document.getElementById('modal-content-id').innerHTML); a.download='export.html'; a.click(); a.href='';">
                                 <svg class="slds-button__icon slds-button__icon_left" aria-hidden="true">
@@ -144,8 +147,11 @@
                     // ========================================================================
                     // Initialization of OrgCheck main object called "core"
                     // ========================================================================
+                    const THIS_YEAR = new Date().getFullYear();
+                    const THIS_MONTH = new Date().getMonth() + 1;
+                    const SF_API_VERSION = 3 * (THIS_YEAR - 2022) + 53 + (THIS_MONTH <= 2 ? 0 : (THIS_MONTH <= 6 ? 1 : (THIS_MONTH <= 10 ? 2 : 3 )));
                     const core = new OrgCheck.Core({
-                        sfApiVersion: 51,
+                        sfApiVersion: SF_API_VERSION,
                         sfLocalAccessToken: '{!$Api.Session_Id}',
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
@@ -161,7 +167,13 @@
                     // ========================================================================
                     // Finally we call the start2 method for the page to use OrgCheck controller and helper
                     // ========================================================================
-                    start2(core.getController(), core.getHelper());
+                    const ctl = core.getController();
+                    const hlp = core.getHelper();
+                    start2(ctl, hlp);
+
+                    new OrgCheck.ShortcutManager(hlp, {
+                        '27': function() { document.getElementById('modal').style.display = 'none'; }
+                    });
                 }
             </script>
         </body>

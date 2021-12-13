@@ -63,7 +63,8 @@
                                 ],
                                 data: map.customFields,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: { 

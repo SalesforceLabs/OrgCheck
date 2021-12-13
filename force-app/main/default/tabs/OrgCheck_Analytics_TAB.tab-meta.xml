@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>OrgCheck Analytics Tab</description>
+    <label>🤪 Analytics</label>
+    <motif>Custom82: Whistle</motif>
+    <page>OrgCheck_Analytics_VFP</page>
+</CustomTab>

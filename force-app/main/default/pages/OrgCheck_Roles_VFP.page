@@ -324,7 +324,7 @@
                                 let member = roles_map[node.data].activeMembers[i];
                                 html += '<li>';
                                 html += '<img src="'+member.photourl+'" width="25" />&nbsp;&nbsp;';
-                                html += '<b><a href="/'+member.id+'" target="_blank">'+member.name+'</a></b>';
+                                html += '<b><a href="/'+member.id+'" target="_blank" rel="external">'+member.name+'</a></b>';
                                 html += '</li>';
                             }
                             html += '</ul>';
@@ -354,6 +354,12 @@
                     controller.run({
                         datasets: [ 'roles' ],
                         onRecords: function(map) { 
+
+                            if (PREF_FILTER_EXTERNAL_ROLES === true) {
+                                helper.map.iterate2(map.roles, function(d, i, s, k) {
+                                    if (d.isExternal === true) delete map.roles[k];
+                                });
+                            }
 
                             helper.html.datatable.create({
                                 element: 'datatable',
@@ -398,9 +404,9 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
-                                    if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
                                 }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                             
                             // Render role graphic

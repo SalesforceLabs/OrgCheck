@@ -65,7 +65,8 @@
                                 ],
                                 data: map.batchesApexJobs,
                                 sorting: { name: 'Context', order: 'asc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Render the data in a table for Scheduled Jobs
@@ -86,7 +87,8 @@
                                 ],
                                 data: map.batchesScheduledJobs,
                                 sorting: { name: 'Context', order: 'asc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Render the data in a table for Not Scheduled Jobs
@@ -104,7 +106,8 @@
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: {  
