@@ -1439,7 +1439,7 @@ const OrgCheck = {
                 html: {
                     modal: {
                         show: function(title, el) {
-                            MSG_HANDLER.showModal([ title, el ]);
+                            MSG_HANDLER.showModal(title, el);
                         }
                     },
                     datatable: {
@@ -1460,14 +1460,22 @@ const OrgCheck = {
                             const buttons = document.getElementsByClassName(buttonClass);
                             for (let i=0; i<tabItems.length; i++) {
                                 tabItems[i].onclick = function(event) {
+                                    const correspondingTabId = event.target.attributes['aria-controls'].value;
+                                    const currentSetOfTabs = event.target.parentElement.parentElement;
+                                    // Switch tabs and show content
                                     for (let j=0; j<tabItems.length; j++) {
-                                        if (tabItems[j] == event.target.parentElement) {
-                                            tabItems[j].classList.add('slds-is-active');
-                                        } else {
-                                            tabItems[j].classList.remove('slds-is-active');
+                                        if (tabItems[j].parentElement === currentSetOfTabs) {
+                                            if (tabItems[j] == event.target.parentElement) {
+                                                tabItems[j].classList.add('slds-is-active');
+                                                tabContents[j].classList.add('slds-show');
+                                                tabContents[j].classList.remove('slds-hide');
+                                            } else {
+                                                tabItems[j].classList.remove('slds-is-active');
+                                                tabContents[j].classList.remove('slds-show');
+                                                tabContents[j].classList.add('slds-hide');
+                                            }
                                         }
                                     }
-                                    let correspondingTabId = event.target.attributes['aria-controls'].value;
                                     // Show buttons
                                     for (let j=0; j<buttons.length; j++) {
                                         const prop = buttons[j].attributes['aria-controlled-by'];
@@ -1477,16 +1485,6 @@ const OrgCheck = {
                                             } else {
                                                 buttons[j].parentNode.style.display = 'none';
                                             }
-                                        }
-                                    }
-                                    // show tab according to selection
-                                    for (let j=0; j<tabContents.length; j++) {
-                                        if (tabContents[j].id == correspondingTabId) {
-                                            tabContents[j].classList.add('slds-show');
-                                            tabContents[j].classList.remove('slds-hide');
-                                        } else {
-                                            tabContents[j].classList.remove('slds-show');
-                                            tabContents[j].classList.add('slds-hide');
                                         }
                                     }
                                 }
