@@ -5,13 +5,13 @@
             "default": true,
             "package": "OrgCheck",
             "versionName": "Version 1.9",
-            "versionNumber": "1.9.5.NEXT",
+            "versionNumber": "1.9.6.NEXT",
             "versionDescription": "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
     "namespace": "OrgCheck",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "51.0",
+    "sourceApiVersion": "53.0",
     "packageAliases": {
         "OrgCheck": "0Ho2X000000KyjaSAC",
         "OrgCheck@1.7.0-8": "04t2X0000011QEvQAM",
