@@ -205,7 +205,7 @@
                                             if (r.type === 'checkbox') {
                                                 return helper.html.render.checkbox(r.value);
                                             }
-                                            return r.value;
+                                            return helper.html.render.escape(r.value);
                                         }}
                                     ],
                                     data: [
@@ -233,8 +233,18 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
                                         columns: [
-                                            { name: 'Field Label', formula: (r) => { return helper.html.render.link('/lightning/setup/ObjectManager/'+(object.id ? object.id : object.name)+'/FieldsAndRelationships/'+(r.id ? r.id : r.name)+'/view', r.label); }},
-                                            { name: 'Custom', property: 'custom', formula: (r) => { return helper.html.render.checkbox(r.custom); }},
+                                            { name: 'Field Label', formula: (r) => { 
+                                                return helper.html.render.link(
+                                                    '/lightning/setup/ObjectManager/'+
+                                                    (object.id ? object.id : helper.html.render.escape(object.name))+
+                                                    '/FieldsAndRelationships/'+
+                                                    (r.id ? r.id : helper.html.render.escape(r.name))+
+                                                    '/view', 
+                                                    helper.html.render.escape(r.label)); 
+                                            }},
+                                            { name: 'Custom', property: 'custom', formula: (r) => { 
+                                                return helper.html.render.checkbox(r.custom); 
+                                            }},
                                             { name: 'Full API Name', property: 'name' },
                                             { name: 'Dependencies', 
                                                 formula: (r) => { 
@@ -256,10 +266,15 @@
                                                     case 'int':
                                                     case 'double':
                                                     case 'currency':
-                                                        type += '(' + r.precision + ',' + r.scale + ')';
+                                                        type += '(' + 
+                                                            helper.html.render.escape(r.precision) + ',' + 
+                                                            helper.html.render.escape(r.scale) + 
+                                                        ')';
                                                         break;
                                                     case 'reference':
-                                                        type += '(' + r.referenceTo[0] + ')';
+                                                        type += '(' + 
+                                                            helper.html.render.escape(r.referenceTo[0]) + 
+                                                        ')';
                                                         break;
                                                     default: 
                                                         // Type stays as it is.
@@ -294,7 +309,9 @@
                                             { name: 'Relationship Name', property: 'relationshipName' },
                                             { name: 'Child SObject', property: 'childSObject' },
                                             { name: 'Field', property: 'field' },
-                                            { name: 'Cascade Delete', property: 'cascadeDelete', formula: (r) => { return helper.html.render.checkbox(r.cascadeDelete); }}
+                                            { name: 'Cascade Delete', property: 'cascadeDelete', formula: (r) => { 
+                                                return helper.html.render.checkbox(r.cascadeDelete); 
+                                            }}
                                         ],
                                         data: object.childRelationships,
                                         sorting: { name: 'Relationship Name', order: 'asc' },
@@ -315,8 +332,12 @@
                                             { name: 'Developer Name', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: 'IsActive', property: 'active', formula: (r) => { return helper.html.render.checkbox(r.active); }},
-                                            { name: 'Available', property: 'available', formula: (r) => { return helper.html.render.checkbox(r.available); }},
+                                            { name: 'IsActive', property: 'active', formula: (r) => { 
+                                                return helper.html.render.checkbox(r.active); 
+                                            }},
+                                            { name: 'Available', property: 'available', formula: (r) => { 
+                                                return helper.html.render.checkbox(r.available); 
+                                            }},
                                             { name: 'Default Mapping', property: 'defaultRecordTypeMapping' }
                                         ],
                                         data: object.recordTypeInfos,
@@ -397,7 +418,9 @@
                                                 const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
                                                 return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
                                             }},
-                                            { name: 'Used', type: 'numeric', formula: (r) => { return r.max - r.remaining;} },
+                                            { name: 'Used', type: 'numeric', formula: (r) => { 
+                                                return r.max - r.remaining; 
+                                            }},
                                             { name: 'Maximum', type: 'numeric', property: 'max' },
                                             { name: 'Left', type: 'numeric', property: 'remaining' },
                                             { name: 'Type', property: 'type' }

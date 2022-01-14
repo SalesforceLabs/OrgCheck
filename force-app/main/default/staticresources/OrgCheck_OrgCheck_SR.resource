@@ -1538,6 +1538,9 @@ const OrgCheck = {
                         }
                     },
                     render: {
+                        escape: function(unsafe) { 
+                            return private_secure_html(unsafe); 
+                        },
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
                             div.innerHTML = 'Dependencies <img src="/img/chatter/lookupSearchHover.png" />';
@@ -1780,6 +1783,21 @@ const OrgCheck = {
         };
 
         /**
+         * Return an HTML-escaped version of the given string value
+         * @param unsafe String to be escaped (no change if null or not a string type)
+         */
+        function private_secure_html(unsafe) {
+            if (!unsafe) return '';
+            if (typeof(unsafe) !== 'string') return unsafe;
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        };
+
+        /**
          * Create a datatable in HTML from a map and a set of configuration
          * @param setup JSON configuration including:
          *              <ol>
@@ -1934,7 +1952,7 @@ const OrgCheck = {
                         if (c.formula) {
                             content = c.formula(row);
                         } else if (c.property) {
-                            content = row[c.property];
+                            content = private_secure_html(row[c.property]);
                         }
                     } catch (e) {
                         e.context = {
