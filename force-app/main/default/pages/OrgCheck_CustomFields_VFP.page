@@ -39,13 +39,19 @@
                                             }
                                             entityName = map.customObjects[r.objectId]?.developerName;
                                         }
-                                        return helper.html.render.link(entityUrl, entityName);
+                                        return helper.html.render.link(
+                                            entityUrl, 
+                                            helper.html.render.escape(entityName)
+                                        );
                                     }},
                                     { name: 'Object Type', formula: (r) => { 
-                                        return r.objectId ? map.customObjects[r.objectId]?.type : 'Standard';
+                                        return r.objectId ? helper.html.render.escape(map.customObjects[r.objectId]?.type) : 'Standard';
                                     }},
                                     { name: 'Field', formula: (r) => { 
-                                        return helper.html.render.link('/'+r.id, r.fieldName); 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.fieldName)
+                                        ); 
                                     }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'packageName' },

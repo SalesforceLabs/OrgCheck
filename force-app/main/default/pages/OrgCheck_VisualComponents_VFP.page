@@ -64,18 +64,25 @@
                             helper.html.datatable.create({
                                 element: 'datatable-vfps',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
                                         }
                                     },
-                                    { name: 'Mobile', property: 'mobile', formula: (r) => { return helper.html.render.checkbox(r.mobile); }},
+                                    { name: 'Mobile', property: 'mobile', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.mobile); 
+                                    }},
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Visual Force Page!';
                                         },
                                         scoreFormula: (r) => { 
@@ -103,7 +110,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-vfcs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
@@ -113,7 +125,7 @@
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Visual Force Component!';
                                         },
                                         scoreFormula: (r) => { 
@@ -141,12 +153,17 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lps',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Lightning Page!';
                                         },
                                         scoreFormula: (r) => { 
@@ -174,7 +191,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lacs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
@@ -184,7 +206,7 @@
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Aura Component!';
                                         },
                                         scoreFormula: (r) => { 
@@ -212,7 +234,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lwcs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
@@ -222,7 +249,7 @@
                                     { name: 'Package', property: 'namespace' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Web Component!';
                                         },
                                         scoreFormula: (r) => { 

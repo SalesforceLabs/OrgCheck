@@ -80,7 +80,12 @@
                                             if (r.status !== 'WAITING') return 1; 
                                         }
                                     },
-                                    { name: 'user', formula: (r) => { return helper.html.render.link('/'+r.userid, (map.users[r.userid]?.name || r.userid)); }},
+                                    { name: 'user', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.userid, 
+                                            helper.html.render.escape(map.users[r.userid]?.name || r.userid)
+                                        ); 
+                                    }},
                                     { name: 'start', property: 'start' },
                                     { name: 'end', property: 'end' },
                                     { name: 'timezone', property: 'timezone' }
@@ -95,7 +100,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-notscheduledjobs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Is Scheduled?', 
                                         formula: (r) => { return helper.html.render.checkbox(r.isScheduled === true); },

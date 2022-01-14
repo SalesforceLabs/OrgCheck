@@ -269,8 +269,8 @@
                             .append('xhtml').html(function(d) {
                                 let html = '<center>';
                                 if (roles_map[d.data]) { 
-                                    if (roles_map[d.data].name) html += '<b>' + roles_map[d.data].name + '</b><br />';
-                                    if (roles_map[d.data].developerName) html += '<i>' + roles_map[d.data].developerName + '</i>'; 
+                                    if (roles_map[d.data].name) html += '<b>' + helper.html.render.escape(roles_map[d.data].name) + '</b><br />';
+                                    if (roles_map[d.data].developerName) html += '<i>' + helper.html.render.escape(roles_map[d.data].developerName) + '</i>'; 
                                 }
                                 html += '</center>';
                                 return html;
@@ -309,10 +309,10 @@
                     let nodeOnClick = function(roles_map, node) {
 
                         let html = '';
-                        html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, roles_map[node.data].name) + '</b><br />';
+                        html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, helper.html.render.escape(roles_map[node.data].name)) + '</b><br />';
                         html += 'Salesforce Id: <b>'+node.id+'</b><br />';
                         if (roles_map[node.data].developerName) {
-                            html += 'Developer Name: <b>'+roles_map[node.data].developerName+'</b><br />';
+                            html += 'Developer Name: <b>'+helper.html.render.escape(roles_map[node.data].developerName)+'</b><br />';
                         }
                         html += '<br />';
                         html += 'Level in hierarchy: '+ node.depth +'<br />';
@@ -323,8 +323,8 @@
                             for (let i=0; i<roles_map[node.data].activeMembersCount; i++) {
                                 let member = roles_map[node.data].activeMembers[i];
                                 html += '<li>';
-                                html += '<img src="'+member.photourl+'" width="25" />&nbsp;&nbsp;';
-                                html += '<b><a href="/'+member.id+'" target="_blank" rel="external">'+member.name+'</a></b>';
+                                html += '<img src="'+helper.html.render.escape(member.photourl)+'" width="25" />&nbsp;&nbsp;';
+                                html += '<b><a href="/'+member.id+'" target="_blank" rel="external">'+helper.html.render.escape(member.name)+'</a></b>';
                                 html += '</li>';
                             }
                             html += '</ul>';
@@ -339,10 +339,10 @@
                         }
                         html += '<br />';
                         if (node.parent) {
-                            html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, roles_map[node.parent.data].name) + '</a></b><br />';
+                            html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, helper.html.render.escape(roles_map[node.parent.data].name)) + '</a></b><br />';
                             html += 'Parent Salesforce Id: <b>'+roles_map[node.parent.data].id+'</b><br />';
                             if (roles_map[node.parent.data].developerName) {
-                                html += 'Parent Developer Name: <b>'+roles_map[node.parent.data].developerName+'</b><br />';
+                                html += 'Parent Developer Name: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
                             }
                         }
                         helper.html.modal.show('Full information about this role', html);
@@ -364,7 +364,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Developer Name', property: 'developerName' },
                                     { name: 'Number of active members', type: 'numeric', 
@@ -388,14 +393,17 @@
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
-                                            return helper.html.render.link('/'+parent.id, parent.name);
+                                            return helper.html.render.link(
+                                                '/'+parent.id, 
+                                                helper.html.render.escape(parent.name)
+                                            );
                                         }
                                         return 'No parent';
                                     }},
                                     { name: 'Parent Developer Name', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
-                                            return parent.developerName;
+                                            return helper.html.render.escape(parent.developerName);
                                         }
                                         return '';
                                     }}

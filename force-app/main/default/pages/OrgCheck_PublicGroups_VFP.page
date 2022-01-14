@@ -42,7 +42,7 @@
                         let htmlContent = '';
                         if (user) {
                             htmlContent = 
-                                (show_photo === true? ('<img src="' + users[uid].photourl + '" width="25" /> ') : '')
+                                (show_photo === true? ('<img src="' + helper.html.render.escape(users[uid].photourl) + '" width="25" /> ') : '')
                                 + users[uid].name;
                         } else {
                             htmlContent = uid + ' (inactive)';
@@ -96,7 +96,7 @@
                                         link = '/'+directGroup.relatedId;
                                         const relatedRole = roles[directGroup.relatedId];
                                         if (relatedRole) {
-                                            name = relatedRole.name;
+                                            name = helper.html.render.escape(relatedRole.name);
                                         } else {
                                             name = 'Role #'+directGroup.relatedId;
                                         }
@@ -217,11 +217,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-publicGroups',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
-                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
-                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.includeBosses); 
+                                    }},
+                                    { name: 'Included groups', formula: (r) => { 
+                                        return renderGroups(map.publicGroups, map.roles, r.directGroups); 
+                                    }},
+                                    { name: 'Included users', formula: (r) => { 
+                                        return renderUsers(map.users, r.directUsers, true); 
+                                    }},
                                     { name: 'All active users', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
@@ -246,11 +257,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-queues',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
-                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
-                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.includeBosses); 
+                                    }},
+                                    { name: 'Included groups', formula: (r) => { 
+                                        return renderGroups(map.publicGroups, map.roles, r.directGroups); 
+                                    }},
+                                    { name: 'Included users', formula: (r) => { 
+                                        return renderUsers(map.users, r.directUsers, true); 
+                                    }},
                                     { name: 'All active users', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';

@@ -23,7 +23,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Namespace', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
@@ -31,7 +36,7 @@
                                     { name: 'IsProtected', property: 'protected' },
                                     { name: 'Language', property: 'language' },
                                     { name: 'Value', formula: (r) => { 
-                                        return helper.html.render.shrinkText(r.value, 150); 
+                                        return helper.html.render.escape(helper.html.render.shrinkText(r.value, 150)); 
                                     }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 

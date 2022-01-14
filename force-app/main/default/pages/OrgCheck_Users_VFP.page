@@ -22,7 +22,13 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
+                                    { name: 'User Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            '<img src="' + helper.html.render.escape((r.photourl) + '" width="25" /> ' + 
+                                                helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Last login', 
                                         formula: (r) => { 
@@ -50,10 +56,19 @@
                                         if (r.permissions.viewAllData) html += 'View All Data<br />';
                                         return html;
                                     }},
-                                    { name: 'Profile Name', formula: (r) => { return helper.html.render.link('/'+r.profile.id, r.profile.name); }},
+                                    { name: 'Profile Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.profile.id, 
+                                            helper.html.render.escape(r.profile.name)
+                                        );
+                                    }},
                                     { name: 'Permission Set Names', formula: (r) => {
                                         let html = '';
-                                        r.permissionSets.forEach(ps => html += helper.html.render.link('/'+ps.id, ps.name) + '<br />');
+                                        r.permissionSets.forEach(
+                                            ps => html += helper.html.render.link(
+                                                '/'+ps.id, 
+                                                helper.html.render.escape(ps.name) + '<br />'
+                                        );
                                         return html;
                                     }}
                                 ],

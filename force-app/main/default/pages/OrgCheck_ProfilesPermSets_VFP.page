@@ -72,9 +72,16 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isCustom); 
+                                    }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
@@ -91,7 +98,7 @@
                                     { name: 'Description', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return 'You should set a description to this custom profile!';
-                                            return r.description;
+                                            return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
@@ -110,7 +117,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Profile', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        );
+                                    }},
                                     { name: 'Monday', formula: (r) => { return r.loginHours.monday ? r.loginHours.monday.from + ' to ' + r.loginHours.monday.to : '' }},
                                     { name: 'Tuesday', formula: (r) => { return r.loginHours.tuesday ? r.loginHours.tuesday.from + ' to ' + r.loginHours.tuesday.to : '' }},
                                     { name: 'Wednesday', formula: (r) => { return r.loginHours.wednesday ? r.loginHours.wednesday.from + ' to ' + r.loginHours.wednesday.to : '' }},
@@ -132,7 +144,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Profile', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Starts', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
@@ -145,7 +162,7 @@
                                     }},
                                     { name: 'Description', formula: (r) => { 
                                         let html = '';
-                                        r.loginIpRanges.forEach(i => html += i.description + '<br />');
+                                        r.loginIpRanges.forEach(i => html += helper.html.render.escape(i.description) + '<br />');
                                         return html;
                                     }}
                                 ],
@@ -177,13 +194,19 @@
                                 columns: [
                                     { name: 'Name', 
                                         formula: (r) => { 
-                                            if (r.isGroup) return helper.html.render.link('/'+r.groupId, r.name); 
-                                            return helper.html.render.link('/'+r.id, r.name); 
+                                            return helper.html.render.link(
+                                                r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
+                                                helper.html.render.escape(r.name)
+                                            ); 
                                         }
                                     },
-                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { return helper.html.render.checkbox(r.isGroup); }},
+                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isGroup); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isCustom); 
+                                    }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of active users', 
@@ -201,14 +224,16 @@
                                     { name: 'Assigned users\'s profiles', formula: (r) => { 
                                         let html = '';
                                         helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
-                                            html += helper.html.render.link('/'+pid, map.profiles[pid]?.name) + ' (' + v.count + ')<br />';
+                                            html += helper.html.render.link(
+                                                '/'+pid, 
+                                                helper.html.render.escape(map.profiles[pid]?.name)) + ' (' + v.count + ')<br />';
                                         });
                                         return html;
                                     }},
                                     { name: 'Description', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return 'You should set a description to this custom permission set!';
-                                            return r.description;
+                                            return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
@@ -238,7 +263,12 @@
                                 helper.html.datatable.create({
                                     element: 'datatable-objectCRUDs',
                                     columns: [
-                                        { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
+                                        { name: 'Parent', formula: (r) => { 
+                                            return helper.html.render.link(
+                                                '/'+r.parent.id, 
+                                                helper.html.render.escape(r.parent.name)
+                                            ); 
+                                        }},
                                         { name: 'Object', property: 'sobject' },
                                         { name: 'Type', property: 'type' },
                                         { name: 'Permissions', formula: (r) => { 
