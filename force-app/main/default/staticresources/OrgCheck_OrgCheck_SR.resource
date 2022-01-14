@@ -1783,7 +1783,7 @@ const OrgCheck = {
         };
 
         /**
-         * Return an HTML-escaped version of the given string value
+         * Return an HTML-safer version of the given string value
          * @param unsafe String to be escaped (no change if null or not a string type)
          */
         function private_secure_html(unsafe) {
@@ -1796,6 +1796,29 @@ const OrgCheck = {
                 .replace(/"/g, "&quot;")
                 .replace(/'/g, "&#039;");
         };
+
+        /**
+         * Return an SOQL-safer version of the given string value
+         * @param unsafe String to be escaped
+         */
+        function private_secure_soql(unsafe) {
+            // If unset the default, return value is an empty string
+            if (!unsafe) return "''";
+            
+            // If not a string typed value, return value is itself (case of a numeric)
+            if (typeof(unsafe) !== 'string') return unsafe;
+            
+            // If a string value, we substitute the quotes
+            return "'" + unsafe.replace(/'/g, "\'") + "'";
+        };
+
+        /**
+         * Return an SOQL-safer version of the given string value
+         * @param unsafe String to be escaped
+         */
+        this.doSecureSOQLBindingVariable = function(unsafe) {
+            return private_secure_soql(unsafe);
+        }
 
         /**
          * Create a datatable in HTML from a map and a set of configuration
@@ -2211,7 +2234,7 @@ const OrgCheck = {
             ids.forEach((v, i, a) => {
                 const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
                 const lastItem = (i === a.length-1);
-                subids += '\'' + v + '\'';
+                subids += private_secure_soql(v);
                 if (batchFull === true || lastItem === true) { 
                     queries.push({
                         tooling: true,
@@ -2290,8 +2313,8 @@ const OrgCheck = {
                                                     'ValidationName FROM ValidationRules), '+
                                                 '(SELECT Id, Name FROM WebLinks) '+
                                             'FROM EntityDefinition '+
-                                            'WHERE DeveloperName = \''+s.shortName+'\' '+
-                                            (s.package !== '' ? 'AND NamespacePrefix = \''+s.package+'\' ' : '')
+                                            'WHERE DeveloperName = '+private_secure_soql(s.shortName)+' '+
+                                            (s.package !== '' ? 'AND NamespacePrefix = '+private_secure_soql(s.package)+' ' : '')
                                 }], 
                                 function(record) {
                                     if ((record.NamespacePrefix && record.NamespacePrefix !== s.package) ||
@@ -2442,7 +2465,9 @@ function buildDatasets(core) {
                     queries.push({
                         tooling: true,
                         byPasses: [ 'UNKNOWN_EXCEPTION' ],
-                        string: 'SELECT Id, FullName, Metadata FROM WorkflowRule WHERE Id = \''+record.Id+'\''
+                        string: 'SELECT Id, FullName, Metadata '+
+                                'FROM WorkflowRule '+
+                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                     });
                 }, 
                 onEnd: function(records, size) { 
@@ -2496,7 +2521,7 @@ function buildDatasets(core) {
                         string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
                                 'VersionNumber, Metadata, Status, Description, '+
                                 'ProcessType FROM Flow '+
-                                'WHERE Id = \''+record.Id+'\' '
+                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                     });
                 }, 
                 onEnd: function(records, size) { 
@@ -3196,7 +3221,9 @@ function buildDatasets(core) {
                 onEachRecord: function(record, index) {
                     queries.push({
                         tooling: true,
-                        string: 'SELECT Id, Name, Metadata FROM Profile WHERE Id = \''+record.Id+'\''
+                        string: 'SELECT Id, Name, Metadata '+
+                                'FROM Profile '+
+                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                     });
                 }, 
                 onEnd: function(records, size) { 
