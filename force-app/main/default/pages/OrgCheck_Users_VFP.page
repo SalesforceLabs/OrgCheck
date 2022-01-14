@@ -25,7 +25,7 @@
                                     { name: 'User Name', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
-                                            '<img src="' + helper.html.render.escape((r.photourl) + '" width="25" /> ' + 
+                                            '<img src="' + helper.html.render.escape(r.photourl) + '" width="25" /> ' + 
                                                 helper.html.render.escape(r.name)
                                         ); 
                                     }},
@@ -67,7 +67,8 @@
                                         r.permissionSets.forEach(
                                             ps => html += helper.html.render.link(
                                                 '/'+ps.id, 
-                                                helper.html.render.escape(ps.name) + '<br />'
+                                                helper.html.render.escape(ps.name)
+                                            ) + '<br />'
                                         );
                                         return html;
                                     }}
