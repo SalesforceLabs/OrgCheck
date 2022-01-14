@@ -46,15 +46,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-rpt',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Developer Name', property: 'developerName' },
-                                    { name: 'Folder', formula: (r) => { return r.folder.name; }},
+                                    { name: 'Folder', formula: (r) => { 
+                                        return helper.html.render.escape(r.folder.name); 
+                                    }},
                                     { name: 'Format', property: 'format' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Report!';
                                         },
                                         scoreFormula: (r) => { 
@@ -72,14 +79,24 @@
                             helper.html.datatable.create({
                                 element: 'datatable-dsb',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Developer Name', property: 'developerName' },
-                                    { name: 'Folder', formula: (r) => { return helper.html.render.link('/'+r.folder.id, r.folder.name); }},
+                                    { name: 'Folder', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.folder.id, 
+                                            helper.html.render.escape(r.folder.name)
+                                        ); 
+                                    }},
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Dashboard!';
                                         },
                                         scoreFormula: (r) => { 

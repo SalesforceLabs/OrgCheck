@@ -93,11 +93,19 @@
                                         }
                                     },
                                     { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abst.', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
-                                    { name: 'Type', property: 'isInterface', formula: (r) => { return r.isInterface === false ? 'Class' : 'Interface'; }},
+                                    { name: 'Abst.', property: 'isAbstract', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isAbstract); 
+                                    }},
+                                    { name: 'Type', property: 'isInterface', formula: (r) => { 
+                                        return r.isInterface === false ? 'Class' : 'Interface';
+                                    }},
                                     { name: 'Intf.', formula: (r) => {
                                         let html = ''; 
-                                        if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
+                                        if (r.interfaces) { 
+                                            r.interfaces.forEach(
+                                                e => html += helper.html.render.escape(e) + '<br />'
+                                            ); 
+                                        }
                                         return html;
                                     }},
                                     { name: 'Size', type: 'numeric', property: 'length' },
@@ -105,13 +113,17 @@
                                     { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
                                     { name: 'Annot.', formula: (r) => {
                                         let html = ''; 
-                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        if (r.annotations) { 
+                                            r.annotations.forEach(
+                                                e => html += helper.html.render.escape(e.name) + '<br />'
+                                            ); 
+                                        }
                                         return html;
                                     }},
                                     { name: 'Sharing', property: 'specifiedSharing', 
                                         formula: (r) => {
                                             if (r.isSharingMissing === true) return 'Not specified!';
-                                            return r.specifiedSharing;
+                                            return helper.html.render.escape(r.specifiedSharing);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isSharingMissing === true) return 1; 
@@ -128,9 +140,14 @@
                                     { name: 'Related Tests',
                                         formula: (r) => {
                                             let html = ''; 
-                                            if (r.relatedTestClasses) { r.relatedTestClasses.forEach(e => {
-                                                html += helper.html.render.link('/'+e, map.apexClasses[e]?.name) + '<br />';
-                                            }); }
+                                            if (r.relatedTestClasses) { 
+                                                r.relatedTestClasses.forEach(e => {
+                                                    html += helper.html.render.link(
+                                                            '/'+e, 
+                                                            helper.html.render.escape(map.apexClasses[e]?.name)
+                                                        ) + '<br />';
+                                                }); 
+                                            }
                                             return html;
                                         }
                                     },
@@ -169,7 +186,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
@@ -222,16 +244,34 @@
                                         // ---
                                         return objName;
                                     }},
-                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
-                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
-                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
-                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { return helper.html.render.checkbox(r.afterUpdate); }},
-                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { return helper.html.render.checkbox(r.beforeDelete); }},
-                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { return helper.html.render.checkbox(r.afterDelete); }},
-                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { return helper.html.render.checkbox(r.afterUndelete); }},
+                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeInsert); 
+                                    }},
+                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterInsert); 
+                                    }},
+                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeUpdate); 
+                                    }},
+                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterUpdate); 
+                                    }},
+                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeDelete); 
+                                    }},
+                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterDelete); 
+                                    }},
+                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterUndelete); 
+                                    }},
                                     { name: 'Annotations', formula: (r) => {
                                         let html = ''; 
-                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        if (r.annotations) { 
+                                            r.annotations.forEach(
+                                                e => html += helper.html.render.escape(e.name) + '<br />'
+                                            ); 
+                                        }
                                         return html;
                                     }},
                                     { name: 'Dependencies', 
