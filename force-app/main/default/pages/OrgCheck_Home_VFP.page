@@ -115,6 +115,9 @@
                                         <li class="slds-tabs_default__item" title="Legal terms" role="presentation">
                                             <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-21" id="tab-default-legalterms__item">Legal terms</a>
                                         </li>
+                                        <li class="slds-tabs_default__item" title="Third party components" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-22" id="tab-default-3rdparty__item">Third party components</a>
+                                        </li>
                                     </ul>
                                     <div id="tab-default-20" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-abouttechdebt__item">
                                         Although invisible, <b>Technical Debt</b> has an impact on your project, your 
@@ -147,6 +150,58 @@
                                         should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank" rel="external">https://github.com/VinceFINET/OrgCheck/issues</a>. 
                                         Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank" rel="external">https://github.com/VinceFINET/OrgCheck</a> 
                                         under separate and different license terms.        
+                                    </div>
+                                    <div id="tab-default-22" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3rdparty__item">
+                                        <b>D3js</b><br />
+                                        WEBSITE: https://d3js.org/<br />
+                                        VERSION: 7.3.0<br />
+                                        SOURCE: https://registry.npmjs.org/d3/-/d3-7.3.0.tgz<br />
+                                        LICENCE:<br />
+                                        <code>
+                                            Copyright 2010-2021 Mike Bostock<br />
+                                            <br />
+                                            Permission to use, copy, modify, and/or distribute this software for any purpose<br />
+                                            with or without fee is hereby granted, provided that the above copyright notice<br />
+                                            and this permission notice appear in all copies.<br />
+                                            <br />
+                                            THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH<br />
+                                            REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND<br />
+                                            FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,<br />
+                                            INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS<br />
+                                            OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER<br />
+                                            TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF<br />
+                                            THIS SOFTWARE.
+                                        </code>
+                                        <br /><br /><br />
+                                        <b>JsForce</b><br />
+                                        WEBSITE: https://jsforce.github.io/<br />
+                                        VERSION: 1.11.0<br />
+                                        SOURCE: https://github.com/jsforce/jsforce/releases/tag/1.11.0<br />
+                                        LICENCE:<br />
+                                        <code>
+                                            (The MIT License)<br />
+                                            <br />
+                                            Copyright (c) 2011 Shinichi Tomita &lt;shinichi.tomita@gmail.com&gt;;<br />
+                                            <br />
+                                            Permission is hereby granted, free of charge, to any person obtaining<br />
+                                            a copy of this software and associated documentation files (the<br />
+                                            'Software'), to deal in the Software without restriction, including<br />
+                                            without limitation the rights to use, copy, modify, merge, publish,<br />
+                                            distribute, sublicense, and/or sell copies of the Software, and to<br />
+                                            permit persons to whom the Software is furnished to do so, subject to<br />
+                                            the following conditions:<br />
+                                            <br />
+                                            The above copyright notice and this permission notice shall be<br />
+                                            included in all copies or substantial portions of the Software.<br />
+                                            <br />
+                                            THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,<br />
+                                            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<br />
+                                            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.<br />
+                                            IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY<br />
+                                            CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,<br />
+                                            TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE<br />
+                                            SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br />
+                                        </code>
                                     </div>
                                 </div>
                             </div>
