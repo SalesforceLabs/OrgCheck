@@ -1190,7 +1190,7 @@ const OrgCheck = {
                                             const row = [];
                                             const cols = rows[i].querySelectorAll('td, th');
                                             for (let j=0; j<cols.length; j++) {
-                                                let v = cols[j].attributes['aria-label']?.value || cols[j].innerText;
+                                                let v = cols[j].attributes['aria-data']?.value || cols[j].innerText;
                                                 v = v.trim() // trim will delete extra spaces (including &nbsp;)
                                                     .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
                                                 if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
@@ -1965,10 +1965,13 @@ const OrgCheck = {
                         grdHead.appendChild(orderingImage);
                         const iOrder = config.sorting.order === 'asc' ? 1 : -1;
                         const items = [].slice.call(table.rows).slice(1);
+                        const isCellNumeric = c.type === 'numeric';
                         items.sort(function compare(a, b) {
-                            const valueA = a.getElementsByTagName('td')[i].textContent;
-                            const valueB = b.getElementsByTagName('td')[i].textContent;
-                            if (c.type === 'numeric') return (valueA - valueB) * iOrder;
+                            const cellA = a.getElementsByTagName('td')[i];
+                            const cellB = b.getElementsByTagName('td')[i];
+                            const valueA = cellA.getAttribute('aria-data') || cellA.textContent;
+                            const valueB = cellB.getAttribute('aria-data') || cellB.textContent;
+                            if (isCellNumeric) return (valueA - valueB) * iOrder;
                             if (valueA < valueB) return -iOrder;
                             if (valueA > valueB) return iOrder;
                             return 0;
@@ -2004,13 +2007,22 @@ const OrgCheck = {
                         return;
                     }
                     const row = isArray ? k : config.data[k];
-                    let content = '';
+                    let dataDecorated = '';
+                    let dataRaw = '';
                     let additiveScore = 0;
                     try {
+                        if (c.property) {
+                            const v = row[c.property];
+                            if (c.type === 'numeric' && (v === 0 || !v)) {
+                                dataRaw = 0;
+                            } else {
+                                dataRaw = private_secure_html(v);
+                            }
+                        }
                         if (c.formula) {
-                            content = c.formula(row);
+                            dataDecorated = c.formula(row);
                         } else if (c.property) {
-                            content = private_secure_html(row[c.property]);
+                            dataDecorated = dataRaw;
                         }
                     } catch (e) {
                         e.context = {
@@ -2044,29 +2056,31 @@ const OrgCheck = {
                         }
                         throw e;
                     }
-                    if (content) {
-                        const isArray = (Array.isArray(content) === true);
-                        if (typeof content === 'object' && isArray === false) {
+                    if (dataDecorated) {
+                        const isArray = (Array.isArray(dataDecorated) === true);
+                        if (typeof dataDecorated === 'object' && isArray === false) {
                             if (additiveScore > 0) {
                                 tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
                             }       
-                            tdBody.appendChild(content);
+                            tdBody.appendChild(dataDecorated);
                         } else {
                             let html = '';
                             if (additiveScore > 0) {
                                 html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
                             }
                             if (isArray === true) {
-                                content.forEach(cnt => html += cnt+'<br />');
+                                dataDecorated.forEach(cnt => html += cnt+'<br />');
                             } else {
-                                html += content;
+                                html += dataDecorated;
                             }
                             tdBody.innerHTML = html;
                         }
                     }
-                    const alternative = (c.property && c.formula ? row[c.property] : '') || '';
-                    if (alternative !== '' || alternative === true || alternative === false) {
-                        tdBody.setAttribute('aria-label', alternative?.toString());
+                    // In case you have a formula that decorates the raw value of the cell,
+                    // you want the sort feature to work on that RAW DATA instead of the 
+                    // decorative version of the data
+                    if (dataRaw !== dataDecorated) {
+                        tdBody.setAttribute('aria-data', dataRaw?.toString());
                     }
                 });
                 if (tdBodyScore && rowScore > 0) {

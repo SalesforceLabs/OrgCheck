@@ -93,13 +93,13 @@
                                         }
                                     },
                                     { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abst.', property: 'isAbstract', formula: (r) => { 
+                                    { name: 'Abst.?', property: 'isAbstract', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isAbstract); 
                                     }},
-                                    { name: 'Type', property: 'isInterface', formula: (r) => { 
+                                    { name: 'Intf.?', property: 'isInterface', formula: (r) => { 
                                         return r.isInterface === false ? 'Class' : 'Interface';
                                     }},
-                                    { name: 'Intf.', formula: (r) => {
+                                    { name: 'Implements', formula: (r) => {
                                         let html = ''; 
                                         if (r.interfaces) { 
                                             r.interfaces.forEach(
