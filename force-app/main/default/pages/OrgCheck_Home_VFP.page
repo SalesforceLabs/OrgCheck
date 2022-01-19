@@ -319,16 +319,16 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Complentary Tools">
+                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Complementary Tools">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Complentary Tools</span>
+                                            <span class="slds-assistive-text">Complementary Tools</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Complentary Tools
+                                            Complementary Tools
                                         </h2>
                                     </div>
                                 </header>
