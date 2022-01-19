@@ -216,7 +216,7 @@
                             .attr('y', - BOX_HEIGHT / 2)
                             .attr('width', BOX_WIDTH)
                             .attr('height', BOX_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
                         
                         // --------------------------------
                         // NOTIFICATION ZONE - ACTIVE USERS
@@ -230,7 +230,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 4)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
                         
                         // --------------------------------
                         // NOTIFICATION ZONE - INACTIVE USERS
@@ -244,7 +244,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 4)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
 
                         // --------------------------------
                         // LEVEL ZONE
@@ -265,7 +265,7 @@
                             .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                             .attr('width', BOX_WIDTH-2*BOX_PADDING)
                             .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  })
+                            .on('click', function(d) { node_click(roles_map, d); })
                             .append('xhtml').html(function(d) {
                                 let html = '<center>';
                                 if (roles_map[d.data]) { 
@@ -285,7 +285,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 5)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(map, d);  })
+                            .on('click', function(d) { node_click(map, d); })
                             .append('xhtml').html(function(d) { return '<center>' + d.active_count + '</center>'; });
                         
                         // --------------------------------
@@ -297,7 +297,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 5)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(map, d); })
+                            .on('click', function(d) { node_click(map, d); })
                             .append('xhtml').html(function(d) { return '<center>' + d.inactive_count + '</center>'; });
 
                         return svg.node();
@@ -306,7 +306,10 @@
                     // =================================
                     // NODE SELECTION
                     // =================================
-                    let nodeOnClick = function(roles_map, node) {
+                    let nodeOnClick = function(roles_map, d) {
+
+                        const node = d.currentTarget.__data__;
+                        if (!node.clickable) return;
 
                         let html = '';
                         html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, helper.html.render.escape(roles_map[node.data].name)) + '</b><br />';
