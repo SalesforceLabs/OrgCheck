@@ -96,8 +96,11 @@
                                     { name: 'Abst.?', property: 'isAbstract', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isAbstract); 
                                     }},
-                                    { name: 'Intf.?', property: 'isInterface', formula: (r) => { 
-                                        return r.isInterface === false ? 'Class' : 'Interface';
+                                    { name: 'Type', formula: (r) => { 
+                                        if (r.isInterface === true) return 'Interface';
+                                        if (r.isEnum === true) return 'Enum';
+                                        if (r.isClass === true) return 'Class';
+                                        return 'Other';
                                     }},
                                     { name: 'Implements', formula: (r) => {
                                         let html = ''; 
@@ -123,6 +126,7 @@
                                     { name: 'Sharing', property: 'specifiedSharing', 
                                         formula: (r) => {
                                             if (r.isSharingMissing === true) return 'Not specified!';
+                                            if (r.specifiedSharing === 'n/a') return 'Not Applicable';
                                             return helper.html.render.escape(r.specifiedSharing);
                                         },
                                         scoreFormula: (r) => { 
@@ -131,10 +135,14 @@
                                     },
                                     { name: 'Coverage', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
-                                            return helper.html.render.percentage(r.coverage);
+                                            if (r.isClass === true) {
+                                                if (r.coverage || r.coverage === 0) return helper.html.render.percentage(r.coverage);
+                                                return 'No coverage data';
+                                            }
+                                            return 'Not Applicable';
                                         },
                                         scoreFormula: (r) => { 
-                                            if (!r.coverage || r.coverage < 0.85) return 1;
+                                            if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) return 1;
                                         }
                                     },
                                     { name: 'Related Tests',

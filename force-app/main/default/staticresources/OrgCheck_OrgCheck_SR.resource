@@ -1568,7 +1568,8 @@ const OrgCheck = {
                                 const vv = Number.parseFloat(v);
                                 if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
                             }
-                            return '0 %';
+                            if (v === 0) return '0 %';
+                            return '';
                         },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
@@ -1796,7 +1797,7 @@ const OrgCheck = {
          * @param unsafe String to be escaped (no change if null or not a string type)
          */
         function private_secure_html(unsafe) {
-            if (!unsafe) return '';
+            if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
             if (typeof(unsafe) !== 'string') return unsafe;
             return unsafe
                 .replace(/&/g, "&amp;")
@@ -1967,13 +1968,17 @@ const OrgCheck = {
                         const items = [].slice.call(table.rows).slice(1);
                         const isCellNumeric = c.type === 'numeric';
                         items.sort(function compare(a, b) {
-                            const cellA = a.getElementsByTagName('td')[i];
-                            const cellB = b.getElementsByTagName('td')[i];
-                            const valueA = cellA.getAttribute('aria-data') || cellA.textContent;
-                            const valueB = cellB.getAttribute('aria-data') || cellB.textContent;
-                            if (isCellNumeric) return (valueA - valueB) * iOrder;
-                            if (valueA < valueB) return -iOrder;
-                            if (valueA > valueB) return iOrder;
+                            const ca = a.getElementsByTagName('td')[i];
+                            const cb = b.getElementsByTagName('td')[i];
+                            const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
+                            const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
+                            if (isCellNumeric) {
+                                if (va && vb) return (va - vb) * iOrder;
+                                if (va) return iOrder;
+                                if (vb) return -iOrder;
+                            }
+                            if (va < vb) return -iOrder;
+                            if (va > vb) return iOrder;
                             return 0;
                         });
                         table.hidden = true; // make table invisible while manipulating the DOM
@@ -2011,19 +2016,10 @@ const OrgCheck = {
                     let dataRaw = '';
                     let additiveScore = 0;
                     try {
-                        if (c.property) {
-                            const v = row[c.property];
-                            if (c.type === 'numeric' && (v === 0 || !v)) {
-                                dataRaw = 0;
-                            } else {
-                                dataRaw = private_secure_html(v);
-                            }
-                        }
-                        if (c.formula) {
-                            dataDecorated = c.formula(row);
-                        } else if (c.property) {
-                            dataDecorated = dataRaw;
-                        }
+                        if (c.property) dataRaw = private_secure_html(row[c.property]);
+                        if (c.formula) dataDecorated = c.formula(row);
+                        if (!c.formula && c.property) dataDecorated = dataRaw;
+                        if (c.formula && !c.property) dataRaw = dataDecorated;
                     } catch (e) {
                         e.context = {
                             'when': 'Datatable: calling formula to render the content of a cell in the table',
@@ -2056,7 +2052,7 @@ const OrgCheck = {
                         }
                         throw e;
                     }
-                    if (dataDecorated) {
+                    if (dataDecorated && dataDecorated !== '') {
                         const isArray = (Array.isArray(dataDecorated) === true);
                         if (typeof dataDecorated === 'object' && isArray === false) {
                             if (additiveScore > 0) {
@@ -2854,6 +2850,8 @@ function buildDatasets(core) {
                                 namespace: v.NamespacePrefix,
                                 isTest: false,
                                 isAbstract: false,
+                                isClass: true,
+                                isEnum: false,
                                 isInterface: false,
                                 isSharingMissing: false,
                                 length: v.LengthWithoutComments,
@@ -2861,7 +2859,9 @@ function buildDatasets(core) {
                                 coverage: 0 // by default no coverage!
                             };
                             if (v.Body) {
-                                item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;   
+                                item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;
+                                item.isEnum = v.Body.match("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{") !== null;
+                                item.isClass = (item.isInterface === false && item.isEnum === false);
                             }
                             if (v.SymbolTable) {
                                 item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
@@ -2884,7 +2884,8 @@ function buildDatasets(core) {
                                     };
                                 }
                             }
-                            if (item.isTest === false && item.isInterface === false && !item.specifiedSharing) {
+                            if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
+                            if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
                                 item.isSharingMissing = true;
                             }
                             classesMap[item.id] = item;
