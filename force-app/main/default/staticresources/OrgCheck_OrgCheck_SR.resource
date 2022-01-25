@@ -14,6 +14,11 @@ const OrgCheck = {
     localOrgId: '',
 
     /**
+     * Current User Id where OrgCheck is currently launched
+     */
+    localUserId: '',
+
+    /**
      * Handlers
      */
     handlers: {
@@ -408,6 +413,7 @@ const OrgCheck = {
                     let informationHTML = '<b>OrgCheck Information</b><br />';
                     informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
                     informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
+                    informationHTML += 'Current running UserId: ' + (OrgCheck && OrgCheck.localUserId ? OrgCheck.localUserId : 'no userId available') + '<br />';
                     informationHTML += '<br />';
                     informationHTML += '<b>Navigation Information</b><br />';
                     informationHTML += 'Page: ' + document.location.pathname + '<br />';
@@ -962,7 +968,7 @@ const OrgCheck = {
      *              <ol>
      *                <li><code>sfApiVersion</code>: Salesforce API version to use</li>
      *                <li><code>sfLocalAccessToken</code>: Salesforce Access Token to access the local org</li> 
-     *                <li><code>sfLocalInstanceUrl</code>: Salesforce Endpoint to access the local org</li>
+     *                <li><code>sfLocalCurrentUserId</code>: Salesforce UserId of the current user in the the local org</li>
      *                <li><code>htmlProgressBarTagId</code>: HTML Tag Id of the progress bar zone</li> 
      *                <li><code>htmlSpinnerTagId</code>: HTML Tag Id of the spinner zone</li> 
      *                <li><code>htmlSpinnerMessagesTagId</code>: HTML Tag Id of the message that goes along with the spinner</li>
@@ -1000,12 +1006,14 @@ const OrgCheck = {
         const ORG_INFORMATION = {
             id: setup.sfLocalAccessToken.split('!')[0],
             version: setup.sfApiVersion,
-            accessToken: setup.sfLocalAccessToken
+            accessToken: setup.sfLocalAccessToken,
+            userId: setup.sfLocalCurrentUserId
         }
 
         // Set global information about org (in case of showError mainly)
         OrgCheck.localOrgId = ORG_INFORMATION.id;
-
+        OrgCheck.localUserId = ORG_INFORMATION.userId;
+                            
         // Get the current Organization information
         const currentOrgId = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'CurrentOrgId');
         if (currentOrgId) {
@@ -1015,6 +1023,7 @@ const OrgCheck = {
                 ORG_INFORMATION.accessToken = orgs[currentOrgId].token;
                 ORG_INFORMATION.instanceUrl = orgs[currentOrgId].endpointUrl;
                 ORG_INFORMATION.proxyUrl = '/services/proxy';
+
             }
         }
         TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, ORG_INFORMATION.id);
@@ -1834,26 +1843,66 @@ const OrgCheck = {
          * Make sure the current user has enough rights on SObjects (only for REST queries)
          * @param setup JSON configuration including:
          *              <ol>
-         *                <li><code>sobjects</code>: Array of SObject names</li>
+         *                <li><code>sobjects</code>: Map with keys as SObject API names and value as an Array of Field API Names</li>
          *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
          *                <li><code>onError</code>: Callback function to call if there is an error</li>
          *              </ol>
          */
         this.doSecureSobjectReadEnforcement = function(setup) {
-            // For SObjects
-            // >>> Using Tooling API!
-            // SELECT DurableId, IsReadable
-            // FROM UserEntityAccess 
-            // WHERE UserId='0053V000000vD5q' // Current User
-            // AND EntityDefinition.QualifiedApiName IN ('User', 'Profile')
-
-            // For Fields
-            // >>> Using Tooling API!
-            // SELECT DurableId, IsAccessible
-            // FROM UserFieldAccess
-            // WHERE DurableId IN ('User.Name.0053V000000vD5q')
-
-            return private_secure_soql(unsafe);
+            // Not ready yet to implement the enforcement
+            if (setup && setup.onEnd) setup.onEnd();
+            /*
+            const queries = [];
+            const currentUser = OrgCheck.localUserId;
+            let sobjectsList = '';
+            let fieldsList = '';
+            for (const [sobject, fields] of Object.entries(setup.sobjects)) {
+                sobjectsList += private_secure_soql(sobject) + ',';
+                fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
+                fields.forEach(f => fieldsList += private_secure_soql(sobject+'.'+f+'.'+currentUser) + ',');
+                // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
+            }
+            if (sobjectsList) sobjectsList = sobjectsList.slice(0, -1);
+            if (fieldsList) fieldsList = fieldsList.slice(0, -1);
+            if (sobjectsList) {
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT DurableId, IsReadable '+
+                            'FROM UserEntityAccess '+
+                            'WHERE UserId='+ private_secure_soql(currentUser) +' '+
+                            'AND EntityDefinition.QualifiedApiName IN ('+sobjectsList+') '+
+                            'AND IsReadable = false'
+                });
+            }
+            if (fieldsList) {
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT DurableId, IsAccessible '+
+                            'FROM UserFieldAccess '+
+                            'WHERE DurableId IN ('+fieldsList+') '+
+                            'AND IsAccessible = false'
+                });
+            }
+            SALESFORCE_HANDLER.doQueries(
+                queries, 
+                (record) => {}, 
+                (records, size) => { 
+                    if (size > 0) {
+                        setup.onError({
+                            'when': 'FLS/CRUD Enforcement: you need to assign yourself the <b>OrgCheck Users</b> permission set.',
+                            'what': {
+                                'Objects and fields': setup.sobjects,
+                                'Number of FLS or CRUD not compatible': size,
+                                'Details': records
+                            }
+                        });
+                    } else {
+                        setup.onEnd(); 
+                    }
+                },
+                setup.onError
+            );
+            */
         }
 
         /**
@@ -2497,47 +2546,56 @@ function buildDatasets(core) {
         name: 'workflows',
         keycache: 'Workflows',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-            const queries = [];
-            core.doSalesforceQueries({
-                queries: [{ 
-                    string: 'SELECT Id FROM WorkflowRule',
-                    tooling: true
-                }], 
-                onEachRecord: function(record, index) {
-                    queries.push({
-                        tooling: true,
-                        byPasses: [ 'UNKNOWN_EXCEPTION' ],
-                        string: 'SELECT Id, FullName, Metadata '+
-                                'FROM WorkflowRule '+
-                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
-                    });
-                }, 
-                onEnd: function(records, size) { 
-                    core.doSalesforceQueriesWithCache({
-                        mnemonic: cache,
-                        queries,
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            const item =  {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                name: v.FullName,
-                                description: v.Metadata.description,
-                                actions: v.Metadata.actions,
-                                futureActions: v.Metadata.workflowTimeTriggers,
-                                isActive: v.Metadata.active
-                            };
-                            if (!item.actions) item.actions = [];
-                            if (!item.futureActions) item.futureActions = [];
-                            item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
-                            return item;
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+                    const queries = [];
+                    core.doSalesforceQueries({
+                        queries: [{ 
+                            string: 'SELECT Id FROM WorkflowRule',
+                            tooling: true
+                        }], 
+                        onEachRecord: function(record, index) {
+                            queries.push({
+                                tooling: true,
+                                byPasses: [ 'UNKNOWN_EXCEPTION' ],
+                                string: 'SELECT Id, FullName, Metadata '+
+                                        'FROM WorkflowRule '+
+                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
+                            });
+                        }, 
+                        onEnd: function(records, size) { 
+                            core.doSalesforceQueriesWithCache({
+                                mnemonic: cache,
+                                queries,
+                                onEachRecordFromAPI: function(v, i, l, ts) {
+                                    const item =  {
+                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        name: v.FullName,
+                                        description: v.Metadata.description,
+                                        actions: v.Metadata.actions,
+                                        futureActions: v.Metadata.workflowTimeTriggers,
+                                        isActive: v.Metadata.active
+                                    };
+                                    if (!item.actions) item.actions = [];
+                                    if (!item.futureActions) item.futureActions = [];
+                                    item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
+                                    return item;
+                                },
+                                onEndFromCache: resolve,
+                                onError: reject
+                            });
                         },
-                        onEndFromCache: resolve,
                         onError: reject
                     });
-                },
-                onError: reject
+                }
             });
         }
     }));
@@ -2551,53 +2609,62 @@ function buildDatasets(core) {
         name: 'flows',
         keycache: 'Flows',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-            const queries = [];
-            core.doSalesforceQueries({
-                queries: [{ 
-                    string: 'SELECT Id FROM Flow',
-                    tooling: true
-                }], 
-                onEachRecord: function(record, index) {
-                    queries.push({
-                        tooling: true,
-                        string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
-                                'VersionNumber, Metadata, Status, Description, '+
-                                'ProcessType FROM Flow '+
-                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
-                    });
-                }, 
-                onEnd: function(records, size) { 
-                    core.doSalesforceQueriesWithCache({
-                        mnemonic: cache,
-                        queries,
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            const item =  {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                name: v.FullName,
-                                definitionId: core.doSimplifiySalesforceID(v.DefinitionId),
-                                definitionName: v.MasterLabel,
-                                version: v.VersionNumber,
-                                dmlCreates: v.Metadata.recordCreates?.length || 0,
-                                dmlDeletes: v.Metadata.recordDeletes?.length || 0,
-                                dmlUpdates: v.Metadata.recordUpdates?.length || 0,
-                                isActive: v.Status === 'Active',
-                                description: v.Description,
-                                type: v.ProcessType
-                            };
-                            v.Metadata.processMetadataValues?.forEach(m => {
-                                if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
-                                if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+                    const queries = [];
+                    core.doSalesforceQueries({
+                        queries: [{ 
+                            string: 'SELECT Id FROM Flow',
+                            tooling: true
+                        }], 
+                        onEachRecord: function(record, index) {
+                            queries.push({
+                                tooling: true,
+                                string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
+                                        'VersionNumber, Metadata, Status, Description, '+
+                                        'ProcessType FROM Flow '+
+                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                             });
-                            return item;
+                        }, 
+                        onEnd: function(records, size) { 
+                            core.doSalesforceQueriesWithCache({
+                                mnemonic: cache,
+                                queries,
+                                onEachRecordFromAPI: function(v, i, l, ts) {
+                                    const item =  {
+                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        name: v.FullName,
+                                        definitionId: core.doSimplifiySalesforceID(v.DefinitionId),
+                                        definitionName: v.MasterLabel,
+                                        version: v.VersionNumber,
+                                        dmlCreates: v.Metadata.recordCreates?.length || 0,
+                                        dmlDeletes: v.Metadata.recordDeletes?.length || 0,
+                                        dmlUpdates: v.Metadata.recordUpdates?.length || 0,
+                                        isActive: v.Status === 'Active',
+                                        description: v.Description,
+                                        type: v.ProcessType
+                                    };
+                                    v.Metadata.processMetadataValues?.forEach(m => {
+                                        if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
+                                        if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
+                                    });
+                                    return item;
+                                },
+                                onEndFromCache: resolve,
+                                onError: reject
+                            });
                         },
-                        onEndFromCache: resolve,
                         onError: reject
                     });
-                },
-                onError: reject
+                }
             });
         }
     }));
@@ -2613,36 +2680,46 @@ function buildDatasets(core) {
         name: 'packages',
         keycache: 'Packages',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
-                            'FROM InstalledSubscriberPackage ' 
-                }, { 
-                    tooling: false,
-                    string: 'SELECT NamespacePrefix '+
-                            'FROM Organization '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    if (i == 0) {
-                        return { 
-                            id: v.Id, 
-                            name: v.SubscriberPackage.Name,
-                            namespace: v.SubscriberPackage.NamespacePrefix,
-                            type: 'Installed'
-                        };
-                    } else {
-                        return { 
-                            id: v.NamespacePrefix, 
-                            name: v.NamespacePrefix,
-                            namespace: v.NamespacePrefix, 
-                            type: 'Local'
-                        };
-                    }
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'Organization': [ 'NamespacePrefix' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
+                                    'FROM InstalledSubscriberPackage ' 
+                        }, { 
+                            tooling: false,
+                            string: 'SELECT NamespacePrefix '+
+                                    'FROM Organization '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            if (i == 0) {
+                                return { 
+                                    id: v.Id, 
+                                    name: v.SubscriberPackage.Name,
+                                    namespace: v.SubscriberPackage.NamespacePrefix,
+                                    type: 'Installed'
+                                };
+                            } else {
+                                return { 
+                                    id: v.NamespacePrefix, 
+                                    name: v.NamespacePrefix,
+                                    namespace: v.NamespacePrefix, 
+                                    type: 'Local'
+                                };
+                            }
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2656,28 +2733,37 @@ function buildDatasets(core) {
         name: 'customLabels',
         keycache: 'CustomLabels',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
-                            'FROM ExternalString '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        masterLabel: v.MasterLabel,
-                        namespace: v.NamespacePrefix,
-                        category: v.Category,
-                        protected: v.IsProtected,
-                        language: v.Language,
-                        value: v.Value
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
+                                    'FROM ExternalString '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                masterLabel: v.MasterLabel,
+                                namespace: v.NamespacePrefix,
+                                category: v.Category,
+                                protected: v.IsProtected,
+                                language: v.Language,
+                                value: v.Value
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2691,24 +2777,33 @@ function buildDatasets(core) {
         name: 'customSettings',
         keycache: 'CustomSettings',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
-                            'FROM EntityDefinition '+
-                            'WHERE IsCustomSetting = true ' + 
-                            'AND NamespacePrefix = NULL '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.DurableId),
-                        name: v.QualifiedApiName,
-                        namespace: v.NamespacePrefix
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE IsCustomSetting = true ' + 
+                                    'AND NamespacePrefix = NULL '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.DurableId),
+                                name: v.QualifiedApiName,
+                                namespace: v.NamespacePrefix
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2722,27 +2817,36 @@ function buildDatasets(core) {
         name: 'vfPages',
         keycache: 'VisualforcePages',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch '+
-                            'FROM ApexPage '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        description: v.Description, 
-                        mobile: v.IsAvailableInTouch
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch '+
+                                    'FROM ApexPage '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                description: v.Description, 
+                                mobile: v.IsAvailableInTouch
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2756,26 +2860,35 @@ function buildDatasets(core) {
         name: 'vfComponents',
         keycache: 'VisualforceComponents',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description '+
-                            'FROM ApexComponent '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description '+
+                                    'FROM ApexComponent '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2789,123 +2902,133 @@ function buildDatasets(core) {
         name: 'apexClasses',
         keycache: 'ApexClasses',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-            const classesMap = {};
-            const relatedTestClassesMap = {};
-            const classesCoverageMap = {};
-            const schedulableMap = {};
-            core.doSalesforceQueries({
-                queries: [{
-                    string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
-                            'FROM ApexCodeCoverage',
-                    tooling: true
-                }, {
-                    string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
-                            'NumLinesUncovered, Coverage '+
-                            'FROM ApexCodeCoverageAggregate',
-                    tooling: true
-                }, { 
-                    string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
-                            'Body, LengthWithoutComments, SymbolTable '+
-                            'FROM ApexClass '+
-                            'WHERE ManageableState = \'unmanaged\' ',
-                    tooling: true
-                }, {
-                    string: 'SELECT ApexClassId '+
-                            'FROM AsyncApexJob '+
-                            'WHERE JobType = \'ScheduledApex\' ',
-                    tooling: false
-                }], 
-                onEachRecord: function(v, index) {
-                    switch (index) {
-                        case 0: {
-                            // ApexCodeCoverage records
-                            const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
-                            const t = core.doSimplifiySalesforceID(v.ApexTestClassId);
-                            const item = relatedTestClassesMap[i] || new Set();
-                            item.add(t);
-                            relatedTestClassesMap[i] = item;
-                            break;
-                        }
-                        case 1: {
-                            // ApexCodeCoverageAggregate records
-                            const item =  {
-                                id: core.doSimplifiySalesforceID(v.ApexClassOrTriggerId),
-                                covered: v.NumLinesCovered,
-                                uncovered: v.NumLinesUncovered,
-                                coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
-                            };
-                            classesCoverageMap[item.id] = item;
-                            break; 
-                        }
-                        case 2: {
-                            // ApexClasses records
-                            const item =  {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                name: v.Name,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                isTest: false,
-                                isAbstract: false,
-                                isClass: true,
-                                isEnum: false,
-                                isInterface: false,
-                                isSharingMissing: false,
-                                length: v.LengthWithoutComments,
-                                needsRecompilation: (!v.SymbolTable ? true : false),
-                                coverage: 0 // by default no coverage!
-                            };
-                            if (v.Body) {
-                                item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;
-                                item.isEnum = v.Body.match("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{") !== null;
-                                item.isClass = (item.isInterface === false && item.isEnum === false);
-                            }
-                            if (v.SymbolTable) {
-                                item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                                item.interfaces = v.SymbolTable.interfaces;
-                                item.methodsCount = v.SymbolTable.methods.length || 0;
-                                if (v.SymbolTable.tableDeclaration) {
-                                    item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                                    if (v.SymbolTable.tableDeclaration.modifiers) {
-                                        v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                            switch (m) {
-                                                case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                                case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                                case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                                case 'public':            item.specifiedAccess  = 'public';    break;
-                                                case 'global':            item.specifiedAccess  = 'global';    break;
-                                                case 'abstract':          item.isAbstract       = true;        break;
-                                                case 'testMethod':        item.isTest           = true;        break;
-                                            }
-                                        });
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'AsyncApexJob': [ 'ApexClassId' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+                    const classesMap = {};
+                    const relatedTestClassesMap = {};
+                    const classesCoverageMap = {};
+                    const schedulableMap = {};
+                    core.doSalesforceQueries({
+                        queries: [{
+                            string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
+                                    'FROM ApexCodeCoverage',
+                            tooling: true
+                        }, {
+                            string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
+                                    'NumLinesUncovered, Coverage '+
+                                    'FROM ApexCodeCoverageAggregate',
+                            tooling: true
+                        }, { 
+                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
+                                    'Body, LengthWithoutComments, SymbolTable '+
+                                    'FROM ApexClass '+
+                                    'WHERE ManageableState = \'unmanaged\' ',
+                            tooling: true
+                        }, {
+                            string: 'SELECT ApexClassId '+
+                                    'FROM AsyncApexJob '+
+                                    'WHERE JobType = \'ScheduledApex\' ',
+                            tooling: false
+                        }], 
+                        onEachRecord: function(v, index) {
+                            switch (index) {
+                                case 0: {
+                                    // ApexCodeCoverage records
+                                    const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
+                                    const t = core.doSimplifiySalesforceID(v.ApexTestClassId);
+                                    const item = relatedTestClassesMap[i] || new Set();
+                                    item.add(t);
+                                    relatedTestClassesMap[i] = item;
+                                    break;
+                                }
+                                case 1: {
+                                    // ApexCodeCoverageAggregate records
+                                    const item =  {
+                                        id: core.doSimplifiySalesforceID(v.ApexClassOrTriggerId),
+                                        covered: v.NumLinesCovered,
+                                        uncovered: v.NumLinesUncovered,
+                                        coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
                                     };
+                                    classesCoverageMap[item.id] = item;
+                                    break; 
+                                }
+                                case 2: {
+                                    // ApexClasses records
+                                    const item =  {
+                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        name: v.Name,
+                                        apiVersion: v.ApiVersion,
+                                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                        namespace: v.NamespacePrefix,
+                                        isTest: false,
+                                        isAbstract: false,
+                                        isClass: true,
+                                        isEnum: false,
+                                        isInterface: false,
+                                        isSharingMissing: false,
+                                        length: v.LengthWithoutComments,
+                                        needsRecompilation: (!v.SymbolTable ? true : false),
+                                        coverage: 0 // by default no coverage!
+                                    };
+                                    if (v.Body) {
+                                        item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;
+                                        item.isEnum = v.Body.match("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{") !== null;
+                                        item.isClass = (item.isInterface === false && item.isEnum === false);
+                                    }
+                                    if (v.SymbolTable) {
+                                        item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
+                                        item.interfaces = v.SymbolTable.interfaces;
+                                        item.methodsCount = v.SymbolTable.methods.length || 0;
+                                        if (v.SymbolTable.tableDeclaration) {
+                                            item.annotations = v.SymbolTable.tableDeclaration.annotations;
+                                            if (v.SymbolTable.tableDeclaration.modifiers) {
+                                                v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                                    switch (m) {
+                                                        case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                                        case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                                        case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                                        case 'public':            item.specifiedAccess  = 'public';    break;
+                                                        case 'global':            item.specifiedAccess  = 'global';    break;
+                                                        case 'abstract':          item.isAbstract       = true;        break;
+                                                        case 'testMethod':        item.isTest           = true;        break;
+                                                    }
+                                                });
+                                            };
+                                        }
+                                    }
+                                    if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
+                                    if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
+                                        item.isSharingMissing = true;
+                                    }
+                                    classesMap[item.id] = item;
+                                    break;
+                                }
+                                default: {
+                                    schedulableMap[core.doSimplifiySalesforceID(v.ApexClassId)] = true;
                                 }
                             }
-                            if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
-                            if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
-                                item.isSharingMissing = true;
+                        }, 
+                        onEnd: function(records, size) { 
+                            for (const [key, value] of Object.entries(classesMap)) {
+                                if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
+                                if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
+                                if (schedulableMap[key]) value.isScheduled = true;
                             }
-                            classesMap[item.id] = item;
-                            break;
-                        }
-                        default: {
-                            schedulableMap[core.doSimplifiySalesforceID(v.ApexClassId)] = true;
-                        }
-                    }
-                }, 
-                onEnd: function(records, size) { 
-                    for (const [key, value] of Object.entries(classesMap)) {
-                        if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
-                        if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
-                        if (schedulableMap[key]) value.isScheduled = true;
-                    }
-                    core.setMetadataInCache(cache, classesMap);
-                    resolve(classesMap);
-                },
-                onError: reject
+                            core.setMetadataInCache(cache, classesMap);
+                            resolve(classesMap);
+                        },
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2919,48 +3042,57 @@ function buildDatasets(core) {
         name: 'apexTriggers',
         keycache: 'ApexTriggers',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                'NamespacePrefix, Body, '+
-                                'UsageBeforeInsert, UsageAfterInsert, '+
-                                'UsageBeforeUpdate, UsageAfterUpdate, '+
-                                'UsageBeforeDelete, UsageAfterDelete, '+
-                                'UsageAfterUndelete, UsageIsBulk, '+
-                                'LengthWithoutComments, EntityDefinitionId '+
-                            'FROM ApexTrigger '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        length: v.LengthWithoutComments,
-                        isActive: (v.Status === 'Active' ? true : false),
-                        beforeInsert: v.UsageBeforeInsert,
-                        afterInsert: v.UsageAfterInsert,
-                        beforeUpdate: v.UsageBeforeUpdate,
-                        afterUpdate: v.UsageAfterUpdate,
-                        beforeDelete: v.UsageBeforeDelete,
-                        afterDelete: v.UsageAfterDelete,
-                        afterUndelete: v.UsageAfterUndelete,
-                        sobject: v.EntityDefinitionId,
-                        hasSOQL: false,
-                        hasDML: false
-                    };
-                    if (v.Body) {
-                        item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
-                        item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
-                    }
-                    return item;
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, Name, ApiVersion, Status, '+
+                                        'NamespacePrefix, Body, '+
+                                        'UsageBeforeInsert, UsageAfterInsert, '+
+                                        'UsageBeforeUpdate, UsageAfterUpdate, '+
+                                        'UsageBeforeDelete, UsageAfterDelete, '+
+                                        'UsageAfterUndelete, UsageIsBulk, '+
+                                        'LengthWithoutComments, EntityDefinitionId '+
+                                    'FROM ApexTrigger '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            const item = {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                length: v.LengthWithoutComments,
+                                isActive: (v.Status === 'Active' ? true : false),
+                                beforeInsert: v.UsageBeforeInsert,
+                                afterInsert: v.UsageAfterInsert,
+                                beforeUpdate: v.UsageBeforeUpdate,
+                                afterUpdate: v.UsageAfterUpdate,
+                                beforeDelete: v.UsageBeforeDelete,
+                                afterDelete: v.UsageAfterDelete,
+                                afterUndelete: v.UsageAfterUndelete,
+                                sobject: v.EntityDefinitionId,
+                                hasSOQL: false,
+                                hasDML: false
+                            };
+                            if (v.Body) {
+                                item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
+                                item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                            }
+                            return item;
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -2974,23 +3106,32 @@ function buildDatasets(core) {
         name: 'stResources',
         keycache: 'StaticResources',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, Name, NamespacePrefix '+
-                            'FROM StaticResource '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        namespace: v.NamespacePrefix
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, Name, NamespacePrefix '+
+                                    'FROM StaticResource '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                namespace: v.NamespacePrefix
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));                    
@@ -3004,27 +3145,36 @@ function buildDatasets(core) {
         name: 'auraPages',
         keycache: 'LightningPages',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
-                                'Type, NamespacePrefix, Description ' +
-                            'FROM FlexiPage '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.MasterLabel,
-                        entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
-                        type: v.Type,
-                        namespace: v.NamespacePrefix,
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
+                                        'Type, NamespacePrefix, Description ' +
+                                    'FROM FlexiPage '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.MasterLabel,
+                                entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
+                                type: v.Type,
+                                namespace: v.NamespacePrefix,
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3038,26 +3188,35 @@ function buildDatasets(core) {
         name: 'lwComponents',
         keycache: 'LightningWebComponents',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+ 
-                            'FROM LightningComponentBundle '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.MasterLabel,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+ 
+                                    'FROM LightningComponentBundle '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.MasterLabel,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3071,26 +3230,35 @@ function buildDatasets(core) {
         name: 'auraComponents',
         keycache: 'AuraComponents',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+
-                            'FROM AuraDefinitionBundle '+
-                            'WHERE ManageableState = \'unmanaged\' '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.MasterLabel,
-                        apiVersion: v.ApiVersion,
-                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                        namespace: v.NamespacePrefix,
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+
+                                    'FROM AuraDefinitionBundle '+
+                                    'WHERE ManageableState = \'unmanaged\' '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.MasterLabel,
+                                apiVersion: v.ApiVersion,
+                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                namespace: v.NamespacePrefix,
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3104,66 +3272,83 @@ function buildDatasets(core) {
         name: 'users',
         keycache: 'Users',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, Name, SmallPhotoUrl, Profile.Id, Profile.Name, '+
-                                'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
-                                'UserPreferencesLightningExperiencePreferred, '+
-                                '(SELECT PermissionSet.Id, PermissionSet.Name, '+
-                                    'PermissionSet.PermissionsApiEnabled, '+
-                                    'PermissionSet.PermissionsViewSetup, '+
-                                    'PermissionSet.PermissionsModifyAllData, '+
-                                    'PermissionSet.PermissionsViewAllData, '+
-                                    'PermissionSet.IsOwnedByProfile '+
-                                    'FROM PermissionSetAssignments '+
-                                    'ORDER BY PermissionSet.Name) '+
-                            'FROM User '+
-                            'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
-                            'AND IsActive = true ', // we only want active users
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    let item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        photourl: v.SmallPhotoUrl,
-                        lastLogin: core.doFormatDatetime(v.LastLoginDate),
-                        neverLogged: (!v.LastLoginDate ? true : false),
-                        numberFailedLogins: v.NumberOfFailedLogins,
-                        lastPasswordChange: core.doFormatDatetime(v.LastPasswordChangeDate),
-                        onLightningExperience: v.UserPreferencesLightningExperiencePreferred,
-                        profile: {
-                            id: core.doSimplifiySalesforceID(v.Profile.Id),
-                            name: v.Profile.Name
-                        },
-                        permissionSets: [],
-                        permissions: {
-                            apiEnabled: false,
-                            viewSetup: false,
-                            modifyAllData: false,
-                            viewAllData: false
-                        }
-                    };
-                    if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
-                        for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
-                            let assignment = v.PermissionSetAssignments.records[i];
-                            if (assignment.PermissionSet.PermissionsApiEnabled === true) item.permissions.apiEnabled = true;
-                            if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
-                            if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
-                            if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
-                            if (assignment.PermissionSet.IsOwnedByProfile == false) {
-                                item.permissionSets.push({
-                                    id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
-                                    name: assignment.PermissionSet.Name
-                                });
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'User': [ 'Id', 'Name', 'SmallPhotoUrl', 'ProfileId', 'LastLoginDate', 
+                              'LastPasswordChangeDate', 'NumberOfFailedLogins', 
+                              'UserPreferencesLightningExperiencePreferred', 'IsActive' ],
+                    'Profile': [ 'Id', 'Name' ],
+                    'PermissionSetAssignment': [ 'PermissionSet' ],
+                    'PermissionSet': [ 'Id', 'Name', 'PermissionSet', 'PermissionsApiEnabled',
+                               'PermissionsViewSetup', 'PermissionsModifyAllData', 
+                               'PermissionsViewAllData', 'IsOwnedByProfile' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, Name, SmallPhotoUrl, Profile.Id, Profile.Name, '+
+                                        'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
+                                        'UserPreferencesLightningExperiencePreferred, '+
+                                        '(SELECT PermissionSet.Id, PermissionSet.Name, '+
+                                            'PermissionSet.PermissionsApiEnabled, '+
+                                            'PermissionSet.PermissionsViewSetup, '+
+                                            'PermissionSet.PermissionsModifyAllData, '+
+                                            'PermissionSet.PermissionsViewAllData, '+
+                                            'PermissionSet.IsOwnedByProfile '+
+                                            'FROM PermissionSetAssignments '+
+                                            'ORDER BY PermissionSet.Name) '+
+                                    'FROM User '+
+                                    'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
+                                    'AND IsActive = true ', // we only want active users
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            let item = {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                photourl: v.SmallPhotoUrl,
+                                lastLogin: core.doFormatDatetime(v.LastLoginDate),
+                                neverLogged: (!v.LastLoginDate ? true : false),
+                                numberFailedLogins: v.NumberOfFailedLogins,
+                                lastPasswordChange: core.doFormatDatetime(v.LastPasswordChangeDate),
+                                onLightningExperience: v.UserPreferencesLightningExperiencePreferred,
+                                profile: {
+                                    id: core.doSimplifiySalesforceID(v.Profile.Id),
+                                    name: v.Profile.Name
+                                },
+                                permissionSets: [],
+                                permissions: {
+                                    apiEnabled: false,
+                                    viewSetup: false,
+                                    modifyAllData: false,
+                                    viewAllData: false
+                                }
+                            };
+                            if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
+                                for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
+                                    let assignment = v.PermissionSetAssignments.records[i];
+                                    if (assignment.PermissionSet.PermissionsApiEnabled === true) item.permissions.apiEnabled = true;
+                                    if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
+                                    if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
+                                    if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
+                                    if (assignment.PermissionSet.IsOwnedByProfile == false) {
+                                        item.permissionSets.push({
+                                            id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
+                                            name: assignment.PermissionSet.Name
+                                        });
+                                    }
+                                }
                             }
-                        }
-                    }
-                    return item;
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+                            return item;
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));    
@@ -3177,35 +3362,48 @@ function buildDatasets(core) {
         name: 'profiles',
         keycache: 'Profiles',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
-                                'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
-                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
-                            'FROM PermissionSet '+ // oh yes we are not mistaken!
-                            'WHERE isOwnedByProfile = TRUE'
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
-                    const item = {
-                        id: core.doSimplifiySalesforceID(v.ProfileId),
-                        name: v.Profile.Name,
-                        description: v.Profile.Description,
-                        license: v.License.Name,
-                        userType: v.Profile.UserType,
-                        isCustom: v.IsCustom,
-                        isUnusedCustom: v.IsCustom && memberCounts == 0,
-                        isUndescribedCustom: v.IsCustom && !v.Profile.Description,
-                        package: v.NamespacePrefix,
-                        membersCount: memberCounts,
-                        hasMembers: memberCounts > 0
-                    };
-                    return item;
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'PermissionSet': [ 'isOwnedByProfile', 'Id', 'ProfileId', 'IsCustom',
+                                       'NamespacePrefix' ],
+                    'Profile': [ 'Name', 'Description', 'UserType' ],
+                    'License': [ 'Name' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
+                                        'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
+                                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
+                                    'FROM PermissionSet '+ // oh yes we are not mistaken!
+                                    'WHERE isOwnedByProfile = TRUE'
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
+                            const item = {
+                                id: core.doSimplifiySalesforceID(v.ProfileId),
+                                name: v.Profile.Name,
+                                description: v.Profile.Description,
+                                license: v.License.Name,
+                                userType: v.Profile.UserType,
+                                isCustom: v.IsCustom,
+                                isUnusedCustom: v.IsCustom && memberCounts == 0,
+                                isUndescribedCustom: v.IsCustom && !v.Profile.Description,
+                                package: v.NamespacePrefix,
+                                membersCount: memberCounts,
+                                hasMembers: memberCounts > 0
+                            };
+                            return item;
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3219,36 +3417,50 @@ function buildDatasets(core) {
         name: 'objectCRUDs',
         keycache: 'ObjectCRUDs',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
-                                   'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
-                                   'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
-                            'FROM ObjectPermissions '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: v.ParentId + v.SobjectType,
-                        sobject: v.SobjectType,
-                        type: (v.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
-                        parent: { 
-                            id: (v.Parent.IsOwnedByProfile ? v.Parent.ProfileId : v.ParentId), 
-                            name: (v.Parent.IsOwnedByProfile ? v.Parent.Profile.Name : v.Parent.Label) 
-                        },
-                        permissions: {
-                            create: v.PermissionsCreate,
-                            read: v.PermissionsRead,
-                            update: v.PermissionsEdit,
-                            delete: v.PermissionsDelete,
-                            viewAll: v.PermissionsViewAllRecords,
-                            modifyAll: v.PermissionsModifyAllRecords
-                        }
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'ObjectPermissions': [ 'ParentId', 'SobjectType', 'PermissionsRead', 
+                                'PermissionsCreate', 'PermissionsEdit', 'PermissionsDelete',
+                                'PermissionsViewAllRecords', 'PermissionsModifyAllRecords' ],
+                    'PermissionSet': [ 'ProfileId', 'Label', 'IsOwnedByProfile' ],
+                    'Profile': [ 'Name' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
+                                        'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                        'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                                    'FROM ObjectPermissions '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: v.ParentId + v.SobjectType,
+                                sobject: v.SobjectType,
+                                type: (v.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
+                                parent: { 
+                                    id: (v.Parent.IsOwnedByProfile ? v.Parent.ProfileId : v.ParentId), 
+                                    name: (v.Parent.IsOwnedByProfile ? v.Parent.Profile.Name : v.Parent.Label) 
+                                },
+                                permissions: {
+                                    create: v.PermissionsCreate,
+                                    read: v.PermissionsRead,
+                                    update: v.PermissionsEdit,
+                                    delete: v.PermissionsDelete,
+                                    viewAll: v.PermissionsViewAllRecords,
+                                    modifyAll: v.PermissionsModifyAllRecords
+                                }
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3262,49 +3474,59 @@ function buildDatasets(core) {
         name: 'profileLoginRestrictions',
         keycache: 'ProfileLoginRestrictions',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-            const queries = [];
-            core.doSalesforceQueries({
-                queries: [{ string: 'SELECT Id FROM Profile' }], 
-                onEachRecord: function(record, index) {
-                    queries.push({
-                        tooling: true,
-                        string: 'SELECT Id, Name, Metadata '+
-                                'FROM Profile '+
-                                'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
-                    });
-                }, 
-                onEnd: function(records, size) { 
-                    core.doSalesforceQueriesWithCache({
-                        mnemonic: cache,
-                        queries,
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            const item =  {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                name: v.Name,
-                                loginIpRanges: v.Metadata.loginIpRanges
-                            };
-                            if (v.Metadata.loginHours) {
-                                const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-                                days.forEach(d => {
-                                    const c1 = v.Metadata.loginHours[d + 'Start'];
-                                    const c2 = v.Metadata.loginHours[d + 'End'];
-                                    if (!item.loginHours) item.loginHours = {};
-                                    item.loginHours[d] = {
-                                        from: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
-                                        to:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'Profile': [ 'Id' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+                    const queries = [];
+                    core.doSalesforceQueries({
+                        queries: [{ string: 'SELECT Id FROM Profile' }], 
+                        onEachRecord: function(record, index) {
+                            queries.push({
+                                tooling: true,
+                                string: 'SELECT Id, Name, Metadata '+
+                                        'FROM Profile '+
+                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
+                            });
+                        }, 
+                        onEnd: function(records, size) { 
+                            core.doSalesforceQueriesWithCache({
+                                mnemonic: cache,
+                                queries,
+                                onEachRecordFromAPI: function(v, i, l, ts) {
+                                    const item =  {
+                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        name: v.Name,
+                                        loginIpRanges: v.Metadata.loginIpRanges
                                     };
-                                });
-                            }
-                            return item;
+                                    if (v.Metadata.loginHours) {
+                                        const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                                        days.forEach(d => {
+                                            const c1 = v.Metadata.loginHours[d + 'Start'];
+                                            const c2 = v.Metadata.loginHours[d + 'End'];
+                                            if (!item.loginHours) item.loginHours = {};
+                                            item.loginHours[d] = {
+                                                from: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
+                                                to:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
+                                            };
+                                        });
+                                    }
+                                    return item;
+                                },
+                                onEndFromCache: resolve,
+                                onError: reject
+                            });
                         },
-                        onEndFromCache: resolve,
                         onError: reject
                     });
-                },
-                onError: reject
+                }
             });
         }
     }));
@@ -3318,65 +3540,80 @@ function buildDatasets(core) {
         name: 'permissionSets',
         keycache: 'PermissionSets',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-
-            const psMap = {};
-            const psgByName1 = {};
-            const psgByName2 = {};
-            core.doSalesforceQueries({
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
-                                '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
-                            'FROM PermissionSet '+
-                            'WHERE IsOwnedByProfile = FALSE' 
-                }, {
-                    tooling: false,
-                    byPasses: [ 'INVALID_TYPE' ],
-                    string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
-                            'FROM PermissionSetGroup ' 
-                } ],
-                onEachRecord: function(v, i) {
-                    if (i === 0) {
-                        const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
-                        const item = {
-                            id: core.doSimplifiySalesforceID(v.Id),
-                            name: v.Name,
-                            description: v.Description,
-                            hasLicense: (v.License ? 'yes' : 'no'),
-                            license: (v.License ? v.License.Name : ''),
-                            isCustom: v.IsCustom,
-                            isUndescribedCustom: v.IsCustom && !v.Description,
-                            package: v.NamespacePrefix,
-                            isUnusedCustom: v.IsCustom && !hasMembers,
-                            hasMembers: hasMembers,
-                            isGroup: (v.Type === 'Group')     // other values can be 'Regular', 'Standard', 'Session
-                        };
-                        if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
-                        psMap[item.id] = item;
-                    } else {
-                        const item = {
-                            id: core.doSimplifiySalesforceID(v.Id),
-                            name: v.DeveloperName,
-                            description: v.Description,
-                            package: v.NamespacePrefix
-                        }
-                        psgByName2[item.package+'--'+item.name] = item;
-                    }
-                }, 
-                onEnd: function() { 
-                    for (const [key, value] of Object.entries(psgByName1)) {
-                        value.groupId = psgByName2[key].id;
-                        value.description = psgByName2[key].description;
-                        value.isUndescribedCustom = value.isCustom && !value.description;
-                        psMap[value.id] = value;
-                    };
-                    core.setMetadataInCache(cache, psMap);
-                    resolve(psMap);
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'PermissionSet': [ 'Id', 'Name', 'Description', 'IsCustom', 'AssigneeId',
+                                       'NamespacePrefix', 'Type', 'IsOwnedByProfile' ],
+                    'License': [ 'Name' ],
+                    'User': [ 'Id', 'IsActive' ],
+                    'PermissionSetGroup': [ 'Id', 'DeveloperName', 'Description', 
+                                       'NamespacePrefix', 'Status' ]
                 },
-                onError: reject
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+
+                    const psMap = {};
+                    const psgByName1 = {};
+                    const psgByName2 = {};
+                    core.doSalesforceQueries({
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
+                                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
+                                    'FROM PermissionSet '+
+                                    'WHERE IsOwnedByProfile = FALSE' 
+                        }, {
+                            tooling: false,
+                            byPasses: [ 'INVALID_TYPE' ],
+                            string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
+                                    'FROM PermissionSetGroup ' 
+                        } ],
+                        onEachRecord: function(v, i) {
+                            if (i === 0) {
+                                const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
+                                const item = {
+                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    name: v.Name,
+                                    description: v.Description,
+                                    hasLicense: (v.License ? 'yes' : 'no'),
+                                    license: (v.License ? v.License.Name : ''),
+                                    isCustom: v.IsCustom,
+                                    isUndescribedCustom: v.IsCustom && !v.Description,
+                                    package: v.NamespacePrefix,
+                                    isUnusedCustom: v.IsCustom && !hasMembers,
+                                    hasMembers: hasMembers,
+                                    isGroup: (v.Type === 'Group')     // other values can be 'Regular', 'Standard', 'Session
+                                };
+                                if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                                psMap[item.id] = item;
+                            } else {
+                                const item = {
+                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    name: v.DeveloperName,
+                                    description: v.Description,
+                                    package: v.NamespacePrefix
+                                }
+                                psgByName2[item.package+'--'+item.name] = item;
+                            }
+                        }, 
+                        onEnd: function() { 
+                            for (const [key, value] of Object.entries(psgByName1)) {
+                                value.groupId = psgByName2[key].id;
+                                value.description = psgByName2[key].description;
+                                value.isUndescribedCustom = value.isCustom && !value.description;
+                                psMap[value.id] = value;
+                            };
+                            core.setMetadataInCache(cache, psMap);
+                            resolve(psMap);
+                        },
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3391,25 +3628,37 @@ function buildDatasets(core) {
         name: 'permissionSetAssignments',
         keycache: 'PermissionSetAssignments',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
-                            'FROM PermissionSetAssignment '+
-                            'WHERE Assignee.IsActive = TRUE '+
-                            'AND PermissionSet.IsOwnedByProfile = FALSE '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
-                        assigneeProfileId: core.doSimplifiySalesforceID(v.Assignee.ProfileId),
-                        permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'PermissionSetAssignment': [ 'AssigneeId', 'Id', 'PermissionSetId' ],
+                    'PermissionSet': [ 'IsOwnedByProfile' ],
+                    'User': [ 'ProfileId', 'IsActive' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
+                                    'FROM PermissionSetAssignment '+
+                                    'WHERE Assignee.IsActive = TRUE '+
+                                    'AND PermissionSet.IsOwnedByProfile = FALSE '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
+                                assigneeProfileId: core.doSimplifiySalesforceID(v.Assignee.ProfileId),
+                                permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3423,60 +3672,73 @@ function buildDatasets(core) {
         name: 'roles',
         keycache: 'Roles',
         retriever: function(me, resolve, reject) {
-            const ROOT_ID = '###root###';
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
-                                '(SELECT Id, Name, Username, Email, Phone, '+
-                                    'SmallPhotoUrl, IsActive FROM Users)'+
-                            ' FROM UserRole '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    let item = {
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        name: v.Name,
-                        developerName: v.DeveloperName,
-                        parentId: v.ParentRoleId ? core.doSimplifiySalesforceID(v.ParentRoleId) : ROOT_ID,
-                        hasParent: v.ParentRoleId ? true : false,
-                        activeMembersCount: 0,
-                        activeMembers: [],
-                        hasActiveMembers: false,
-                        inactiveMembersCount: 0,
-                        hasInactiveMembers: false,
-                        isExternal: (v.PortalType !== 'None') ? true : false
-                    };
-                    if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
-                        let user = v.Users.records[i];
-                        if (user.IsActive) {
-                            item.activeMembers.push({
-                                id: core.doSimplifiySalesforceID(user.Id),
-                                name: user.Name,
-                                username: user.Username,
-                                email: user.Email,
-                                telephone: user.Phone,
-                                photourl: user.SmallPhotoUrl,
-                                isActive: user.IsActive
-                            });
-                        } else {
-                            item.inactiveMembersCount++;
-                        }
-                    }
-                    item.activeMembersCount = item.activeMembers.length;
-                    item.hasActiveMembers = item.activeMembers.length > 0;
-                    item.hasInactiveMembers = item.inactiveMembersCount > 0;
-                    return item;
-                }, 
-                onEndFromCache: function(records) {
-                    records[ROOT_ID] = {
-                        id: ROOT_ID,
-                        name: 'Role Hierarchy',
-                        developerName: ROOT_ID,
-                        parentId: null
-                    };
-                    resolve(records);
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'UserRole': [ 'Id', 'DeveloperName', 'Name', 'ParentRoleId', 
+                                  'PortalType' ],
+                    'User': [ 'Id', 'Name', 'Username', 'Email', 'Phone', 
+                                  'SmallPhotoUrl', 'IsActive' ]
                 },
-                onError: reject
+                onError: reject,
+                onEnd: () => {
+                    const ROOT_ID = '###root###';
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
+                                        '(SELECT Id, Name, Username, Email, Phone, '+
+                                            'SmallPhotoUrl, IsActive FROM Users)'+
+                                    ' FROM UserRole '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            let item = {
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                name: v.Name,
+                                developerName: v.DeveloperName,
+                                parentId: v.ParentRoleId ? core.doSimplifiySalesforceID(v.ParentRoleId) : ROOT_ID,
+                                hasParent: v.ParentRoleId ? true : false,
+                                activeMembersCount: 0,
+                                activeMembers: [],
+                                hasActiveMembers: false,
+                                inactiveMembersCount: 0,
+                                hasInactiveMembers: false,
+                                isExternal: (v.PortalType !== 'None') ? true : false
+                            };
+                            if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
+                                let user = v.Users.records[i];
+                                if (user.IsActive) {
+                                    item.activeMembers.push({
+                                        id: core.doSimplifiySalesforceID(user.Id),
+                                        name: user.Name,
+                                        username: user.Username,
+                                        email: user.Email,
+                                        telephone: user.Phone,
+                                        photourl: user.SmallPhotoUrl,
+                                        isActive: user.IsActive
+                                    });
+                                } else {
+                                    item.inactiveMembersCount++;
+                                }
+                            }
+                            item.activeMembersCount = item.activeMembers.length;
+                            item.hasActiveMembers = item.activeMembers.length > 0;
+                            item.hasInactiveMembers = item.inactiveMembersCount > 0;
+                            return item;
+                        }, 
+                        onEndFromCache: function(records) {
+                            records[ROOT_ID] = {
+                                id: ROOT_ID,
+                                name: 'Role Hierarchy',
+                                developerName: ROOT_ID,
+                                parentId: null
+                            };
+                            resolve(records);
+                        },
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3490,76 +3752,87 @@ function buildDatasets(core) {
         name: 'publicGroups',
         keycache: 'PublicGroups',
         retriever: function(me, resolve, reject) {
-            const cache = this.keycache;
-            const value = core.getMetadataInCache(cache);
-            if (value) resolve(value);
-            const publicGroupsMap = {};
-            const pgAssignmentsMap = {};
-            core.doSalesforceQueries({
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
-                            'FROM Group ' 
-                }, { 
-                    tooling: false, 
-                    string: 'SELECT Id, GroupId, UserOrGroupId FROM GroupMember '
-                } ],
-                onEachRecord: function(v, i, l, ts) {
-                    if (i === 0) {
-                        const item = { id: core.doSimplifiySalesforceID(v.Id) };
-                        switch (v.Type) {
-                            case 'Regular':              item.type = 'publicGroup'; break;
-                            case 'Role':                 item.type = 'role';        break;
-                            case 'Queue':                item.type = 'queue';       break;
-                            case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
-                            // case 'AllCustomerPortal':
-                            // case 'Organization':
-                            // case 'PRMOrganization':
-                            default: item.type = 'technical';
-                        }
-                        if (item.type === 'role' || item.type === 'roleAndSub') {
-                            item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
-                        } else {
-                            item.developerName = v.DeveloperName;
-                            item.name = v.Name;
-                            item.includeBosses = v.DoesIncludeBosses;
-                            item.directMembersCount = 0;
-                            item.directUsers = [];
-                            item.directGroups = [];                            
-                        }
-                        publicGroupsMap[item.id] = item;
-                    } else {
-                        const groupId = core.doSimplifiySalesforceID(v.GroupId);
-                        let item = pgAssignmentsMap[groupId];
-                        if (!item) {
-                            // no assignment yet for this group
-                            item = { 
-                                directMembersCount: 0,
-                                directUsers: [],
-                                directGroups: []
-                            };
-                        }
-                        item.directMembersCount++;
-                        const member_id = core.doSimplifiySalesforceID(v.UserOrGroupId);
-                        const member_is_a_user = member_id.startsWith('005');
-                        (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
-                        pgAssignmentsMap[groupId] = item;
-                    }
-                }, 
-                onEnd: function(records, size) {
-                    // Merge publicGroupsMap and pgAssignmentsMap
-                    for (const [key, value] of Object.entries(publicGroupsMap)) {
-                        if (pgAssignmentsMap[key]) {
-                            value.directMembersCount = pgAssignmentsMap[key].directMembersCount;
-                            value.directUsers = pgAssignmentsMap[key].directUsers;
-                            value.directGroups = pgAssignmentsMap[key].directGroups;
-                            delete pgAssignmentsMap[key];
-                        }
-                    }
-                    core.setMetadataInCache(cache, publicGroupsMap);
-                    resolve(publicGroupsMap);
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'GroupMember': [ 'Id', 'GroupId', 'UserOrGroupId' ],
+                    'Group': [ 'Id', 'Name', 'DeveloperName', 'DoesIncludeBosses', 'Type', 'RelatedId' ] 
                 },
-                onError: reject
+                onError: reject,
+                onEnd: () => {
+                    const cache = this.keycache;
+                    const value = core.getMetadataInCache(cache);
+                    if (value) resolve(value);
+                    const publicGroupsMap = {};
+                    const pgAssignmentsMap = {};
+                    core.doSalesforceQueries({
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
+                                    'FROM Group ' 
+                        }, { 
+                            tooling: false, 
+                            string: 'SELECT Id, GroupId, UserOrGroupId FROM GroupMember '
+                        } ],
+                        onEachRecord: function(v, i, l, ts) {
+                            if (i === 0) {
+                                const item = { id: core.doSimplifiySalesforceID(v.Id) };
+                                switch (v.Type) {
+                                    case 'Regular':              item.type = 'publicGroup'; break;
+                                    case 'Role':                 item.type = 'role';        break;
+                                    case 'Queue':                item.type = 'queue';       break;
+                                    case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
+                                    // case 'AllCustomerPortal':
+                                    // case 'Organization':
+                                    // case 'PRMOrganization':
+                                    default: item.type = 'technical';
+                                }
+                                if (item.type === 'role' || item.type === 'roleAndSub') {
+                                    item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                                } else {
+                                    item.developerName = v.DeveloperName;
+                                    item.name = v.Name;
+                                    item.includeBosses = v.DoesIncludeBosses;
+                                    item.directMembersCount = 0;
+                                    item.directUsers = [];
+                                    item.directGroups = [];                            
+                                }
+                                publicGroupsMap[item.id] = item;
+                            } else {
+                                const groupId = core.doSimplifiySalesforceID(v.GroupId);
+                                let item = pgAssignmentsMap[groupId];
+                                if (!item) {
+                                    // no assignment yet for this group
+                                    item = { 
+                                        directMembersCount: 0,
+                                        directUsers: [],
+                                        directGroups: []
+                                    };
+                                }
+                                item.directMembersCount++;
+                                const member_id = core.doSimplifiySalesforceID(v.UserOrGroupId);
+                                const member_is_a_user = member_id.startsWith('005');
+                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
+                                pgAssignmentsMap[groupId] = item;
+                            }
+                        }, 
+                        onEnd: function(records, size) {
+                            // Merge publicGroupsMap and pgAssignmentsMap
+                            for (const [key, value] of Object.entries(publicGroupsMap)) {
+                                if (pgAssignmentsMap[key]) {
+                                    value.directMembersCount = pgAssignmentsMap[key].directMembersCount;
+                                    value.directUsers = pgAssignmentsMap[key].directUsers;
+                                    value.directGroups = pgAssignmentsMap[key].directGroups;
+                                    delete pgAssignmentsMap[key];
+                                }
+                            }
+                            core.setMetadataInCache(cache, publicGroupsMap);
+                            resolve(publicGroupsMap);
+                        },
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3573,45 +3846,54 @@ function buildDatasets(core) {
         name: 'objects',
         keycache: 'Objects',
         retriever: function(me, resolve, reject) {
-            core.doRetrieveDataWithCache({
-                mnemonic: this.keycache, 
-                doDataRetriever: function(callbackToSetTheCache) {
-                    core.doSalesforceGlobalDescribe({
-                        onEnd: function(sobjects) {
-                            const map = {};
-                            let size = 0;
-                            if (sobjects) {
-                                sobjects.forEach(v => {
-                                    if (!v.keyPrefix) return;
-                                    const isCS = (v.customSetting === true);
-                                    const isCO = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
-                                    const isSO = (v.customSetting === false && v.custom === false);
-                                    const isEO = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
-                                    const isCMDT = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
-                                    if (!isCS && !isCO && !isSO && !isEO && !isCMDT) return;
-                                    const object = {
-                                        id: v.name,
-                                        label: v.label,
-                                        developerName: v.name,
-                                        package: core.doSalesforceSplitDeveloperName(v.name).package,
-                                        isCustomSetting: isCS,
-                                        isCustomObject: isCO,
-                                        isStandardObject: isSO,
-                                        isExternalObject: isEO,
-                                        isCustomMetadataType: isCMDT
-                                    };
-                                    map[object.id] = object;
-                                    size++;
-                                });
-                            }
-                            core.doSetSizeInMap(map, size);
-                            callbackToSetTheCache(map);
-                        }, 
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doRetrieveDataWithCache({
+                        mnemonic: this.keycache, 
+                        doDataRetriever: function(callbackToSetTheCache) {
+                            core.doSalesforceGlobalDescribe({
+                                onEnd: function(sobjects) {
+                                    const map = {};
+                                    let size = 0;
+                                    if (sobjects) {
+                                        sobjects.forEach(v => {
+                                            if (!v.keyPrefix) return;
+                                            const isCS = (v.customSetting === true);
+                                            const isCO = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
+                                            const isSO = (v.customSetting === false && v.custom === false);
+                                            const isEO = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
+                                            const isCMDT = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
+                                            if (!isCS && !isCO && !isSO && !isEO && !isCMDT) return;
+                                            const object = {
+                                                id: v.name,
+                                                label: v.label,
+                                                developerName: v.name,
+                                                package: core.doSalesforceSplitDeveloperName(v.name).package,
+                                                isCustomSetting: isCS,
+                                                isCustomObject: isCO,
+                                                isStandardObject: isSO,
+                                                isExternalObject: isEO,
+                                                isCustomMetadataType: isCMDT
+                                            };
+                                            map[object.id] = object;
+                                            size++;
+                                        });
+                                    }
+                                    core.doSetSizeInMap(map, size);
+                                    callbackToSetTheCache(map);
+                                }, 
+                                onError: reject
+                            });
+                        },
+                        onEndFromCache: resolve,
                         onError: reject
                     });
-                },
-                onEndFromCache: resolve,
-                onError: reject
+                }
             });
         }
     }));
@@ -3625,26 +3907,37 @@ function buildDatasets(core) {
         name: 'reports',
         keycache: 'Reports',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, Name, NamespacePrefix, DeveloperName, FolderName, Format, Description '+
-                            'FROM Report '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return { 
-                        id: v.Id,
-                        name: v.Name,
-                        package: v.NamespacePrefix,
-                        developerName: v.DeveloperName,
-                        folder: { name: v.FolderName },
-                        format: v.Format,
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'Report' : [ 'Id', 'Name', 'NamespacePrefix', 'DeveloperName', 
+                                 'FolderName', 'Format', 'Description' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, Name, NamespacePrefix, DeveloperName, FolderName, Format, Description '+
+                                    'FROM Report '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return { 
+                                id: v.Id,
+                                name: v.Name,
+                                package: v.NamespacePrefix,
+                                developerName: v.DeveloperName,
+                                folder: { name: v.FolderName },
+                                format: v.Format,
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3658,25 +3951,36 @@ function buildDatasets(core) {
         name: 'dashboards',
         keycache: 'Dashboards',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT Id, Title, NamespacePrefix, DeveloperName, FolderId, FolderName, Description '+
-                            'FROM Dashboard '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return { 
-                        id: v.Id,
-                        name: v.Title,
-                        package: v.NamespacePrefix,
-                        developerName: v.DeveloperName,
-                        folder: { id: v.FolderId, name: v.FolderName },
-                        description: v.Description
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'Dashboard': [ 'Id', 'Title', 'NamespacePrefix', 'DeveloperName', 
+                                   'FolderId', 'FolderName', 'Description' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT Id, Title, NamespacePrefix, DeveloperName, FolderId, FolderName, Description '+
+                                    'FROM Dashboard '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return { 
+                                id: v.Id,
+                                name: v.Title,
+                                package: v.NamespacePrefix,
+                                developerName: v.DeveloperName,
+                                folder: { id: v.FolderId, name: v.FolderName },
+                                description: v.Description
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3690,33 +3994,44 @@ function buildDatasets(core) {
         name: 'batchesApexJobs',
         keycache: 'BatchesApexJobs',
         retriever: function(me, resolve, reject) {
-            let artificial_id = 0;
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
-                            'FROM AsyncApexJob '+
-                            'WHERE CreatedDate >= YESTERDAY '+
-                            'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
-                            'OR Status = \'Failed\') '+
-                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
-                            'LIMIT 10000 '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
-                    return { 
-                        id: 'APXJOBS-'+artificial_id++,
-                        type: v.JobType,
-                        context: apexClass,
-                        status: v.Status,
-                        message: v.ExtendedStatus,
-                        numIds: v.ids,
-                        numErrors: v.errors
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'AsyncApexJob': [ 'JobType', 'ApexClassId', 'MethodName', 'Status', 
+                                      'ExtendedStatus', 'Id', 'NumberOfErrors', 'CreatedDate' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    let artificial_id = 0;
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
+                                    'FROM AsyncApexJob '+
+                                    'WHERE CreatedDate >= YESTERDAY '+
+                                    'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
+                                    'OR Status = \'Failed\') '+
+                                    'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
+                                    'LIMIT 10000 '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
+                            return { 
+                                id: 'APXJOBS-'+artificial_id++,
+                                type: v.JobType,
+                                context: apexClass,
+                                status: v.Status,
+                                message: v.ExtendedStatus,
+                                numIds: v.ids,
+                                numErrors: v.errors
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3724,46 +4039,59 @@ function buildDatasets(core) {
         name: 'batchesScheduledJobs',
         keycache: 'BatchesScheduledJobs',
         retriever: function(me, resolve, reject) {
-            let artificial_id = 0;
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: false, 
-                    string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
-                                'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
-                                'EndTime, Id, LastModifiedById, NextFireTime, OwnerId, '+
-                                'PreviousFireTime, StartTime, State, TimesTriggered, '+
-                                'TimeZoneSidKey '+
-                            'FROM CronTrigger '+
-                            'WHERE State <> \'COMPLETE\' ' +
-                            'LIMIT 10000 '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    let jobTypeLabel = '';
-                    switch (v.CronJobDetail.JobType) {
-                        case '1': jobTypeLabel = 'Data Export'; break;
-                        case '3': jobTypeLabel = 'Dashboard Refresh'; break;
-                        case '4': jobTypeLabel = 'Reporting Snapshot'; break;
-                        case '6': jobTypeLabel = 'Scheduled Flow'; break;
-                        case '7': jobTypeLabel = 'Scheduled Apex'; break;
-                        case '8': jobTypeLabel = 'Report Run'; break;
-                        case '9': jobTypeLabel = 'Batch Job'; break;
-                        case 'A': jobTypeLabel = 'Reporting Notification'; break;
-                        default:  return; // skip if type is not supported
-                    }
-                    return { 
-                        id: 'SCHJOBS-'+artificial_id++,
-                        name: v.CronJobDetail.Name,
-                        type: jobTypeLabel,
-                        status: v.State,
-                        userid: core.doSimplifiySalesforceID(v.OwnerId),
-                        start: v.StartTime,
-                        end: v.EndTime,
-                        timezone: v.TimeZoneSidKey
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'CronTrigger': [ 'CreatedById', 'CreatedDate', 'CronExpression', 
+                                     'CronJobDetailId', 'EndTime', 'Id', 'LastModifiedById', 
+                                     'NextFireTime', 'OwnerId', 'PreviousFireTime', 
+                                     'StartTime', 'State', 'TimesTriggered', 'TimeZoneSidKey' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    let artificial_id = 0;
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: false, 
+                            string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
+                                        'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
+                                        'EndTime, Id, LastModifiedById, NextFireTime, OwnerId, '+
+                                        'PreviousFireTime, StartTime, State, TimesTriggered, '+
+                                        'TimeZoneSidKey '+
+                                    'FROM CronTrigger '+
+                                    'WHERE State <> \'COMPLETE\' ' +
+                                    'LIMIT 10000 '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            let jobTypeLabel = '';
+                            switch (v.CronJobDetail.JobType) {
+                                case '1': jobTypeLabel = 'Data Export'; break;
+                                case '3': jobTypeLabel = 'Dashboard Refresh'; break;
+                                case '4': jobTypeLabel = 'Reporting Snapshot'; break;
+                                case '6': jobTypeLabel = 'Scheduled Flow'; break;
+                                case '7': jobTypeLabel = 'Scheduled Apex'; break;
+                                case '8': jobTypeLabel = 'Report Run'; break;
+                                case '9': jobTypeLabel = 'Batch Job'; break;
+                                case 'A': jobTypeLabel = 'Reporting Notification'; break;
+                                default:  return; // skip if type is not supported
+                            }
+                            return { 
+                                id: 'SCHJOBS-'+artificial_id++,
+                                name: v.CronJobDetail.Name,
+                                type: jobTypeLabel,
+                                status: v.State,
+                                userid: core.doSimplifiySalesforceID(v.OwnerId),
+                                start: v.StartTime,
+                                end: v.EndTime,
+                                timezone: v.TimeZoneSidKey
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3777,39 +4105,48 @@ function buildDatasets(core) {
         name: 'customObjects',
         keycache: 'CustomObjects',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT DurableId, DeveloperName, IsCustomSetting, QualifiedApiName, NamespacePrefix '+
-                            'FROM EntityDefinition '+
-                            'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    let entityType = 'Other';
-                    if (v.IsCustomSetting == true) 
-                        entityType = 'CustomSetting';
-                    else {
-                        const pp = v.QualifiedApiName.split('__');
-                        const prefix = pp[pp.length-1];
-                        switch (prefix) {
-                            case 'c':   entityType = 'CustomObject';  break;
-                            case 'e':   entityType = 'CustomEvent';  break;
-                            case 'ka':  entityType = 'KnowledgeArticle';  break;
-                            case 'x':   entityType = 'ExternalObject';  break;
-                            case 'b':   entityType = 'BigObject';  break;
-                            case 'mdt': entityType = 'CustomMetadataType';  break;
-                        }
-                    }
-                    return { 
-                        id: core.doSimplifiySalesforceID(v.DurableId),
-                        developerName: v.DeveloperName,
-                        packageName: v.NamespacePrefix,
-                        type: entityType
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT DurableId, DeveloperName, IsCustomSetting, QualifiedApiName, NamespacePrefix '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            let entityType = 'Other';
+                            if (v.IsCustomSetting == true) 
+                                entityType = 'CustomSetting';
+                            else {
+                                const pp = v.QualifiedApiName.split('__');
+                                const prefix = pp[pp.length-1];
+                                switch (prefix) {
+                                    case 'c':   entityType = 'CustomObject';  break;
+                                    case 'e':   entityType = 'CustomEvent';  break;
+                                    case 'ka':  entityType = 'KnowledgeArticle';  break;
+                                    case 'x':   entityType = 'ExternalObject';  break;
+                                    case 'b':   entityType = 'BigObject';  break;
+                                    case 'mdt': entityType = 'CustomMetadataType';  break;
+                                }
+                            }
+                            return { 
+                                id: core.doSimplifiySalesforceID(v.DurableId),
+                                developerName: v.DeveloperName,
+                                packageName: v.NamespacePrefix,
+                                type: entityType
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3823,28 +4160,37 @@ function buildDatasets(core) {
         name: 'customFields',
         keycache: 'CustomFields',
         retriever: function(me, resolve, reject) {
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: [ { 
-                    tooling: true, 
-                    string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix '+
-                            'FROM CustomField '+
-                            'WHERE ManageableState = \'unmanaged\'  '
-                } ],
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
-                    return { 
-                        id: core.doSimplifiySalesforceID(v.Id),
-                        objectId: (isObjectId === true ? core.doSimplifiySalesforceID(v.TableEnumOrId) : ''),
-                        objectName: (isObjectId === false ? v.TableEnumOrId : ''),
-                        fieldName: v.DeveloperName,
-                        developerName: v.DeveloperName,
-                        packageName: v.NamespacePrefix,
-                        fullName: v.DeveloperName
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix '+
+                                    'FROM CustomField '+
+                                    'WHERE ManageableState = \'unmanaged\'  '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
+                            return { 
+                                id: core.doSimplifiySalesforceID(v.Id),
+                                objectId: (isObjectId === true ? core.doSimplifiySalesforceID(v.TableEnumOrId) : ''),
+                                objectName: (isObjectId === false ? v.TableEnumOrId : ''),
+                                fieldName: v.DeveloperName,
+                                developerName: v.DeveloperName,
+                                packageName: v.NamespacePrefix,
+                                fullName: v.DeveloperName
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));
@@ -3858,41 +4204,54 @@ function buildDatasets(core) {
         name: 'orgWideDefaults',
         keycache: 'OrgWideDefaults',
         retriever: function(me, resolve, reject) {
-            // We have some issue calling the Bulk API with jsforce
-            // As EntityDefinition does not accept querMore, we will trick the system
-            const MAX_COUNT_ENTITYDEF = 600;
-            const BATCH_SIZE = 200;
-            const NUM_LOOP = MAX_COUNT_ENTITYDEF/BATCH_SIZE;
-            const entityDefQueries = [];
-            for (let i=0; i<NUM_LOOP; i++) {
-                entityDefQueries.push({
-                    rest: true,
-                    string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
-                                'NamespacePrefix '+
-                            'FROM EntityDefinition '+
-                            'WHERE IsCustomSetting = false '+
-                            'AND IsApexTriggerable = true '+
-                            'AND IsCompactLayoutable = true '+
-                            'LIMIT ' + BATCH_SIZE + ' '+
-                            'OFFSET ' + (BATCH_SIZE*i),
-                    queryMore: false
-                });
-            }
-            core.doSalesforceQueriesWithCache({
-                mnemonic: this.keycache, 
-                queries: entityDefQueries,
-                onEachRecordFromAPI: function(v, i, l, ts) {
-                    return { 
-                        id: v.DurableId,
-                        name: v.QualifiedApiName,
-                        label: v.MasterLabel,
-                        packageName: v.NamespacePrefix,
-                        external: v.ExternalSharingModel,
-                        internal: v.InternalSharingModel
-                    };
-                }, 
-                onEndFromCache: resolve,
-                onError: reject
+            core.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    /*'EntityDefinition': [ 'DurableId', 'QualifiedApiName', 'MasterLabel', 
+                                          'ExternalSharingModel', 'InternalSharingModel',
+                                          'NamespacePrefix', 'IsCustomSetting',
+                                          'IsApexTriggerable', 'IsCompactLayoutable' ]*/
+                },
+                onError: reject,
+                onEnd: () => {
+                    // We have some issue calling the Bulk API with jsforce
+                    // As EntityDefinition does not accept querMore, we will trick the system
+                    const MAX_COUNT_ENTITYDEF = 600;
+                    const BATCH_SIZE = 200;
+                    const NUM_LOOP = MAX_COUNT_ENTITYDEF/BATCH_SIZE;
+                    const entityDefQueries = [];
+                    for (let i=0; i<NUM_LOOP; i++) {
+                        entityDefQueries.push({
+                            rest: true,
+                            string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
+                                        'NamespacePrefix '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE IsCustomSetting = false '+
+                                    'AND IsApexTriggerable = true '+
+                                    'AND IsCompactLayoutable = true '+
+                                    'LIMIT ' + BATCH_SIZE + ' '+
+                                    'OFFSET ' + (BATCH_SIZE*i),
+                            queryMore: false
+                        });
+                    }
+                    core.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: entityDefQueries,
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return { 
+                                id: v.DurableId,
+                                name: v.QualifiedApiName,
+                                label: v.MasterLabel,
+                                packageName: v.NamespacePrefix,
+                                external: v.ExternalSharingModel,
+                                internal: v.InternalSharingModel
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
             });
         }
     }));

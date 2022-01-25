@@ -153,6 +153,7 @@
                     const core = new OrgCheck.Core({
                         sfApiVersion: SF_API_VERSION,
                         sfLocalAccessToken: '{!$Api.Session_Id}',
+                        sfLocalCurrentUserId: '{!$User.Id}',
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
