@@ -393,7 +393,7 @@ const OrgCheck = {
 
         /**
         * Message handler
-        * @param configuration Object must contain 'modalContentId', 'modalId'
+        * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
         */
         MessageHandler: function (configuration) {
 
@@ -452,6 +452,16 @@ const OrgCheck = {
             */
             this.showModal = function (title, element) {
                 private_show_modal(title, element);
+            };
+
+            /**
+            * Show warning message
+            * @param message String the message
+            */
+            this.showWarning = function (message) {
+                const messageId = document.getElementById(configuration.warningMessageId);
+                messageId.innerHTML = message;
+                messageId.style.display = 'block';
             };
 
             /**
@@ -976,6 +986,7 @@ const OrgCheck = {
      *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
      *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
      *                <li><code>htmlMainContentTagId</code>: HTML Tag Id of the main content zone of the page</li> 
+     *                <li><code>htmlWarningMessageTagId</code>: HTML Tag Id of the message</li>
      *                <li><code>formatDefaultDate</code>: Default date format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultDatetime</code>: Default datetime format (if not specified for the current user)</li> 
      *              </ol>
@@ -1041,7 +1052,8 @@ const OrgCheck = {
         const MSG_HANDLER = new OrgCheck.handlers.MessageHandler({
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
-            modalTitleId: setup.htmlModalTitleTagId
+            modalTitleId: setup.htmlModalTitleTagId,
+            warningMessageId: setup.htmlWarningMessageTagId
         });
 
         const PROGRESSBAR_HANDLER = new OrgCheck.handlers.ProgressBarHandler({
@@ -1458,6 +1470,11 @@ const OrgCheck = {
                     modal: {
                         show: function(title, el) {
                             MSG_HANDLER.showModal(title, el);
+                        }
+                    },
+                    message: {
+                        show: function(message, type) {
+                            MSG_HANDLER.showWarning(message);
                         }
                     },
                     datatable: {

@@ -113,6 +113,9 @@
                     </div>
                 </div>
             </div>
+            <div id="warning-message" style="display: none;" class="slds-notify slds-theme_warning">
+                Warning: This is a warning message
+            </div>
             <div id="spinner" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
                     <div class="slds-modal__container">
@@ -157,6 +160,7 @@
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
+                        htmlWarningMessageTagId: 'warning-message',
                         htmlModalTagId: 'modal',
                         htmlModalTitleTagId: 'modal-heading',
                         htmlMainContentTagId: 'content',

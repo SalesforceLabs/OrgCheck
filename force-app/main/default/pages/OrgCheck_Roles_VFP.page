@@ -129,11 +129,12 @@
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
                             let html = '';
                             html += 'You have more than '+MAX_LEVEL_DEPTH_ROLES+' levels of roles in your Role Hierarchy ';
-                            html += '(exactly '+mdepth+' levels).<br /><br />';
+                            html += '(exactly '+mdepth+' levels).<br />';
                             html += 'The Role Hierarchy is not there to mimic the hierarchy of your ';
-                            html += 'company, it is there for visibility purpose.<br /><br />';
-                            html += 'Please reduce it!<br />';
+                            html += 'company, it is there for visibility purpose.<br />';
+                            html += 'Please reduce it!';
                             helper.html.modal.show('Too many levels in your Role Hierarchy!', html);
+                            helper.html.message.show(html);
                         }
                         
                         // Set some attributes that we use to render each nodes

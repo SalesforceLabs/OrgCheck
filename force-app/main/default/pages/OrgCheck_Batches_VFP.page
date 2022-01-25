@@ -10,7 +10,7 @@
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external">
-                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -106,7 +106,7 @@
                                 showStatistics: true
                             });
 
-                            let countRecompileApexClasses = 0;
+                            let cntClsToCompile = 0;
 
                             // Render the data in a table for Not Scheduled Jobs
                             helper.html.datatable.create({
@@ -122,7 +122,7 @@
                                     { name: 'Status', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
-                                                countRecompileApexClasses++;
+                                                cntClsToCompile++;
                                                 return 'Recompile!';
                                             }
                                             return 'OK';
@@ -145,17 +145,14 @@
                             });
 
                             // Show alert about recompilation
-                            if (countRecompileApexClasses > 0) {
-                                let html = '';
-                                if (countRecompileApexClasses > 0) {
-                                    html += 'You have '+countRecompileApexClasses+' Apex classes that need to be <b>recompiled</b> and it may be a schedulable!<br />';
-                                    html += 'You need to review the classes that could not have been compiled in this org.<br />';
-                                    html += '<br />';
-                                }
+                            if (cntClsToCompile > 0) {
+                                let html = 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
+                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
+                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
                                 helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                helper.html.message.show(html);
+                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
                             }
-
-
                         },
                         actions: {  
                             clearCache: { 

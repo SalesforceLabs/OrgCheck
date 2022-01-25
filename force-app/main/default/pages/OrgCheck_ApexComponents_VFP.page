@@ -10,7 +10,7 @@
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external">
-                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -20,9 +20,9 @@
             </div>
             <div class="slds-page-header__control">
                 <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank" rel="external">
-                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
+                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
                         <svg class="slds-button__icon" aria-hidden="true">
-                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#checkout')}"></use>
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#like')}"></use>
                         </svg>
                         <span class="slds-assistive-text">Unit Tests</span>
                     </button>
@@ -66,7 +66,9 @@
                         dependencies: true,
                         onRecords: function(map) { 
 
-                            let countRecompileApexClasses = 0;
+                            let cntClsToCompile = 0;
+                            let cntClsNoCoverage = 0;
+                            let cntClsLowCoverage = 0;
 
                             // Render the Apex Classes data in a table
                             helper.html.datatable.create({
@@ -83,7 +85,7 @@
                                     { name: 'Status', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
-                                                countRecompileApexClasses++;
+                                                cntClsToCompile++;
                                                 return 'Recompile!';
                                             }
                                             return 'OK';
@@ -137,12 +139,16 @@
                                         formula: (r) => { 
                                             if (r.isClass === true) {
                                                 if (r.coverage || r.coverage === 0) return helper.html.render.percentage(r.coverage);
+                                                cntClsNoCoverage++;
                                                 return 'No coverage data';
                                             }
                                             return 'Not Applicable';
                                         },
                                         scoreFormula: (r) => { 
-                                            if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) return 1;
+                                            if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) {
+                                                if (r.coverage < 0.85) cntClsLowCoverage++;
+                                                return 1;
+                                            }
                                         }
                                     },
                                     { name: 'Related Tests',
@@ -177,15 +183,29 @@
                                 showStatistics: true
                             });
 
+                            let html = '';
+
                             // Show alert about recompilation
-                            if (countRecompileApexClasses > 0) {
-                                let html = '';
-                                if (countRecompileApexClasses > 0) {
-                                    html += 'You have '+countRecompileApexClasses+' Apex classes that need to be <b>recompiled</b>.<br />';
-                                    html += 'You need to review the classes that could not have been compiled in this org.<br />';
-                                    html += '<br />';
-                                }
+                            if (cntClsToCompile > 0) {
+                                html += 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
+                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
+                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
+                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                            }
+
+                            // Show alert about no code coverage
+                            if (cntClsNoCoverage > 0 || cntClsLowCoverage > 0) {
+                                if (html) html += '<br />';
+                                if (cntClsNoCoverage > 0) html += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
+                                if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
+                                html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
+                                html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                helper.html.element.addClass('run-all-tests', ['slds-theme_warning']);
+                            }
+
+                            if (html) {
                                 helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                helper.html.message.show(html);
                             }
 
                             const objectTriggersCountMap = {};
