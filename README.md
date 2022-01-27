@@ -45,4 +45,4 @@ OrgCheck is available under the [MIT license](LICENSE.md)
 - Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
 - Salesforce's Ben blog article: https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/
 - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
-- Salesforce Labs's Twitter: https://mobile.twitter.com/salesforce_labs/status/1480669271617568770
+- Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
