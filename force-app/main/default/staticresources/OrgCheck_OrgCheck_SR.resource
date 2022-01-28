@@ -1867,39 +1867,36 @@ const OrgCheck = {
          */
         this.doSecureSobjectReadEnforcement = function(setup) {
             // Not ready yet to implement the enforcement
-            if (setup && setup.onEnd) setup.onEnd();
-            /*
+            //if (setup && setup.onEnd) setup.onEnd();
             const queries = [];
             const currentUser = OrgCheck.localUserId;
-            let sobjectsList = '';
-            let fieldsList = '';
+            let sobjectsList = [];
+            let fieldsList = [];
             for (const [sobject, fields] of Object.entries(setup.sobjects)) {
-                sobjectsList += private_secure_soql(sobject) + ',';
+                sobjectsList.push(sobject); 
                 fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
-                fields.forEach(f => fieldsList += private_secure_soql(sobject+'.'+f+'.'+currentUser) + ',');
+                fields.forEach(f => fieldsList.push(sobject+'.'+f+'.'+currentUser)); 
                 // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
             }
-            if (sobjectsList) sobjectsList = sobjectsList.slice(0, -1);
-            if (fieldsList) fieldsList = fieldsList.slice(0, -1);
-            if (sobjectsList) {
+            sobjectsList.forEach(sobject =>
                 queries.push({
                     tooling: true,
                     string: 'SELECT DurableId, IsReadable '+
                             'FROM UserEntityAccess '+
                             'WHERE UserId='+ private_secure_soql(currentUser) +' '+
-                            'AND EntityDefinition.QualifiedApiName IN ('+sobjectsList+') '+
+                            'AND EntityDefinition.QualifiedApiName = '+ private_secure_soql(sobject) +' '+
                             'AND IsReadable = false'
-                });
-            }
-            if (fieldsList) {
+                })
+            );
+            sobjectsList.forEach(field =>
                 queries.push({
                     tooling: true,
                     string: 'SELECT DurableId, IsAccessible '+
                             'FROM UserFieldAccess '+
-                            'WHERE DurableId IN ('+fieldsList+') '+
+                            'WHERE DurableId = '+ private_secure_soql(field) +' '+
                             'AND IsAccessible = false'
-                });
-            }
+                })
+            );
             SALESFORCE_HANDLER.doQueries(
                 queries, 
                 (record) => {}, 
@@ -1919,7 +1916,6 @@ const OrgCheck = {
                 },
                 setup.onError
             );
-            */
         }
 
         /**
