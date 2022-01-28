@@ -1866,8 +1866,6 @@ const OrgCheck = {
          *              </ol>
          */
         this.doSecureSobjectReadEnforcement = function(setup) {
-            // Not ready yet to implement the enforcement
-            //if (setup && setup.onEnd) setup.onEnd();
             const queries = [];
             const currentUser = OrgCheck.localUserId;
             let sobjectsList = [];
