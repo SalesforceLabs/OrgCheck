@@ -26,14 +26,13 @@
                                     const usingTypes = helper.map.keys(dep.using);
                                     if (usingTypes) {
                                         let count = 0;
-                                        if (count > 0) {
-                                            usingTypes.forEach(u => count += helper.map.keys(dep.using[u]).length );
-                                            return helper.html.render.checkbox(true) + ' ' + count;
-                                        }
+                                        usingTypes.forEach(u => count += helper.map.keys(dep.using[u]).length );
+                                        return count;
                                     }
                                 }
-                                return helper.html.render.checkbox(false);
+                                return 0;
                             }
+
                             const countWhereIsItUsed = function(id, typeAPI, typeLabel, typesLabel) {
                                 const dep = map.dependencies[id];
                                 if (dep) {
@@ -42,21 +41,16 @@
                                         if (typeAPI) {
                                             const idx = usedTypes.indexOf(typeAPI);
                                             if (idx >= 0) {
-                                                const size = helper.map.keys(dep.used[typeAPI]).length;
-                                                if (size > 0) {
-                                                    return helper.html.render.checkbox(true) + ' ' + size + ' ' + (size>1?typesLabel:typeLabel);
-                                                }
+                                                return helper.map.keys(dep.used[typeAPI]).length;
                                             }
                                         } else {
                                             let count = 0;
                                             usedTypes.forEach(u => count += helper.map.keys(dep.used[u]).length );
-                                            if (count > 0) {
-                                                return helper.html.render.checkbox(true) + ' ' + count;
-                                            }
+                                            return count;
                                         }
                                     }
                                 }
-                                return helper.html.render.checkbox(false);
+                                return 0;
                             };
 
                             helper.html.datatable.create({
@@ -96,28 +90,40 @@
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
                                     { name: 'Ref. by', type: 'numeric', formula: (r) => { 
-                                        return countWhereIsItReferenced(r.id);
+                                        const count = countWhereIsItReferenced(r.id);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', formula: (r) => { 
-                                        return countWhereIsItUsed(r.id);
-                                    }},
+                                    { name: 'Used in', type: 'numeric', 
+                                        formula: (r) => { 
+                                            const count = countWhereIsItUsed(r.id);
+                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                            return 'Not used!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (countWhereIsItUsed(r.id) === 0) return 1;
+                                        }
+                                    },
                                     { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
-                                        return countWhereIsItUsed(r.id, 'Layout', 'Page Layout', 'Page Layouts');
+                                        const count = countWhereIsItUsed(r.id, 'Layout');
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
-                                        return countWhereIsItUsed(r.id, 'ApexClass', 'Apex Class', 'Apex Classes');
+                                        const count = countWhereIsItUsed(r.id, 'ApexClass');
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
-                                        return countWhereIsItUsed(r.id, 'Flow', 'Flow', 'Flows');
+                                        const count = countWhereIsItUsed(r.id, 'Flow');
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],
