@@ -1934,6 +1934,7 @@ const OrgCheck = {
             const counters = dt.appendChild(document.createElement('span'));
             const filterCounters = dt.appendChild(document.createElement('span'));
             const table = dt.appendChild(document.createElement('table'));
+            const footerMessage = dt.appendChild(document.createElement('span'));
             if (config.showSearch === true) {
                 const searchBox = dt.insertBefore(document.createElement('div'), table);
                 const searchIcon = searchBox.appendChild(document.createElement('img'));
@@ -1973,6 +1974,11 @@ const OrgCheck = {
                             } else {
                                 filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
                             }
+                        }
+                        if (nbVisible == 0) {
+                            footerMessage.innerHTML = 'No data to show with this filter.';
+                        } else {
+                            footerMessage.innerHTML = '';
                         }
                         table.hidden = false; // make table visible again
                     }
@@ -2150,6 +2156,11 @@ const OrgCheck = {
             if (config.showStatistics === true) {
                 counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
                                     nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
+            }
+            if (nbRows == 0) {
+                footerMessage.innerHTML = 'No data to show.';
+            } else {
+                footerMessage.innerHTML = '';
             }
             table.hidden = false; // make table visible again
             if (firstSortCallback) { 
