@@ -2358,9 +2358,7 @@ const OrgCheck = {
                                     'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                                 'FROM MetadataComponentDependency '+
                                 'WHERE (RefMetadataComponentId IN (' + subids + ') '+
-                                'OR MetadataComponentId IN (' + subids+ ')) '+
-                                'AND MetadataComponentType != \'ReportType\' '+
-                                'AND RefMetadataComponentType != \'ReportType\' ',
+                                'OR MetadataComponentId IN (' + subids+ ')) ',
                         queryMore: false
                     });
                     subids = '';
