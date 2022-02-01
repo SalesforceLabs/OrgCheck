@@ -1590,11 +1590,25 @@ const OrgCheck = {
                             return div;
                         },
                         whatIsItUsing: function(id, data) {
-                            if (data && data.usingCount) return data.usingCount;
+                            if (data && data.using) {
+                                const types = MAP_HANDLER.keys(data.using);
+                                if (types) {
+                                    let count = 0;
+                                    types.forEach(u => count += MAP_HANDLER.keys(data.using[u]).length);
+                                    return count;
+                                }
+                            }
                             return 0;
                         },
                         whereIsItUsed: function(id, data) {
-                            if (data && data.usedCount) return data.usedCount;
+                            if (data && data.used) {
+                                const types = MAP_HANDLER.keys(data.used);
+                                if (types) {
+                                    let count = 0;
+                                    types.forEach(u => count += MAP_HANDLER.keys(data.used[u]).length);
+                                    return count;
+                                }
+                            }
                             return 0;
                         },
                         whereIsItUsedBy: function(id, typeAPI, data) {
@@ -2395,18 +2409,14 @@ const OrgCheck = {
                     const bName = record.RefMetadataComponentName;
                     let b = map[bId];
                     if (!b) b = map[bId] = {};
-                    if (!b.usedCount) b.usedCount = 0;
                     if (!b.used) b.used = {};
                     if (!b.used[aType]) b.used[aType] = [];
                     b.used[aType][aId] = { name: aName };
-                    b.usedCount++;
                     let a = map[aId];
                     if (!a) a = map[aId] = {};
-                    if (!a.usingCount) a.usingCount = 0;
                     if (!a.using) a.using = {};
                     if (!a.using[bType]) a.using[bType] = [];
                     a.using[bType][bId] = { name: bName };
-                    a.usingCount++;
                     return {};
                 }, 
                 function() {
