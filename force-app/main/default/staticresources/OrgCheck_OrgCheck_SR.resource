@@ -892,53 +892,6 @@ const OrgCheck = {
             this.show = function () {
                 SPINNER_DIV.style.display = 'block';
             };
-
-            /**
-            * Private method to set the message
-            * @param message Text to write in the div
-            * @param isAppended Reset the content or just append it
-            * @param section Name of the section (optionnal)
-            */
-            function private_set_message(message, isAppended, section) {
-                /*
-                if (message) { 
-                    if (section) {
-                        const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
-                        for (let i=0; i<sections.length; i++) {
-                            if (sections.item(i))
-                        }
-                        document.getElementById(SPINNER_MSG_DIV.)
-                        if (SPINNER_MSG_DIV.;
-
-                            const item = helper.html.element.create('li');
-                            helper.html.element.addClass(item, ['slds-progress__item', 'slds-is-completed']);
-                            helper.html.element.setAttribute(item, 'id', keys[i]);
-                            // add inner div #1
-                            const innerDiv1 = helper.html.element.create('div');
-                            helper.html.element.addClass(innerDiv1, ['slds-progress__marker']);
-                            helper.html.element.appendChild(item, innerDiv1);
-                            // add inner div #2
-                            const innerDiv2 = helper.html.element.create('div');
-                            helper.html.element.addClass(innerDiv2, ['slds-progress__item_content', 'slds-grid', 'slds-grid_align-spread']);
-                            const timestamp = helper.timestamp.to.date(sideValues.timestamp);
-                            const nbItems = (sideValues.size ? (sideValues.size === 0 ? 'No item' : (sideValues.size + ' item' + (sideValues.size > 1 ? 's' : ''))):'N/A');
-                            helper.html.element.setText(innerDiv2, keys[i] + ' (' + timestamp + ' - ' + nbItems + ')');
-                            helper.html.element.appendChild(item, innerDiv2);
-                    }
-                    if (isAppended === true) {
-                        let sectionNode = null;
-                        for (let i=0; i<SPINNER_MSG_DIV.children.length; i++) {
-                            const SPINNER_MSG_DIV.children.item(i)
-                            sectionNode = 
-                        }
-
-                        SPINNER_MSG_DIV.innerHTML += message + '<br />';
-                    } else {
-                        SPINNER_MSG_DIV.innerHTML = message + '<br />';
-                    }
-                }
-                */
-            };
         }
     },
 
@@ -1245,18 +1198,6 @@ const OrgCheck = {
                                 }
                             }
                             buttonExport.parentNode.style.display = 'block';
-                        }
-                        // 3.3 Set the help button (if specified)
-                        if (ctlSetup.actions && ctlSetup.actions.help && ctlSetup.actions.help.content) { 
-                            const buttonHelp = document.getElementById('button-help');
-                            buttonHelp.onclick = function(e) { 
-                                const lines = ctlSetup.actions.help.content || [];
-                                let html = '<ul class="slds-has-dividers_around-space">';
-                                lines.forEach(l => html += '<li class="slds-item" style="background-color: #f0f8ff;">'+l+'</li>');
-                                html += '</ul>';
-                                MSG_HANDLER.showModal('With A Little Help From My Friends', html);
-                            };
-                            buttonHelp.parentNode.style.display = 'block';
                         }
                     }
 

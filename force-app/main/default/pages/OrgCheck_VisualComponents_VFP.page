@@ -5,7 +5,19 @@
             Visual/UI Components
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Visual/UI Components Overview
+            Visual/UI Components Overview<br />
+            <small><i>
+                This page lists all your <b>Visual Components</b> in five tabs.
+                The first two are focused on <b>Visualforce Pages</b> and <b>Visualforce Components</b>.
+                The third is focused on the <b>Lightning Pages</b> (aka Flexi Pages for the ones that are deploying).
+                And last two tabs are about <b>Lightning Aura Components</b> and <b>Lightning Web Components</b>. 
+                For each one, a badness score is calculated based on the following rules. 
+                <u>Rule #1:</u> If the item is not used by any other entity (based on the Dependency API), then you get +1. 
+                <u>Ryle #2:</u> When applicable, if the API version used by the item is older than three year, then you get +1. 
+                <u>Ryle #3:</u> If the item has no description, then you get +1. 
+                By default, the table is ordered by Score descending, in other words the biggest scores come first. 
+                If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is used and what it is using.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -355,35 +367,7 @@
                                 table: 'datatable-lwcs',
                                 visibleTab: 'tab-default-lwcs__item',
                                 filename: 'LightningWebComponents'
-                            }],
-                            help: {
-                                content: [
-                                    'This page shows the Visualforce Pages, Visualforce Components, Lightning Pages, '+
-                                        'Lightning Aura Components, Lightning Web Components.',
-                                    'The <b>SCORE</b> for visual force pages is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the page is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the page is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the page has no description.</li></ul>',
-                                    'The <b>SCORE</b> for visual force components is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the component has no description.</li></ul>',
-                                    'The <b>SCORE</b> for lightning pages is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the page is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the page has no description.</li></ul>',
-                                    'The <b>SCORE</b> for lightning aura components is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the component has no description.</li></ul>',
-                                    'The <b>SCORE</b> for lightning web components is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the component is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the component is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the component has no description.</li></ul>',
-                                    'The <b>DEPENDENCIES</b> is showing where the component or page is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
-                            }
+                            }]
                         }
                     });
                 }

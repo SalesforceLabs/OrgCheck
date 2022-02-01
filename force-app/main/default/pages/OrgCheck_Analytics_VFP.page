@@ -5,7 +5,13 @@
             Analytics Components
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Analytics Components Overview
+            Analytics Components Overview<br />
+            <small><i>
+                This page lists all the <b>reports</b> and <b>dashboards</b> you can see in the current organization.
+                For each one, a <b>badness score</b> is calculated based on the following rules.
+                <u>Rule #1:</u> If the item has no description, then you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -122,13 +128,7 @@
                                 table: 'datatable-dsb',
                                 visibleTab: 'tab-default-dsb__item',
                                 filename: 'Dashboards'
-                            }],
-                            help: {
-                                content: [
-                                    'This page shows the Reports and Dashboard that you can see.',
-                                    'To see more reports and dashboard check out the system permission on your profile/permission sets'
-                                ]
-                            }
+                            }]
                         }
                     });
                 }

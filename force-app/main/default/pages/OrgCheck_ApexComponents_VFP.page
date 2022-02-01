@@ -5,7 +5,24 @@
             Apex Classes and Triggers
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Apex Classes and Triggers Overview
+            Apex Classes and Triggers Overview<br />
+            <small><i>
+                This page lists all your <b>Apex Classes and Triggers</b> in three tabs.
+                To make sure you get <b>all the benefits</b> from this page, make sure you (1) <b>compile all classes</b> (see the "Plug" icon) and (2) <b>run all tests</b> (see the "Like" icon).
+                For each class or trigger, a badness score is calculated based on the following rules. 
+                <u>Rule #1:</u> If the item is not used by any other entity (based on the Dependency API), then you get +1. 
+                <u>Ryle #2:</u> If the API version of the item is older than 3 year, then you get +1. 
+                <u>Ryle #3:</u> If the item needs recompilation, then you get +1. 
+                <u>Ryle #4:</u> If the <b>class</b> is not explicitely specifying the sharing, then you get +1. 
+                <u>Ryle #5:</u> If the <b>class</b> has not reached a code covergare of <b>85%</b>, then you get +1. 
+                <u>Ryle #6:</u> If the <b>trigger</b> is inactive, then you get +1. 
+                <u>Ryle #7:</u> If the <b>trigger</b> is 5,000+ characters, then you get +1. 
+                <u>Ryle #8:</u> If the <b>trigger</b> is contains SOQL or DML, then you get +1. 
+                We also provide the list of SObjects that have triggers, with the specific rules: 
+                <u>Rule #9</u> If the count of active triggers per object is greater that one, you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first. 
+                If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is used and what it is using.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
@@ -369,28 +386,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Apex classes and triggers.',
-                                    'The <b>SCORE</b> for apex classes is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex class is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the class is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the <i>with or without sharing</i> option is not clearly specified (only if the class is not an interface and not a Test class,</li>'+
-                                        '<li><code>+1</code> if the class needs recompilation.</li>'+
-                                        '<li><code>+1</code> if the class needs has no coverage or less than 85% code coverage.</li></ul>',
-                                    'The <b>SCORE</b> for apex triggers is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the trigger needs recompilation,</li>'+
-                                        '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li>'+
-                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</li>'+
-                                        '<li><code>+1</code> if the trigger contains a direct SOQL or DML statement (we do not consider indirect SOQL or DML included in the call of other classes!!).</li>'+
-                                        '</ul>',
-                                    'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });
