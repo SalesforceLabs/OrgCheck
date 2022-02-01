@@ -7,6 +7,8 @@
         <apex:define name="text_page_subtitle">
             Object Configuration Overview
         </apex:define>
+        <apex:define name="text_page_description">
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">

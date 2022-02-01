@@ -7,6 +7,8 @@
         <apex:define name="text_page_subtitle">
             Monitor your org seamlessly
         </apex:define>
+        <apex:define name="text_page_description">
+        </apex:define>
         <apex:define name="html_actions" />
         <apex:define name="html_content_core">
             <div class="slds-brand-band slds-brand-band_cover slds-brand-band_medium slds-template_profile slds-brand-band_group">

@@ -68,7 +68,8 @@
                                         <h1>
                                             <span class="slds-page-header__title slds-truncate"><apex:insert name="text_page_title" /></span>
                                         </h1>
-                                        <apex:insert name="text_page_subtitle" />
+                                        <apex:insert name="text_page_subtitle" /><br />
+                                        <div class="slds-text-title"><apex:insert name="text_page_description" /></div>
                                      </div>
                                  </div>
                             </div>
@@ -113,8 +114,16 @@
                     </div>
                 </div>
             </div>
-            <div id="warning-message" style="display: none;" class="slds-notify slds-theme_warning">
-                Warning: This is a warning message
+            <div id="warning-message" style="display: none;" class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">
+                <div class="slds-media__figure">
+                    <span class="slds-icon_container slds-icon-utility-warning" title="warning">
+                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">warning</span>
+                    </span>
+                </div>
+                <div class="slds-media__body"></div>
             </div>
             <div id="spinner" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">

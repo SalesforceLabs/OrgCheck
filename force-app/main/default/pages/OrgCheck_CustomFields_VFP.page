@@ -5,15 +5,15 @@
             Custom Fields
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Custom Fields Dependency Overview<br />
-            <small><i>
-                This page lists all your <b>custom fields</b> and not the standard fields.
-                For each one, a <b>badness score</b> is calculated based on the following rules.
-                <u>Rule #1:</u> If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                By default, the table is ordered by Score descending, in other words the biggest scores come first.
-                If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
-                used and what it is using.
-            </i></small>
+            Custom Fields Dependency Overview
+        </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>custom fields</b> and not the standard fields.
+            For each one, a <b>badness score</b> is calculated based on the following rules.
+            <u>Rule #1:</u> If the field is not used by any other entity (based on the Dependency API), then you get +1.
+            By default, the table is ordered by Score descending, in other words the biggest scores come first.
+            If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
+            used and what it is using.
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

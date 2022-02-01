@@ -460,8 +460,8 @@ const OrgCheck = {
             */
             this.showWarning = function (message) {
                 const messageId = document.getElementById(configuration.warningMessageId);
-                messageId.innerHTML = message;
-                messageId.style.display = 'block';
+                messageId.children[1].innerHTML = '<p>'+message+'</p>';
+                messageId.style.display = 'flex';
             };
 
             /**
@@ -470,7 +470,7 @@ const OrgCheck = {
             this.hideWarning = function (message) {
                 const messageId = document.getElementById(configuration.warningMessageId);
                 messageId.style.display = 'hidden';
-                messageId.innerHTML = '';
+                messageId.children[1].innerHTML = '';
             };
 
             /**

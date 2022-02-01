@@ -5,16 +5,16 @@
             Public Groups and Queues
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Public Groups and Queues Overview<br />
-            <small><i>
-                This page lists all your <b>Public Groups and Queues</b> in two tabs.
-                The first tab show public groups, and the second queues.
-                The secret sauce in the page is the column called "All Active Users" which is calculated recurcively across 
-                all possible sub meta-groups (role, role and subordinates, groups, etc.) that are contained in the groups or queues.
-                For each group or queue, a <b>badness score</b> is calculated based on the following rules.
-                <u>Rule #1:</u> If the item contains no active user at all (see All Active Users column), then you get +1.
-                By default, the tables are ordered by Score descending, in other words the biggest scores come first.
-            </i></small>
+            Public Groups and Queues Overview
+        </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>Public Groups and Queues</b> in two tabs.
+            The first tab show public groups, and the second queues.
+            The secret sauce in the page is the column called "All Active Users" which is calculated recurcively across 
+            all possible sub meta-groups (role, role and subordinates, groups, etc.) that are contained in the groups or queues.
+            For each group or queue, a <b>badness score</b> is calculated based on the following rules.
+            <u>Rule #1:</u> If the item contains no active user at all (see All Active Users column), then you get +1.
+            By default, the tables are ordered by Score descending, in other words the biggest scores come first.
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
