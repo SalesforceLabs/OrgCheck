@@ -5,7 +5,15 @@
             Custom Fields
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Custom Fields Dependency Overview
+            Custom Fields Dependency Overview<br />
+            <small><i>
+                This page lists all your <b>custom fields</b> and not the standard fields.
+                For each one, a <b>badness score</b> is calculated based on the following rules.
+                <u>Rule #1:</u> If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first.
+                If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
+                used and what it is using.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -107,16 +115,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Custom Fields.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the fields has no dependency.</li></ul>',
-                                    'The <b>DEPENDENCIES</b> is showing where the field is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });

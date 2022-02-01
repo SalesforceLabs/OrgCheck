@@ -5,7 +5,21 @@
             Role Hierarchy Advanced Tree
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Role Hierarchy Overview
+            Role Hierarchy Overview<br />
+            <small><i>
+                This page illustrates your <b>Role Hierarchy</b> in two tabs.
+                The first tab shows a graphical view of the role hierarchy, and the second a tabular list of the corresponding data.
+                You get an alert if your hierarchy uses more that 7 levels.
+                On the graphical view, you have the <b>yellow</b> boxes representing roles without any active users and
+                the <b>blue</b> boxes representing roles with active users. For each box, you can see the <b>blue</b> bubbles 
+                representing the number of active users (if more than 100 we put 99+) and the <b>grey</b> bubbles representing
+                the number of inactive users (if more than 100 we put 99+). 
+                You can click on each box to get more details about the corresponding role.
+                On the tabular table view, for each role, a <b>badness score</b> is calculated based on the following rules.
+                <u>Rule #1:</u> If the role contains no active user, then you get +1.
+                <u>Rule #2:</u> If the role contains more than one inactive user, then you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control" style="display: block;">
@@ -436,20 +450,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Role hierarchy and the list of Roles.',
-                                    'On the role explorer tab, here are the graphical conventions: '+
-                                        '<ul class="slds-list_dotted"><li>the <b>yellow</b> boxes represent roles without any active users in it,</li>'+
-                                        '<li>the <b>blue</b> boxes represent roles with active users,</li>'+
-                                        '<li>the <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+),</li>'+
-                                        '<li>the <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+).</li></ul>',
-                                    'You can click on each node to get more details about this role.',
-                                    'On the role list tab, the <b>SCORE</b> is computed with the following rules: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the role contains no active user,</li>'+
-                                        '<li><code>+1</code> if the role contains more than one inactive user.</li></ul>'
-                                ]
                             }
                         }
                     });

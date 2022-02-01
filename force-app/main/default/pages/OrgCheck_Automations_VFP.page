@@ -197,11 +197,6 @@
                         actions: { 
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'For more information about Flow types, check https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_flow.htm'
-                                ]
                             }
                         }
                     });

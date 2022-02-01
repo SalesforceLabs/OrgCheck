@@ -4,7 +4,16 @@
             Users
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Active Users Profile and Permissions Overview
+            Active Users Profile and Permissions Overview<br />
+            <small><i>
+                This page lists all your <b>active users</b> in the organization.
+                For each one, a <b>badness score</b> is calculated based on the following rules.
+                <u>Rule #1:</u> If the user is not using Lightning Experience, then you get +1.
+                <u>Rule #2:</u> If the user never logged, , then you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first.
+                The "Key Permission" column is focused on important permission such as Api Enabled, View Setup,
+                Modify All Data and View All Data.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -86,19 +95,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Active Users.',
-                                    'The <b>SCORE</b> is computed with the following rules: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the user is no on Lightning Experience, </li>'+
-                                        '<li><code>+1</code> if the user never logged.</li></ul>',
-                                    'The <b>KEY PERMISSIONS</b> is showing if a user has one of the following system permissions: '+
-                                        '<ul class="slds-list_dotted"><li><code>apiEnabled</code>: Api Enabled,</li>'+
-                                        '<li><code>viewSetup</code>: View Setup,</li>'+
-                                        '<li><code>modifyAllData</code>: Modify All Data,</li>'+
-                                        '<li><code>viewAllData</code>: View All Data.</li></ul>'
-                                ]
                             }
                         }
                     });

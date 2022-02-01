@@ -5,7 +5,15 @@
             Custom Labels
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Custom Labels Overview
+            Custom Labels Overview<br />
+            <small><i>
+                This page lists all your <b>custom labels</b>.
+                For each one, a <b>badness score</b> is calculated based on the following rules.
+                <u>Rule #1:</u> If the custom label is not used by any other entity (based on the Dependency API), then you get +1.
+                By default, the table is ordered by Score descending, in other words the biggest scores come first.
+                If the labem has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
+                used and what it is using.
+            </i></small>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -36,7 +44,7 @@
                                     { name: 'IsProtected', property: 'protected' },
                                     { name: 'Language', property: 'language' },
                                     { name: 'Value', formula: (r) => { 
-                                        return helper.html.render.escape(helper.html.render.shrinkText(r.value, 150)); 
+                                        return helper.html.render.escape(helper.html.render.shrinkText(r.value, 50)); 
                                     }},
                                     { name: 'Using', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
@@ -84,17 +92,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Custom Labels.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the label is not used (in other words it has no dependency).</li></ul>',
-                                    'The <b>VALUE</b> is potentially trunkated (maximum characters is 150).',
-                                    'The <b>DEPENDENCIES</b> is showing where the label is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });
