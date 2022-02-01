@@ -465,6 +465,15 @@ const OrgCheck = {
             };
 
             /**
+            * Hide warning banner and empty the message
+            */
+            this.hideWarning = function (message) {
+                const messageId = document.getElementById(configuration.warningMessageId);
+                messageId.style.display = 'hidden';
+                messageId.innerHTML = '';
+            };
+
+            /**
             * Show the modal dialog box
             * @param element Html element to show in the modal box
             */
@@ -1475,6 +1484,9 @@ const OrgCheck = {
                     message: {
                         show: function(message, type) {
                             MSG_HANDLER.showWarning(message);
+                        },
+                        hide: function() {
+                            MSG_HANDLER.hideWarning();
                         }
                     },
                     datatable: {

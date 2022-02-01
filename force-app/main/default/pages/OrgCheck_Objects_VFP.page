@@ -164,6 +164,7 @@
                         // Remove previous options (except the first two which is the blank one)
                         helper.html.picklist.clear(select, 2);
 
+                        let countElementsInSelect = 0;
                         if (namespace || namespace === '') {
                             helper.map.iterate2(allObjects, function(d, i, s) {
                                 if (d.package !== namespace) return;
@@ -175,7 +176,18 @@
                                     if (type === 'CUSTOM_METADATA_TYPES' && d.isCustomMetadataType === false) return;
                                 }
                                 helper.html.picklist.addValue(select, d.developerName, d.label);
+                                countElementsInSelect++;
                             });
+                        }
+
+                        helper.html.message.hide();
+                        if (namespace && type && countElementsInSelect === 0) {
+                            const html = 
+                                'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
+                                'Package: <b>'+namespace+'</b><br />'+
+                                'Type: <b>'+type+'</b><br />';
+                            helper.html.modal.show('No Object in this context...', html);
+                            helper.html.message.show(html);
                         }
                     }
 
