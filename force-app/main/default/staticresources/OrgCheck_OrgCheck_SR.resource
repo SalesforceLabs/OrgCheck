@@ -2114,6 +2114,7 @@ const OrgCheck = {
                 const trBody = tbody.appendChild(document.createElement('tr'));
                 let rowScore = 0;
                 let tdBodyScore = null;
+                const rowBadColumns = [];
                 config.columns.forEach(c => {
                     const tdBody = trBody.appendChild(document.createElement('td'));
                     if (c.property === '##score##') {
@@ -2147,6 +2148,7 @@ const OrgCheck = {
                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
                                 rowScore += additiveScore;
                                 tdBody.bgColor = '#ffd079';
+                                rowBadColumns.push(c.name);
                             }
                         }
                     } catch (e) {
@@ -2189,7 +2191,8 @@ const OrgCheck = {
                     }
                 });
                 if (tdBodyScore && rowScore > 0) {
-                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="bad score: '+rowScore+'" />&nbsp;' + rowScore;
+                    const msg = 'The badness score is '+rowScore+'. Please check the column'+(rowBadColumns.length>1?'s':'')+' '+rowBadColumns+'. Thank you!';
+                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="'+msg+'" title="'+msg+'" />&nbsp;' + rowScore;
                     tdBodyScore.bgColor = '#ffd079';
                     trBody.bgColor = '#ffe099';
                     sumScore += rowScore;
