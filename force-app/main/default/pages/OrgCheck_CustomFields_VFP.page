@@ -56,8 +56,8 @@
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
-                                    { name: 'Ref. by', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whereIsItReferenced(r.id, map.dependencies[r.id]);
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},

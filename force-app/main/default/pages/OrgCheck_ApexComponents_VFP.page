@@ -165,14 +165,26 @@
                                             return html;
                                         }
                                     },
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in', type: 'numeric', 
+                                        formula: (r) => { 
+                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
+                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                            return 'Not used!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                        }
+                                    },
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],
@@ -302,14 +314,16 @@
                                         }
                                         return html;
                                     }},
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],

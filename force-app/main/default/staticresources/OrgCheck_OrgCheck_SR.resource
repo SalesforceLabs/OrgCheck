@@ -1589,7 +1589,7 @@ const OrgCheck = {
                             };
                             return div;
                         },
-                        whereIsItReferenced: function(id, data) {
+                        whatIsItUsing: function(id, data) {
                             if (data && data.usingCount) return data.usingCount;
                             return 0;
                         },
@@ -2020,9 +2020,6 @@ const OrgCheck = {
                 aHead.setAttribute('href', 'javascript:void(0);');
                 aHead.setAttribute('role', 'button');
                 aHead.setAttribute('tabindex', i);
-                const assHead = aHead.appendChild(document.createElement('span'));
-                assHead.classList.add('slds-assistive-text');
-                assHead.textContent = 'Sort by: ';
                 const grdHead = aHead.appendChild(document.createElement('div'));
                 grdHead.classList.add('slds-grid', 'slds-grid_vertical-align-center', 'slds-has-flexi-truncate');
                 const ttlHead = grdHead.appendChild(document.createElement('span'));

@@ -106,6 +106,7 @@
                     <!-- FIELDS SECTION -->
                     <div id="section-fields">
                         <h1 class="slds-text-heading--small">Fields</h1>
+                        <i>Please note that we get dependencies only for custom fields and not standard fields. Thank you!</i>
                         <div id="datatable-fields" data-title="Fields" />
                     </div>
                     
@@ -246,6 +247,48 @@
                                                 return helper.html.render.checkbox(r.custom); 
                                             }},
                                             { name: 'Full API Name', property: 'name' },
+                                            { name: 'Using', type: 'numeric', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
+                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                                    return helper.html.render.checkbox(false);
+                                                }
+                                            }},
+                                            { name: 'Used in', type: 'numeric', 
+                                                formula: (r) => { 
+                                                    if (r.custom === true) {
+                                                        const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
+                                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                                        return 'Not used!';
+                                                    }
+                                                },
+                                                scoreFormula: (r) => { 
+                                                    if (r.custom === true) {
+                                                        if (helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]) === 0) return 1;
+                                                    }
+                                                }
+                                            },
+                                            { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', object.fieldDependencies[r.id]);
+                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
+                                                    return helper.html.render.checkbox(false);
+                                                }
+                                            }},
+                                            { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', object.fieldDependencies[r.id]);
+                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
+                                                    return helper.html.render.checkbox(false);
+                                                }
+                                            }},
+                                            { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
+                                                if (r.custom === true) {
+                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', object.fieldDependencies[r.id]);
+                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
+                                                    return helper.html.render.checkbox(false);
+                                                }
+                                            }},
                                             { name: 'Dependencies', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
@@ -253,12 +296,9 @@
                                                         if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                                         return 'No dependency';
                                                     }
-                                                    return '';
-                                                }, 
-                                                scoreFormula: (r) => { 
-                                                    if (r.custom === true && !object.fieldDependencies[r.id]) return 1; 
                                                 }
                                             },
+
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: 'Type', formula: (r) => {
                                                 let type = r.type;
