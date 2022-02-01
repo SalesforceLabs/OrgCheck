@@ -9,7 +9,7 @@
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
-                <a href="/01p" target="_blank" rel="external">
+                <a href="/01p" target="_blank" rel="external noopener noreferrer">
                     <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>

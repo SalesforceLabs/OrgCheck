@@ -68,17 +68,17 @@
                                                 <td width="70%">
                                                     <b>Issues or new ideas?</b><br />
                                                     Track them at <br />
-                                                    <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external">https://sfdc.co/OrgCheck-Backlog</a><br />
+                                                    <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">https://sfdc.co/OrgCheck-Backlog</a><br />
                                                     <br />
                                                     <b>Want to chat with other users?</b><br />
                                                     Please join us on Slack with this 
-                                                    <a href="http://sfdc.co/OrgCheck-Community" target="_blank" rel="external">invitation</a><br />
+                                                    <a href="http://sfdc.co/OrgCheck-Community" target="_blank" rel="external noopener noreferrer">invitation</a><br />
                                                     <br />
                                                     <b>Social Media</b><br />
                                                     Like and share posts on 
-                                                    <a href="https://www.linkedin.com/company/sf-orgcheck" target="_blank" rel="external">LinkedIn</a> 
+                                                    <a href="https://www.linkedin.com/company/sf-orgcheck" target="_blank" rel="external noopener noreferrer">LinkedIn</a> 
                                                     and on
-                                                    <a href="https://twitter.com/VinceFINET/status/1453307931554942992" target="_blank" rel="external">Twitter</a>!<br />
+                                                    <a href="https://twitter.com/VinceFINET/status/1453307931554942992" target="_blank" rel="external noopener noreferrer">Twitter</a>!<br />
                                                 </td>
                                             </tr>
                                         </table>
@@ -122,7 +122,7 @@
                                     <div id="tab-default-20" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-abouttechdebt__item">
                                         Although invisible, <b>Technical Debt</b> has an impact on your project, your 
                                         IT budget, your Salesforce app, your end-users and... your business.<br />
-                                        You may be interested in this <a target="_blank" rel="external"
+                                        You may be interested in this <a target="_blank" rel="external noopener noreferrer"
                                         href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
                                         <br />
                                         You may have a <b>Technical Debt</b>, if you answer 'yes' to the following questions:
@@ -147,8 +147,8 @@
                                     <div id="tab-default-21" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-tegalterms__item">
                                         <b>OrgCheck is free to use, but is not an official Salesforce product. </b> OrgCheck has not been officially 
                                         tested or documented. Salesforce support is not available for OrgCheck. Support requests for OrgCheck 
-                                        should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank" rel="external">https://github.com/VinceFINET/OrgCheck/issues</a>. 
-                                        Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank" rel="external">https://github.com/VinceFINET/OrgCheck</a> 
+                                        should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck/issues</a>. 
+                                        Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck</a> 
                                         under separate and different license terms.        
                                     </div>
                                     <div id="tab-default-22" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3rdparty__item">
@@ -317,7 +317,7 @@
                                         The <i>"My Domain"</i> feature let us distinguish the remote org you want to scan from the 
                                         local org where you installed OrgCheck.<br />
                                         For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank" rel="external">this 
+                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
                                         article</a> from the Salesforce official documentation.<br />
                                         <br />
                                         The <i>"CORS"</i> feature is necessary because it is very likely that your browser will require it
@@ -328,7 +328,7 @@
                                         You can set <code>https://*.visualforce.com</code> which is more generic, or you can replace the 
                                         <code>'*'</code> with the mydomain of the local org where you installed OrgCheck.<br />
                                         For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank" rel="external">this 
+                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
                                         article</a> from the Salesforce official documentation.<br />
                                         <br />
                                         A <i>"ConnectedApp"</i> should be created in your local org. Please make sure you set the following information:

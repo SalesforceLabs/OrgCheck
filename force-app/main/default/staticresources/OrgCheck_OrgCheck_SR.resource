@@ -408,7 +408,7 @@ const OrgCheck = {
                     private_errors.push(error);
                     let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
                     commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
-                            'target="_blank" rel="external">here</a> and log an issue with the following information. <br /'+
+                            'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
                             '><br />';
                     let informationHTML = '<b>OrgCheck Information</b><br />';
                     informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
@@ -1649,7 +1649,7 @@ const OrgCheck = {
                         },
                         link: function(uri, content) {
                             const completeURL = (ORG_INFORMATION.instanceUrl ? ORG_INFORMATION.instanceUrl : '') + uri;
-                            return '<a href="' + completeURL + '" target="_blank" rel="external">' + content + '</a>';
+                            return '<a href="' + completeURL + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
                         },
                         icon: function(name) {
                             switch (name) {
