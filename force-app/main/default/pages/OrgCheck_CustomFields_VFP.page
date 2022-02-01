@@ -20,39 +20,6 @@
                         dependencies: true,
                         onRecords: function(map) {
 
-                            const countWhereIsItReferenced = function(id) {
-                                const dep = map.dependencies[id];
-                                if (dep) {
-                                    const usingTypes = helper.map.keys(dep.using);
-                                    if (usingTypes) {
-                                        let count = 0;
-                                        usingTypes.forEach(u => count += helper.map.keys(dep.using[u]).length );
-                                        return count;
-                                    }
-                                }
-                                return 0;
-                            }
-
-                            const countWhereIsItUsed = function(id, typeAPI, typeLabel, typesLabel) {
-                                const dep = map.dependencies[id];
-                                if (dep) {
-                                    const usedTypes = helper.map.keys(dep.used);
-                                    if (usedTypes) {
-                                        if (typeAPI) {
-                                            const idx = usedTypes.indexOf(typeAPI);
-                                            if (idx >= 0) {
-                                                return helper.map.keys(dep.used[typeAPI]).length;
-                                            }
-                                        } else {
-                                            let count = 0;
-                                            usedTypes.forEach(u => count += helper.map.keys(dep.used[u]).length );
-                                            return count;
-                                        }
-                                    }
-                                }
-                                return 0;
-                            };
-
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
@@ -90,32 +57,32 @@
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
                                     { name: 'Ref. by', type: 'numeric', formula: (r) => { 
-                                        const count = countWhereIsItReferenced(r.id);
+                                        const count = helper.html.render.whereIsItReferenced(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Used in', type: 'numeric', 
                                         formula: (r) => { 
-                                            const count = countWhereIsItUsed(r.id);
+                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                             return 'Not used!';
                                         },
                                         scoreFormula: (r) => { 
-                                            if (countWhereIsItUsed(r.id) === 0) return 1;
+                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
                                     { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
-                                        const count = countWhereIsItUsed(r.id, 'Layout');
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
-                                        const count = countWhereIsItUsed(r.id, 'ApexClass');
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
-                                        const count = countWhereIsItUsed(r.id, 'Flow');
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},

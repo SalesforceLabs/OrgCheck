@@ -1578,7 +1578,7 @@ const OrgCheck = {
                         },
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
-                            div.innerHTML = 'Dependencies <img src="/img/chatter/lookupSearchHover.png" />';
+                            div.innerHTML = '<a>Dependencies <img src="/img/chatter/lookupSearchHover.png" /></a>';
                             div.setAttribute('id', 'chart-container-' + id);
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
@@ -1588,6 +1588,26 @@ const OrgCheck = {
                                 MSG_HANDLER.showModal('Dependencies Graphical and Tabular Information', information); 
                             };
                             return div;
+                        },
+                        whereIsItReferenced: function(id, data) {
+                            if (data && data.usingCount) return data.usingCount;
+                            return 0;
+                        },
+                        whereIsItUsed: function(id, data) {
+                            if (data && data.usedCount) return data.usedCount;
+                            return 0;
+                        },
+                        whereIsItUsedBy: function(id, typeAPI, data) {
+                            if (data) {
+                                const usedTypes = MAP_HANDLER.keys(data.used);
+                                if (usedTypes && typeAPI) {
+                                    const idx = usedTypes.indexOf(typeAPI);
+                                    if (idx >= 0) {
+                                        return MAP_HANDLER.keys(data.used[typeAPI]).length;
+                                    }
+                                }
+                            }
+                            return 0;
                         },
                         percentage: function(v) {
                             if (v) {
@@ -2378,14 +2398,18 @@ const OrgCheck = {
                     const bName = record.RefMetadataComponentName;
                     let b = map[bId];
                     if (!b) b = map[bId] = {};
+                    if (!b.usedCount) b.usedCount = 0;
                     if (!b.used) b.used = {};
                     if (!b.used[aType]) b.used[aType] = [];
                     b.used[aType][aId] = { name: aName };
+                    b.usedCount++;
                     let a = map[aId];
                     if (!a) a = map[aId] = {};
+                    if (!a.usingCount) a.usingCount = 0;
                     if (!a.using) a.using = {};
                     if (!a.using[bType]) a.using[bType] = [];
                     a.using[bType][bId] = { name: bName };
+                    a.usingCount++;
                     return {};
                 }, 
                 function() {
