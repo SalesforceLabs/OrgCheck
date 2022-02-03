@@ -39,10 +39,13 @@ OrgCheck is available under the [MIT license](LICENSE.md)
 
 
 ## Some references
-- LinkedIn: https://www.linkedin.com/company/sf-orgcheck/
-- Twitter: https://mobile.twitter.com/VinceFINET/status/1453307931554942992
-- Albanian Dreamin21, OrgCheck presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
-- Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
-- Salesforce's Ben blog article: https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/
-- App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
-- Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
+- Social:
+  - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
+  - Twitter: https://www.twitter.com/OrgCheckSFDC
+- 2022:
+  - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
+  - Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
+- 2021: 
+  - Albanian Dreamin21, OrgCheck presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
+  - Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
+  - Salesforce's Ben blog article: https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/
