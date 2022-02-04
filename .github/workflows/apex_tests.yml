@@ -3,7 +3,7 @@ name: Apex Tests
 on: [push]
 
 env:
-  CUMULUSCI_SERVICE_github: ${{ secrets.CUMULUSCI_SERVICE_github }}
+  CUMULUSCI_SERVICE_github: ${{ secrets.cumulusci.CUMULUSCI_SERVICE_github }}
 
 jobs:
   unit_tests:
