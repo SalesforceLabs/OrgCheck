@@ -3,12 +3,13 @@ name: Apex Tests
 on: [push]
 
 env:
-  CUMULUSCI_SERVICE_github: ${{ secrets.cumulusci.CUMULUSCI_SERVICE_github }}
+  CUMULUSCI_SERVICE_github: ${{ secrets.CUMULUSCI_SERVICE_github }}
 
 jobs:
   unit_tests:
     name: "Run Apex tests"
     runs-on: ubuntu-latest
+    environment: cumulusci
     steps:
     - uses: actions/checkout@v2
     - name: Install Salesforce CLI
@@ -18,7 +19,7 @@ jobs:
         echo $(realpath sfdx/bin) >> $GITHUB_PATH
     - name: Authenticate Dev Hub
       run: |
-        echo ${{ secrets.cumulusci.SFDX_AUTH_URL }} > sfdx_auth
+        echo ${{ secrets.SFDX_AUTH_URL }} > sfdx_auth
         sfdx force:auth:sfdxurl:store -f sfdx_auth -d
     - name: Set up Python
       uses: actions/setup-python@v1
