@@ -18,7 +18,7 @@ jobs:
         echo $(realpath sfdx/bin) >> $GITHUB_PATH
     - name: Authenticate Dev Hub
       run: |
-        echo ${{ secrets.SFDX_AUTH_URL }} > sfdx_auth
+        echo ${{ secrets.cumulusci.SFDX_AUTH_URL }} > sfdx_auth
         sfdx force:auth:sfdxurl:store -f sfdx_auth -d
     - name: Set up Python
       uses: actions/setup-python@v1
