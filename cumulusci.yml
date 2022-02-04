@@ -1,0 +1,26 @@
+minimum_cumulusci_version: '3.49.0'
+project:
+    name: OrgCheck
+    package:
+        name: OrgCheck
+        namespace: OrgCheck
+        api_version: '53.0'
+    git:
+        default_branch: 'main'
+    source_format: sfdx
+
+tasks:
+    robot:
+        options:
+            suites: robot/OrgCheck/tests
+            options:
+                outputdir: robot/OrgCheck/results
+
+    robot_testdoc:
+        options:
+            path: robot/OrgCheck/tests
+            output: robot/OrgCheck/doc/OrgCheck_tests.html
+
+    run_tests:
+        options:
+            required_org_code_coverage_percent: 75
