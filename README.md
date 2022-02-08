@@ -1,47 +1,51 @@
-# OrgCheck Salesforce Application
+<div align="center">
+  <img src="docs/assets/pngs/Logo+Mascot-v2.png" width="256" alt="OrgCheck Logo" />
+  <h1>OrgCheck Salesforce Application</h1>
+  <p>
+    <b>OrgCheck</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
+  </p>
+  <a href="https://github.com/VinceFINET/OrgCheck/network/members">
+    <img alt="forks on github" src="https://img.shields.io/github/forks/VinceFINET/OrgCheck?style=flat-square&logoColor=blue">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/stargazers">
+    <img alt="stars on github" src="https://img.shields.io/github/stars/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/watchers">
+    <img alt="watchers" src="https://img.shields.io/github/watchers/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://github.com/VinceFINET/OrgCheck/issues">
+    <img alt="issues" src="https://img.shields.io/github/issues-raw/VinceFINET/OrgCheck?style=flat-square">
+  </a>
+  <a href="https://opensource.org/licenses/MIT">
+    <img alt="licenses" src="https://img.shields.io/badge/License-MIT-yellow.svg">
+  </a>
+</div>
 
-OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
 
-## Some screenshots
-
-### Home Page tab
-
-![screenshot 1.9.1 #1](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot1.png)
-
-### Custom Field tab
-
-![screenshot 1.9.1 #2](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot2.png)
-
-### Dependency tree 
-
-![screenshot 1.9.1 #3](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.2-Screenshot3.png)
-
-### Role Hierarchy tab
-
-![screenshot 1.9.1 #4](https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot4.png)
+## More information about OrgCheck:
+- Home: https://vincefinet.github.io/OrgCheck/
+- Preview: https://vincefinet.github.io/OrgCheck/preview/
+- Installation: https://vincefinet.github.io/OrgCheck/installation/
 
 
-## Installation
+## Issues or new ideas?
 
-Here is the links of OrgCheck's unlocked packages v1.8:
-- for Sandboxes: http://sfdc.co/OrgCheck-Install-1_8-SDB
-- for Developer Orgs: http://sfdc.co/OrgCheck-Install-1_8-DevOrg
+You can log any issues and new ideas in our tracker: https://github.com/VinceFINET/OrgCheck/issues
 
-PLEASE install it in sandbox or dev orgs ONLY!!!
 
-If already installed, just go to the same link and it will update the application (no need anymore to unassigned users from the permission set).
+## License
 
-For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
-<p><img src="https://github.com/VinceFINET/OrgCheck/blob/main/docs/images/screenshots/OrgCheck-v1.9.1-Screenshot5.png" alt="screenshot 1.9.1 #5" width="50%" /></p>
+OrgCheck is available under the [MIT license](LICENSE.md)
 
-Source of the application is in this git repository.
 
-## Issues
-
-You can log any issues in here:
-https://github.com/VinceFINET/OrgCheck/issues
-
-## Project
-
-My prioritsations is shown here:
-https://github.com/VinceFINET/OrgCheck/projects
+## Some references
+- Social:
+  - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
+  - Twitter: https://www.twitter.com/OrgCheckSFDC
+- 2022:
+  - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
+  - Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
+- 2021: 
+  - Albanian Dreamin21, OrgCheck presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
+  - Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
+  - Salesforce's Ben blog article: https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/
