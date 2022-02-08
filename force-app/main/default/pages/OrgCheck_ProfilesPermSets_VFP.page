@@ -7,15 +7,42 @@
             Non User Specific Profile and Permissions Overview
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>Profiles and Permission Sets</b> in five tabs.
-            The first tab show profiles, the second permission sets and permission set groups, the third 
-            is extracting the login hour restrictions from all the profiles at once, the fourth 
-            is extracting the IP Range restrictions from all the profiles at once, and the last one 
-            is showing the CRUD for profiles and permission sets.
-            For each profile and permission set, a <b>badness score</b> is calculated based on the following rules.
-            <u>Rule #1:</u> If it is custom and is not used by any active users, then you get +1.
-            <u>Rule #2:</u> If it is custom and has no description, then you get +1.
-            By default, the tables are ordered by Score descending, in other words the biggest scores come first.
+            This page lists all your <b>Profiles and Permission Sets</b> in five tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Profiles</b> is giving you a tabular list of all the profiles in this Org</li>
+                <li>The second tab called <b>Permission Sets</b> is giving you a tabular list of all the permission sets and permission set groups in this Org</li>
+                <li>The third tab called <b>Login Hours Restrictions</b> is extracting the login hour restrictions from all the profiles at once</li>
+                <li>The fourth tab called <b>IP Range Restrictions</b> is extracting the IP Range restrictions from all the profiles at once</li>
+                <li>The fifth tab called <b>Object CRUDs</b> (beta) is showing the rights (Create, Read, Update, Delete) on Objects for profiles and permission sets</li>
+            </ul>
+            <br />
+            On the profiles table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a profile which can be custom or standard</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If it is custom and is not used by any active users, then you get +1.</li>
+                        <li>If it is custom and has no description, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+            On the permission sets table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a permissio set or a permission set group</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If it is custom and is not used by any active users, then you get +1.</li>
+                        <li>If it is custom and has no description, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+            At this time, the Object CRUDs are shown as a beta feature that needs to be activated on the Home tab of this application.<br />
+            We did this to make sure this feature is not slowing you down. <br />
+            In the future, you will be able to select either the object(s) or the profile(s)/permission set(s).<br />
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

@@ -7,8 +7,6 @@
         <apex:define name="text_page_subtitle">
             Batches Overview
         </apex:define>
-        <apex:define name="text_page_description">
-        </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external noopener noreferrer">

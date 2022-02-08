@@ -21,6 +21,26 @@
                 .slds-scope table {
                     width: auto;
                 }
+                .orgcheck-page-header {
+                    padding-bottom: 0.5rem !important;
+                }
+                .orgcheck-page-description {
+                    margin-top: 0.3rem;
+                    height: 1rem;
+                    background: rgb(221, 221, 221);
+                    border-radius: 10px;
+                    padding: 0px 5px 0px 5px;
+                    box-shadow: 0 2px 2px 0 rgb(0 0 0 / 10%);
+                    transition: height 1s, background 1s;
+                }
+                .orgcheck-page-description:hover {
+                    height: 20rem;
+                    background: white;
+                }
+                .orgcheck-legend {
+                    text-align: center;
+                    color: white;
+                }
             </style>
             <div id="modal" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
@@ -50,7 +70,7 @@
                 </section>
                 <div class="slds-backdrop slds-backdrop_open"></div>
             </div>
-            <div class="slds-page-header">
+            <div class="slds-page-header orgcheck-page-header">
                 <div class="slds-page-header__row">
                     <div class="slds-page-header__col-title">
                         <div class="slds-media">
@@ -69,7 +89,6 @@
                                             <span class="slds-page-header__title slds-truncate"><apex:insert name="text_page_title" /></span>
                                         </h1>
                                         <apex:insert name="text_page_subtitle" /><br />
-                                        <div class="slds-text-title"><apex:insert name="text_page_description" /></div>
                                      </div>
                                  </div>
                             </div>
@@ -112,6 +131,13 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div id="page-description-zone" class="slds-text-title orgcheck-page-description slds-scrollable">
+                    <div class="orgcheck-legend">Hover in this zone to have more information about this page!<br /></div>
+                    <apex:insert name="text_page_description">
+                        <script>document.getElementById('page-description-zone').style.display = 'none';</script>
+                    </apex:insert>
+                    <br />
                 </div>
             </div>
             <div id="warning-message" style="display: none;" class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">

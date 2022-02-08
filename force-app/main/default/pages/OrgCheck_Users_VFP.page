@@ -7,13 +7,21 @@
             Active Users Profile and Permissions Overview
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>active users</b> in the organization.
-            For each one, a <b>badness score</b> is calculated based on the following rules.
-            <u>Rule #1:</u> If the user is not using Lightning Experience, then you get +1.
-            <u>Rule #2:</u> If the user never logged, , then you get +1.
-            By default, the table is ordered by Score descending, in other words the biggest scores come first.
-            The "Key Permission" column is focused on important permission such as Api Enabled, View Setup,
-            Modify All Data and View All Data.
+            This page lists all your <b>active users</b> in the organization.<br />
+            <br />
+            On this table :<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents an active user</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the user is not using Lightning Experience, then you get +1.</li>
+                        <li>If the user never logged, , then you get +1.</li>
+                    </ol>
+                </li>
+                <li>The column <b>Key Permission</b> is focused on important permissions such as Api Enabled, View Setup,
+                    Modify All Data and View All Data.</li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

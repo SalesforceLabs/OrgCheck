@@ -8,6 +8,12 @@
             Object Configuration Overview
         </apex:define>
         <apex:define name="text_page_description">
+            This page gives you an overview of your <b>Objects</b> in two tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Object Documentation</b> is giving you the entire documentatio of a specified object</li>
+                <li>The second tab called <b>Org Wide Default</b> is a tabular list of the internal and external sharing for all your objects</li>
+            </ul>
+            <br />
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

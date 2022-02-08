@@ -7,8 +7,6 @@
         <apex:define name="text_page_subtitle">
             Workflows, Process Builders and Flows Overview
         </apex:define>
-        <apex:define name="text_page_description">
-        </apex:define>
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">

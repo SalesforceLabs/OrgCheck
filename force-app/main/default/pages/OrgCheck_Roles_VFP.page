@@ -8,18 +8,37 @@
             Role Hierarchy Overview
         </apex:define>
         <apex:define name="text_page_description">
-            This page illustrates your <b>Role Hierarchy</b> in two tabs.
-            The first tab shows a graphical view of the role hierarchy, and the second a tabular list of the corresponding data.
-            You get an alert if your hierarchy uses more that 7 levels.
-            On the graphical view, you have the <b>yellow</b> boxes representing roles without any active users and
-            the <b>blue</b> boxes representing roles with active users. For each box, you can see the <b>blue</b> bubbles 
-            representing the number of active users (if more than 100 we put 99+) and the <b>grey</b> bubbles representing
-            the number of inactive users (if more than 100 we put 99+). 
-            You can click on each box to get more details about the corresponding role.
-            On the tabular table view, for each role, a <b>badness score</b> is calculated based on the following rules.
-            <u>Rule #1:</u> If the role contains no active user, then you get +1.
-            <u>Rule #2:</u> If the role contains more than one inactive user, then you get +1.
-            By default, the table is ordered by Score descending, in other words the biggest scores come first.
+            This page illustrates your <b>Role Hierarchy</b> in two tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Role Explorer</b> is showing a graphical view of your role hierarchy</li>
+                <li>The second tab called <b>Role Listing</b> is a tabular list of the corresponding data.</li>
+            </ul>
+            <br />
+            Too many levels in your role hierarchy can lead to bad performance (including sharing calculation). <br />
+            That is why we are giving you an alert if your hierarchy uses more that <b>7 levels</b>.<br />
+            <br />
+            On the graphical view:<br />
+            <ul class="slds-list_dotted">
+                <li>Each <b>box</b> represents a <b>role</b> that are linked to each other following their parent role.</li>
+                <li>The <b>yellow</b> boxes represent roles without any active users</li>
+                <li>The <b>blue</b> boxes represent roles with active users</li>
+                <li>On each box, you can see <b>bubbles</b> in their upper right corner</li>
+                <li>The <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+)</li>
+                <li>The <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+)</li>
+                <li>You can click on each box to get more details about the corresponding role.</li>
+            </ul>
+            <br />
+            On the tabular table view:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a role</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the role contains no active user, then you get +1.</li>
+                        <li>If the role contains more than one inactive user, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control" style="display: block;">
