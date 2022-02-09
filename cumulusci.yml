@@ -7,7 +7,7 @@ project:
         api_version: '53.0'
     git:
         default_branch: 'main'
-    source_format: sfdx
+    source_format: mdapi
 
 tasks:
     robot:
