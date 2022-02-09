@@ -9,6 +9,7 @@ jobs:
   unit_tests:
     name: "Run Apex tests"
     runs-on: ubuntu-latest
+    environment: cumulusci
     steps:
     - uses: actions/checkout@v2
     - name: Install Salesforce CLI
