@@ -7,7 +7,7 @@ project:
         api_version: '53.0'
     git:
         default_branch: 'main'
-    source_format: mdapi
+    source_format: sfdx
 
 tasks:
     robot:
@@ -23,4 +23,4 @@ tasks:
 
     run_tests:
         options:
-            required_org_code_coverage_percent: 75
+            required_org_code_coverage_percent: 85
