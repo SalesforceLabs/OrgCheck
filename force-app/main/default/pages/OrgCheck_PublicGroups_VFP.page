@@ -7,6 +7,39 @@
         <apex:define name="text_page_subtitle">
             Public Groups and Queues Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>Public Groups and Queues</b> in two tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Public Groups</b> is giving you a tabular list of all the public groups in this Org</li>
+                <li>The second tab called <b>Queues</b> is giving you a tabular list of all the queues in this Org</li>
+            </ul>
+            <br />
+            The secret sauce in the page is the column called <b>All Active Users</b> which is calculated recurcively across 
+            all possible sub meta-groups (role, role and subordinates, groups, etc.) that are contained in the groups or queues.<br />
+            <br />
+            On the public groups table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a public group</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the public group contains no active user at all (see All Active Users column), then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+            On the queues table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a queue</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the queue contains no active user at all (see All Active Users column), then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">
@@ -42,7 +75,7 @@
                         let htmlContent = '';
                         if (user) {
                             htmlContent = 
-                                (show_photo === true? ('<img src="' + users[uid].photourl + '" width="25" /> ') : '')
+                                (show_photo === true? ('<img src="' + helper.html.render.escape(users[uid].photourl) + '" width="25" /> ') : '')
                                 + users[uid].name;
                         } else {
                             htmlContent = uid + ' (inactive)';
@@ -96,7 +129,7 @@
                                         link = '/'+directGroup.relatedId;
                                         const relatedRole = roles[directGroup.relatedId];
                                         if (relatedRole) {
-                                            name = relatedRole.name;
+                                            name = helper.html.render.escape(relatedRole.name);
                                         } else {
                                             name = 'Role #'+directGroup.relatedId;
                                         }
@@ -217,11 +250,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-publicGroups',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
-                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
-                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.includeBosses); 
+                                    }},
+                                    { name: 'Included groups', formula: (r) => { 
+                                        return renderGroups(map.publicGroups, map.roles, r.directGroups); 
+                                    }},
+                                    { name: 'Included users', formula: (r) => { 
+                                        return renderUsers(map.users, r.directUsers, true); 
+                                    }},
                                     { name: 'All active users', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
@@ -239,17 +283,29 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             helper.html.datatable.create({
                                 element: 'datatable-queues',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { return helper.html.render.checkbox(r.includeBosses); }},
-                                    { name: 'Included groups', formula: (r) => { return renderGroups(map.publicGroups, map.roles, r.directGroups); }},
-                                    { name: 'Included users', formula: (r) => { return renderUsers(map.users, r.directUsers, true); }},
+                                    { name: 'With bosses?', property: 'includeBosses', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.includeBosses); 
+                                    }},
+                                    { name: 'Included groups', formula: (r) => { 
+                                        return renderGroups(map.publicGroups, map.roles, r.directGroups); 
+                                    }},
+                                    { name: 'Included users', formula: (r) => { 
+                                        return renderUsers(map.users, r.directUsers, true); 
+                                    }},
                                     { name: 'All active users', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return 'Includes technical group(s)<br />';
@@ -267,7 +323,8 @@
                                 data: map.publicGroups,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'queue'; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: {  
@@ -282,17 +339,7 @@
                                 table: 'datatable-queues',
                                 visibleTab: 'tab-default-queues__item',
                                 filename: 'Queues'
-                            }],
-                            help: {
-                                content: [
-                                    'This page shows the Public Groups and the Queues.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the public group or the queue contains no active user (direct nor indirect).</li></ul>',
-                                    'The <b>ALL USERS</b> is computed recurcively across all possible '+
-                                        'sub meta-groups (role, role and sub, groups, etc.) that are '+
-                                        'contained in the groups or queues.'
-                                ]
-                            }
+                            }]
                         }
                     });
                 }

@@ -49,11 +49,16 @@
                             helper.html.datatable.create({
                                 element: 'datatable-workflows',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Workflow!';
                                         },
                                         scoreFormula: (r) => { 
@@ -74,8 +79,18 @@
                                                 return 'No direct action!<br />';
                                             }
                                             let html = '';
-                                            r.actions.forEach(a => html += 'Direct action: '+a.name+' ('+a.type+')<br />'); 
-                                            r.futureActions.forEach(tt => tt.actions.forEach(a => html += 'Future action: '+a.name+' ('+a.type+')<br />'));
+                                            r.actions.forEach(
+                                                a => html += 
+                                                    'Direct action: ' + helper.html.render.escape(a.name) +
+                                                        ' (' + helper.html.render.escape(a.type) + ')<br />'
+                                            ); 
+                                            r.futureActions.forEach(
+                                                tt => tt.actions.forEach(
+                                                    a => html += 
+                                                        'Future action: ' + helper.html.render.escape(a.name) +
+                                                            ' (' + helper.html.render.escape(a.type) + ')<br />'
+                                                )
+                                            );
                                             return html;
                                         },
                                         scoreFormula: (r) => { 
@@ -85,14 +100,25 @@
                                 ],
                                 data: map.workflows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             helper.html.datatable.create({
                                 element: 'datatable-processbuilders',
                                 columns: [
-                                    { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
-                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Flow', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.definitionId, 
+                                            helper.html.render.escape(r.definitionName)
+                                        ); 
+                                    }},
+                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Version', type: 'numeric', property: 'version' },
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Active', property: 'isActive', 
@@ -110,7 +136,7 @@
                                     { name: 'DML Updates', property: 'dmlUpdates' },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Process Builder!';
                                         },
                                         scoreFormula: (r) => { 
@@ -121,16 +147,28 @@
                                 data: map.flows,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'Workflow' }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             helper.html.datatable.create({
                                 element: 'datatable-flows',
                                 columns: [
-                                    { name: 'Flow', formula: (r) => { return helper.html.render.link('/'+r.definitionId, r.definitionName); }},
-                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Flow', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.definitionId, 
+                                            helper.html.render.escape(r.definitionName)
+                                        ); 
+                                    }},
+                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Version', type: 'numeric', property: 'version' },
                                     { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Type', property: 'type' }, 
                                     { name: 'Active', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
@@ -141,7 +179,7 @@
                                     },
                                     { name: 'Description', 
                                         formula: (r) => {
-                                            if (r.description) return r.description;
+                                            if (r.description) return helper.html.render.escape(r.description);
                                             return 'You should set a description to this Flow!';
                                         },
                                         scoreFormula: (r) => { 
@@ -151,8 +189,9 @@
                                 ],
                                 data: map.flows,
                                 sorting: { name: 'Score', order: 'desc' },
-                                filtering: { formula: (r) => { return r.type === 'Flow' }},
-                                showSearch: true
+                                filtering: { formula: (r) => { return r.type !== 'Workflow' }},
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: { 

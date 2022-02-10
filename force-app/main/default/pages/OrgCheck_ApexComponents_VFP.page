@@ -7,10 +7,67 @@
         <apex:define name="text_page_subtitle">
             Apex Classes and Triggers Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>Apex Classes and Triggers</b> in three tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Classes</b> is a tabular list of all the Apex Classes in this org.</li>
+                <li>The second tab called <b>Triggers</b> is a tabular list of all Apex Triggers in this org.</li>
+                <li>The third tab called <b>Object's triggers count</b> is a grouped table that aggregates all triggers per objects in this org.</li>
+            </ul>
+            <br />
+            To make sure you get <b>all the benefits</b> from this page, make sure to follow these steps:
+            <ol class="slds-list_ordered">
+                <li>You <b>compile all classes</b> by selecting the "Plug" button.</li>
+                <li>You <b>run all tests</b> by selecting the "Like" button.</li>
+            </ol>
+            <br />
+            On the Classes table:<br />
+            <ul class="slds-list_dotted">
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the class is not used by any other entity (based on the Dependency API), then you get +1. </li>
+                        <li>If the API version of the class is older than 3 year, then you get +1. </li>
+                        <li>If the class needs recompilation, then you get +1. </li>
+                        <li>If the class is not explicitely specifying the sharing, then you get +1. </li>
+                        <li>If the class has not reached a code covergare of <b>85%</b>, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
+                    it is used and what it is using.</li>
+            </ul>
+            <br />
+            On the Triggers table:<br />
+            <ul class="slds-list_dotted">
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the trigger is not used by any other entity (based on the Dependency API), then you get +1. </li>
+                        <li>If the API version of the trigger is older than 3 year, then you get +1. </li>
+                        <li>If the trigger is inactive, then you get +1. </li>
+                        <li>If the trigger is more than 5,000 characters long, then you get +1. </li>
+                        <li>If the trigger is containing SOQL or DML statments, then you get +1. </li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
+                    it is used and what it is using.</li>
+            </ul>
+            <br />
+            On the Triggers per object table:<br />
+            <ul class="slds-list_dotted">
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the count of active triggers per object is greater that one, you get +1. </li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+        </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
-                <a href="/01p" target="_blank">
-                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                <a href="/01p" target="_blank" rel="external noopener noreferrer">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -19,10 +76,10 @@
                 </a>
             </div>
             <div class="slds-page-header__control">
-                <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank">
-                    <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
+                <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank" rel="external noopener noreferrer">
+                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
                         <svg class="slds-button__icon" aria-hidden="true">
-                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#checkout')}"></use>
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#like')}"></use>
                         </svg>
                         <span class="slds-assistive-text">Unit Tests</span>
                     </button>
@@ -66,7 +123,9 @@
                         dependencies: true,
                         onRecords: function(map) { 
 
-                            let countRecompileApexClasses = 0;
+                            let cntClsToCompile = 0;
+                            let cntClsNoCoverage = 0;
+                            let cntClsLowCoverage = 0;
 
                             // Render the Apex Classes data in a table
                             helper.html.datatable.create({
@@ -83,7 +142,7 @@
                                     { name: 'Status', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
-                                                countRecompileApexClasses++;
+                                                cntClsToCompile++;
                                                 return 'Recompile!';
                                             }
                                             return 'OK';
@@ -93,11 +152,22 @@
                                         }
                                     },
                                     { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abst.', property: 'isAbstract', formula: (r) => { return helper.html.render.checkbox(r.isAbstract); }},
-                                    { name: 'Type', property: 'isInterface', formula: (r) => { return r.isInterface === false ? 'Class' : 'Interface'; }},
-                                    { name: 'Intf.', formula: (r) => {
+                                    { name: 'Abst.?', property: 'isAbstract', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isAbstract); 
+                                    }},
+                                    { name: 'Type', formula: (r) => { 
+                                        if (r.isInterface === true) return 'Interface';
+                                        if (r.isEnum === true) return 'Enum';
+                                        if (r.isClass === true) return 'Class';
+                                        return 'Other';
+                                    }},
+                                    { name: 'Implements', formula: (r) => {
                                         let html = ''; 
-                                        if (r.interfaces) { r.interfaces.forEach(e => html += e + '<br />'); }
+                                        if (r.interfaces) { 
+                                            r.interfaces.forEach(
+                                                e => html += helper.html.render.escape(e) + '<br />'
+                                            ); 
+                                        }
                                         return html;
                                     }},
                                     { name: 'Size', type: 'numeric', property: 'length' },
@@ -105,13 +175,18 @@
                                     { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
                                     { name: 'Annot.', formula: (r) => {
                                         let html = ''; 
-                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        if (r.annotations) { 
+                                            r.annotations.forEach(
+                                                e => html += helper.html.render.escape(e.name) + '<br />'
+                                            ); 
+                                        }
                                         return html;
                                     }},
                                     { name: 'Sharing', property: 'specifiedSharing', 
                                         formula: (r) => {
                                             if (r.isSharingMissing === true) return 'Not specified!';
-                                            return r.specifiedSharing;
+                                            if (r.specifiedSharing === 'n/a') return 'Not Applicable';
+                                            return helper.html.render.escape(r.specifiedSharing);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isSharingMissing === true) return 1; 
@@ -119,19 +194,47 @@
                                     },
                                     { name: 'Coverage', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
-                                            return helper.html.render.percentage(r.coverage);
+                                            if (r.isClass === true) {
+                                                if (r.coverage || r.coverage === 0) return helper.html.render.percentage(r.coverage);
+                                                cntClsNoCoverage++;
+                                                return 'No coverage data';
+                                            }
+                                            return 'Not Applicable';
                                         },
                                         scoreFormula: (r) => { 
-                                            if (!r.coverage || r.coverage < 0.85) return 1;
+                                            if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) {
+                                                if (r.coverage < 0.85) cntClsLowCoverage++;
+                                                return 1;
+                                            }
                                         }
                                     },
                                     { name: 'Related Tests',
                                         formula: (r) => {
                                             let html = ''; 
-                                            if (r.relatedTestClasses) { r.relatedTestClasses.forEach(e => {
-                                                html += helper.html.render.link('/'+e, map.apexClasses[e]?.name) + '<br />';
-                                            }); }
+                                            if (r.relatedTestClasses) { 
+                                                r.relatedTestClasses.forEach(e => {
+                                                    html += helper.html.render.link(
+                                                            '/'+e, 
+                                                            helper.html.render.escape(map.apexClasses[e]?.name)
+                                                        ) + '<br />';
+                                                }); 
+                                            }
                                             return html;
+                                        }
+                                    },
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in', type: 'numeric', 
+                                        formula: (r) => { 
+                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
+                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                            return 'Not used!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
                                     { name: 'Dependencies', 
@@ -139,27 +242,39 @@
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
+                            let html = '';
+
                             // Show alert about recompilation
-                            if (countRecompileApexClasses > 0) {
-                                let html = '';
-                                if (countRecompileApexClasses > 0) {
-                                    html += 'You have '+countRecompileApexClasses+' Apex classes that need to be <b>recompiled</b>.<br />';
-                                    html += 'You need to review the classes that could not have been compiled in this org.<br />';
-                                    html += '<br />';
-                                }
+                            if (cntClsToCompile > 0) {
+                                html += 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
+                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
+                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
+                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                            }
+
+                            // Show alert about no code coverage
+                            if (cntClsNoCoverage > 0 || cntClsLowCoverage > 0) {
+                                if (html) html += '<br />';
+                                if (cntClsNoCoverage > 0) html += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
+                                if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
+                                html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
+                                html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                helper.html.element.addClass('run-all-tests', ['slds-theme_warning']);
+                            }
+
+                            if (html) {
                                 helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                helper.html.message.show(html);
                             }
 
                             const objectTriggersCountMap = {};
@@ -168,7 +283,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'API', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
@@ -221,32 +341,53 @@
                                         // ---
                                         return objName;
                                     }},
-                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { return helper.html.render.checkbox(r.beforeInsert); }},
-                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { return helper.html.render.checkbox(r.afterInsert); }},
-                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { return helper.html.render.checkbox(r.beforeUpdate); }},
-                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { return helper.html.render.checkbox(r.afterUpdate); }},
-                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { return helper.html.render.checkbox(r.beforeDelete); }},
-                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { return helper.html.render.checkbox(r.afterDelete); }},
-                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { return helper.html.render.checkbox(r.afterUndelete); }},
+                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeInsert); 
+                                    }},
+                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterInsert); 
+                                    }},
+                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeUpdate); 
+                                    }},
+                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterUpdate); 
+                                    }},
+                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.beforeDelete); 
+                                    }},
+                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterDelete); 
+                                    }},
+                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.afterUndelete); 
+                                    }},
                                     { name: 'Annotations', formula: (r) => {
                                         let html = ''; 
-                                        if (r.annotations) { r.annotations.forEach(e => html += e.name + '<br />'); }
+                                        if (r.annotations) { 
+                                            r.annotations.forEach(
+                                                e => html += helper.html.render.escape(e.name) + '<br />'
+                                            ); 
+                                        }
                                         return html;
+                                    }},
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],
                                 data: map.apexTriggers,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Render the Apex Triggers data in a table
@@ -264,7 +405,8 @@
                                 ],
                                 data: objectTriggersCountMap,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                             
                         },
@@ -284,28 +426,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Apex classes and triggers.',
-                                    'The <b>SCORE</b> for apex classes is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex class is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the class is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the <i>with or without sharing</i> option is not clearly specified (only if the class is not an interface and not a Test class,</li>'+
-                                        '<li><code>+1</code> if the class needs recompilation.</li>'+
-                                        '<li><code>+1</code> if the class needs has no coverage or less than 85% code coverage.</li></ul>',
-                                    'The <b>SCORE</b> for apex triggers is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the apex trigger is not used (in other words it has no dependency),</li>'+
-                                        '<li><code>+1</code> if the API version of the trigger is too old (3 years old),</li>'+
-                                        '<li><code>+1</code> if the trigger needs recompilation,</li>'+
-                                        '<li><code>+1</code> if the trigger is inactive (what is the use of an inactive trigger, why not delete it?).</li>'+
-                                        '<li><code>+1</code> if the trigger has more than 5000 characters without comments (in that case we suspect logic!).</li>'+
-                                        '<li><code>+1</code> if the trigger contains a direct SOQL or DML statement (we do not consider indirect SOQL or DML included in the call of other classes!!).</li>'+
-                                        '</ul>',
-                                    'The <b>DEPENDENCIES</b> is showing where the classes or triggers is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });

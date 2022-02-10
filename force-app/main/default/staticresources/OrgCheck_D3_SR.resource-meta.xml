@@ -3,5 +3,5 @@
     <cacheControl>Private</cacheControl>
     <contentType>text/javascript</contentType>
     <description>Data-Driven Documents framework from https://d3js.org/
-Version 5.16 minimized at https://github.com/d3/d3/releases/download/v5.16.0/d3.zip</description>
+Version v7.3.0 minimized at https://registry.npmjs.org/d3/-/d3-7.3.0.tgz</description>
 </StaticResource>

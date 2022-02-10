@@ -33,35 +33,73 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <table>
-                                    <tr>
-                                        <td width="50%">
-                                            <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%">
-                                                <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%" />
-                                            </object>
-                                        </td>
-                                        <td width="50%">
-                                            Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
-                                            application in order to quickly analyze your org and its technical debt.
-                                        </td>
-                                    </tr>
-                                </table>
+                                <div class="slds-tabs_default">
+                                    <ul class="slds-tabs_default__nav" role="tablist">
+                                        <li class="slds-tabs_default__item slds-is-active" title="Welcome" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">Welcome</a>
+                                        </li>
+                                        <li class="slds-tabs_default__item" title="Support and feedback" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-11" id="tab-default-support__item">Support and feedback</a>
+                                        </li>
+                                    </ul>
+                                    <div id="tab-default-10" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-welcome__item">
+                                        <table>
+                                            <tr>
+                                                <td width="50%">
+                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%">
+                                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%" />
+                                                    </object>
+                                                </td>
+                                                <td width="50%">
+                                                    Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
+                                                    application in order to quickly analyze your org and its technical debt.
+                                                </td>
+                                            </tr>
+                                        </table>        
+                                    </div>
+                                    <div id="tab-default-11" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-support__item">
+                                        <table>
+                                            <tr>
+                                                <td width="30%">
+                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%">
+                                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%" />
+                                                    </object>
+                                                </td>
+                                                <td width="70%">
+                                                    <b>Issues or new ideas?</b><br />
+                                                    Track them at <br />
+                                                    <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">https://sfdc.co/OrgCheck-Backlog</a><br />
+                                                    <br />
+                                                    <b>Want to chat with other users?</b><br />
+                                                    Please join us on Slack with this 
+                                                    <a href="http://sfdc.co/OrgCheck-Community" target="_blank" rel="external noopener noreferrer">invitation</a><br />
+                                                    <br />
+                                                    <b>Social Media</b><br />
+                                                    Like and share posts on 
+                                                    <a href="https://www.linkedin.com/company/sf-orgcheck" target="_blank" rel="external noopener noreferrer">LinkedIn</a> 
+                                                    and on
+                                                    <a href="https://twitter.com/VinceFINET/status/1453307931554942992" target="_blank" rel="external noopener noreferrer">Twitter</a>!<br />
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </article>
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="Legal terms">
+                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="General Information">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#observation_component')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Legal terms</span>
+                                            <span class="slds-assistive-text">General Information</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Legal terms
+                                            General Information
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex">
@@ -69,57 +107,103 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <b>OrgCheck is free to use, but is not an official Salesforce product. </b> OrgCheck has not been officially 
-                                tested or documented. Salesforce support is not available for OrgCheck. Support requests for OrgCheck 
-                                should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a>. 
-                                Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank">https://github.com/VinceFINET/OrgCheck</a> 
-                                under separate and different license terms.
-                            </div>
-                        </article>
-                        <article class="slds-card">
-                            <div class="slds-card__header slds-grid">
-                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                    <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-number-input" title="welcome">
-                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#number_input')}"></use>
-                                            </svg>
-                                            <span class="slds-assistive-text">Welcome</span>
-                                        </span>
+                                <div class="slds-tabs_default">
+                                    <ul class="slds-tabs_default__nav" role="tablist">
+                                        <li class="slds-tabs_default__item slds-is-active" title="About Technical Debt" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-20" id="tab-default-abouttechdebt__item">About Technical Debt</a>
+                                        </li>
+                                        <li class="slds-tabs_default__item" title="Legal terms" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-21" id="tab-default-legalterms__item">Legal terms</a>
+                                        </li>
+                                        <li class="slds-tabs_default__item" title="Third party components" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-22" id="tab-default-3rdparty__item">Third party components</a>
+                                        </li>
+                                    </ul>
+                                    <div id="tab-default-20" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-abouttechdebt__item">
+                                        Although invisible, <b>Technical Debt</b> has an impact on your project, your 
+                                        IT budget, your Salesforce app, your end-users and... your business.<br />
+                                        You may be interested in this <a target="_blank" rel="external noopener noreferrer"
+                                        href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
+                                        <br />
+                                        You may have a <b>Technical Debt</b>, if you answer 'yes' to the following questions:
+                                        <ul class="slds-list_dotted">
+                                            <li>Is the performance of your Salesforce app low?</li>
+                                            <li>Is the time to resolve a bug long with your support?</li>
+                                            <li>Is maintenance cost increasing?</li>
+                                            <li>Is documentation about your Salesforce org poor?</li>
+                                            <li>Is adding new features getting more complex?</li>
+                                            <li>Is testing and/or deploying your app a nightmare?</li>
+                                            <li>If yes, you may have a technical debt that you need to reduce.</li>
+                                        </ul>
+                                        <br />
+                                        My vision of this tool was (and still is):
+                                        <ul class="slds-list_dotted">
+                                            <li>The tool should run on a salesforce org: easy to install and easy to use</li>
+                                            <li>No additional software or platform</li>
+                                            <li>No need to have a Salesforce Employee with her/his magical access</li>
+                                            <li>Code of the application is available you can modify it, if you need it</li>
+                                        </ul>
                                     </div>
-                                    <div class="slds-media__body">
-                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Technical Debt
-                                        </h2>
+                                    <div id="tab-default-21" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-tegalterms__item">
+                                        <b>OrgCheck is free to use, but is not an official Salesforce product. </b> OrgCheck has not been officially 
+                                        tested or documented. Salesforce support is not available for OrgCheck. Support requests for OrgCheck 
+                                        should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck/issues</a>. 
+                                        Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck</a> 
+                                        under separate and different license terms.        
                                     </div>
-                                    <div class="slds-no-flex">
+                                    <div id="tab-default-22" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3rdparty__item">
+                                        <b>D3js</b><br />
+                                        WEBSITE: https://d3js.org/<br />
+                                        VERSION: 7.3.0<br />
+                                        SOURCE: https://registry.npmjs.org/d3/-/d3-7.3.0.tgz<br />
+                                        LICENCE:<br />
+                                        <code>
+                                            Copyright 2010-2021 Mike Bostock<br />
+                                            <br />
+                                            Permission to use, copy, modify, and/or distribute this software for any purpose<br />
+                                            with or without fee is hereby granted, provided that the above copyright notice<br />
+                                            and this permission notice appear in all copies.<br />
+                                            <br />
+                                            THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH<br />
+                                            REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND<br />
+                                            FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,<br />
+                                            INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS<br />
+                                            OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER<br />
+                                            TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF<br />
+                                            THIS SOFTWARE.
+                                        </code>
+                                        <br /><br /><br />
+                                        <b>JsForce</b><br />
+                                        WEBSITE: https://jsforce.github.io/<br />
+                                        VERSION: 1.11.0<br />
+                                        SOURCE: https://github.com/jsforce/jsforce/releases/tag/1.11.0<br />
+                                        LICENCE:<br />
+                                        <code>
+                                            (The MIT License)<br />
+                                            <br />
+                                            Copyright (c) 2011 Shinichi Tomita &lt;shinichi.tomita@gmail.com&gt;;<br />
+                                            <br />
+                                            Permission is hereby granted, free of charge, to any person obtaining<br />
+                                            a copy of this software and associated documentation files (the<br />
+                                            'Software'), to deal in the Software without restriction, including<br />
+                                            without limitation the rights to use, copy, modify, merge, publish,<br />
+                                            distribute, sublicense, and/or sell copies of the Software, and to<br />
+                                            permit persons to whom the Software is furnished to do so, subject to<br />
+                                            the following conditions:<br />
+                                            <br />
+                                            The above copyright notice and this permission notice shall be<br />
+                                            included in all copies or substantial portions of the Software.<br />
+                                            <br />
+                                            THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,<br />
+                                            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<br />
+                                            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.<br />
+                                            IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY<br />
+                                            CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,<br />
+                                            TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE<br />
+                                            SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br />
+                                        </code>
                                     </div>
-                                </header>
-                            </div>
-                            <div class="slds-card__body slds-card__body_inner">
-                                Although invisible, <b>Technical Debt</b> has an impact on your project, your 
-                                IT budget, your Salesforce app, your end-users and... your business.<br />
-                                You may be interested in this <a target="_blank" 
-                                href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
-                                <br />
-                                You may have a <b>Technical Debt</b>, if you answer 'yes' to the following questions:
-                                <ul class="slds-list_dotted">
-                                    <li>Is the performance of your Salesforce app low?</li>
-                                    <li>Is the time to resolve a bug long with your support?</li>
-                                    <li>Is maintenance cost increasing?</li>
-                                    <li>Is documentation about your Salesforce org poor?</li>
-                                    <li>Is adding new features getting more complex?</li>
-                                    <li>Is testing and/or deploying your app a nightmare?</li>
-                                    <li>If yes, you may have a technical debt that you need to reduce.</li>
-                                </ul>
-                                <br />
-                                My vision of this tool was (and still is):
-                                <ul class="slds-list_dotted">
-                                    <li>The tool should run on a salesforce org: easy to install and easy to use</li>
-                                    <li>No additional software or platform</li>
-                                    <li>No need to have a Salesforce Employee with her/his magical access</li>
-                                    <li>Code of the application is available you can modify it, if you need it</li>
-                                </ul>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -180,51 +264,6 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-endorsement" title="Support and feedback">
-                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#endorsement')}"></use>
-                                            </svg>
-                                            <span class="slds-assistive-text">Support and feedback</span>
-                                        </span>
-                                    </div>
-                                    <div class="slds-media__body">
-                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Support and feedback
-                                        </h2>
-                                    </div>
-                                </header>
-                            </div>
-                            <div class="slds-card__body slds-card__body_inner">
-                                <table>
-                                    <tr>
-                                        <td width="30%">
-                                            <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%">
-                                                <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%" />
-                                            </object>
-                                        </td>
-                                        <td width="70%">
-                                            <b>Issues or new ideas?</b><br />
-                                            Track them at <br />
-                                            <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a><br />
-                                            <br />
-                                            <b>Want to chat with other users?</b><br />
-                                            Please join us on Slack with this 
-                                            <a href="https://join.slack.com/t/orgcheck-ohana/shared_invite/zt-nuah90gx-TGZhS8wp049pGNVSPheamA" target="_blank">never expiring invitation</a><br />
-                                            <br />
-                                            <b>Social Media</b><br />
-                                            Like and share posts on 
-                                            <a href="https://www.linkedin.com/posts/vincentfinet_technicaldebt-activity-6776216981533200384-Zs2X" target="_blank">LinkedIn</a> 
-                                            and on
-                                            <a href="https://twitter.com/VinceFINET/status/1370446145999212553" target="_blank">Twitter</a>!<br />
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </article>
-                        <article class="slds-card">
-                            <div class="slds-card__header slds-grid">
-                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                    <div class="slds-media__figure">
                                         <span class="slds-icon_container slds-icon-standard-visit-templates" title="Org Connection">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#visit_templates')}"></use>
@@ -244,13 +283,13 @@
                                 <div class="slds-tabs_default">
                                     <ul class="slds-tabs_default__nav" role="tablist">
                                         <li class="slds-tabs_default__item slds-is-active" title="Local connection" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-1__item">Local connection</a>
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-31" id="tab-default-localcon__item">Local connection</a>
                                         </li>
                                         <li class="slds-tabs_default__item" title="Remote connection" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-2__item">Remote connection</a>
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-32" id="tab-default-remotecon__item">Remote connection</a>
                                         </li>
                                     </ul>
-                                    <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-1__item">
+                                    <div id="tab-default-31" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-localcon__item">
                                         <!-- By default, OrgCheck will scan the org where it has been installed. But you 
                                         can specify another org!!<br />-->
                                         OrgCheck scans the org where it has been installed<br />
@@ -265,7 +304,7 @@
                                         <button id="button-orgauth-local" class="slds-button slds-button_brand">Check back my local org!</button><br />
                                         <br />-->
                                     </div>
-                                    <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-2__item">
+                                    <div id="tab-default-32" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-remotecon__item">
                                         In the next versions, OrgCheck will be able to log to another org!!!<br />
                                         <!--
                                         OrgCheck can scan any other org (DE, Sandboxes and Production) as long as:
@@ -278,7 +317,7 @@
                                         The <i>"My Domain"</i> feature let us distinguish the remote org you want to scan from the 
                                         local org where you installed OrgCheck.<br />
                                         For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank">this 
+                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
                                         article</a> from the Salesforce official documentation.<br />
                                         <br />
                                         The <i>"CORS"</i> feature is necessary because it is very likely that your browser will require it
@@ -289,7 +328,7 @@
                                         You can set <code>https://*.visualforce.com</code> which is more generic, or you can replace the 
                                         <code>'*'</code> with the mydomain of the local org where you installed OrgCheck.<br />
                                         For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank">this 
+                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
                                         article</a> from the Salesforce official documentation.<br />
                                         <br />
                                         A <i>"ConnectedApp"</i> should be created in your local org. Please make sure you set the following information:
@@ -335,27 +374,77 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Alternatives">
+                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Complementary Tools">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Alternatives</span>
+                                            <span class="slds-assistive-text">Complementary Tools</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Alternatives
+                                            Complementary Tools
                                         </h2>
                                     </div>
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                Did you look at the <a href="/lightning/setup/SalesforceOptimizer/home" target="_blank">Salesforce Optimizer</a>?<br />
-                                This tool is complementary to <b>OrgCheck</b>!<br />
-                                <br />
-                                Also if you want to scale up (specialy if you have a very LARGE org), you might consider using tools like Element Clouds.<br />
-                                <br />
-                                Want to analyze code quality, consultants often use Checkmarx or Codescan.<br />
+                                <ul class="slds-tabs_default__nav" role="tablist">
+                                    <li class="slds-tabs_default__item slds-is-active" title="Salesforce" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-40" id="tab-default-sfdc__item">Salesforce</a>
+                                    </li>
+                                    <li class="slds-tabs_default__item " title="Scanning Code" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-41" id="tab-default-scancode__item">Code</a>
+                                    </li>
+                                    <li class="slds-tabs_default__item" title="Debug Logs Analysis" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-42" id="tab-default-deblog__item">Debug Logs</a>
+                                    </li>
+                                    <li class="slds-tabs_default__item" title="Dependencies Tool" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="true" aria-controls="tab-default-43" id="tab-default-deptoo__item">Dependencies</a>
+                                    </li>
+                                    <li class="slds-tabs_default__item" title="Data Cleansing" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="true" aria-controls="tab-default-44" id="tab-default-dataclean__item">Data Cleansing</a>
+                                    </li>
+                                </ul>
+                                <div id="tab-default-40" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-sfdc__item">
+                                    Out of the box tool provided by Salesforce or Salesforce Lab:
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank">Salesforce Optimizer</a></li>
+                                        <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;type=5" target="_blank">Salesforce LEX Readiness Report</a></li>
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=%22Permission%20Helper%22&amp;searchType=simpleSearch" target="_blank">Permission Helper (AppExchange / Salesforce Lab)</a></li>
+                                    </ul>
+                                </div>
+                                <div id="tab-default-41" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scancode__item">
+                                    Want to analyze code quality?
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank">Salesforce Guidelines for secure code</a></li>
+                                        <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank">Apex PMD Rules</a></li>
+                                        <li><a href="https://security.secure.force.com/security/tools/forcecom/scanner" target="_blank">Checkmarx</a></li>
+                                        <li><a href="https://www.getclayton.com/" target="_blank">Clayton</a></li>
+                                        <li><a href="https://www.codescan.io/" target="_blank">Codescan</a></li>
+                                    </ul>
+                                </div>
+                                <div id="tab-default-42" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deblog__item">
+                                    Want to understand better what's happening in debug logs?
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank">Apex Replay Debugger</a></li>
+                                        <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank">Online Debug Log Tree (on github)</a></li>
+                                        <li><a href="http://sfdc-log.herokuapp.com/" target="_blank">Online Debug Log Visualizer (on heroku)</a></li>
+                                    </ul>
+                                </div>
+                                <div id="tab-default-43" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deptoo__item">
+                                    Want to go further with the dependency API?
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://happysoup.io/" target="_blank">Happy Soup</a></li>
+                                    </ul>
+                                </div>
+                                <div id="tab-default-44" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-dataclean__item">
+                                    Want to have clean data?
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank">RingLead Field Trip</a></li>
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank">RingLead Dupe Dive</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </article>
                     </div>                    

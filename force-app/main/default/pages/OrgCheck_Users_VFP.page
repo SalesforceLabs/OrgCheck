@@ -6,6 +6,23 @@
         <apex:define name="text_page_subtitle">
             Active Users Profile and Permissions Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>active users</b> in the organization.<br />
+            <br />
+            On this table :<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents an active user</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the user is not using Lightning Experience, then you get +1.</li>
+                        <li>If the user never logged, , then you get +1.</li>
+                    </ol>
+                </li>
+                <li>The column <b>Key Permission</b> is focused on important permissions such as Api Enabled, View Setup,
+                    Modify All Data and View All Data.</li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">
@@ -22,7 +39,13 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'User Name', formula: (r) => { return helper.html.render.link('/'+r.id, '<img src="' + r.photourl + '" width="25" /> ' + r.name); }},
+                                    { name: 'User Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            '<img src="' + helper.html.render.escape(r.photourl) + '" width="25" /> ' + 
+                                                helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Last login', 
                                         formula: (r) => { 
@@ -50,16 +73,27 @@
                                         if (r.permissions.viewAllData) html += 'View All Data<br />';
                                         return html;
                                     }},
-                                    { name: 'Profile Name', formula: (r) => { return helper.html.render.link('/'+r.profile.id, r.profile.name); }},
+                                    { name: 'Profile Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.profile.id, 
+                                            helper.html.render.escape(r.profile.name)
+                                        );
+                                    }},
                                     { name: 'Permission Set Names', formula: (r) => {
                                         let html = '';
-                                        r.permissionSets.forEach(ps => html += helper.html.render.link('/'+ps.id, ps.name) + '<br />');
+                                        r.permissionSets.forEach(
+                                            ps => html += helper.html.render.link(
+                                                '/'+ps.id, 
+                                                helper.html.render.escape(ps.name)
+                                            ) + '<br />'
+                                        );
                                         return html;
                                     }}
                                 ],
                                 data: map.users,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
                         },
                         actions: { 
@@ -69,19 +103,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Active Users.',
-                                    'The <b>SCORE</b> is computed with the following rules: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the user is no on Lightning Experience, </li>'+
-                                        '<li><code>+1</code> if the user never logged.</li></ul>',
-                                    'The <b>KEY PERMISSIONS</b> is showing if a user has one of the following system permissions: '+
-                                        '<ul class="slds-list_dotted"><li><code>apiEnabled</code>: Api Enabled,</li>'+
-                                        '<li><code>viewSetup</code>: View Setup,</li>'+
-                                        '<li><code>modifyAllData</code>: Modify All Data,</li>'+
-                                        '<li><code>viewAllData</code>: View All Data.</li></ul>'
-                                ]
                             }
                         }
                     });

@@ -8,30 +8,40 @@
             Batches Overview
         </apex:define>
         <apex:define name="html_actions">
+            <div class="slds-page-header__control">
+                <a href="/01p" target="_blank" rel="external noopener noreferrer">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                        <svg class="slds-button__icon" aria-hidden="true">
+                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
+                        </svg>
+                        <span class="slds-assistive-text">Compile all</span>
+                    </button>
+                </a>
+            </div>
         </apex:define>
         <apex:define name="html_content_core">
             <div id="datatable" />
 
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Apex Jobs" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-apexjobs" id="tab-default-apexjobs__item">Apex Jobs</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="Schedulable classes not yet scheduled" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-notscheduledjobs" id="tab-default-notscheduledjobs__item">Schedulable classes not yet scheduled</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Apex Jobs" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-apexjobs" id="tab-default-apexjobs__item">Apex Jobs</a>
                     </li>
                     <li class="slds-tabs_default__item" title="Scheduled Jobs" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-scheduledjobs" id="tab-default-scheduledjobs__item">Scheduled Jobs</a>
-                    </li>
-                    <li class="slds-tabs_default__item" title="Schedulable classes not yet scheduled" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-notscheduledjobs" id="tab-default-notscheduledjobs__item">Schedulable classes not yet scheduled</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-scheduledjobs" id="tab-default-scheduledjobs__item">Scheduled Jobs</a>
                     </li>
                 </ul>
-                <div id="tab-default-apexjobs" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-apexjobs__item">
+                <div id="tab-default-notscheduledjobs" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-notscheduledjobs__item">
+                    <div id="datatable-notscheduledjobs" />
+                </div>
+                <div id="tab-default-apexjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-apexjobs__item">
                     <div id="datatable-apexjobs" />
                 </div>
                 <div id="tab-default-scheduledjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scheduledjobs__item">
                     <div id="datatable-scheduledjobs" />
-                </div>
-                <div id="tab-default-notscheduledjobs" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-notscheduledjobs__item">
-                    <div id="datatable-notscheduledjobs" />
                 </div>
             </div>
         </apex:define>
@@ -65,7 +75,8 @@
                                 ],
                                 data: map.batchesApexJobs,
                                 sorting: { name: 'Context', order: 'asc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
 
                             // Render the data in a table for Scheduled Jobs
@@ -79,22 +90,47 @@
                                             if (r.status !== 'WAITING') return 1; 
                                         }
                                     },
-                                    { name: 'user', formula: (r) => { return helper.html.render.link('/'+r.userid, (map.users[r.userid]?.name || r.userid)); }},
+                                    { name: 'user', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.userid, 
+                                            helper.html.render.escape(map.users[r.userid]?.name || r.userid)
+                                        ); 
+                                    }},
                                     { name: 'start', property: 'start' },
                                     { name: 'end', property: 'end' },
                                     { name: 'timezone', property: 'timezone' }
                                 ],
                                 data: map.batchesScheduledJobs,
                                 sorting: { name: 'Context', order: 'asc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true
                             });
+
+                            let cntClsToCompile = 0;
 
                             // Render the data in a table for Not Scheduled Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-notscheduledjobs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Status', 
+                                        formula: (r) => {
+                                            if (r.needsRecompilation === true) {
+                                                cntClsToCompile++;
+                                                return 'Recompile!';
+                                            }
+                                            return 'OK';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.needsRecompilation === true) return 1; 
+                                        }
+                                    },
                                     { name: 'Is Scheduled?', 
                                         formula: (r) => { return helper.html.render.checkbox(r.isScheduled === true); },
                                         scoreFormula: (r) => { if (r.isScheduled !== true) return 1; }
@@ -103,9 +139,20 @@
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
-                                filtering: { formula: (r) => { return (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
-                                showSearch: true
+                                filtering: { formula: (r) => { return r.needsRecompilation === true || (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
+                                showSearch: true,
+                                showStatistics: true
                             });
+
+                            // Show alert about recompilation
+                            if (cntClsToCompile > 0) {
+                                let html = 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
+                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
+                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
+                                helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                helper.html.message.show(html);
+                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                            }
                         },
                         actions: {  
                             clearCache: { 

@@ -1,0 +1,146 @@
+<apex:page >
+    <apex:composition template="OrgCheck_PageTemplate_VFT">
+        <apex:define name="html_additional_scripttags" />
+        <apex:define name="text_page_title">
+            Analytics Components
+        </apex:define>
+        <apex:define name="text_page_subtitle">
+            Analytics Components Overview
+        </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all the <b>reports</b> and <b>dashboards</b> you can see in the current organization.<br />
+            <br />
+            On all the tables:<br />
+            <ul class="slds-list_dotted">
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the item has no description, then you get +1. </li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+        </apex:define>
+        <apex:define name="html_actions">
+        </apex:define>
+        <apex:define name="html_content_core">
+            <div class="slds-tabs_default">
+                <ul class="slds-tabs_default__nav" role="tablist">
+                    <li class="slds-tabs_default__item slds-is-active" title="Visual Force Pages" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-rpt" id="tab-default-rpt__item">Reports</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Visual Force Components" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-dsb" id="tab-default-dsb__item">Dashboards</a>
+                    </li>
+                </ul>
+                <div id="tab-default-rpt" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-rpt__item">
+                    <div id="datatable-rpt" />
+                </div>
+                <div id="tab-default-dsb" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-dsb__item">
+                    <div id="datatable-dsb" />
+                </div>
+            </div>
+        </apex:define>
+        <apex:define name="html_start_definition_script">
+            <script>
+                function start2(controller, helper) {
+
+                    // Initialize TABS bindings
+                    helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
+
+                    // =================================
+                    // RUN CONTROLLER
+                    // =================================
+                    controller.run({
+                        datasets: [ 'reports', 'dashboards' ],
+                        dependencies: false,
+                        onRecords: function(map) { 
+
+                            // Render the Reports data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-rpt',
+                                columns: [
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Package', property: 'package' },
+                                    { name: 'Developer Name', property: 'developerName' },
+                                    { name: 'Folder', formula: (r) => { 
+                                        return helper.html.render.escape(r.folder.name); 
+                                    }},
+                                    { name: 'Format', property: 'format' },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(r.description);
+                                            return 'You should set a description to this Report!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
+                                ],
+                                data: map.reports,
+                                sorting: { name: 'Score', order: 'desc' },
+                                showSearch: true,
+                                showStatistics: true
+                            });
+
+                            // Render the Dashboards data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-dsb',
+                                columns: [
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
+                                    { name: 'Score', type: 'numeric', property: '##score##' },
+                                    { name: 'Package', property: 'package' },
+                                    { name: 'Developer Name', property: 'developerName' },
+                                    { name: 'Folder', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.folder.id, 
+                                            helper.html.render.escape(r.folder.name)
+                                        ); 
+                                    }},
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(r.description);
+                                            return 'You should set a description to this Dashboard!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
+                                ],
+                                data: map.dashboards,
+                                sorting: { name: 'Score', order: 'desc' },
+                                showSearch: true,
+                                showStatistics: true
+                            });
+                        },
+                        actions: {  
+                            clearCache: { 
+                                show: true 
+                            },
+                            exportTable: [{
+                                table: 'datatable-rpt',
+                                visibleTab: 'tab-default-rpt__item',
+                                filename: 'Reports'
+                            }, {
+                                table: 'datatable-dsb',
+                                visibleTab: 'tab-default-dsb__item',
+                                filename: 'Dashboards'
+                            }]
+                        }
+                    });
+                }
+            </script>
+        </apex:define>
+    </apex:composition>
+</apex:page>
