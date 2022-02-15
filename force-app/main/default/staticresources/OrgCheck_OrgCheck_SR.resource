@@ -2312,7 +2312,7 @@ const OrgCheck = {
                 .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                 .attr('width', BOX_WIDTH-2*BOX_PADDING)
                 .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + d.data.name + '</span>');
+                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + private_secure_html(d.data.name) + '</span>');
 
             return svg.node();
         };
