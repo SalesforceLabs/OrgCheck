@@ -76,7 +76,8 @@
                                 data: map.batchesApexJobs,
                                 sorting: { name: 'Context', order: 'asc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Render the data in a table for Scheduled Jobs
@@ -103,7 +104,8 @@
                                 data: map.batchesScheduledJobs,
                                 sorting: { name: 'Context', order: 'asc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             let cntClsToCompile = 0;
@@ -141,7 +143,8 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.needsRecompilation === true || (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Show alert about recompilation

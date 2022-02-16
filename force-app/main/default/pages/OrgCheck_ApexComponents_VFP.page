@@ -249,7 +249,8 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             let html = '';
@@ -387,7 +388,8 @@
                                 data: map.apexTriggers,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Render the Apex Triggers data in a table
@@ -406,7 +408,8 @@
                                 data: objectTriggersCountMap,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                             
                         },

@@ -86,7 +86,8 @@
                                 data: map.reports,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Render the Dashboards data in a table
@@ -121,7 +122,8 @@
                                 data: map.dashboards,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                         },
                         actions: {  

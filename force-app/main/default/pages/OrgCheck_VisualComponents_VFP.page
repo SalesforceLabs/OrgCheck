@@ -140,7 +140,8 @@
                                 data: map.vfPages,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Render the Visual Force Components data in a table
@@ -194,7 +195,8 @@
                                 data: map.vfComponents,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });   
 
                             // Render the Lighnting Pages data in a table
@@ -244,7 +246,8 @@
                                 data: map.auraPages,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });   
                             
                             // Render the Lighnting Aura Components data in a table
@@ -298,7 +301,8 @@
                                 data: map.auraComponents,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });  
 
                             // Render the Lighnting Web Components data in a table
@@ -353,7 +357,8 @@
                                 data: map.lwComponents,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                         },
                         actions: {  

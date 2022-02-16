@@ -1910,6 +1910,7 @@ const OrgCheck = {
          *                <li><code>element</code>: name of the root element where the table will be added as a child node.</li>
          *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
          *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
+         *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
          *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
          *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
@@ -1977,6 +1978,7 @@ const OrgCheck = {
             trHead.classList.add('slds-text-title_caps');
             const orderingImage = document.createElement('img');
             let firstSortCallback;
+            if (config.showLineCount === true) config.columns.unshift({ name: '#' });
             config.columns.forEach((c, i) => {
                 const thHead = trHead.appendChild(document.createElement('th'));
                 thHead.setAttribute('scope', 'col');
@@ -2032,10 +2034,15 @@ const OrgCheck = {
                             return 0;
                         });
                         table.hidden = true; // make table invisible while manipulating the DOM
+                        let countRow = 1;
                         items.forEach(r => {
                             const parent = r.parentNode;
                             const detatchedItem = parent.removeChild(r);
                             parent.appendChild(detatchedItem);
+                            if (config.showLineCount === true) {
+                                detatchedItem.firstChild.innerText = countRow;
+                                countRow++;
+                            }
                         });
                         table.hidden = false; // make table visible again
                     };
@@ -2060,6 +2067,10 @@ const OrgCheck = {
                     const tdBody = trBody.appendChild(document.createElement('td'));
                     if (c.property === '##score##') {
                         tdBodyScore = tdBody;
+                        return;
+                    }
+                    if (config.showLineCount === true && c.name === '#') {
+                        tdBody.innerHTML = nbRows;
                         return;
                     }
                     const row = isArray ? k : config.data[k];

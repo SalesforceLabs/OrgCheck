@@ -101,7 +101,8 @@
                                 data: map.workflows,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             helper.html.datatable.create({
@@ -148,7 +149,8 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'Workflow' }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             helper.html.datatable.create({
@@ -191,7 +193,8 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type !== 'Workflow' }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                         },
                         actions: { 

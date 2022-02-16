@@ -451,7 +451,8 @@
                                     if (r.developerName === '###root###') return false;
                                 }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                             
                             // Render role graphic

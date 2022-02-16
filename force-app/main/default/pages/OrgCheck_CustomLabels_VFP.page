@@ -90,7 +90,8 @@
                                 data: map.customLabels,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });                            
                         },
                         actions: {  

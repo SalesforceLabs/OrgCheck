@@ -146,7 +146,8 @@
                                 data: map.profiles,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -173,7 +174,8 @@
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
-                                showStatistics: false
+                                showStatistics: false,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -208,7 +210,8 @@
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
-                                showStatistics: false
+                                showStatistics: false,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -281,7 +284,8 @@
                                 data: map.permissionSets,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -323,7 +327,8 @@
                                     data: map.objectCRUDs,
                                     sorting: { name: 'Object', order: 'asc' },
                                     showSearch: true,
-                                showStatistics: true
+                                    showStatistics: true,
+                                    showLineCount: true
                                 });
                             }
 
