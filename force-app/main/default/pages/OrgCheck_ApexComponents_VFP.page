@@ -243,7 +243,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: 'Score', order: 'desc' },
@@ -383,7 +385,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexTriggers,
                                 sorting: { name: 'Score', order: 'desc' },

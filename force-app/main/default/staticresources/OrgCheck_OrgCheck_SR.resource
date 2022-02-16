@@ -2875,7 +2875,8 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch '+
+                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM ApexPage '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -2887,7 +2888,9 @@ function buildDatasets(core) {
                                 isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
                                 description: v.Description, 
-                                mobile: v.IsAvailableInTouch
+                                mobile: v.IsAvailableInTouch,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,
@@ -2918,7 +2921,8 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description '+
+                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM ApexComponent '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -2929,7 +2933,9 @@ function buildDatasets(core) {
                                 apiVersion: v.ApiVersion,
                                 isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
-                                description: v.Description
+                                description: v.Description,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,
@@ -2971,12 +2977,13 @@ function buildDatasets(core) {
                             tooling: true
                         }, {
                             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
-                                    'NumLinesUncovered, Coverage '+
+                                        'NumLinesUncovered, Coverage '+
                                     'FROM ApexCodeCoverageAggregate',
                             tooling: true
                         }, { 
                             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
-                                    'Body, LengthWithoutComments, SymbolTable '+
+                                        'Body, LengthWithoutComments, SymbolTable, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM ApexClass '+
                                     'WHERE ManageableState = \'unmanaged\' ',
                             tooling: true
@@ -3024,7 +3031,9 @@ function buildDatasets(core) {
                                         isSharingMissing: false,
                                         length: v.LengthWithoutComments,
                                         needsRecompilation: (!v.SymbolTable ? true : false),
-                                        coverage: 0 // by default no coverage!
+                                        coverage: 0, // by default no coverage!
+                                        createdDate: v.CreatedDate,
+                                        lastModifiedDate: v.LastModifiedDate
                                     };
                                     if (v.Body) {
                                         item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;
@@ -3106,7 +3115,8 @@ function buildDatasets(core) {
                                         'UsageBeforeUpdate, UsageAfterUpdate, '+
                                         'UsageBeforeDelete, UsageAfterDelete, '+
                                         'UsageAfterUndelete, UsageIsBulk, '+
-                                        'LengthWithoutComments, EntityDefinitionId '+
+                                        'LengthWithoutComments, EntityDefinitionId, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM ApexTrigger '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -3128,7 +3138,9 @@ function buildDatasets(core) {
                                 afterUndelete: v.UsageAfterUndelete,
                                 sobject: v.EntityDefinitionId,
                                 hasSOQL: false,
-                                hasDML: false
+                                hasDML: false,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                             if (v.Body) {
                                 item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
@@ -3204,7 +3216,8 @@ function buildDatasets(core) {
                         queries: [ { 
                             tooling: true, 
                             string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
-                                        'Type, NamespacePrefix, Description ' +
+                                        'Type, NamespacePrefix, Description, ' +
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM FlexiPage '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -3215,7 +3228,9 @@ function buildDatasets(core) {
                                 entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
                                 type: v.Type,
                                 namespace: v.NamespacePrefix,
-                                description: v.Description
+                                description: v.Description,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,
@@ -3246,7 +3261,8 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+ 
+                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM LightningComponentBundle '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -3257,7 +3273,9 @@ function buildDatasets(core) {
                                 apiVersion: v.ApiVersion,
                                 isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
-                                description: v.Description
+                                description: v.Description,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,
@@ -3288,7 +3306,8 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description '+
+                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM AuraDefinitionBundle '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
@@ -3299,7 +3318,9 @@ function buildDatasets(core) {
                                 apiVersion: v.ApiVersion,
                                 isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
-                                description: v.Description
+                                description: v.Description,
+                                createdDate: v.CreatedDate,
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,

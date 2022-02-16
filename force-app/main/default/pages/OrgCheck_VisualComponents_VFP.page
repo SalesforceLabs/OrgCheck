@@ -135,7 +135,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.vfPages,
                                 sorting: { name: 'Score', order: 'desc' },
@@ -191,7 +193,10 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }                                ],
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                ],
                                 data: map.vfComponents,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
@@ -241,7 +246,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.auraPages,
                                 sorting: { name: 'Score', order: 'desc' },
@@ -297,7 +304,10 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }                                ],
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                ],
                                 data: map.auraComponents,
                                 sorting: { name: 'Score', order: 'desc' },
                                 showSearch: true,
@@ -352,7 +362,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.lwComponents,
                                 sorting: { name: 'Score', order: 'desc' },
