@@ -37,10 +37,6 @@
                     height: 20rem;
                     background: white;
                 }
-                .orgcheck-page-description__hover {
-                    height: 10rem;
-                    background: white;
-                }
                 .orgcheck-legend {
                     text-align: center;
                     color: white;
