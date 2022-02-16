@@ -120,7 +120,7 @@
                                         }
                                     },
                                     { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'date', property: 'lastModifiedDate' }                                    
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.customFields,
                                 sorting: { name: 'Score', order: 'desc' },
