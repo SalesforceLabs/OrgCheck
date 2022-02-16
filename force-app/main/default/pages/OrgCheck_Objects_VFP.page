@@ -174,7 +174,15 @@
 
                         let countElementsInSelect = 0;
                         if (namespace || namespace === '') {
-                            helper.map.iterate2(allObjects, function(d, i, s) {
+
+                            // Get an index of the objects using the specific compare function
+                            const indexesObjects = helper.map.index(allObjects, function compare(a, b) {
+                                if (a.label < b.label) return -1;
+                                if (a.label > b.label) return 1;
+                                return 0;
+                            });
+
+                            helper.map.iterate(allObjects, indexesObjects, function(d, i, s) {
                                 if (d.package !== namespace) return;
                                 if (type !== 'ALL') {
                                     if (type === 'CUSTOM_SOBJECTS' && d.isCustomObject === false) return;
@@ -183,18 +191,24 @@
                                     if (type === 'CUSTOM_SETTINGS' && d.isCustomSetting === false) return;
                                     if (type === 'CUSTOM_METADATA_TYPES' && d.isCustomMetadataType === false) return;
                                 }
-                                helper.html.picklist.addValue(select, d.developerName, d.label);
+                                helper.html.picklist.addValue(select, d.developerName, d.label + ' (api=' + d.developerName + ')');
                                 countElementsInSelect++;
                             });
                         }
 
                         helper.html.message.hide();
-                        if (namespace && type && countElementsInSelect === 0) {
+                        if ((namespace || namespace === '') && type && countElementsInSelect === 0) {
+                            const labelType = (type === 'STANDARD_SOBJECTS' ? 'Standard objects' :
+                                              (type === 'CUSTOM_SOBJECTS' ? 'Custom Objects' :
+                                              (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? 'External Objects' :
+                                              (type === 'CUSTOM_SETTINGS' ? 'Custom Settings' :
+                                              (type === '"CUSTOM_METADATA_TYPES' ? 'Custom Metadata Types' : 'All types')))));
+
                             const html = 
                                 'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
-                                'Package: <b>'+namespace+'</b><br />'+
-                                'Type: <b>'+type+'</b><br />';
-                            helper.html.modal.show('No Object in this context...', html);
+                                'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
+                                'Type: <b>'+labelType+'</b><br />';
+                            //helper.html.modal.show('No Object in this context...', html);
                             helper.html.message.show(html);
                         }
                     }
@@ -555,7 +569,7 @@
                             // Render the data in a table
                             const selectPck = helper.html.element.get('object-namespace');
                             helper.map.iterate(map.packages, indexesPackages, function(d, i, s) {
-                                helper.html.picklist.addValue(selectPck, d.namespace, d.name + ' (' + d.type + ')');
+                                helper.html.picklist.addValue(selectPck, d.namespace, d.name + ' (api=' + d.namespace + ', type=' + d.type + ')');
                             });
 
                             // Store all objects

@@ -469,7 +469,7 @@ const OrgCheck = {
             */
             this.hideWarning = function (message) {
                 const messageId = document.getElementById(configuration.warningMessageId);
-                messageId.style.display = 'hidden';
+                messageId.style.display = 'none';
                 messageId.children[1].innerHTML = '';
             };
 
@@ -1184,7 +1184,7 @@ const OrgCheck = {
                                         data.push('');
                                     });
                                     const link = document.createElement('a');
-                                    link.style.visibility = 'hidden';
+                                    link.style.visibility = 'none';
                                     document.body.appendChild(link);
                                     link.download = d.filename + '.csv';
                                     link.target = '_blank';
