@@ -141,7 +141,9 @@
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.profiles,
                                 sorting: { name: 'Score', order: 'desc' },
@@ -279,7 +281,9 @@
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.permissionSets,
                                 sorting: { name: 'Score', order: 'desc' },

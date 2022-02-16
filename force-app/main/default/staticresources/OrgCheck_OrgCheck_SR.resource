@@ -3421,6 +3421,7 @@ function buildDatasets(core) {
                         queries: [ { 
                             tooling: false, 
                             string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
+                                        'Profile.CreatedDate, Profile.LastModifiedDate, '+
                                         'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
                                         '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                                     'FROM PermissionSet '+ // oh yes we are not mistaken!
@@ -3439,7 +3440,9 @@ function buildDatasets(core) {
                                 isUndescribedCustom: v.IsCustom && !v.Profile.Description,
                                 package: v.NamespacePrefix,
                                 membersCount: memberCounts,
-                                hasMembers: memberCounts > 0
+                                hasMembers: memberCounts > 0,
+                                createdDate: v.Profile.CreatedDate, 
+                                lastModifiedDate: v.Profile.LastModifiedDate
                             };
                             return item;
                         }, 
@@ -3607,13 +3610,15 @@ function buildDatasets(core) {
                         queries: [ { 
                             tooling: false, 
                             string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
+                                        'CreatedDate, LastModifiedDate, '+
                                         '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
                                     'FROM PermissionSet '+
                                     'WHERE IsOwnedByProfile = FALSE' 
                         }, {
                             tooling: false,
                             byPasses: [ 'INVALID_TYPE' ],
-                            string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status '+
+                            string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status, '+
+                                        'CreatedDate, LastModifiedDate '+
                                     'FROM PermissionSetGroup ' 
                         } ],
                         onEachRecord: function(v, i) {
@@ -3630,7 +3635,9 @@ function buildDatasets(core) {
                                     package: v.NamespacePrefix,
                                     isUnusedCustom: v.IsCustom && !hasMembers,
                                     hasMembers: hasMembers,
-                                    isGroup: (v.Type === 'Group')     // other values can be 'Regular', 'Standard', 'Session
+                                    isGroup: (v.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                                    createdDate: v.CreatedDate, 
+                                    lastModifiedDate: v.LastModifiedDate
                                 };
                                 if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
                                 psMap[item.id] = item;
@@ -3639,7 +3646,9 @@ function buildDatasets(core) {
                                     id: core.doSimplifiySalesforceID(v.Id),
                                     name: v.DeveloperName,
                                     description: v.Description,
-                                    package: v.NamespacePrefix
+                                    package: v.NamespacePrefix,
+                                    createdDate: v.CreatedDate, 
+                                    lastModifiedDate: v.LastModifiedDate
                                 }
                                 psgByName2[item.package+'--'+item.name] = item;
                             }
