@@ -2609,7 +2609,7 @@ function buildDatasets(core) {
                             queries.push({
                                 tooling: true,
                                 byPasses: [ 'UNKNOWN_EXCEPTION' ],
-                                string: 'SELECT Id, FullName, Metadata '+
+                                string: 'SELECT Id, FullName, Metadata, CreatedDate, LastModifiedDate '+
                                         'FROM WorkflowRule '+
                                         'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                             });
@@ -2625,7 +2625,9 @@ function buildDatasets(core) {
                                         description: v.Metadata.description,
                                         actions: v.Metadata.actions,
                                         futureActions: v.Metadata.workflowTimeTriggers,
-                                        isActive: v.Metadata.active
+                                        isActive: v.Metadata.active,
+                                        createdDate: v.CreatedDate,
+                                        lastModifiedDate: v.LastModifiedDate
                                     };
                                     if (!item.actions) item.actions = [];
                                     if (!item.futureActions) item.futureActions = [];
@@ -2673,7 +2675,7 @@ function buildDatasets(core) {
                                 tooling: true,
                                 string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
                                         'VersionNumber, Metadata, Status, Description, '+
-                                        'ProcessType FROM Flow '+
+                                        'ProcessType, CreatedDate, LastModifiedDate FROM Flow '+
                                         'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
                             });
                         }, 
@@ -2693,7 +2695,9 @@ function buildDatasets(core) {
                                         dmlUpdates: v.Metadata.recordUpdates?.length || 0,
                                         isActive: v.Status === 'Active',
                                         description: v.Description,
-                                        type: v.ProcessType
+                                        type: v.ProcessType,
+                                        createdDate: v.CreatedDate,
+                                        lastModifiedDate: v.LastModifiedDate
                                     };
                                     v.Metadata.processMetadataValues?.forEach(m => {
                                         if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
