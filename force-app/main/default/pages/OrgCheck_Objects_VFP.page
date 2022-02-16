@@ -220,10 +220,19 @@
                     // Describe the selected object
                     // =================================
                     let describeObject = function(packageName, objectName) {
+                        
+                        helper.html.progress.resetSections();
+                        helper.html.progress.show();
+                        helper.html.progress.addSection('describing', 
+                            'Looking for the description of the object ' + objectName + ' '+
+                            '(' + (packageName===''?'No Package':('Package: ' + packageName + ')')) + ')...');
+
                         helper.salesforce.describe.object(
                             packageName, 
                             objectName, 
                             function(object) {
+
+                                helper.html.progress.setSection('describing', 'Describing done!', 'ended');
 
                                 const MAX_STEPS = 10;
                                 let currentStep = 0;
@@ -553,8 +562,11 @@
                                         showLineCount: true
                                     });
                                 }
+
+                                helper.html.progress.hide();
                             }, 
                             function(error) { 
+                                helper.html.progress.hide();
                                 helper.error.show(error); 
                             }
                         );

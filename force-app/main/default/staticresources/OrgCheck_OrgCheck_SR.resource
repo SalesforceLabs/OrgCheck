@@ -1430,6 +1430,23 @@ const OrgCheck = {
                             MSG_HANDLER.hideWarning();
                         }
                     },
+                    progress: {
+                        show: function() {
+                            PROGRESSBAR_HANDLER.show();
+                        },
+                        hide: function() {
+                            PROGRESSBAR_HANDLER.hide();
+                        },
+                        resetSections: function() {
+                            PROGRESSBAR_HANDLER.reset();
+                        },
+                        addSection: function(sectionName, message) {
+                            PROGRESSBAR_HANDLER.addSection(sectionName, message);
+                        },
+                        setSection: function (sectionName, message, status) {
+                            PROGRESSBAR_HANDLER.setSection(sectionName, message, status);
+                        }
+                    },
                     datatable: {
                         create: function(config) {
                             private_create_datatable(config);
