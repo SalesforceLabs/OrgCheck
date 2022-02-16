@@ -15,6 +15,7 @@
                 <li>Each row represents a custom field</li>
                 <li>The column <b>score</b> is calculated based on the following rules:
                     <ol class="slds-list_ordered">
+                        <li>If the field has no description, then you get +1.</li>
                         <li>If the field is not used by any other entity (based on the Dependency API), then you get +1.</li>
                     </ol>
                 </li>
@@ -72,6 +73,15 @@
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Package', property: 'packageName' },
                                     { name: 'Full API Name', property: 'fullName' },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(r.description);
+                                            return 'You should set a description to this Custom Field!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
                                     { name: 'Using', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
@@ -108,7 +118,9 @@
                                             if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
                                             return 'No dependency';
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'date', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.customFields,
                                 sorting: { name: 'Score', order: 'desc' },

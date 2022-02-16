@@ -2096,9 +2096,17 @@ const OrgCheck = {
                     let additiveScore = 0;
                     try {
                         if (c.property) dataRaw = private_secure_html(row[c.property]);
-                        if (c.formula) dataDecorated = c.formula(row);
-                        if (!c.formula && c.property) dataDecorated = dataRaw;
-                        if (c.formula && !c.property) dataRaw = dataDecorated;
+                        if (c.type && !c.formula) {
+                            switch (c.type) {
+                                case 'date': dataDecorated = FORMAT_HANDLER.dateFormat(dataRaw); break;
+                                case 'datetime': dataDecorated = FORMAT_HANDLER.datetimeFormat(dataRaw); break;
+                                case 'numeric': dataDecorated = dataRaw; break;
+                            }   
+                        } else {
+                            if (c.formula) dataDecorated = c.formula(row);
+                            if (!c.formula && c.property) dataDecorated = dataRaw;
+                            if (c.formula && !c.property) dataRaw = dataDecorated;
+                        }
                     } catch (e) {
                         e.context = {
                             'when': 'Datatable: calling formula to render the content of a cell in the table',
@@ -4206,7 +4214,7 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix '+
+                            string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate '+
                                     'FROM CustomField '+
                                     'WHERE ManageableState = \'unmanaged\'  '
                         } ],
@@ -4219,7 +4227,10 @@ function buildDatasets(core) {
                                 fieldName: v.DeveloperName,
                                 developerName: v.DeveloperName,
                                 packageName: v.NamespacePrefix,
-                                fullName: v.DeveloperName
+                                fullName: v.DeveloperName,
+                                description: v.Description,
+                                createdDate: v.CreatedDate, 
+                                lastModifiedDate: v.LastModifiedDate
                             };
                         }, 
                         onEndFromCache: resolve,
