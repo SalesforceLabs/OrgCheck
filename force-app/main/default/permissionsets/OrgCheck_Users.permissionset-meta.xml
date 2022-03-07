@@ -73,6 +73,7 @@
     <userPermissions><name>ManageReportsInPubFolders</name><enabled>true</enabled></userPermissions>
     <userPermissions><name>ManageRoles</name><enabled>true</enabled></userPermissions>
     <userPermissions><name>ManageSharing</name><enabled>true</enabled></userPermissions>
+    <userPermissions><name>ManageTranslation</name><enabled>true</enabled></userPermissions>
     <userPermissions><name>ManageUsers</name><enabled>true</enabled></userPermissions>
     <userPermissions><name>ModifyAllData</name><enabled>true</enabled></userPermissions>
     <userPermissions><name>ModifyMetadata</name><enabled>true</enabled></userPermissions>
