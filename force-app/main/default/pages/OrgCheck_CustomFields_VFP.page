@@ -7,6 +7,23 @@
         <apex:define name="text_page_subtitle">
             Custom Fields Dependency Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>custom fields</b> and not the standard fields.<br />
+            <br />
+            On this table :<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a custom field</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the field has no description, then you get +1.</li>
+                        <li>If the field is not used by any other entity (based on the Dependency API), then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+                <li>If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
+                    used and what it is using.</li>
+            </ul>
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">
@@ -16,7 +33,7 @@
             <script>
                 function start2(controller, helper) {
                     controller.run({
-                        datasets: [ 'customFields', 'customObjects' ],
+                        datasets: [ 'customFields', 'objects' ],
                         dependencies: true,
                         onRecords: function(map) {
 
@@ -24,46 +41,99 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'Object Name', formula: (r) => { 
-                                        let entityUrl = '/lightning/setup/ObjectManager/'+r.objectName+'/Details/view';
-                                        let entityName = r.objectName;
-                                        if (r.objectId) {
-                                            switch (map.customObjects[r.objectId]?.type) {
-                                                case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
-                                                case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
-                                                case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
-                                                case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
-                                                default:                   entityUrl = '/'+r.objectId;
-                                            }
-                                            entityName = map.customObjects[r.objectId]?.developerName;
+                                        const label = map.objects[r.objectDeveloperName]?.label;
+                                        const type = map.objects[r.objectDeveloperName]?.type;
+                                        let entityUrl = '';
+                                        switch (type) {
+                                            case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
+                                            case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
+                                            case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
+                                            case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
                                         }
-                                        return helper.html.render.link(entityUrl, entityName);
+                                        let entityLabel = label + (label !== r.objectDeveloperName ? ' ('+r.objectDeveloperName+')' : '');
+                                        return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
                                     }},
                                     { name: 'Object Type', formula: (r) => { 
-                                        return r.objectId ? map.customObjects[r.objectId]?.type : 'Standard';
+                                        const type = map.objects[r.objectDeveloperName]?.type;
+                                        let t = '';
+                                        switch (type) {
+                                            case 'CustomSetting':      t = 'Custom Setting'; break;
+                                            case 'CustomObject':       t = 'Custom Object';  break;
+                                            case 'CustomEvent':        t = 'Platform Event';  break;
+                                            case 'KnowledgeArticle':   t = 'Knowledge Article';  break;
+                                            case 'ExternalObject':     t = 'External Object';  break;
+                                            case 'BigObject':          t = 'Big Object';  break;
+                                            case 'CustomMetadataType': t = 'Custom Metadata Type';  break;
+                                            case 'StandardObject':     t = 'Standard';  break;
+                                        }
+                                        return helper.html.render.escape(t);
                                     }},
                                     { name: 'Field', formula: (r) => { 
-                                        return helper.html.render.link('/'+r.id, r.fieldName); 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.fieldName)
+                                        ); 
                                     }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Package', property: 'packageName' },
+                                    { name: 'Package', property: 'package' },
                                     { name: 'Full API Name', property: 'fullName' },
+                                    { name: 'Description', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(r.description);
+                                            return 'You should set a description to this Custom Field!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in', type: 'numeric', 
+                                        formula: (r) => { 
+                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
+                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                            return 'Not used!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                        }
+                                    },
+                                    { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
+                                        return helper.html.render.checkbox(false);
+                                    }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.customFields,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });
                         },
                         actions: { 
@@ -73,16 +143,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Custom Fields.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the fields has no dependency.</li></ul>',
-                                    'The <b>DEPENDENCIES</b> is showing where the field is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });

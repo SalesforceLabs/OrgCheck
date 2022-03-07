@@ -6,6 +6,44 @@
         <apex:define name="text_page_subtitle">
             Non User Specific Profile and Permissions Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>Profiles and Permission Sets</b> in five tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Profiles</b> is giving you a tabular list of all the profiles in this Org</li>
+                <li>The second tab called <b>Permission Sets</b> is giving you a tabular list of all the permission sets and permission set groups in this Org</li>
+                <li>The third tab called <b>Login Hours Restrictions</b> is extracting the login hour restrictions from all the profiles at once</li>
+                <li>The fourth tab called <b>IP Range Restrictions</b> is extracting the IP Range restrictions from all the profiles at once</li>
+                <li>The fifth tab called <b>Object CRUDs</b> (beta) is showing the rights (Create, Read, Update, Delete) on Objects for profiles and permission sets</li>
+            </ul>
+            <br />
+            On the profiles table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a profile which can be custom or standard</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If it is custom and is not used by any active users, then you get +1.</li>
+                        <li>If it is custom and has no description, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+            On the permission sets table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a permissio set or a permission set group</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If it is custom and is not used by any active users, then you get +1.</li>
+                        <li>If it is custom and has no description, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+            <br />
+            At this time, the Object CRUDs are shown as a beta feature that needs to be activated on the Home tab of this application.<br />
+            We did this to make sure this feature is not slowing you down. <br />
+            In the future, you will be able to select either the object(s) or the profile(s)/permission set(s).<br />
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">
@@ -72,9 +110,16 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isCustom); 
+                                    }},
                                     { name: 'License', property: 'license' },
                                     { name: 'User Type', property: 'userType' },
                                     { name: 'Package', property: 'package' },
@@ -91,16 +136,20 @@
                                     { name: 'Description', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return 'You should set a description to this custom profile!';
-                                            return r.description;
+                                            return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.profiles,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -109,7 +158,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Profile', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        );
+                                    }},
                                     { name: 'Monday', formula: (r) => { return r.loginHours.monday ? r.loginHours.monday.from + ' to ' + r.loginHours.monday.to : '' }},
                                     { name: 'Tuesday', formula: (r) => { return r.loginHours.tuesday ? r.loginHours.tuesday.from + ' to ' + r.loginHours.tuesday.to : '' }},
                                     { name: 'Wednesday', formula: (r) => { return r.loginHours.wednesday ? r.loginHours.wednesday.from + ' to ' + r.loginHours.wednesday.to : '' }},
@@ -121,7 +175,9 @@
                                 data: map.profileLoginRestrictions,
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
-                                showSearch: false
+                                showSearch: false,
+                                showStatistics: false,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -130,7 +186,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Profile', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Starts', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
@@ -143,14 +204,16 @@
                                     }},
                                     { name: 'Description', formula: (r) => { 
                                         let html = '';
-                                        r.loginIpRanges.forEach(i => html += i.description + '<br />');
+                                        r.loginIpRanges.forEach(i => html += helper.html.render.escape(i.description) + '<br />');
                                         return html;
                                     }}
                                 ],
                                 data: map.profileLoginRestrictions,
                                 sorting: { name: 'Profile', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
-                                showSearch: false
+                                showSearch: false,
+                                showStatistics: false,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -174,13 +237,19 @@
                                 columns: [
                                     { name: 'Name', 
                                         formula: (r) => { 
-                                            if (r.isGroup) return helper.html.render.link('/'+r.groupId, r.name); 
-                                            return helper.html.render.link('/'+r.id, r.name); 
+                                            return helper.html.render.link(
+                                                r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
+                                                helper.html.render.escape(r.name)
+                                            ); 
                                         }
                                     },
-                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { return helper.html.render.checkbox(r.isGroup); }},
+                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isGroup); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { return helper.html.render.checkbox(r.isCustom); }},
+                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                        return helper.html.render.checkbox(r.isCustom); 
+                                    }},
                                     { name: 'License', property: 'license' },
                                     { name: 'Package', property: 'package' },
                                     { name: 'Number of active users', 
@@ -198,23 +267,29 @@
                                     { name: 'Assigned users\'s profiles', formula: (r) => { 
                                         let html = '';
                                         helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
-                                            html += helper.html.render.link('/'+pid, map.profiles[pid]?.name) + ' (' + v.count + ')<br />';
+                                            html += helper.html.render.link(
+                                                '/'+pid, 
+                                                helper.html.render.escape(map.profiles[pid]?.name)) + ' (' + v.count + ')<br />';
                                         });
                                         return html;
                                     }},
                                     { name: 'Description', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return 'You should set a description to this custom permission set!';
-                                            return r.description;
+                                            return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    }
+                                    },
+                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
+                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.permissionSets,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // -------------------------------------------
@@ -234,7 +309,12 @@
                                 helper.html.datatable.create({
                                     element: 'datatable-objectCRUDs',
                                     columns: [
-                                        { name: 'Parent', formula: (r) => { return helper.html.render.link('/'+r.parent.id, r.parent.name);  }},
+                                        { name: 'Parent', formula: (r) => { 
+                                            return helper.html.render.link(
+                                                '/'+r.parent.id, 
+                                                helper.html.render.escape(r.parent.name)
+                                            ); 
+                                        }},
                                         { name: 'Object', property: 'sobject' },
                                         { name: 'Type', property: 'type' },
                                         { name: 'Permissions', formula: (r) => { 
@@ -250,7 +330,9 @@
                                     ],
                                     data: map.objectCRUDs,
                                     sorting: { name: 'Object', order: 'asc' },
-                                    showSearch: true
+                                    showSearch: true,
+                                    showStatistics: true,
+                                    showLineCount: true
                                 });
                             }
 
@@ -275,16 +357,7 @@
                                 table: 'datatable-profileRangeIPs',
                                 visibleTab: 'tab-default-ipranges__item',
                                 filename: 'IPRangesRestrictions'
-                            }],
-                            help: {
-                                content: [
-                                    'This page shows the Profiles, the Permission Sets and the Profile Login '+
-                                        'restrictions.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the profile/permission set is custom and is not used by any active users, </li>'+
-                                        '<li><code>+1</code> if the profile/permission set is custom and has no description.</li></ul>'
-                                ]
-                            }
+                            }]
                         }
                     });
                 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
     <description>OrgCheck Apex Components Tab</description>
-    <label>Automations</label>
-    <motif>Custom15: People</motif>
+    <label>🤖 Automations</label>
+    <motif>Custom13: Box</motif>
     <page>OrgCheck_Automations_VFP</page>
 </CustomTab>

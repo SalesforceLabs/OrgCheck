@@ -40,10 +40,10 @@
         <members>OrgCheck_Analytics_TAB</members>
         <name>CustomTab</name>
     </types>
-    <types>
+<!--    <types>
         <members>OrgCheck_Users</members>
         <name>PermissionSet</name>
-    </types>
+    </types>-->
     <types>
         <members>OrgCheck_JSForce_SR</members>
         <members>OrgCheck_D3_SR</members>

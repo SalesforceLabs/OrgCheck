@@ -7,6 +7,22 @@
         <apex:define name="text_page_subtitle">
             Custom Labels Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page lists all your <b>custom labels</b>.<br />
+            <br />
+            On this table:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a custom label</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the custom label is not used by any other entity (based on the Dependency API), then you get +1</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+                <li>If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
+                    used and what it is using.</li>
+            </ul>
+        </apex:define>
         <apex:define name="html_actions">
         </apex:define>
         <apex:define name="html_content_core">
@@ -23,7 +39,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Namespace', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
@@ -31,22 +52,46 @@
                                     { name: 'IsProtected', property: 'protected' },
                                     { name: 'Language', property: 'language' },
                                     { name: 'Value', formula: (r) => { 
-                                        return helper.html.render.shrinkText(r.value, 150); 
+                                        return helper.html.render.escape(helper.html.render.shrinkText(r.value, 100)); 
+                                    }},
+                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in', type: 'numeric', 
+                                        formula: (r) => { 
+                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
+                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                            return 'Not used!';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                        }
+                                    },
+                                    { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: 'Dependencies', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                             return 'No dependency';
-                                        }, 
-                                        scoreFormula: (r) => { 
-                                            if (!map.dependencies[r.id]) return 1; 
                                         }
                                     }
                                 ],
                                 data: map.customLabels,
                                 sorting: { name: 'Score', order: 'desc' },
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });                            
                         },
                         actions: {  
@@ -56,17 +101,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Custom Labels.',
-                                    'The <b>SCORE</b> is computed with the following rule: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the label is not used (in other words it has no dependency).</li></ul>',
-                                    'The <b>VALUE</b> is potentially trunkated (maximum characters is 150).',
-                                    'The <b>DEPENDENCIES</b> is showing where the label is used and '+
-                                        'what it is using. You can click on each diagram to have it shown in '+
-                                        'a dialog box.'
-                                ]
                             }
                         }
                     });

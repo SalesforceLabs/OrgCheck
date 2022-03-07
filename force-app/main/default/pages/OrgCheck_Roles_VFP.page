@@ -7,6 +7,39 @@
         <apex:define name="text_page_subtitle">
             Role Hierarchy Overview
         </apex:define>
+        <apex:define name="text_page_description">
+            This page illustrates your <b>Role Hierarchy</b> in two tabs:<br />
+            <ul class="slds-list_dotted">
+                <li>The first tab called <b>Role Explorer</b> is showing a graphical view of your role hierarchy</li>
+                <li>The second tab called <b>Role Listing</b> is a tabular list of the corresponding data.</li>
+            </ul>
+            <br />
+            Too many levels in your role hierarchy can lead to bad performance (including sharing calculation). <br />
+            That is why we are giving you an alert if your hierarchy uses more that <b>7 levels</b>.<br />
+            <br />
+            On the graphical view:<br />
+            <ul class="slds-list_dotted">
+                <li>Each <b>box</b> represents a <b>role</b> that are linked to each other following their parent role.</li>
+                <li>The <b>yellow</b> boxes represent roles without any active users</li>
+                <li>The <b>blue</b> boxes represent roles with active users</li>
+                <li>On each box, you can see <b>bubbles</b> in their upper right corner</li>
+                <li>The <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+)</li>
+                <li>The <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+)</li>
+                <li>You can click on each box to get more details about the corresponding role.</li>
+            </ul>
+            <br />
+            On the tabular table view:<br />
+            <ul class="slds-list_dotted">
+                <li>Each row represents a role</li>
+                <li>The column <b>score</b> is calculated based on the following rules:
+                    <ol class="slds-list_ordered">
+                        <li>If the role contains no active user, then you get +1.</li>
+                        <li>If the role contains more than one inactive user, then you get +1.</li>
+                    </ol>
+                </li>
+                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
+            </ul>
+        </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control" style="display: block;">
                 <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button" aria-controlled-by="tab-default-1">
@@ -129,11 +162,12 @@
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
                             let html = '';
                             html += 'You have more than '+MAX_LEVEL_DEPTH_ROLES+' levels of roles in your Role Hierarchy ';
-                            html += '(exactly '+mdepth+' levels).<br /><br />';
+                            html += '(exactly '+mdepth+' levels).<br />';
                             html += 'The Role Hierarchy is not there to mimic the hierarchy of your ';
-                            html += 'company, it is there for visibility purpose.<br /><br />';
-                            html += 'Please reduce it!<br />';
+                            html += 'company, it is there for visibility purpose.<br />';
+                            html += 'Please reduce it!';
                             helper.html.modal.show('Too many levels in your Role Hierarchy!', html);
+                            helper.html.message.show(html);
                         }
                         
                         // Set some attributes that we use to render each nodes
@@ -216,7 +250,7 @@
                             .attr('y', - BOX_HEIGHT / 2)
                             .attr('width', BOX_WIDTH)
                             .attr('height', BOX_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
                         
                         // --------------------------------
                         // NOTIFICATION ZONE - ACTIVE USERS
@@ -230,7 +264,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 4)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
                         
                         // --------------------------------
                         // NOTIFICATION ZONE - INACTIVE USERS
@@ -244,7 +278,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 4)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  });
+                            .on('click', function(d) { node_click(roles_map, d); });
 
                         // --------------------------------
                         // LEVEL ZONE
@@ -265,12 +299,12 @@
                             .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                             .attr('width', BOX_WIDTH-2*BOX_PADDING)
                             .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                            .on('click', function(d) { if (d.clickable) node_click(roles_map, d);  })
+                            .on('click', function(d) { node_click(roles_map, d); })
                             .append('xhtml').html(function(d) {
                                 let html = '<center>';
                                 if (roles_map[d.data]) { 
-                                    if (roles_map[d.data].name) html += '<b>' + roles_map[d.data].name + '</b><br />';
-                                    if (roles_map[d.data].developerName) html += '<i>' + roles_map[d.data].developerName + '</i>'; 
+                                    if (roles_map[d.data].name) html += '<b>' + helper.html.render.escape(roles_map[d.data].name) + '</b><br />';
+                                    if (roles_map[d.data].developerName) html += '<i>' + helper.html.render.escape(roles_map[d.data].developerName) + '</i>'; 
                                 }
                                 html += '</center>';
                                 return html;
@@ -285,7 +319,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 5)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(map, d);  })
+                            .on('click', function(d) { node_click(map, d); })
                             .append('xhtml').html(function(d) { return '<center>' + d.active_count + '</center>'; });
                         
                         // --------------------------------
@@ -297,7 +331,7 @@
                             .attr('y', - BOX_HEIGHT / 2 - 5)
                             .attr('width', NOTIF_WIDTH)
                             .attr('height', NOTIF_HEIGHT)
-                            .on('click', function(d) { if (d.clickable) node_click(map, d); })
+                            .on('click', function(d) { node_click(map, d); })
                             .append('xhtml').html(function(d) { return '<center>' + d.inactive_count + '</center>'; });
 
                         return svg.node();
@@ -306,13 +340,16 @@
                     // =================================
                     // NODE SELECTION
                     // =================================
-                    let nodeOnClick = function(roles_map, node) {
+                    let nodeOnClick = function(roles_map, d) {
+
+                        const node = d.currentTarget.__data__;
+                        if (!node.clickable) return;
 
                         let html = '';
-                        html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, roles_map[node.data].name) + '</b><br />';
+                        html += 'Role Name: <b>'+helper.html.render.link('/'+node.id, helper.html.render.escape(roles_map[node.data].name)) + '</b><br />';
                         html += 'Salesforce Id: <b>'+node.id+'</b><br />';
                         if (roles_map[node.data].developerName) {
-                            html += 'Developer Name: <b>'+roles_map[node.data].developerName+'</b><br />';
+                            html += 'Developer Name: <b>'+helper.html.render.escape(roles_map[node.data].developerName)+'</b><br />';
                         }
                         html += '<br />';
                         html += 'Level in hierarchy: '+ node.depth +'<br />';
@@ -323,8 +360,8 @@
                             for (let i=0; i<roles_map[node.data].activeMembersCount; i++) {
                                 let member = roles_map[node.data].activeMembers[i];
                                 html += '<li>';
-                                html += '<img src="'+member.photourl+'" width="25" />&nbsp;&nbsp;';
-                                html += '<b><a href="/'+member.id+'" target="_blank">'+member.name+'</a></b>';
+                                html += '<img src="'+helper.html.render.escape(member.photourl)+'" width="25" />&nbsp;&nbsp;';
+                                html += '<b><a href="/'+member.id+'" target="_blank" rel="external noopener noreferrer">'+helper.html.render.escape(member.name)+'</a></b>';
                                 html += '</li>';
                             }
                             html += '</ul>';
@@ -339,10 +376,10 @@
                         }
                         html += '<br />';
                         if (node.parent) {
-                            html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, roles_map[node.parent.data].name) + '</a></b><br />';
+                            html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, helper.html.render.escape(roles_map[node.parent.data].name)) + '</a></b><br />';
                             html += 'Parent Salesforce Id: <b>'+roles_map[node.parent.data].id+'</b><br />';
                             if (roles_map[node.parent.data].developerName) {
-                                html += 'Parent Developer Name: <b>'+roles_map[node.parent.data].developerName+'</b><br />';
+                                html += 'Parent Developer Name: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
                             }
                         }
                         helper.html.modal.show('Full information about this role', html);
@@ -355,10 +392,21 @@
                         datasets: [ 'roles' ],
                         onRecords: function(map) { 
 
+                            if (PREF_FILTER_EXTERNAL_ROLES === true) {
+                                helper.map.iterate2(map.roles, function(d, i, s, k) {
+                                    if (d.isExternal === true) delete map.roles[k];
+                                });
+                            }
+
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: 'Name', formula: (r) => { 
+                                        return helper.html.render.link(
+                                            '/'+r.id, 
+                                            helper.html.render.escape(r.name)
+                                        ); 
+                                    }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
                                     { name: 'Developer Name', property: 'developerName' },
                                     { name: 'Number of active members', type: 'numeric', 
@@ -382,14 +430,17 @@
                                     { name: 'Parent', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
-                                            return helper.html.render.link('/'+parent.id, parent.name);
+                                            return helper.html.render.link(
+                                                '/'+parent.id, 
+                                                helper.html.render.escape(parent.name)
+                                            );
                                         }
                                         return 'No parent';
                                     }},
                                     { name: 'Parent Developer Name', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
-                                            return parent.developerName;
+                                            return helper.html.render.escape(parent.developerName);
                                         }
                                         return '';
                                     }}
@@ -398,9 +449,10 @@
                                 sorting: { name: 'Score', order: 'desc' },
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
-                                    if (PREF_FILTER_EXTERNAL_ROLES === true && r.isExternal === true) return false;
                                 }},
-                                showSearch: true
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });
                             
                             // Render role graphic
@@ -418,20 +470,6 @@
                             }],
                             clearCache: { 
                                 show: true 
-                            },
-                            help: {
-                                content: [
-                                    'This page shows the Role hierarchy and the list of Roles.',
-                                    'On the role explorer tab, here are the graphical conventions: '+
-                                        '<ul class="slds-list_dotted"><li>the <b>yellow</b> boxes represent roles without any active users in it,</li>'+
-                                        '<li>the <b>blue</b> boxes represent roles with active users,</li>'+
-                                        '<li>the <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+),</li>'+
-                                        '<li>the <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+).</li></ul>',
-                                    'You can click on each node to get more details about this role.',
-                                    'On the role list tab, the <b>SCORE</b> is computed with the following rules: '+
-                                        '<ul class="slds-list_dotted"><li><code>+1</code> if the role contains no active user,</li>'+
-                                        '<li><code>+1</code> if the role contains more than one inactive user.</li></ul>'
-                                ]
                             }
                         }
                     });
