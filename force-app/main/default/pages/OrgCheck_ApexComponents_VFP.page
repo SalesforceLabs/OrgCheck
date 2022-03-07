@@ -119,7 +119,7 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'apexClasses', 'apexTriggers', 'customObjects' ],
+                        datasets: [ 'apexClasses', 'apexTriggers', 'objects' ],
                         dependencies: true,
                         onRecords: function(map) { 
 
@@ -330,7 +330,7 @@
                                     },
                                     { name: 'SObject', formula: (r) => { 
                                         const objId = r.sobject;
-                                        const objName = map.customObjects[objId]?.developerName || objId;
+                                        const objName = map.objects[objId]?.label;
                                         // ---
                                         // let's calculate (on the fly) the number of active triggers per object!!
                                         const otc = objectTriggersCountMap[objName] || { 
@@ -342,7 +342,7 @@
                                         else if (r.isActive === false) otc.deactiveTriggerCount++;
                                         objectTriggersCountMap[objName] = otc;
                                         // ---
-                                        return objName;
+                                        return helper.html.render.escape(objName);
                                     }},
                                     { name : '*Insert', property: 'beforeInsert', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeInsert); 

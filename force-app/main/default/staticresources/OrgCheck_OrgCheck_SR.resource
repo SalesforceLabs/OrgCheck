@@ -3115,38 +3115,41 @@ function buildDatasets(core) {
                                         'UsageBeforeUpdate, UsageAfterUpdate, '+
                                         'UsageBeforeDelete, UsageAfterDelete, '+
                                         'UsageAfterUndelete, UsageIsBulk, '+
-                                        'LengthWithoutComments, EntityDefinitionId, '+
+                                        'LengthWithoutComments, '+
+                                        'EntityDefinition.QualifiedApiName, '+
                                         'CreatedDate, LastModifiedDate '+
                                     'FROM ApexTrigger '+
                                     'WHERE ManageableState = \'unmanaged\' '
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
-                            const item = {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                name: v.Name,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                length: v.LengthWithoutComments,
-                                isActive: (v.Status === 'Active' ? true : false),
-                                beforeInsert: v.UsageBeforeInsert,
-                                afterInsert: v.UsageAfterInsert,
-                                beforeUpdate: v.UsageBeforeUpdate,
-                                afterUpdate: v.UsageAfterUpdate,
-                                beforeDelete: v.UsageBeforeDelete,
-                                afterDelete: v.UsageAfterDelete,
-                                afterUndelete: v.UsageAfterUndelete,
-                                sobject: v.EntityDefinitionId,
-                                hasSOQL: false,
-                                hasDML: false,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                            if (v.Body) {
-                                item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
-                                item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                            if (v.EntityDefinition) {
+                                const item = {
+                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    name: v.Name,
+                                    apiVersion: v.ApiVersion,
+                                    isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                    namespace: v.NamespacePrefix,
+                                    length: v.LengthWithoutComments,
+                                    isActive: (v.Status === 'Active' ? true : false),
+                                    beforeInsert: v.UsageBeforeInsert,
+                                    afterInsert: v.UsageAfterInsert,
+                                    beforeUpdate: v.UsageBeforeUpdate,
+                                    afterUpdate: v.UsageAfterUpdate,
+                                    beforeDelete: v.UsageBeforeDelete,
+                                    afterDelete: v.UsageAfterDelete,
+                                    afterUndelete: v.UsageAfterUndelete,
+                                    sobject: v.EntityDefinition.QualifiedApiName,
+                                    hasSOQL: false,
+                                    hasDML: false,
+                                    createdDate: v.CreatedDate,
+                                    lastModifiedDate: v.LastModifiedDate
+                                };
+                                if (v.Body) {
+                                    item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
+                                    item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                                }
+                                return item;
                             }
-                            return item;
                         }, 
                         onEndFromCache: resolve,
                         onError: reject
@@ -3940,22 +3943,38 @@ function buildDatasets(core) {
                                     if (sobjects) {
                                         sobjects.forEach(v => {
                                             if (!v.keyPrefix) return;
-                                            const isCS = (v.customSetting === true);
-                                            const isCO = (v.customSetting === false && v.custom === true && v.name.endsWith('__c'));
-                                            const isSO = (v.customSetting === false && v.custom === false);
-                                            const isEO = (v.customSetting === false && v.custom === true && v.name.endsWith('__e'));
-                                            const isCMDT = (v.customSetting === false && v.custom === true && v.name.endsWith('__mdt'));
-                                            if (!isCS && !isCO && !isSO && !isEO && !isCMDT) return;
+                                            let entityType = 'Other';
+                                            if (v.customSetting == true) {
+                                                entityType = 'CustomSetting';
+                                            } else if (v.custom === false) {
+                                                entityType = 'StandardObject';
+                                            } else if (v.name) {
+                                                const pp = v.name.split('__');
+                                                const prefix = pp[pp.length-1];
+                                                switch (prefix) {
+                                                    case 'c':   entityType = 'CustomObject';  break;
+                                                    case 'e':   entityType = 'CustomEvent';  break;
+                                                    case 'ka':  entityType = 'KnowledgeArticle';  break;
+                                                    case 'x':   entityType = 'ExternalObject';  break;
+                                                    case 'b':   entityType = 'BigObject';  break;
+                                                    case 'mdt': entityType = 'CustomMetadataType';  break;
+                                                }
+                                            }
+                                            if (entityType === 'Other') return;
                                             const object = {
                                                 id: v.name,
                                                 label: v.label,
                                                 developerName: v.name,
                                                 package: core.doSalesforceSplitDeveloperName(v.name).package,
-                                                isCustomSetting: isCS,
-                                                isCustomObject: isCO,
-                                                isStandardObject: isSO,
-                                                isExternalObject: isEO,
-                                                isCustomMetadataType: isCMDT
+                                                isCustomSetting: entityType === 'CustomSetting',
+                                                isCustomObject: entityType === 'CustomObject',
+                                                isStandardObject: entityType === 'StandardObject',
+                                                isExternalObject: entityType === 'ExternalObject',
+                                                isCustomMetadataType: entityType === 'CustomMetadataType',
+                                                isPlatformEvent: entityType === 'CustomEvent',
+                                                isBigObject: entityType === 'BigObject',
+                                                isKnowledgeArticle: entityType === 'KnowledgeArticle',
+                                                type: entityType
                                             };
                                             map[object.id] = object;
                                             size++;
@@ -4174,61 +4193,6 @@ function buildDatasets(core) {
     }));
 
     // ========================================================================
-    // CUSTOM OBJECTS
-    // ------------------------------------------------------------------------
-    // Get the list of custom objects in Salesforce 
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'customObjects',
-        keycache: 'CustomObjects',
-        retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT DurableId, DeveloperName, IsCustomSetting, QualifiedApiName, NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE DurableId LIKE \'01I%\' AND (NOT DurableId LIKE \'%.%\') '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            let entityType = 'Other';
-                            if (v.IsCustomSetting == true) 
-                                entityType = 'CustomSetting';
-                            else {
-                                const pp = v.QualifiedApiName.split('__');
-                                const prefix = pp[pp.length-1];
-                                switch (prefix) {
-                                    case 'c':   entityType = 'CustomObject';  break;
-                                    case 'e':   entityType = 'CustomEvent';  break;
-                                    case 'ka':  entityType = 'KnowledgeArticle';  break;
-                                    case 'x':   entityType = 'ExternalObject';  break;
-                                    case 'b':   entityType = 'BigObject';  break;
-                                    case 'mdt': entityType = 'CustomMetadataType';  break;
-                                }
-                            }
-                            return { 
-                                id: core.doSimplifiySalesforceID(v.DurableId),
-                                developerName: v.DeveloperName,
-                                packageName: v.NamespacePrefix,
-                                type: entityType
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
     // CUSTOM FIELDS
     // ------------------------------------------------------------------------
     // Get the list of custom fields in Salesforce 
@@ -4248,24 +4212,28 @@ function buildDatasets(core) {
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
-                            string: 'SELECT Id, TableEnumOrId, DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate '+
+                            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinitionId, '+
+                                        'DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate '+
                                     'FROM CustomField '+
-                                    'WHERE ManageableState = \'unmanaged\'  '
+                                    'WHERE ManageableState = \'unmanaged\' '
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
-                            const isObjectId = (v.TableEnumOrId && v.TableEnumOrId.startsWith && v.TableEnumOrId.startsWith('01I'));
-                            return { 
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                objectId: (isObjectId === true ? core.doSimplifiySalesforceID(v.TableEnumOrId) : ''),
-                                objectName: (isObjectId === false ? v.TableEnumOrId : ''),
-                                fieldName: v.DeveloperName,
-                                developerName: v.DeveloperName,
-                                packageName: v.NamespacePrefix,
-                                fullName: v.DeveloperName,
-                                description: v.Description,
-                                createdDate: v.CreatedDate, 
-                                lastModifiedDate: v.LastModifiedDate
-                            };
+                            if (v.EntityDefinition) {
+                                const objectId = core.doSimplifiySalesforceID(v.EntityDefinitionId);
+                                const objectName = v.EntityDefinition.QualifiedApiName;
+                                return { 
+                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    objectId: objectId,
+                                    objectDeveloperName: objectName,
+                                    fieldName: v.DeveloperName,
+                                    developerName: v.DeveloperName,
+                                    package: v.NamespacePrefix,
+                                    fullName: v.DeveloperName,
+                                    description: v.Description,
+                                    createdDate: v.CreatedDate, 
+                                    lastModifiedDate: v.LastModifiedDate
+                                };
+                            }
                         }, 
                         onEndFromCache: resolve,
                         onError: reject
@@ -4323,7 +4291,7 @@ function buildDatasets(core) {
                                 id: v.DurableId,
                                 name: v.QualifiedApiName,
                                 label: v.MasterLabel,
-                                packageName: v.NamespacePrefix,
+                                package: v.NamespacePrefix,
                                 external: v.ExternalSharingModel,
                                 internal: v.InternalSharingModel
                             };

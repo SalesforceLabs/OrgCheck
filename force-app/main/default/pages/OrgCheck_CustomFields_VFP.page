@@ -33,7 +33,7 @@
             <script>
                 function start2(controller, helper) {
                     controller.run({
-                        datasets: [ 'customFields', 'customObjects' ],
+                        datasets: [ 'customFields', 'objects' ],
                         dependencies: true,
                         onRecords: function(map) {
 
@@ -41,28 +41,35 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: 'Object Name', formula: (r) => { 
-                                        let entityUrl = '/lightning/setup/ObjectManager/'+r.objectName+'/Details/view';
-                                        let entityName = r.objectName;
-                                        if (r.objectId) {
-                                            switch (map.customObjects[r.objectId]?.type) {
-                                                case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
-                                                case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
-                                                case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
-                                                case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
-                                                default:                   entityUrl = '/'+r.objectId;
-                                            }
-                                            entityName = map.customObjects[r.objectId]?.developerName;
+                                        const label = map.objects[r.objectDeveloperName]?.label;
+                                        const type = map.objects[r.objectDeveloperName]?.type;
+                                        let entityUrl = '';
+                                        switch (type) {
+                                            case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
+                                            case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
+                                            case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
+                                            case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
+                                            case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
                                         }
-                                        return helper.html.render.link(
-                                            entityUrl, 
-                                            helper.html.render.escape(entityName)
-                                        );
+                                        let entityLabel = label + (label !== r.objectDeveloperName ? ' ('+r.objectDeveloperName+')' : '');
+                                        return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
                                     }},
                                     { name: 'Object Type', formula: (r) => { 
-                                        return r.objectId ? helper.html.render.escape(map.customObjects[r.objectId]?.type) : 'Standard';
+                                        const type = map.objects[r.objectDeveloperName]?.type;
+                                        let t = '';
+                                        switch (type) {
+                                            case 'CustomSetting':      t = 'Custom Setting'; break;
+                                            case 'CustomObject':       t = 'Custom Object';  break;
+                                            case 'CustomEvent':        t = 'Platform Event';  break;
+                                            case 'KnowledgeArticle':   t = 'Knowledge Article';  break;
+                                            case 'ExternalObject':     t = 'External Object';  break;
+                                            case 'BigObject':          t = 'Big Object';  break;
+                                            case 'CustomMetadataType': t = 'Custom Metadata Type';  break;
+                                            case 'StandardObject':     t = 'Standard';  break;
+                                        }
+                                        return helper.html.render.escape(t);
                                     }},
                                     { name: 'Field', formula: (r) => { 
                                         return helper.html.render.link(
@@ -71,7 +78,7 @@
                                         ); 
                                     }},
                                     { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Package', property: 'packageName' },
+                                    { name: 'Package', property: 'package' },
                                     { name: 'Full API Name', property: 'fullName' },
                                     { name: 'Description', 
                                         formula: (r) => {

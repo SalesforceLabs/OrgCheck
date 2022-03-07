@@ -42,6 +42,9 @@
                                                 <option value="CUSTOM_EXTERNAL_SOBJECTS">External Objects</option>
                                                 <option value="CUSTOM_SETTINGS">Custom Settings</option>
                                                 <option value="CUSTOM_METADATA_TYPES">Custom Metadata Types</option>
+                                                <option value="CUSTOM_EVENTS">Platform Events</option>
+                                                <option value="KNOWLEDGE_ARTICLES">Knowledge Articles</option>
+                                                <option value="CUSTOM_BIG_OBJECTS">Big Objects</option>
                                             </select>
                                         </div>
                                     </div>
@@ -190,6 +193,9 @@
                                     if (type === 'CUSTOM_EXTERNAL_SOBJECTS' && d.isExternalObject === false) return;
                                     if (type === 'CUSTOM_SETTINGS' && d.isCustomSetting === false) return;
                                     if (type === 'CUSTOM_METADATA_TYPES' && d.isCustomMetadataType === false) return;
+                                    if (type === 'CUSTOM_EVENTS' && d.isPlatformEvent === false) return;
+                                    if (type === 'KNOWLEDGE_ARTICLES' && d.isKnowledgeArticle === false) return;
+                                    if (type === 'CUSTOM_BIG_OBJECTS' && d.isBigObject === false) return;
                                 }
                                 helper.html.picklist.addValue(select, d.developerName, d.label + ' (api=' + d.developerName + ')');
                                 countElementsInSelect++;
@@ -202,13 +208,14 @@
                                               (type === 'CUSTOM_SOBJECTS' ? 'Custom Objects' :
                                               (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? 'External Objects' :
                                               (type === 'CUSTOM_SETTINGS' ? 'Custom Settings' :
-                                              (type === '"CUSTOM_METADATA_TYPES' ? 'Custom Metadata Types' : 'All types')))));
-
+                                              (type === 'CUSTOM_METADATA_TYPES' ? 'Custom Metadata Types' : 
+                                              (type === 'CUSTOM_EVENTS' ? 'Platform Events' :
+                                              (type === 'KNOWLEDGE_ARTICLES' ? 'Knowledge Articles' :
+                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : 'All types'))))))));
                             const html = 
                                 'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
                                 'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
                                 'Type: <b>'+labelType+'</b><br />';
-                            //helper.html.modal.show('No Object in this context...', html);
                             helper.html.message.show(html);
                         }
                     }
@@ -600,7 +607,7 @@
                                 columns: [
                                     { name: 'Label', property: 'label' },
                                     { name: 'Name', property: 'name' },
-                                    { name: 'Package', property: 'packageName' },
+                                    { name: 'Package', property: 'package' },
                                     { name: 'Internal', property: 'internal' },
                                     { name: 'External', property: 'external' }
                                 ],
