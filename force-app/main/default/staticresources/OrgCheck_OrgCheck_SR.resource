@@ -37,12 +37,6 @@ const OrgCheck = {
             /**
              * Private connection to Salesforce using JsForce
              */
-            //const BULK_CONNECTION = new jsforce.Connection({
-            //    accessToken: configuration.accessToken,
-            //    version: API_VERSION + ".0",
-            //    proxyUrl: '/services/proxy',
-            //    instanceUrl: 'https://eu29.salesforce.com'
-            //});
             const CONNECTION = new jsforce.Connection({
                 accessToken: configuration.accessToken,
                 version: API_VERSION + ".0",
@@ -282,51 +276,6 @@ const OrgCheck = {
                                 }
                             }
                             api.query(config.queryString, callback_api);
-                            break;
-
-                        case 'bulk':
-                            /* bug in jsforce for bulk api with more than one batch */
-                            //const query = config.queryString;
-                            //const start = query.toUpperCase().lastIndexOf('FROM ')+5;
-                            //const end = query.indexOf(' ', start);
-                            //const table = query.substring(start, end);
-                            //const job = BULK_CONNECTION.bulk.createJob(table, 'query');
-                            //const batch = job.createBatch();
-                            //batch.execute(query);
-                            //batch.on('error', err => config.onError(err));
-                            //batch.on('queue', info => { 
-                            //    console.log('queue ==> info: ', info);
-                            //    batch.poll(1000, 500000);
-                            //});
-                            //batch.on('response', responses => {
-                            //    console.log('response ==> responses: ', responses);
-                            //    responses.forEach(response => {
-                            //        const ebatch = BULK_CONNECTION.bulk.job(response.jobId).batch(response.batchId);
-                            //        ebatch.retrieve((error, results) => {
-                            //            // Check errors
-                            //            if (error) {
-                            //                config.onError(error);
-                            //                return;
-                            //            }
-                            //            // Add results to data
-                            //            console.log('response ==> results: ', results);
-                            //            results.forEach(result => ebatch.result(result.id)
-                            //                .on('data', d => {
-                            //                    console.log('record====', d);
-                            //                    wrap(d);
-                            //               })
-                            //                .on('end', function() {
-                            //                    if (config.onEnd) {
-                            //                        config.onEnd(data.records, data.size);
-                            //                    }
-                            //                    console.log('end====', data.records, data.size);
-                            //                })
-                            //            );
-                            //        });
-                            //    });
-                            //    // Close job
-                            //    job.close();
-                            //});
                             break;
                     }
                 } catch (error) {
