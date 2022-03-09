@@ -1,6 +1,6 @@
 name: Apex Tests
 
-on: [push]
+on: workflow_dispatch
 
 env:
   CUMULUSCI_SERVICE_github: ${{ secrets.CUMULUSCI_SERVICE_github }}
