@@ -1241,7 +1241,8 @@
                 salesforce: {
                     describe: {
                         object: function(pckg, obj, success, error) {
-                            private_salesforce_descrive_object({
+                            private_salesforce_describe_object({
+                                namespaceName: pckg,
                                 objectName: obj, 
                                 callbackSuccess: success,
                                 callbackError: error
@@ -2371,13 +2372,13 @@
          * Get description of an object (mix of JSForce and SOQL query in Tooling API)
          * @param setup JSON configuration including:
          *              <ol>
-         *                <li><code>objectName</code>: Name of the object to get the description</li>
+         *                <li><code>namespaceName</code>: Name of the package for the object to get the description</li>
+         *                <li><code>objectName</code>: Name of the object to get the description (may contain the namespace already)</li>
          *                <li><code>callbackSuccess</code>: function called in case of a successful describe query</li>
          *                <li><code>callbackError</code>: function called in case of an error</li>
          *              </ol>
          */
-        function private_salesforce_descrive_object(setup) {
-            const s = SALESFORCE_HANDLER.splitDeveloperName(setup.objectName);
+        function private_salesforce_describe_object(setup) {
             // Get records count for this object
             SALESFORCE_HANDLER.doHttpCall(
                 '/limits/recordCount?sObjects='+setup.objectName,
@@ -2386,6 +2387,7 @@
                     SALESFORCE_HANDLER.doDescribeObject(
                         setup.objectName, 
                         function(object) {
+                            let recordCount = 0;
                             SALESFORCE_HANDLER.doQueries(
                                 [{ 
                                     tooling: true, 
@@ -2399,12 +2401,10 @@
                                                     'ValidationName FROM ValidationRules), '+
                                                 '(SELECT Id, Name FROM WebLinks) '+
                                             'FROM EntityDefinition '+
-                                            'WHERE DeveloperName = '+private_secure_soql(s.shortName)+' '+
-                                            (s.package !== '' ? 'AND NamespacePrefix = '+private_secure_soql(s.package)+' ' : '')
+                                            'WHERE DurableId = '+private_secure_soql(setup.objectName)
                                 }], 
                                 function(record) {
-                                    if ((record.NamespacePrefix && record.NamespacePrefix !== s.package) ||
-                                        (!record.NamespacePrefix && s.package !== '')) return;
+                                    recordCount++;
 
                                     // 0. Generic information
                                     object.id = record.DurableId;
@@ -2510,7 +2510,10 @@
                                         setup.callbackSuccess(object);
                                     }
                                 },
-                                function(records, size) {},
+                                function() { if (recordCount !== 1)
+                                    if (recordCount == 0) setup.callbackError('we retrieved zero record!');
+                                    if (recordCount > 1) setup.callbackError('we retrieved '+recordCount+' records!');
+                                },
                                 setup.callbackError
                             );
                         }, 
