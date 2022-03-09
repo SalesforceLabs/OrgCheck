@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customLabels>
+        <label>Cette page liste tous les &lt;b&gt;rapports&lt;/b&gt; et les &lt;b&gt;tableaux de bord&lt;/b&gt; vous pouvez voir dans cette organisation.&lt;br /&gt;
+&lt;br /&gt;
+Dans toutes les tables:&lt;br /&gt;
+&lt;ul class=&quot;slds-list_dotted&quot;&gt;
+&lt;li&gt;La colonne &lt;b&gt;score&lt;/b&gt; est calculée à partir des règles suivantes:
+    &lt;ol class=&quot;slds-list_ordered&quot;&gt;
+        &lt;li&gt;si l&apos;élément n&apos;a pas de description, alors nous ajoutons 1.&lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;Par défaut, la table est triée par Score descendant, en d&apos;autres termes le plus grand score est en premier.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;br /&gt;</label>
+        <name>OrgCheck_Analytics_Description_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Vue d&apos;ensemble des composants analytiques</label>
+        <name>OrgCheck_Analytics_Subtitle_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Composants Analytiques</label>
+        <name>OrgCheck_Analytics_Title_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Vue d&apos;ensemble des composants Apex: Classes et Triggers</label>
+        <name>OrgCheck_Apex_Subtitle_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Classes Apex et Triggers</label>
+        <name>OrgCheck_Apex_Title_CL</name>
+    </customLabels>
+</Translations>

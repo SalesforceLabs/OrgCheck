@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customLabels>
+        <label>このページは組織の全てのレポートやダッシュボードが表示されます。&lt;br /&gt;
+&lt;br /&gt;
+全テーブルでは:&lt;br /&gt;
+&lt;ul class=&quot;slds-list_dotted&quot;&gt;
+&lt;li&gt;スコア列は下記のように計算されています。
+    &lt;ol class=&quot;slds-list_ordered&quot;&gt;
+        &lt;li&gt;アイテム詳細が空白の場合、+1を加算する。 &lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;テーブルの初期表示はスコア降順で並べています。つまり、最大スコアが先に最初に表示されます。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;br /&gt;</label>
+        <name>OrgCheck_Analytics_Description_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>分析コンポーネントの概要</label>
+        <name>OrgCheck_Analytics_Subtitle_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>分析コンポーネント</label>
+        <name>OrgCheck_Analytics_Title_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Apexクラスとトリガーの概要</label>
+        <name>OrgCheck_Apex_Subtitle_CL</name>
+    </customLabels>
+    <customLabels>
+        <label>Apexクラスとトリガー</label>
+        <name>OrgCheck_Apex_Title_CL</name>
+    </customLabels>
+</Translations>

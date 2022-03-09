@@ -48,11 +48,7 @@
         <name>StaticResource</name>
     </types>
     <types>
-        <members>OrgCheck_Analytics_Title_CL</members>
-        <members>OrgCheck_Analytics_Subtitle_CL</members>
-        <members>OrgCheck_Analytics_Description_CL</members>
-        <members>OrgCheck_Apex_Title_CL</members>
-        <members>OrgCheck_Apex_Subtitle_CL</members>
+        <members>*</members>
         <name>CustomLabels</name>
     </types>
     <types>

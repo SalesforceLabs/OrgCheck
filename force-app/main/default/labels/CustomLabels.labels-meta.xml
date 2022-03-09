@@ -46,4 +46,21 @@ On all the tables:&lt;br /&gt;
 &lt;/ul&gt;
 &lt;br /&gt;</value>
     </labels>
+    <labels>
+        <fullName>lonnnngggg</fullName>
+        <categories>one two three</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lonnnngggg</shortDescription>
+        <value>Viva l&apos;Algérie!</value>
+    </labels>
+    <labels>
+        <fullName>verryyylonnnggg</fullName>
+        <categories>one two three</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>verryyylonnnggg</shortDescription>
+        <value>eutuytutiacriurybzoic rbaoiuerycboaiezurybcaeutuyt utiacriurybzoicrba oiuerycboaiezurybcaeutuytutiacriurybzoicrbaoiuerycboaiezurybcaeutuytutiacriur ybzoi 
+ crbaoiuerycboaiez urybcaeutuytutiacriuryb zoicrbaoiuerycboaiezurybc aeutuytutiacriurybzoicrbaoi uerycboaiezurybcaeutuytut iacriurybzoicrbaoiuerycboa iezurybcaeutuytutiacriurybz oicrbaoiuerycboaiezurybca eutuytutiacriurybzoicrbaoiuerycboaiezurybca</value>
+    </labels>
 </CustomLabels>
