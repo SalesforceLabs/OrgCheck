@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>OrgCheck_Analytics_Title_CL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Title of the Analytics tab in OrgCheck</shortDescription>
+        <value>Analytics Components</value>
+    </labels>
+    <labels>
+        <fullName>OrgCheck_Analytics_Subtitle_CL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Subtitle of the Analytics tab in OrgCheck</shortDescription>
+        <value>Analytics Components Overview</value>
+    </labels>
+    <labels>
+        <fullName>OrgCheck_Apex_Title_CL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Title of the Apex tab in OrgCheck</shortDescription>
+        <value>Apex Classes and Triggers</value>
+    </labels>
+    <labels>
+        <fullName>OrgCheck_Apex_Subtitle_CL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Subtitle of the Apex tab in OrgCheck</shortDescription>
+        <value>Apex Classes and Triggers Overview</value>
+    </labels>
+    <labels>
+        <fullName>OrgCheck_Analytics_Description_CL</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Description / Help text of the Analytics tab in OrgCheck</shortDescription>
+        <value>This page lists all the &lt;b&gt;reports&lt;/b&gt; and &lt;b&gt;dashboards&lt;/b&gt; you can see in the current organization.&lt;br /&gt;
+&lt;br /&gt;
+On all the tables:&lt;br /&gt;
+&lt;ul class=&quot;slds-list_dotted&quot;&gt;
+&lt;li&gt;The column &lt;b&gt;score&lt;b&gt; is calculated based on the following rules:
+    &lt;ol class=&quot;slds-list_ordered&quot;&gt;
+        &lt;li&gt;If the item has no description, then you get +1.&lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;By default, the table is ordered by descending Score, in other words the biggest scores come first.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;br /&gt;</value>
+    </labels>
+</CustomLabels>

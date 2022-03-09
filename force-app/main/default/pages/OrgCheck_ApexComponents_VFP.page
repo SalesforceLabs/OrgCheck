@@ -2,10 +2,10 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Apex Classes and Triggers
+            {!$Label.OrgCheck_Apex_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Apex Classes and Triggers Overview
+            {!$Label.OrgCheck_Apex_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
             This page lists all your <b>Apex Classes and Triggers</b> in three tabs:<br />

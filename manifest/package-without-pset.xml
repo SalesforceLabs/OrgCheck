@@ -40,16 +40,24 @@
         <members>OrgCheck_Analytics_TAB</members>
         <name>CustomTab</name>
     </types>
-<!--    <types>
-        <members>OrgCheck_Users</members>
-        <name>PermissionSet</name>
-    </types>-->
     <types>
         <members>OrgCheck_JSForce_SR</members>
         <members>OrgCheck_D3_SR</members>
         <members>OrgCheck_OrgCheck_SR</members>
         <members>OrgCheck_Logos_SR</members>
         <name>StaticResource</name>
+    </types>
+    <types>
+        <members>OrgCheck_Analytics_Title_CL</members>
+        <members>OrgCheck_Analytics_Subtitle_CL</members>
+        <members>OrgCheck_Analytics_Description_CL</members>
+        <members>OrgCheck_Apex_Title_CL</members>
+        <members>OrgCheck_Apex_Subtitle_CL</members>
+        <name>CustomLabels</name>
+    </types>
+    <types>
+        <members>*</members>
+        <name>Translations</name>
     </types>
     <version>53.0</version>
 </Package>
