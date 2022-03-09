@@ -201,7 +201,8 @@
                         htmlModalTitleTagId: 'modal-heading',
                         htmlMainContentTagId: 'content',
                         formatDefaultDate: 'dd/MM/y',
-                        formatDefaultDatetime: 'dd/MM/y HH:mm:ss'
+                        formatDefaultDatetime: 'dd/MM/y HH:mm:ss',
+                        formatDefaultLanguage: 'en'
                     });
                     buildDatasets(core);
 

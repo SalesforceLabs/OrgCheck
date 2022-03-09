@@ -286,9 +286,10 @@
 
         /**
         * Format handler
-        * @param configuration Object must contain 'defaultDateFormat' and 'defaultDatetimeFormat'
+        * @param configuration Object must contain 'defaultLanguage', 'defaultDateFormat' and 'defaultDatetimeFormat'
         */
         FormatterHandler: function (configuration) {
+
             /**
             * Returns systematically an ID15 based on the ID18
             * @param id to simplify
@@ -900,6 +901,7 @@
      *                <li><code>htmlWarningMessageTagId</code>: HTML Tag Id of the message</li>
      *                <li><code>formatDefaultDate</code>: Default date format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultDatetime</code>: Default datetime format (if not specified for the current user)</li> 
+     *                <li><code>formatDefaultLanguage</code>: Default language format (likely 'en')</li>
      *              </ol>
      */
     Core: function(setup) {
@@ -973,6 +975,7 @@
         });
         
         const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
+            defaultLanguage: setup.formatDefaultLanguage,
             defaultDateFormat: setup.formatDefaultDate,  
             defaultDatetimeFormat: setup.formatDefaultDatetime 
         });
