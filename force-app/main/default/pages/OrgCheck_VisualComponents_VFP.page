@@ -2,35 +2,14 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Visual/UI Components
+            {!$Label.OrgCheck_Visuals_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Visual/UI Components Overview
+            {!$Label.OrgCheck_Visuals_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>Visual Components</b> in five tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Visual Force Pages</b> is a tabular list of all the VF pages in this org.</li>
-                <li>The second tab called <b>Visual Force Components</b> is a tabular list of all VF components in this org.</li>
-                <li>The third tab called <b>Lightning Pages</b> is a tabular list of all the Lightning pages (aka Flexi Pages for the ones that are deploying) in this org.</li>
-                <li>The fourth tab called <b>Lightning Aura Components</b> is a tabular list of all the Aura Components in this org.</li>
-                <li>The fifth tab called <b>Lightning Web Components</b> is a tabular list of all the LWC in this org.</li>
-            </ul>
-            <br />
-            On all the tables:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the item is not used by any other entity (based on the Dependency API), then you get +1.</li>
-                        <li>When applicable, if the API version used by the item is older than three year, then you get +1. </li>
-                        <li>If the item has no description, then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
-                    it is used and what it is using.</li>
-            </ul>
-            <br />
+            {!$Label.OrgCheck_Visuals_Description1_CL}
+            {!$Label.OrgCheck_Visuals_Description2_CL}
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

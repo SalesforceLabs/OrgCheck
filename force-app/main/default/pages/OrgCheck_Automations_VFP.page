@@ -2,10 +2,13 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Automations 
+            {!$Label.OrgCheck_Automations_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Workflows, Process Builders and Flows Overview
+            {!$Label.OrgCheck_Automations_Subtitle_CL}
+        </apex:define>
+        <apex:define name="text_page_description">
+            {!$Label.OrgCheck_Automations_Description_CL}
         </apex:define>
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">

@@ -2,18 +2,13 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Object Documentation
+            {!$Label.OrgCheck_Objects_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Object Configuration Overview
+            {!$Label.OrgCheck_Objects_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page gives you an overview of your <b>Objects</b> in two tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Object Documentation</b> is giving you the entire documentatio of a specified object</li>
-                <li>The second tab called <b>Org Wide Default</b> is a tabular list of the internal and external sharing for all your objects</li>
-            </ul>
-            <br />
+            {!$Label.OrgCheck_Objects_Description_CL}
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

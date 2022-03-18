@@ -2,26 +2,13 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Custom Labels
+            {!$Label.OrgCheck_CustomLabels_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Custom Labels Overview
+            {!$Label.OrgCheck_CustomLabels_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>custom labels</b>.<br />
-            <br />
-            On this table:<br />
-            <ul class="slds-list_dotted">
-                <li>Each row represents a custom label</li>
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the custom label is not used by any other entity (based on the Dependency API), then you get +1</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
-                    used and what it is using.</li>
-            </ul>
+            {!$Label.OrgCheck_CustomLabels_Description_CL}
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

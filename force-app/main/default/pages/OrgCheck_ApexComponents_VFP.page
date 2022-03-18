@@ -8,61 +8,10 @@
             {!$Label.OrgCheck_Apex_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>Apex Classes and Triggers</b> in three tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Classes</b> is a tabular list of all the Apex Classes in this org.</li>
-                <li>The second tab called <b>Triggers</b> is a tabular list of all Apex Triggers in this org.</li>
-                <li>The third tab called <b>Object's triggers count</b> is a grouped table that aggregates all triggers per objects in this org.</li>
-            </ul>
-            <br />
-            To make sure you get <b>all the benefits</b> from this page, make sure to follow these steps:
-            <ol class="slds-list_ordered">
-                <li>You <b>compile all classes</b> by selecting the "Plug" button.</li>
-                <li>You <b>run all tests</b> by selecting the "Like" button.</li>
-            </ol>
-            <br />
-            On the Classes table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the class is not used by any other entity (based on the Dependency API), then you get +1. </li>
-                        <li>If the API version of the class is older than 3 year, then you get +1. </li>
-                        <li>If the class needs recompilation, then you get +1. </li>
-                        <li>If the class is not explicitely specifying the sharing, then you get +1. </li>
-                        <li>If the class has not reached a code covergare of <b>85%</b>, then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
-                    it is used and what it is using.</li>
-            </ul>
-            <br />
-            On the Triggers table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the trigger is not used by any other entity (based on the Dependency API), then you get +1. </li>
-                        <li>If the API version of the trigger is older than 3 year, then you get +1. </li>
-                        <li>If the trigger is inactive, then you get +1. </li>
-                        <li>If the trigger is more than 5,000 characters long, then you get +1. </li>
-                        <li>If the trigger is containing SOQL or DML statments, then you get +1. </li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
-                    it is used and what it is using.</li>
-            </ul>
-            <br />
-            On the Triggers per object table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the count of active triggers per object is greater that one, you get +1. </li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-            </ul>
-            <br />
+            {!$Label.OrgCheck_Apex_Description1_CL}
+            {!$Label.OrgCheck_Apex_Description2_CL}
+            {!$Label.OrgCheck_Apex_Description3_CL}
+            {!$Label.OrgCheck_Apex_Description4_CL}
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">

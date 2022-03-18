@@ -2,43 +2,14 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Public Groups and Queues
+            {!$Label.OrgCheck_PublicGroups_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Public Groups and Queues Overview
+            {!$Label.OrgCheck_PublicGroups_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>Public Groups and Queues</b> in two tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Public Groups</b> is giving you a tabular list of all the public groups in this Org</li>
-                <li>The second tab called <b>Queues</b> is giving you a tabular list of all the queues in this Org</li>
-            </ul>
-            <br />
-            The secret sauce in the page is the column called <b>All Active Users</b> which is calculated recurcively across 
-            all possible sub meta-groups (role, role and subordinates, groups, etc.) that are contained in the groups or queues.<br />
-            <br />
-            On the public groups table:<br />
-            <ul class="slds-list_dotted">
-                <li>Each row represents a public group</li>
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the public group contains no active user at all (see All Active Users column), then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-            </ul>
-            <br />
-            On the queues table:<br />
-            <ul class="slds-list_dotted">
-                <li>Each row represents a queue</li>
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the queue contains no active user at all (see All Active Users column), then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-            </ul>
-            <br />
+            {!$Label.OrgCheck_PublicGroups_Description1_CL}
+            {!$Label.OrgCheck_PublicGroups_Description2_CL}
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
