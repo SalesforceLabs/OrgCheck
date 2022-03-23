@@ -2,10 +2,10 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Welcome in OrgCheck (<script>document.write(OrgCheck.version);</script>)
+            {!$Label.OrgCheck_Home_Title_CL} (<script>document.write(OrgCheck.version);</script>)
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Monitor your org seamlessly
+            {!$Label.OrgCheck_Home_Subtitle_CL}
         </apex:define>
         <apex:define name="html_actions" />
         <apex:define name="html_content_core">
@@ -16,16 +16,16 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-opportunity" title="welcome">
+                                        <span class="slds-icon_container slds-icon-standard-opportunity" title="{!$Label.OrgCheck_Home_Section1_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Welcome</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section1_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Welcome!!!
+                                            {!$Label.OrgCheck_Home_Section1_Title_CL}
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex">
@@ -90,16 +90,16 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="General Information">
+                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="{!$Label.OrgCheck_Home_Section2_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#observation_component')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">General Information</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section2_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            General Information
+                                            {!$Label.OrgCheck_Home_Section2_Title_CL}
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex">
@@ -212,16 +212,16 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-account" title="preferences">
+                                        <span class="slds-icon_container slds-icon-standard-account" title="{!$Label.OrgCheck_Home_Section3_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Preferences</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section3_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Preferences
+                                            {!$Label.OrgCheck_Home_Section3_Title_CL}
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex"></div>
@@ -233,16 +233,16 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-account" title="cache">
+                                        <span class="slds-icon_container slds-icon-standard-account" title="{!$Label.OrgCheck_Home_Section4_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#account')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Metadata Cache</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section4_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Metadata Cache
+                                            {!$Label.OrgCheck_Home_Section4_Title_CL}
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex">
@@ -264,126 +264,44 @@
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-visit-templates" title="Org Connection">
+                                        <span class="slds-icon_container slds-icon-standard-visit-templates" title="{!$Label.OrgCheck_Home_Section5_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#visit_templates')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Org Connection</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section5_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Org Connection
+                                            {!$Label.OrgCheck_Home_Section5_Title_CL}
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex"></div>
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <div class="slds-tabs_default">
-                                    <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="Local connection" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-31" id="tab-default-localcon__item">Local connection</a>
-                                        </li>
-                                        <li class="slds-tabs_default__item" title="Remote connection" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-32" id="tab-default-remotecon__item">Remote connection</a>
-                                        </li>
-                                    </ul>
-                                    <div id="tab-default-31" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-localcon__item">
-                                        <!-- By default, OrgCheck will scan the org where it has been installed. But you 
-                                        can specify another org!!<br />-->
-                                        OrgCheck scans the org where it has been installed<br />
-                                        <br />
-                                        On the top of each page, you will see the org id (in a green badge) being 
-                                        used by OrgCheck. The org Id starts with <code>OOD</code>.<br />
-                                        <br />
-                                        OrgCheck is currently installed on <b>{!MID($Organization.Id, 1, 15)}</b>.<br />
-                                        <br />
-                                        <!--If you neet to reset the connection to this local org, click on the following button.<br />
-                                        <br />
-                                        <button id="button-orgauth-local" class="slds-button slds-button_brand">Check back my local org!</button><br />
-                                        <br />-->
-                                    </div>
-                                    <div id="tab-default-32" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-remotecon__item">
-                                        In the next versions, OrgCheck will be able to log to another org!!!<br />
-                                        <!--
-                                        OrgCheck can scan any other org (DE, Sandboxes and Production) as long as:
-                                        <ol class="slds-list_dotted">
-                                            <li>the <i>"My Domain"</i> feature is enabled on that remote org</li>
-                                            <li>a <i>"CORS"</i> setting is set to <code>https://*.visualforce.com</code> on that remote org</li>
-                                            <li>a <i>"connected app"</i> should be created on this local org</li>
-                                        </ol>
-                                        <br />
-                                        The <i>"My Domain"</i> feature let us distinguish the remote org you want to scan from the 
-                                        local org where you installed OrgCheck.<br />
-                                        For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
-                                        article</a> from the Salesforce official documentation.<br />
-                                        <br />
-                                        The <i>"CORS"</i> feature is necessary because it is very likely that your browser will require it
-                                        when OrgCheck (from your local org) tries to connect to another domain (to the remote org).<br />
-                                        As we do not encourage you to disable this feature in your browser, you will have to go to
-                                        the setup menu of your remote org and add a CORS setting to say that you accept outcoming request 
-                                        (from your local org) to the API (of your remote org).<br />
-                                        You can set <code>https://*.visualforce.com</code> which is more generic, or you can replace the 
-                                        <code>'*'</code> with the mydomain of the local org where you installed OrgCheck.<br />
-                                        For more information about this feature, please go to 
-                                        <a href="https://help.salesforce.com/articleView?id=extend_code_cors.htm&type=5" target="_blank" rel="external noopener noreferrer">this 
-                                        article</a> from the Salesforce official documentation.<br />
-                                        <br />
-                                        A <i>"ConnectedApp"</i> should be created in your local org. Please make sure you set the following information:
-                                        <ul class="slds-list_dotted">
-                                            <li>Icon URL: <code>https://login.salesforce.com/logos/Custom/Scope_Primary/icon.svg</code></li>
-                                            <li>Label: <code>OrgCheck</code></li>
-                                            <li>Logo URL: <code>https://login.salesforce.com/logos/Custom/Scope_Primary/logo.png</code></li>
-                                            <li>oAuth / Callback URL: <code><script>document.write(window.location.ancestorOrigins[0]);</script>/apex/OrgCheck_Authorization_VFP</code></li>
-                                            <li>oAuth / Is Admin Apporved: <code>False</code></li>
-                                            <li>oAuth / Scopes: <code>Api</code></li>
-                                        </ul>
-                                        Once created in the local org, get the <code>Consumer Key</code> of that connected app and 
-                                        paste it below (whatever remote org you want to scan).<br />
-                                        <br /><br />
-                                        <div class="slds-grid slds-gutters_xxx-small">
-                                            <div class="slds-col slds-size_1-of-5">
-                                                <span>Consumer</span>
-                                            </div>
-                                            <div class="slds-col slds-size_4-of-5">
-                                                <input type="text" id="consumer-key" size="20" class="slds-input" />
-                                            </div>
-                                        </div>
-                                        <div class="slds-grid slds-gutters_xxx-small">
-                                            <div class="slds-col slds-size_1-of-5">
-                                                <span>Check</span>
-                                            </div>
-                                            <div class="slds-col slds-size_1-of-5">
-                                                <input type="text" id="other-one-my-domain" size="5" class="slds-input" />
-                                            </div>
-                                            <div class="slds-col slds-col_bump-right slds-size_2-of-5">
-                                                <span>.my.salesforce.com</span>
-                                            </div>
-                                            <div class="slds-col slds-size_1-of-5">
-                                                <button id="button-orgauth-other" class="slds-button slds-button_outline-brand">Go!</button>
-                                            </div>
-                                        </div>
-                                        -->
-                                    </div>
-                                </div>
+                                OrgCheck scans the org where it has been installed<br />
+                                <br />
+                                On the top of each page, you will see the org id (in a green badge) being 
+                                used by OrgCheck. The org Id starts with <code>OOD</code>.<br />
+                                <br />
+                                OrgCheck is currently installed on <b>{!MID($Organization.Id, 1, 15)}</b>.<br />
                             </div>
                         </article>
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="Complementary Tools">
+                                        <span class="slds-icon_container slds-icon-standard-record-lookup" title="{!$Label.OrgCheck_Home_Section6_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#record_lookup')}"></use>
                                             </svg>
-                                            <span class="slds-assistive-text">Complementary Tools</span>
+                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section6_Title_CL}</span>
                                         </span>
                                     </div>
                                     <div class="slds-media__body">
                                         <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            Complementary Tools
+                                            {!$Label.OrgCheck_Home_Section6_Title_CL}
                                         </h2>
                                     </div>
                                 </header>
@@ -561,24 +479,6 @@
                         reset_items_in_list(); 
                     };
                     reset_items_in_list();
-
-                    // ========================================
-                    // Authentication part
-                    // ========================================
-                    /*helper.html.element.get('button-orgauth-local').onclick = function(e) {
-                        // Back to local org!!
-                        helper.information.switchToOrg();
-                        reset_items_in_list(); 
-                    }*/
-                    /*
-                    helper.html.element.get('button-orgauth-other').onclick = function(e) {
-                        // Redirect to oAuth flow to remote org!!
-                        const callbackURL = window.location.ancestorOrigins[0] + '/apex/OrgCheck_Authorization_VFP';
-                        const clientId = helper.html.element.get('consumer-key').value; 
-                        const mydomain = helper.html.element.get('other-one-my-domain').value;
-                        top.location.href = 'https://'+mydomain+'.my.salesforce.com/services/oauth2/authorize?'+
-                            'client_id='+clientId+'&response_type=token&redirect_uri='+callbackURL;
-                    }*/
 
                     helper.information.showMainContent();
 
