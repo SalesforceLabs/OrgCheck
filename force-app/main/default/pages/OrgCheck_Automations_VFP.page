@@ -8,7 +8,7 @@
             {!$Label.OrgCheck_Automations_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            {!$Label.OrgCheck_Automations_Description_CL}
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Automations_Description_CL}" />
         </apex:define>
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">

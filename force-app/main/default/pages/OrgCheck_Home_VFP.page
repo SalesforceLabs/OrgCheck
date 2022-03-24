@@ -51,8 +51,7 @@
                                                     </object>
                                                 </td>
                                                 <td width="50%">
-                                                    Introducing <b>OrgCheck</b>. An easy-to-install and easy-to-use Salesforce 
-                                                    application in order to quickly analyze your org and its technical debt.
+                                                    <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text1_CL}" />
                                                 </td>
                                             </tr>
                                         </table>        
@@ -66,19 +65,7 @@
                                                     </object>
                                                 </td>
                                                 <td width="70%">
-                                                    <b>Issues or new ideas?</b><br />
-                                                    Track them at <br />
-                                                    <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">https://sfdc.co/OrgCheck-Backlog</a><br />
-                                                    <br />
-                                                    <b>Want to chat with other users?</b><br />
-                                                    Please join us on Slack with this 
-                                                    <a href="http://sfdc.co/OrgCheck-Community" target="_blank" rel="external noopener noreferrer">invitation</a><br />
-                                                    <br />
-                                                    <b>Social Media</b><br />
-                                                    Like and share posts on 
-                                                    <a href="https://www.linkedin.com/company/sf-orgcheck" target="_blank" rel="external noopener noreferrer">LinkedIn</a> 
-                                                    and on
-                                                    <a href="https://twitter.com/VinceFINET/status/1453307931554942992" target="_blank" rel="external noopener noreferrer">Twitter</a>!<br />
+                                                    <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text2_CL}" />
                                                 </td>
                                             </tr>
                                         </table>

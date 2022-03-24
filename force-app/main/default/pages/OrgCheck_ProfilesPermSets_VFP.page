@@ -7,9 +7,9 @@
             {!$Label.OrgCheck_ProfilePermSets_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            {!$Label.OrgCheck_ProfilePermSets_Description1_CL}
-            {!$Label.OrgCheck_ProfilePermSets_Description2_CL}
-            {!$Label.OrgCheck_ProfilePermSets_Description3_CL}
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description1_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description2_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description3_CL}" />
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>

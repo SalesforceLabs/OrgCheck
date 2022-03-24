@@ -8,9 +8,9 @@
             {!$Label.OrgCheck_Roles_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            {!$Label.OrgCheck_Roles_Description1_CL}
-            {!$Label.OrgCheck_Roles_Description2_CL}
-            {!$Label.OrgCheck_Roles_Description3_CL}
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description1_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description2_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description3_CL}" />
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control" style="display: block;">

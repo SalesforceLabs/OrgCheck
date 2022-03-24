@@ -8,7 +8,7 @@
             {!$Label.OrgCheck_Analytics_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            {!$Label.OrgCheck_Analytics_Description_CL}
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Analytics_Description_CL}" />
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
