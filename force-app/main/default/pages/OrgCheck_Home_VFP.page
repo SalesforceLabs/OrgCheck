@@ -35,8 +35,8 @@
                             <div class="slds-card__body slds-card__body_inner">
                                 <div class="slds-tabs_default">
                                     <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="Welcome" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">Welcome</a>
+                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section1_Title_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">{!$Label.OrgCheck_Home_Section1_Title_CL}</a>
                                         </li>
                                         <li class="slds-tabs_default__item" title="Support and feedback" role="presentation">
                                             <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-11" id="tab-default-support__item">Support and feedback</a>
