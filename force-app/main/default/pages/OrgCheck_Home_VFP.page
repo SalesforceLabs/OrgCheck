@@ -35,11 +35,11 @@
                             <div class="slds-card__body slds-card__body_inner">
                                 <div class="slds-tabs_default">
                                     <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section1_Title_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">{!$Label.OrgCheck_Home_Section1_Title_CL}</a>
+                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section1_Subtitle1_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">{!$Label.OrgCheck_Home_Section1_Subtitle1_CL}</a>
                                         </li>
-                                        <li class="slds-tabs_default__item" title="Support and feedback" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-11" id="tab-default-support__item">Support and feedback</a>
+                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section1_Subtitle2_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-11" id="tab-default-support__item">{!$Label.OrgCheck_Home_Section1_Subtitle2_CL}</a>
                                         </li>
                                     </ul>
                                     <div id="tab-default-10" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-welcome__item">
@@ -96,47 +96,22 @@
                             <div class="slds-card__body slds-card__body_inner">
                                 <div class="slds-tabs_default">
                                     <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="About Technical Debt" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-20" id="tab-default-abouttechdebt__item">About Technical Debt</a>
+                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section2_Subtitle1_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-20" id="tab-default-abouttechdebt__item">{!$Label.OrgCheck_Home_Section2_Subtitle1_CL}</a>
                                         </li>
-                                        <li class="slds-tabs_default__item" title="Legal terms" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-21" id="tab-default-legalterms__item">Legal terms</a>
+                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section2_Subtitle2_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-21" id="tab-default-legalterms__item">{!$Label.OrgCheck_Home_Section2_Subtitle2_CL}</a>
                                         </li>
-                                        <li class="slds-tabs_default__item" title="Third party components" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-22" id="tab-default-3rdparty__item">Third party components</a>
+                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section2_Subtitle3_CL}" role="presentation">
+                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-22" id="tab-default-3rdparty__item">{!$Label.OrgCheck_Home_Section2_Subtitle3_CL}</a>
                                         </li>
                                     </ul>
                                     <div id="tab-default-20" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-abouttechdebt__item">
-                                        Although invisible, <b>Technical Debt</b> has an impact on your project, your 
-                                        IT budget, your Salesforce app, your end-users and... your business.<br />
-                                        You may be interested in this <a target="_blank" rel="external noopener noreferrer"
-                                        href="https://www.toptal.com/finance/part-time-cfos/technical-debt">article</a>!<br />
-                                        <br />
-                                        You may have a <b>Technical Debt</b>, if you answer 'yes' to the following questions:
-                                        <ul class="slds-list_dotted">
-                                            <li>Is the performance of your Salesforce app low?</li>
-                                            <li>Is the time to resolve a bug long with your support?</li>
-                                            <li>Is maintenance cost increasing?</li>
-                                            <li>Is documentation about your Salesforce org poor?</li>
-                                            <li>Is adding new features getting more complex?</li>
-                                            <li>Is testing and/or deploying your app a nightmare?</li>
-                                            <li>If yes, you may have a technical debt that you need to reduce.</li>
-                                        </ul>
-                                        <br />
-                                        My vision of this tool was (and still is):
-                                        <ul class="slds-list_dotted">
-                                            <li>The tool should run on a salesforce org: easy to install and easy to use</li>
-                                            <li>No additional software or platform</li>
-                                            <li>No need to have a Salesforce Employee with her/his magical access</li>
-                                            <li>Code of the application is available you can modify it, if you need it</li>
-                                        </ul>
+                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text1_CL}" />
+                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text2_CL}" />
                                     </div>
                                     <div id="tab-default-21" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-tegalterms__item">
-                                        <b>OrgCheck is free to use, but is not an official Salesforce product. </b> OrgCheck has not been officially 
-                                        tested or documented. Salesforce support is not available for OrgCheck. Support requests for OrgCheck 
-                                        should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck/issues</a>. 
-                                        Source code for OrgCheck can be found at <a href="https://github.com/VinceFINET/OrgCheck" target="_blank" rel="external noopener noreferrer">https://github.com/VinceFINET/OrgCheck</a> 
-                                        under separate and different license terms.        
+                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text3_CL}" />
                                     </div>
                                     <div id="tab-default-22" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3rdparty__item">
                                         <b>D3js</b><br />
@@ -233,13 +208,13 @@
                                         </h2>
                                     </div>
                                     <div class="slds-no-flex">
-                                        <button class="slds-button slds-button_brand" id="button-lazy-load-cache">Load</button>
-                                        <button class="slds-button slds-button_destructive" id="button-clear-cache">Clear</button>
+                                        <button class="slds-button slds-button_brand" id="button-lazy-load-cache">{!$Label.OrgCheck_Load_CL}</button>
+                                        <button class="slds-button slds-button_destructive" id="button-clear-cache">{!$Label.OrgCheck_Clear_CL}</button>
                                     </div>
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
+                                {!$Label.OrgCheck_Home_Section4_Text1_CL}<br />
                                 <div class="slds-progress slds-progress_vertical">
                                     <ol class="slds-progress__list" id="list-loading-items" />
                                 </div>
@@ -267,12 +242,7 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                OrgCheck scans the org where it has been installed<br />
-                                <br />
-                                On the top of each page, you will see the org id (in a green badge) being 
-                                used by OrgCheck. The org Id starts with <code>OOD</code>.<br />
-                                <br />
-                                OrgCheck is currently installed on <b>{!MID($Organization.Id, 1, 15)}</b>.<br />
+                                <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section5_Text1_CL}" />
                             </div>
                         </article>
                         <article class="slds-card">
@@ -295,24 +265,23 @@
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
                                 <ul class="slds-tabs_default__nav" role="tablist">
-                                    <li class="slds-tabs_default__item slds-is-active" title="Salesforce" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-40" id="tab-default-sfdc__item">Salesforce</a>
+                                    <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section6_Subtitle1_CL}" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-40" id="tab-default-sfdc__item">{!$Label.OrgCheck_Home_Section6_Subtitle1_CL}</a>
                                     </li>
-                                    <li class="slds-tabs_default__item " title="Scanning Code" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-41" id="tab-default-scancode__item">Code</a>
+                                    <li class="slds-tabs_default__item " title="{!$Label.OrgCheck_Home_Section6_Subtitle2_CL}" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-41" id="tab-default-scancode__item">{!$Label.OrgCheck_Home_Section6_Subtitle2_CL}</a>
                                     </li>
-                                    <li class="slds-tabs_default__item" title="Debug Logs Analysis" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-42" id="tab-default-deblog__item">Debug Logs</a>
+                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle3_CL}" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-42" id="tab-default-deblog__item">{!$Label.OrgCheck_Home_Section6_Subtitle3_CL}</a>
                                     </li>
-                                    <li class="slds-tabs_default__item" title="Dependencies Tool" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="true" aria-controls="tab-default-43" id="tab-default-deptoo__item">Dependencies</a>
+                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle4_CL}" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="true" aria-controls="tab-default-43" id="tab-default-deptoo__item">{!$Label.OrgCheck_Home_Section6_Subtitle4_CL}</a>
                                     </li>
-                                    <li class="slds-tabs_default__item" title="Data Cleansing" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="true" aria-controls="tab-default-44" id="tab-default-dataclean__item">Data Cleansing</a>
+                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle5_CL}" role="presentation">
+                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="true" aria-controls="tab-default-44" id="tab-default-dataclean__item">{!$Label.OrgCheck_Home_Section6_Subtitle5_CL}</a>
                                     </li>
                                 </ul>
                                 <div id="tab-default-40" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-sfdc__item">
-                                    Out of the box tool provided by Salesforce or Salesforce Lab:
                                     <ul class="slds-list_dotted">
                                         <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank">Salesforce Optimizer</a></li>
                                         <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;type=5" target="_blank">Salesforce LEX Readiness Report</a></li>
@@ -320,7 +289,6 @@
                                     </ul>
                                 </div>
                                 <div id="tab-default-41" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scancode__item">
-                                    Want to analyze code quality?
                                     <ul class="slds-list_dotted">
                                         <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank">Salesforce Guidelines for secure code</a></li>
                                         <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank">Apex PMD Rules</a></li>
@@ -330,7 +298,6 @@
                                     </ul>
                                 </div>
                                 <div id="tab-default-42" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deblog__item">
-                                    Want to understand better what's happening in debug logs?
                                     <ul class="slds-list_dotted">
                                         <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank">Apex Replay Debugger</a></li>
                                         <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank">Online Debug Log Tree (on github)</a></li>
@@ -338,13 +305,11 @@
                                     </ul>
                                 </div>
                                 <div id="tab-default-43" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deptoo__item">
-                                    Want to go further with the dependency API?
                                     <ul class="slds-list_dotted">
                                         <li><a href="https://happysoup.io/" target="_blank">Happy Soup</a></li>
                                     </ul>
                                 </div>
                                 <div id="tab-default-44" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-dataclean__item">
-                                    Want to have clean data?
                                     <ul class="slds-list_dotted">
                                         <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank">RingLead Field Trip</a></li>
                                         <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank">RingLead Dupe Dive</a></li>
