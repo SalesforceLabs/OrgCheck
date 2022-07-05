@@ -68,58 +68,58 @@
                             helper.html.datatable.create({
                                 element: 'datatable-vfps',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
                                         }
                                     },
-                                    { name: 'Mobile', property: 'mobile', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Mobile_CL}', property: 'mobile', formula: (r) => { 
                                         return helper.html.render.checkbox(r.mobile); 
                                     }},
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Visual Force Page!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.vfPages,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -129,55 +129,55 @@
                             helper.html.datatable.create({
                                 element: 'datatable-vfcs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Visual Force Component!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.vfComponents,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -187,50 +187,50 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lps',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Lightning Page!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.auraPages,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -240,55 +240,55 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lacs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Aura Component!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.auraComponents,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -298,55 +298,55 @@
                             helper.html.datatable.create({
                                 element: 'datatable-lwcs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Web Component!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.lwComponents,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true

@@ -13,11 +13,11 @@
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}all">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
-                        <span class="slds-assistive-text">Compile all</span>
+                        <span class="slds-assistive-text">{!$Label.OrgCheck_CompileAll_CL}</span>
                     </button>
                 </a>
             </div>
@@ -64,20 +64,20 @@
                             helper.html.datatable.create({
                                 element: 'datatable-apexjobs',
                                 columns: [
-                                    { name: 'Type', property: 'type' },
-                                    { name: 'Apex Context', property: 'context' },
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Status', property: 'status',
+                                    { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' },
+                                    { name: '{!$Label.OrgCheck_ApexContext_CL}', property: 'context' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Status_CL}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status === 'Failed') return 1; 
                                         }
                                     },
                                     { name: 'Message', property: 'message' },
-                                    { name: 'Count', type: 'numeric', property: 'numIds' },
-                                    { name: 'Errors', type: 'numeric', property: 'numErrors' }
+                                    { name: '{!$Label.OrgCheck_Count_CL}', type: 'numeric', property: 'numIds' },
+                                    { name: '{!$Label.OrgCheck_Errors_CL}', type: 'numeric', property: 'numErrors' }
                                 ],
                                 data: map.batchesApexJobs,
-                                sorting: { name: 'Context', order: 'asc' },
+                                sorting: { name: '{!$Label.OrgCheck_ApexContext_CL}', order: 'asc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -87,9 +87,10 @@
                             helper.html.datatable.create({
                                 element: 'datatable-scheduledjobs',
                                 columns: [
-                                    { name: 'Name', property: 'name' },
-                                    { name: 'Type', property: 'type' },
-                                    { name: 'Status', property: 'status',
+                                    { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
+                                    { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Status_CL}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status !== 'WAITING') return 1; 
                                         }
@@ -100,12 +101,12 @@
                                             helper.html.render.escape(map.users[r.userid]?.name || r.userid)
                                         ); 
                                     }},
-                                    { name: 'start', property: 'start' },
-                                    { name: 'end', property: 'end' },
+                                    { name: '{!$Label.OrgCheck_Starts_CL}', property: 'start' },
+                                    { name: '{!$Label.OrgCheck_Ends_CL}', property: 'end' },
                                     { name: 'timezone', property: 'timezone' }
                                 ],
                                 data: map.batchesScheduledJobs,
-                                sorting: { name: 'Context', order: 'asc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'asc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -117,20 +118,18 @@
                             helper.html.datatable.create({
                                 element: 'datatable-notscheduledjobs',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Status', 
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Status_CL}', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
-                                                return 'Recompile!';
                                             }
-                                            return 'OK';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.needsRecompilation === true) return 1; 
@@ -140,10 +139,10 @@
                                         formula: (r) => { return helper.html.render.checkbox(r.isScheduled === true); },
                                         scoreFormula: (r) => { if (r.isScheduled !== true) return 1; }
                                     },
-                                    { name: 'Package', property: 'namespace' }
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' }
                                 ],
                                 data: map.apexClasses,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.needsRecompilation === true || (r.interfaces && r.interfaces.includes('System.Schedulable')); }},
                                 showSearch: true,
                                 showStatistics: true,

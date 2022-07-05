@@ -24,19 +24,19 @@
                 </ul>
                 <div id="tab-default-1" class="slds-tabs_default__content slds-show" style="padding-top: 0;" role="tabpanel" aria-labelledby="tab-default-objectdoc__item">
                     <div class="slds-grid slds-border_bottom slds-theme_shade">
-                        <h1 class="slds-text-heading--small" style="padding-top: 5px;">On which entity do you wish to have information?</h1>
+                        <h1 class="slds-text-heading--small" style="padding-top: 5px;">{!$Label.OrgCheck_WhichEntity_CL}</h1>
                         <div class="slds-col_bump-left slds-form">
                             <div class="slds-form__row">
                                 <div class="slds-form__item">
                                     <div class="slds-form-element__control">
                                         <div class="slds-select_container">
                                             <select class="slds-select" id="object-type">
-                                                <option value="ALL">All types</option>
-                                                <option value="STANDARD_SOBJECTS">Standard objects</option>
-                                                <option value="CUSTOM_SOBJECTS">Custom Objects</option>
-                                                <option value="CUSTOM_EXTERNAL_SOBJECTS">External Objects</option>
-                                                <option value="CUSTOM_SETTINGS">Custom Settings</option>
-                                                <option value="CUSTOM_METADATA_TYPES">Custom Metadata Types</option>
+                                                <option value="ALL">{!$Label.OrgCheck_AllTypes_CL}</option>
+                                                <option value="STANDARD_SOBJECTS">{!$Label.OrgCheck_StandardObjects_CL}</option>
+                                                <option value="CUSTOM_SOBJECTS">{!$Label.OrgCheck_CustomObjects_CL}</option>
+                                                <option value="CUSTOM_EXTERNAL_SOBJECTS">{!$Label.OrgCheck_ExternalObjects_CL}</option>
+                                                <option value="CUSTOM_SETTINGS">{!$Label.OrgCheck_CustomSettings_CL}</option>
+                                                <option value="CUSTOM_METADATA_TYPES">{!$Label.OrgCheck_CustomMetadataTypes_CL}</option>
                                                 <option value="CUSTOM_EVENTS">Platform Events</option>
                                                 <option value="KNOWLEDGE_ARTICLES">Knowledge Articles</option>
                                                 <option value="CUSTOM_BIG_OBJECTS">Big Objects</option>
@@ -48,8 +48,8 @@
                                     <div class="slds-form-element__control">
                                         <div class="slds-select_container">
                                             <select class="slds-select" id="object-namespace">
-                                                <option value="EMPTY">Please select a package...</option>
-                                                <option value="NO_PACKAGE">No package</option>
+                                                <option value="EMPTY">{!$Label.OrgCheck_SelectPackage_CL}</option>
+                                                <option value="NO_PACKAGE">{!$Label.OrgCheck_NoPackage_CL}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -58,7 +58,7 @@
                                     <div class="slds-form-element__control">
                                         <div class="slds-select_container">
                                             <select class="slds-select" id="object-api-name">
-                                                <option value="EMPTY">Please select an object...</option>
+                                                <option value="EMPTY">{!$Label.OrgCheck_SelectObject_CL}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -69,57 +69,57 @@
         
                     <!-- GENERAL SECTION -->
                     <div id="section-general">
-                        <h1 class="slds-text-heading--small">General information</h1>
-                        <div id="datatable-general" data-title="General information" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_GeneralInformation_CL}</h1>
+                        <div id="datatable-general" data-title="{!$Label.OrgCheck_GeneralInformation_CL}" />
                     </div>
 
                     <!-- APEX TRIGGER SECTION -->
                     <div id="section-apexTriggers">
-                        <h1 class="slds-text-heading--small">Apex Triggers</h1>
-                        <div id="datatable-apexTriggers" data-title="Apex Triggers" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_ApexTriggers_CL}</h1>
+                        <div id="datatable-apexTriggers" data-title="{!$Label.OrgCheck_ApexTriggers_CL}" />
                     </div>
                     
                     <!-- FIELD SETS SECTION -->
                     <div id="section-fieldSets">
-                        <h1 class="slds-text-heading--small">Field Sets</h1>
-                        <div id="datatable-fieldSets" data-title="Field Sets" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_FieldSets_CL}</h1>
+                        <div id="datatable-fieldSets" data-title="{!$Label.OrgCheck_FieldSets_CL}" />
                     </div>
                         
                     <!-- LAYOUTS SECTION -->
                     <div id="section-layouts">
-                        <h1 class="slds-text-heading--small">Layouts</h1>
-                        <div id="datatable-layouts" data-title="Layouts" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_PageLayouts_CL}</h1>
+                        <div id="datatable-layouts" data-title="{!$Label.OrgCheck_PageLayouts_CL}" />
                     </div>
                     
                     <!-- LIMITS SECTION -->
                     <div id="section-limits">
-                        <h1 class="slds-text-heading--small">Limits</h1>
-                        <div id="datatable-limits" data-title="Limits" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_Limits_CL}</h1>
+                        <div id="datatable-limits" data-title="{!$Label.OrgCheck_Limits_CL}" />
                     </div>
                     
                     <!-- VALIDATION RULES SECTION -->
                     <div id="section-validationRules">
-                        <h1 class="slds-text-heading--small">Validation Rules</h1>
-                        <div id="datatable-validationRules" data-title="Validation Rules" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_ValidationRules_CL}</h1>
+                        <div id="datatable-validationRules" data-title="{!$Label.OrgCheck_ValidationRules_CL}" />
                     </div>
                     
                     <!-- WEB LINKS SECTION -->
                     <div id="section-webLinks">
-                        <h1 class="slds-text-heading--small">Web Links</h1>
-                        <div id="datatable-webLinks" data-title="Web Links" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_WebLinks_CL}</h1>
+                        <div id="datatable-webLinks" data-title="{!$Label.OrgCheck_WebLinks_CL}" />
                     </div>
                     
                     <!-- FIELDS SECTION -->
                     <div id="section-fields">
-                        <h1 class="slds-text-heading--small">Fields</h1>
-                        <i>Please note that we get dependencies only for custom fields and not standard fields. Thank you!</i>
-                        <div id="datatable-fields" data-title="Fields" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_Fields_CL}</h1>
+                        <i>{!$Label.OrgCheck_FieldsNote_CL}</i>
+                        <div id="datatable-fields" data-title="{!$Label.OrgCheck_Fields_CL}" />
                     </div>
                     
                     <!-- RECORD TYPES SECTION -->
                     <div id="section-recordtypes">
-                        <h1 class="slds-text-heading--small">Record Types</h1>
-                        <div id="datatable-recordtypes" data-title="Record Types" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_RecordTypes_CL}</h1>
+                        <div id="datatable-recordtypes" data-title="{!$Label.OrgCheck_RecordTypes_CL}" />
                     </div>
                     
                     <!-- RELEATIONSHIPS SECTION -->
@@ -199,14 +199,14 @@
 
                         helper.html.message.hide();
                         if ((namespace || namespace === '') && type && countElementsInSelect === 0) {
-                            const labelType = (type === 'STANDARD_SOBJECTS' ? 'Standard objects' :
-                                              (type === 'CUSTOM_SOBJECTS' ? 'Custom Objects' :
-                                              (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? 'External Objects' :
-                                              (type === 'CUSTOM_SETTINGS' ? 'Custom Settings' :
-                                              (type === 'CUSTOM_METADATA_TYPES' ? 'Custom Metadata Types' : 
+                            const labelType = (type === 'STANDARD_SOBJECTS' ? '{!$Label.OrgCheck_StandardObjects_CL}' :
+                                              (type === 'CUSTOM_SOBJECTS' ? '{!$Label.OrgCheck_CustomObjects_CL}' :
+                                              (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? '{!$Label.OrgCheck_ExternalObjects_CL}' :
+                                              (type === 'CUSTOM_SETTINGS' ? '{!$Label.OrgCheck_CustomSettings_CL}' :
+                                              (type === 'CUSTOM_METADATA_TYPES' ? '{!$Label.OrgCheck_CustomMetadataTypes_CL}' : 
                                               (type === 'CUSTOM_EVENTS' ? 'Platform Events' :
                                               (type === 'KNOWLEDGE_ARTICLES' ? 'Knowledge Articles' :
-                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : 'All types'))))))));
+                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : '{!$Label.OrgCheck_AllTypes_CL}'))))))));
                             const html = 
                                 'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
                                 'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
@@ -246,8 +246,8 @@
                                 helper.html.datatable.create({
                                     element: 'datatable-general',
                                     columns: [
-                                        { name: 'Information', property: 'key' },
-                                        { name: 'Value', formula: (r) => { 
+                                        { name: '{!$Label.OrgCheck_Label_CL}', property: 'key' },
+                                        { name: '{!$Label.OrgCheck_Value_CL}', formula: (r) => { 
                                             if (r.type === 'checkbox') {
                                                 return helper.html.render.checkbox(r.value);
                                             }
@@ -255,7 +255,7 @@
                                         }}
                                     ],
                                     data: [
-                                        { key: 'Description', value: object.description },
+                                        { key: '{!$Label.OrgCheck_Description_CL}', value: object.description },
                                         { key: 'API Name', value: object.name },
                                         { key: 'Singular Label', value: object.label },
                                         { key: 'Plural Label ', value: object.labelPlural },
@@ -279,7 +279,7 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
                                         columns: [
-                                            { name: 'Field Label', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_Label_CL}', formula: (r) => { 
                                                 return helper.html.render.link(
                                                     '/lightning/setup/ObjectManager/'+
                                                     (object.id ? object.id : helper.html.render.escape(object.name))+
@@ -288,23 +288,23 @@
                                                     '/view', 
                                                     helper.html.render.escape(r.label)); 
                                             }},
-                                            { name: 'Custom', property: 'custom', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'custom', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.custom); 
                                             }},
-                                            { name: 'Full API Name', property: 'name' },
-                                            { name: 'Using', type: 'numeric', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_FullApiName_CL}', property: 'name' },
+                                            { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
                                                     if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: 'Used in', type: 'numeric', 
+                                            { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
                                                         const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
                                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                        return 'Not used!';
+                                                        return '{!$Label.OrgCheck_NotUsed_CL}';
                                                     }
                                                 },
                                                 scoreFormula: (r) => { 
@@ -334,18 +334,18 @@
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: 'Dependencies', 
+                                            { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
                                                         const dep = object.fieldDependencies[r.id]; 
                                                         if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                                        return 'No dependency';
+                                                        return '{!$Label.OrgCheck_NoDependency_CL}';
                                                     }
                                                 }
                                             },
 
                                             { name: 'Tooltip', property: 'inlineHelpText' },
-                                            { name: 'Type', formula: (r) => {
+                                            { name: '{!$Label.OrgCheck_Type_CL}', formula: (r) => {
                                                 let type = r.type;
                                                 switch (r.type) {
                                                     case 'int':
@@ -370,14 +370,14 @@
                                                 return type;
                                             }},
                                             { name: 'Length', type: 'numeric', property: 'length' },
-                                            { name: 'Encr.', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
+                                            { name: '{!$Label.OrgCheck_Encrypted_CL}', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
                                             { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
-                                            { name: 'ExtID', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
-                                            { name: 'Default', property: 'defaultValue' },
-                                            { name: 'Formula', property: 'calculatedFormula' }
+                                            { name: '{!$Label.OrgCheck_ExternalId_CL}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: '{!$Label.OrgCheck_Default_CL}', property: 'defaultValue' },
+                                            { name: '{!$Label.OrgCheck_Formula_CL}', property: 'calculatedFormula' }
                                         ],
                                         data: object.fields,
-                                        sorting: { name: 'Field Label', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Label_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -393,9 +393,9 @@
                                         element: 'datatable-relationships',
                                         columns: [
                                             { name: 'Relationship Name', property: 'relationshipName' },
-                                            { name: 'Child SObject', property: 'childSObject' },
-                                            { name: 'Field', property: 'field' },
-                                            { name: 'Cascade Delete', property: 'cascadeDelete', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_ChildObject_CL}', property: 'childSObject' },
+                                            { name: '{!$Label.OrgCheck_Field_CL}', property: 'field' },
+                                            { name: '{!$Label.OrgCheck_CascadeDelete_CL}', property: 'cascadeDelete', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.cascadeDelete); 
                                             }}
                                         ],
@@ -415,20 +415,20 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-recordtypes',
                                         columns: [
-                                            { name: 'Name', property: 'name' },
-                                            { name: 'Developer Name', property: 'developerName' },
+                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
+                                            { name: '{!$Label.OrgCheck_DeveloperName_CL}', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: 'IsActive', property: 'active', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'active', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.active); 
                                             }},
-                                            { name: 'Available', property: 'available', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_Available_CL}', property: 'available', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.available); 
                                             }},
-                                            { name: 'Default Mapping', property: 'defaultRecordTypeMapping' }
+                                            { name: '{!$Label.OrgCheck_DefaultMapping_CL}', property: 'defaultRecordTypeMapping' }
                                         ],
                                         data: object.recordTypeInfos,
-                                        sorting: { name: 'Name', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -444,10 +444,10 @@
                                         element: 'datatable-apexTriggers',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Name', property: 'name' }
+                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' }
                                         ],
                                         data: object.apexTriggers,
-                                        sorting: { name: 'Name', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -464,7 +464,7 @@
                                         columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Master Label', property: 'label' },
-                                            { name: 'Description', property: 'description' }
+                                            { name: '{!$Label.OrgCheck_Description_CL}', property: 'description' }
                                         ],
                                         data: object.fieldSets,
                                         sorting: { name: 'Master Label', order: 'asc' },
@@ -483,11 +483,11 @@
                                         element: 'datatable-layouts',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Name', property: 'name' },
-                                            { name: 'Type', property: 'type' }
+                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
+                                            { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' }
                                         ],
                                         data: object.layouts,
-                                        sorting: { name: 'Name', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -503,8 +503,8 @@
                                         element: 'datatable-limits',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Label', property: 'label' },
-                                            { name: '% used', type: 'numeric', formula: (r) => { 
+                                            { name: '{!$Label.OrgCheck_Label_CL}', property: 'label' },
+                                            { name: '{!$Label.OrgCheck_PercentageUsed_CL}', type: 'numeric', formula: (r) => { 
                                                 const percentageUsed = (r.max - r.remaining) / r.max;
                                                 const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
                                                 return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
@@ -514,10 +514,10 @@
                                             }},
                                             { name: 'Maximum', type: 'numeric', property: 'max' },
                                             { name: 'Left', type: 'numeric', property: 'remaining' },
-                                            { name: 'Type', property: 'type' }
+                                            { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' }
                                         ],
                                         data: object.limits,
-                                        sorting: { name: 'Label', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Label_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false
                                     });
@@ -532,14 +532,14 @@
                                         element: 'datatable-validationRules',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Name', property: 'name' },
-                                            { name: 'Active', property: 'isActive' },
-                                            { name: 'Description', property: 'description' },
-                                            { name: 'ErrorDisplayField', property: 'errorDisplayField' },
-                                            { name: 'ErrorMessage', property: 'errorMessage' }
+                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
+                                            { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive' },
+                                            { name: '{!$Label.OrgCheck_Description_CL}', property: 'description' },
+                                            { name: '{!$Label.OrgCheck_Field_CL}', property: 'errorDisplayField' },
+                                            { name: '{!$Label.OrgCheck_ErrorMessage_CL}', property: 'errorMessage' }
                                         ],
                                         data: object.validationRules,
-                                        sorting: { name: 'Name', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -555,10 +555,10 @@
                                         element: 'datatable-webLinks',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Name', property: 'name' }
+                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' }
                                         ],
                                         data: object.webLinks,
-                                        sorting: { name: 'Name', order: 'asc' },
+                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -600,14 +600,14 @@
                             helper.html.datatable.create({
                                 element: 'datatable-orgWideDefaults',
                                 columns: [
-                                    { name: 'Label', property: 'label' },
-                                    { name: 'Name', property: 'name' },
-                                    { name: 'Package', property: 'package' },
-                                    { name: 'Internal', property: 'internal' },
-                                    { name: 'External', property: 'external' }
+                                    { name: '{!$Label.OrgCheck_Label_CL}', property: 'label' },
+                                    { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
+                                    { name: '{!$Label.OrgCheck_Internal_CL}', property: 'internal' },
+                                    { name: '{!$Label.OrgCheck_External_CL}', property: 'external' }
                                 ],
                                 data: map.orgWideDefaults,
-                                sorting: { name: 'Object', order: 'asc' },
+                                sorting: { name: '{!$Label.OrgCheck_Object_CL}', order: 'asc' },
                                 showSearch: false,
                                 showStatistics: false,
                                 showLineCount: true

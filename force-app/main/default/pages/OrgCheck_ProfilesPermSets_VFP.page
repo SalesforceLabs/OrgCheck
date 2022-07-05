@@ -77,43 +77,43 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'isCustom', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isCustom); 
                                     }},
-                                    { name: 'License', property: 'license' },
-                                    { name: 'User Type', property: 'userType' },
-                                    { name: 'Package', property: 'package' },
-                                    { name: 'Number of active users', 
+                                    { name: '{!$Label.OrgCheck_License_CL}', property: 'license' },
+                                    { name: '{!$Label.OrgCheck_UserType_CL}', property: 'userType' },
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
+                                    { name: '{!$Label.OrgCheck_NbActiveUsers_CL}', 
                                         formula: (r) => { 
-                                            if (r.isUnusedCustom === true) return 'No user for this custom profile!'; 
-                                            if (r.membersCount < 101) return r.membersCount + ' user' + (r.membersCount>1?'s':'');
-                                            return 'More than 100 users';
+                                            if (r.isUnusedCustom === true) return '{!$Label.OrgCheck_NoUserForThisProfile_CL}'; 
+                                            if (r.membersCount < 101) return helper.render.format('{!$Label.OrgCheck_XUsers_CL}', r.membersCount);
+                                            return '{!$Label.OrgCheck_More100Users_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUnusedCustom === true) return 1;
                                         }
                                     },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
-                                            if (r.isUndescribedCustom === true) return 'You should set a description to this custom profile!';
+                                            if (r.isUndescribedCustom === true) return '{!$Label.OrgCheck_SetADescription_CL}';
                                             return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.profiles,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -125,22 +125,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Profile_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         );
                                     }},
-                                    { name: 'Monday', formula: (r) => { return r.loginHours.monday ? r.loginHours.monday.from + ' to ' + r.loginHours.monday.to : '' }},
-                                    { name: 'Tuesday', formula: (r) => { return r.loginHours.tuesday ? r.loginHours.tuesday.from + ' to ' + r.loginHours.tuesday.to : '' }},
-                                    { name: 'Wednesday', formula: (r) => { return r.loginHours.wednesday ? r.loginHours.wednesday.from + ' to ' + r.loginHours.wednesday.to : '' }},
-                                    { name: 'Thursday', formula: (r) => { return r.loginHours.thursday ? r.loginHours.thursday.from + ' to ' + r.loginHours.thursday.to : '' }},
-                                    { name: 'Friday', formula: (r) => { return r.loginHours.friday ? r.loginHours.friday.from + ' to ' + r.loginHours.friday.to : '' }},
-                                    { name: 'Saturday', formula: (r) => { return r.loginHours.saturday ? r.loginHours.saturday.from + ' to ' + r.loginHours.saturday.to : '' }},
-                                    { name: 'Sunday', formula: (r) => { return r.loginHours.sunday ? r.loginHours.sunday.from + ' to ' + r.loginHours.sunday.to : '' }},
+                                    { name: '{!$Label.OrgCheck_Monday_CL}', formula: (r) => { return r.loginHours.monday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.monday.from, r.loginHours.monday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Tuesday_CL}', formula: (r) => { return r.loginHours.tuesday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.tuesday.from,  r.loginHours.tuesday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Wednesday_CL}', formula: (r) => { return r.loginHours.wednesday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.wednesday.from,  r.loginHours.wednesday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Thursday_CL}', formula: (r) => { return r.loginHours.thursday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.thursday.from,  r.loginHours.thursday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Friday_CL}', formula: (r) => { return r.loginHours.friday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.friday.from, r.loginHours.friday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Saturday_CL}', formula: (r) => { return r.loginHours.saturday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.saturday.from,  r.loginHours.saturday.to) : '' }},
+                                    { name: '{!$Label.OrgCheck_Sunday_CL}', formula: (r) => { return r.loginHours.sunday ? helper.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.sunday.from,  r.loginHours.sunday.to) : '' }},
                                 ],
                                 data: map.profileLoginRestrictions,
-                                sorting: { name: 'Profile', order: 'asc' },
+                                sorting: { name: 'OrgCheck_Profile_CL', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
@@ -153,30 +153,30 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
-                                    { name: 'Profile', formula: (r) => { 
+                                    { name: 'OrgCheck_Profile_CL', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Starts', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Starts_CL}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
                                         return html;
                                     }},
-                                    { name: 'Ends', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Ends_CL}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.endAddress + '<br />');
                                         return html;
                                     }},
-                                    { name: 'Description', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Description_CL}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += helper.html.render.escape(i.description) + '<br />');
                                         return html;
                                     }}
                                 ],
                                 data: map.profileLoginRestrictions,
-                                sorting: { name: 'Profile', order: 'asc' },
+                                sorting: { name: 'OrgCheck_Profile_CL', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
@@ -202,7 +202,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
                                 columns: [
-                                    { name: 'Name', 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', 
                                         formula: (r) => { 
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
@@ -210,28 +210,28 @@
                                             ); 
                                         }
                                     },
-                                    { name: 'Is Group?', property: 'isGroup', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_IsGroup_CL}', property: 'isGroup', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isGroup); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Custom', property: 'isCustom', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'isCustom', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isCustom); 
                                     }},
-                                    { name: 'License', property: 'license' },
-                                    { name: 'Package', property: 'package' },
-                                    { name: 'Number of active users', 
+                                    { name: '{!$Label.OrgCheck_License_CL}', property: 'license' },
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
+                                    { name: '{!$Label.OrgCheck_NbActiveUsers_CL}', 
                                         formula: (r) => { 
                                             if (r.isUnusedCustom === true) return 'No user for this custom permission set!'; 
                                             const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
-                                            if (membersCount < 101) return membersCount + ' user' + (membersCount>1?'s':'');
-                                            return 'More than 100 users';
+                                            if (membersCount < 101) return helper.render.format('{!$Label.OrgCheck_XUsers_CL}', membersCount);                                            
+                                            return '{!$Label.OrgCheck_More100Users_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUnusedCustom === true) return 1;
                                         }
                                     },
 
-                                    { name: 'Assigned users\'s profiles', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_AssignedUsersProfiles_CL}', formula: (r) => { 
                                         let html = '';
                                         helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
                                             html += helper.html.render.link(
@@ -240,20 +240,20 @@
                                         });
                                         return html;
                                     }},
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
-                                            if (r.isUndescribedCustom === true) return 'You should set a description to this custom permission set!';
+                                            if (r.isUndescribedCustom === true) return '{!$Label.OrgCheck_SetADescription_CL}';
                                             return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.permissionSets,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -264,27 +264,20 @@
                             // -------------------------------------------
                             if (PREF_HIDE_CRUDS === true) {
                                 const divCRUDs = helper.html.element.get('legend-objectCRUDs');
-                                divCRUDs.innerHTML = '<br /><br />This page is showing (as a first <b>beta</b> version) a tabular view of all '+
-                                                        'CRUDs for each Profile/PermSet and Objects.<br /><br />'+
-                                                     'As this (beta) approach could be time consuming when loading the page, we disabled '+
-                                                        'this feature by default.<br /><br />'+
-                                                     'If you want to test this feature, go to the home page and unselect the preference '+
-                                                        '<b><code>Do not fetch the CRUDs on profiles and permission sets</code></b>.<br /><br />'+
-                                                     'In the future, this page will let you select the profile/permission set and/or the objects '+
-                                                        'before retrieving the data.<br /><br />';
+                                divCRUDs.innerHTML = '{!$Label.OrgCheck_CRUDMessage_CL}';
                             } else {
                                 helper.html.datatable.create({
                                     element: 'datatable-objectCRUDs',
                                     columns: [
-                                        { name: 'Parent', formula: (r) => { 
+                                        { name: '{!$Label.OrgCheck_Parent_CL}', formula: (r) => { 
                                             return helper.html.render.link(
                                                 '/'+r.parent.id, 
                                                 helper.html.render.escape(r.parent.name)
                                             ); 
                                         }},
-                                        { name: 'Object', property: 'sobject' },
-                                        { name: 'Type', property: 'type' },
-                                        { name: 'Permissions', formula: (r) => { 
+                                        { name: '{!$Label.OrgCheck_Object_CL}', property: 'sobject' },
+                                        { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' },
+                                        { name: '{!$Label.OrgCheck_Permissions_CL}', formula: (r) => { 
                                             let html = '';
                                             if (r.permissions.create === true) html += 'C';
                                             if (r.permissions.read === true) html += 'R';
@@ -296,7 +289,7 @@
                                         }}
                                     ],
                                     data: map.objectCRUDs,
-                                    sorting: { name: 'Object', order: 'asc' },
+                                    sorting: { name: '{!$Label.OrgCheck_Object_CL}', order: 'asc' },
                                     showSearch: true,
                                     showStatistics: true,
                                     showLineCount: true

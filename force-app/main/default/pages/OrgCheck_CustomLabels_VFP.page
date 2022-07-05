@@ -26,31 +26,31 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Namespace', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
-                                    { name: 'Category', property: 'category' },
+                                    { name: '{!$Label.OrgCheck_Category_CL}', property: 'category' },
                                     { name: 'IsProtected', property: 'protected' },
                                     { name: 'Language', property: 'language' },
-                                    { name: 'Value', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Value_CL}', formula: (r) => { 
                                         return helper.html.render.escape(helper.html.render.shrinkText(r.value, 100)); 
                                     }},
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -66,16 +66,16 @@
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     }
                                 ],
                                 data: map.customLabels,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true

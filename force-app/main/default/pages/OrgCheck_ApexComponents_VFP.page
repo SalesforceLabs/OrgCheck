@@ -16,21 +16,21 @@
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
-                        <span class="slds-assistive-text">Compile all</span>
+                        <span class="slds-assistive-text">{!$Label.OrgCheck_CompileAll_CL}</span>
                     </button>
                 </a>
             </div>
             <div class="slds-page-header__control">
                 <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank" rel="external noopener noreferrer">
-                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
+                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_UnitTests_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#like')}"></use>
                         </svg>
-                        <span class="slds-assistive-text">Unit Tests</span>
+                        <span class="slds-assistive-text">{!$Label.OrgCheck_UnitTests_CL}</span>
                     </button>
                 </a>
             </div>
@@ -38,14 +38,14 @@
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Classes" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">Classes</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Classes_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Triggers" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">Triggers</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Triggers_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Object's triggers count" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">Object's triggers count</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
@@ -80,37 +80,35 @@
                             helper.html.datatable.create({
                                 element: 'datatable-classes',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Status', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_Status_CL}', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
-                                                return 'Recompile!';
                                             }
-                                            return 'OK';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.needsRecompilation === true) return 1; 
                                         }
                                     },
-                                    { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abst.?', property: 'isAbstract', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Access_CL}', property: 'specifiedAccess' },
+                                    { name: '{!$Label.OrgCheck_IsAbstract_CL}', property: 'isAbstract', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isAbstract); 
                                     }},
-                                    { name: 'Type', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Type_CL}', formula: (r) => { 
                                         if (r.isInterface === true) return 'Interface';
                                         if (r.isEnum === true) return 'Enum';
                                         if (r.isClass === true) return 'Class';
                                         return 'Other';
                                     }},
-                                    { name: 'Implements', formula: (r) => {
+                                    { name: '{!$Label.OrgCheck_Implements_CL}', formula: (r) => {
                                         let html = ''; 
                                         if (r.interfaces) { 
                                             r.interfaces.forEach(
@@ -119,10 +117,10 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Size', type: 'numeric', property: 'length' },
-                                    { name: 'Methods', type: 'numeric', property: 'methodsCount' },
-                                    { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
-                                    { name: 'Annot.', formula: (r) => {
+                                    { name: '{!$Label.OrgCheck_Size_CL}', type: 'numeric', property: 'length' },
+                                    { name: '{!$Label.OrgCheck_Methods_CL}', type: 'numeric', property: 'methodsCount' },
+                                    { name: '{!$Label.OrgCheck_InnerClasses_CL}', type: 'numeric', property: 'innerClassesCount' },
+                                    { name: '{!$Label.OrgCheck_Annotations_CL}', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { 
                                             r.annotations.forEach(
@@ -131,24 +129,24 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Sharing', property: 'specifiedSharing', 
+                                    { name: '{!$Label.OrgCheck_Sharing_CL}', property: 'specifiedSharing', 
                                         formula: (r) => {
-                                            if (r.isSharingMissing === true) return 'Not specified!';
-                                            if (r.specifiedSharing === 'n/a') return 'Not Applicable';
+                                            if (r.isSharingMissing === true) return '{!$Label.OrgCheck_NotSpecified_CL}';
+                                            if (r.specifiedSharing === 'n/a') return '{!$Label.OrgCheck_NotApplicable_CL}';
                                             return helper.html.render.escape(r.specifiedSharing);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isSharingMissing === true) return 1; 
                                         }
                                     },
-                                    { name: 'Coverage', type: 'numeric', property: 'coverage', 
+                                    { name: '{!$Label.OrgCheck_CodeCverage_CL}', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
                                             if (r.isClass === true) {
                                                 if (r.coverage || r.coverage === 0) return helper.html.render.percentage(r.coverage);
                                                 cntClsNoCoverage++;
-                                                return 'No coverage data';
+                                                return '{!$Label.OrgCheck_NoData_CL}';
                                             }
-                                            return 'Not Applicable';
+                                            return '{!$Label.OrgCheck_NotApplicable_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) {
@@ -157,7 +155,7 @@
                                             }
                                         }
                                     },
-                                    { name: 'Related Tests',
+                                    { name: '{!$Label.OrgCheck_RelatedTests_CL}',
                                         formula: (r) => {
                                             let html = ''; 
                                             if (r.relatedTestClasses) { 
@@ -171,33 +169,33 @@
                                             return html;
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!$Label.OrgCheck_NotUsed_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexClasses,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
                                 showSearch: true,
                                 showStatistics: true,
@@ -235,20 +233,20 @@
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ApiVersion_CL}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Active', property: 'isActive', 
+                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
                                         },
@@ -256,12 +254,12 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
-                                    { name: 'Size', type: 'numeric', property: 'length',
+                                    { name: '{!$Label.OrgCheck_Size_CL}', type: 'numeric', property: 'length',
                                         scoreFormula: (r) => { 
                                             if (r.length > 5000) return 1;
                                         }
                                     },
-                                    { name: 'Contains SOQL', property: 'hasSOQL',
+                                    { name: '{!$Label.OrgCheck_ContainsSoql_CL}', property: 'hasSOQL',
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.hasSOQL); 
                                         },
@@ -269,7 +267,7 @@
                                             if (r.hasSOQL === true) return 1;
                                         }
                                     },
-                                    { name: 'Contains DML', property: 'hasDML',
+                                    { name: '{!$Label.OrgCheck_ContainsDml_CL}', property: 'hasDML',
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.hasDML); 
                                         },
@@ -277,7 +275,7 @@
                                             if (r.hasDML === true) return 1;
                                         }
                                     },
-                                    { name: 'SObject', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Object_CL}', formula: (r) => { 
                                         const objId = r.sobject;
                                         const objName = map.objects[objId]?.label;
                                         // ---
@@ -293,28 +291,28 @@
                                         // ---
                                         return helper.html.render.escape(objName);
                                     }},
-                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { 
+                                    { name: '*Insert', property: 'beforeInsert', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeInsert); 
                                     }},
-                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { 
+                                    { name: 'Insert*', property: 'afterInsert', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterInsert); 
                                     }},
-                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { 
+                                    { name: '*Update', property: 'beforeUpdate', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeUpdate); 
                                     }},
-                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { 
+                                    { name: 'Update*', property: 'afterUpdate', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterUpdate); 
                                     }},
-                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { 
+                                    { name: '*Delete', property: 'beforeDelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeDelete); 
                                     }},
-                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { 
+                                    { name: 'Delete*', property: 'afterDelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterDelete); 
                                     }},
-                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { 
+                                    { name: 'Undelete*', property: 'afterUndelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterUndelete); 
                                     }},
-                                    { name: 'Annotations', formula: (r) => {
+                                    { name: '{!$Label.OrgCheck_Annotations_CL}', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { 
                                             r.annotations.forEach(
@@ -323,23 +321,23 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Dependencies', 
+                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!$Label.OrgCheck_NoDependency_CL}';
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexTriggers,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -349,17 +347,17 @@
                             helper.html.datatable.create({
                                 element: 'datatable-objtriggercounts',
                                 columns: [
-                                    { name: 'Name', property: 'object' },
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Active triggers', type: 'numeric', property: 'activeTriggerCount', 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', property: 'object' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_ActiveTriggers_CL}', type: 'numeric', property: 'activeTriggerCount', 
                                         scoreFormula: (r) => { 
                                             if (r.activeTriggerCount > 1) return 1; 
                                         }
                                     },
-                                    { name: 'Deactive triggers', type: 'numeric', property: 'deactiveTriggerCount' }                                            
+                                    { name: '{!$Label.OrgCheck_UnactiveTriggers_CL}', type: 'numeric', property: 'deactiveTriggerCount' }                                            
                                 ],
                                 data: objectTriggersCountMap,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true

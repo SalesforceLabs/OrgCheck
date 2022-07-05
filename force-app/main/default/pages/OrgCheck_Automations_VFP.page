@@ -52,23 +52,23 @@
                             helper.html.datatable.create({
                                 element: 'datatable-workflows',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Workflow!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Active', property: 'isActive', 
+                                    { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
                                         },
@@ -76,7 +76,7 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
-                                    { name: 'Actions', 
+                                    { name: '{!$Label.OrgCheck_Actions_CL}', 
                                         formula: (r) => { 
                                             if (r.noAction === true) {
                                                 return 'No direct action!<br />';
@@ -100,11 +100,11 @@
                                             if (r.noAction === true) return 1; 
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.workflows,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -113,21 +113,21 @@
                             helper.html.datatable.create({
                                 element: 'datatable-processbuilders',
                                 columns: [
-                                    { name: 'Flow', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Flow_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.definitionId, 
                                             helper.html.render.escape(r.definitionName)
                                         ); 
                                     }},
-                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_FlowVersion_CL}', type: 'numeric', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Version', type: 'numeric', property: 'version' },
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Active', property: 'isActive', 
+                                    { name: '{!$Label.OrgCheck_Version_CL}', type: 'numeric', property: 'version' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
                                         },
@@ -135,25 +135,25 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
-                                    { name: 'Object', property: 'sobject' },
+                                    { name: '{!$Label.OrgCheck_Object_CL}', property: 'sobject' },
                                     { name: 'Trigger', property: 'triggerType' },
-                                    { name: 'DML Creates', property: 'dmlCreates' },
-                                    { name: 'DML Deletes', property: 'dmlDeletes' },
-                                    { name: 'DML Updates', property: 'dmlUpdates' },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_DmlCreates_CL}', property: 'dmlCreates' },
+                                    { name: '{!$Label.OrgCheck_DmlDeletes_CL}', property: 'dmlDeletes' },
+                                    { name: '{!$Label.OrgCheck_DmlUpdates_CL}', property: 'dmlUpdates' },
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Process Builder!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.flows,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'Workflow' }},
                                 showSearch: true,
                                 showStatistics: true,
@@ -163,22 +163,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-flows',
                                 columns: [
-                                    { name: 'Flow', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Flow_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.definitionId, 
                                             helper.html.render.escape(r.definitionName)
                                         ); 
                                     }},
-                                    { name: 'FlowVersion', type: 'numeric', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_FlowVersion_CL}', type: 'numeric', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Version', type: 'numeric', property: 'version' },
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Type', property: 'type' }, 
-                                    { name: 'Active', property: 'isActive', 
+                                    { name: '{!$Label.OrgCheck_Version_CL}', type: 'numeric', property: 'version' },
+                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
+                                    { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' }, 
+                                    { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
                                         },
@@ -186,20 +186,20 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
-                                    { name: 'Description', 
+                                    { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return 'You should set a description to this Flow!';
+                                            return '{!$Label.OrgCheck_SetADescription_CL};
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: 'Created', type: 'datetime', property: 'createdDate' },
-                                    { name: 'Modified', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.flows,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type !== 'Workflow' }},
                                 showSearch: true,
                                 showStatistics: true,
