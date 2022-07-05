@@ -132,7 +132,7 @@
                         // Show alert about too many number of levels in the hierarchy
                         const MAX_LEVEL_DEPTH_ROLES = 7;
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
-                            const html = helper.render.format('{!$Label.OrgCheck_TooManyRoles_CL}', MAX_LEVEL_DEPTH_ROLES, mdepth);
+                            const html = helper.html.render.format('{!$Label.OrgCheck_TooManyRoles_CL}', MAX_LEVEL_DEPTH_ROLES, mdepth);
                             helper.html.modal.show('{!$Label.OrgCheck_TooManyLevels_CL}', html);
                             helper.html.message.show(html);
                         }
@@ -380,7 +380,7 @@
                                         formula: (r) => {
                                             if (r.hasActiveMembers == false) return '{!$Label.OrgCheck_NoActiveMember_CL}';   
                                             if (r.activeMembersCount == 1) return '{!$Label.OrgCheck_OneActiveMember_CL}';
-                                            return helper.render.format('{!$Label.OrgCheck_XActiveMembers_CL}', r.activeMembersCount);
+                                            return helper.html.render.format('{!$Label.OrgCheck_XActiveMembers_CL}', r.activeMembersCount);
                                         },
                                         scoreFormula: (r) => {
                                             if (r.hasActiveMembers == false) return 1;
@@ -390,7 +390,7 @@
                                         formula: (r) => {
                                             if (r.hasInactiveMembers === false) return '{!$Label.OrgCheck_NoInactiveMember_CL}';
                                             if (r.inactiveMembersCount == 1) return '{!$Label.OrgCheck_OneInactiveMember_CL}';
-                                            return helper.render.format('{!$Label.OrgCheck_XInactiveMembers_CL}', r.inactiveMembersCount);
+                                            return helper.html.render.format('{!$Label.OrgCheck_XInactiveMembers_CL}', r.inactiveMembersCount);
                                             ;                                
                                         },
                                         scoreFormula: (r) => {

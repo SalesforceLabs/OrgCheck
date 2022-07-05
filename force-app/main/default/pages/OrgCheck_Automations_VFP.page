@@ -189,7 +189,7 @@
                                     { name: '{!$Label.OrgCheck_Description_CL}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return '{!$Label.OrgCheck_SetADescription_CL};
+                                            return '{!$Label.OrgCheck_SetADescription_CL}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 

@@ -61,7 +61,7 @@
                         if (!uids || (uids && uids.length == 0)) {
                             return '(empty)';
                         }
-                        let htmlContent = '<b>' + helper.render.format('{!$Label.OrgCheck_XUsers_CL}', uids.length) + '</b><br />';
+                        let htmlContent = '<b>' + helper.html.render.format('{!$Label.OrgCheck_XUsers_CL}', uids.length) + '</b><br />';
                         htmlContent += '<ul class="slds-list_dotted">';
                         for (let i=0; i<uids.length; i++) {
                             htmlContent += '<li>' + renderUser(users, uids[i].id, show_photo) + '</li>';
