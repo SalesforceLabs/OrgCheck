@@ -1496,6 +1496,10 @@
                         }
                     },
                     render: {
+                        format: function(label, ...parameters) {
+                            if (label) return label.replace(/{(\d+)}/g, (m, n) => { return parameters[n] ? parameters[n] : m; });
+                            return '';
+                        },
                         escape: function(unsafe) { 
                             return private_secure_html(unsafe); 
                         },

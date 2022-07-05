@@ -1,0 +1,230 @@
+"<?xml version=""1.0"" encoding=""UTF-8""?>
+<Translations xmlns=""http://soap.sforce.com/2006/04/metadata"">"
+"<customLabels><name>OrgCheck_Automations_Description_CL</name><label>.</label></customLabels>
+<customLabels><name>OrgCheck_Batches_Description_CL</name><label>.</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Text2_CL</name><label> &lt;b&gt;Problèmes ou nouvelles idées?&lt;&#x2F;b&gt;&lt;br &#x2F;&gt; Suivez-les à&lt;br &#x2F;&gt; &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;sfdc.co&#x2F;orgcheck-backlog&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;sfdc.co&#x2F;orgcheck-backlog&lt;&#x2F;a&gt; &lt;br &#x2F;&gt; &lt;br &#x2F;&gt; &lt;b&gt;Vous voulez discuter avec d&#39;autres utilisateurs?&lt;&#x2F;b&gt;&lt;br &#x2F;&gt; Veuillez vous joindre à nous sur Slack avec ça &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;sfdc.co&#x2F;orgcheck-community&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;invitation&lt;&#x2F;a&gt; &lt;br &#x2F;&gt; &lt;br &#x2F;&gt; &lt;b&gt;Médias sociaux&lt;&#x2F;b&gt;&lt;br &#x2F;&gt; Aimez et partagez des messages sur &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;www.linkedin.com&#x2F;company&#x2F;orgchecksfdc&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;LinkedIn&lt;&#x2F;a&gt; et sur &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;twitter.com&#x2F;orgchecksfdf&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;Twitter&lt;&#x2F;a&gt; !&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Text3_CL</name><label> &lt;b&gt;OrgCheck est gratuit, mais n&#39;est pas un produit officiel Salesforce.&lt;&#x2F;b&gt; Orgcheck n&#39;a pas été officiellementtesté ou documenté. Le support Salesforce n&#39;est pas disponible pour orgcheck. Demandes d&#39;assistance pour orgcheckdevrait être dirigé vers GitHub sur &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;github.com&#x2F;vincefinet&#x2F;orgcheck&#x2F;issues&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;vincefinet&#x2F;orgcheck&#x2F;issues&lt;&#x2F;a&gt; .Le code source pour orgcheck peut être trouvé sur &lt;a href&#x3D;&quot;https:&#x2F;&#x2F;github.com&#x2F;vincefinet&#x2F;orgcheck&quot; target&#x3D;&quot;_blank&quot; rel&#x3D;&quot;external noopener noreferrer&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;vincefinet&#x2F;orgcheck&lt;&#x2F;a&gt; Selon des conditions de licence distinctes et différentes.</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Text2_CL</name><label>&lt;br &#x2F;&gt; Ma vision de cet outil était (et l&#39;est toujours):&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;L&#39;outil doit fonctionner sur un org Salesforce: facile à installer et facile à utiliser&lt;&#x2F;li&gt;&lt;li&gt;Aucun logiciel ou plate-forme supplémentaire&lt;&#x2F;li&gt;&lt;li&gt;Pas besoin d&#39;avoir un employé de Salesforce avec son accès magique&lt;&#x2F;li&gt;&lt;li&gt;Le code de l&#39;application est disponible, vous pouvez le modifier, si vous en avez besoin&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_CRUDMessage_CL</name><label>&lt;br &#x2F;&gt; Cette page affiche (en première version bêta) une vue tabulaire de tous les cruds pour chaque profil &#x2F; permset et objets.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Comme cette approche (bêta) pourrait prendre du temps lors du chargement de la page, nous avons désactivé cette fonction par défaut.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Si vous souhaitez tester cette fonctionnalité, accédez à la page d&#39;accueil et non, non, la préférence ne va pas récupérer les cruds sur les profils et les ensembles d&#39;autorisation&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Dans le futur, cette page vous permettra de sélectionner le (s) profil &#x2F; s) et &#x2F; ou les objets avant de récupérer les données.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_XActiveMembers_CL</name><label>{0} membres actifs</label></customLabels>
+<customLabels><name>OrgCheck_XInactiveMembers_CL</name><label>{0} membres inactifs</label></customLabels>
+<customLabels><name>OrgCheck_XtoY_CL</name><label>{0} à {1}</label></customLabels>
+<customLabels><name>OrgCheck_XUsers_CL</name><label>{0} utilisateur (s)</label></customLabels>
+<customLabels><name>OrgCheck_PercentageUsed_CL</name><label>% utilisé</label></customLabels>
+<customLabels><name>OrgCheck_OneActiveMember_CL</name><label>1 membre actif</label></customLabels>
+<customLabels><name>OrgCheck_OneInactiveMember_CL</name><label>1 membre inactif</label></customLabels>
+<customLabels><name>OrgCheck_OneUser_CL</name><label>1 utilisateur</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Subtitle1_CL</name><label>Sur la dette technique</label></customLabels>
+<customLabels><name>OrgCheck_Access_CL</name><label>Accéder</label></customLabels>
+<customLabels><name>OrgCheck_Actions_CL</name><label>Actions</label></customLabels>
+<customLabels><name>OrgCheck_ActiveTriggers_CL</name><label>Déclencheurs actifs</label></customLabels>
+<customLabels><name>OrgCheck_Users_Subtitle_CL</name><label>Présentation du profil et des autorisations des utilisateurs actifs</label></customLabels>
+<customLabels><name>OrgCheck_AllActiveUsers_CL</name><label>Tous les utilisateurs actifs</label></customLabels>
+<customLabels><name>OrgCheck_AllTypes_CL</name><label>Tous les types</label></customLabels>
+<customLabels><name>OrgCheck_Analytics_Title_CL</name><label>Composants analytiques</label></customLabels>
+<customLabels><name>OrgCheck_Analytics_Subtitle_CL</name><label>Présentation des composants analytiques</label></customLabels>
+<customLabels><name>OrgCheck_Annotations_CL</name><label>Annotations</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Title_CL</name><label>Classes et déclencheurs Apex</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Subtitle_CL</name><label>Aperçu des classes et déclencheurs Apex</label></customLabels>
+<customLabels><name>OrgCheck_ApexContext_CL</name><label>Contexte de l&#39;apex</label></customLabels>
+<customLabels><name>OrgCheck_ApexTriggers_CL</name><label>Déclencheurs Apex</label></customLabels>
+<customLabels><name>OrgCheck_ApiVersion_CL</name><label>Version API</label></customLabels>
+<customLabels><name>OrgCheck_APIEnabled_CL</name><label>API activé</label></customLabels>
+<customLabels><name>OrgCheck_AssignedUsersProfiles_CL</name><label>Profils des utilisateurs attribués</label></customLabels>
+<customLabels><name>OrgCheck_Automations_Title_CL</name><label>Automatisation</label></customLabels>
+<customLabels><name>OrgCheck_Available_CL</name><label>Disponible</label></customLabels>
+<customLabels><name>OrgCheck_Batches_Title_CL</name><label>Lots</label></customLabels>
+<customLabels><name>OrgCheck_Batches_Subtitle_CL</name><label>Présentation des lots</label></customLabels>
+<customLabels><name>OrgCheck_CascadeDelete_CL</name><label>Cascade Supprimer</label></customLabels>
+<customLabels><name>OrgCheck_Category_CL</name><label>Catégorie</label></customLabels>
+<customLabels><name>OrgCheck_ChildObject_CL</name><label>Objet enfant</label></customLabels>
+<customLabels><name>OrgCheck_Classes_CL</name><label>Des classes</label></customLabels>
+<customLabels><name>OrgCheck_ClassicUI_CL</name><label>Classique</label></customLabels>
+<customLabels><name>OrgCheck_Clear_CL</name><label>Dégager</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Subtitle2_CL</name><label>Code</label></customLabels>
+<customLabels><name>OrgCheck_CompileAll_CL</name><label>Compiler tout</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Title_CL</name><label>Outils complémentaires</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section5_Title_CL</name><label>Connexion avec l&#39;organisation</label></customLabels>
+<customLabels><name>OrgCheck_ContainsDml_CL</name><label>Contient dml</label></customLabels>
+<customLabels><name>OrgCheck_ContainsSoql_CL</name><label>Contient SOQL</label></customLabels>
+<customLabels><name>OrgCheck_Count_CL</name><label>Compter</label></customLabels>
+<customLabels><name>OrgCheck_CodeCverage_CL</name><label>Couverture</label></customLabels>
+<customLabels><name>OrgCheck_CreatedDate_CL</name><label>Date de création</label></customLabels>
+<customLabels><name>OrgCheck_IsCustom_CL</name><label>Personnalisé</label></customLabels>
+<customLabels><name>OrgCheck_CustomFields_Title_CL</name><label>Les champs personnalisés</label></customLabels>
+<customLabels><name>OrgCheck_CustomFields_Subtitle_CL</name><label>Présentation de la dépendance des champs personnalisés</label></customLabels>
+<customLabels><name>OrgCheck_CustomLabels_Title_CL</name><label>Étiquettes personnalisées</label></customLabels>
+<customLabels><name>OrgCheck_CustomLabels_Subtitle_CL</name><label>Présentation des étiquettes personnalisées</label></customLabels>
+<customLabels><name>OrgCheck_CustomMetadataTypes_CL</name><label>Types de métadonnées personnalisées</label></customLabels>
+<customLabels><name>OrgCheck_CustomObjects_CL</name><label>Objets personnalisés</label></customLabels>
+<customLabels><name>OrgCheck_CustomSettings_CL</name><label>Paramètres personnalisés</label></customLabels>
+<customLabels><name>OrgCheck_Dashboards_CL</name><label>Tableaux de bord</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Subtitle5_CL</name><label>Nettoyage des données</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Subtitle3_CL</name><label>Débogage des journaux</label></customLabels>
+<customLabels><name>OrgCheck_Default_CL</name><label>Défaut</label></customLabels>
+<customLabels><name>OrgCheck_DefaultMapping_CL</name><label>Mappage par défaut</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Subtitle4_CL</name><label>Dépendances</label></customLabels>
+<customLabels><name>OrgCheck_Dependencies_CL</name><label>Dépendances</label></customLabels>
+<customLabels><name>OrgCheck_Description_CL</name><label>La description</label></customLabels>
+<customLabels><name>OrgCheck_DeveloperName_CL</name><label>Nom du développeur</label></customLabels>
+<customLabels><name>OrgCheck_DmlCreates_CL</name><label>DML crée</label></customLabels>
+<customLabels><name>OrgCheck_DmlDeletes_CL</name><label>DML Supprime</label></customLabels>
+<customLabels><name>OrgCheck_DmlUpdates_CL</name><label>Mises à jour DML</label></customLabels>
+<customLabels><name>OrgCheck_Encrypted_CL</name><label>Crypté</label></customLabels>
+<customLabels><name>OrgCheck_Ends_CL</name><label>Prend fin</label></customLabels>
+<customLabels><name>OrgCheck_ErrorMessage_CL</name><label>Message d&#39;erreur</label></customLabels>
+<customLabels><name>OrgCheck_Errors_CL</name><label>les erreurs</label></customLabels>
+<customLabels><name>OrgCheck_External_CL</name><label>Externe</label></customLabels>
+<customLabels><name>OrgCheck_ExternalObjects_CL</name><label>Objets externes</label></customLabels>
+<customLabels><name>OrgCheck_ExternalId_CL</name><label>ID externe</label></customLabels>
+<customLabels><name>OrgCheck_FailedLogins_CL</name><label>Connects échoués</label></customLabels>
+<customLabels><name>OrgCheck_Field_CL</name><label>Champ</label></customLabels>
+<customLabels><name>OrgCheck_FieldSets_CL</name><label>Ensembles de champs</label></customLabels>
+<customLabels><name>OrgCheck_Fields_CL</name><label>Des champs</label></customLabels>
+<customLabels><name>OrgCheck_Flow_CL</name><label>Couler</label></customLabels>
+<customLabels><name>OrgCheck_FlowVersion_CL</name><label>Circulation</label></customLabels>
+<customLabels><name>OrgCheck_Folder_CL</name><label>Dossier</label></customLabels>
+<customLabels><name>OrgCheck_Format_CL</name><label>Format</label></customLabels>
+<customLabels><name>OrgCheck_Formula_CL</name><label>Formule</label></customLabels>
+<customLabels><name>OrgCheck_Friday_CL</name><label>Vendredi</label></customLabels>
+<customLabels><name>OrgCheck_FullApiName_CL</name><label>Nom de l&#39;API complet</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Title_CL</name><label>Informations générales</label></customLabels>
+<customLabels><name>OrgCheck_GeneralInformation_CL</name><label>informations générales</label></customLabels>
+<customLabels><name>OrgCheck_Implements_CL</name><label>Met en oeuvre</label></customLabels>
+<customLabels><name>OrgCheck_IncludedGroups_CL</name><label>Groupes inclus</label></customLabels>
+<customLabels><name>OrgCheck_IncludedUsers_CL</name><label>Utilisateurs inclus</label></customLabels>
+<customLabels><name>OrgCheck_IncludesTechGroups_CL</name><label>Comprend des groupes techniques</label></customLabels>
+<customLabels><name>OrgCheck_InnerClasses_CL</name><label>Classes intérieures</label></customLabels>
+<customLabels><name>OrgCheck_Internal_CL</name><label>Interne</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Text1_CL</name><label>Présentation &lt;b&gt;orgcheck&lt;&#x2F;b&gt; . Une application Salesforce facile à installer et facile à utiliser afin d&#39;analyser rapidement votre organisation et sa dette technique.</label></customLabels>
+<customLabels><name>OrgCheck_IsAbstract_CL</name><label>Est le résumé?</label></customLabels>
+<customLabels><name>OrgCheck_IsActive_CL</name><label>C&#39;est actif</label></customLabels>
+"
+"<customLabels><name>OrgCheck_IsGroup_CL</name><label>Est le groupe?</label></customLabels>
+<customLabels><name>OrgCheck_KeyPermissions_CL</name><label>Autorisation clé</label></customLabels>
+<customLabels><name>OrgCheck_Label_CL</name><label>Étiquette</label></customLabels>
+<customLabels><name>OrgCheck_LastLogin_CL</name><label>Dernière connexion</label></customLabels>
+<customLabels><name>OrgCheck_PageLayouts_CL</name><label>Disposition</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Subtitle2_CL</name><label>Termes légaux</label></customLabels>
+<customLabels><name>OrgCheck_LexUI_CL</name><label>Lex</label></customLabels>
+<customLabels><name>OrgCheck_License_CL</name><label>Licence</label></customLabels>
+<customLabels><name>OrgCheck_Limits_CL</name><label>Limites</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section4_Text1_CL</name><label>Liste des métadonnées mises en cache de l&#39;organisation Salesforce que vous souhaitez vérifier dans votre cache persistant du navigateur.</label></customLabels>
+<customLabels><name>OrgCheck_Load_CL</name><label>Charger</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section4_Title_CL</name><label>Cache de métadonnées</label></customLabels>
+<customLabels><name>OrgCheck_Methods_CL</name><label>Méthodes</label></customLabels>
+<customLabels><name>OrgCheck_Mobile_CL</name><label>Mobile</label></customLabels>
+<customLabels><name>OrgCheck_ModifiedDate_CL</name><label>Date modifiée</label></customLabels>
+<customLabels><name>OrgCheck_ModifyAllData_CL</name><label>Modifier toutes les données</label></customLabels>
+<customLabels><name>OrgCheck_Monday_CL</name><label>Lundi</label></customLabels>
+<customLabels><name>OrgCheck_Home_Subtitle_CL</name><label>Surveillez votre org de manière transparente</label></customLabels>
+<customLabels><name>OrgCheck_More100Users_CL</name><label>Plus de 100 utilisateurs</label></customLabels>
+<customLabels><name>OrgCheck_Name_CL</name><label>Nom</label></customLabels>
+<customLabels><name>OrgCheck_NeverLoggedIn_CL</name><label>Jamais connecté!</label></customLabels>
+<customLabels><name>OrgCheck_NoActiveMember_CL</name><label>Pas de membre actif!</label></customLabels>
+<customLabels><name>OrgCheck_NoDependency_CL</name><label>Aucune dépendance</label></customLabels>
+<customLabels><name>OrgCheck_NoInactiveMember_CL</name><label>Pas de membre inactif!</label></customLabels>
+<customLabels><name>OrgCheck_NoPackage_CL</name><label>Pas de package</label></customLabels>
+<customLabels><name>OrgCheck_NoParent_CL</name><label>Pas de parent</label></customLabels>
+<customLabels><name>OrgCheck_NoUserForThisProfile_CL</name><label>Aucun utilisateur pour ce profil personnalisé!</label></customLabels>
+<customLabels><name>OrgCheck_ProfilePermSets_Subtitle_CL</name><label>Présentation du profil et des autorisations non spécifiques à l&#39;utilisateur</label></customLabels>
+<customLabels><name>OrgCheck_NotUsed_CL</name><label>Non utilisé!</label></customLabels>
+<customLabels><name>OrgCheck_NbActiveMembers_CL</name><label>Nombre de membres actifs</label></customLabels>
+<customLabels><name>OrgCheck_NbActiveUsers_CL</name><label>Nombre d&#39;utilisateurs actifs</label></customLabels>
+<customLabels><name>OrgCheck_NbInactiveMembers_CL</name><label>Nombre de membres inactifs</label></customLabels>
+<customLabels><name>OrgCheck_Object_CL</name><label>Objet</label></customLabels>
+<customLabels><name>OrgCheck_Objects_Subtitle_CL</name><label>Présentation de la configuration de l&#39;objet</label></customLabels>
+<customLabels><name>OrgCheck_Objects_Title_CL</name><label>Documentation de l&#39;objet</label></customLabels>
+<customLabels><name>OrgCheck_TriggersCount_CL</name><label>Les décalages de l&#39;objet comptent</label></customLabels>
+<customLabels><name>OrgCheck_Visuals_Description2_CL</name><label>Sur toutes les tables:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si l&#39;élément n&#39;est utilisé par aucune autre entité (en fonction de l&#39;API de dépendance), vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Le cas échéant, si la version API utilisée par l&#39;élément est plus âgé de trois ans, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si l&#39;élément n&#39;a pas de description, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;li&gt;Si l&#39;élément a des dépendances, vous pouvez cliquer sur le lien &quot;dépendances&quot; pour obtenir une vue graphique de l&#39;endroit oùIl est utilisé et ce qu&#39;il utilise.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_WhichUI_CL</name><label>Sur lex?</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Description2_CL</name><label>Sur la table des classes:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si la classe n&#39;est utilisée par aucune autre entité (en fonction de l&#39;API de dépendance), vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si la version API de la classe est âgée de plus de 3 ans, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si la classe a besoin de recompilation, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si la classe ne spécifie pas explicitement le partage, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si la classe n&#39;a pas atteint de code COVERGARE de &lt;b&gt;85%&lt;&#x2F;b&gt; , alors vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;li&gt;Si l&#39;élément a des dépendances, vous pouvez cliquer sur le lien &quot;dépendances&quot; pour obtenir une vue graphique de l&#39;endroit oùIl est utilisé et ce qu&#39;il utilise.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Roles_Description2_CL</name><label>Sur la vue graphique:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque &lt;b&gt;case&lt;&#x2F;b&gt; représente un rôle &lt;b&gt;&lt;&#x2F;b&gt; qui sont liés les uns aux autres en suivant leur rôle parent.&lt;&#x2F;li&gt;&lt;li&gt;Les cases &lt;b&gt;jaunes&lt;&#x2F;b&gt; représentent des rôles sans utilisateurs actifs&lt;&#x2F;li&gt;&lt;li&gt;Les cases &lt;b&gt;Blue&lt;&#x2F;b&gt; représentent des rôles avec des utilisateurs actifs&lt;&#x2F;li&gt;&lt;li&gt;Sur chaque case, vous pouvez voir &lt;b&gt;bulles&lt;&#x2F;b&gt; dans leur coin supérieur droit&lt;&#x2F;li&gt;&lt;li&gt;Les bulles &lt;b&gt;bleu&lt;&#x2F;b&gt; représentent le nombre d&#39;utilisateurs actifs (si plus de 100 nous mettons 99+)&lt;&#x2F;li&gt;&lt;li&gt;Les bulles &lt;b&gt;gris&lt;&#x2F;b&gt; représentent le nombre d&#39;utilisateurs inactifs (si plus de 100 nous mettons 99+)&lt;&#x2F;li&gt;&lt;li&gt;Vous pouvez cliquer sur chaque case pour obtenir plus de détails sur le rôle correspondant.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_ProfilePermSets_Description3_CL</name><label>Sur le tableau des ensembles d&#39;autorisation:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un ensemble de permiso ou un groupe de jeu d&#39;autorisation&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;S&#39;il est personnalisé et n&#39;est utilisé par aucun utilisateur actif, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;S&#39;il est personnalisé et n&#39;a pas de description, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; À l&#39;heure actuelle, les cruds d&#39;objet sont affichés comme une fonctionnalité bêta qui doit être activée sur l&#39;onglet Home de cette application.&lt;br &#x2F;&gt; Nous l&#39;avons fait pour nous assurer que cette fonctionnalité ne vous ralentit pas.&lt;br &#x2F;&gt; À l&#39;avenir, vous pourrez sélectionner soit le (s) objet (s) ou le (s) profil (s) &#x2F; ensemble d&#39;autorisation.&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_ProfilePermSets_Description2_CL</name><label>Sur la table des profils:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un profil qui peut être personnalisé ou standard&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;S&#39;il est personnalisé et n&#39;est utilisé par aucun utilisateur actif, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;S&#39;il est personnalisé et n&#39;a pas de description, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_PublicGroups_Description2_CL</name><label>Sur le tableau des groupes publics:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un groupe public&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si le groupe public ne contient aucun utilisateur actif (voir la colonne des utilisateurs actifs), vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; Sur la table des files d&#39;attente:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente une file d&#39;attente&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si la file d&#39;attente ne contient aucun utilisateur actif (voir toutes les colonnes des utilisateurs actifs), vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Roles_Description3_CL</name><label>Sur la vue de la table tabulaire:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un rôle&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si le rôle ne contient aucun utilisateur actif, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si le rôle contient plus d&#39;un utilisateur inactif, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Description4_CL</name><label>Sur les déclencheurs par table d&#39;objet:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si le nombre de déclencheurs actifs par objet est plus grand, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Description3_CL</name><label>Sur la table des déclencheurs:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si le déclencheur n&#39;est utilisé par aucune autre entité (en fonction de l&#39;API de dépendance), vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si la version API du déclencheur est âgée de plus de 3 ans, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si le déclencheur est inactif, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si le déclencheur mesure plus de 5 000 caractères, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si le déclencheur contient des instructions SOQL ou DML, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;li&gt;Si l&#39;élément a des dépendances, vous pouvez cliquer sur le lien &quot;dépendances&quot; pour obtenir une vue graphique de l&#39;endroit oùIl est utilisé et ce qu&#39;il utilise.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_WhichEntity_CL</name><label>Sur quelle entité souhaitez-vous avoir des informations?</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section5_Text1_CL</name><label>OrgCheck scanne l&#39;organisation où il a été installé&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; En haut de chaque page, vous verrez l&#39;id org (dans un badge vert)utilisé par orgcheck. L&#39;ID ORG commence par 00d.&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Package_CL</name><label>Forfait</label></customLabels>
+<customLabels><name>OrgCheck_Parent_CL</name><label>Parent</label></customLabels>
+<customLabels><name>OrgCheck_ParentDevName_CL</name><label>Nom du développeur parent</label></customLabels>
+<customLabels><name>OrgCheck_PasswordChange_CL</name><label>Changement de mot de passe</label></customLabels>
+<customLabels><name>OrgCheck_PermissionSetNames_CL</name><label>Noms de jeu d&#39;autorisation</label></customLabels>
+<customLabels><name>OrgCheck_Permissions_CL</name><label>Autorisation</label></customLabels>
+<customLabels><name>OrgCheck_FieldsNote_CL</name><label>Veuillez noter que nous obtenons des dépendances uniquement pour les champs personnalisés et non les champs standard. Merci!</label></customLabels>
+<customLabels><name>OrgCheck_SelectPackage_CL</name><label>Veuillez sélectionner un colis ...</label></customLabels>
+<customLabels><name>OrgCheck_SelectObject_CL</name><label>Veuillez sélectionner un objet ...</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section3_Title_CL</name><label>Préférences</label></customLabels>
+<customLabels><name>OrgCheck_Profile_CL</name><label>Profil</label></customLabels>
+<customLabels><name>OrgCheck_ProfilePermSets_Title_CL</name><label>Profils et autorisations</label></customLabels>
+<customLabels><name>OrgCheck_PublicGroups_Title_CL</name><label>Groupes publics et files d&#39;attente</label></customLabels>
+<customLabels><name>OrgCheck_PublicGroups_Subtitle_CL</name><label>Aperçu des groupes publics et des files d&#39;attente</label></customLabels>
+<customLabels><name>OrgCheck_RecordTypes_CL</name><label>Types de dossiers</label></customLabels>
+<customLabels><name>OrgCheck_RelatedTests_CL</name><label>Tests connexes</label></customLabels>
+<customLabels><name>OrgCheck_Reports_CL</name><label>Rapports</label></customLabels>
+<customLabels><name>OrgCheck_RoleExplorer_CL</name><label>Explorateur</label></customLabels>
+<customLabels><name>OrgCheck_Roles_Title_CL</name><label>Hiérarchie des rôles Arbre avancé</label></customLabels>
+<customLabels><name>OrgCheck_Roles_Subtitle_CL</name><label>Présentation de la hiérarchie des rôles</label></customLabels>
+<customLabels><name>OrgCheck_RoleListing_CL</name><label>Liste de rôles</label></customLabels>
+<customLabels><name>OrgCheck_Saturday_CL</name><label>Samedi</label></customLabels>
+<customLabels><name>OrgCheck_Score_CL</name><label>Score</label></customLabels>
+<customLabels><name>OrgCheck_Sharing_CL</name><label>Partage</label></customLabels>
+<customLabels><name>OrgCheck_Size_CL</name><label>Taille</label></customLabels>
+<customLabels><name>OrgCheck_StandardObjects_CL</name><label>Objets standard</label></customLabels>
+<customLabels><name>OrgCheck_Starts_CL</name><label>Départs</label></customLabels>
+<customLabels><name>OrgCheck_Status_CL</name><label>Statut</label></customLabels>
+<customLabels><name>OrgCheck_Sunday_CL</name><label>Dimanche</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Subtitle2_CL</name><label>Soutien et commentaires</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Subtitle3_CL</name><label>Composants tiers</label></customLabels>
+<customLabels><name>OrgCheck_Objects_Description_CL</name><label>Cette page vous donne un aperçu de vos objets &lt;b&gt;&lt;&#x2F;b&gt; en deux onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;documentation d&#39;objet&lt;&#x2F;b&gt; vous donne l&#39;intégralité de documentatio d&#39;un objet spécifié&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;org large par défaut&lt;&#x2F;b&gt; est une liste tabulaire du partage interne et externe pour tous vos objets&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Roles_Description1_CL</name><label>Cette page illustre votre hiérarchie &lt;b&gt;de rôles&lt;&#x2F;b&gt; dans deux onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;Role Explorer&lt;&#x2F;b&gt; montre une vue graphique de votre hiérarchie de rôle&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;Liste des rôles&lt;&#x2F;b&gt; est une liste tabulaire des données correspondantes.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; Trop de niveaux dans votre hiérarchie de rôles peuvent conduire à de mauvaises performances (y compris le calcul du partage).&lt;br &#x2F;&gt; C&#39;est pourquoi nous vous donnons une alerte si votre hiérarchie utilise plus que &lt;b&gt;7 niveaux&lt;&#x2F;b&gt; .&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Analytics_Description_CL</name><label>Cette page répertorie tous les rapports &lt;b&gt;&lt;&#x2F;b&gt; et &lt;b&gt;tableaux de bord&lt;&#x2F;b&gt; que vous pouvez voir dans l&#39;organisation actuelle.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Sur toutes les tables:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le score de la colonne &lt;b&gt; &lt;b&gt;est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si l&#39;élément n&#39;a pas de description, vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est commandé par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+"
+"<customLabels><name>OrgCheck_Users_Description_CL</name><label>Cette page répertorie tous vos utilisateurs &lt;b&gt;actifs&lt;&#x2F;b&gt; dans l&#39;organisation.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Sur ce tableau:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un utilisateur actif&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si l&#39;utilisateur n&#39;utilise pas d&#39;expérience Lightning, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si l&#39;utilisateur n&#39;a jamais enregistré, alors vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;La colonne &lt;b&gt;l&#39;autorisation de clé&lt;&#x2F;b&gt; est axée sur des autorisations importantes telles que la configuration de la visualisation de l&#39;API, Affichage,Modifiez toutes les données et affichez toutes les données.&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_Apex_Description1_CL</name><label>Cette page répertorie toutes vos classes &lt;b&gt;Apex et déclenche&lt;&#x2F;b&gt; en trois onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;classes&lt;&#x2F;b&gt; est une liste tabulaire de toutes les classes Apex dans cette org.&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;déclenche&lt;&#x2F;b&gt; est une liste tabulaire de tous les déclencheurs Apex dans cette org.&lt;&#x2F;li&gt;&lt;li&gt;Le troisième onglet appelé &lt;b&gt;les déclencheurs de l&#39;objet Count&lt;&#x2F;b&gt; est une table groupée qui agrége tous les déclencheurs par objets dans cette organisation.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; Pour vous assurer d&#39;obtenir &lt;b&gt;tous les avantages&lt;&#x2F;b&gt; de cette page, assurez-vous de suivre ces étapes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;vous &lt;b&gt;compilez toutes les classes&lt;&#x2F;b&gt; en sélectionnant le bouton &quot;Plug&quot;.&lt;&#x2F;li&gt;&lt;li&gt;Vous &lt;b&gt;Exécutez tous les tests&lt;&#x2F;b&gt; en sélectionnant le bouton &quot;Like&quot;.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_CustomFields_Description_CL</name><label>Cette page répertorie tous vos champs personnalisés &lt;b&gt;&lt;&#x2F;b&gt; et non les champs standard.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Sur ce tableau:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente un champ personnalisé&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si le champ n&#39;a pas de description, vous obtenez +1.&lt;&#x2F;li&gt;&lt;li&gt;Si le champ n&#39;est utilisé par aucune autre entité (en fonction de l&#39;API de dépendance), vous obtenez +1.&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;li&gt;Si le champ a des dépendances, vous pouvez cliquer sur le lien &quot;dépendances&quot; pour obtenir une vue graphique de l&#39;endroit où il estutilisé et ce qu&#39;il utilise.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_CustomLabels_Description_CL</name><label>Cette page répertorie toutes vos étiquettes personnalisées &lt;b&gt;&lt;&#x2F;b&gt; .&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; Sur ce tableau:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Chaque ligne représente une étiquette personnalisée&lt;&#x2F;li&gt;&lt;li&gt;Le score de la colonne &lt;b&gt;&lt;&#x2F;b&gt; est calculé en fonction des règles suivantes:&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;Si l&#39;étiquette personnalisée n&#39;est utilisée par aucune autre entité (en fonction de l&#39;API de dépendance), vous obtenez +1&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;Par défaut, le tableau est ordonné par score descendant, en d&#39;autres termes, les plus grands scores passent en premier.&lt;&#x2F;li&gt;&lt;li&gt;Si le champ a des dépendances, vous pouvez cliquer sur le lien &quot;dépendances&quot; pour obtenir une vue graphique de l&#39;endroit où il estutilisé et ce qu&#39;il utilise.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_ProfilePermSets_Description1_CL</name><label>Cette page répertorie tous vos profils &lt;b&gt;et ensembles d&#39;autorisations&lt;&#x2F;b&gt; en cinq onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;Profils&lt;&#x2F;b&gt; vous donne une liste tabulaire de tous les profils de cet org&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;ensembles d&#39;autorisations&lt;&#x2F;b&gt; vous donne une liste tabulaire de tous les ensembles de jeux d&#39;autorisation et de jeu d&#39;autorisation dans cet org&lt;&#x2F;li&gt;&lt;li&gt;Le troisième onglet appelé &lt;b&gt;Restrictions d&#39;heures de connexion&lt;&#x2F;b&gt; extrait les restrictions à l&#39;heure de connexion de tous les profils à la fois&lt;&#x2F;li&gt;&lt;li&gt;Le quatrième onglet appelé &lt;b&gt;Restrictions de plage IP&lt;&#x2F;b&gt; extrait les restrictions de plage IP de tous les profils à la fois&lt;&#x2F;li&gt;&lt;li&gt;Le cinquième onglet appelé &lt;b&gt;objet cruds&lt;&#x2F;b&gt; (bêta) affiche les droits (créer, lire, mettre à jour, supprimer) sur les objets pour les profils et les ensembles d&#39;autorisation&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_PublicGroups_Description1_CL</name><label>Cette page répertorie tous vos &lt;b&gt;groupes publics et files d&#39;attente&lt;&#x2F;b&gt; en deux onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;groupes publics&lt;&#x2F;b&gt; vous donne une liste tabulaire de tous les groupes publics de cet org&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;files d&#39;attente&lt;&#x2F;b&gt; vous donne une liste tabulaire de toutes les files d&#39;attente de cet org&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; La sauce secrète dans la page est la colonne appelée &lt;b&gt;tous les utilisateurs actifs&lt;&#x2F;b&gt; qui est calculé de manière récurrente à traversTous les sous-méta-groupes possibles (rôle, rôle et subordonnés, groupes, etc.) qui sont contenus dans les groupes ou les files d&#39;attente.&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Visuals_Description1_CL</name><label>Cette page répertorie tous vos composants visuels &lt;b&gt;&lt;&#x2F;b&gt; en cinq onglets:&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Le premier onglet appelé &lt;b&gt;Pages de force visuelle&lt;&#x2F;b&gt; est une liste tabulaire de toutes les pages VF de cet org.&lt;&#x2F;li&gt;&lt;li&gt;Le deuxième onglet appelé &lt;b&gt;Visual Force Components&lt;&#x2F;b&gt; est une liste tabulaire de tous les composants VF de cette org.&lt;&#x2F;li&gt;&lt;li&gt;Le troisième onglet appelé &lt;b&gt;Pages Lightning&lt;&#x2F;b&gt; est une liste tabulaire de toutes les pages de foudre (aka pages flexi pour celles qui se déploient) dans cet org.&lt;&#x2F;li&gt;&lt;li&gt;Le quatrième onglet appelé &lt;b&gt;Lightning Aura Components&lt;&#x2F;b&gt; est une liste tabulaire de tous les composants Aura de cette organisation.&lt;&#x2F;li&gt;&lt;li&gt;Le cinquième onglet appelé &lt;b&gt;Lightning Web Components&lt;&#x2F;b&gt; est une liste tabulaire de tous les LWC de cette organisation.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Thursday_CL</name><label>Jeudi</label></customLabels>
+<customLabels><name>OrgCheck_TooManyLevels_CL</name><label>Trop de niveaux dans votre hiérarchie de rôles!</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section6_Subtitle1_CL</name><label>Outils de Salesforce</label></customLabels>
+<customLabels><name>OrgCheck_Triggers_CL</name><label>Déclencheurs</label></customLabels>
+<customLabels><name>OrgCheck_Tuesday_CL</name><label>Mardi</label></customLabels>
+<customLabels><name>OrgCheck_Type_CL</name><label>Taper</label></customLabels>
+<customLabels><name>OrgCheck_UnactiveTriggers_CL</name><label>Déclencheurs non actifs</label></customLabels>
+<customLabels><name>OrgCheck_UnitTests_CL</name><label>Tests unitaires</label></customLabels>
+<customLabels><name>OrgCheck_UsedIn_CL</name><label>Utilisé dans</label></customLabels>
+<customLabels><name>OrgCheck_UserName_CL</name><label>Nom d&#39;utilisateur</label></customLabels>
+<customLabels><name>OrgCheck_UserType_CL</name><label>Type d&#39;utilisateur</label></customLabels>
+<customLabels><name>OrgCheck_Users_Title_CL</name><label>Utilisateurs</label></customLabels>
+<customLabels><name>OrgCheck_Using_CL</name><label>Utilisant</label></customLabels>
+<customLabels><name>OrgCheck_ValidationRules_CL</name><label>Règles de validation</label></customLabels>
+<customLabels><name>OrgCheck_Value_CL</name><label>Évaluer</label></customLabels>
+<customLabels><name>OrgCheck_Version_CL</name><label>Version</label></customLabels>
+<customLabels><name>OrgCheck_ViewAllData_CL</name><label>Afficher toutes les données</label></customLabels>
+<customLabels><name>OrgCheck_ViewSetup_CL</name><label>Configuration de la vue</label></customLabels>
+<customLabels><name>OrgCheck_Visuals_Title_CL</name><label>Composants visuels &#x2F; ui</label></customLabels>
+<customLabels><name>OrgCheck_Visuals_Subtitle_CL</name><label>Présentation des composants visuels &#x2F; UI</label></customLabels>
+<customLabels><name>OrgCheck_WebLinks_CL</name><label>Liens web</label></customLabels>
+<customLabels><name>OrgCheck_Wednesday_CL</name><label>Mercredi</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Subtitle1_CL</name><label>Accueillir</label></customLabels>
+<customLabels><name>OrgCheck_Home_Title_CL</name><label>Bienvenue dans orgcheck</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Title_CL</name><label>Accueillir!</label></customLabels>
+<customLabels><name>OrgCheck_WithBosses_CL</name><label>Avec des patrons?</label></customLabels>
+<customLabels><name>OrgCheck_Automations_Subtitle_CL</name><label>Présentation des flux de travail, des constructeurs de processus et des flux</label></customLabels>
+<customLabels><name>OrgCheck_TooManyRoles_CL</name><label>Vous avez plus de niveaux de rôles {0} dans votre hiérarchie de rôles (exactement les niveaux {1}).&lt;br &#x2F;&gt; La hiérarchie des rôles n&#39;est pas là pour imiter la hiérarchie de votre entreprise, c&#39;est là pour aider à gérer la visibilité des records.&lt;br &#x2F;&gt; Veuillez le réduire!</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section2_Text1_CL</name><label>Vous pouvez avoir une dette technique &lt;b&gt;&lt;&#x2F;b&gt; ,Si vous répondez «oui» aux questions suivantes:&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;Les performances de votre application Salesforce sont-elles faibles?&lt;&#x2F;li&gt;&lt;li&gt;est le temps de résoudre un bug long avec votre support?&lt;&#x2F;li&gt;&lt;li&gt;La maintenance augmente-t-elle?&lt;&#x2F;li&gt;&lt;li&gt;La documentation sur votre org Salesforce est-elle pauvre?&lt;&#x2F;li&gt;&lt;li&gt;L&#39;ajout de nouvelles fonctionnalités devient-il plus complexe?&lt;&#x2F;li&gt;&lt;li&gt;Tester et &#x2F; ou déployer votre application un cauchemar?&lt;&#x2F;li&gt;est-il&lt;li&gt;Si oui, vous pouvez avoir une dette technique que vous devez réduire.&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
+<customLabels><name>OrgCheck_SetADescription_CL</name><label>Vous devriez définir une description!</label></customLabels>
+<customLabels><name>OrgCheck_Zoom1x1_CL</name><label>Zoom 1: 1</label></customLabels>
+<customLabels><name>OrgCheck_ZoomIn_CL</name><label>Agrandir</label></customLabels>
+<customLabels><name>OrgCheck_ZoomOut_CL</name><label>Dézoomer</label></customLabels>
+<customLabels><name>OrgCheck_NotSpecified_CL</name><label>Non précisé</label></customLabels>
+<customLabels><name>OrgCheck_NotApplicable_CL</name><label>N&#39;est pas applicable</label></customLabels>
+<customLabels><name>OrgCheck_NoData_CL</name><label>Pas de données</label></customLabels>
+"
+</Translations>
