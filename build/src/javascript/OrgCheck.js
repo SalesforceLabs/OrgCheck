@@ -3641,7 +3641,7 @@ function buildDatasets(core) {
                             }
                         }, 
                         onEnd: function() { 
-                            for (const [key, value] of Object.entries(psgByName1)) {
+                            for (const [key, value] of Object.entries(psgByName1)) if (psgByName2[key]) {
                                 value.groupId = psgByName2[key].id;
                                 value.description = psgByName2[key].description;
                                 value.isUndescribedCustom = value.isCustom && !value.description;
