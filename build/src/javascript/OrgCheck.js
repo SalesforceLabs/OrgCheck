@@ -6,7 +6,7 @@
     /**
      * OrgCheck Version
      */
-    version: 'v1.9.7',
+    version: 'Hydrogen [H,1]',
 
     /**
      * Organization Id where OrgCheck is currently installed
