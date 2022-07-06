@@ -25,7 +25,7 @@
 
         /**
          * Salesforce query handler
-         * @param configuration Object must contain 'version', 'instanceUrl' and 'accessToken'
+         * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
          */
         SalesforceQueryHandler: function (configuration) {
 
@@ -42,6 +42,17 @@
                 version: API_VERSION + ".0",
                 maxRequest: "10000",
                 instanceUrl: configuration.instanceUrl
+            });
+
+            /**
+             * Limits call
+             */
+            CONNECTION.limits(data => { 
+                let message = '';
+                if (!data) message = 'Cannot reach your current Org limits.';
+                else if (data.errorCode === 'REQUEST_LIMIT_EXCEEDED') message = 'Reached the number of daily API calls.';
+                if (configuration.stopWatcherCallback) configuration.stopWatcherCallback(message, data);
+                console.log('__LIMITS__CHECKING__', message, data, configuration.stopWatcherCallback);
             });
 
             /**
