@@ -74,6 +74,10 @@
                                             ) + '<br />'
                                         );
                                         return html;
+                                    }},
+                                    { name: 'Exp. cert.', formula: (r) => {
+                                        if (r.permissions.viewSetup === true && r.permissions.modifyAllData === true) return 'yes';
+                                        return 'no';
                                     }}
                                 ],
                                 data: map.users,
