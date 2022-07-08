@@ -47,8 +47,8 @@
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="TEST UNITAIRES" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-apextests" id="tab-default-apextests__item">TEST UNITAIRES</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_UnitTests_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
@@ -233,7 +233,7 @@
                                         }
                                     },
                                     { name: '{!$Label.OrgCheck_Size_CL}', type: 'numeric', property: 'length' },
-                                    { name: 'SEE ALL DATA?',
+                                    { name: '{!$Label.OrgCheck_SeeAlllData_CL}',
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isTestSeeAllData);
                                         },
@@ -241,9 +241,9 @@
                                             if (r.isTestSeeAllData === true) return 1; 
                                         }
                                     },
-                                    { name: 'NB ASSERTS', type: 'numeric', property: 'nbSystemAsserts',
+                                    { name: '{!$Label.OrgCheck_NumlberOfAsserts_CL}', type: 'numeric', property: 'nbSystemAsserts',
                                         formula: (r) => { 
-                                            if (r.nbSystemAsserts === 0) return 'No assert!';
+                                            if (r.nbSystemAsserts === 0) return '{!$Label.OrgCheck_NotSpecified_CL}';
                                             return r.nbSystemAsserts;
                                         },
                                         scoreFormula: (r) => { 

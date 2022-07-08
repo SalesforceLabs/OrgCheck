@@ -226,5 +226,7 @@
 <customLabels><name>OrgCheck_NotSpecified_CL</name><label>Non précisé</label></customLabels>
 <customLabels><name>OrgCheck_NotApplicable_CL</name><label>N&#39;est pas applicable</label></customLabels>
 <customLabels><name>OrgCheck_NoData_CL</name><label>Pas de données</label></customLabels>
+<customLabels><name>OrgCheck_SeeAlllData_CL</name><label>SeeAllData?</label></customLabels>
+<customLabels><name>OrgCheck_NumlberOfAsserts_CL</name><label>Nb d&#39;asserts</label></customLabels>
 "
 </Translations>
