@@ -16,7 +16,6 @@
         <members>OrgCheck_Automations_VFP</members>
         <members>OrgCheck_VisualComponents_VFP</members>
         <members>OrgCheck_ApexComponents_VFP</members>
-        <members>OrgCheck_Authorization_VFP</members>
         <members>OrgCheck_Analytics_VFP</members>
         <name>ApexPage</name>
     </types>

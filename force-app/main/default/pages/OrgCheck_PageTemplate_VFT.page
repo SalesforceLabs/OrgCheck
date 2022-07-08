@@ -127,7 +127,7 @@
                                 </svg>
                             </div>
                             <div class="slds-page-header__control slds-align_absolute-center">
-                                <span class="slds-badge slds-theme_success" id="org-id" />
+                                <span class="slds-badge slds-theme_success">{!$Organization.Id}</span>
                             </div>
                             <div class="slds-page-header__control slds-align_absolute-center">
                                 <span class="slds-badge" id="org-daily-api-requests" />

@@ -10,7 +10,6 @@
     <license>Salesforce</license>
     <pageAccesses><apexPage>OrgCheck_Analytics_VFP</apexPage><enabled>true</enabled></pageAccesses>
     <pageAccesses><apexPage>OrgCheck_ApexComponents_VFP</apexPage><enabled>true</enabled></pageAccesses>
-    <pageAccesses><apexPage>OrgCheck_Authorization_VFP</apexPage><enabled>true</enabled></pageAccesses>
     <pageAccesses><apexPage>OrgCheck_Automations_VFP</apexPage><enabled>true</enabled></pageAccesses>
     <pageAccesses><apexPage>OrgCheck_Batches_VFP</apexPage><enabled>true</enabled></pageAccesses>
     <pageAccesses><apexPage>OrgCheck_CustomFields_VFP</apexPage><enabled>true</enabled></pageAccesses>

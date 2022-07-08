@@ -71,6 +71,8 @@
                 });
             }
 
+            
+
             // let's call it at the beggining
             private_check_limits();
 
@@ -949,7 +951,6 @@
         const CACHE_PREFIX = 'OrgCheck';
         const CACHE_SECTION_METADATA = 'Metadata';
         const CACHE_SECTION_PREFERENCE = 'Preference';
-        const CACHE_SECTION_AUTH = 'Autorization';
         const MAP_KEYSIZE = '__51Z3__';
 
         const PERSISTANT_CACHE_HANDLER = new OrgCheck.handlers.CacheHandler({
@@ -973,21 +974,6 @@
         // Set global information about org (in case of showError mainly)
         OrgCheck.localOrgId = ORG_INFORMATION.id;
         OrgCheck.localUserId = ORG_INFORMATION.userId;
-                            
-        // Get the current Organization information
-        const currentOrgId = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'CurrentOrgId');
-        if (currentOrgId) {
-            const orgs = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'Organisations') || {};
-            if (orgs[currentOrgId] && orgs[currentOrgId].endpointUrl && orgs[currentOrgId].token) {
-                ORG_INFORMATION.id = currentOrgId;
-                ORG_INFORMATION.accessToken = orgs[currentOrgId].token;
-                ORG_INFORMATION.instanceUrl = orgs[currentOrgId].endpointUrl;
-                ORG_INFORMATION.proxyUrl = '/services/proxy';
-
-            }
-        }
-        TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, ORG_INFORMATION.id);
-        document.getElementById('org-id').textContent = ORG_INFORMATION.id;
 
         const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
             keySize: MAP_KEYSIZE,
@@ -1323,27 +1309,6 @@
                 information: {
                     showMainContent: function() {
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
-                    },
-                    switchToOrg: function(mydomain_url, id_url, access_token) {
-                        PERSISTANT_CACHE_HANDLER.clearAll(CACHE_SECTION_METADATA);
-                        var orgId = '';
-                        if (mydomain_url && id_url && access_token) {
-                            const arrSplit = id_url.split('/');
-                            orgId = arrSplit[4].substring(0, 15);
-                            const userId = arrSplit[5];
-                            const map = TEMPORARY_CACHE_HANDLER.getItem(CACHE_SECTION_AUTH, 'Organisations') || {};
-                            map[orgId] = { 
-                                'orgId': orgId,
-                                'userId': userId,
-                                'endpointUrl': mydomain_url,
-                                'token': access_token
-                            };
-                            TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, 'Organisations', map);
-                        } else {
-                            orgId = setup.sfLocalAccessToken.split('!')[0];
-                        }
-                        TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, 'CurrentOrgId', orgId);
-                        document.getElementById('org-id').textContent = orgId;
                     }
                 },
                 preferences: {
