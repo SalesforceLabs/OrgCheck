@@ -129,6 +129,7 @@
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
+                                                return 'Recompile!';
                                             }
                                         },
                                         scoreFormula: (r) => { 

@@ -191,17 +191,23 @@
             }
 
             /**
-            * Call REST api endpoint in HTTP direclty with GET method
+            * Call REST api endpoint in HTTP direclty with GET (default) or POST method (with payload)
             * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
             * @param onEnd Callback function to call with all records (as a map)
             * @param onError Callback function to call if there is an error
+            * @param optionalPayload Optional payload body and content type for the request (if specified method=POST if not method=GET)
             */
-            this.doHttpCall = function(partialUrl, onEnd, onError) {
+            this.doHttpCall = function(partialUrl, onEnd, onError, optionalPayload) {
                 private_check_limits();
-                const request = { 
+                let request = { 
                     url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
-                    method: 'GET' 
+                    method: 'GET'
                 };
+                if (optionalPayload) {
+                    request.method = 'POST';
+                    request.body = optionalPayload.body;
+                    request.headers = { "Content-Type": optionalPayload.type };
+                }
                 CONNECTION.request(
                     request, 
                     function(error, response) {
@@ -211,7 +217,8 @@
                                 what: {
                                     partialUrl: partialUrl,
                                     url: request.url,
-                                    method: request.method
+                                    method: request.method,
+                                    body: request.body
                                 }
                             };
                             onError(error);
@@ -1276,6 +1283,19 @@
                                 callbackSuccess: success,
                                 callbackError: error
                             });
+                        }
+                    },
+                    apex: {
+                        runAllLocalTests: function() {
+                            return SALESFORCE_HANDLER.doHttpCall(
+                                '/tooling/runTestsAsynchronous', 
+                                r => console.debug(r), 
+                                r => console.error(r), 
+                                { 
+                                    body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": "false" }', 
+                                    type: 'application/json' 
+                                }
+                            );
                         }
                     },
                     version: {

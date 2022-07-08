@@ -237,7 +237,7 @@
                                     { name: '{!$Label.OrgCheck_IncludedUsers_CL}', formula: (r) => { 
                                         return renderUsers(map.users, r.directUsers, true); 
                                     }},
-                                    { name: '{$Label.OrgCheck_AllActiveUsers_CL}', 
+                                    { name: '{!$Label.OrgCheck_AllActiveUsers_CL}', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return '{!$Label.OrgCheck_IncludesTechGroups_CL}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
@@ -277,7 +277,7 @@
                                     { name: '{!$Label.OrgCheck_IncludedUsers_CL}', formula: (r) => { 
                                         return renderUsers(map.users, r.directUsers, true); 
                                     }},
-                                    { name: '{$Label.OrgCheck_AllActiveUsers_CL}', 
+                                    { name: '{!$Label.OrgCheck_AllActiveUsers_CL}', 
                                         formula: (r) => { 
                                             if (r.includesTechnicalGroup === true) return '{!$Label.OrgCheck_IncludesTechGroups_CL}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');

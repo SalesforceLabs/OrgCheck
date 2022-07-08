@@ -334,7 +334,7 @@
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                            { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
                                                         const dep = object.fieldDependencies[r.id]; 

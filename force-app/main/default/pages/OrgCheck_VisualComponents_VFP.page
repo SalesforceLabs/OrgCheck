@@ -108,7 +108,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
@@ -166,7 +166,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
@@ -219,7 +219,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
@@ -277,7 +277,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
@@ -335,7 +335,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);

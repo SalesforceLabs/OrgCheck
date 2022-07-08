@@ -92,6 +92,7 @@
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
+                                                return 'Recompile!';
                                             }
                                         },
                                         scoreFormula: (r) => { 
@@ -184,7 +185,7 @@
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
@@ -219,7 +220,12 @@
                                 if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
                                 html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
                                 html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
-                                helper.html.element.addClass('run-all-tests', ['slds-theme_warning']);
+                                const runAllTestsButton = helper.html.element.get('run-all-tests');
+                                runAllTestsButton.onclick = (e) => { 
+                                    helper.salesforce.apex.runAllLocalTests();
+                                    return true; 
+                                }
+                                helper.html.element.addClass(runAllTestsButton, ['slds-theme_warning']);
                             }
 
                             if (html) {
@@ -326,7 +332,7 @@
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
