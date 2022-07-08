@@ -19,6 +19,11 @@
     localUserId: '',
 
     /**
+     * Current limit informations
+     */
+     limitInfo: {},
+
+     /**
      * Handlers
      */
     handlers: {
@@ -47,13 +52,27 @@
             /**
              * Limits call
              */
-            CONNECTION.limits(data => { 
-                let message = '';
-                if (!data) message = 'Cannot reach your current Org limits.';
-                else if (data.errorCode === 'REQUEST_LIMIT_EXCEEDED') message = 'Reached the number of daily API calls.';
-                if (configuration.stopWatcherCallback) configuration.stopWatcherCallback(message, data);
-                console.log('__LIMITS__CHECKING__', message, data, configuration.stopWatcherCallback);
-            });
+            function private_check_limits() {
+                CONNECTION.limits().then(d => {
+                    this.limitInfo = d;
+                    const elmt = document.getElementById('org-daily-api-requests');
+                    if (d && d.DailyApiRequests) {
+                        const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
+                        elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+rate.toFixed(3)+'</small></center>';
+                        if (rate > 0.9) {
+                            elmt.classList.add('slds-theme_error');
+                            stopWatcherCallback('Daily API Request is too high...');
+                        } else if (rate > 0.7) {
+                            elmt.classList.add('slds-theme_warning');
+                        } else {
+                            elmt.classList.add('slds-badge_lightest');
+                        }
+                    }
+                });
+            }
+
+            // let's call it at the beggining
+            private_check_limits();
 
             /**
              * Is an API version is old or not?
@@ -105,6 +124,7 @@
                 onResult,
                 onError
             ) {
+                private_check_limits();
                 CONNECTION.describeGlobal(function (error, result) {
                     if (error) {
                         if (onError) {
@@ -129,6 +149,7 @@
                 onResult,
                 onError
             ) {
+                private_check_limits();
                 CONNECTION.sobject(developerName).describe$(function (error, object) {
                     if (error) {
                         if (onError) {
@@ -153,6 +174,7 @@
                 onResult,
                 onError
             ) {
+                private_check_limits();
                 CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
                     if (error) {
                         if (onError) {
@@ -173,6 +195,7 @@
             * @param onError Callback function to call if there is an error
             */
             this.doHttpCall = function(partialUrl, onEnd, onError) {
+                private_check_limits();
                 const request = { 
                     url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
                     method: 'GET' 
@@ -210,6 +233,7 @@
                 onEnd,
                 onError
             ) {
+                private_check_limits();
                 const promises = [];
                 queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
                     private_query({
@@ -375,6 +399,7 @@
                     informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
                     informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
                     informationHTML += 'Current running UserId: ' + (OrgCheck && OrgCheck.localUserId ? OrgCheck.localUserId : 'no userId available') + '<br />';
+                    informationHTML += 'Current Daily Api Requests: ' + (OrgCheck && OrgCheck.limitInfo && OrgCheck.limitInfo.DailyApiRequests ? ( 'remains: '+OrgCheck.limitInfo.DailyApiRequests.Remaining+' max:'+OrgCheck.limitInfo.DailyApiRequests.Max ) : 'no limit info available') + '<br />';
                     informationHTML += '<br />';
                     informationHTML += '<b>Navigation Information</b><br />';
                     informationHTML += 'Page: ' + document.location.pathname + '<br />';
@@ -964,8 +989,6 @@
         TEMPORARY_CACHE_HANDLER.setItem(CACHE_SECTION_AUTH, ORG_INFORMATION.id);
         document.getElementById('org-id').textContent = ORG_INFORMATION.id;
 
-        const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
-
         const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
             keySize: MAP_KEYSIZE,
             keyExcludePrefix: '__'            
@@ -985,6 +1008,12 @@
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
+        ORG_INFORMATION.stopWatcherCallback = function(d) {
+            MSG_HANDLER.showError(d);
+            MSG_HANDLER.showModal(d);
+        }
+        const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
+
         const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
             defaultLanguage: setup.formatDefaultLanguage,
             defaultDateFormat: setup.formatDefaultDate,  
