@@ -154,7 +154,7 @@
                                 let html = 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
                                 html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
                                 html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
-                                helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
                                 helper.html.message.show(html);
                                 helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
                             }

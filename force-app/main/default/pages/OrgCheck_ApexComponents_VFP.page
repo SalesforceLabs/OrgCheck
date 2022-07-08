@@ -223,7 +223,7 @@
                             }
 
                             if (html) {
-                                helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
                                 helper.html.message.show(html);
                             }
 

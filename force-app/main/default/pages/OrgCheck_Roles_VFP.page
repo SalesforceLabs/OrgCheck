@@ -133,7 +133,7 @@
                         const MAX_LEVEL_DEPTH_ROLES = 7;
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
                             const html = helper.html.render.format('{!$Label.OrgCheck_TooManyRoles_CL}', MAX_LEVEL_DEPTH_ROLES, mdepth);
-                            helper.html.modal.show('{!$Label.OrgCheck_TooManyLevels_CL}', html);
+                            //helper.html.modal.show('{!$Label.OrgCheck_TooManyLevels_CL}', html);
                             helper.html.message.show(html);
                         }
                         
