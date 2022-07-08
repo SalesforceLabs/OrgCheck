@@ -2954,6 +2954,10 @@ function buildDatasets(core) {
                     const relatedTestClassesMap = {};
                     const classesCoverageMap = {};
                     const schedulableMap = {};
+                    const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{", 'i');
+                    const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
+                    const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
+                    const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
                     core.doSalesforceQueries({
                         queries: [{
                             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
@@ -3020,8 +3024,8 @@ function buildDatasets(core) {
                                         lastModifiedDate: v.LastModifiedDate
                                     };
                                     if (v.Body) {
-                                        item.isInterface = v.Body.match("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{") !== null;
-                                        item.isEnum = v.Body.match("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{") !== null;
+                                        item.isInterface = v.Body.match(REGEX_ISINTERFACE) !== null;
+                                        item.isEnum = v.Body.match(REGEX_ISENUM) !== null;
                                         item.isClass = (item.isInterface === false && item.isEnum === false);
                                     }
                                     if (v.SymbolTable) {
@@ -3048,6 +3052,10 @@ function buildDatasets(core) {
                                     if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
                                     if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
                                         item.isSharingMissing = true;
+                                    }
+                                    if (item.isTest === true) {
+                                        item.isTestSeeAllData = v.Body.match(REGEX_ISTESTSEEALLDATA) !== null;
+                                        item.nbSystemAsserts = v.Body.match(REGEX_TESTNBASSERTS)?.length || 0;
                                     }
                                     classesMap[item.id] = item;
                                     break;
