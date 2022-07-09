@@ -4,7 +4,7 @@ project:
     package:
         name: OrgCheck
         namespace: OrgCheck
-        api_version: '53.0'
+        api_version: '55.0'
     git:
         default_branch: 'main'
     source_format: sfdx
