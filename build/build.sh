@@ -5,9 +5,25 @@
 ### -----------------------
 
 ## npm install uglify-js -g
+## npm install tsc
 
-## uglifyjs javascript/src/OrgCheck.js -o force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
-uglifyjs --ie --webkit --v8 build/src/javascript/OrgCheck.js -o force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
+for f in build/src/javascript/*_*; do
+    ## uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
+    cat "${f}" > /tmp/$(basename $f)
+done
+for f in build/src/javascript/OrgCheck.js; do
+    ## uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
+    cat "${f}" > /tmp/$(basename $f)
+done
+
+(
+    for f in build/src/javascript/OrgCheck.js; do
+        cat /tmp/$(basename $f)
+    done
+    for f in build/src/javascript/*_*; do
+        cat /tmp/$(basename $f)
+    done
+) > force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
 
 ## https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
 ## ln -s ../../pre-commit.sh .git/hooks/pre-commit

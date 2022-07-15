@@ -13,7 +13,6 @@
 <customLabels><name>OrgCheck_PercentageUsed_CL</name><label>% utilisé</label></customLabels>
 <customLabels><name>OrgCheck_OneActiveMember_CL</name><label>1 membre actif</label></customLabels>
 <customLabels><name>OrgCheck_OneInactiveMember_CL</name><label>1 membre inactif</label></customLabels>
-<customLabels><name>OrgCheck_OneUser_CL</name><label>1 utilisateur</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section2_Subtitle1_CL</name><label>A propos de la dette technique</label></customLabels>
 <customLabels><name>OrgCheck_Access_CL</name><label>Accéder</label></customLabels>
 <customLabels><name>OrgCheck_Actions_CL</name><label>Actions</label></customLabels>

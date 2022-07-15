@@ -13,7 +13,6 @@
 <labels><fullName>OrgCheck_PercentageUsed_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>% used</shortDescription><value>% used</value></labels>
 <labels><fullName>OrgCheck_OneActiveMember_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>1 active member</shortDescription><value>1 active member</value></labels>
 <labels><fullName>OrgCheck_OneInactiveMember_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>1 inactive member</shortDescription><value>1 inactive member</value></labels>
-<labels><fullName>OrgCheck_OneUser_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>1 user</shortDescription><value>1 user</value></labels>
 <labels><fullName>OrgCheck_Home_Section2_Subtitle1_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Subtitle #1 in section #1 in home page</shortDescription><value>About Technical Debt</value></labels>
 <labels><fullName>OrgCheck_Access_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Access</shortDescription><value>Access</value></labels>
 <labels><fullName>OrgCheck_Actions_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Actions</shortDescription><value>Actions</value></labels>
