@@ -216,7 +216,7 @@
                     const hlp = core.getHelper();
                     start2(ctl, hlp);
 
-                    new OrgCheck.ShortcutManager(hlp, {
+                    new OrgCheck.ShortcutManager().register(hlp, {
                         '27': function() { document.getElementById('modal').style.display = 'none'; }
                     });
                 }
