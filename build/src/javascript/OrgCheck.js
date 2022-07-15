@@ -21,874 +21,7 @@
     /**
      * Current limit informations
      */
-     limitInfo: {},
-
-     /**
-     * Handlers
-     */
-    handlers: {
-
-        /**
-         * Salesforce query handler
-         * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
-         */
-        SalesforceQueryHandler: function (configuration) {
-
-            /**
-             * Pivotable version number we use for connection and api age calculation
-             */
-            const API_VERSION = configuration.version;
-
-            /**
-             * Private connection to Salesforce using JsForce
-             */
-            const CONNECTION = new jsforce.Connection({
-                accessToken: configuration.accessToken,
-                version: API_VERSION + ".0",
-                maxRequest: "10000",
-                instanceUrl: configuration.instanceUrl
-            });
-
-            /**
-             * Limits call
-             */
-            function private_check_limits() {
-                CONNECTION.limits().then(d => {
-                    this.limitInfo = d;
-                    const elmt = document.getElementById('org-daily-api-requests');
-                    if (d && d.DailyApiRequests) {
-                        const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
-                        elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+rate.toFixed(3)+'</small></center>';
-                        if (rate > 0.9) {
-                            elmt.classList.add('slds-theme_error');
-                            stopWatcherCallback('Daily API Request is too high...');
-                        } else if (rate > 0.7) {
-                            elmt.classList.add('slds-theme_warning');
-                        } else {
-                            elmt.classList.add('slds-badge_lightest');
-                        }
-                    }
-                });
-            }
-
-            
-
-            // let's call it at the beggining
-            private_check_limits();
-
-            /**
-             * Is an API version is old or not?
-             * @param version The given version number (should be an integer)
-             * @param definition_of_old in Years (by default 3 years)
-             */
-            this.isVersionOld = function(version, definition_of_old = 3) {
-                // Compute age version in Years
-                const age = (API_VERSION - version) / 3;
-                if (age >= definition_of_old) return true;
-                return false;
-            };
-
-            /**
-            * Helper to extract the package and developer name
-            * @param fullDeveloperName Developer Name
-            */
-            this.splitDeveloperName = function(fullDeveloperName) {
-                let package_name = '';
-                let short_dev_name = fullDeveloperName;
-                const full_name_splitted = fullDeveloperName.split('__');
-                switch (full_name_splitted.length) {
-                    case 3: {
-                        // Use case #1: Custom object in a package
-                        // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
-                        package_name = full_name_splitted[0];
-                        short_dev_name = full_name_splitted[1];
-                        break;
-                    }
-                    case 2: {
-                        // Use case #2: Custom object in the org (no namespace)
-                        // Note: package_name is already set to ''
-                        short_dev_name = full_name_splitted[0];
-                        break;
-                    }
-                }
-                return {
-                    package: package_name,
-                    shortName : short_dev_name
-                };
-            };
-
-            /**
-            * Do a global describe on the salesforce org
-            * @param onResult Callback function to call with the results from global describe
-            * @param onError Callback function to call if there is an error
-            */
-            this.doDescribeGlobal = function (
-                onResult,
-                onError
-            ) {
-                private_check_limits();
-                CONNECTION.describeGlobal(function (error, result) {
-                    if (error) {
-                        if (onError) {
-                            onError(error);
-                        }
-                    } else {
-                        if (onResult) {
-                            onResult(result.sobjects);
-                        }
-                    }
-                });
-            };
-
-            /**
-            * Do a describe for a specific object in the salesforce org
-            * @param developerName Developer name of the object to retrieve
-            * @param onResult Callback function to call with the describe of this object
-            * @param onError Callback function to call if there is an error
-            */
-            this.doDescribeObject = function (
-                developerName,
-                onResult,
-                onError
-            ) {
-                private_check_limits();
-                CONNECTION.sobject(developerName).describe$(function (error, object) {
-                    if (error) {
-                        if (onError) {
-                            onError(error);
-                        }
-                    } else {
-                        if (onResult) {
-                            onResult(object);
-                        }
-                    }
-                });
-            };
-
-            /**
-            * Do a metadata retrieve describe for a specific type and list of members
-            * @param types List of types of metadata to retrieve
-            * @param onResult Callback function to call with the information
-            * @param onError Callback function to call if there is an error
-            */
-            this.doMetadataRetrieve = function(
-                types, 
-                onResult,
-                onError
-            ) {
-                private_check_limits();
-                CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
-                    if (error) {
-                        if (onError) {
-                            onError(error);
-                        }
-                    } else {
-                        if (onResult) {
-                            onResult(metadata);
-                        }
-                    }
-                });
-            }
-
-            /**
-            * Call REST api endpoint in HTTP direclty with GET (default) or POST method (with payload)
-            * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
-            * @param onEnd Callback function to call with all records (as a map)
-            * @param onError Callback function to call if there is an error
-            * @param optionalPayload Optional payload body and content type for the request (if specified method=POST if not method=GET)
-            */
-            this.doHttpCall = function(partialUrl, onEnd, onError, optionalPayload) {
-                private_check_limits();
-                let request = { 
-                    url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
-                    method: 'GET'
-                };
-                if (optionalPayload) {
-                    request.method = 'POST';
-                    request.body = optionalPayload.body;
-                    request.headers = { "Content-Type": optionalPayload.type };
-                }
-                CONNECTION.request(
-                    request, 
-                    function(error, response) {
-                        if (error) {
-                            error.context = { 
-                                when: 'While calling "connection.request".',
-                                what: {
-                                    partialUrl: partialUrl,
-                                    url: request.url,
-                                    method: request.method,
-                                    body: request.body
-                                }
-                            };
-                            onError(error);
-                        } else {
-                            onEnd(response);
-                        }
-                    }
-                );
-            }
-
-            /**
-            * Do Salesforce SOQL queries from Tooling API or not
-            * @param queries Array of objects containing 'tooling', 'queryMore', 'byPasses' (array of strings) and 'string'
-            * @param onEach Callback function for each record from database
-            * @param onEnd Callback function to call with all records (as a map)
-            * @param onError Callback function to call if there is an error
-            */
-            this.doQueries = function (
-                queries,
-                onEach,
-                onEnd,
-                onError
-            ) {
-                private_check_limits();
-                const promises = [];
-                queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
-                    private_query({
-                        index: i,
-                        queryString: q.string,
-                        queryMore: q.queryMore, 
-                        api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
-                        onEach: onEach,
-                        onEnd: function (map, size) {
-                            resolve({ d: map, l: size });
-                        },
-                        onError: function(error) {
-                            if (q.byPasses && q.byPasses.includes(error["errorCode"])) {
-                                resolve({ d: {}, l: 0 });
-                                return;
-                            }
-                            error.context = { 
-                                when: 'While creating a promise to call "private_query".',
-                                what: {
-                                    index: i,
-                                    queryMore: q.queryMore,
-                                    queryString: q.string,
-                                    queryUseTooling: q.tooling
-                                }
-                            };
-                            reject(error);
-                        }
-                    });
-                })));
-                Promise.all(promises)
-                    .then(function (results) {
-                        let data = {};
-                        let length = 0;
-                        results.forEach((v) => {
-                            data = Object.assign({}, data, v.d);
-                            length += v.l;
-                        });
-                        onEnd(data, length);
-                    })
-                    .catch(function (error) {
-                        onError(error);
-                    });
-            };
-
-            function private_query(config) {
-                const data = { records: {}, size: 0 };
-                const wrap = function(record, totalSize) {
-                    const wrapper = (config.onEach ? config.onEach(record, config.index, data.size+1, totalSize) : record);
-                    if (wrapper && wrapper.id) {
-                        const oldValue = data.records[wrapper.id];
-                        if (!oldValue) data.size++;
-                        data.records[wrapper.id] = wrapper;
-                    }
-                }
-                try {
-                    switch (config.api) {
-                        case 'rest':
-                        case 'tooling':
-                            const api = (config.api === 'rest' ? CONNECTION : CONNECTION.tooling);
-                            const callback_api = function(error, result) {
-                                // Check errors
-                                if (error) {
-                                    config.onError(error);
-                                    return;
-                                }
-                                // Add results to data
-                                result.records.forEach((record) => wrap(record, result.totalSize));
-                                // Continue looping?
-                                if (result.done === true || (result.done === false && config.queryMore === false)) {
-                                    if (config.onEnd) {
-                                        config.onEnd(data.records, data.size);
-                                    }
-                                } else {
-                                    api.queryMore(result.nextRecordsUrl, callback_api);
-                                }
-                            }
-                            api.query(config.queryString, callback_api);
-                            break;
-                    }
-                } catch (error) {
-                    config.onError(error);  
-                }
-            }
-        },
-
-        /**
-        * Format handler
-        * @param configuration Object must contain 'defaultLanguage', 'defaultDateFormat' and 'defaultDatetimeFormat'
-        */
-        FormatterHandler: function (configuration) {
-
-            /**
-            * Returns systematically an ID15 based on the ID18
-            * @param id to simplify
-            */
-            this.salesforceIdFormat = function (id) {
-                if (id && id.length == 18) return id.substr(0, 15);
-                return id;
-            };
-
-            /**
-            * Returns the string representation of a given date using the user's preferences
-            * @param value to format (number if a timestamp, string otherwise)
-            */
-            this.dateFormat = function (value) {
-                return private_date_format(
-                    value,
-                    UserContext.dateFormat,
-                    configuration.defaultDateFormat
-                );
-            };
-
-            /**
-            * Returns the string representation of a given datetime using the user's preferences
-            * @param value to format (number if a timestamp, string otherwise)
-            */
-            this.datetimeFormat = function (value) {
-                return private_date_format(
-                    value,
-                    UserContext.dateTimeFormat,
-                    configuration.defaultDatetimeFormat
-                );
-            };
-
-            /**
-            * Private method to format data/time into a string representation
-            * @param value to format (number if a timestamp, string otherwise)
-            * @param format to use
-            * @param formatIfNull to use if the previous parameter was null or empty
-            */
-            function private_date_format(value, format, formatIfNull) {
-                if (value) {
-                    const timestamp = typeof value === "number" ? value : Date.parse(value);
-                    return DateUtil.formatDate(
-                        new Date(timestamp),
-                        format ? format : formatIfNull
-                    );
-                }
-                return "";
-            }
-        },
-
-        /**
-        * Message handler
-        * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
-        */
-        MessageHandler: function (configuration) {
-
-            const private_errors = [];
-
-            /**
-            * Show error and clean other stuff in the page
-            * @param error
-            */
-            this.showError = function (error) {
-                if (error) {
-                    private_errors.push(error);
-                    let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
-                    commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
-                            'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
-                            '><br />';
-                    let informationHTML = '<b>OrgCheck Information</b><br />';
-                    informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
-                    informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
-                    informationHTML += 'Current running UserId: ' + (OrgCheck && OrgCheck.localUserId ? OrgCheck.localUserId : 'no userId available') + '<br />';
-                    informationHTML += 'Current Daily Api Requests: ' + (OrgCheck && OrgCheck.limitInfo && OrgCheck.limitInfo.DailyApiRequests ? ( 'remains: '+OrgCheck.limitInfo.DailyApiRequests.Remaining+' max:'+OrgCheck.limitInfo.DailyApiRequests.Max ) : 'no limit info available') + '<br />';
-                    informationHTML += '<br />';
-                    informationHTML += '<b>Navigation Information</b><br />';
-                    informationHTML += 'Page: ' + document.location.pathname + '<br />';
-                    informationHTML += '<br />';
-                    informationHTML += '<b>System Information</b><br />';
-                    informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
-                    informationHTML += 'Operating System: ' + navigator.platform + '<br />';
-                    informationHTML += 'Language: ' + navigator.language + '<br />';
-                    informationHTML += '<br />';
-                    private_errors.forEach((v, i) => {
-                        informationHTML += '<b>Error #' + i + ': ' + v.name + '</b><br />';
-                        if (v.context) {
-                            informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
-                            informationHTML += 'What:<ul class="slds-list_dotted">';
-                            for (k in v.context.what) {
-                                informationHTML += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
-                            }
-                            informationHTML += '</ul>';
-                        }
-                        if (v.stack) {
-                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
-                        }
-                        informationHTML += '<br />';
-                    });
-                    private_show_modal(
-                        'Oh no, OrgCheck had an error!', 
-                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
-                    );
-                }
-            };
-
-            /**
-            * Show dialog box with a title and content
-            * @param title String title
-            * @param content String html or NodeElement representing the content of the box
-            */
-            this.showModal = function (title, element) {
-                private_show_modal(title, element);
-            };
-
-            /**
-            * Show warning message
-            * @param message String the message
-            */
-            this.showWarning = function (message) {
-                const messageId = document.getElementById(configuration.warningMessageId);
-                messageId.children[1].innerHTML = '<p>'+message+'</p>';
-                messageId.style.display = 'flex';
-            };
-
-            /**
-            * Hide warning banner and empty the message
-            */
-            this.hideWarning = function (message) {
-                const messageId = document.getElementById(configuration.warningMessageId);
-                messageId.style.display = 'none';
-                messageId.children[1].innerHTML = '';
-            };
-
-            /**
-            * Show the modal dialog box
-            * @param element Html element to show in the modal box
-            */
-            function private_show_modal(title, element) {
-                const header = document.getElementById(configuration.modalTitleId);
-                const content = document.getElementById(configuration.modalContentId);
-                header.textContent = title;
-                if (content.firstElementChild) {
-                    content.removeChild(content.firstElementChild);
-                }
-                if (typeof element == 'string') {
-                    const span = document.createElement('span');
-                    span.innerHTML = element;
-                    content.appendChild(span);
-                } else {
-                    content.appendChild(element);
-                }
-                document.getElementById(configuration.modalId).style.display = 'block';
-            }
-        },
-
-        /**
-        * Caching handler
-        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
-        */
-        CacheHandler: function (configuration) {
-
-            /**
-            * Cache system to use. 
-            *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
-            *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
-            *              <b>Session storage</b> means data WILL be erased after closing the browser. 
-            *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
-            */
-            const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
-
-            /**
-             * Key for "timestamp" on every cache entry
-             */
-            const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
-            
-            /**
-             * Key for "version" on every cache entry
-             */
-            const VERSION_KEY = configuration.versionKey || "__VERSION__";
-
-            /**
-             * Key for "size" on every cache entry
-             */
-            const SIZE_KEY = configuration.sizeKey || "__51Z3__";
-
-            /**
-            * Method to clear all OrgCheck cached items
-            * @param section Name of the section (group of keys) in the cache. If undefined, any section
-            */
-            this.clearAll = function (section) {
-                let keys_to_remove = private_get_keys(section);
-                for (let i = 0; i < keys_to_remove.length; i++) {
-                    private_delete_item(section, keys_to_remove[i]);
-                }
-            };
-
-            /**
-            * Method to clear one OrgCheck cached item
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the previous value that has been deleted
-            */
-            this.clear = function (section, key) {
-                const oldValue = private_delete_item(section, key);
-                return oldValue;
-            };
-
-            /**
-            * Method to get all keys of the WoldemOrg cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @return All keys of the cache of the section.
-            */
-            this.keys = function (section) {
-                const keys = private_get_keys(section);
-                return keys;
-            };
-
-            /**
-            * Method to get an item from the cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the value in cache (undefined if not found)
-            */
-            this.getItem = function (section, key) {
-                const value = private_get_item(section, key);
-                return value;
-            };
-
-            /**
-            * Method to get the timestamp and version of a specific cache item
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the side values of the item in cache (undefined if not found)
-            */
-            this.sideValues = function (section, key) {
-                const value = private_get_item(section, key);
-                if (value) {
-                    return {
-                        timestamp: value[TIMESTAMP_KEY],
-                        version: value[VERSION_KEY],
-                        size: value[SIZE_KEY]
-                    };
-                }
-                return;
-            };
-
-            /**
-            * Method to set an item into the cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @param value of the item to store in cache
-            */
-            this.setItem = function (section, key, value) {
-                try {
-                    private_set_item(section, key, value);
-                } catch (e) {
-                    private_log_error(e);
-                }
-            };
-
-            /**
-            * Method to cache error and clean other stuff in the page
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @param retrieverCallback function that we call to get the value
-            * @param finalCallback function to call after the value was got
-            */
-            this.cache = function (section, key, retrieverCallback, finalCallback) {
-                // Query the cache first
-                const value = private_get_item(section, key);
-                // Is the cache available??
-                if (value) {
-                    // Yes, the cache is available
-                    // Call the onEnd method with data coming from cache
-                    finalCallback(value, true);
-                } else {
-                    // No, the cache is not available for this data
-                    retrieverCallback(function (newValue) {
-                        // check if data is undefined
-                        if (newValue) {
-                            // Update the cache
-                            try {
-                                private_set_item(section, key, newValue);
-                            } catch (e) {
-                                private_log_error(e);
-                            }
-                        }
-                        // Call the onEnd method with data not coming from cache
-                        finalCallback(newValue, false);
-                    });
-                }
-            };
-
-            /**
-            * Log actions from the cache
-            * @param e Error
-            */
-            function private_log_error(e) {
-                console.error("[OrgCheck:Cache]", { error: e });
-            }
-
-            /**
-            * Private method to generate the prefix used for keys in cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @return Prefix generated from section name
-            */
-            function private_generate_prefix(section) {
-                return configuration.cachePrefix + "." + (section ? section + "." : "");
-            }
-
-            /**
-            * Returns all the OrgCheck keys in cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @return All the keys of the OrgCheck cache for the given section
-            */
-            function private_get_keys(section) {
-                const prefix = private_generate_prefix(section);
-                let keys_to_remove = [];
-                for (let i = 0; i < CACHE_SYSTEM.length; i++) {
-                    const key = CACHE_SYSTEM.key(i);
-                    if (key && key.startsWith(prefix)) {
-                        keys_to_remove.push(key.substr(prefix.length));
-                    }
-                }
-                return keys_to_remove;
-            }
-
-            /**
-            * Private method to get an item from the cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the value in cache (undefined if not found)
-            */
-            function private_get_item(section, key) {
-                const k = private_generate_prefix(section) + key;
-                const value = CACHE_SYSTEM.getItem(k);
-                if (value) {
-                    let jsonValue = JSON.parse(value);
-                    if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
-                        CACHE_SYSTEM.removeItem(k);
-                        return;
-                    }
-                    return jsonValue;
-                }
-                return;
-            }
-
-            /**
-            * Private method to set an item into the cache
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @param value of the item to store in cache
-            */
-            function private_set_item(section, key, value) {
-                if (!value) return;
-                try {
-                    value[TIMESTAMP_KEY] = Date.now();
-                    value[VERSION_KEY] = OrgCheck.version;
-                    CACHE_SYSTEM.setItem(
-                        private_generate_prefix(section) + key,
-                        JSON.stringify(value)
-                    );
-                } catch (e) {
-                    throw Error("Failed to write in cache");
-                } finally {
-                    // Make sure to delete the timestamp even after error
-                    delete value[TIMESTAMP_KEY];
-                    delete value[VERSION_KEY];
-                }
-            }
-
-            /**
-            * Private method to clear one OrgCheck cached item
-            * @param section Name of the section (group of keys) in the cache.
-            * @param key in cache (without the prefix) to use
-            * @return the previous value that has been deleted
-            */
-            function private_delete_item(section, key) {
-                return CACHE_SYSTEM.removeItem(private_generate_prefix(section) + key);
-            }
-        },
-
-        /**
-        * Manage a "map" in this context which is an object containing
-        *              Salesforce IDs as properties plus an extra property called
-        *              "size" which is the number of Salesforce IDs contained in the
-        *              object.
-        * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
-        */
-        MapHandler: function (configuration) {
-            /**
-            * Iterative function for each key of the given map
-            * @param map Given map
-            * @param keyCallback function to call for each key of the given map
-            */
-            this.forEach = function (map, keyCallback) {
-                for (let key in map)
-                    if (map.hasOwnProperty(key) && key !== configuration.keySize 
-                            && !key.startsWith(configuration.keyExcludePrefix)) {
-                        keyCallback(key);
-                    }
-            };
-
-            /**
-            * Returns the size of the map (as stored)
-            * @param map Given map
-            */
-            this.getSize = function (map) {
-                return map[configuration.keySize];
-            };
-
-            /**
-            * Set the size of the map
-            * @param map Given map
-            * @param newSize
-            */
-            this.setSize = function (map, newSize) {
-                map[configuration.keySize] = newSize;
-            };
-
-            /**
-            * Returns the keys of the map (excluding the technical size key!)
-            * @param map Given map
-            * @return Keys of the map
-            */
-            this.keys = function (map) {
-                if (!map) return [];
-                const keys = Object.keys(map);
-                return keys.filter(key => key !== configuration.keySize && !key.startsWith(configuration.keyExcludePrefix));
-            };
-        },
-
-        /**
-        * Array handler
-        */
-        ArrayHandler: function () {
-            /**
-            * Concatenate two arrays
-            * @param array1 First array (will not be modified)
-            * @param array2 Second array (will not be modified)
-            * @param prop Optionnal property to use in the arrays
-            * @return A new array containing uniq items from array1 and array2
-            */
-            this.concat = function (array1, array2, prop) {
-                if (prop) {
-                    let new_array = [];
-                    let array2_keys = [];
-                    if (array2) for (let i = 0; i < array2.length; i++) {
-                        const item2 = array2[i];
-                        array2_keys.push(item2[prop]);
-                        new_array.push(item2);
-                    }
-                    if (array1) for (let i = 0; i < array1.length; i++) {
-                        const item1 = array1[i];
-                        const key1 = item1[prop];
-                        if (array2_keys.indexOf(key1) < 0) {
-                            new_array.push(item1);
-                        }
-                    }
-                    return new_array;
-                } else {
-                    let uniq_items_to_add;
-                    if (array1) {
-                        uniq_items_to_add = array1.filter((item) => array2.indexOf(item) < 0);
-                    } else {
-                        uniq_items_to_add = [];
-                    }
-                    if (array2) {
-                        return array2.concat(uniq_items_to_add);
-                    } else {
-                        return uniq_items_to_add;
-                    }
-                }
-            };
-        },
-
-        /**
-        * Progress bar handler
-        * @param configuration Object must contain 'spinnerDivId' and 'spinnerMessagesId'
-        */
-        ProgressBarHandler: function (configuration) {
-
-            const SPINNER_DIV = document.getElementById(configuration.spinnerDivId);
-            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessagesId);
-
-            /**
-            * Reset the progress bar with current value at zero and an empty message
-            */
-            this.reset = function () {
-                SPINNER_MSG_DIV.innerHTML = '';
-            };
-
-            this.addSection = function(sectionName, message) {
-                SPINNER_MSG_DIV.innerHTML += 
-                    '<li class="slds-progress__item" id="spinner-section-'+sectionName+'">'+
-                        '<div class="slds-progress__marker"></div>'+
-                        '<div class="slds-progress__item_content slds-grid slds-grid_align-spread" id="spinner-section-msg-'+sectionName+'">'+message+'</div>'+
-                    '</li>';
-            };
-
-            /**
-            * Set the progress message with a given value
-            * @param message message to display
-            * @param status 'initialized', 'started', 'failed', 'ended'
-            * @param section optional section name
-            */
-            this.setSection = function (sectionName, message, status) {
-                const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
-                const sectionId = 'spinner-section-'+sectionName;
-                const li = document.getElementById('spinner-section-'+sectionName);
-                if (li) {
-                    li.classList.remove('slds-has-error','slds-is-completed','slds-is-active');
-                    switch (status) {
-                        case 'started': 
-                            li.classList.add('slds-is-completed');
-                            li.children[0].style['border-color'] = '';
-                            li.children[0].style['background-image'] = 'url(/img/loading.gif)';
-                            li.children[0].style['background-size'] = '8px';
-                            break;
-                        case 'ended': 
-                            li.classList.add('slds-is-completed'); 
-                            li.children[0].style['border-color'] = 'green';
-                            li.children[0].style['background-image'] = 'url(/img/func_icons/util/checkmark16.gif)';
-                            li.children[0].style['background-size'] = '8px';
-                            break;
-                        case 'failed': 
-                            li.classList.add('slds-has-error'); 
-                            li.children[0].style['border-color'] = '';
-                            li.children[0].style['background-image'] = 'url(/img/func_icons/remove12_on.gif)';
-                            li.children[0].style['background-size'] = '8px';
-                            break;
-                    }
-                }
-                const msg = document.getElementById('spinner-section-msg-'+sectionName);
-                if (msg) {
-                    msg.innerText = message;
-                }
-            };
-
-            /**
-            * Hide the spinner and toast
-            */
-            this.hide = function () {
-                SPINNER_DIV.style.display = 'none';
-            };
-
-            /**
-            * Show the spinner and toast
-            */
-            this.show = function () {
-                SPINNER_DIV.style.display = 'block';
-            };
-        }
-    },
+    limitInfo: {},
 
     /**
      * Dataset representation
@@ -960,57 +93,57 @@
         const CACHE_SECTION_PREFERENCE = 'Preference';
         const MAP_KEYSIZE = '__51Z3__';
 
-        const PERSISTANT_CACHE_HANDLER = new OrgCheck.handlers.CacheHandler({
+        const PERSISTANT_CACHE_HANDLER = new OrgCheck.CacheHandler({
             isPersistant: true,
             cachePrefix: CACHE_PREFIX
         });
 
-        const TEMPORARY_CACHE_HANDLER = new OrgCheck.handlers.CacheHandler({
+        const TEMPORARY_CACHE_HANDLER = new OrgCheck.CacheHandler({
             isPersistant: false,
             cachePrefix: CACHE_PREFIX
         });
 
-        // Current org information set by default to the local org
-        const ORG_INFORMATION = {
-            id: setup.sfLocalAccessToken.split('!')[0],
-            version: setup.sfApiVersion,
-            accessToken: setup.sfLocalAccessToken,
-            userId: setup.sfLocalCurrentUserId
-        }
-
-        // Set global information about org (in case of showError mainly)
-        OrgCheck.localOrgId = ORG_INFORMATION.id;
-        OrgCheck.localUserId = ORG_INFORMATION.userId;
-
-        const MAP_HANDLER = new OrgCheck.handlers.MapHandler({
+        const MAP_HANDLER = new OrgCheck.DataTypes.MapHandler({
             keySize: MAP_KEYSIZE,
             keyExcludePrefix: '__'            
         });
 
-        const ARRAY_HANDLER = new OrgCheck.handlers.ArrayHandler();
+        const ARRAY_HANDLER = new OrgCheck.DataTypes.ArrayHandler();
 
-        const MSG_HANDLER = new OrgCheck.handlers.MessageHandler({
+        const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
             warningMessageId: setup.htmlWarningMessageTagId
         });
 
-        const PROGRESSBAR_HANDLER = new OrgCheck.handlers.ProgressBarHandler({
+        const PROGRESSBAR_HANDLER = new OrgCheck.VisualComponents.ProgressBarHandler({
             spinnerDivId: setup.htmlSpinnerTagId,
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
-        ORG_INFORMATION.stopWatcherCallback = function(d) {
-            MSG_HANDLER.showError(d);
-            MSG_HANDLER.showModal(d);
-        }
-        const SALESFORCE_HANDLER = new OrgCheck.handlers.SalesforceQueryHandler(ORG_INFORMATION);
+        const SALESFORCE_HANDLER = new OrgCheck.SalesforceHandler({
+            id: setup.sfLocalAccessToken.split('!')[0],
+            version: setup.sfApiVersion,
+            accessToken: setup.sfLocalAccessToken,
+            userId: setup.sfLocalCurrentUserId
+        });
 
-        const FORMAT_HANDLER = new OrgCheck.handlers.FormatterHandler({ 
+        // Set global information about org (in case of showError mainly)
+        OrgCheck.localOrgId = SALESFORCE_HANDLER.getOrgId();
+        OrgCheck.localUserId = SALESFORCE_HANDLER.getCurrentUserId();
+
+        const FORMAT_HANDLER = new OrgCheck.DataTypes.DateHandler({ 
             defaultLanguage: setup.formatDefaultLanguage,
             defaultDateFormat: setup.formatDefaultDate,  
             defaultDatetimeFormat: setup.formatDefaultDatetime 
+        });
+
+        const SECURITY_HANDLER = new OrgCheck.DataTypes.SecurityHandler();
+
+        const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
+            SecurityHandler: SECURITY_HANDLER,
+            DateHandler: FORMAT_HANDLER
         });
 
         // ======================================================
@@ -1302,12 +435,6 @@
                         isOld: function(version) {
                             return SALESFORCE_HANDLER.isVersionOld(version, 3);
                         }
-                    },
-                    information: function() {
-                        return { 
-                            organizationId: ORG_INFORMATION.id,
-                            apiVersion: ORG_INFORMATION.version
-                        }
                     }
                 },
                 cache: {
@@ -1427,7 +554,16 @@
                     },
                     datatable: {
                         create: function(config) {
-                            private_create_datatable(config);
+                            if (!Array.isArray(config.data)) config.datakeys = MAP_HANDLER.keys(config.data);
+                            DATATABLE_HANDLER.create(config);
+                            /*
+                            SECURITY_HANDLER.htmlSecurise(row[c.property]);
+                        if (c.type && !c.formula) {
+                            switch (c.type) {
+                                case 'date': dataDecorated = services.Formatable_Date__dateFormat(dataRaw); break;
+                                case 'datetime': dataDecorated = services.Formatable_Date__datetimeFormat
+
+                            ).create(config);*/
                         },
                         clean: function(element) {
                             const dt = document.getElementById(element);
@@ -1588,8 +724,7 @@
                             return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
                         },
                         link: function(uri, content) {
-                            const completeURL = (ORG_INFORMATION.instanceUrl ? ORG_INFORMATION.instanceUrl : '') + uri;
-                            return '<a href="' + completeURL + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
+                            return '<a href="' + SALESFORCE_HANDLER.getEndpointUrl() + uri + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
                         },
                         icon: function(name) {
                             switch (name) {
@@ -1629,7 +764,7 @@
          * @param id to simplify
          */
         this.doSimplifiySalesforceID = function(id) {
-            return FORMAT_HANDLER.salesforceIdFormat(id);
+            return SALESFORCE_HANDLER.salesforceIdFormat(id);
         };
 
         /**
@@ -1903,277 +1038,6 @@
         }
 
         /**
-         * Create a datatable in HTML from a map and a set of configuration
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>element</code>: name of the root element where the table will be added as a child node.</li>
-         *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
-         *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
-         *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
-         *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
-         *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
-         *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
-         *                <li><code>filtering</code>: JSON, description of an optional filter to apply to the visual representation.</li>
-         *              </ol>
-         */
-        function private_create_datatable(config) {
-            const dt = (typeof config.element === 'string') ? document.getElementById(config.element) : config.element;
-            const counters = dt.appendChild(document.createElement('span'));
-            const filterCounters = dt.appendChild(document.createElement('span'));
-            const table = dt.appendChild(document.createElement('table'));
-            const footerMessage = dt.appendChild(document.createElement('span'));
-            if (config.showSearch === true) {
-                const searchBox = dt.insertBefore(document.createElement('div'), table);
-                const searchIcon = searchBox.appendChild(document.createElement('img'));
-                const search = searchBox.appendChild(document.createElement('input'));
-                searchBox.classList.add('slds-input-has-icon', 'slds-input-has-icon_left');
-                searchIcon.classList.add('slds-icon','slds-input__icon','slds-input__icon_left','slds-icon-text-default');
-                searchIcon.setAttribute('src', '/img/chatter/lookupSearchHover.png');
-                search.classList.add('slds-input');
-                search.setAttribute('placeholder', 'Search any field (case sensitive) and press Enter');
-                search.onkeydown = function(e) {
-                    if (e.code === 'Enter') {
-                        const searchValue = e.target.value;
-                        const items = [].slice.call(table.rows).slice(1);
-                        let nbVisible = 0;
-                        table.hidden = true; // make table invisible while manipulating the DOM
-                        items.forEach(tr => {
-                            if (!searchValue) {
-                                tr.hidden = false;
-                                nbVisible++;
-                            } else {
-                                let hidden = true;
-                                const lowerCaseSearchValue = searchValue.toLowerCase();
-                                for (let i=0; i<tr.children.length; i++) {
-                                    const v = tr.children[i].innerText?.toLowerCase();
-                                    if (v && v.includes && v.includes(lowerCaseSearchValue)) {
-                                        hidden = false;
-                                        nbVisible++;
-                                        break;
-                                    }
-                                }
-                                tr.hidden = hidden;
-                            }
-                        });
-                        if (config.showStatistics === true) {
-                            if (searchValue) {
-                                filterCounters.innerHTML = ', Filter is <b><code>on</code></b>, Number of visible rows: <b><code>'+nbVisible+'</code></b>';
-                            } else {
-                                filterCounters.innerHTML = ', Filter is <b><code>off</code></b>';
-                            }
-                        }
-                        if (nbVisible == 0) {
-                            footerMessage.innerHTML = 'No data to show with this filter.';
-                        } else {
-                            footerMessage.innerHTML = '';
-                        }
-                        table.hidden = false; // make table visible again
-                    }
-                };
-            }
-            table.classList.add('slds-table', 'slds-table_bordered', 'slds-table_cell-buffer');
-            const thead = table.appendChild(document.createElement('thead'));
-            const trHead = thead.appendChild(document.createElement('tr'));
-            trHead.classList.add('slds-text-title_caps');
-            const orderingImage = document.createElement('img');
-            let firstSortCallback;
-            if (config.showLineCount === true) config.columns.unshift({ name: '#' });
-            config.columns.forEach((c, i) => {
-                const thHead = trHead.appendChild(document.createElement('th'));
-                thHead.setAttribute('scope', 'col');
-                thHead.setAttribute('aria-label', c.name);
-                thHead.classList.add('slds-is-sortable');
-                const aHead = thHead.appendChild(document.createElement('a'));
-                aHead.classList.add('slds-th__action', 'slds-text-link_reset');
-                aHead.setAttribute('href', 'javascript:void(0);');
-                aHead.setAttribute('role', 'button');
-                aHead.setAttribute('tabindex', i);
-                const grdHead = aHead.appendChild(document.createElement('div'));
-                grdHead.classList.add('slds-grid', 'slds-grid_vertical-align-center', 'slds-has-flexi-truncate');
-                const ttlHead = grdHead.appendChild(document.createElement('span'));
-                ttlHead.classList.add('slds-truncate');
-                ttlHead.setAttribute('title', c.name);
-                ttlHead.textContent = c.name;
-                if (config.sorting) {
-                    aHead.onclick = function(e) { 
-                        if (e) {
-                            if (config.sorting.name === c.name) {
-                                config.sorting.order = (config.sorting.order !== 'asc') ? 'asc' : 'desc';
-                            } else {
-                                config.sorting.name = c.name;
-                                config.sorting.order = 'asc';
-                            }
-                            if (orderingImage.parentNode) {
-                                orderingImage.parentNode.removeChild(orderingImage);
-                            }
-                        }
-                        if (config.sorting.order === 'asc') {
-                            thHead.setAttribute('aria-sort', 'ascending');
-                            orderingImage.src = '/img/sort_asc_arrow.gif';
-                        } else {
-                            thHead.setAttribute('aria-sort', 'descending');
-                            orderingImage.src = '/img/sort_desc_arrow.gif';
-                        }
-                        grdHead.appendChild(orderingImage);
-                        const iOrder = config.sorting.order === 'asc' ? 1 : -1;
-                        const items = [].slice.call(table.rows).slice(1);
-                        const isCellNumeric = c.type === 'numeric';
-                        items.sort(function compare(a, b) {
-                            const ca = a.getElementsByTagName('td')[i];
-                            const cb = b.getElementsByTagName('td')[i];
-                            const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
-                            const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
-                            if (isCellNumeric) {
-                                if (va && vb) return (va - vb) * iOrder;
-                                if (va) return iOrder;
-                                if (vb) return -iOrder;
-                            }
-                            if (va < vb) return -iOrder;
-                            if (va > vb) return iOrder;
-                            return 0;
-                        });
-                        table.hidden = true; // make table invisible while manipulating the DOM
-                        let countRow = 1;
-                        items.forEach(r => {
-                            const parent = r.parentNode;
-                            const detatchedItem = parent.removeChild(r);
-                            parent.appendChild(detatchedItem);
-                            if (config.showLineCount === true) {
-                                detatchedItem.firstChild.innerText = countRow;
-                                countRow++;
-                            }
-                        });
-                        table.hidden = false; // make table visible again
-                    };
-                    if (config.sorting.name === c.name) {
-                        firstSortCallback = function() { aHead.onclick(); }
-                    }
-                }
-            });
-            const tbody = table.appendChild(document.createElement('tbody'));
-            const isArray = Array.isArray(config.data);
-            const iterable = isArray ? config.data : MAP_HANDLER.keys(config.data);
-            table.hidden = true; // make table invisible while manipulating the DOM
-            let nbRows = 0, nbBadRows = 0, sumScore = 0;
-            iterable.forEach(k => {
-                if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
-                nbRows++;
-                const trBody = tbody.appendChild(document.createElement('tr'));
-                let rowScore = 0;
-                let tdBodyScore = null;
-                const rowBadColumns = [];
-                config.columns.forEach(c => {
-                    const tdBody = trBody.appendChild(document.createElement('td'));
-                    if (c.property === '##score##') {
-                        tdBodyScore = tdBody;
-                        return;
-                    }
-                    if (config.showLineCount === true && c.name === '#') {
-                        tdBody.innerHTML = nbRows;
-                        return;
-                    }
-                    const row = isArray ? k : config.data[k];
-                    let dataDecorated = '';
-                    let dataRaw = '';
-                    let additiveScore = 0;
-                    try {
-                        if (c.property) dataRaw = private_secure_html(row[c.property]);
-                        if (c.type && !c.formula) {
-                            switch (c.type) {
-                                case 'date': dataDecorated = FORMAT_HANDLER.dateFormat(dataRaw); break;
-                                case 'datetime': dataDecorated = FORMAT_HANDLER.datetimeFormat(dataRaw); break;
-                                case 'numeric': dataDecorated = dataRaw; break;
-                            }   
-                        } else {
-                            if (c.formula) dataDecorated = c.formula(row);
-                            if (!c.formula && c.property) dataDecorated = dataRaw;
-                            if (c.formula && !c.property) dataRaw = dataDecorated;
-                        }
-                    } catch (e) {
-                        e.context = {
-                            'when': 'Datatable: calling formula to render the content of a cell in the table',
-                            'what': {
-                                'Column': c.name,
-                                'Formula': c.formula,
-                                'Property': c.property,
-                                'Data': row
-                            }
-                        }
-                        throw e;
-                    }
-                    try {
-                        if (c.scoreFormula) {
-                            additiveScore = c.scoreFormula(row);
-                            if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
-                                rowScore += additiveScore;
-                                tdBody.bgColor = '#ffd079';
-                                rowBadColumns.push(c.name);
-                            }
-                        }
-                    } catch (e) {
-                        e.context = {
-                            'when': 'Datatable: calling scoreFormula to calculate the score of a cell in the table',
-                            'what': {
-                                'Column': c.name,
-                                'Formula': c.scoreFormula,
-                                'Current Score': rowScore,
-                                'Data': row
-                            }
-                        }
-                        throw e;
-                    }
-                    if (dataDecorated && dataDecorated !== '') {
-                        const isArray = (Array.isArray(dataDecorated) === true);
-                        if (typeof dataDecorated === 'object' && isArray === false) {
-                            if (additiveScore > 0) {
-                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }       
-                            tdBody.appendChild(dataDecorated);
-                        } else {
-                            let html = '';
-                            if (additiveScore > 0) {
-                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }
-                            if (isArray === true) {
-                                dataDecorated.forEach(cnt => html += cnt+'<br />');
-                            } else {
-                                html += dataDecorated;
-                            }
-                            tdBody.innerHTML = html;
-                        }
-                    }
-                    // In case you have a formula that decorates the raw value of the cell,
-                    // you want the sort feature to work on that RAW DATA instead of the 
-                    // decorative version of the data
-                    if (dataRaw !== dataDecorated) {
-                        tdBody.setAttribute('aria-data', dataRaw?.toString());
-                    }
-                });
-                if (tdBodyScore && rowScore > 0) {
-                    const msg = 'The badness score is '+rowScore+'. Please check the column'+(rowBadColumns.length>1?'s':'')+' '+rowBadColumns+'. Thank you!';
-                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="'+msg+'" title="'+msg+'" />&nbsp;' + rowScore;
-                    tdBodyScore.bgColor = '#ffd079';
-                    trBody.bgColor = '#ffe099';
-                    sumScore += rowScore;
-                    nbBadRows++;
-                }
-            });
-            if (config.showStatistics === true) {
-                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
-                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
-            }
-            if (nbRows == 0) {
-                footerMessage.innerHTML = 'No data to show.';
-            } else {
-                footerMessage.innerHTML = '';
-            }
-            table.hidden = false; // make table visible again
-            if (firstSortCallback) { 
-                firstSortCallback(); 
-            }
-        };
-
-        /**
          * Compute the dependencies tabular view
          * @param tagId id of the entity
          * @param name of the entity we want to analyze the dependencies
@@ -2200,7 +1064,7 @@
             const div = document.createElement('div');
             div.id = tagId;
             
-            private_create_datatable({
+            DATATABLE_HANDLER.create({
                 element: div,
                 data: tabularView,
                 columns: [
@@ -2375,23 +1239,27 @@
             SALESFORCE_HANDLER.doQueries(
                 queries, 
                 function(record) {
-                    const aId = FORMAT_HANDLER.salesforceIdFormat(record.MetadataComponentId);
-                    const aType = record.MetadataComponentType;
-                    const aName = record.MetadataComponentName;
-                    const bId = FORMAT_HANDLER.salesforceIdFormat(record.RefMetadataComponentId);
-                    const bType = record.RefMetadataComponentType;
-                    const bName = record.RefMetadataComponentName;
-                    let b = map[bId];
-                    if (!b) b = map[bId] = {};
-                    if (!b.used) b.used = {};
-                    if (!b.used[aType]) b.used[aType] = [];
-                    b.used[aType][aId] = { name: aName };
-                    let a = map[aId];
-                    if (!a) a = map[aId] = {};
-                    if (!a.using) a.using = {};
-                    if (!a.using[bType]) a.using[bType] = [];
-                    a.using[bType][bId] = { name: bName };
-                    return {};
+                    try {
+                        const aId = SALESFORCE_HANDLER.salesforceIdFormat(record.MetadataComponentId);
+                        const aType = record.MetadataComponentType;
+                        const aName = record.MetadataComponentName;
+                        const bId = SALESFORCE_HANDLER.salesforceIdFormat(record.RefMetadataComponentId);
+                        const bType = record.RefMetadataComponentType;
+                        const bName = record.RefMetadataComponentName;
+                        let b = map[bId];
+                        if (!b) b = map[bId] = {};
+                        if (!b.used) b.used = {};
+                        if (!b.used[aType]) b.used[aType] = [];
+                        b.used[aType][aId] = { name: aName };
+                        let a = map[aId];
+                        if (!a) a = map[aId] = {};
+                        if (!a.using) a.using = {};
+                        if (!a.using[bType]) a.using[bType] = [];
+                        a.using[bType][bId] = { name: bName };
+                        return {};
+                    } catch (e) {
+                        callbackError(e);
+                    }
                 }, 
                 function() {
                     callbackSuccess(map);
@@ -2449,7 +1317,7 @@
                                         let apexTriggers = [];
                                         for (let i=0; i<record.ApexTriggers.records.length; i++) {
                                             apexTriggers.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
                                                 name: record.ApexTriggers.records[i].Name
                                             });
                                         }
@@ -2460,7 +1328,7 @@
                                         let fieldSets = [];
                                         for (let i=0; i<record.FieldSets.records.length; i++) {
                                             fieldSets.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
                                                 label: record.FieldSets.records[i].MasterLabel,
                                                 description: record.FieldSets.records[i].Description
                                             });
@@ -2472,7 +1340,7 @@
                                         let layouts = [];
                                         for (let i=0; i<record.Layouts.records.length; i++) {
                                             layouts.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
                                                 name: record.Layouts.records[i].Name,
                                                 type: record.Layouts.records[i].LayoutType
                                             });
@@ -2484,7 +1352,7 @@
                                         let limits = [];
                                         for (let i=0; i<record.Limits.records.length; i++) {
                                             limits.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
                                                 label: record.Limits.records[i].Label,
                                                 remaining: record.Limits.records[i].Remaining,
                                                 max: record.Limits.records[i].Max,
@@ -2498,7 +1366,7 @@
                                         let validationRules = [];
                                         for (let i=0; i<record.ValidationRules.records.length; i++) {
                                             validationRules.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
                                                 name: record.ValidationRules.records[i].ValidationName,
                                                 isActive: record.ValidationRules.records[i].Active,
                                                 description: record.ValidationRules.records[i].Description,
@@ -2513,7 +1381,7 @@
                                         let webLinks = [];
                                         for (let i=0; i<record.WebLinks.records.length; i++) {
                                             webLinks.push({
-                                                id: FORMAT_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
+                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
                                                 name: record.WebLinks.records[i].Name,
                                             });
                                         }

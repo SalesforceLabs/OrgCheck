@@ -1,0 +1,226 @@
+/**
+ * Cache
+ * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
+ */
+OrgCheck.CacheHandler = function (configuration) {
+
+    /**
+    * Cache system to use. 
+    *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
+    *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
+    *              <b>Session storage</b> means data WILL be erased after closing the browser. 
+    *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
+    */
+    const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
+
+    /**
+     * Key for "timestamp" on every cache entry
+     */
+    const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
+    
+    /**
+     * Key for "version" on every cache entry
+     */
+    const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+    /**
+     * Key for "size" on every cache entry
+     */
+    const SIZE_KEY = configuration.sizeKey || "__51Z3__";
+
+    /**
+    * Method to clear all OrgCheck cached items
+    * @param section Name of the section (group of keys) in the cache. If undefined, any section
+    */
+    this.clearAll = function (section) {
+        let keys_to_remove = private_get_keys(section);
+        for (let i = 0; i < keys_to_remove.length; i++) {
+            private_delete_item(section, keys_to_remove[i]);
+        }
+    };
+
+    /**
+    * Method to clear one OrgCheck cached item
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @return the previous value that has been deleted
+    */
+    this.clear = function (section, key) {
+        const oldValue = private_delete_item(section, key);
+        return oldValue;
+    };
+
+    /**
+    * Method to get all keys of the WoldemOrg cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @return All keys of the cache of the section.
+    */
+    this.keys = function (section) {
+        const keys = private_get_keys(section);
+        return keys;
+    };
+
+    /**
+    * Method to get an item from the cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @return the value in cache (undefined if not found)
+    */
+    this.getItem = function (section, key) {
+        const value = private_get_item(section, key);
+        return value;
+    };
+
+    /**
+    * Method to get the timestamp and version of a specific cache item
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @return the side values of the item in cache (undefined if not found)
+    */
+    this.sideValues = function (section, key) {
+        const value = private_get_item(section, key);
+        if (value) {
+            return {
+                timestamp: value[TIMESTAMP_KEY],
+                version: value[VERSION_KEY],
+                size: value[SIZE_KEY]
+            };
+        }
+        return;
+    };
+
+    /**
+    * Method to set an item into the cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @param value of the item to store in cache
+    */
+    this.setItem = function (section, key, value) {
+        try {
+            private_set_item(section, key, value);
+        } catch (e) {
+            private_log_error(e);
+        }
+    };
+
+    /**
+    * Method to cache error and clean other stuff in the page
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @param retrieverCallback function that we call to get the value
+    * @param finalCallback function to call after the value was got
+    */
+    this.cache = function (section, key, retrieverCallback, finalCallback) {
+        // Query the cache first
+        const value = private_get_item(section, key);
+        // Is the cache available??
+        if (value) {
+            // Yes, the cache is available
+            // Call the onEnd method with data coming from cache
+            finalCallback(value, true);
+        } else {
+            // No, the cache is not available for this data
+            retrieverCallback(function (newValue) {
+                // check if data is undefined
+                if (newValue) {
+                    // Update the cache
+                    try {
+                        private_set_item(section, key, newValue);
+                    } catch (e) {
+                        private_log_error(e);
+                    }
+                }
+                // Call the onEnd method with data not coming from cache
+                finalCallback(newValue, false);
+            });
+        }
+    };
+
+    /**
+    * Log actions from the cache
+    * @param e Error
+    */
+    function private_log_error(e) {
+        console.error("[OrgCheck:Cache]", { error: e });
+    }
+
+    /**
+    * Private method to generate the prefix used for keys in cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @return Prefix generated from section name
+    */
+    function private_generate_prefix(section) {
+        return configuration.cachePrefix + "." + (section ? section + "." : "");
+    }
+
+    /**
+    * Returns all the OrgCheck keys in cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @return All the keys of the OrgCheck cache for the given section
+    */
+    function private_get_keys(section) {
+        const prefix = private_generate_prefix(section);
+        let keys_to_remove = [];
+        for (let i = 0; i < CACHE_SYSTEM.length; i++) {
+            const key = CACHE_SYSTEM.key(i);
+            if (key && key.startsWith(prefix)) {
+                keys_to_remove.push(key.substr(prefix.length));
+            }
+        }
+        return keys_to_remove;
+    }
+
+    /**
+    * Private method to get an item from the cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @return the value in cache (undefined if not found)
+    */
+    function private_get_item(section, key) {
+        const k = private_generate_prefix(section) + key;
+        const value = CACHE_SYSTEM.getItem(k);
+        if (value) {
+            let jsonValue = JSON.parse(value);
+            if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
+                CACHE_SYSTEM.removeItem(k);
+                return;
+            }
+            return jsonValue;
+        }
+        return;
+    }
+
+    /**
+    * Private method to set an item into the cache
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @param value of the item to store in cache
+    */
+    function private_set_item(section, key, value) {
+        if (!value) return;
+        try {
+            value[TIMESTAMP_KEY] = Date.now();
+            value[VERSION_KEY] = OrgCheck.version;
+            CACHE_SYSTEM.setItem(
+                private_generate_prefix(section) + key,
+                JSON.stringify(value)
+            );
+        } catch (e) {
+            throw Error("Failed to write in cache");
+        } finally {
+            // Make sure to delete the timestamp even after error
+            delete value[TIMESTAMP_KEY];
+            delete value[VERSION_KEY];
+        }
+    }
+
+    /**
+    * Private method to clear one OrgCheck cached item
+    * @param section Name of the section (group of keys) in the cache.
+    * @param key in cache (without the prefix) to use
+    * @return the previous value that has been deleted
+    */
+    function private_delete_item(section, key) {
+        return CACHE_SYSTEM.removeItem(private_generate_prefix(section) + key);
+    }
+}
