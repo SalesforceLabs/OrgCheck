@@ -32,12 +32,14 @@
                                         let entityUrl = '';
                                         switch (type) {
                                             case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
+                                            case 'StandardObject':
                                             case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
                                             case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
                                             case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
                                             case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
                                             case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
                                             case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
+                                            default:                   entityUrl = '/'+r.objectId;
                                         }
                                         let entityLabel = label + (label !== r.objectDeveloperName ? ' ('+r.objectDeveloperName+')' : '');
                                         return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
