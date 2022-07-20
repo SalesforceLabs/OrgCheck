@@ -1,7 +1,7 @@
 // Dependencies with:
-// - OrgCheck.DataTypes.SecurityHandler.htmlSecurise() <-- SECURITY_HANDLER.htmlSecurise()
-// - OrgCheck.DataTypes.DateHandler.dateFormat() <-- FORMAT_HANDLER.dateFormat()
-// - OrgCheck.DataTypes.DateHandler.datetimeFormat() <-- FORMAT_HANDLER.datetimeFormat()
+// - OrgCheck.DataTypes.String.Handler.htmlSecurise() <-- STRING_HANDLER.htmlSecurise()
+// - OrgCheck.DataTypes.Date.Handler.dateFormat() <-- DATE_HANDLER.dateFormat()
+// - OrgCheck.DataTypes.Date.Handler.datetimeFormat() <-- DATE_HANDLER.datetimeFormat()
 
 /**
  * Visual Components
@@ -12,14 +12,14 @@ OrgCheck.VisualComponents = {
      * List of decorator handlers needed for this component
      * @param handlers JSON configuration including:
      *              <ol>
-     *                <li><code>SecurityHandler</code>: method with one argument (html code text) that returns the securised version of the argument</li>
-     *                <li><code>DateHandler</code>: method with one argument (html code text) that returns the securised version of the argument)</li>
+     *                <li><code>StringHandler</code> including method <code>htmlSecurise</code></li>
+     *                <li><code>DateHandler</code> including method <code>dateFormat</code> and <code>datetimeFormat</code></li>
      *              </ol>
      */
     DatatableHandler: function(handlers) { 
      
-        const SECURITY_HANDLER = handlers.SecurityHandler;
-        const FORMAT_HANDLER = handlers.DateHandler;
+        const STRING_HANDLER = handlers.StringHandler;
+        const DATE_HANDLER = handlers.DateHandler;
 
         /**
          * Creates a datatable
@@ -198,7 +198,7 @@ OrgCheck.VisualComponents = {
             const tbody = table.appendChild(document.createElement('tbody'));
             table.hidden = true; // make table invisible while manipulating the DOM
             let nbRows = 0, nbBadRows = 0, sumScore = 0;
-            iterable.forEach(k => {
+            if (iterable) iterable.forEach(k => {
                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                 nbRows++;
                 const trBody = tbody.appendChild(document.createElement('tr'));
@@ -220,11 +220,11 @@ OrgCheck.VisualComponents = {
                     let dataRaw = '';
                     let additiveScore = 0;
                     try {
-                        if (c.property) dataRaw = SECURITY_HANDLER.htmlSecurise(row[c.property]);
+                        if (c.property) dataRaw = STRING_HANDLER.htmlSecurise(row[c.property]);
                         if (c.type && !c.formula) {
                             switch (c.type) {
-                                case 'date': dataDecorated = FORMAT_HANDLER.dateFormat(dataRaw); break;
-                                case 'datetime': dataDecorated = FORMAT_HANDLER.datetimeFormat(dataRaw); break;
+                                case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
+                                case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
                                 case 'numeric': dataDecorated = dataRaw; break;
                             }
                         } else {

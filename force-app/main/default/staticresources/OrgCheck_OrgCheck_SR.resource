@@ -22,22 +22,6 @@
      * Current limit informations
      */
     limitInfo: {},
-
-    /**
-     * Dataset representation
-     * @param setup JSON configuration including:
-     *              <ol>
-     *                <li><code>name</code>: Technical name of this dataset (used in controller)</li>
-     *                <li><code>keycache</code>: Key used when caching the data in localStorage</li>
-     *                <li><code>retriever</code>: Retreiver function with success and error callback methods</li>
-     *              </ol>
-     */
-    Dataset: function (setup) {
-        const THAT = this;
-        this.getName = function() { return setup.name };
-        this.getKeyCache = function() { return setup.keycache };
-        this.getRetriever = function() { return function(s, e) { setup.retriever(THAT, s, e) } };
-    },
    
     /**
      * OrgCheck core
@@ -70,22 +54,24 @@
         const CACHE_SECTION_PREFERENCE = 'Preference';
         const MAP_KEYSIZE = '__51Z3__';
 
-        const PERSISTANT_CACHE_HANDLER = new OrgCheck.CacheHandler({
+        const METADATA_CACHE_HANDLER = new OrgCheck.Cache.Handler({
             isPersistant: true,
-            cachePrefix: CACHE_PREFIX
+            cachePrefix: CACHE_PREFIX,
+            section: CACHE_SECTION_METADATA
         });
 
-        const TEMPORARY_CACHE_HANDLER = new OrgCheck.CacheHandler({
-            isPersistant: false,
-            cachePrefix: CACHE_PREFIX
+        const PREFERENCE_CACHE_HANDLER = new OrgCheck.Cache.Handler({
+            isPersistant: true,
+            cachePrefix: CACHE_PREFIX,
+            section: CACHE_SECTION_PREFERENCE
         });
 
-        const MAP_HANDLER = new OrgCheck.DataTypes.MapHandler({
+        const MAP_HANDLER = new OrgCheck.DataTypes.Collection.MapHandler({
             keySize: MAP_KEYSIZE,
             keyExcludePrefix: '__'            
         });
 
-        const ARRAY_HANDLER = new OrgCheck.DataTypes.ArrayHandler();
+        const ARRAY_HANDLER = new OrgCheck.DataTypes.Collection.ArrayHandler();
 
         const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
             modalContentId: setup.htmlModalContentTagId,
@@ -99,7 +85,7 @@
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
-        const SALESFORCE_HANDLER = new OrgCheck.SalesforceHandler({
+        const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
             id: setup.sfLocalAccessToken.split('!')[0],
             version: setup.sfApiVersion,
             accessToken: setup.sfLocalAccessToken,
@@ -110,38 +96,32 @@
         OrgCheck.localOrgId = SALESFORCE_HANDLER.getOrgId();
         OrgCheck.localUserId = SALESFORCE_HANDLER.getCurrentUserId();
 
-        const FORMAT_HANDLER = new OrgCheck.DataTypes.DateHandler({ 
+        const DATE_HANDLER = new OrgCheck.DataTypes.Date.Handler({ 
             defaultLanguage: setup.formatDefaultLanguage,
             defaultDateFormat: setup.formatDefaultDate,  
             defaultDatetimeFormat: setup.formatDefaultDatetime 
         });
 
-        const SECURITY_HANDLER = new OrgCheck.DataTypes.SecurityHandler();
+        const STRING_HANDLER = new OrgCheck.DataTypes.String.Handler();
 
         const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
-            SecurityHandler: SECURITY_HANDLER,
-            DateHandler: FORMAT_HANDLER
+            StringHandler: STRING_HANDLER,
+            DateHandler: DATE_HANDLER
+        });
+
+        const DATASETS_HANDLER = new OrgCheck.Datasets.Handler({
+            SalesforceHandler: SALESFORCE_HANDLER,
+            MetadataCacheHandler: METADATA_CACHE_HANDLER,
+            PreferenceCacheHandler: PREFERENCE_CACHE_HANDLER,
+            MapHandler:  MAP_HANDLER,
+            ArrayHandler: ARRAY_HANDLER,
+            DateHandler: DATE_HANDLER
         });
 
         // ======================================================
         // DATASETS LAYER
         // ======================================================
 
-        /**
-         * This is a collection of dataset
-         */
-        const private_datasets_collection = {};
-
-        /**
-         * Add a dataset in the internal list
-         * @param dataset Object of type OrgCheck.Dataset
-         */
-        this.addDataset = function(dataset) {
-            private_datasets_collection[dataset.getName()] = {
-                keycache: dataset.getKeyCache(),
-                retriever: dataset.getRetriever()
-            };
-        };
 
         // ======================================================
         // CACHE LAYER
@@ -153,7 +133,7 @@
          * @return the value in cache, undefined if not present in cache
          */
         this.getMetadataInCache = function(key) {
-            return PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_METADATA, key);
+            return METADATA_CACHE_HANDLER.getItem(key);
         };
         
         /**
@@ -162,7 +142,7 @@
          * @param value in cache
          */
         this.setMetadataInCache = function(key, value) {
-            return PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_METADATA, key, value);
+            return METADATA_CACHE_HANDLER.setItem(key, value);
         };
 
         // ======================================================
@@ -202,15 +182,14 @@
                         ctlSetup.datasets.forEach(dataset => {
                             if (!dataset) throw '"datasets" property contains an undefined/null/empty value';
                             if (typeof dataset !== 'string') throw '"datasets" property should contain only string values';
-                            const ds = private_datasets_collection[dataset];
-                            if (!ds || !ds.retriever || typeof ds.retriever !== 'function') throw '"datasets" property should point to a known data retreiver (dataset causing the issue is '+dataset+')';
+                            if (DATASETS_HANDLER.hasDataset(dataset) === false) throw '"datasets" property should point to a known data retreiver (dataset causing the issue is '+dataset+')';
                         });
                         if (!ctlSetup.onRecords) throw '"onRecords" property is undefined';
                         if (typeof ctlSetup.onRecords !== 'function') throw '"onRecords" property is not a method';
                         if (!ctlSetup.dependencies) ctlSetup.dependencies = false;
                         if (typeof ctlSetup.dependencies !== 'boolean') throw '"dependencies" property is not a boolean'
                     } catch (error) {
-                        showError(error);
+                        showError({name: error});
                         return;
                     }
 
@@ -237,8 +216,7 @@
                             const buttonClearCache = document.getElementById('button-clear-page-cache');
                             buttonClearCache.onclick = function(e) { 
                                 ctlSetup.datasets.forEach(dataset => {
-                                    const ds = private_datasets_collection[dataset];
-                                    PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, ds.keycache);
+                                    METADATA_CACHE_HANDLER.clear(DATASETS_HANDLER.getDataset(dataset).getKeyCache());
                                 });
                                 document.location.reload(false);
                             };
@@ -311,66 +289,23 @@
                     }
 
                     // 5. Calling the dataset retreivers
-                    const onLoadPromises = [];
-                    ctlSetup.datasets.forEach(d => onLoadPromises.push(new Promise(function(s, e) { 
-                        PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: starting...', 'started');
-                        private_datasets_collection[d].retriever(
-                            function(m) {
-                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended successfuly', 'ended');
-                                s(m);
-                            }, function(m) {
-                                PROGRESSBAR_HANDLER.setSection('dataset-'+d, 'Dataset ['+d+']: ended with an error', 'failed');
-                                e(m);
-                            }
-                        ); 
-                    })));
-
-                    // 6. Calling the dataset retreivers
-                    Promise.all(onLoadPromises)
-                        .then(function(results) {
-                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started');
-                            // 7. When all datasets are retreived, we calculate keys and map
-                            const map = {};
-                            let keys = [];
-                            results.forEach((v, i) => {
-                                map[ctlSetup.datasets[i]] = v;
-                                keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(v));
-                            });
-                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended');
-                            return { m: map, k: keys };
-                        })
-                        .catch(function(error) {
-                            PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed');
-                            showError(error);
-                        }) 
-                        .then(function(data) {
-                            if (data) { // check if no error during mapping
-                                // 8. If we were asked to get the dependencies of all Salesforce Ids in the map
-                                if (ctlSetup.dependencies === true) {
-                                    PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started');
-                                    private_salesforce_dapi(
-                                        data.k, 
-                                        function(dependencies) { 
-                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended');
-                                            // We are altering the map to include the dependencies
-                                            data.m['dependencies'] = dependencies || {};
-                                            // 9.1 And then call the method (with dependencies)
-                                            onEnd(data.m);
-                                        }, 
-                                        function(error) {
-                                            PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed');
-                                            showError(error);
-                                        }
-                                    );
-                                } else {
-                                    // 9.2 Calling the method (no dependencies)
-                                    onEnd(data.m);
-                                }
-                            }
-                        })
-                        .catch(function(error) {
-                            showError(error);
-                        });
+                    DATASETS_HANDLER.runDatasets(
+                        ctlSetup.datasets,
+                        ctlSetup.dependencies,
+                        {
+                            startDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: starting...', 'started'),
+                            successDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended successfuly', 'ended'), 
+                            errorDatasetDecorator: (ds, error) => { PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended with an error', 'failed'); showError(error); },
+                            startMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started'),
+                            successMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended'),
+                            errorMappingDecorator: (error) => { PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed'); showError(error); },
+                            startDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started'),
+                            successDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended'), 
+                            errorDependenciesDecorator: (error) => { PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed'); showError(error); },
+                            successFinalDecorator: (data) => onEnd(data),
+                            errorFinalDecorator: (error) => showError(error)
+                        }
+                    );
                 }
             };
         }
@@ -397,7 +332,7 @@
                     },
                     apex: {
                         runAllLocalTests: function() {
-                            return SALESFORCE_HANDLER.doHttpCall(
+                            return SALESFORCE_HANDLER.httpCall(
                                 '/tooling/runTestsAsynchronous', 
                                 r => console.debug(r), 
                                 r => console.error(r), 
@@ -417,16 +352,16 @@
                 cache: {
                     metadata: {
                         clearAll: function() {
-                            PERSISTANT_CACHE_HANDLER.clearAll(CACHE_SECTION_METADATA);
+                            METADATA_CACHE_HANDLER.clearAll();
                         },
                         keys: function() {
-                            return PERSISTANT_CACHE_HANDLER.keys(CACHE_SECTION_METADATA);
+                            return METADATA_CACHE_HANDLER.keys();
                         },
                         sideValues: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.sideValues(CACHE_SECTION_METADATA, key);
+                            return METADATA_CACHE_HANDLER.sideValues(key);
                         },
                         clear: function(key) {
-                            return PERSISTANT_CACHE_HANDLER.clear(CACHE_SECTION_METADATA, key);
+                            return METADATA_CACHE_HANDLER.clear(key);
                         }
                     }
                 },
@@ -437,15 +372,15 @@
                 },
                 preferences: {
                     get: function(key) {
-                        const map = PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_PREFERENCE, 'Options') || {};
+                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
                         const value = map[key];
                         if (value === undefined) return true;
                         return value;
                     },
                     set: function(key, value) {
-                        const map = PERSISTANT_CACHE_HANDLER.getItem(CACHE_SECTION_PREFERENCE, 'Options') || {};
+                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
                         map[key] = value;
-                        PERSISTANT_CACHE_HANDLER.setItem(CACHE_SECTION_PREFERENCE, 'Options', map);
+                        PREFERENCE_CACHE_HANDLER.setItem('Options', map);
                     }
                 },
                 array: {
@@ -486,10 +421,10 @@
                 timestamp: {
                     to: {
                         datetime: function(ts) {
-                            return FORMAT_HANDLER.datetimeFormat(ts);
+                            return DATE_HANDLER.datetimeFormat(ts);
                         },
                         date: function(ts) {
-                            return FORMAT_HANDLER.dateFormat(ts);
+                            return DATE_HANDLER.dateFormat(ts);
                         }
                     }
                 },
@@ -533,14 +468,6 @@
                         create: function(config) {
                             if (!Array.isArray(config.data)) config.datakeys = MAP_HANDLER.keys(config.data);
                             DATATABLE_HANDLER.create(config);
-                            /*
-                            SECURITY_HANDLER.htmlSecurise(row[c.property]);
-                        if (c.type && !c.formula) {
-                            switch (c.type) {
-                                case 'date': dataDecorated = services.Formatable_Date__dateFormat(dataRaw); break;
-                                case 'datetime': dataDecorated = services.Formatable_Date__datetimeFormat
-
-                            ).create(config);*/
                         },
                         clean: function(element) {
                             const dt = document.getElementById(element);
@@ -639,7 +566,7 @@
                             return '';
                         },
                         escape: function(unsafe) { 
-                            return private_secure_html(unsafe); 
+                            return STRING_HANDLER.htmlSecurise(unsafe); 
                         },
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
@@ -736,281 +663,9 @@
             };
         };
 
-        /**
-         * Returns systematically an ID15 based on the ID18
-         * @param id to simplify
-         */
-        this.doSimplifiySalesforceID = function(id) {
-            return SALESFORCE_HANDLER.salesforceIdFormat(id);
-        };
-
-        /**
-         * Returns the string representation of a given date using the user's preferences
-         * @param value to format (number if a timestamp, string otherwise)
-         */
-        this.doFormatDate = function(value) {
-            return FORMAT_HANDLER.dateFormat(value);
-        };
-
-        /**
-         * Returns the string representation of a given datetime using the user's preferences
-         * @param value to format (number if a timestamp, string otherwise)
-         */
-        this.doFormatDatetime = function(value) {
-            return FORMAT_HANDLER.datetimeFormat(value);
-        };
-
-        this.doSetSizeInMap = function(map, size) {
-            MAP_HANDLER.setSize(map, size);
-        };
-
-        /**
-         * Data retriever with cache
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>mnemonic</code>: tag used for caching this data</li>
-         *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onError</code>: function called if an error happens</li> 
-         *              </ol>
-         */
-        this.doRetrieveDataWithCache = function(setup) {
-            try {
-                PERSISTANT_CACHE_HANDLER.cache(
-                    CACHE_SECTION_METADATA,
-                    setup.mnemonic, 
-                    setup.doDataRetriever, 
-                    function(records, isFromCache) {
-                        if (setup.onEachFromCache) {
-                            MAP_HANDLER.forEach(records, function(id) {
-                                setup.onEachFromCache(records[id]);
-                            });
-                        }
-                        if (setup.onEndFromCache) {
-                            setup.onEndFromCache(records);
-                        }
-                    }
-                );
-            } catch (error) {
-                if (setup.onError) {
-                    setup.onError(error);
-                }
-            }
-        };
-
-        /**
-         * Data retriever with cache for SOQL queries
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
-         *                <li><code>onEachRecordFromAPI</code>: function called for each record retrieved from database</li>
-         *                <li><code>mnemonic</code>: tag used for caching this data</li>
-         *                <li><code>doDataRetriever</code>: function with a callback function parameter used to set the cache if needed</li> 
-         *                <li><code>onEachFromCache</code>: function called for each record of the map stored in the cache </li> 
-         *                <li><code>onEndFromCache</code>: function called for the map stored in the cache</li> 
-         *                <li><code>onError</code>: function called if an error happens</li> 
-         *              </ol>
-         */
-        this.doSalesforceQueriesWithCache = function(setup) {
-            this.doRetrieveDataWithCache({
-                mnemonic: setup.mnemonic,
-                doDataRetriever: function(callbackToSetTheCache) {
-                    SALESFORCE_HANDLER.doQueries(
-                        setup.queries, 
-                        function(record, index, dataSize, totalSize) {
-                            try {
-                                return setup.onEachRecordFromAPI(record, index, dataSize, totalSize);
-                            } catch(error) {
-                                setup.onError(error);
-                            }
-                        }, 
-                        function(records, size) {
-                            try {
-                                MAP_HANDLER.setSize(records, size);
-                                callbackToSetTheCache(records);
-                            } catch(error) {
-                                setup.onError(error);
-                            }
-                        },
-                        setup.onError
-                    );
-                },
-                onEachFromCache: setup.onEachFromCache,
-                onEndFromCache: setup.onEndFromCache,
-                onError: setup.onError
-            });
-        };
-
-        /**
-         * Data retriever without cache for SOQL queries
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>queries</code>: array describing the queries you want to execute ; for each you set the query and if you use the tooling api or not </li>
-         *                <li><code>onEachRecord</code>: function called for each record retrieved from database</li>
-         *                <li><code>onEnd</code>: function called when all records were retrieved from database</li> 
-         *                <li><code>onError</code>: function called if an error happens</li> 
-         *              </ol>
-         */
-        this.doSalesforceQueries = function(setup) {
-            SALESFORCE_HANDLER.doQueries(
-                setup.queries, 
-                function(record, index) {
-                    try {
-                        return setup.onEachRecord(record, index);
-                    } catch(error) {
-                        setup.onError(error);
-                    }
-                }, 
-                function(records, size) {
-                    try {
-                        return setup.onEnd(records, size);
-                    } catch(error) {
-                        setup.onError(error);
-                    }
-                },
-                setup.onError
-            );
-        }
-
         this.isVersionOld = function(setup) {
             return SALESFORCE_HANDLER.isVersionOld(
                 setup.apiVersion
-            );
-        }
-
-        /**
-         * Metadata retriever without cache
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>types</code>: List of types of metadata to retrieve</li> 
-         *                <li><code>onEnd</code>: function called when all records were retrieved from database</li> 
-         *                <li><code>onError</code>: function called if an error happens</li> 
-         *              </ol>
-         */
-        this.doSalesforceMetadataRetrieve = function(setup) {
-            SALESFORCE_HANDLER.doMetadataRetrieve(
-                setup.types, 
-                setup.onEnd,
-                setup.onError
-            );
-        }
-
-        /**
-         * Helper to extract the package and developer name
-         * @param fullDeveloperName Developer Name
-        */
-        this.doSalesforceSplitDeveloperName = function(fullDeveloperName) {
-            return SALESFORCE_HANDLER.splitDeveloperName(fullDeveloperName);
-        };
-
-        /**
-         * Do a global describe on the salesforce org
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
-         *                <li><code>onError</code>: Callback function to call if there is an error</li>
-         *              </ol>
-         */
-        this.doSalesforceGlobalDescribe = function(setup) {
-            SALESFORCE_HANDLER.doDescribeGlobal(setup.onEnd, setup.onError);
-        };
-
-        /**
-         * Return an HTML-safer version of the given string value
-         * @param unsafe String to be escaped (no change if null or not a string type)
-         */
-        function private_secure_html(unsafe) {
-            if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
-            if (typeof(unsafe) !== 'string') return unsafe;
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        };
-
-        /**
-         * Return an SOQL-safer version of the given string value
-         * @param unsafe String to be escaped
-         */
-        function private_secure_soql(unsafe) {
-            // If unset the default, return value is an empty string
-            if (!unsafe) return "''";
-            
-            // If not a string typed value, return value is itself (case of a numeric)
-            if (typeof(unsafe) !== 'string') return unsafe;
-            
-            // If a string value, we substitute the quotes
-            return "'" + unsafe.replace(/'/g, "\'") + "'";
-        };
-
-        /**
-         * Return an SOQL-safer version of the given string value
-         * @param unsafe String to be escaped
-         */
-        this.doSecureSOQLBindingVariable = function(unsafe) {
-            return private_secure_soql(unsafe);
-        }
-
-        /**
-         * Make sure the current user has enough rights on SObjects (only for REST queries)
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>sobjects</code>: Map with keys as SObject API names and value as an Array of Field API Names</li>
-         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
-         *                <li><code>onError</code>: Callback function to call if there is an error</li>
-         *              </ol>
-         */
-        this.doSecureSobjectReadEnforcement = function(setup) {
-            const queries = [];
-            const currentUser = OrgCheck.localUserId;
-            let sobjectsList = [];
-            let fieldsList = [];
-            for (const [sobject, fields] of Object.entries(setup.sobjects)) {
-                sobjectsList.push(sobject); 
-                fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
-                fields.forEach(f => fieldsList.push(sobject+'.'+f+'.'+currentUser)); 
-                // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
-            }
-            sobjectsList.forEach(sobject =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsReadable '+
-                            'FROM UserEntityAccess '+
-                            'WHERE UserId='+ private_secure_soql(currentUser) +' '+
-                            'AND EntityDefinition.QualifiedApiName = '+ private_secure_soql(sobject) +' '+
-                            'AND IsReadable = false'
-                })
-            );
-            sobjectsList.forEach(field =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsAccessible '+
-                            'FROM UserFieldAccess '+
-                            'WHERE DurableId = '+ private_secure_soql(field) +' '+
-                            'AND IsAccessible = false'
-                })
-            );
-            SALESFORCE_HANDLER.doQueries(
-                queries, 
-                (record) => {}, 
-                (records, size) => { 
-                    if (size > 0) {
-                        setup.onError({
-                            'when': 'FLS/CRUD Enforcement: you need to assign yourself the <b>OrgCheck Users</b> permission set.',
-                            'what': {
-                                'Objects and fields': setup.sobjects,
-                                'Number of FLS or CRUD not compatible': size,
-                                'Details': records
-                            }
-                        });
-                    } else {
-                        setup.onEnd(); 
-                    }
-                },
-                setup.onError
             );
         }
 
@@ -1171,235 +826,11 @@
                 .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                 .attr('width', BOX_WIDTH-2*BOX_PADDING)
                 .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + private_secure_html(d.data.name) + '</span>');
+                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + '</span>');
 
             return svg.node();
         };
 
-        /**
-         * Call the Dependency API (synchronous version)
-         * @param ids Array of IDs that we are interested in
-         * @param callbackSuccess Callback method in case of a success with the resulting map
-         * @param callbackError Callback method in case of an error
-         */
-        function private_salesforce_dapi(ids, callbackSuccess, callbackError) {
-            const map = {};
-
-            if (ids.length == 0) {
-                callbackSuccess();
-                return;
-            }
-
-            const MAX_IDS_IN_QUERY = 50; // max is 2000 records, so avg of 40 dependencies for each id
-            const queries = [];
-            let subids = '';
-            ids.forEach((v, i, a) => {
-                const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
-                const lastItem = (i === a.length-1);
-                subids += private_secure_soql(v);
-                if (batchFull === true || lastItem === true) { 
-                    queries.push({
-                        tooling: true,
-                        string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
-                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
-                                'FROM MetadataComponentDependency '+
-                                'WHERE (RefMetadataComponentId IN (' + subids + ') '+
-                                'OR MetadataComponentId IN (' + subids+ ')) ',
-                        queryMore: false
-                    });
-                    subids = '';
-                } else {
-                    subids += ',';
-                }
-            });
-
-            SALESFORCE_HANDLER.doQueries(
-                queries, 
-                function(record) {
-                    try {
-                        const aId = SALESFORCE_HANDLER.salesforceIdFormat(record.MetadataComponentId);
-                        const aType = record.MetadataComponentType;
-                        const aName = record.MetadataComponentName;
-                        const bId = SALESFORCE_HANDLER.salesforceIdFormat(record.RefMetadataComponentId);
-                        const bType = record.RefMetadataComponentType;
-                        const bName = record.RefMetadataComponentName;
-                        let b = map[bId];
-                        if (!b) b = map[bId] = {};
-                        if (!b.used) b.used = {};
-                        if (!b.used[aType]) b.used[aType] = [];
-                        b.used[aType][aId] = { name: aName };
-                        let a = map[aId];
-                        if (!a) a = map[aId] = {};
-                        if (!a.using) a.using = {};
-                        if (!a.using[bType]) a.using[bType] = [];
-                        a.using[bType][bId] = { name: bName };
-                        return {};
-                    } catch (e) {
-                        callbackError(e);
-                    }
-                }, 
-                function() {
-                    callbackSuccess(map);
-                },
-                callbackError
-            );
-        };
-
-        /**
-         * Get description of an object (mix of JSForce and SOQL query in Tooling API)
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>namespaceName</code>: Name of the package for the object to get the description</li>
-         *                <li><code>objectName</code>: Name of the object to get the description (may contain the namespace already)</li>
-         *                <li><code>callbackSuccess</code>: function called in case of a successful describe query</li>
-         *                <li><code>callbackError</code>: function called in case of an error</li>
-         *              </ol>
-         */
-        function private_salesforce_describe_object(setup) {
-            // Get records count for this object
-            SALESFORCE_HANDLER.doHttpCall(
-                '/limits/recordCount?sObjects='+setup.objectName,
-                function(result) {
-                    const recordCount = (Array.isArray(result?.sObjects) && result?.sObjects.length == 1) ? result?.sObjects[0].count : 0;
-                    SALESFORCE_HANDLER.doDescribeObject(
-                        setup.objectName, 
-                        function(object) {
-                            let recordCount = 0;
-                            SALESFORCE_HANDLER.doQueries(
-                                [{ 
-                                    tooling: true, 
-                                    string: 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                                                '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
-                                                '(SELECT Id, Name FROM ApexTriggers), '+
-                                                '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
-                                                '(SELECT Id, Name, LayoutType FROM Layouts), '+
-                                                '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
-                                                '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
-                                                    'ValidationName FROM ValidationRules), '+
-                                                '(SELECT Id, Name FROM WebLinks) '+
-                                            'FROM EntityDefinition '+
-                                            'WHERE DurableId = '+private_secure_soql(setup.objectName)
-                                }], 
-                                function(record) {
-                                    recordCount++;
-
-                                    // 0. Generic information
-                                    object.id = record.DurableId;
-                                    object.description = record.Description;
-                                    object.externalSharingModel = record.ExternalSharingModel;
-                                    object.internalSharingModel = record.InternalSharingModel;
-                                    object.recordCount = recordCount;
-                                    // 1. Apex Triggers
-                                    if (record.ApexTriggers) {
-                                        let apexTriggers = [];
-                                        for (let i=0; i<record.ApexTriggers.records.length; i++) {
-                                            apexTriggers.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.ApexTriggers.records[i].Id),
-                                                name: record.ApexTriggers.records[i].Name
-                                            });
-                                        }
-                                        object.apexTriggers = apexTriggers;
-                                    }
-                                    // 2. FieldSets
-                                    if (record.FieldSets) {
-                                        let fieldSets = [];
-                                        for (let i=0; i<record.FieldSets.records.length; i++) {
-                                            fieldSets.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.FieldSets.records[i].Id),
-                                                label: record.FieldSets.records[i].MasterLabel,
-                                                description: record.FieldSets.records[i].Description
-                                            });
-                                        }
-                                        object.fieldSets = fieldSets;
-                                    }
-                                    // 3. Page Layouts
-                                    if (record.Layouts) {
-                                        let layouts = [];
-                                        for (let i=0; i<record.Layouts.records.length; i++) {
-                                            layouts.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.Layouts.records[i].Id),
-                                                name: record.Layouts.records[i].Name,
-                                                type: record.Layouts.records[i].LayoutType
-                                            });
-                                        }
-                                        object.layouts = layouts;
-                                    }
-                                    // 4. Limits
-                                    if (record.Limits) {
-                                        let limits = [];
-                                        for (let i=0; i<record.Limits.records.length; i++) {
-                                            limits.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.Limits.records[i].DurableId),
-                                                label: record.Limits.records[i].Label,
-                                                remaining: record.Limits.records[i].Remaining,
-                                                max: record.Limits.records[i].Max,
-                                                type: record.Limits.records[i].Type
-                                            });
-                                        }
-                                        object.limits = limits;
-                                    }
-                                    // 5. ValidationRules
-                                    if (record.ValidationRules) {
-                                        let validationRules = [];
-                                        for (let i=0; i<record.ValidationRules.records.length; i++) {
-                                            validationRules.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.ValidationRules.records[i].Id),
-                                                name: record.ValidationRules.records[i].ValidationName,
-                                                isActive: record.ValidationRules.records[i].Active,
-                                                description: record.ValidationRules.records[i].Description,
-                                                errorDisplayField: record.ValidationRules.records[i].ErrorDisplayField,
-                                                errorMessage: record.ValidationRules.records[i].ErrorMessage
-                                            });
-                                        }
-                                        object.validationRules = validationRules;
-                                    }
-                                    // 6. WebLinks
-                                    if (record.WebLinks) {
-                                        let webLinks = [];
-                                        for (let i=0; i<record.WebLinks.records.length; i++) {
-                                            webLinks.push({
-                                                id: SALESFORCE_HANDLER.salesforceIdFormat(record.WebLinks.records[i].Id),
-                                                name: record.WebLinks.records[i].Name,
-                                            });
-                                        }
-                                        object.webLinks = webLinks;
-                                    }
-                                    // 7. If any fields, add field dependencies
-                                    if (record.Fields) {
-                                        const mapFields = {};
-                                        const fieldIds = [];
-                                        for (let i=0; i<record.Fields.records.length; i++) {
-                                            const f = record.Fields.records[i];
-                                            const id = SALESFORCE_HANDLER.splitDeveloperName(f.DurableId).shortName.split('.')[1];
-                                            fieldIds.push(id);
-                                            mapFields[f.QualifiedApiName] = id;
-                                        }
-                                        object.fields.forEach(f => f.id = mapFields[f.name]);
-                                        private_salesforce_dapi(
-                                            fieldIds, 
-                                            function(fieldDependencies) {
-                                                object.fieldDependencies = fieldDependencies;
-                                                setup.callbackSuccess(object);
-                                            }, 
-                                            setup.callbackError
-                                        );
-                                    } else {
-                                        setup.callbackSuccess(object);
-                                    }
-                                },
-                                function() { if (recordCount !== 1)
-                                    if (recordCount == 0) setup.callbackError('we retrieved zero record!');
-                                    if (recordCount > 1) setup.callbackError('we retrieved '+recordCount+' records!');
-                                },
-                                setup.callbackError
-                            );
-                        }, 
-                        setup.callbackError
-                    );
-                },
-                setup.callbackError
-            );
-        };
     }
 };
 
@@ -1411,79 +842,784 @@
  */
 function buildDatasets(core) {
 
-    // ========================================================================
-    // WORKFLOWS
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'workflows',
-        keycache: 'Workflows',
-        retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
-                    if (value) resolve(value);
-                    const queries = [];
-                    core.doSalesforceQueries({
-                        queries: [{ 
-                            string: 'SELECT Id FROM WorkflowRule',
-                            tooling: true
-                        }], 
-                        onEachRecord: function(record, index) {
-                            queries.push({
-                                tooling: true,
-                                byPasses: [ 'UNKNOWN_EXCEPTION' ],
-                                string: 'SELECT Id, FullName, Metadata, CreatedDate, LastModifiedDate '+
-                                        'FROM WorkflowRule '+
-                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
-                            });
-                        }, 
-                        onEnd: function(records, size) { 
-                            core.doSalesforceQueriesWithCache({
-                                mnemonic: cache,
-                                queries,
-                                onEachRecordFromAPI: function(v, i, l, ts) {
-                                    const item =  {
-                                        id: core.doSimplifiySalesforceID(v.Id),
-                                        name: v.FullName,
-                                        description: v.Metadata.description,
-                                        actions: v.Metadata.actions,
-                                        futureActions: v.Metadata.workflowTimeTriggers,
-                                        isActive: v.Metadata.active,
-                                        createdDate: v.CreatedDate,
-                                        lastModifiedDate: v.LastModifiedDate
-                                    };
-                                    if (!item.actions) item.actions = [];
-                                    if (!item.futureActions) item.futureActions = [];
-                                    item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
-                                    return item;
-                                },
-                                onEndFromCache: resolve,
-                                onError: reject
-                            });
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
+}/**
+ * Cache module
+ */
+OrgCheck.Cache = {
+
+    /**
+     * Cache handler
+     * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'section', 'timestampKey', 'sizeKey' and 'versionKey'
+     */
+    Handler: function (configuration) {
+
+        /**
+        * Cache system to use. 
+        *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
+        *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
+        *              <b>Session storage</b> means data WILL be erased after closing the browser. 
+        *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
+        */
+        const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
+
+        /**
+         * Key for "timestamp" on every cache entry
+         */
+        const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
+        
+        /**
+         * Key for "version" on every cache entry
+         */
+        const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+        /**
+         * Key for "size" on every cache entry
+         */
+        const SIZE_KEY = configuration.sizeKey || "__51Z3__";
+
+        /**
+         * Cache prefix
+         */
+        const PREFIX = configuration.cachePrefix;
+
+        /**
+         * Section
+         */
+        const SECTION = configuration.section;
+
+        /**
+        * Method to clear all OrgCheck cached items
+        */
+        this.clearAll = function () {
+            let keys_to_remove = private_get_keys();
+            for (let i = 0; i < keys_to_remove.length; i++) {
+                private_delete_item(keys_to_remove[i]);
+            }
+        };
+
+        /**
+        * Method to clear one OrgCheck cached item
+        * @param key in cache (without the prefix) to use
+        * @return the previous value that has been deleted
+        */
+        this.clear = function (key) {
+            const oldValue = private_delete_item(key);
+            return oldValue;
+        };
+
+        /**
+        * Method to get all keys of the WoldemOrg cache
+        * @return All keys of the cache of the section.
+        */
+        this.keys = function () {
+            const keys = private_get_keys();
+            return keys;
+        };
+
+        /**
+        * Method to get an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @return the value in cache (undefined if not found)
+        */
+        this.getItem = function (key) {
+            const value = private_get_item(key);
+            return value;
+        };
+
+        /**
+        * Method to get the timestamp and version of a specific cache item
+        * @param key in cache (without the prefix) to use
+        * @return the side values of the item in cache (undefined if not found)
+        */
+        this.sideValues = function (key) {
+            const value = private_get_item(key);
+            if (value) {
+                return {
+                    timestamp: value[TIMESTAMP_KEY],
+                    version: value[VERSION_KEY],
+                    size: value[SIZE_KEY]
+                };
+            }
+            return;
+        };
+
+        /**
+        * Method to set an item into the cache
+        * @param key in cache (without the prefix) to use
+        * @param value of the item to store in cache
+        */
+        this.setItem = function (key, value) {
+            try {
+                private_set_item(key, value);
+            } catch (e) {
+                private_log_error(e);
+            }
+        };
+
+        /**
+        * Method to cache error and clean other stuff in the page
+        * @param key in cache (without the prefix) to use
+        * @param retrieverCallback function that we call to get the value
+        * @param finalCallback function to call after the value was got
+        */
+        this.cache = function (key, retrieverCallback, finalCallback) {
+            // Query the cache first
+            const value = private_get_item(key);
+            // Is the cache available??
+            if (value) {
+                // Yes, the cache is available
+                // Call the onEnd method with data coming from cache
+                finalCallback(value, true);
+            } else {
+                // No, the cache is not available for this data
+                retrieverCallback(function (newValue) {
+                    // check if data is undefined
+                    if (newValue) {
+                        // Update the cache
+                        try {
+                            private_set_item(key, newValue);
+                        } catch (e) {
+                            private_log_error(e);
+                        }
+                    }
+                    // Call the onEnd method with data not coming from cache
+                    finalCallback(newValue, false);
+                });
+            }
+        };
+
+        /**
+        * Log actions from the cache
+        * @param e Error
+        */
+        function private_log_error(e) {
+            console.error("[OrgCheck:Cache]", { error: e });
+        }
+
+        /**
+        * Private method to generate the prefix used for keys in cache
+        * @return Prefix generated from section name
+        */
+        function private_generate_prefix() {
+            return PREFIX + '.' + SECTION + '.';
+        }
+
+        /**
+        * Returns all the OrgCheck keys in cache
+        * @return All the keys of the OrgCheck cache for the given section
+        */
+        function private_get_keys() {
+            const prefix = private_generate_prefix();
+            let keys_to_remove = [];
+            for (let i = 0; i < CACHE_SYSTEM.length; i++) {
+                const key = CACHE_SYSTEM.key(i);
+                if (key && key.startsWith(prefix)) {
+                    keys_to_remove.push(key.substr(prefix.length));
+                }
+            }
+            return keys_to_remove;
+        }
+
+        /**
+        * Private method to get an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @return the value in cache (undefined if not found)
+        */
+        function private_get_item(key) {
+            const k = private_generate_prefix() + key;
+            const value = CACHE_SYSTEM.getItem(k);
+            if (value) {
+                let jsonValue = JSON.parse(value);
+                if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
+                    CACHE_SYSTEM.removeItem(k);
+                    return;
+                }
+                return jsonValue;
+            }
+            return;
+        }
+
+        /**
+        * Private method to set an item into the cache
+        * @param key in cache (without the prefix) to use
+        * @param value of the item to store in cache
+        */
+        function private_set_item(key, value) {
+            if (!value) return;
+            try {
+                value[TIMESTAMP_KEY] = Date.now();
+                value[VERSION_KEY] = OrgCheck.version;
+                CACHE_SYSTEM.setItem(
+                    private_generate_prefix() + key,
+                    JSON.stringify(value)
+                );
+            } catch (e) {
+                throw Error("Failed to write in cache");
+            } finally {
+                // Make sure to delete the timestamp even after error
+                delete value[TIMESTAMP_KEY];
+                delete value[VERSION_KEY];
+            }
+        }
+
+        /**
+        * Private method to clear one OrgCheck cached item
+        * @param key in cache (without the prefix) to use
+        * @return the previous value that has been deleted
+        */
+        function private_delete_item(key) {
+            return CACHE_SYSTEM.removeItem(private_generate_prefix() + key);
+        }
+    }
+}/**
+ * Data Types module
+ */
+ OrgCheck.DataTypes = {
+
+    /**
+     * String sub-module
+     */
+     String: {
+        
+        /**
+        * String handler
+        */
+        Handler: function() {
+
+            /**
+             * Return an HTML-safer version of the given string value
+             * @param unsafe String to be escaped (no change if null or not a string type)
+             */
+             this.htmlSecurise = (unsafe) => {
+                if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
+                if (typeof(unsafe) !== 'string') return unsafe;
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            };
+        }
+    },
+
+    /**
+     * Date and Datetime sub-module
+     */
+    Date: {
+
+        /**
+        * Date handler
+        * @param configuration Object must contain 'defaultLanguage', 'defaultDateFormat' and 'defaultDatetimeFormat'
+        */
+        Handler: function(configuration) {
+
+            /**
+            * Returns the string representation of a given date using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.dateFormat = (value) => {
+                return private_date_format(value, UserContext?.dateFormat,
+                    configuration.defaultDateFormat
+                );
+            };
+
+            /**
+            * Returns the string representation of a given datetime using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.datetimeFormat = (value) => {
+                return private_date_format(value, UserContext?.dateTimeFormat,
+                    configuration.defaultDatetimeFormat
+                );
+            };
+
+            /**
+            * Private method to format data/time into a string representation
+            * @param value to format (number if a timestamp, string otherwise)
+            * @param format to use
+            * @param formatIfNull to use if the previous parameter was null or empty
+            */
+            const private_date_format = (value, format, formatIfNull) => {
+                if (value) {
+                    const timestamp = typeof value === "number" ? value : Date.parse(value);
+                    return DateUtil.formatDate(new Date(timestamp), format ? format : formatIfNull);
+                }
+                return '';
+            }
+        },
+
+    },
+
+    /**
+     * Collection sub-module
+     */
+    Collection: {
+
+        /**
+         * Manage a "map" in this context which is an object containing
+         * Salesforce IDs as properties plus an extra property called
+         * "size" which is the number of Salesforce IDs contained in the
+         * object.
+         * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
+         */
+        MapHandler: function (configuration) {
+
+            /**
+             * @param key 
+             * @return if that key is functional (not technical)
+             */
+            const private_is_safe_key = (key) => {
+                return (key !== configuration.keySize 
+                    && !key.startsWith(configuration.keyExcludePrefix));
+            }
+
+            /**
+             * @param map
+             * @return List all functional keys 
+             */
+            const private_get_safe_keys = (map) => {
+                if (map) return Object.keys(map).filter(k => private_is_safe_key(k));
+            };
+
+            /**
+             * Creates a new Map
+             * @return the new map instance
+             */
+            this.newMap = () => {
+                const map = new Map();
+                map[configuration.keySize] = 0;
+                return map;
+            }
+
+            /**
+             * @return the value for the key of the map (only if the key is safe)
+             */
+            this.getValue = (map, key) => {
+                if (private_is_safe_key(key)) return map[key];
+            };
+
+            /**
+             * Retrieve the value for the key of the map (only if the key is safe)
+             * @param map
+             * @param key 
+             * @param value 
+             */
+             this.setValue = (map, key, value) => {
+                if (private_is_safe_key(key)) {
+                    if (map.hasOwnProperty(key) === false) map[configuration.keySize]++;;
+                    map[key] = value;
+                }
+            };
+
+            /**
+             * Iterative function for each key of the given map
+             * @param map
+             * @param fn function to call for each key
+             */
+            this.forEach = (map, fn) => {
+                private_get_safe_keys(map).forEach(k => fn(k));
+            };
+
+            /**
+             * @param map
+             * @return the size of the map
+             */
+            this.size = (map) => {
+                return map[configuration.keySize];
+            };
+
+            /**
+             * Returns the keys of the map (excluding the technical ones!)
+             * @param map
+             */
+            this.keys = (map) => {
+                return private_get_safe_keys(map);
+            };
+        },
+
+        /**
+        * Array handler
+        */
+        ArrayHandler: function () {
+            /**
+            * Concatenate two arrays
+            * @param array1 First array (will not be modified)
+            * @param array2 Second array (will not be modified)
+            * @param prop Optionnal property to use in the arrays
+            * @return A new array containing uniq items from array1 and array2
+            */
+            this.concat = (array1, array2, prop) => {
+                if (prop) {
+                    let new_array = [];
+                    let array2_keys = [];
+                    if (array2) for (let i = 0; i < array2.length; i++) {
+                        const item2 = array2[i];
+                        array2_keys.push(item2[prop]);
+                        new_array.push(item2);
+                    }
+                    if (array1) for (let i = 0; i < array1.length; i++) {
+                        const item1 = array1[i];
+                        const key1 = item1[prop];
+                        if (array2_keys.indexOf(key1) < 0) {
+                            new_array.push(item1);
+                        }
+                    }
+                    return new_array;
+                } else {
+                    let uniq_items_to_add;
+                    if (array1) {
+                        uniq_items_to_add = array1.filter((item) => array2.indexOf(item) < 0);
+                    } else {
+                        uniq_items_to_add = [];
+                    }
+                    if (array2) {
+                        return array2.concat(uniq_items_to_add);
+                    } else {
+                        return uniq_items_to_add;
+                    }
+                }
+            }
+        }
+    }
+}/**
+ * Datasets module
+ */
+OrgCheck.Datasets = {
+
+    /**
+     * Dataset representation
+     * @param setup JSON configuration including:
+     *              <ol>
+     *                <li><code>name</code>: Technical name of this dataset (used in controller)</li>
+     *                <li><code>keyCache</code>: Key used when caching the data in localStorage</li>
+     *                <li><code>isCachable</code>: Should we cache the data or not?</li>
+     *                <li><code>retriever</code>: Retreiver function with success and error callback methods</li>
+     *              </ol>
+     */
+    Dataset: function(setup) {
+        const THAT = this;
+        this.getName = () => { return setup.name };
+        this.getKeyCache = () => { return setup.keyCache };
+        this.isCachable = () => { return setup.isCachable === true };
+        this.getRetriever = () => { return (s, e) => { setup.retriever(THAT, s, e) } };
+    },
+
+    /**
+     * Datasets collection representation
+     */
+    Collection: function() {
+
+        /**
+         * This is a collection of datasets
+         */
+        const private_datasets_collection = {};
+
+        /**
+         * Add a dataset in the internal list
+         * @param dataset Object of type OrgCheck.Datasets.Dataset
+         */
+        this.addDataset = (dataset) => {
+            private_datasets_collection[dataset.getName()] = dataset;
+        };
+
+        /**
+         * Is this dataset name part of the list?
+         * @param name of the dataset
+         * @return true or false
+         */
+        this.hasDataset = (name) => {
+            return private_datasets_collection.hasOwnProperty(name);
+        };
+
+        /**
+         * Return the dataset item
+         * @param name of the dataset
+         * @return the dataset item
+         */
+        this.getDataset = (name) => {
+            return private_datasets_collection[name];
+        };
+
+    },
+
+    /**
+     * @param handlers Map of handlers to use inside this handler:
+     *                 <ol>
+     *                   <li><code>SalesforceHandler</code>: Salesforce Handler</li>
+     *                   <li><code>MetadataCacheHandler</code>: Metadata Cache Handler</li>
+     *                   <li><code>PreferenceCacheHandler</code>: Preference Cache Handler</li>
+     *                   <li><code>MapHandler</code>: Map Handler</li>
+     *                   <li><code>ArrayHandler</code>: Array Handler</li>
+     *                   <li><code>DateHandler</code>: Date Handler</li>
+     *                 </ol>
+     */
+    Handler: function(handlers) {
+
+        /**
+         * Salesforce handler that will let us do queries etc...
+         */
+         const SALESFORCE_HANDLER = handlers.SalesforceHandler;
+        
+        /**
+         * Metadata Cache handler to use for perfomance
+         */
+        const METADATA_CACHE_HANDLER = handlers.MetadataCacheHandler;
+    
+        /**
+         * Preference Cache handler to use for perfomance
+         */
+        const PREFERENCE_CACHE_HANDLER = handlers.PreferenceCacheHandler;
+
+         /**
+         * Map handler for output data
+         */
+        const MAP_HANDLER = handlers.MapHandler;
+
+        /**
+         * Array handler
+         */
+        const ARRAY_HANDLER = handlers.ArrayHandler;
+
+        /**
+         * Date handler
+         */
+        const DATE_HANDLER = handlers.DateHandler;
+
+         /**
+         * collections of datasets
+         */
+        const private_datasets = new OrgCheck.Datasets.Collection();
+
+        /**
+         * Is the collection has a given dataset?
+         * @param name of the dataset
+         * @return true or false
+         */
+        this.hasDataset = (name) => {
+            return private_datasets.hasDataset(name);
+        };
+
+        /**
+         * Return the dataset item
+         * @param name of the dataset
+         * @return the dataset item
+         */
+        this.getDataset = (name) => {
+            return private_datasets.getDataset(name);
+        };
+
+        /**
+         * Run a list of datasets given their names
+         * @param datasets Array of string representing the datasets you wan to run
+         * @param dependencies Flag to say if you want us to calculate the dependencies for the ids retrieved from datasets
+         * @param decorators List of decorators:
+         *                 <ol>
+         *                   <li><code>startDatasetDecorator</code>: Starting decorator for a given dataset name</li>
+         *                   <li><code>successDatasetDecorator</code>: Success decorator for a given dataset name</li>
+         *                   <li><code>errorDatasetDecorator</code>: Error decorator for a given dataset name</li>
+         *                   <li><code>startMappingDecorator</code>: Starting decorator for the mapping phase</li>
+         *                   <li><code>successMappingDecorator</code>: Success decorator for mapping phase</li>
+         *                   <li><code>errorMappingDecorator</code>: Error decorator for mapping phase</li>
+         *                   <li><code>startDependenciesDecorator</code>: Starting decorator for dependencies phase</li>
+         *                   <li><code>successDependenciesDecorator</code>: Success decorator for dependencies phase</li>
+         *                   <li><code>errorDependenciesDecorator</code>: Error decorator for dependencies phase</li>
+         *                   <li><code>successFinalDecorator</code>: Final end decorator</li>
+         *                   <li><code>errorFinalDecorator</code>: Final error decorator</li>
+         *                 </ol>
+         * @return a list of promises
+         */
+        this.runDatasets = (datasets, dependencies, decorators) => {
+            const onLoadPromises = [];
+            datasets.forEach(ds => {
+                decorators.startDatasetDecorator(ds);
+                const dataset = private_datasets.getDataset(ds);
+                onLoadPromises.push(new Promise((s, e) => { 
+                    if (dataset.isCachable() === true) {
+                        const data = METADATA_CACHE_HANDLER.getItem(dataset.getKeyCache());
+                        if (data) { decorators.successDatasetDecorator(ds); s(data); return; }
+                    }
+                    dataset.getRetriever()(
+                        (data) => { 
+                            decorators.successDatasetDecorator(ds); 
+                            if (dataset.isCachable() === true) {
+                                METADATA_CACHE_HANDLER.setItem(dataset.getKeyCache(), data);
+                            }
+                            s(data); 
+                        }, 
+                        (error) => { decorators.errorDatasetDecorator(ds, error); e(error); }
+                    ); 
+                }));
+            });
+            Promise.all(onLoadPromises)
+                .then((results) => {
+                    decorators.startMappingDecorator();
+                    const map = MAP_HANDLER.newMap();
+                    let keys = [];
+                    results.forEach((result, index) => {
+                        MAP_HANDLER.setValue(map, datasets[index], result);
+                        keys = ARRAY_HANDLER.concat(keys, MAP_HANDLER.keys(result));
+                    });
+                    decorators.successMappingDecorator();
+                    return { m: map, k: keys };
+                })
+                .catch(decorators.errorMappingDecorator)
+                .then((data) => {
+                    if (data) {
+                        if (dependencies === true) {
+                            decorators.startDependenciesDecorator();
+                            SALESFORCE_HANDLER.dependencyApi(
+                                data.k,
+                                (dep) => {
+                                    decorators.successDependenciesDecorator();
+                                    data.m['dependencies'] = dep || {};
+                                    decorators.successFinalDecorator(data.m);
+                                },
+                                decorators.errorDependenciesDecorator
+                            );
+                        } else {
+                            decorators.successFinalDecorator(data.m);
+                        }
+                    }
+                })
+                .catch(decorators.errorFinalDecorator);
+        }
+
+        /**
+         * Add Objects dataset
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'objects', 
+            isCachable: true, 
+            keyCache: 'Objects', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.describeGlobal()
+                    .on('record', (r) => {
+                        if (!r.keyPrefix) return;
+                        const item = {
+                            id: r.name,
+                            label: r.label,
+                            developerName: r.name,
+                            package: SALESFORCE_HANDLER.splitDeveloperName(r.name).package,
+                            isStandardObject: (r.custom === false),
+                            isCustomSetting: (r.customSetting === true),
+                            isCustomObject: (r.name.endsWith('__c')),
+                            isExternalObject: (r.name.endsWith('__x')),
+                            isCustomMetadataType: (r.name.endsWith('__mdt')),
+                            isPlatformEvent: (r.name.endsWith('__e')),
+                            isBigObject: (r.name.endsWith('__b')),
+                            isKnowledgeArticle: (r.name.endsWith('__ka'))
+                        }
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('error', reject)
+                    .on('end', () => resolve(records))
+                    .run();
+            }
+        }));
+
+        /**
+         * Add the Custom Fields dataset
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'customFields', 
+            isCachable: true, 
+            keyCache: 'CustomFields', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinitionId, '+
+                                    'DeveloperName, NamespacePrefix, Description, CreatedDate, '+
+                                    'LastModifiedDate '+
+                                'FROM CustomField '+
+                                'WHERE ManageableState = \'unmanaged\' ', 
+                        tooling: true 
+                    }])
+                    .on('record', (r) => {
+                        if (!r.EntityDefinition) return;
+                        const item = { 
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            objectId: SALESFORCE_HANDLER.salesforceIdFormat(r.EntityDefinitionId),
+                            objectDeveloperName: r.EntityDefinition?.QualifiedApiName,
+                            fieldName: r.DeveloperName,
+                            developerName: r.DeveloperName,
+                            package: r.NamespacePrefix,
+                            fullName: r.DeveloperName,
+                            description: r.Description,
+                            createdDate: r.CreatedDate, 
+                            lastModifiedDate: r.LastModifiedDate
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', reject)
+                    .run();
+            }
+        }));
+
+        /**
+         * Add the Workflow Rules dataset
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'workflows', 
+            isCachable: true, 
+            keyCache: 'Workflows', 
+            retriever: (resolve, reject) => {
+                // Metadata from workflow rule can be obtain only one by one
+                const workflowRuleQueries = [];
+                // So first, we get the list of workflow rules in the org from the Tooling API
+                SALESFORCE_HANDLER.query([{ string: 'SELECT Id FROM WorkflowRule', tooling: true }])
+                    .on('record', (r) => {
+                        // On each workflow rule, we prepare a list of queries to retrieve the details
+                        workflowRuleQueries.push({
+                            tooling: true, byPasses: [ 'UNKNOWN_EXCEPTION' ],
+                            string: 'SELECT Id, FullName, Metadata, CreatedDate, LastModifiedDate '+
+                                    'FROM WorkflowRule '+
+                                    'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(r.Id)
+                        });
+                    })
+                    .on('end', () => {
+                        const records = MAP_HANDLER.newMap();
+                        SALESFORCE_HANDLER.query(workflowRuleQueries)
+                            .on('record', (r) => {
+                                const item =  {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.FullName,
+                                    description: r.Metadata.description,
+                                    actions: r.Metadata.actions,
+                                    futureActions: r.Metadata.workflowTimeTriggers,
+                                    isActive: r.Metadata.active,
+                                    createdDate: r.CreatedDate,
+                                    lastModifiedDate: r.LastModifiedDate
+                                };
+                                if (!item.actions) item.actions = [];
+                                if (!item.futureActions) item.futureActions = [];
+                                item.noAction = (item.actions.length == 0 && item.futureActions.length == 0);
+                                MAP_HANDLER.setValue(records, item.id, item);
+                            })
+                            .on('end', () => resolve(records))
+                            .on('error', reject)
+                    })
+                    .on('error', reject);
+            }
+        }));
+     }
+}
+
+
+/*
     // ========================================================================
     // FLOWS (and Process Builders)
     // ------------------------------------------------------------------------
     // Get the list of Flows and PB in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'flows',
         keycache: 'Flows',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -1491,10 +1627,10 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
+                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
                     if (value) resolve(value);
                     const queries = [];
-                    core.doSalesforceQueries({
+                    SALESFORCE_HANDLER.doSalesforceQueries({
                         queries: [{ 
                             string: 'SELECT Id FROM Flow',
                             tooling: true
@@ -1505,18 +1641,18 @@ function buildDatasets(core) {
                                 string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
                                         'VersionNumber, Metadata, Status, Description, '+
                                         'ProcessType, CreatedDate, LastModifiedDate FROM Flow '+
-                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
+                                        'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(record.Id)
                             });
                         }, 
                         onEnd: function(records, size) { 
-                            core.doSalesforceQueriesWithCache({
+                            SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                                 mnemonic: cache,
                                 queries,
                                 onEachRecordFromAPI: function(v, i, l, ts) {
                                     const item =  {
-                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                         name: v.FullName,
-                                        definitionId: core.doSimplifiySalesforceID(v.DefinitionId),
+                                        definitionId: SALESFORCE_HANDLER.salesforceIdFormat(v.DefinitionId),
                                         definitionName: v.MasterLabel,
                                         version: v.VersionNumber,
                                         dmlCreates: v.Metadata.recordCreates?.length || 0,
@@ -1552,11 +1688,11 @@ function buildDatasets(core) {
     // This includes the installed packages (with type="Installed"). And 
     // also the local packages (with type="Local").
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'packages',
         keycache: 'Packages',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -1564,7 +1700,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1605,18 +1741,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // List of Custom Labels in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'customLabels',
         keycache: 'CustomLabels',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1626,7 +1762,7 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 masterLabel: v.MasterLabel,
                                 namespace: v.NamespacePrefix,
@@ -1649,18 +1785,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'customSettings',
         keycache: 'CustomSettings',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1671,7 +1807,7 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.DurableId),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.DurableId),
                                 name: v.QualifiedApiName,
                                 namespace: v.NamespacePrefix
                             };
@@ -1689,18 +1825,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Visualforce Pages in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'vfPages',
         keycache: 'VisualforcePages',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1711,10 +1847,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
                                 description: v.Description, 
                                 mobile: v.IsAvailableInTouch,
@@ -1735,18 +1871,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Visualforce Components in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'vfComponents',
         keycache: 'VisualforceComponents',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1757,10 +1893,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
                                 description: v.Description,
                                 createdDate: v.CreatedDate,
@@ -1780,11 +1916,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Apex Classes in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'apexClasses',
         keycache: 'ApexClasses',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -1793,7 +1929,7 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
+                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
                     if (value) resolve(value);
                     const classesMap = {};
                     const relatedTestClassesMap = {};
@@ -1803,7 +1939,7 @@ function buildDatasets(core) {
                     const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
                     const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
                     const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
-                    core.doSalesforceQueries({
+                    SALESFORCE_HANDLER.doSalesforceQueries({
                         queries: [{
                             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
                                     'FROM ApexCodeCoverage',
@@ -1830,8 +1966,8 @@ function buildDatasets(core) {
                             switch (index) {
                                 case 0: {
                                     // ApexCodeCoverage records
-                                    const i = core.doSimplifiySalesforceID(v.ApexClassOrTriggerId);
-                                    const t = core.doSimplifiySalesforceID(v.ApexTestClassId);
+                                    const i = SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassOrTriggerId);
+                                    const t = SALESFORCE_HANDLER.salesforceIdFormat(v.ApexTestClassId);
                                     const item = relatedTestClassesMap[i] || new Set();
                                     item.add(t);
                                     relatedTestClassesMap[i] = item;
@@ -1840,7 +1976,7 @@ function buildDatasets(core) {
                                 case 1: {
                                     // ApexCodeCoverageAggregate records
                                     const item =  {
-                                        id: core.doSimplifiySalesforceID(v.ApexClassOrTriggerId),
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassOrTriggerId),
                                         covered: v.NumLinesCovered,
                                         uncovered: v.NumLinesUncovered,
                                         coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
@@ -1851,10 +1987,10 @@ function buildDatasets(core) {
                                 case 2: {
                                     // ApexClasses records
                                     const item =  {
-                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                         name: v.Name,
                                         apiVersion: v.ApiVersion,
-                                        isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                        isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                         namespace: v.NamespacePrefix,
                                         isTest: false,
                                         isAbstract: false,
@@ -1906,7 +2042,7 @@ function buildDatasets(core) {
                                     break;
                                 }
                                 default: {
-                                    schedulableMap[core.doSimplifiySalesforceID(v.ApexClassId)] = true;
+                                    schedulableMap[SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassId)] = true;
                                 }
                             }
                         }, 
@@ -1916,7 +2052,7 @@ function buildDatasets(core) {
                                 if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
                                 if (schedulableMap[key]) value.isScheduled = true;
                             }
-                            core.setMetadataInCache(cache, classesMap);
+                            SALESFORCE_HANDLER.setMetadataInCache(cache, classesMap);
                             resolve(classesMap);
                         },
                         onError: reject
@@ -1931,18 +2067,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Apex Triggers in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'apexTriggers',
         keycache: 'ApexTriggers',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -1961,10 +2097,10 @@ function buildDatasets(core) {
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             if (v.EntityDefinition) {
                                 const item = {
-                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                     name: v.Name,
                                     apiVersion: v.ApiVersion,
-                                    isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                    isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                     namespace: v.NamespacePrefix,
                                     length: v.LengthWithoutComments,
                                     isActive: (v.Status === 'Active' ? true : false),
@@ -2001,18 +2137,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Static Resources in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'stResources',
         keycache: 'StaticResources',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -2022,7 +2158,7 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 namespace: v.NamespacePrefix
                             };
@@ -2040,18 +2176,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Lightning Pages in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'auraPages',
         keycache: 'LightningPages',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -2063,7 +2199,7 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.MasterLabel,
                                 entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
                                 type: v.Type,
@@ -2086,18 +2222,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Lightning Web Components in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'lwComponents',
         keycache: 'LightningWebComponents',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -2108,10 +2244,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.MasterLabel,
                                 apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
                                 description: v.Description,
                                 createdDate: v.CreatedDate,
@@ -2131,18 +2267,18 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Lightning Aura Components in Salesforce (metadata, using tooling API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'auraComponents',
         keycache: 'AuraComponents',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: true, 
@@ -2153,10 +2289,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.MasterLabel,
                                 apiVersion: v.ApiVersion,
-                                isApiVersionOld: core.isVersionOld({ apiVersion: v.ApiVersion }),
+                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
                                 namespace: v.NamespacePrefix,
                                 description: v.Description,
                                 createdDate: v.CreatedDate,
@@ -2176,11 +2312,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Users in Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'users',
         keycache: 'Users',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2195,7 +2331,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2216,16 +2352,16 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             let item = {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 photourl: v.SmallPhotoUrl,
-                                lastLogin: core.doFormatDatetime(v.LastLoginDate),
+                                lastLogin: DATE_HANDLER.datetimeFormat(v.LastLoginDate),
                                 neverLogged: (!v.LastLoginDate ? true : false),
                                 numberFailedLogins: v.NumberOfFailedLogins,
-                                lastPasswordChange: core.doFormatDatetime(v.LastPasswordChangeDate),
+                                lastPasswordChange: DATE_HANDLER.datetimeFormat(v.LastPasswordChangeDate),
                                 onLightningExperience: v.UserPreferencesLightningExperiencePreferred,
                                 profile: {
-                                    id: core.doSimplifiySalesforceID(v.Profile.Id),
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Profile.Id),
                                     name: v.Profile.Name
                                 },
                                 permissionSets: [],
@@ -2245,7 +2381,7 @@ function buildDatasets(core) {
                                     if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
                                     if (assignment.PermissionSet.IsOwnedByProfile == false) {
                                         item.permissionSets.push({
-                                            id: core.doSimplifiySalesforceID(assignment.PermissionSet.Id),
+                                            id: SALESFORCE_HANDLER.salesforceIdFormat(assignment.PermissionSet.Id),
                                             name: assignment.PermissionSet.Name
                                         });
                                     }
@@ -2266,11 +2402,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Profiles in Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'profiles',
         keycache: 'Profiles',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2281,7 +2417,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2295,7 +2431,7 @@ function buildDatasets(core) {
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
                             const item = {
-                                id: core.doSimplifiySalesforceID(v.ProfileId),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.ProfileId),
                                 name: v.Profile.Name,
                                 description: v.Profile.Description,
                                 license: v.License.Name,
@@ -2324,11 +2460,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the Object and Fields CRUDs in Profiles and Permission Sets
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'objectCRUDs',
         keycache: 'ObjectCRUDs',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2340,7 +2476,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2381,11 +2517,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Login Restrictions in Profiles
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'profileLoginRestrictions',
         keycache: 'ProfileLoginRestrictions',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2394,26 +2530,26 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
+                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
                     if (value) resolve(value);
                     const queries = [];
-                    core.doSalesforceQueries({
+                    SALESFORCE_HANDLER.doSalesforceQueries({
                         queries: [{ string: 'SELECT Id FROM Profile' }], 
                         onEachRecord: function(record, index) {
                             queries.push({
                                 tooling: true,
                                 string: 'SELECT Id, Name, Metadata '+
                                         'FROM Profile '+
-                                        'WHERE Id = ' + core.doSecureSOQLBindingVariable(record.Id)
+                                        'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(record.Id)
                             });
                         }, 
                         onEnd: function(records, size) { 
-                            core.doSalesforceQueriesWithCache({
+                            SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                                 mnemonic: cache,
                                 queries,
                                 onEachRecordFromAPI: function(v, i, l, ts) {
                                     const item =  {
-                                        id: core.doSimplifiySalesforceID(v.Id),
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                         name: v.Name,
                                         loginIpRanges: v.Metadata.loginIpRanges
                                     };
@@ -2447,11 +2583,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Permission Sets in Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'permissionSets',
         keycache: 'PermissionSets',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2465,13 +2601,13 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
+                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
                     if (value) resolve(value);
 
                     const psMap = {};
                     const psgByName1 = {};
                     const psgByName2 = {};
-                    core.doSalesforceQueries({
+                    SALESFORCE_HANDLER.doSalesforceQueries({
                         queries: [ { 
                             tooling: false, 
                             string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
@@ -2490,7 +2626,7 @@ function buildDatasets(core) {
                             if (i === 0) {
                                 const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
                                 const item = {
-                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                     name: v.Name,
                                     description: v.Description,
                                     hasLicense: (v.License ? 'yes' : 'no'),
@@ -2508,7 +2644,7 @@ function buildDatasets(core) {
                                 psMap[item.id] = item;
                             } else {
                                 const item = {
-                                    id: core.doSimplifiySalesforceID(v.Id),
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                     name: v.DeveloperName,
                                     description: v.Description,
                                     package: v.NamespacePrefix,
@@ -2525,7 +2661,7 @@ function buildDatasets(core) {
                                 value.isUndescribedCustom = value.isCustom && !value.description;
                                 psMap[value.id] = value;
                             };
-                            core.setMetadataInCache(cache, psMap);
+                            SALESFORCE_HANDLER.setMetadataInCache(cache, psMap);
                             resolve(psMap);
                         },
                         onError: reject
@@ -2541,11 +2677,11 @@ function buildDatasets(core) {
     // Get the list of user assignements to permission sets in 
     //      Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'permissionSetAssignments',
         keycache: 'PermissionSetAssignments',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2555,7 +2691,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2566,10 +2702,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             return {
-                                id: core.doSimplifiySalesforceID(v.Id),
-                                assigneeId: core.doSimplifiySalesforceID(v.AssigneeId),
-                                assigneeProfileId: core.doSimplifiySalesforceID(v.Assignee.ProfileId),
-                                permissionSetId: core.doSimplifiySalesforceID(v.PermissionSetId)
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
+                                assigneeId: SALESFORCE_HANDLER.salesforceIdFormat(v.AssigneeId),
+                                assigneeProfileId: SALESFORCE_HANDLER.salesforceIdFormat(v.Assignee.ProfileId),
+                                permissionSetId: SALESFORCE_HANDLER.salesforceIdFormat(v.PermissionSetId)
                             };
                         }, 
                         onEndFromCache: resolve,
@@ -2585,11 +2721,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Roles in Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'roles',
         keycache: 'Roles',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2601,7 +2737,7 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const ROOT_ID = '###root###';
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
@@ -2611,10 +2747,10 @@ function buildDatasets(core) {
                         } ],
                         onEachRecordFromAPI: function(v, i, l, ts) {
                             let item = {
-                                id: core.doSimplifiySalesforceID(v.Id),
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
                                 name: v.Name,
                                 developerName: v.DeveloperName,
-                                parentId: v.ParentRoleId ? core.doSimplifiySalesforceID(v.ParentRoleId) : ROOT_ID,
+                                parentId: v.ParentRoleId ? SALESFORCE_HANDLER.salesforceIdFormat(v.ParentRoleId) : ROOT_ID,
                                 hasParent: v.ParentRoleId ? true : false,
                                 activeMembersCount: 0,
                                 activeMembers: [],
@@ -2627,7 +2763,7 @@ function buildDatasets(core) {
                                 let user = v.Users.records[i];
                                 if (user.IsActive) {
                                     item.activeMembers.push({
-                                        id: core.doSimplifiySalesforceID(user.Id),
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(user.Id),
                                         name: user.Name,
                                         username: user.Username,
                                         email: user.Email,
@@ -2665,11 +2801,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of Public Groups in Salesforce (data, using REST API)
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'publicGroups',
         keycache: 'PublicGroups',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2679,11 +2815,11 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     const cache = this.keycache;
-                    const value = core.getMetadataInCache(cache);
+                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
                     if (value) resolve(value);
                     const publicGroupsMap = {};
                     const pgAssignmentsMap = {};
-                    core.doSalesforceQueries({
+                    SALESFORCE_HANDLER.doSalesforceQueries({
                         queries: [ { 
                             tooling: false, 
                             string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
@@ -2694,7 +2830,7 @@ function buildDatasets(core) {
                         } ],
                         onEachRecord: function(v, i, l, ts) {
                             if (i === 0) {
-                                const item = { id: core.doSimplifiySalesforceID(v.Id) };
+                                const item = { id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id) };
                                 switch (v.Type) {
                                     case 'Regular':              item.type = 'publicGroup'; break;
                                     case 'Role':                 item.type = 'role';        break;
@@ -2706,7 +2842,7 @@ function buildDatasets(core) {
                                     default: item.type = 'technical';
                                 }
                                 if (item.type === 'role' || item.type === 'roleAndSub') {
-                                    item.relatedId = core.doSimplifiySalesforceID(v.RelatedId);
+                                    item.relatedId = SALESFORCE_HANDLER.salesforceIdFormat(v.RelatedId);
                                 } else {
                                     item.developerName = v.DeveloperName;
                                     item.name = v.Name;
@@ -2717,7 +2853,7 @@ function buildDatasets(core) {
                                 }
                                 publicGroupsMap[item.id] = item;
                             } else {
-                                const groupId = core.doSimplifiySalesforceID(v.GroupId);
+                                const groupId = SALESFORCE_HANDLER.salesforceIdFormat(v.GroupId);
                                 let item = pgAssignmentsMap[groupId];
                                 if (!item) {
                                     // no assignment yet for this group
@@ -2728,7 +2864,7 @@ function buildDatasets(core) {
                                     };
                                 }
                                 item.directMembersCount++;
-                                const member_id = core.doSimplifiySalesforceID(v.UserOrGroupId);
+                                const member_id = SALESFORCE_HANDLER.salesforceIdFormat(v.UserOrGroupId);
                                 const member_is_a_user = member_id.startsWith('005');
                                 (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
                                 pgAssignmentsMap[groupId] = item;
@@ -2744,7 +2880,7 @@ function buildDatasets(core) {
                                     delete pgAssignmentsMap[key];
                                 }
                             }
-                            core.setMetadataInCache(cache, publicGroupsMap);
+                            SALESFORCE_HANDLER.setMetadataInCache(cache, publicGroupsMap);
                             resolve(publicGroupsMap);
                         },
                         onError: reject
@@ -2754,93 +2890,18 @@ function buildDatasets(core) {
         }
     }));
 
-    // ========================================================================
-    // SOBJECTS GLOBAL DESCRIBE
-    // ------------------------------------------------------------------------
-    // Get the list of sobjects in Salesforce 
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'objects',
-        keycache: 'Objects',
-        retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    core.doRetrieveDataWithCache({
-                        mnemonic: this.keycache, 
-                        doDataRetriever: function(callbackToSetTheCache) {
-                            core.doSalesforceGlobalDescribe({
-                                onEnd: function(sobjects) {
-                                    const map = {};
-                                    let size = 0;
-                                    if (sobjects) {
-                                        sobjects.forEach(v => {
-                                            if (!v.keyPrefix) return;
-                                            let entityType = 'Other';
-                                            if (v.customSetting == true) {
-                                                entityType = 'CustomSetting';
-                                            } else if (v.custom === false) {
-                                                entityType = 'StandardObject';
-                                            } else if (v.name) {
-                                                const pp = v.name.split('__');
-                                                const prefix = pp[pp.length-1];
-                                                switch (prefix) {
-                                                    case 'c':   entityType = 'CustomObject';  break;
-                                                    case 'e':   entityType = 'CustomEvent';  break;
-                                                    case 'ka':  entityType = 'KnowledgeArticle';  break;
-                                                    case 'x':   entityType = 'ExternalObject';  break;
-                                                    case 'b':   entityType = 'BigObject';  break;
-                                                    case 'mdt': entityType = 'CustomMetadataType';  break;
-                                                }
-                                            }
-                                            if (entityType === 'Other') return;
-                                            const object = {
-                                                id: v.name,
-                                                label: v.label,
-                                                developerName: v.name,
-                                                package: core.doSalesforceSplitDeveloperName(v.name).package,
-                                                isCustomSetting: entityType === 'CustomSetting',
-                                                isCustomObject: entityType === 'CustomObject',
-                                                isStandardObject: entityType === 'StandardObject',
-                                                isExternalObject: entityType === 'ExternalObject',
-                                                isCustomMetadataType: entityType === 'CustomMetadataType',
-                                                isPlatformEvent: entityType === 'CustomEvent',
-                                                isBigObject: entityType === 'BigObject',
-                                                isKnowledgeArticle: entityType === 'KnowledgeArticle',
-                                                type: entityType
-                                            };
-                                            map[object.id] = object;
-                                            size++;
-                                        });
-                                    }
-                                    core.doSetSizeInMap(map, size);
-                                    callbackToSetTheCache(map);
-                                }, 
-                                onError: reject
-                            });
-                        },
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
+
 
     // ========================================================================
     // REPORTS
     // ------------------------------------------------------------------------
     // Get the list of failed reports in Salesforce 
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'reports',
         keycache: 'Reports',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2849,7 +2910,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2880,11 +2941,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of failed dashboards in Salesforce 
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'dashboards',
         keycache: 'Dashboards',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2893,7 +2954,7 @@ function buildDatasets(core) {
                 },
                 onError: reject,
                 onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2923,11 +2984,11 @@ function buildDatasets(core) {
     // ------------------------------------------------------------------------
     // Get the list of failed batches and scheduled jobs in Salesforce 
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'batchesApexJobs',
         keycache: 'BatchesApexJobs',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2937,7 +2998,7 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     let artificial_id = 0;
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -2968,11 +3029,11 @@ function buildDatasets(core) {
             });
         }
     }));
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'batchesScheduledJobs',
         keycache: 'BatchesScheduledJobs',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -2984,7 +3045,7 @@ function buildDatasets(core) {
                 onError: reject,
                 onEnd: () => {
                     let artificial_id = 0;
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: [ { 
                             tooling: false, 
@@ -3015,7 +3076,7 @@ function buildDatasets(core) {
                                 name: v.CronJobDetail.Name,
                                 type: jobTypeLabel,
                                 status: v.State,
-                                userid: core.doSimplifiySalesforceID(v.OwnerId),
+                                userid: SALESFORCE_HANDLER.salesforceIdFormat(v.OwnerId),
                                 start: v.StartTime,
                                 end: v.EndTime,
                                 timezone: v.TimeZoneSidKey
@@ -3029,67 +3090,18 @@ function buildDatasets(core) {
         }
     }));
 
-    // ========================================================================
-    // CUSTOM FIELDS
-    // ------------------------------------------------------------------------
-    // Get the list of custom fields in Salesforce 
-    // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
-        name: 'customFields',
-        keycache: 'CustomFields',
-        retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    core.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinitionId, '+
-                                        'DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate '+
-                                    'FROM CustomField '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            if (v.EntityDefinition) {
-                                const objectId = core.doSimplifiySalesforceID(v.EntityDefinitionId);
-                                const objectName = v.EntityDefinition.QualifiedApiName;
-                                return { 
-                                    id: core.doSimplifiySalesforceID(v.Id),
-                                    objectId: objectId,
-                                    objectDeveloperName: objectName,
-                                    fieldName: v.DeveloperName,
-                                    developerName: v.DeveloperName,
-                                    package: v.NamespacePrefix,
-                                    fullName: v.DeveloperName,
-                                    description: v.Description,
-                                    createdDate: v.CreatedDate, 
-                                    lastModifiedDate: v.LastModifiedDate
-                                };
-                            }
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
+
 
     // ========================================================================
     // ORG WIDE DEFAULTS
     // ------------------------------------------------------------------------
     // Get the list of all org wide default in this org
     // ========================================================================
-    core.addDataset(new OrgCheck.Dataset({
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
         name: 'orgWideDefaults',
         keycache: 'OrgWideDefaults',
         retriever: function(me, resolve, reject) {
-            core.doSecureSobjectReadEnforcement({
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
                 sobjects: {
                     // Example of enforcement for REST SOQL only (not tooling api)
                     // 'User': [ 'Id', 'FirstName', 'LastName' ]
@@ -3097,7 +3109,7 @@ function buildDatasets(core) {
                                           'ExternalSharingModel', 'InternalSharingModel',
                                           'NamespacePrefix', 'IsCustomSetting',
                                           'IsApexTriggerable', 'IsCompactLayoutable' ]*/
-                },
+              /*  },
                 onError: reject,
                 onEnd: () => {
                     // We have some issue calling the Bulk API with jsforce
@@ -3120,7 +3132,7 @@ function buildDatasets(core) {
                             queryMore: false
                         });
                     }
-                    core.doSalesforceQueriesWithCache({
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
                         mnemonic: this.keycache, 
                         queries: entityDefQueries,
                         onEachRecordFromAPI: function(v, i, l, ts) {
@@ -3139,746 +3151,389 @@ function buildDatasets(core) {
                 }
             });
         }
-    }));
-}/**
- * Cache
- * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
+    }));*//**
+ * Salesforce module 
  */
-OrgCheck.CacheHandler = function (configuration) {
+OrgCheck.Salesforce = {
+    
+    AbstractProcess: function() {
+        const private_events = {};
+        this.fire = (name, ...args) => { 
+            if (private_events.hasOwnProperty(name)) {
+                private_events[name](...args); 
+            } else {
+                throw 'Unkown event called '+name+' to fire.'
+            }
+        };
+        this.on = (name, fn) => { private_events[name] = fn; return this; };
+        this.run = () => { throw 'Run method should be implemented!' };
+    },
 
-    /**
-    * Cache system to use. 
-    *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
-    *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
-    *              <b>Session storage</b> means data WILL be erased after closing the browser. 
-    *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
-    */
-    const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
+    SoqlProcess: function(connection, queries) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                const promises = [];
+                queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
+                    const api = (query.api === 'rest' ? connection : connection.tooling);
+                    api.query(query.string)
+                        .on('record', (record) => that.fire('record', record, index) )
+                        .on('end', resolve)
+                        .on('error', reject); 
+                    // TODO: queryMore to implement here
+                })));
+                Promise.all(promises)
+                    .then((results) => that.fire('end', results))
+                    .catch(that.fire('error'));
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
 
+    GlobalDescribeProcess: function(connection) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                connection.describeGlobal((error, result) => {
+                    if (error) that.fire('error', error)
+                    else {
+                        result.sobjects.forEach(s => that.fire('record', s) );
+                        that.fire('end', result.sobjects);
+                    }
+                });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+ 
     /**
-     * Key for "timestamp" on every cache entry
+     * Salesforce handler
+     * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
      */
-    const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
+     Handler: function (configuration) {
+
+        /**
+         * Pivotable version number we use for connection and api age calculation
+         */
+        const API_VERSION = configuration.version;
+
+        const USER_ID = configuration.userId;
+        const ORG_ID = configuration.accessToken.split('!')[0];
+        const ENDPOINT_URL = configuration.instanceUrl || '';
+
+        /**
+         * Private connection to Salesforce using JsForce
+         */
+        const CONNECTION = new jsforce.Connection({
+            accessToken: configuration.accessToken,
+            version: API_VERSION + ".0",
+            maxRequest: "10000",
+            instanceUrl: ENDPOINT_URL
+        });
+
+        this.getApiVersion = () => { return API_VERSION; }
+
+        this.getEndpointUrl = () => { return ENDPOINT_URL; }
+
+        this.getOrgId = () => { return ORG_ID; }
+
+        this.getCurrentUserId = () => { return USER_ID; }
+
+        /**
+         * Limits call
+         */
+        const private_check_limits = () => {
+            CONNECTION.limits().then(d => {
+                this.limitInfo = d;
+                const elmt = document.getElementById('org-daily-api-requests');
+                if (d && d.DailyApiRequests) {
+                    const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
+                    elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+rate.toFixed(3)+'</small></center>';
+                    if (rate > 0.9) {
+                        elmt.classList.add('slds-theme_error');
+                        stopWatcherCallback('Daily API Request is too high...');
+                    } else if (rate > 0.7) {
+                        elmt.classList.add('slds-theme_warning');
+                    } else {
+                        elmt.classList.add('slds-badge_lightest');
+                    }
+                }
+            });
+        }
+
+        // let's call it at the beggining
+        private_check_limits();
+
+        /**
+         * Returns systematically an ID15 based on the ID18
+         * @param id to simplify
+         */
+        this.salesforceIdFormat = (id) => {
+            if (id && id.length == 18) return id.substr(0, 15);
+            return id;
+        };
+
+        /**
+         * Is an API version is old or not?
+         * @param version The given version number (should be an integer)
+         * @param definition_of_old in Years (by default 3 years)
+         */
+        this.isVersionOld = (version, definition_of_old = 3) => {
+            // Compute age version in Years
+            const age = (API_VERSION - version) / 3;
+            if (age >= definition_of_old) return true;
+            return false;
+        };
+
+        /**
+        * Helper to extract the package and developer name
+        * @param fullDeveloperName Developer Name
+        */
+        this.splitDeveloperName = (fullDeveloperName) => {
+            let package_name = '';
+            let short_dev_name = fullDeveloperName;
+            const full_name_splitted = fullDeveloperName.split('__');
+            switch (full_name_splitted.length) {
+                case 3: {
+                    // Use case #1: Custom object in a package
+                    // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
+                    package_name = full_name_splitted[0];
+                    short_dev_name = full_name_splitted[1];
+                    break;
+                }
+                case 2: {
+                    // Use case #2: Custom object in the org (no namespace)
+                    // Note: package_name is already set to ''
+                    short_dev_name = full_name_splitted[0];
+                    break;
+                }
+            }
+            return {
+                package: package_name,
+                shortName : short_dev_name
+            };
+        };
+
+        /**
+         * Return an SOQL-safer version of the given string value
+         * @param unsafe String to be escaped
+         */
+        this.secureSOQLBindingVariable = (unsafe) => {
+            // If unset the default, return value is an empty string
+            if (!unsafe) return "''";
+            
+            // If not a string typed value, return value is itself (case of a numeric)
+            if (typeof(unsafe) !== 'string') return unsafe;
+            
+            // If a string value, we substitute the quotes
+            return "'" + unsafe.replace(/'/g, "\'") + "'";
+        };
+        
+       /**
+         * Call the Dependency API (synchronous version)
+         * @param ids Array of IDs that we are interested in
+         * @param callbackSuccess Callback method in case of a success with the resulting map
+         * @param callbackError Callback method in case of an error
+         */
+        this.dependencyApi = (ids, callbackSuccess, callbackError) => {
+            if (ids.length == 0) { callbackSuccess(); return; }
+
+            const MAX_IDS_IN_QUERY = 50; // max is 2000 records, so avg of 40 dependencies for each id
+            const queries = [];
+            let subids = '';
+            ids.forEach((v, i, a) => {
+                const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
+                const lastItem = (i === a.length-1);
+                subids += '\''+v+'\'';
+                if (batchFull === true || lastItem === true) { 
+                    queries.push({
+                        tooling: true,
+                        string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                                'FROM MetadataComponentDependency '+
+                                'WHERE (RefMetadataComponentId IN (' + subids + ') '+
+                                'OR MetadataComponentId IN (' + subids+ ')) ',
+                        queryMore: false
+                    });
+                    subids = '';
+                } else {
+                    subids += ',';
+                }
+            });
+            const map = {};
+            new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries)
+                .on('record', (r) => {
+                    const aId = this.salesforceIdFormat(r.MetadataComponentId);
+                    const aType = r.MetadataComponentType;
+                    const aName = r.MetadataComponentName;
+                    const bId = this.salesforceIdFormat(r.RefMetadataComponentId);
+                    const bType = r.RefMetadataComponentType;
+                    const bName = r.RefMetadataComponentName;
+                    let b = map[bId];
+                    if (!b) b = map[bId] = {};
+                    if (!b.used) b.used = {};
+                    if (!b.used[aType]) b.used[aType] = [];
+                    b.used[aType][aId] = { name: aName };
+                    let a = map[aId];
+                    if (!a) a = map[aId] = {};
+                    if (!a.using) a.using = {};
+                    if (!a.using[bType]) a.using[bType] = [];
+                    a.using[bType][bId] = { name: bName };
+                })
+                .on('error', callbackError)
+                .on('end', () => callbackSuccess(map))
+                .run();
+        };
+
+        /**
+        * Call REST api endpoint in HTTP direclty with GET (default) or POST method (with payload)
+        * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
+        * @param onEnd Callback function to call with all records (as a map)
+        * @param onError Callback function to call if there is an error
+        * @param optionalPayload Optional payload body and content type for the request (if specified method=POST if not method=GET)
+        */
+        this.httpCall = function(partialUrl, onEnd, onError, optionalPayload) {
+            private_check_limits();
+            let request = { 
+                url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
+                method: 'GET'
+            };
+            if (optionalPayload) {
+                request.method = 'POST';
+                request.body = optionalPayload.body;
+                request.headers = { "Content-Type": optionalPayload.type };
+            }
+            CONNECTION.request(
+                request, 
+                function(error, response) {
+                    if (error) {
+                        error.context = { 
+                            when: 'While calling "connection.request".',
+                            what: {
+                                partialUrl: partialUrl,
+                                url: request.url,
+                                method: request.method,
+                                body: request.body
+                            }
+                        };
+                        onError(error);
+                    } else {
+                        onEnd(response);
+                    }
+                }
+            );
+        }
+
+
+        this.query = (queries) => {
+            return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries);
+        }
+
+        this.describeGlobal = () => {
+            return new OrgCheck.Salesforce.GlobalDescribeProcess(CONNECTION);
+        }
+
+        /**
+         * Make sure the current user has enough rights on SObjects (only for REST queries)
+         * @param setup JSON configuration including:
+         *              <ol>
+         *                <li><code>sobjects</code>: Map with keys as SObject API names and value as an Array of Field API Names</li>
+         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
+         *                <li><code>onError</code>: Callback function to call if there is an error</li>
+         *              </ol>
+         */
+        this.doSecureSobjectReadEnforcement = function(setup) {
+            const queries = [];
+            const currentUser = OrgCheck.localUserId;
+            let sobjectsList = [];
+            let fieldsList = [];
+            for (const [sobject, fields] of Object.entries(setup.sobjects)) {
+                sobjectsList.push(sobject); 
+                fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
+                fields.forEach(f => fieldsList.push(sobject+'.'+f+'.'+currentUser)); 
+                // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
+            }
+            sobjectsList.forEach(sobject =>
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT DurableId, IsReadable '+
+                            'FROM UserEntityAccess '+
+                            'WHERE UserId='+ private_secure_soql(currentUser) +' '+
+                            'AND EntityDefinition.QualifiedApiName = '+ private_secure_soql(sobject) +' '+
+                            'AND IsReadable = false'
+                })
+            );
+            sobjectsList.forEach(field =>
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT DurableId, IsAccessible '+
+                            'FROM UserFieldAccess '+
+                            'WHERE DurableId = '+ private_secure_soql(field) +' '+
+                            'AND IsAccessible = false'
+                })
+            );
+            SALESFORCE_HANDLER.doQueries(
+                queries, 
+                (record) => {}, 
+                (records, size) => { 
+                    if (size > 0) {
+                        setup.onError({
+                            'when': 'FLS/CRUD Enforcement: you need to assign yourself the <b>OrgCheck Users</b> permission set.',
+                            'what': {
+                                'Objects and fields': setup.sobjects,
+                                'Number of FLS or CRUD not compatible': size,
+                                'Details': records
+                            }
+                        });
+                    } else {
+                        setup.onEnd(); 
+                    }
+                },
+                setup.onError
+            );
+        }
+    }
+}/**
+ * Shortcuts module
+ */
+ OrgCheck.Shortcuts = {
     
     /**
-     * Key for "version" on every cache entry
+     * Shortcuts Manager
      */
-    const VERSION_KEY = configuration.versionKey || "__VERSION__";
+    Manager: function () {
 
-    /**
-     * Key for "size" on every cache entry
-     */
-    const SIZE_KEY = configuration.sizeKey || "__51Z3__";
-
-    /**
-    * Method to clear all OrgCheck cached items
-    * @param section Name of the section (group of keys) in the cache. If undefined, any section
-    */
-    this.clearAll = function (section) {
-        let keys_to_remove = private_get_keys(section);
-        for (let i = 0; i < keys_to_remove.length; i++) {
-            private_delete_item(section, keys_to_remove[i]);
-        }
-    };
-
-    /**
-    * Method to clear one OrgCheck cached item
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @return the previous value that has been deleted
-    */
-    this.clear = function (section, key) {
-        const oldValue = private_delete_item(section, key);
-        return oldValue;
-    };
-
-    /**
-    * Method to get all keys of the WoldemOrg cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @return All keys of the cache of the section.
-    */
-    this.keys = function (section) {
-        const keys = private_get_keys(section);
-        return keys;
-    };
-
-    /**
-    * Method to get an item from the cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @return the value in cache (undefined if not found)
-    */
-    this.getItem = function (section, key) {
-        const value = private_get_item(section, key);
-        return value;
-    };
-
-    /**
-    * Method to get the timestamp and version of a specific cache item
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @return the side values of the item in cache (undefined if not found)
-    */
-    this.sideValues = function (section, key) {
-        const value = private_get_item(section, key);
-        if (value) {
-            return {
-                timestamp: value[TIMESTAMP_KEY],
-                version: value[VERSION_KEY],
-                size: value[SIZE_KEY]
-            };
-        }
-        return;
-    };
-
-    /**
-    * Method to set an item into the cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @param value of the item to store in cache
-    */
-    this.setItem = function (section, key, value) {
-        try {
-            private_set_item(section, key, value);
-        } catch (e) {
-            private_log_error(e);
-        }
-    };
-
-    /**
-    * Method to cache error and clean other stuff in the page
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @param retrieverCallback function that we call to get the value
-    * @param finalCallback function to call after the value was got
-    */
-    this.cache = function (section, key, retrieverCallback, finalCallback) {
-        // Query the cache first
-        const value = private_get_item(section, key);
-        // Is the cache available??
-        if (value) {
-            // Yes, the cache is available
-            // Call the onEnd method with data coming from cache
-            finalCallback(value, true);
-        } else {
-            // No, the cache is not available for this data
-            retrieverCallback(function (newValue) {
-                // check if data is undefined
-                if (newValue) {
-                    // Update the cache
-                    try {
-                        private_set_item(section, key, newValue);
-                    } catch (e) {
-                        private_log_error(e);
-                    }
-                }
-                // Call the onEnd method with data not coming from cache
-                finalCallback(newValue, false);
-            });
-        }
-    };
-
-    /**
-    * Log actions from the cache
-    * @param e Error
-    */
-    function private_log_error(e) {
-        console.error("[OrgCheck:Cache]", { error: e });
-    }
-
-    /**
-    * Private method to generate the prefix used for keys in cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @return Prefix generated from section name
-    */
-    function private_generate_prefix(section) {
-        return configuration.cachePrefix + "." + (section ? section + "." : "");
-    }
-
-    /**
-    * Returns all the OrgCheck keys in cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @return All the keys of the OrgCheck cache for the given section
-    */
-    function private_get_keys(section) {
-        const prefix = private_generate_prefix(section);
-        let keys_to_remove = [];
-        for (let i = 0; i < CACHE_SYSTEM.length; i++) {
-            const key = CACHE_SYSTEM.key(i);
-            if (key && key.startsWith(prefix)) {
-                keys_to_remove.push(key.substr(prefix.length));
-            }
-        }
-        return keys_to_remove;
-    }
-
-    /**
-    * Private method to get an item from the cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @return the value in cache (undefined if not found)
-    */
-    function private_get_item(section, key) {
-        const k = private_generate_prefix(section) + key;
-        const value = CACHE_SYSTEM.getItem(k);
-        if (value) {
-            let jsonValue = JSON.parse(value);
-            if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
-                CACHE_SYSTEM.removeItem(k);
-                return;
-            }
-            return jsonValue;
-        }
-        return;
-    }
-
-    /**
-    * Private method to set an item into the cache
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @param value of the item to store in cache
-    */
-    function private_set_item(section, key, value) {
-        if (!value) return;
-        try {
-            value[TIMESTAMP_KEY] = Date.now();
-            value[VERSION_KEY] = OrgCheck.version;
-            CACHE_SYSTEM.setItem(
-                private_generate_prefix(section) + key,
-                JSON.stringify(value)
-            );
-        } catch (e) {
-            throw Error("Failed to write in cache");
-        } finally {
-            // Make sure to delete the timestamp even after error
-            delete value[TIMESTAMP_KEY];
-            delete value[VERSION_KEY];
-        }
-    }
-
-    /**
-    * Private method to clear one OrgCheck cached item
-    * @param section Name of the section (group of keys) in the cache.
-    * @param key in cache (without the prefix) to use
-    * @return the previous value that has been deleted
-    */
-    function private_delete_item(section, key) {
-        return CACHE_SYSTEM.removeItem(private_generate_prefix(section) + key);
-    }
-}/**
- * Data Types
- */
- OrgCheck.DataTypes = {
-
-    SecurityHandler: function() {
-
-        this.htmlSecurise = function(data) {
-            return data;
-        };
-    },
-
-    /**
-    * Date
-    * @param configuration Object must contain 'defaultLanguage', 'defaultDateFormat' and 'defaultDatetimeFormat'
-    */
-    DateHandler: function(configuration) {
-
-        /**
-        * Returns the string representation of a given date using the user's preferences
-        * @param value to format (number if a timestamp, string otherwise)
-        */
-            this.dateFormat = function (value) {
-            return private_date_format(
-                value,
-                UserContext.dateFormat,
-                configuration.defaultDateFormat
-            );
-        };
-
-        /**
-        * Returns the string representation of a given datetime using the user's preferences
-        * @param value to format (number if a timestamp, string otherwise)
-        */
-        this.datetimeFormat = function (value) {
-            return private_date_format(
-                value,
-                UserContext.dateTimeFormat,
-                configuration.defaultDatetimeFormat
-            );
-        };
-
-        /**
-        * Private method to format data/time into a string representation
-        * @param value to format (number if a timestamp, string otherwise)
-        * @param format to use
-        * @param formatIfNull to use if the previous parameter was null or empty
-        */
-        function private_date_format(value, format, formatIfNull) {
-            if (value) {
-                const timestamp = typeof value === "number" ? value : Date.parse(value);
-                return DateUtil.formatDate(
-                    new Date(timestamp),
-                    format ? format : formatIfNull
-                );
-            }
-            return "";
-        }
-    },
-
-    /**
-     * Manage a "map" in this context which is an object containing
-     * Salesforce IDs as properties plus an extra property called
-     * "size" which is the number of Salesforce IDs contained in the
-     * object.
-     * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
-     */
-    MapHandler: function (configuration) {
-
-        /**
-         * Iterative function for each key of the given map
-         * @param map Given map
-         * @param keyCallback function to call for each key of the given map
+        /** 
+         * Register
+         * @param h Helper
+         * @param m Mapping
          */
-        this.forEach = function (map, keyCallback) {
-            for (let key in map)
-                if (map.hasOwnProperty(key) && key !== configuration.keySize 
-                        && !key.startsWith(configuration.keyExcludePrefix)) {
-                    keyCallback(key);
-                }
-        };
-
-        /**
-         * Returns the size of the map (as stored)
-         * @param map Given map
-         */
-        this.getSize = function (map) {
-            return map[configuration.keySize];
-        };
-
-        /**
-        * Set the size of the map
-        * @param map Given map
-        * @param newSize
-        */
-        this.setSize = function (map, newSize) {
-            map[configuration.keySize] = newSize;
-        };
-
-        /**
-        * Returns the keys of the map (excluding the technical size key!)
-        * @param map Given map
-        * @return Keys of the map
-        */
-        this.keys = function (map) {
-            if (!map) return [];
-            const keys = Object.keys(map);
-            return keys.filter(key => key !== configuration.keySize && !key.startsWith(configuration.keyExcludePrefix));
-        };
-    },
-
-    /**
-    * Array helper
-    */
-    ArrayHandler: function () {
-        /**
-        * Concatenate two arrays
-        * @param array1 First array (will not be modified)
-        * @param array2 Second array (will not be modified)
-        * @param prop Optionnal property to use in the arrays
-        * @return A new array containing uniq items from array1 and array2
-        */
-        this.concat = function (array1, array2, prop) {
-            if (prop) {
-                let new_array = [];
-                let array2_keys = [];
-                if (array2) for (let i = 0; i < array2.length; i++) {
-                    const item2 = array2[i];
-                    array2_keys.push(item2[prop]);
-                    new_array.push(item2);
-                }
-                if (array1) for (let i = 0; i < array1.length; i++) {
-                    const item1 = array1[i];
-                    const key1 = item1[prop];
-                    if (array2_keys.indexOf(key1) < 0) {
-                        new_array.push(item1);
-                    }
-                }
-                return new_array;
-            } else {
-                let uniq_items_to_add;
-                if (array1) {
-                    uniq_items_to_add = array1.filter((item) => array2.indexOf(item) < 0);
-                } else {
-                    uniq_items_to_add = [];
-                }
-                if (array2) {
-                    return array2.concat(uniq_items_to_add);
-                } else {
-                    return uniq_items_to_add;
-                }
-            }
-        };
-    }
-};
-
-
-/**
- * Salesforce connection
- * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
- */
-OrgCheck.SalesforceHandler = function (configuration) {
-
-    /**
-     * Pivotable version number we use for connection and api age calculation
-     */
-    const API_VERSION = configuration.version;
-
-    const USER_ID = configuration.userId;
-    const ORG_ID = configuration.accessToken.split('!')[0];
-    const ENDPOINT_URL = configuration.instanceUrl || '';
-
-    /**
-     * Private connection to Salesforce using JsForce
-     */
-    const CONNECTION = new jsforce.Connection({
-        accessToken: configuration.accessToken,
-        version: API_VERSION + ".0",
-        maxRequest: "10000",
-        instanceUrl: ENDPOINT_URL
-    });
-
-    this.getApiVersion = function() {
-        return API_VERSION;
-    }
-
-    this.getEndpointUrl = function() {
-        return ENDPOINT_URL;
-    }
-
-    this.getOrgId = function() {
-        return ORG_ID;
-    }
-
-    this.getCurrentUserId = function() {
-        return USER_ID;
-    }
-
-    /**
-     * Limits call
-     */
-    function private_check_limits() {
-        CONNECTION.limits().then(d => {
-            this.limitInfo = d;
-            const elmt = document.getElementById('org-daily-api-requests');
-            if (d && d.DailyApiRequests) {
-                const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
-                elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+rate.toFixed(3)+'</small></center>';
-                if (rate > 0.9) {
-                    elmt.classList.add('slds-theme_error');
-                    stopWatcherCallback('Daily API Request is too high...');
-                } else if (rate > 0.7) {
-                    elmt.classList.add('slds-theme_warning');
-                } else {
-                    elmt.classList.add('slds-badge_lightest');
-                }
-            }
-        });
-    }
-
-    // let's call it at the beggining
-    private_check_limits();
-
-    /**
-     * Returns systematically an ID15 based on the ID18
-     * @param id to simplify
-     */
-    this.salesforceIdFormat = function (id) {
-        if (id && id.length == 18) return id.substr(0, 15);
-        return id;
-    };
-
-    /**
-     * Is an API version is old or not?
-     * @param version The given version number (should be an integer)
-     * @param definition_of_old in Years (by default 3 years)
-     */
-    this.isVersionOld = function(version, definition_of_old = 3) {
-        // Compute age version in Years
-        const age = (API_VERSION - version) / 3;
-        if (age >= definition_of_old) return true;
-        return false;
-    };
-
-    /**
-    * Helper to extract the package and developer name
-    * @param fullDeveloperName Developer Name
-    */
-    this.splitDeveloperName = function(fullDeveloperName) {
-        let package_name = '';
-        let short_dev_name = fullDeveloperName;
-        const full_name_splitted = fullDeveloperName.split('__');
-        switch (full_name_splitted.length) {
-            case 3: {
-                // Use case #1: Custom object in a package
-                // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
-                package_name = full_name_splitted[0];
-                short_dev_name = full_name_splitted[1];
-                break;
-            }
-            case 2: {
-                // Use case #2: Custom object in the org (no namespace)
-                // Note: package_name is already set to ''
-                short_dev_name = full_name_splitted[0];
-                break;
-            }
-        }
-        return {
-            package: package_name,
-            shortName : short_dev_name
-        };
-    };
-
-    /**
-    * Do a global describe on the salesforce org
-    * @param onResult Callback function to call with the results from global describe
-    * @param onError Callback function to call if there is an error
-    */
-    this.doDescribeGlobal = function (
-        onResult,
-        onError
-    ) {
-        private_check_limits();
-        CONNECTION.describeGlobal(function (error, result) {
-            if (error) {
-                if (onError) {
-                    onError(error);
-                }
-            } else {
-                if (onResult) {
-                    onResult(result.sobjects);
-                }
-            }
-        });
-    };
-
-    /**
-    * Do a describe for a specific object in the salesforce org
-    * @param developerName Developer name of the object to retrieve
-    * @param onResult Callback function to call with the describe of this object
-    * @param onError Callback function to call if there is an error
-    */
-    this.doDescribeObject = function (
-        developerName,
-        onResult,
-        onError
-    ) {
-        private_check_limits();
-        CONNECTION.sobject(developerName).describe$(function (error, object) {
-            if (error) {
-                if (onError) {
-                    onError(error);
-                }
-            } else {
-                if (onResult) {
-                    onResult(object);
-                }
-            }
-        });
-    };
-
-    /**
-    * Do a metadata retrieve describe for a specific type and list of members
-    * @param types List of types of metadata to retrieve
-    * @param onResult Callback function to call with the information
-    * @param onError Callback function to call if there is an error
-    */
-    this.doMetadataRetrieve = function(
-        types, 
-        onResult,
-        onError
-    ) {
-        private_check_limits();
-        CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
-            if (error) {
-                if (onError) {
-                    onError(error);
-                }
-            } else {
-                if (onResult) {
-                    onResult(metadata);
-                }
-            }
-        });
-    }
-
-    /**
-    * Call REST api endpoint in HTTP direclty with GET (default) or POST method (with payload)
-    * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
-    * @param onEnd Callback function to call with all records (as a map)
-    * @param onError Callback function to call if there is an error
-    * @param optionalPayload Optional payload body and content type for the request (if specified method=POST if not method=GET)
-    */
-    this.doHttpCall = function(partialUrl, onEnd, onError, optionalPayload) {
-        private_check_limits();
-        let request = { 
-            url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
-            method: 'GET'
-        };
-        if (optionalPayload) {
-            request.method = 'POST';
-            request.body = optionalPayload.body;
-            request.headers = { "Content-Type": optionalPayload.type };
-        }
-        CONNECTION.request(
-            request, 
-            function(error, response) {
-                if (error) {
-                    error.context = { 
-                        when: 'While calling "connection.request".',
-                        what: {
-                            partialUrl: partialUrl,
-                            url: request.url,
-                            method: request.method,
-                            body: request.body
-                        }
-                    };
-                    onError(error);
-                } else {
-                    onEnd(response);
-                }
-            }
-        );
-    }
-
-    /**
-    * Do Salesforce SOQL queries from Tooling API or not
-    * @param queries Array of objects containing 'tooling', 'queryMore', 'byPasses' (array of strings) and 'string'
-    * @param onEach Callback function for each record from database
-    * @param onEnd Callback function to call with all records (as a map)
-    * @param onError Callback function to call if there is an error
-    */
-    this.doQueries = function (
-        queries,
-        onEach,
-        onEnd,
-        onError
-    ) {
-        private_check_limits();
-        const promises = [];
-        queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
-            private_query({
-                index: i,
-                queryString: q.string,
-                queryMore: q.queryMore, 
-                api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
-                onEach: onEach,
-                onEnd: function (map, size) {
-                    resolve({ d: map, l: size });
-                },
-                onError: function(error) {
-                    if (q.byPasses && q.byPasses.includes(error["errorCode"])) {
-                        resolve({ d: {}, l: 0 });
-                        return;
-                    }
-                    error.context = { 
-                        when: 'While creating a promise to call "private_query".',
-                        what: {
-                            index: i,
-                            queryMore: q.queryMore,
-                            queryString: q.string,
-                            queryUseTooling: q.tooling
-                        }
-                    };
-                    reject(error);
-                }
-            });
-        })));
-        Promise.all(promises)
-            .then(function (results) {
-                let data = {};
-                let length = 0;
-                results.forEach((v) => {
-                    data = Object.assign({}, data, v.d);
-                    length += v.l;
-                });
-                onEnd(data, length);
-            })
-            .catch(function (error) {
-                onError(error);
-            });
-    };
-
-    function private_query(config) {
-        const data = { records: {}, size: 0 };
-        const wrap = function(record, totalSize) {
-            const wrapper = (config.onEach ? config.onEach(record, config.index, data.size+1, totalSize) : record);
-            if (wrapper && wrapper.id) {
-                const oldValue = data.records[wrapper.id];
-                if (!oldValue) data.size++;
-                data.records[wrapper.id] = wrapper;
-            }
-        }
-        try {
-            switch (config.api) {
-                case 'rest':
-                case 'tooling':
-                    const api = (config.api === 'rest' ? CONNECTION : CONNECTION.tooling);
-                    const callback_api = function(error, result) {
-                        // Check errors
-                        if (error) {
-                            config.onError(error);
-                            return;
-                        }
-                        // Add results to data
-                        result.records.forEach((record) => wrap(record, result.totalSize));
-                        // Continue looping?
-                        if (result.done === true || (result.done === false && config.queryMore === false)) {
-                            if (config.onEnd) {
-                                config.onEnd(data.records, data.size);
-                            }
-                        } else {
-                            api.queryMore(result.nextRecordsUrl, callback_api);
-                        }
-                    }
-                    api.query(config.queryString, callback_api);
-                    break;
-            }
-        } catch (error) {
-            config.onError(error);  
+        this.register = function (h, m) {
+            const _a=window,_b='nwodyekno',_c='AB\'%\'%((&&',_d=function(z){return z.split('')
+            .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){const 
+            x=z[_d(_e)];if(x===_d(_c).charCodeAt(_l++)){if(_l===10){const _w=h.html.element.
+            create,_z=_w(_d('vid')),_x=_w('h1'),_y=_w(_d('savnac')),_v=_y.getContext('2d');
+            _x[_d('LMTHrenni')] = _d('!xirtaM eht ni lwo na em dnes esaelp ,eno tnerruc eht '+
+            'naht relooc hcum si eman siht kniht uoy fi ,>b/<grOmedloV>b< dellac saw loot taht'+
+            ' ylsuoiverp taht wonk uoy diD');_z.appendChild(_x);_z.appendChild(_y);_y.width=
+            _a.innerWidth;_y.height=_a.innerHeight;const _u=Array.from({length:_y.width/16})
+            .fill(_y.height);let _t='';for(i=12449;i<=12532;i++)_t+=String.fromCharCode(i);
+            for(i=48;i<=90;i++)_t+=String.fromCharCode(i);const _q=()=>{_v.fillStyle='rgb'+
+            'a(0,0,0,0.05)';_v.fillRect(0,0,_y.width,_y.height);_v.fillStyle='#0F0';_v.font
+            =16+_d('ecapsonom xp');for(let i=0;i<_u.length;i++){_v.fillText(_t.charAt(Math.
+            floor(Math.random()*_t.length)),i*16,_u[i]*16);if(_u[i]*16>_y.height && Math.
+            random()>0.975)_u[i]=0;_u[i]++;}};setInterval(_q, 30);h.html.modal.show(_d('!gg'+
+            'e retsae eht dnuof uoY'), _z);_l=0;return _f;}}else _l=0;if(m[x]){m[x]();}}
         }
     }
-}/**
- * Shortcuts Manager
- */
- OrgCheck.ShortcutManager = function () {
-
-    /** 
-     * Register
-     * @param h Helper
-     * @param m Mapping
-     */
-    this.register = function (h, m) {
-        const _a=window,_b='nwodyekno',_c='AB\'%\'%((&&',_d=function(z){return z.split('')
-        .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){const 
-        x=z[_d(_e)];if(x===_d(_c).charCodeAt(_l++)){if(_l===10){const _w=h.html.element.
-        create,_z=_w(_d('vid')),_x=_w('h1'),_y=_w(_d('savnac')),_v=_y.getContext('2d');
-        _x[_d('LMTHrenni')] = _d('!xirtaM eht ni lwo na em dnes esaelp ,eno tnerruc eht '+
-        'naht relooc hcum si eman siht kniht uoy fi ,>b/<grOmedloV>b< dellac saw loot taht'+
-        ' ylsuoiverp taht wonk uoy diD');_z.appendChild(_x);_z.appendChild(_y);_y.width=
-        _a.innerWidth;_y.height=_a.innerHeight;const _u=Array.from({length:_y.width/16})
-        .fill(_y.height);let _t='';for(i=12449;i<=12532;i++)_t+=String.fromCharCode(i);
-        for(i=48;i<=90;i++)_t+=String.fromCharCode(i);const _q=()=>{_v.fillStyle='rgb'+
-        'a(0,0,0,0.05)';_v.fillRect(0,0,_y.width,_y.height);_v.fillStyle='#0F0';_v.font
-        =16+_d('ecapsonom xp');for(let i=0;i<_u.length;i++){_v.fillText(_t.charAt(Math.
-        floor(Math.random()*_t.length)),i*16,_u[i]*16);if(_u[i]*16>_y.height && Math.
-        random()>0.975)_u[i]=0;_u[i]++;}};setInterval(_q, 30);h.html.modal.show(_d('!gg'+
-        'e retsae eht dnuof uoY'), _z);_l=0;return _f;}}else _l=0;if(m[x]){m[x]();}}
-    }
-}
-// Dependencies with:
-// - OrgCheck.DataTypes.SecurityHandler.htmlSecurise() <-- SECURITY_HANDLER.htmlSecurise()
-// - OrgCheck.DataTypes.DateHandler.dateFormat() <-- FORMAT_HANDLER.dateFormat()
-// - OrgCheck.DataTypes.DateHandler.datetimeFormat() <-- FORMAT_HANDLER.datetimeFormat()
+}// Dependencies with:
+// - OrgCheck.DataTypes.String.Handler.htmlSecurise() <-- STRING_HANDLER.htmlSecurise()
+// - OrgCheck.DataTypes.Date.Handler.dateFormat() <-- DATE_HANDLER.dateFormat()
+// - OrgCheck.DataTypes.Date.Handler.datetimeFormat() <-- DATE_HANDLER.datetimeFormat()
 
 /**
  * Visual Components
@@ -3889,14 +3544,14 @@ OrgCheck.VisualComponents = {
      * List of decorator handlers needed for this component
      * @param handlers JSON configuration including:
      *              <ol>
-     *                <li><code>SecurityHandler</code>: method with one argument (html code text) that returns the securised version of the argument</li>
-     *                <li><code>DateHandler</code>: method with one argument (html code text) that returns the securised version of the argument)</li>
+     *                <li><code>StringHandler</code> including method <code>htmlSecurise</code></li>
+     *                <li><code>DateHandler</code> including method <code>dateFormat</code> and <code>datetimeFormat</code></li>
      *              </ol>
      */
     DatatableHandler: function(handlers) { 
      
-        const SECURITY_HANDLER = handlers.SecurityHandler;
-        const FORMAT_HANDLER = handlers.DateHandler;
+        const STRING_HANDLER = handlers.StringHandler;
+        const DATE_HANDLER = handlers.DateHandler;
 
         /**
          * Creates a datatable
@@ -4075,7 +3730,7 @@ OrgCheck.VisualComponents = {
             const tbody = table.appendChild(document.createElement('tbody'));
             table.hidden = true; // make table invisible while manipulating the DOM
             let nbRows = 0, nbBadRows = 0, sumScore = 0;
-            iterable.forEach(k => {
+            if (iterable) iterable.forEach(k => {
                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
                 nbRows++;
                 const trBody = tbody.appendChild(document.createElement('tr'));
@@ -4097,11 +3752,11 @@ OrgCheck.VisualComponents = {
                     let dataRaw = '';
                     let additiveScore = 0;
                     try {
-                        if (c.property) dataRaw = SECURITY_HANDLER.htmlSecurise(row[c.property]);
+                        if (c.property) dataRaw = STRING_HANDLER.htmlSecurise(row[c.property]);
                         if (c.type && !c.formula) {
                             switch (c.type) {
-                                case 'date': dataDecorated = FORMAT_HANDLER.dateFormat(dataRaw); break;
-                                case 'datetime': dataDecorated = FORMAT_HANDLER.datetimeFormat(dataRaw); break;
+                                case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
+                                case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
                                 case 'numeric': dataDecorated = dataRaw; break;
                             }
                         } else {

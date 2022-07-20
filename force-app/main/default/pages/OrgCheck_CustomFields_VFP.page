@@ -27,35 +27,32 @@
                                 element: 'datatable',
                                 columns: [
                                     { name: '{!$Label.OrgCheck_Object_CL}', formula: (r) => { 
-                                        const label = map.objects[r.objectDeveloperName]?.label;
-                                        const type = map.objects[r.objectDeveloperName]?.type;
-                                        let entityUrl = '';
-                                        switch (type) {
-                                            case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
-                                            case 'StandardObject':
-                                            case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
-                                            case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
-                                            case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
-                                            case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
-                                            case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
-                                            case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
-                                            default:                   entityUrl = '/'+r.objectId;
+                                        const object = map.objects[r.objectDeveloperName];
+                                        let entityUrl = '/'+r.objectId;
+                                        let entityLabel = object?.label + (object?.label !== r.objectId ? ' ('+object?.developerName+')' : '');
+                                        if (object) {
+                                            if (r.isCustomSetting === true) entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId;
+                                            if (r.isCustomObject === true || r.isStandardObject === true) entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';
+                                            if (r.isExternalObject === true) entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;
+                                            if (r.isCustomMetadataType === true) entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId; 
+                                            if (r.isPlatformEvent === true) entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;
+                                            if (r.isBigObject === true) entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;
+                                            if (r.isKnowledgeArticle === true) entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;
                                         }
-                                        let entityLabel = label + (label !== r.objectDeveloperName ? ' ('+r.objectDeveloperName+')' : '');
                                         return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
                                     }},
                                     { name: '{!$Label.OrgCheck_Type_CL}', formula: (r) => { 
-                                        const type = map.objects[r.objectDeveloperName]?.type;
+                                        const object = map.objects[r.objectDeveloperName];
                                         let t = '';
-                                        switch (type) {
-                                            case 'CustomSetting':      t = 'Custom Setting'; break;
-                                            case 'CustomObject':       t = 'Custom Object';  break;
-                                            case 'CustomEvent':        t = 'Platform Event';  break;
-                                            case 'KnowledgeArticle':   t = 'Knowledge Article';  break;
-                                            case 'ExternalObject':     t = 'External Object';  break;
-                                            case 'BigObject':          t = 'Big Object';  break;
-                                            case 'CustomMetadataType': t = 'Custom Metadata Type';  break;
-                                            case 'StandardObject':     t = 'Standard';  break;
+                                        if (object) {
+                                            if (object.isCustomSetting === true) t = 'Custom Setting';
+                                            if (object.isCustomObject === true) t = 'Custom Object';
+                                            if (object.isStandardObject === true) t = 'Standard';
+                                            if (object.isExternalObject === true) t = 'External Object';
+                                            if (object.isCustomMetadataType === true) t = 'Custom Metadata Type'; 
+                                            if (object.isPlatformEvent === true) t = 'Platform Event';
+                                            if (object.isBigObject === true) t = 'Big Object';
+                                            if (object.isKnowledgeArticle === true) t = 'Knowledge Article';
                                         }
                                         return helper.html.render.escape(t);
                                     }},
