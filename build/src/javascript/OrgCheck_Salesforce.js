@@ -32,7 +32,7 @@ OrgCheck.Salesforce = {
                 })));
                 Promise.all(promises)
                     .then((results) => that.fire('end', results))
-                    .catch(that.fire('error'));
+                    .catch((error) => that.fire('error', error));
             } catch (error) {
                 that.fire('error', error);
             }
@@ -231,7 +231,7 @@ OrgCheck.Salesforce = {
                     if (!a.using[bType]) a.using[bType] = [];
                     a.using[bType][bId] = { name: bName };
                 })
-                .on('error', callbackError)
+                .on('error', (error) => callbackError(error))
                 .on('end', () => callbackSuccess(map))
                 .run();
         };

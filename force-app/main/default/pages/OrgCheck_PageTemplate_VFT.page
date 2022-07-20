@@ -207,7 +207,6 @@
                         formatDefaultDatetime: 'dd/MM/y HH:mm:ss',
                         formatDefaultLanguage: 'en'
                     });
-                    buildDatasets(core);
 
                     // ========================================================================
                     // Finally we call the start2 method for the page to use OrgCheck controller and helper

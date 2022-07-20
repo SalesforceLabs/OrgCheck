@@ -170,8 +170,8 @@
                     // 0. Clean way to show errors
                     const showError = function(error) {
                         MSG_HANDLER.showError(error);
-                        PROGRESSBAR_HANDLER.reset();
-                        PROGRESSBAR_HANDLER.hide();
+                        //PROGRESSBAR_HANDLER.reset();
+                        //PROGRESSBAR_HANDLER.hide();
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
                     };
 
@@ -198,10 +198,10 @@
                     ctlSetup.datasets.forEach(d => {
                         PROGRESSBAR_HANDLER.addSection('dataset-'+d, 'Dataset ['+d+']: initialize...', 'initialized');
                     });
+                    PROGRESSBAR_HANDLER.addSection('mapping', 'Mapping: initialize...', 'initialized');
                     if (ctlSetup.dependencies) {
                         PROGRESSBAR_HANDLER.addSection('dependencies', 'Dependencies: initialize...', 'initialized');
                     }
-                    PROGRESSBAR_HANDLER.addSection('mapping', 'Mapping: initialize...', 'initialized');
                     PROGRESSBAR_HANDLER.addSection('records', 'Records: initialize...', 'initialized');
                     if (ctlSetup.actions) {
                         PROGRESSBAR_HANDLER.addSection('actions', 'Actions: initialize...', 'initialized');
@@ -295,13 +295,13 @@
                         {
                             startDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: starting...', 'started'),
                             successDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended successfuly', 'ended'), 
-                            errorDatasetDecorator: (ds, error) => { PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended with an error', 'failed'); showError(error); },
+                            errorDatasetDecorator: (ds, error) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended with an error', 'failed'),
                             startMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started'),
                             successMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended'),
-                            errorMappingDecorator: (error) => { PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed'); showError(error); },
+                            errorMappingDecorator: (error) => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed'),
                             startDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started'),
                             successDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended'), 
-                            errorDependenciesDecorator: (error) => { PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed'); showError(error); },
+                            errorDependenciesDecorator: (error) => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed'),
                             successFinalDecorator: (data) => onEnd(data),
                             errorFinalDecorator: (error) => showError(error)
                         }
@@ -663,12 +663,6 @@
             };
         };
 
-        this.isVersionOld = function(setup) {
-            return SALESFORCE_HANDLER.isVersionOld(
-                setup.apiVersion
-            );
-        }
-
         /**
          * Compute the dependencies tabular view
          * @param tagId id of the entity
@@ -833,14 +827,3 @@
 
     }
 };
-
-/**
- * Let's define all the dataset that we have available for the pages.
- *              Pages will activate the one they need when calling the controller
- *              At this time, no data is yet retrieved from Salesforce.
- * @param core The OrgCheck instance 
- */
-function buildDatasets(core) {
-
-
-}

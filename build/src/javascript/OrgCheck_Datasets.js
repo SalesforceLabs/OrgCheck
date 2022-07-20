@@ -147,6 +147,7 @@ OrgCheck.Datasets = {
          */
         this.runDatasets = (datasets, dependencies, decorators) => {
             const onLoadPromises = [];
+            const errors = [];
             datasets.forEach(ds => {
                 decorators.startDatasetDecorator(ds);
                 const dataset = private_datasets.getDataset(ds);
@@ -179,7 +180,10 @@ OrgCheck.Datasets = {
                     decorators.successMappingDecorator();
                     return { m: map, k: keys };
                 })
-                .catch(decorators.errorMappingDecorator)
+                .catch((error) => {
+                    decorators.errorMappingDecorator(error);
+                    decorators.errorFinalDecorator(error);
+                })
                 .then((data) => {
                     if (data) {
                         if (dependencies === true) {
@@ -191,14 +195,17 @@ OrgCheck.Datasets = {
                                     data.m['dependencies'] = dep || {};
                                     decorators.successFinalDecorator(data.m);
                                 },
-                                decorators.errorDependenciesDecorator
+                                (error) => {
+                                    decorators.errorDependenciesDecorator(error);
+                                    decorators.errorFinalDecorator(error);
+                                }
                             );
                         } else {
                             decorators.successFinalDecorator(data.m);
                         }
                     }
                 })
-                .catch(decorators.errorFinalDecorator);
+                .catch((error) => { decorators.errorFinalDecorator(error); });
         }
 
         /**
