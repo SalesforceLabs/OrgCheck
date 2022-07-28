@@ -58,7 +58,7 @@
 
                     const PREF_HIDE_CRUDS = helper.preferences.get('filter.HideCRUDsProfilesPermSets');
 
-                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profileLoginRestrictions' ];
+                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments' ];
                     if (PREF_HIDE_CRUDS === false) profileDatasets.push('objectCRUDs');
 
                     // Initialize TABS bindings
@@ -139,8 +139,8 @@
                                     { name: '{!$Label.OrgCheck_Saturday_CL}', formula: (r) => { return r.loginHours.saturday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.saturday.from,  r.loginHours.saturday.to) : '' }},
                                     { name: '{!$Label.OrgCheck_Sunday_CL}', formula: (r) => { return r.loginHours.sunday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.sunday.from,  r.loginHours.sunday.to) : '' }},
                                 ],
-                                data: map.profileLoginRestrictions,
-                                sorting: { name: 'OrgCheck_Profile_CL', order: 'asc' },
+                                data: map.profiles,
+                                sorting: { name: '{!$Label.OrgCheck_Profile_CL}', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
@@ -153,7 +153,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
-                                    { name: 'OrgCheck_Profile_CL', formula: (r) => { 
+                                    { name: '{!$Label.OrgCheck_Profile_CL}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -175,8 +175,8 @@
                                         return html;
                                     }}
                                 ],
-                                data: map.profileLoginRestrictions,
-                                sorting: { name: 'OrgCheck_Profile_CL', order: 'asc' },
+                                data: map.profiles,
+                                sorting: { name: '{!$Label.OrgCheck_Profile_CL}', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,

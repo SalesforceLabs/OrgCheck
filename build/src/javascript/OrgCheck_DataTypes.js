@@ -107,6 +107,7 @@
              */
             const private_get_safe_keys = (map) => {
                 if (map) return Object.keys(map).filter(k => private_is_safe_key(k));
+                return [];
             };
 
             /**

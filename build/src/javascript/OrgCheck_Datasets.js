@@ -152,20 +152,22 @@ OrgCheck.Datasets = {
                 decorators.startDatasetDecorator(ds);
                 const dataset = private_datasets.getDataset(ds);
                 onLoadPromises.push(new Promise((s, e) => { 
-                    if (dataset.isCachable() === true) {
-                        const data = METADATA_CACHE_HANDLER.getItem(dataset.getKeyCache());
-                        if (data) { decorators.successDatasetDecorator(ds); s(data); return; }
-                    }
-                    dataset.getRetriever()(
-                        (data) => { 
-                            decorators.successDatasetDecorator(ds); 
-                            if (dataset.isCachable() === true) {
-                                METADATA_CACHE_HANDLER.setItem(dataset.getKeyCache(), data);
-                            }
-                            s(data); 
-                        }, 
-                        (error) => { decorators.errorDatasetDecorator(ds, error); e(error); }
-                    ); 
+                    try {
+                        if (dataset.isCachable() === true) {
+                            const data = METADATA_CACHE_HANDLER.getItem(dataset.getKeyCache());
+                            if (data) { decorators.successDatasetDecorator(ds); s(data); return; }
+                        }
+                        dataset.getRetriever()(
+                            (data) => { 
+                                decorators.successDatasetDecorator(ds); 
+                                if (dataset.isCachable() === true) {
+                                    METADATA_CACHE_HANDLER.setItem(dataset.getKeyCache(), data);
+                                }
+                                s(data); 
+                            }, 
+                            (error) => { decorators.errorDatasetDecorator(ds, error); e(error); }
+                        );
+                    } catch (error) { decorators.errorDatasetDecorator(ds, error); e(error); } 
                 }));
             });
             Promise.all(onLoadPromises)
@@ -209,9 +211,11 @@ OrgCheck.Datasets = {
         }
 
         /**
+         * ======================================================================
          * Add Objects dataset
+         * ======================================================================
          */
-         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
             name: 'objects', 
             isCachable: true, 
             keyCache: 'Objects', 
@@ -236,16 +240,18 @@ OrgCheck.Datasets = {
                         }
                         MAP_HANDLER.setValue(records, item.id, item);
                     })
-                    .on('error', reject)
+                    .on('error', (error) => reject(error))
                     .on('end', () => resolve(records))
                     .run();
             }
         }));
 
         /**
+         * ======================================================================
          * Add the Custom Fields dataset
+         * ======================================================================
          */
-         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
             name: 'customFields', 
             isCachable: true, 
             keyCache: 'CustomFields', 
@@ -276,35 +282,439 @@ OrgCheck.Datasets = {
                         MAP_HANDLER.setValue(records, item.id, item);
                     })
                     .on('end', () => resolve(records))
-                    .on('error', reject)
+                    .on('error', (error) => reject(error))
                     .run();
             }
         }));
 
         /**
-         * Add the Workflow Rules dataset
+         * ======================================================================
+         * Add the Active Users dataset
+         * ======================================================================
          */
         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
-            name: 'workflows', 
+            name: 'users', 
             isCachable: true, 
-            keyCache: 'Workflows', 
-            retriever: (resolve, reject) => {
-                // Metadata from workflow rule can be obtain only one by one
-                const workflowRuleQueries = [];
-                // So first, we get the list of workflow rules in the org from the Tooling API
-                SALESFORCE_HANDLER.query([{ string: 'SELECT Id FROM WorkflowRule', tooling: true }])
+            keyCache: 'Users', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, Name, SmallPhotoUrl, Profile.Id, Profile.Name, '+
+                                    'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
+                                    'UserPreferencesLightningExperiencePreferred, '+
+                                    '(SELECT PermissionSet.Id, PermissionSet.Name, '+
+                                        'PermissionSet.PermissionsApiEnabled, '+
+                                        'PermissionSet.PermissionsViewSetup, '+
+                                        'PermissionSet.PermissionsModifyAllData, '+
+                                        'PermissionSet.PermissionsViewAllData, '+
+                                        'PermissionSet.IsOwnedByProfile '+
+                                        'FROM PermissionSetAssignments '+
+                                        'ORDER BY PermissionSet.Name) '+
+                                'FROM User '+
+                                'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
+                                'AND IsActive = true ', // we only want active users
+                    }])
                     .on('record', (r) => {
-                        // On each workflow rule, we prepare a list of queries to retrieve the details
-                        workflowRuleQueries.push({
-                            tooling: true, byPasses: [ 'UNKNOWN_EXCEPTION' ],
-                            string: 'SELECT Id, FullName, Metadata, CreatedDate, LastModifiedDate '+
-                                    'FROM WorkflowRule '+
-                                    'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(r.Id)
-                        });
+                        let item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.Name,
+                            photourl: r.SmallPhotoUrl,
+                            lastLogin: DATE_HANDLER.datetimeFormat(r.LastLoginDate),
+                            neverLogged: (!r.LastLoginDate ? true : false),
+                            numberFailedLogins: r.NumberOfFailedLogins,
+                            lastPasswordChange: DATE_HANDLER.datetimeFormat(r.LastPasswordChangeDate),
+                            onLightningExperience: r.UserPreferencesLightningExperiencePreferred,
+                            profile: {
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Profile.Id),
+                                name: r.Profile.Name
+                            },
+                            permissionSets: [],
+                            permissions: {
+                                apiEnabled: false,
+                                viewSetup: false,
+                                modifyAllData: false,
+                                viewAllData: false
+                            }
+                        };
+                        if (r.PermissionSetAssignments && r.PermissionSetAssignments.records) {
+                            for (let i=0; i<r.PermissionSetAssignments.records.length; i++) {
+                                let assignment = r.PermissionSetAssignments.records[i];
+                                if (assignment.PermissionSet.PermissionsApiEnabled === true) item.permissions.apiEnabled = true;
+                                if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
+                                if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
+                                if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
+                                if (assignment.PermissionSet.IsOwnedByProfile == false) {
+                                    item.permissionSets.push({
+                                        id: SALESFORCE_HANDLER.salesforceIdFormat(assignment.PermissionSet.Id),
+                                        name: assignment.PermissionSet.Name
+                                    });
+                                }
+                            }
+                        }
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+    
+        /**
+         * ======================================================================
+         * Add the Object CRUDs dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'objectCRUDs', 
+            isCachable: true, 
+            keyCache: 'ObjectCRUDs', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
+                                    'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                    'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                                'FROM ObjectPermissions '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: r.ParentId + r.SobjectType,
+                            sobject: r.SobjectType,
+                            type: (r.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
+                            parent: { 
+                                id: (r.Parent.IsOwnedByProfile ? r.Parent.ProfileId : r.ParentId), 
+                                name: (r.Parent.IsOwnedByProfile ? r.Parent.Profile.Name : r.Parent.Label) 
+                            },
+                            permissions: {
+                                create: r.PermissionsCreate,
+                                read: r.PermissionsRead,
+                                update: r.PermissionsEdit,
+                                delete: r.PermissionsDelete,
+                                viewAll: r.PermissionsViewAllRecords,
+                                modifyAll: r.PermissionsModifyAllRecords
+                            }
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+        
+        /**
+         * ======================================================================
+         * Add the Profiles dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'profiles', 
+            isCachable: true, 
+            keyCache: 'Profiles', 
+            retriever: (me, resolve, reject) => {
+                const profileIds = [];
+                const profiles = {};
+                SALESFORCE_HANDLER.query([{
+                        string: 'SELECT ProfileId, Profile.UserType, NamespacePrefix, '+
+                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
+                                'FROM PermissionSet '+ // oh yes we are not mistaken!
+                                'WHERE isOwnedByProfile = TRUE'
+                    }])
+                    .on('record', (r) => {
+                        const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.ProfileId);
+                        profileIds.push(profileId);
+                        profiles[profileId] = r;
                     })
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.query(workflowRuleQueries)
+                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Profile', ids: profileIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                            .on('record', (r) => {
+                                const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.Id);
+                                const profileSoql = profiles[profileId];
+                                if (!profileSoql) return;
+                                const memberCounts = (profileSoql.Assignments && profileSoql.Assignments.records) ? profileSoql.Assignments.records.length : 0;
+                                const item = {
+                                    id: profileId,
+                                    name: r.Name,
+                                    loginIpRanges: r.Metadata.loginIpRanges,
+                                    description: r.Description,
+                                    license: r.Metadata.userLicense,
+                                    userType: profileSoql.Profile.UserType,
+                                    isCustom: r.Metadata.custom,
+                                    isUnusedCustom: r.Metadata.custom && memberCounts == 0,
+                                    isUndescribedCustom: r.Metadata.custom && !r.Description,
+                                    package: profileSoql.NamespacePrefix,
+                                    membersCount: memberCounts,
+                                    hasMembers: memberCounts > 0,
+                                    createdDate: r.CreatedDate, 
+                                    lastModifiedDate: r.LastModifiedDate
+                                }
+                                if (r.Metadata.loginHours) {
+                                    const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                                    days.forEach(d => {
+                                        const c1 = r.Metadata.loginHours[d + 'Start'];
+                                        const c2 = r.Metadata.loginHours[d + 'End'];
+                                        if (!item.loginHours) item.loginHours = {};
+                                        item.loginHours[d] = {
+                                            from: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
+                                            to:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
+                                        };
+                                    });
+                                }
+                                MAP_HANDLER.setValue(records, item.id, item);
+                            })
+                            .on('end', () => resolve(records))
+                            .on('error', (error) => reject(error))
+                            .run();
+                    })
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Permission Sets dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'permissionSets', 
+            isCachable: true, 
+            keyCache: 'PermissionSets', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                const psgByName1 = {};
+                const psgByName2 = {};
+                SALESFORCE_HANDLER.query([{
+                        string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
+                                    'CreatedDate, LastModifiedDate, '+
+                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
+                                'FROM PermissionSet '+
+                                'WHERE IsOwnedByProfile = FALSE' 
+                    }, {
+                        byPasses: [ 'INVALID_TYPE' ],
+                        string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM PermissionSetGroup ' 
+                    }])
+                    .on('record', (r, i) => {
+                        if (i === 0) {
+                            const hasMembers = (r.Assignments && r.Assignments.records) ? r.Assignments.records.length > 0 : false;
+                            const item = {
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                name: r.Name,
+                                description: r.Description,
+                                hasLicense: (r.License ? 'yes' : 'no'),
+                                license: (r.License ? r.License.Name : ''),
+                                isCustom: r.IsCustom,
+                                isUndescribedCustom: r.IsCustom && !r.Description,
+                                package: r.NamespacePrefix,
+                                isUnusedCustom: r.IsCustom && !hasMembers,
+                                hasMembers: hasMembers,
+                                isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                                createdDate: r.CreatedDate, 
+                                lastModifiedDate: r.LastModifiedDate
+                            };
+                            if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                            MAP_HANDLER.setValue(records, item.id, item);
+                        } else {
+                            const item = {
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                name: r.DeveloperName,
+                                description: r.Description,
+                                package: r.NamespacePrefix,
+                                createdDate: r.CreatedDate, 
+                                lastModifiedDate: r.LastModifiedDate
+                            }
+                            psgByName2[item.package+'--'+item.name] = item;
+                        }
+                    })
+                    .on('end', () => {
+                        for (const [key, value] of Object.entries(psgByName1)) if (psgByName2[key]) {
+                            value.groupId = psgByName2[key].id;
+                            value.description = psgByName2[key].description;
+                            value.isUndescribedCustom = value.isCustom && !value.description;
+                            MAP_HANDLER.setValue(records, value.id, value);
+                        };
+                        resolve(records);
+                    })
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Permission Set Assignments dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'permissionSetAssignments', 
+            isCachable: true, 
+            keyCache: 'PermissionSetAssignments', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
+                                'FROM PermissionSetAssignment '+
+                                'WHERE Assignee.IsActive = TRUE '+
+                                'AND PermissionSet.IsOwnedByProfile = FALSE '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            assigneeId: SALESFORCE_HANDLER.salesforceIdFormat(r.AssigneeId),
+                            assigneeProfileId: SALESFORCE_HANDLER.salesforceIdFormat(r.Assignee.ProfileId),
+                            permissionSetId: SALESFORCE_HANDLER.salesforceIdFormat(r.PermissionSetId)
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Role dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'roles', 
+            isCachable: true, 
+            keyCache: 'Roles', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                const ROOT_ID = '###root###';
+                SALESFORCE_HANDLER.query([{ 
+                        string:  'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
+                                    '(SELECT Id, Name, Username, Email, Phone, '+
+                                        'SmallPhotoUrl, IsActive FROM Users)'+
+                                ' FROM UserRole '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.Name,
+                            developerName: r.DeveloperName,
+                            parentId: r.ParentRoleId ? SALESFORCE_HANDLER.salesforceIdFormat(r.ParentRoleId) : ROOT_ID,
+                            hasParent: r.ParentRoleId ? true : false,
+                            activeMembersCount: 0,
+                            activeMembers: [],
+                            hasActiveMembers: false,
+                            inactiveMembersCount: 0,
+                            hasInactiveMembers: false,
+                            isExternal: (r.PortalType !== 'None') ? true : false
+                        };
+                        if (r.Users && r.Users.records) for (let i=0; i<r.Users.records.length; i++) {
+                            let user = r.Users.records[i];
+                            if (user.IsActive) {
+                                item.activeMembers.push({
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(user.Id),
+                                    name: user.Name,
+                                    username: user.Username,
+                                    email: user.Email,
+                                    telephone: user.Phone,
+                                    photourl: user.SmallPhotoUrl,
+                                    isActive: user.IsActive
+                                });
+                            } else {
+                                item.inactiveMembersCount++;
+                            }
+                        }
+                        item.activeMembersCount = item.activeMembers.length;
+                        item.hasActiveMembers = item.activeMembers.length > 0;
+                        item.hasInactiveMembers = item.inactiveMembersCount > 0;
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => {
+                        records[ROOT_ID] = {
+                            id: ROOT_ID,
+                            name: 'Role Hierarchy',
+                            developerName: ROOT_ID,
+                            parentId: null
+                        };
+                        resolve(records);
+                    })
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Public Groups dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'publicGroups', 
+            isCachable: true, 
+            keyCache: 'PublicGroups', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
+                                    '(SELECT UserOrGroupId From GroupMembers)'+
+                                'FROM Group' 
+                    }])
+                    .on('record', (r) => {
+                        const item = { id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id) };
+                        switch (r.Type) {
+                            case 'Regular':              item.type = 'publicGroup'; break;
+                            case 'Role':                 item.type = 'role';        break;
+                            case 'Queue':                item.type = 'queue';       break;
+                            case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
+                            // case 'AllCustomerPortal':
+                            // case 'Organization':
+                            // case 'PRMOrganization':
+                            default: item.type = 'technical';
+                        }
+                        if (item.type === 'role' || item.type === 'roleAndSub') {
+                            item.relatedId = SALESFORCE_HANDLER.salesforceIdFormat(r.RelatedId);
+                        } else {
+                            item.developerName = r.DeveloperName;
+                            item.name = r.Name;
+                            item.includeBosses = r.DoesIncludeBosses;
+                            item.directMembersCount = 0;
+                            item.directUsers = [];
+                            item.directGroups = [];                            
+                        }
+                        if (r.GroupMembers && r.GroupMembers.records) {
+                            for (let i=0; i<r.GroupMembers.records.length; i++) {
+                                item.directMembersCount++;
+                                const member_id = SALESFORCE_HANDLER.salesforceIdFormat(r.GroupMembers.records[i].UserOrGroupId);
+                                const member_is_a_user = member_id.startsWith('005');
+                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
+                            }
+                        }
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Workflow Rules dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'workflows', 
+            isCachable: true, 
+            keyCache: 'Workflows', 
+            retriever: (me, resolve, reject) => {
+                const workflowRuleIds = [];
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id FROM WorkflowRule', 
+                        tooling: true 
+                    }])
+                    .on('record', (r) => workflowRuleIds.push(r.Id))
+                    .on('end', () => {
+                        const records = MAP_HANDLER.newMap();
+                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'WorkflowRule', ids: workflowRuleIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
                             .on('record', (r) => {
                                 const item =  {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
@@ -314,7 +724,8 @@ OrgCheck.Datasets = {
                                     futureActions: r.Metadata.workflowTimeTriggers,
                                     isActive: r.Metadata.active,
                                     createdDate: r.CreatedDate,
-                                    lastModifiedDate: r.LastModifiedDate
+                                    lastModifiedDate: r.LastModifiedDate,
+                                    noAction: true
                                 };
                                 if (!item.actions) item.actions = [];
                                 if (!item.futureActions) item.futureActions = [];
@@ -322,316 +733,292 @@ OrgCheck.Datasets = {
                                 MAP_HANDLER.setValue(records, item.id, item);
                             })
                             .on('end', () => resolve(records))
-                            .on('error', reject)
+                            .on('error', (error) => reject(error))
+                            .run();
                     })
-                    .on('error', reject);
+                    .on('error', (error) => reject(error))
+                    .run();
             }
         }));
-     }
-}
 
+        /**
+         * ======================================================================
+         * Add the Flow dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'flows', 
+            isCachable: true, 
+            keyCache: 'Flows', 
+            retriever: (me, resolve, reject) => {
+                const flowIds = [];
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id FROM Flow', 
+                        tooling: true 
+                    }])
+                    .on('record', (r) => flowIds.push(r.Id))
+                    .on('end', () => {
+                        const records = MAP_HANDLER.newMap();
+                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Flow', ids: flowIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                            .on('record', (r) => {
+                                const item =  {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.FullName,
+                                    definitionId: SALESFORCE_HANDLER.salesforceIdFormat(r.DefinitionId),
+                                    definitionName: r.MasterLabel,
+                                    version: r.VersionNumber,
+                                    dmlCreates: r.Metadata.recordCreates?.length || 0,
+                                    dmlDeletes: r.Metadata.recordDeletes?.length || 0,
+                                    dmlUpdates: r.Metadata.recordUpdates?.length || 0,
+                                    isActive: r.Status === 'Active',
+                                    description: r.Description,
+                                    type: r.ProcessType,
+                                    createdDate: r.CreatedDate,
+                                    lastModifiedDate: r.LastModifiedDate
+                                };
+                                r.Metadata.processMetadataValues?.forEach(m => {
+                                    if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
+                                    if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
+                                });
+                                MAP_HANDLER.setValue(records, item.id, item);
+                            })
+                            .on('end', () => resolve(records))
+                            .on('error', (error) => reject(error))
+                            .run();
+                    })
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Custom Labels dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'customLabels', 
+            isCachable: true, 
+            keyCache: 'CustomLabels', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
+                                'FROM ExternalString '+
+                                'WHERE ManageableState = \'unmanaged\' ',
+                        tooling: true
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.Name,
+                            masterLabel: r.MasterLabel,
+                            namespace: r.NamespacePrefix,
+                            category: r.Category,
+                            protected: r.IsProtected,
+                            language: r.Language,
+                            value: r.Value
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Lightning Pages dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'auraPages', 
+            isCachable: true, 
+            keyCache: 'LightningPages', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
+                                    'Type, NamespacePrefix, Description, ' +
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM FlexiPage '+
+                                'WHERE ManageableState = \'unmanaged\' '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.MasterLabel,
+                            entityName: r.EntityDefinition ? r.EntityDefinition.DeveloperName : '',
+                            type: r.Type,
+                            namespace: r.NamespacePrefix,
+                            description: r.Description,
+                            createdDate: r.CreatedDate,
+                            lastModifiedDate: r.LastModifiedDate
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Lightning Components dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'auraComponents', 
+            isCachable: true, 
+            keyCache: 'AuraComponents', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM AuraDefinitionBundle '+
+                                'WHERE ManageableState = \'unmanaged\' '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.MasterLabel,
+                            apiVersion: r.ApiVersion,
+                            isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                            namespace: r.NamespacePrefix,
+                            description: r.Description,
+                            createdDate: r.CreatedDate,
+                            lastModifiedDate: r.LastModifiedDate
+                    };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Visual Force pages dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'vfPages', 
+            isCachable: true, 
+            keyCache: 'VisualforcePages', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM ApexPage '+
+                                'WHERE ManageableState = \'unmanaged\''
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.Name,
+                            apiVersion: r.ApiVersion,
+                            isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                            namespace: r.NamespacePrefix,
+                            description: r.Description, 
+                            mobile: r.IsAvailableInTouch,
+                            createdDate: r.CreatedDate,
+                            lastModifiedDate: r.LastModifiedDate
+                    };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Visual Force components dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'vfComponents', 
+            isCachable: true, 
+            keyCache: 'VisualforceComponents', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM ApexComponent '+
+                                'WHERE ManageableState = \'unmanaged\' '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.Name,
+                            apiVersion: r.ApiVersion,
+                            isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                            namespace: r.NamespacePrefix,
+                            description: r.Description,
+                            createdDate: r.CreatedDate,
+                            lastModifiedDate: r.LastModifiedDate
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+        
+        /**
+         * ======================================================================
+         * Add the Lightning Web Components dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'lwComponents', 
+            isCachable: true, 
+            keyCache: 'LightningWebComponents', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM LightningComponentBundle '+
+                                'WHERE ManageableState = \'unmanaged\' '
+                    }])
+                    .on('record', (r) => {
+                        const item = {
+                            id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                            name: r.MasterLabel,
+                            apiVersion: r.ApiVersion,
+                            isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                            namespace: r.NamespacePrefix,
+                            description: r.Description,
+                            createdDate: r.CreatedDate,
+                            lastModifiedDate: r.LastModifiedDate
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
 
 /*
-    // ========================================================================
-    // FLOWS (and Process Builders)
-    // ------------------------------------------------------------------------
-    // Get the list of Flows and PB in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'flows',
-        keycache: 'Flows',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
-                    if (value) resolve(value);
-                    const queries = [];
-                    SALESFORCE_HANDLER.doSalesforceQueries({
-                        queries: [{ 
-                            string: 'SELECT Id FROM Flow',
-                            tooling: true
-                        }], 
-                        onEachRecord: function(record, index) {
-                            queries.push({
-                                tooling: true,
-                                string: 'SELECT Id, FullName, DefinitionId, MasterLabel, '+
-                                        'VersionNumber, Metadata, Status, Description, '+
-                                        'ProcessType, CreatedDate, LastModifiedDate FROM Flow '+
-                                        'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(record.Id)
-                            });
-                        }, 
-                        onEnd: function(records, size) { 
-                            SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                                mnemonic: cache,
-                                queries,
-                                onEachRecordFromAPI: function(v, i, l, ts) {
-                                    const item =  {
-                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                        name: v.FullName,
-                                        definitionId: SALESFORCE_HANDLER.salesforceIdFormat(v.DefinitionId),
-                                        definitionName: v.MasterLabel,
-                                        version: v.VersionNumber,
-                                        dmlCreates: v.Metadata.recordCreates?.length || 0,
-                                        dmlDeletes: v.Metadata.recordDeletes?.length || 0,
-                                        dmlUpdates: v.Metadata.recordUpdates?.length || 0,
-                                        isActive: v.Status === 'Active',
-                                        description: v.Description,
-                                        type: v.ProcessType,
-                                        createdDate: v.CreatedDate,
-                                        lastModifiedDate: v.LastModifiedDate
-                                    };
-                                    v.Metadata.processMetadataValues?.forEach(m => {
-                                        if (m.name === 'ObjectType') item.sobject = m.value.stringValue;
-                                        if (m.name === 'TriggerType') item.triggerType = m.value.stringValue;
-                                    });
-                                    return item;
-                                },
-                                onEndFromCache: resolve,
-                                onError: reject
-                            });
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
-    // ========================================================================
-    // PACKAGES
-    // ------------------------------------------------------------------------
-    // List of Packages in Salesforce (metadata, using tooling API). 
-    // This includes the installed packages (with type="Installed"). And 
-    // also the local packages (with type="Local").
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'packages',
-        keycache: 'Packages',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Organization': [ 'NamespacePrefix' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
-                                    'FROM InstalledSubscriberPackage ' 
-                        }, { 
-                            tooling: false,
-                            string: 'SELECT NamespacePrefix '+
-                                    'FROM Organization '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            if (i == 0) {
-                                return { 
-                                    id: v.Id, 
-                                    name: v.SubscriberPackage.Name,
-                                    namespace: v.SubscriberPackage.NamespacePrefix,
-                                    type: 'Installed'
-                                };
-                            } else {
-                                return { 
-                                    id: v.NamespacePrefix, 
-                                    name: v.NamespacePrefix,
-                                    namespace: v.NamespacePrefix, 
-                                    type: 'Local'
-                                };
-                            }
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
+ 
 
-    // ========================================================================
-    // CUSTOM LABELS
-    // ------------------------------------------------------------------------
-    // List of Custom Labels in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'customLabels',
-        keycache: 'CustomLabels',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
-                                    'FROM ExternalString '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                masterLabel: v.MasterLabel,
-                                namespace: v.NamespacePrefix,
-                                category: v.Category,
-                                protected: v.IsProtected,
-                                language: v.Language,
-                                value: v.Value
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
-    // ========================================================================
-    // CUSTOM SETTINGS
-    // ------------------------------------------------------------------------
-    // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'customSettings',
-        keycache: 'CustomSettings',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE IsCustomSetting = true ' + 
-                                    'AND NamespacePrefix = NULL '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.DurableId),
-                                name: v.QualifiedApiName,
-                                namespace: v.NamespacePrefix
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // VISUAL FORCE PAGES (still alive!)
-    // ------------------------------------------------------------------------
-    // Get the list of Visualforce Pages in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'vfPages',
-        keycache: 'VisualforcePages',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM ApexPage '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                description: v.Description, 
-                                mobile: v.IsAvailableInTouch,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // VISUAL FORCE COMPONENTS (still alive!)
-    // ------------------------------------------------------------------------
-    // Get the list of Visualforce Components in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'vfComponents',
-        keycache: 'VisualforceComponents',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM ApexComponent '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                description: v.Description,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
     // ========================================================================
     // APEX CLASSES (UNIT TEST AND OTHERS)
@@ -853,6 +1240,113 @@ OrgCheck.Datasets = {
             });
         }
     }));
+    */
+
+
+     }
+}
+
+
+/*
+
+    // ========================================================================
+    // PACKAGES
+    // ------------------------------------------------------------------------
+    // List of Packages in Salesforce (metadata, using tooling API). 
+    // This includes the installed packages (with type="Installed"). And 
+    // also the local packages (with type="Local").
+    // ========================================================================
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
+        name: 'packages',
+        keycache: 'Packages',
+        retriever: function(me, resolve, reject) {
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                    'Organization': [ 'NamespacePrefix' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
+                                    'FROM InstalledSubscriberPackage ' 
+                        }, { 
+                            tooling: false,
+                            string: 'SELECT NamespacePrefix '+
+                                    'FROM Organization '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            if (i == 0) {
+                                return { 
+                                    id: v.Id, 
+                                    name: v.SubscriberPackage.Name,
+                                    namespace: v.SubscriberPackage.NamespacePrefix,
+                                    type: 'Installed'
+                                };
+                            } else {
+                                return { 
+                                    id: v.NamespacePrefix, 
+                                    name: v.NamespacePrefix,
+                                    namespace: v.NamespacePrefix, 
+                                    type: 'Local'
+                                };
+                            }
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
+            });
+        }
+    }));
+
+
+
+    // ========================================================================
+    // CUSTOM SETTINGS
+    // ------------------------------------------------------------------------
+    // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
+    // ========================================================================
+    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
+        name: 'customSettings',
+        keycache: 'CustomSettings',
+        retriever: function(me, resolve, reject) {
+            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
+                sobjects: {
+                    // Example of enforcement for REST SOQL only (not tooling api)
+                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
+                },
+                onError: reject,
+                onEnd: () => {
+                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
+                        mnemonic: this.keycache, 
+                        queries: [ { 
+                            tooling: true, 
+                            string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE IsCustomSetting = true ' + 
+                                    'AND NamespacePrefix = NULL '
+                        } ],
+                        onEachRecordFromAPI: function(v, i, l, ts) {
+                            return {
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.DurableId),
+                                name: v.QualifiedApiName,
+                                namespace: v.NamespacePrefix
+                            };
+                        }, 
+                        onEndFromCache: resolve,
+                        onError: reject
+                    });
+                }
+            });
+        }
+    }));
+
+
 
     // ========================================================================
     // STATIC RESOURCES
@@ -893,724 +1387,8 @@ OrgCheck.Datasets = {
         }
     }));                    
 
-    // ========================================================================
-    // LIGHTNING PAGES
-    // ------------------------------------------------------------------------
-    // Get the list of Lightning Pages in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'auraPages',
-        keycache: 'LightningPages',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
-                                        'Type, NamespacePrefix, Description, ' +
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM FlexiPage '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.MasterLabel,
-                                entityName: v.EntityDefinition ? v.EntityDefinition.DeveloperName : '',
-                                type: v.Type,
-                                namespace: v.NamespacePrefix,
-                                description: v.Description,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
-    // ========================================================================
-    // LIGHTNING WEB COMPONENTS
-    // ------------------------------------------------------------------------
-    // Get the list of Lightning Web Components in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'lwComponents',
-        keycache: 'LightningWebComponents',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM LightningComponentBundle '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.MasterLabel,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                description: v.Description,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
-    // ========================================================================
-    // LIGHTNING AURA COMPONENTS
-    // ------------------------------------------------------------------------
-    // Get the list of Lightning Aura Components in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'auraComponents',
-        keycache: 'AuraComponents',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM AuraDefinitionBundle '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.MasterLabel,
-                                apiVersion: v.ApiVersion,
-                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                namespace: v.NamespacePrefix,
-                                description: v.Description,
-                                createdDate: v.CreatedDate,
-                                lastModifiedDate: v.LastModifiedDate
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-                        
-    // ========================================================================
-    // USERS
-    // ------------------------------------------------------------------------
-    // Get the list of Users in Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'users',
-        keycache: 'Users',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'User': [ 'Id', 'Name', 'SmallPhotoUrl', 'ProfileId', 'LastLoginDate', 
-                              'LastPasswordChangeDate', 'NumberOfFailedLogins', 
-                              'UserPreferencesLightningExperiencePreferred', 'IsActive' ],
-                    'Profile': [ 'Id', 'Name' ],
-                    'PermissionSetAssignment': [ 'PermissionSet' ],
-                    'PermissionSet': [ 'Id', 'Name', 'PermissionSet', 'PermissionsApiEnabled',
-                               'PermissionsViewSetup', 'PermissionsModifyAllData', 
-                               'PermissionsViewAllData', 'IsOwnedByProfile' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, Name, SmallPhotoUrl, Profile.Id, Profile.Name, '+
-                                        'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
-                                        'UserPreferencesLightningExperiencePreferred, '+
-                                        '(SELECT PermissionSet.Id, PermissionSet.Name, '+
-                                            'PermissionSet.PermissionsApiEnabled, '+
-                                            'PermissionSet.PermissionsViewSetup, '+
-                                            'PermissionSet.PermissionsModifyAllData, '+
-                                            'PermissionSet.PermissionsViewAllData, '+
-                                            'PermissionSet.IsOwnedByProfile '+
-                                            'FROM PermissionSetAssignments '+
-                                            'ORDER BY PermissionSet.Name) '+
-                                    'FROM User '+
-                                    'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
-                                    'AND IsActive = true ', // we only want active users
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            let item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                photourl: v.SmallPhotoUrl,
-                                lastLogin: DATE_HANDLER.datetimeFormat(v.LastLoginDate),
-                                neverLogged: (!v.LastLoginDate ? true : false),
-                                numberFailedLogins: v.NumberOfFailedLogins,
-                                lastPasswordChange: DATE_HANDLER.datetimeFormat(v.LastPasswordChangeDate),
-                                onLightningExperience: v.UserPreferencesLightningExperiencePreferred,
-                                profile: {
-                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Profile.Id),
-                                    name: v.Profile.Name
-                                },
-                                permissionSets: [],
-                                permissions: {
-                                    apiEnabled: false,
-                                    viewSetup: false,
-                                    modifyAllData: false,
-                                    viewAllData: false
-                                }
-                            };
-                            if (v.PermissionSetAssignments && v.PermissionSetAssignments.records) {
-                                for (let i=0; i<v.PermissionSetAssignments.records.length; i++) {
-                                    let assignment = v.PermissionSetAssignments.records[i];
-                                    if (assignment.PermissionSet.PermissionsApiEnabled === true) item.permissions.apiEnabled = true;
-                                    if (assignment.PermissionSet.PermissionsViewSetup === true) item.permissions.viewSetup = true;
-                                    if (assignment.PermissionSet.PermissionsModifyAllData === true) item.permissions.modifyAllData = true;
-                                    if (assignment.PermissionSet.PermissionsViewAllData === true) item.permissions.viewAllData = true;
-                                    if (assignment.PermissionSet.IsOwnedByProfile == false) {
-                                        item.permissionSets.push({
-                                            id: SALESFORCE_HANDLER.salesforceIdFormat(assignment.PermissionSet.Id),
-                                            name: assignment.PermissionSet.Name
-                                        });
-                                    }
-                                }
-                            }
-                            return item;
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));    
-
-    // ========================================================================
-    // PROFILES
-    // ------------------------------------------------------------------------
-    // Get the list of Profiles in Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'profiles',
-        keycache: 'Profiles',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'PermissionSet': [ 'isOwnedByProfile', 'Id', 'ProfileId', 'IsCustom',
-                                       'NamespacePrefix' ],
-                    'Profile': [ 'Name', 'Description', 'UserType' ],
-                    'License': [ 'Name' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, ProfileId, Profile.Name, Profile.Description, '+
-                                        'Profile.CreatedDate, Profile.LastModifiedDate, '+
-                                        'IsCustom, License.Name, Profile.UserType, NamespacePrefix, '+
-                                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
-                                    'FROM PermissionSet '+ // oh yes we are not mistaken!
-                                    'WHERE isOwnedByProfile = TRUE'
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            const memberCounts = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length : 0;
-                            const item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.ProfileId),
-                                name: v.Profile.Name,
-                                description: v.Profile.Description,
-                                license: v.License.Name,
-                                userType: v.Profile.UserType,
-                                isCustom: v.IsCustom,
-                                isUnusedCustom: v.IsCustom && memberCounts == 0,
-                                isUndescribedCustom: v.IsCustom && !v.Profile.Description,
-                                package: v.NamespacePrefix,
-                                membersCount: memberCounts,
-                                hasMembers: memberCounts > 0,
-                                createdDate: v.Profile.CreatedDate, 
-                                lastModifiedDate: v.Profile.LastModifiedDate
-                            };
-                            return item;
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-    
-    // ========================================================================
-    // Object CRUD (Profile and Permission Set)
-    // ------------------------------------------------------------------------
-    // Get the Object and Fields CRUDs in Profiles and Permission Sets
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'objectCRUDs',
-        keycache: 'ObjectCRUDs',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'ObjectPermissions': [ 'ParentId', 'SobjectType', 'PermissionsRead', 
-                                'PermissionsCreate', 'PermissionsEdit', 'PermissionsDelete',
-                                'PermissionsViewAllRecords', 'PermissionsModifyAllRecords' ],
-                    'PermissionSet': [ 'ProfileId', 'Label', 'IsOwnedByProfile' ],
-                    'Profile': [ 'Name' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
-                                        'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
-                                        'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
-                                    'FROM ObjectPermissions '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: v.ParentId + v.SobjectType,
-                                sobject: v.SobjectType,
-                                type: (v.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
-                                parent: { 
-                                    id: (v.Parent.IsOwnedByProfile ? v.Parent.ProfileId : v.ParentId), 
-                                    name: (v.Parent.IsOwnedByProfile ? v.Parent.Profile.Name : v.Parent.Label) 
-                                },
-                                permissions: {
-                                    create: v.PermissionsCreate,
-                                    read: v.PermissionsRead,
-                                    update: v.PermissionsEdit,
-                                    delete: v.PermissionsDelete,
-                                    viewAll: v.PermissionsViewAllRecords,
-                                    modifyAll: v.PermissionsModifyAllRecords
-                                }
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // PROFILE LOGIN RESTRICTIONS (IN PROFILE)
-    // ------------------------------------------------------------------------
-    // Get the list of Login Restrictions in Profiles
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'profileLoginRestrictions',
-        keycache: 'ProfileLoginRestrictions',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Profile': [ 'Id' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
-                    if (value) resolve(value);
-                    const queries = [];
-                    SALESFORCE_HANDLER.doSalesforceQueries({
-                        queries: [{ string: 'SELECT Id FROM Profile' }], 
-                        onEachRecord: function(record, index) {
-                            queries.push({
-                                tooling: true,
-                                string: 'SELECT Id, Name, Metadata '+
-                                        'FROM Profile '+
-                                        'WHERE Id = ' + SALESFORCE_HANDLER.secureSOQLBindingVariable(record.Id)
-                            });
-                        }, 
-                        onEnd: function(records, size) { 
-                            SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                                mnemonic: cache,
-                                queries,
-                                onEachRecordFromAPI: function(v, i, l, ts) {
-                                    const item =  {
-                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                        name: v.Name,
-                                        loginIpRanges: v.Metadata.loginIpRanges
-                                    };
-                                    if (v.Metadata.loginHours) {
-                                        const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-                                        days.forEach(d => {
-                                            const c1 = v.Metadata.loginHours[d + 'Start'];
-                                            const c2 = v.Metadata.loginHours[d + 'End'];
-                                            if (!item.loginHours) item.loginHours = {};
-                                            item.loginHours[d] = {
-                                                from: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
-                                                to:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
-                                            };
-                                        });
-                                    }
-                                    return item;
-                                },
-                                onEndFromCache: resolve,
-                                onError: reject
-                            });
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-                        
-    // ========================================================================
-    // PERMISSION SETS
-    // ------------------------------------------------------------------------
-    // Get the list of Permission Sets in Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'permissionSets',
-        keycache: 'PermissionSets',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'PermissionSet': [ 'Id', 'Name', 'Description', 'IsCustom', 'AssigneeId',
-                                       'NamespacePrefix', 'Type', 'IsOwnedByProfile' ],
-                    'License': [ 'Name' ],
-                    'User': [ 'Id', 'IsActive' ],
-                    'PermissionSetGroup': [ 'Id', 'DeveloperName', 'Description', 
-                                       'NamespacePrefix', 'Status' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
-                    if (value) resolve(value);
-
-                    const psMap = {};
-                    const psgByName1 = {};
-                    const psgByName2 = {};
-                    SALESFORCE_HANDLER.doSalesforceQueries({
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
-                                        'CreatedDate, LastModifiedDate, '+
-                                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
-                                    'FROM PermissionSet '+
-                                    'WHERE IsOwnedByProfile = FALSE' 
-                        }, {
-                            tooling: false,
-                            byPasses: [ 'INVALID_TYPE' ],
-                            string: 'SELECT Id, DeveloperName, Description, NamespacePrefix, Status, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM PermissionSetGroup ' 
-                        } ],
-                        onEachRecord: function(v, i) {
-                            if (i === 0) {
-                                const hasMembers = (v.Assignments && v.Assignments.records) ? v.Assignments.records.length > 0 : false;
-                                const item = {
-                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                    name: v.Name,
-                                    description: v.Description,
-                                    hasLicense: (v.License ? 'yes' : 'no'),
-                                    license: (v.License ? v.License.Name : ''),
-                                    isCustom: v.IsCustom,
-                                    isUndescribedCustom: v.IsCustom && !v.Description,
-                                    package: v.NamespacePrefix,
-                                    isUnusedCustom: v.IsCustom && !hasMembers,
-                                    hasMembers: hasMembers,
-                                    isGroup: (v.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
-                                    createdDate: v.CreatedDate, 
-                                    lastModifiedDate: v.LastModifiedDate
-                                };
-                                if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
-                                psMap[item.id] = item;
-                            } else {
-                                const item = {
-                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                    name: v.DeveloperName,
-                                    description: v.Description,
-                                    package: v.NamespacePrefix,
-                                    createdDate: v.CreatedDate, 
-                                    lastModifiedDate: v.LastModifiedDate
-                                }
-                                psgByName2[item.package+'--'+item.name] = item;
-                            }
-                        }, 
-                        onEnd: function() { 
-                            for (const [key, value] of Object.entries(psgByName1)) if (psgByName2[key]) {
-                                value.groupId = psgByName2[key].id;
-                                value.description = psgByName2[key].description;
-                                value.isUndescribedCustom = value.isCustom && !value.description;
-                                psMap[value.id] = value;
-                            };
-                            SALESFORCE_HANDLER.setMetadataInCache(cache, psMap);
-                            resolve(psMap);
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // PERMISSION SETS ASSIGNMENTS
-    // ------------------------------------------------------------------------
-    // Get the list of user assignements to permission sets in 
-    //      Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'permissionSetAssignments',
-        keycache: 'PermissionSetAssignments',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'PermissionSetAssignment': [ 'AssigneeId', 'Id', 'PermissionSetId' ],
-                    'PermissionSet': [ 'IsOwnedByProfile' ],
-                    'User': [ 'ProfileId', 'IsActive' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
-                                    'FROM PermissionSetAssignment '+
-                                    'WHERE Assignee.IsActive = TRUE '+
-                                    'AND PermissionSet.IsOwnedByProfile = FALSE '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                assigneeId: SALESFORCE_HANDLER.salesforceIdFormat(v.AssigneeId),
-                                assigneeProfileId: SALESFORCE_HANDLER.salesforceIdFormat(v.Assignee.ProfileId),
-                                permissionSetId: SALESFORCE_HANDLER.salesforceIdFormat(v.PermissionSetId)
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
- 
-    // ========================================================================
-    // ROLES
-    // ------------------------------------------------------------------------
-    // Get the list of Roles in Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'roles',
-        keycache: 'Roles',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'UserRole': [ 'Id', 'DeveloperName', 'Name', 'ParentRoleId', 
-                                  'PortalType' ],
-                    'User': [ 'Id', 'Name', 'Username', 'Email', 'Phone', 
-                                  'SmallPhotoUrl', 'IsActive' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const ROOT_ID = '###root###';
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
-                                        '(SELECT Id, Name, Username, Email, Phone, '+
-                                            'SmallPhotoUrl, IsActive FROM Users)'+
-                                    ' FROM UserRole '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            let item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                developerName: v.DeveloperName,
-                                parentId: v.ParentRoleId ? SALESFORCE_HANDLER.salesforceIdFormat(v.ParentRoleId) : ROOT_ID,
-                                hasParent: v.ParentRoleId ? true : false,
-                                activeMembersCount: 0,
-                                activeMembers: [],
-                                hasActiveMembers: false,
-                                inactiveMembersCount: 0,
-                                hasInactiveMembers: false,
-                                isExternal: (v.PortalType !== 'None') ? true : false
-                            };
-                            if (v.Users && v.Users.records) for (let i=0; i<v.Users.records.length; i++) {
-                                let user = v.Users.records[i];
-                                if (user.IsActive) {
-                                    item.activeMembers.push({
-                                        id: SALESFORCE_HANDLER.salesforceIdFormat(user.Id),
-                                        name: user.Name,
-                                        username: user.Username,
-                                        email: user.Email,
-                                        telephone: user.Phone,
-                                        photourl: user.SmallPhotoUrl,
-                                        isActive: user.IsActive
-                                    });
-                                } else {
-                                    item.inactiveMembersCount++;
-                                }
-                            }
-                            item.activeMembersCount = item.activeMembers.length;
-                            item.hasActiveMembers = item.activeMembers.length > 0;
-                            item.hasInactiveMembers = item.inactiveMembersCount > 0;
-                            return item;
-                        }, 
-                        onEndFromCache: function(records) {
-                            records[ROOT_ID] = {
-                                id: ROOT_ID,
-                                name: 'Role Hierarchy',
-                                developerName: ROOT_ID,
-                                parentId: null
-                            };
-                            resolve(records);
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // PUBLIC GROUPS
-    // ------------------------------------------------------------------------
-    // Get the list of Public Groups in Salesforce (data, using REST API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'publicGroups',
-        keycache: 'PublicGroups',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'GroupMember': [ 'Id', 'GroupId', 'UserOrGroupId' ],
-                    'Group': [ 'Id', 'Name', 'DeveloperName', 'DoesIncludeBosses', 'Type', 'RelatedId' ] 
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
-                    if (value) resolve(value);
-                    const publicGroupsMap = {};
-                    const pgAssignmentsMap = {};
-                    SALESFORCE_HANDLER.doSalesforceQueries({
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name '+
-                                    'FROM Group ' 
-                        }, { 
-                            tooling: false, 
-                            string: 'SELECT Id, GroupId, UserOrGroupId FROM GroupMember '
-                        } ],
-                        onEachRecord: function(v, i, l, ts) {
-                            if (i === 0) {
-                                const item = { id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id) };
-                                switch (v.Type) {
-                                    case 'Regular':              item.type = 'publicGroup'; break;
-                                    case 'Role':                 item.type = 'role';        break;
-                                    case 'Queue':                item.type = 'queue';       break;
-                                    case 'RoleAndSubordinates':  item.type = 'roleAndSub';  break;
-                                    // case 'AllCustomerPortal':
-                                    // case 'Organization':
-                                    // case 'PRMOrganization':
-                                    default: item.type = 'technical';
-                                }
-                                if (item.type === 'role' || item.type === 'roleAndSub') {
-                                    item.relatedId = SALESFORCE_HANDLER.salesforceIdFormat(v.RelatedId);
-                                } else {
-                                    item.developerName = v.DeveloperName;
-                                    item.name = v.Name;
-                                    item.includeBosses = v.DoesIncludeBosses;
-                                    item.directMembersCount = 0;
-                                    item.directUsers = [];
-                                    item.directGroups = [];                            
-                                }
-                                publicGroupsMap[item.id] = item;
-                            } else {
-                                const groupId = SALESFORCE_HANDLER.salesforceIdFormat(v.GroupId);
-                                let item = pgAssignmentsMap[groupId];
-                                if (!item) {
-                                    // no assignment yet for this group
-                                    item = { 
-                                        directMembersCount: 0,
-                                        directUsers: [],
-                                        directGroups: []
-                                    };
-                                }
-                                item.directMembersCount++;
-                                const member_id = SALESFORCE_HANDLER.salesforceIdFormat(v.UserOrGroupId);
-                                const member_is_a_user = member_id.startsWith('005');
-                                (member_is_a_user === true ? item.directUsers : item.directGroups).push({ id: member_id });    
-                                pgAssignmentsMap[groupId] = item;
-                            }
-                        }, 
-                        onEnd: function(records, size) {
-                            // Merge publicGroupsMap and pgAssignmentsMap
-                            for (const [key, value] of Object.entries(publicGroupsMap)) {
-                                if (pgAssignmentsMap[key]) {
-                                    value.directMembersCount = pgAssignmentsMap[key].directMembersCount;
-                                    value.directUsers = pgAssignmentsMap[key].directUsers;
-                                    value.directGroups = pgAssignmentsMap[key].directGroups;
-                                    delete pgAssignmentsMap[key];
-                                }
-                            }
-                            SALESFORCE_HANDLER.setMetadataInCache(cache, publicGroupsMap);
-                            resolve(publicGroupsMap);
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
 
 

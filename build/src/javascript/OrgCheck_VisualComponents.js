@@ -357,7 +357,8 @@ OrgCheck.VisualComponents = {
                         informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
                         informationHTML += 'What:<ul class="slds-list_dotted">';
                         for (k in v.context.what) {
-                            informationHTML += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
+                            const value = v.context.what[k];
+                            informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
                         }
                         informationHTML += '</ul>';
                     }

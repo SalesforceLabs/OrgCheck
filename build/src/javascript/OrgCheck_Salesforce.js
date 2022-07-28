@@ -4,16 +4,17 @@
 OrgCheck.Salesforce = {
     
     AbstractProcess: function() {
-        const private_events = {};
+        const private_events = {
+            'error': (error) => { console.error(error); }
+        };
+        const private_error_event = private_events.error;
         this.fire = (name, ...args) => { 
             if (private_events.hasOwnProperty(name)) {
                 private_events[name](...args); 
-            } else {
-                throw 'Unkown event called '+name+' to fire.'
             }
         };
         this.on = (name, fn) => { private_events[name] = fn; return this; };
-        this.run = () => { throw 'Run method should be implemented!' };
+        this.run = () => { private_error_event('Run method should be implemented!')};
     },
 
     SoqlProcess: function(connection, queries) {
@@ -23,11 +24,28 @@ OrgCheck.Salesforce = {
             try {
                 const promises = [];
                 queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
-                    const api = (query.api === 'rest' ? connection : connection.tooling);
+                    const api = (query.tooling === true ? connection.tooling : connection);
+                    const records = [];
                     api.query(query.string)
-                        .on('record', (record) => that.fire('record', record, index) )
-                        .on('end', resolve)
-                        .on('error', reject); 
+                        .on('record', (record) => { that.fire('record', record, index); records.push(record); })
+                        .on('end', () => resolve(records))
+                        .on('error', (error) => {
+                            if (query.byPasses && query.byPasses.includes(error['errorCode'])) {
+                                resolve();
+                                return;
+                            }
+                            error.context = { 
+                                when: 'While creating a promise to call a SOQL query.',
+                                what: {
+                                    index: index,
+                                    queryMore: query.queryMore,
+                                    queryString: query.string,
+                                    queryUseTooling: query.tooling
+                                }
+                            };
+                            reject(error);
+                        })
+                        .run(); 
                     // TODO: queryMore to implement here
                 })));
                 Promise.all(promises)
@@ -45,8 +63,13 @@ OrgCheck.Salesforce = {
         this.run = () => {
             try {
                 connection.describeGlobal((error, result) => {
-                    if (error) that.fire('error', error)
-                    else {
+                    if (error) {
+                        error.context = { 
+                            when: 'While calling a global describe.',
+                            what: {}
+                        };
+                        that.fire('error', error)
+                    } else {
                         result.sobjects.forEach(s => that.fire('record', s) );
                         that.fire('end', result.sobjects);
                     }
@@ -56,7 +79,123 @@ OrgCheck.Salesforce = {
             }
         }
     },
- 
+
+    MetadataAtScaleProcess: function(connection, metadataInformation) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                const compositeRequestBodies = [];
+                let currentCompositeRequestBody;
+                const BATCH_MAX_SIZE = 25;
+                metadataInformation.ids.forEach((id) => {
+                    if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+                        currentCompositeRequestBody = {
+                            allOrNone: false,
+                            compositeRequest: []
+                        };
+                        compositeRequestBodies.push(currentCompositeRequestBody);
+                    }
+                    currentCompositeRequestBody.compositeRequest.push({ 
+                        url: '/services/data/v'+connection.version+'/tooling/sobjects/' + metadataInformation.type + '/' + id, 
+                        method: 'GET',
+                        referenceId: id
+                    });
+                });
+                const promises = [];
+                compositeRequestBodies.forEach((requestBody) => {
+                    promises.push(new Promise((resolve, reject) => {
+                        connection.request({
+                                url: '/services/data/v'+connection.version+'/tooling/composite', 
+                                method: 'POST',
+                                body: JSON.stringify(requestBody),
+                                headers: { 'Content-Type': 'application/json' }
+                            }, (error, response) => { 
+                                if (error) {
+                                    error.context = { 
+                                        when: 'While creating a promise to call the Tooling Composite API.',
+                                        what: {
+                                            type: metadataInformation.type,
+                                            ids: metadataInformation.ids,
+                                            body: requestBody
+                                        }
+                                    };
+                                    reject(error); 
+                                } else resolve(response); 
+                            }
+                        );
+                    }));
+                });
+                const records = [];
+                Promise.all(promises)
+                    .then((results) => {
+                        results.forEach((result) => {
+                            result.compositeResponse.forEach((response) => {
+                                if (response.httpStatusCode === 200) {
+                                    that.fire('record', response.body);
+                                    records.push(response.body);
+                                } else {
+                                    const errorCode = response.body[0].errorCode;
+                                    if (metadataInformation.byPasses && metadataInformation.byPasses.includes(errorCode) === false) {
+                                        const error = new Error();
+                                        error.context = { 
+                                            when: 'After receiving a response with bad HTTP status code.',
+                                            what: {
+                                                type: metadataInformation.type,
+                                                ids: metadataInformation.ids,
+                                                body: response.body
+                                            }
+                                        };
+                                        that.fire('error', error);
+                                    }
+                                }
+                            });
+                        });
+                        that.fire('end', records);
+                    })
+                    .catch((error) => that.fire('error', error));
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
+    HttpProcess: function(connection, partialUrl, optionalPayload) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                let request = { 
+                    url: '/services/data/v'+connection.version + partialUrl, 
+                    method: 'GET'
+                };
+                if (optionalPayload) {
+                    request.method = 'POST';
+                    request.body = optionalPayload.body;
+                    request.headers = { "Content-Type": optionalPayload.type };
+                }
+                connection.request(request, (error, response) => {
+                    if (error) {
+                        error.context = { 
+                            when: 'While calling "connection.request".',
+                            what: {
+                                partialUrl: partialUrl,
+                                url: request.url,
+                                method: request.method,
+                                body: request.body
+                            }
+                        };
+                        that.fire('error', error);
+                    } else {
+                        that.fire('end', response);
+                    }
+                });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
     /**
      * Salesforce handler
      * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
@@ -236,52 +375,20 @@ OrgCheck.Salesforce = {
                 .run();
         };
 
-        /**
-        * Call REST api endpoint in HTTP direclty with GET (default) or POST method (with payload)
-        * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
-        * @param onEnd Callback function to call with all records (as a map)
-        * @param onError Callback function to call if there is an error
-        * @param optionalPayload Optional payload body and content type for the request (if specified method=POST if not method=GET)
-        */
-        this.httpCall = function(partialUrl, onEnd, onError, optionalPayload) {
-            private_check_limits();
-            let request = { 
-                url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
-                method: 'GET'
-            };
-            if (optionalPayload) {
-                request.method = 'POST';
-                request.body = optionalPayload.body;
-                request.headers = { "Content-Type": optionalPayload.type };
-            }
-            CONNECTION.request(
-                request, 
-                function(error, response) {
-                    if (error) {
-                        error.context = { 
-                            when: 'While calling "connection.request".',
-                            what: {
-                                partialUrl: partialUrl,
-                                url: request.url,
-                                method: request.method,
-                                body: request.body
-                            }
-                        };
-                        onError(error);
-                    } else {
-                        onEnd(response);
-                    }
-                }
-            );
-        }
-
-
         this.query = (queries) => {
             return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries);
         }
 
         this.describeGlobal = () => {
             return new OrgCheck.Salesforce.GlobalDescribeProcess(CONNECTION);
+        }
+
+        this.readMetadataAtScale = (metadataInformation) => {
+            return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, metadataInformation);
+        }
+
+        this.httpCall = function(partialUrl, optionalPayload) {
+            return new OrgCheck.Salesforce.HttpProcess(CONNECTION, partialUrl, optionalPayload);
         }
 
         /**
