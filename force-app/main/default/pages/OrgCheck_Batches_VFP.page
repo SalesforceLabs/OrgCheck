@@ -57,7 +57,7 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'batchesApexJobs', 'batchesScheduledJobs', 'users', 'apexClasses' ],
+                        datasets: [ 'batches', 'users', 'apexClasses' ],
                         onRecords: function(map) { 
 
                             // Render the data in a table for failed Apex Jobs
@@ -76,8 +76,9 @@
                                     { name: '{!$Label.OrgCheck_Count_CL}', type: 'numeric', property: 'numIds' },
                                     { name: '{!$Label.OrgCheck_Errors_CL}', type: 'numeric', property: 'numErrors' }
                                 ],
-                                data: map.batchesApexJobs,
+                                data: map.batches,
                                 sorting: { name: '{!$Label.OrgCheck_ApexContext_CL}', order: 'asc' },
+                                filtering: { formula: (r) => { return r.nature === 'AsyncApexJob'; }},
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -105,8 +106,9 @@
                                     { name: '{!$Label.OrgCheck_Ends_CL}', property: 'end' },
                                     { name: 'timezone', property: 'timezone' }
                                 ],
-                                data: map.batchesScheduledJobs,
+                                data: map.batches,
                                 sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'asc' },
+                                filtering: { formula: (r) => { return r.nature === 'ScheduledJob'; }},
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true

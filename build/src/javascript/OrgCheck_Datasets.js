@@ -1014,233 +1014,343 @@ OrgCheck.Datasets = {
             }
         }));
 
-/*
-
- 
-
-
-
-    // ========================================================================
-    // APEX CLASSES (UNIT TEST AND OTHERS)
-    // ------------------------------------------------------------------------
-    // Get the list of Apex Classes in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'apexClasses',
-        keycache: 'ApexClasses',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'AsyncApexJob': [ 'ApexClassId' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    const cache = this.keycache;
-                    const value = SALESFORCE_HANDLER.getMetadataInCache(cache);
-                    if (value) resolve(value);
-                    const classesMap = {};
-                    const relatedTestClassesMap = {};
-                    const classesCoverageMap = {};
-                    const schedulableMap = {};
-                    const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{", 'i');
-                    const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
-                    const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
-                    const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
-                    SALESFORCE_HANDLER.doSalesforceQueries({
-                        queries: [{
-                            string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
-                                    'FROM ApexCodeCoverage',
-                            tooling: true
-                        }, {
-                            string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
-                                        'NumLinesUncovered, Coverage '+
-                                    'FROM ApexCodeCoverageAggregate',
-                            tooling: true
-                        }, { 
-                            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
-                                        'Body, LengthWithoutComments, SymbolTable, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM ApexClass '+
-                                    'WHERE ManageableState = \'unmanaged\' ',
-                            tooling: true
-                        }, {
-                            string: 'SELECT ApexClassId '+
-                                    'FROM AsyncApexJob '+
-                                    'WHERE JobType = \'ScheduledApex\' ',
-                            tooling: false
-                        }], 
-                        onEachRecord: function(v, index) {
-                            switch (index) {
-                                case 0: {
-                                    // ApexCodeCoverage records
-                                    const i = SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassOrTriggerId);
-                                    const t = SALESFORCE_HANDLER.salesforceIdFormat(v.ApexTestClassId);
-                                    const item = relatedTestClassesMap[i] || new Set();
-                                    item.add(t);
-                                    relatedTestClassesMap[i] = item;
-                                    break;
-                                }
-                                case 1: {
-                                    // ApexCodeCoverageAggregate records
-                                    const item =  {
-                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassOrTriggerId),
-                                        covered: v.NumLinesCovered,
-                                        uncovered: v.NumLinesUncovered,
-                                        coverage: (v.NumLinesCovered / (v.NumLinesCovered + v.NumLinesUncovered))
-                                    };
-                                    classesCoverageMap[item.id] = item;
-                                    break; 
-                                }
-                                case 2: {
-                                    // ApexClasses records
-                                    const item =  {
-                                        id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                        name: v.Name,
-                                        apiVersion: v.ApiVersion,
-                                        isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                        namespace: v.NamespacePrefix,
-                                        isTest: false,
-                                        isAbstract: false,
-                                        isClass: true,
-                                        isEnum: false,
-                                        isInterface: false,
-                                        isSharingMissing: false,
-                                        length: v.LengthWithoutComments,
-                                        needsRecompilation: (!v.SymbolTable ? true : false),
-                                        coverage: 0, // by default no coverage!
-                                        createdDate: v.CreatedDate,
-                                        lastModifiedDate: v.LastModifiedDate
-                                    };
-                                    if (v.Body) {
-                                        item.isInterface = v.Body.match(REGEX_ISINTERFACE) !== null;
-                                        item.isEnum = v.Body.match(REGEX_ISENUM) !== null;
-                                        item.isClass = (item.isInterface === false && item.isEnum === false);
-                                    }
-                                    if (v.SymbolTable) {
-                                        item.innerClassesCount = v.SymbolTable.innerClasses.length || 0;
-                                        item.interfaces = v.SymbolTable.interfaces;
-                                        item.methodsCount = v.SymbolTable.methods.length || 0;
-                                        if (v.SymbolTable.tableDeclaration) {
-                                            item.annotations = v.SymbolTable.tableDeclaration.annotations;
-                                            if (v.SymbolTable.tableDeclaration.modifiers) {
-                                                v.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                                                    switch (m) {
-                                                        case 'with sharing':      item.specifiedSharing = 'with';      break;
-                                                        case 'without sharing':   item.specifiedSharing = 'without';   break;
-                                                        case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
-                                                        case 'public':            item.specifiedAccess  = 'public';    break;
-                                                        case 'global':            item.specifiedAccess  = 'global';    break;
-                                                        case 'abstract':          item.isAbstract       = true;        break;
-                                                        case 'testMethod':        item.isTest           = true;        break;
-                                                    }
-                                                });
-                                            };
-                                        }
-                                    }
-                                    if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
-                                    if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
-                                        item.isSharingMissing = true;
-                                    }
-                                    if (item.isTest === true) {
-                                        item.isTestSeeAllData = v.Body.match(REGEX_ISTESTSEEALLDATA) !== null;
-                                        item.nbSystemAsserts = v.Body.match(REGEX_TESTNBASSERTS)?.length || 0;
-                                    }
-                                    classesMap[item.id] = item;
-                                    break;
-                                }
-                                default: {
-                                    schedulableMap[SALESFORCE_HANDLER.salesforceIdFormat(v.ApexClassId)] = true;
-                                }
+        /**
+         * ======================================================================
+         * Add the Apex Classes dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'apexClasses', 
+            isCachable: true, 
+            keyCache: 'ApexClasses', 
+            retriever: (me, resolve, reject) => {
+                const relatedTestClassesMap = {};
+                const classesCoverageMap = {};
+                const classesMap = {};
+                const schedulableMap = {};
+                const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{", 'i');
+                const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
+                const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
+                const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
+                SALESFORCE_HANDLER.query([{
+                        string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
+                                'FROM ApexCodeCoverage',
+                        tooling: true
+                    }, {
+                        string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
+                                    'NumLinesUncovered, Coverage '+
+                                'FROM ApexCodeCoverageAggregate',
+                        tooling: true
+                    }, { 
+                        string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
+                                    'Body, LengthWithoutComments, SymbolTable, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM ApexClass '+
+                                'WHERE ManageableState = \'unmanaged\' ',
+                        tooling: true
+                    }, {
+                        string: 'SELECT ApexClassId '+
+                                'FROM AsyncApexJob '+
+                                'WHERE JobType = \'ScheduledApex\' '
+                    }])
+                    .on('record', (r, i) => {
+                        switch (i) {
+                            case 0: { // ApexCodeCoverage records
+                                const classId = SALESFORCE_HANDLER.salesforceIdFormat(r.ApexClassOrTriggerId);
+                                const testClassId = SALESFORCE_HANDLER.salesforceIdFormat(r.ApexTestClassId);
+                                const item = relatedTestClassesMap[classId] || new Set();
+                                item.add(testClassId);
+                                relatedTestClassesMap[classId] = item;
+                                break;
                             }
-                        }, 
-                        onEnd: function(records, size) { 
-                            for (const [key, value] of Object.entries(classesMap)) {
-                                if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
-                                if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
-                                if (schedulableMap[key]) value.isScheduled = true;
-                            }
-                            SALESFORCE_HANDLER.setMetadataInCache(cache, classesMap);
-                            resolve(classesMap);
-                        },
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // APEX TRIGGERS
-    // ------------------------------------------------------------------------
-    // Get the list of Apex Triggers in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'apexTriggers',
-        keycache: 'ApexTriggers',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, ApiVersion, Status, '+
-                                        'NamespacePrefix, Body, '+
-                                        'UsageBeforeInsert, UsageAfterInsert, '+
-                                        'UsageBeforeUpdate, UsageAfterUpdate, '+
-                                        'UsageBeforeDelete, UsageAfterDelete, '+
-                                        'UsageAfterUndelete, UsageIsBulk, '+
-                                        'LengthWithoutComments, '+
-                                        'EntityDefinition.QualifiedApiName, '+
-                                        'CreatedDate, LastModifiedDate '+
-                                    'FROM ApexTrigger '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            if (v.EntityDefinition) {
-                                const item = {
-                                    id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                    name: v.Name,
-                                    apiVersion: v.ApiVersion,
-                                    isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: v.ApiVersion }),
-                                    namespace: v.NamespacePrefix,
-                                    length: v.LengthWithoutComments,
-                                    isActive: (v.Status === 'Active' ? true : false),
-                                    beforeInsert: v.UsageBeforeInsert,
-                                    afterInsert: v.UsageAfterInsert,
-                                    beforeUpdate: v.UsageBeforeUpdate,
-                                    afterUpdate: v.UsageAfterUpdate,
-                                    beforeDelete: v.UsageBeforeDelete,
-                                    afterDelete: v.UsageAfterDelete,
-                                    afterUndelete: v.UsageAfterUndelete,
-                                    sobject: v.EntityDefinition.QualifiedApiName,
-                                    hasSOQL: false,
-                                    hasDML: false,
-                                    createdDate: v.CreatedDate,
-                                    lastModifiedDate: v.LastModifiedDate
+                            case 1: { // ApexCodeCoverageAggregate records
+                                const item =  {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.ApexClassOrTriggerId),
+                                    covered: r.NumLinesCovered,
+                                    uncovered: r.NumLinesUncovered,
+                                    coverage: (r.NumLinesCovered / (r.NumLinesCovered + r.NumLinesUncovered))
                                 };
-                                if (v.Body) {
-                                    item.hasSOQL = v.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
-                                    item.hasDML = v.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
-                                }
-                                return item;
+                                classesCoverageMap[item.id] = item;
+                                break; 
                             }
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-    */
+                            case 2: { // ApexClasses records
+                                const item =  {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.Name,
+                                    apiVersion: r.ApiVersion,
+                                    isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                                    namespace: r.NamespacePrefix,
+                                    isTest: false,
+                                    isAbstract: false,
+                                    isClass: true,
+                                    isEnum: false,
+                                    isInterface: false,
+                                    isSharingMissing: false,
+                                    length: r.LengthWithoutComments,
+                                    needsRecompilation: (!r.SymbolTable ? true : false),
+                                    coverage: 0, // by default no coverage!
+                                    createdDate: r.CreatedDate,
+                                    lastModifiedDate: r.LastModifiedDate
+                                };
+                                if (r.Body) {
+                                    item.isInterface = r.Body.match(REGEX_ISINTERFACE) !== null;
+                                    item.isEnum = r.Body.match(REGEX_ISENUM) !== null;
+                                    item.isClass = (item.isInterface === false && item.isEnum === false);
+                                }
+                                if (r.SymbolTable) {
+                                    item.innerClassesCount = r.SymbolTable.innerClasses.length || 0;
+                                    item.interfaces = r.SymbolTable.interfaces;
+                                    item.methodsCount = r.SymbolTable.methods.length || 0;
+                                    if (r.SymbolTable.tableDeclaration) {
+                                        item.annotations = r.SymbolTable.tableDeclaration.annotations;
+                                        if (r.SymbolTable.tableDeclaration.modifiers) {
+                                            r.SymbolTable.tableDeclaration.modifiers.forEach(m => {
+                                                switch (m) {
+                                                    case 'with sharing':      item.specifiedSharing = 'with';      break;
+                                                    case 'without sharing':   item.specifiedSharing = 'without';   break;
+                                                    case 'inherited sharing': item.specifiedSharing = 'inherited'; break;
+                                                    case 'public':            item.specifiedAccess  = 'public';    break;
+                                                    case 'global':            item.specifiedAccess  = 'global';    break;
+                                                    case 'abstract':          item.isAbstract       = true;        break;
+                                                    case 'testMethod':        item.isTest           = true;        break;
+                                                }
+                                            });
+                                        };
+                                    }
+                                }
+                                if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';
+                                if (item.isTest === false && item.isClass === true && !item.specifiedSharing) {
+                                    item.isSharingMissing = true;
+                                }
+                                if (item.isTest === true) {
+                                    item.isTestSeeAllData = r.Body.match(REGEX_ISTESTSEEALLDATA) !== null;
+                                    item.nbSystemAsserts = r.Body.match(REGEX_TESTNBASSERTS)?.length || 0;
+                                }
+                                classesMap[item.id] = item;
+                                break;
+                            }
+                            default: { // AsyncApexJob records
+                                schedulableMap[SALESFORCE_HANDLER.salesforceIdFormat(r.ApexClassId)] = true;
+                            }
+                        }
+                    })
+                    .on('end', () => {
+                        const records = MAP_HANDLER.newMap();
+                        for (const [key, value] of Object.entries(classesMap)) {
+                            if (classesCoverageMap[key]) value.coverage = classesCoverageMap[key].coverage;
+                            if (relatedTestClassesMap[key]) value.relatedTestClasses = Array.from(relatedTestClassesMap[key]);
+                            if (schedulableMap[key]) value.isScheduled = true;
+                            MAP_HANDLER.setValue(records, key, value);
+                        }
+                        resolve(records);
+                    })
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Apex Triggers dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'apexTriggers', 
+            isCachable: true, 
+            keyCache: 'ApexTriggers', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true, 
+                        string: 'SELECT Id, Name, ApiVersion, Status, '+
+                                    'NamespacePrefix, Body, '+
+                                    'UsageBeforeInsert, UsageAfterInsert, '+
+                                    'UsageBeforeUpdate, UsageAfterUpdate, '+
+                                    'UsageBeforeDelete, UsageAfterDelete, '+
+                                    'UsageAfterUndelete, UsageIsBulk, '+
+                                    'LengthWithoutComments, '+
+                                    'EntityDefinition.QualifiedApiName, '+
+                                    'CreatedDate, LastModifiedDate '+
+                                'FROM ApexTrigger '+
+                                'WHERE ManageableState = \'unmanaged\' '
+                    }])
+                    .on('record', (r) => {
+                        if (r.EntityDefinition) {
+                            const item = {
+                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                name: r.Name,
+                                apiVersion: r.ApiVersion,
+                                isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
+                                namespace: r.NamespacePrefix,
+                                length: r.LengthWithoutComments,
+                                isActive: (r.Status === 'Active' ? true : false),
+                                beforeInsert: r.UsageBeforeInsert,
+                                afterInsert: r.UsageAfterInsert,
+                                beforeUpdate: r.UsageBeforeUpdate,
+                                afterUpdate: r.UsageAfterUpdate,
+                                beforeDelete: r.UsageBeforeDelete,
+                                afterDelete: r.UsageAfterDelete,
+                                afterUndelete: r.UsageAfterUndelete,
+                                sobject: r.EntityDefinition.QualifiedApiName,
+                                hasSOQL: false,
+                                hasDML: false,
+                                createdDate: r.CreatedDate,
+                                lastModifiedDate: r.LastModifiedDate
+                            };
+                            if (r.Body) {
+                                item.hasSOQL = r.Body.match("\\[\\s*(?:SELECT|FIND)") !== null; 
+                                item.hasDML = r.Body.match("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)") !== null; 
+                            }
+                            MAP_HANDLER.setValue(records, item.id, item);
+                        }
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Reports dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'reports', 
+            isCachable: true, 
+            keyCache: 'Reports', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, Name, NamespacePrefix, DeveloperName, FolderName, Format, Description '+
+                                'FROM Report '
+                    }])
+                    .on('record', (r) => {
+                        const item = { 
+                            id: r.Id,
+                            name: r.Name,
+                            package: r.NamespacePrefix,
+                            developerName: r.DeveloperName,
+                            folder: { name: r.FolderName },
+                            format: r.Format,
+                            description: r.Description
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Dashboards dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'dashboards', 
+            isCachable: true, 
+            keyCache: 'Dashboards', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        string: 'SELECT Id, Title, NamespacePrefix, DeveloperName, FolderId, FolderName, Description '+
+                                'FROM Dashboard '
+                    }])
+                    .on('record', (r) => {
+                        const item = { 
+                            id: r.Id,
+                            name: r.Title,
+                            package: r.NamespacePrefix,
+                            developerName: r.DeveloperName,
+                            folder: { id: r.FolderId, name: r.FolderName },
+                            description: r.Description
+                        };
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();                
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Batches dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'batches', 
+            isCachable: true, 
+            keyCache: 'Batches', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                let artificial_id = 0;
+                SALESFORCE_HANDLER.query([{ 
+                    string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
+                            'FROM AsyncApexJob '+
+                            'WHERE CreatedDate >= YESTERDAY '+
+                            'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
+                            'OR Status = \'Failed\') '+
+                            'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
+                            'LIMIT 10000 '
+                }, { 
+                    string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
+                                'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
+                                'EndTime, Id, LastModifiedById, NextFireTime, OwnerId, '+
+                                'PreviousFireTime, StartTime, State, TimesTriggered, '+
+                                'TimeZoneSidKey '+
+                            'FROM CronTrigger '+
+                            'WHERE State <> \'COMPLETE\' ' +
+                            'LIMIT 10000 '
+                }])
+                .on('record', (r, i) => {
+                    const item = {};
+                    switch (i) {
+                        case 0: { // AsyncApexJob
+                            item.id = 'APXJOBS-'+artificial_id++;
+                            item.nature = 'AsyncApexJob';
+                            item.type = r.JobType;
+                            item.context = (r.ApexClass ? r.ApexClass.Name : 'anonymous')+(r.MethodName ? ('.'+r.MethodName) : '');
+                            item.status = r.Status;
+                            item.message = r.ExtendedStatus;
+                            item.numIds = r.ids;
+                            item.numErrors = r.errors;
+                            break;
+                        }
+                        default: { // CronTrigger
+                            let jobTypeLabel = '';
+                            switch (r.CronJobDetail.JobType) {
+                                case '1': jobTypeLabel = 'Data Export'; break;
+                                case '3': jobTypeLabel = 'Dashboard Refresh'; break;
+                                case '4': jobTypeLabel = 'Reporting Snapshot'; break;
+                                case '6': jobTypeLabel = 'Scheduled Flow'; break;
+                                case '7': jobTypeLabel = 'Scheduled Apex'; break;
+                                case '8': jobTypeLabel = 'Report Run'; break;
+                                case '9': jobTypeLabel = 'Batch Job'; break;
+                                case 'A': jobTypeLabel = 'Reporting Notification'; break;
+                            }
+                            item.id = 'SCHJOBS-'+artificial_id++;
+                            item.name = r.CronJobDetail.Name;
+                            item.type = jobTypeLabel;
+                            item.nature = 'ScheduledJob';
+                            item.status = r.State;
+                            item.userid = SALESFORCE_HANDLER.salesforceIdFormat(r.OwnerId);
+                            item.start = r.StartTime; 
+                            item.end = r.EndTime;
+                            item.timezone = r.TimeZoneSidKey;
+                            break;
+                        }
+                    }
+                    MAP_HANDLER.setValue(records, item.id, item);
+                })
+                .on('end', () => resolve(records))
+                .on('error', (error) => reject(error))
+                .run();                
+            }
+        }));
+
 
 
      }
@@ -1391,204 +1501,6 @@ OrgCheck.Datasets = {
 
 
 
-
-    // ========================================================================
-    // REPORTS
-    // ------------------------------------------------------------------------
-    // Get the list of failed reports in Salesforce 
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'reports',
-        keycache: 'Reports',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Report' : [ 'Id', 'Name', 'NamespacePrefix', 'DeveloperName', 
-                                 'FolderName', 'Format', 'Description' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, Name, NamespacePrefix, DeveloperName, FolderName, Format, Description '+
-                                    'FROM Report '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return { 
-                                id: v.Id,
-                                name: v.Name,
-                                package: v.NamespacePrefix,
-                                developerName: v.DeveloperName,
-                                folder: { name: v.FolderName },
-                                format: v.Format,
-                                description: v.Description
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // DASHBOARDS
-    // ------------------------------------------------------------------------
-    // Get the list of failed dashboards in Salesforce 
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'dashboards',
-        keycache: 'Dashboards',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Dashboard': [ 'Id', 'Title', 'NamespacePrefix', 'DeveloperName', 
-                                   'FolderId', 'FolderName', 'Description' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT Id, Title, NamespacePrefix, DeveloperName, FolderId, FolderName, Description '+
-                                    'FROM Dashboard '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return { 
-                                id: v.Id,
-                                name: v.Title,
-                                package: v.NamespacePrefix,
-                                developerName: v.DeveloperName,
-                                folder: { id: v.FolderId, name: v.FolderName },
-                                description: v.Description
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-    // ========================================================================
-    // BATCHES
-    // ------------------------------------------------------------------------
-    // Get the list of failed batches and scheduled jobs in Salesforce 
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'batchesApexJobs',
-        keycache: 'BatchesApexJobs',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'AsyncApexJob': [ 'JobType', 'ApexClassId', 'MethodName', 'Status', 
-                                      'ExtendedStatus', 'Id', 'NumberOfErrors', 'CreatedDate' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    let artificial_id = 0;
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT JobType, ApexClass.Name, MethodName, Status, ExtendedStatus, COUNT(Id) ids, SUM(NumberOfErrors) errors '+
-                                    'FROM AsyncApexJob '+
-                                    'WHERE CreatedDate >= YESTERDAY '+
-                                    'AND ((Status = \'Completed\' AND ExtendedStatus <> NULL) '+
-                                    'OR Status = \'Failed\') '+
-                                    'GROUP BY JobType, ApexClass.Name, MethodName, Status, ExtendedStatus '+
-                                    'LIMIT 10000 '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            const apexClass = (v.ApexClass ? v.ApexClass.Name : 'anonymous')+(v.MethodName ? ('.'+v.MethodName) : '');
-                            return { 
-                                id: 'APXJOBS-'+artificial_id++,
-                                type: v.JobType,
-                                context: apexClass,
-                                status: v.Status,
-                                message: v.ExtendedStatus,
-                                numIds: v.ids,
-                                numErrors: v.errors
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'batchesScheduledJobs',
-        keycache: 'BatchesScheduledJobs',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'CronTrigger': [ 'CreatedById', 'CreatedDate', 'CronExpression', 
-                                     'CronJobDetailId', 'EndTime', 'Id', 'LastModifiedById', 
-                                     'NextFireTime', 'OwnerId', 'PreviousFireTime', 
-                                     'StartTime', 'State', 'TimesTriggered', 'TimeZoneSidKey' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    let artificial_id = 0;
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: false, 
-                            string: 'SELECT CreatedById, CreatedDate, CronExpression, '+
-                                        'CronJobDetailId, CronJobDetail.JobType, CronJobDetail.Name, '+
-                                        'EndTime, Id, LastModifiedById, NextFireTime, OwnerId, '+
-                                        'PreviousFireTime, StartTime, State, TimesTriggered, '+
-                                        'TimeZoneSidKey '+
-                                    'FROM CronTrigger '+
-                                    'WHERE State <> \'COMPLETE\' ' +
-                                    'LIMIT 10000 '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            let jobTypeLabel = '';
-                            switch (v.CronJobDetail.JobType) {
-                                case '1': jobTypeLabel = 'Data Export'; break;
-                                case '3': jobTypeLabel = 'Dashboard Refresh'; break;
-                                case '4': jobTypeLabel = 'Reporting Snapshot'; break;
-                                case '6': jobTypeLabel = 'Scheduled Flow'; break;
-                                case '7': jobTypeLabel = 'Scheduled Apex'; break;
-                                case '8': jobTypeLabel = 'Report Run'; break;
-                                case '9': jobTypeLabel = 'Batch Job'; break;
-                                case 'A': jobTypeLabel = 'Reporting Notification'; break;
-                                default:  return; // skip if type is not supported
-                            }
-                            return { 
-                                id: 'SCHJOBS-'+artificial_id++,
-                                name: v.CronJobDetail.Name,
-                                type: jobTypeLabel,
-                                status: v.State,
-                                userid: SALESFORCE_HANDLER.salesforceIdFormat(v.OwnerId),
-                                start: v.StartTime,
-                                end: v.EndTime,
-                                timezone: v.TimeZoneSidKey
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
 
 
 
