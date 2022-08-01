@@ -212,6 +212,51 @@ OrgCheck.Datasets = {
 
         /**
          * ======================================================================
+         * Add the Packages dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'packages', 
+            isCachable: true, 
+            keyCache: 'Packages', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true,
+                        string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
+                                'FROM InstalledSubscriberPackage ' 
+                    }, { 
+                        string: 'SELECT NamespacePrefix '+
+                                'FROM Organization '
+                    }])
+                    .on('record', (r, i) => {
+                        const item = {};
+                        switch (i) {
+                            case 0: { // InstalledSubscriberPackage records
+                                item.id = r.Id;
+                                item.name = r.SubscriberPackage.Name;
+                                item.namespace = r.SubscriberPackage.NamespacePrefix;
+                                item.type = 'Installed';
+                                break;
+                            }
+                            case 1: { // Organization record (it should be only one!)
+                                item.id = r.NamespacePrefix;
+                                item.name = r.NamespacePrefix;
+                                item.namespace = r.NamespacePrefix;
+                                item.type = 'Local';
+                                break;
+                            }
+                        }
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
          * Add Objects dataset
          * ======================================================================
          */
@@ -242,6 +287,58 @@ OrgCheck.Datasets = {
                     })
                     .on('error', (error) => reject(error))
                     .on('end', () => resolve(records))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add Org Wide Defaults dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'orgWideDefaults', 
+            isCachable: true, 
+            keyCache: 'OrgWideDefaults', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                // We have some issue calling the Bulk API with jsforce
+                // As EntityDefinition does not accept querMore, we will trick the system
+                SALESFORCE_HANDLER.query([{ string: 'SELECT COUNT() FROM EntityDefinition'}])
+                    .on('error', (error) => reject(error))
+                    .on('end', (result) => {
+                        const nbEntities = result.length || 0;
+                        const BATCH_SIZE = 200;
+                        const NUM_LOOP = nbEntities/BATCH_SIZE;
+                        const entityDefQueries = [];
+                        for (let i=0; i<NUM_LOOP; i++) {
+                            entityDefQueries.push({
+                                string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
+                                            'NamespacePrefix '+
+                                        'FROM EntityDefinition '+
+                                        'WHERE IsCustomSetting = false '+
+                                        'AND IsApexTriggerable = true '+
+                                        'AND IsCompactLayoutable = true '+
+                                        'LIMIT ' + BATCH_SIZE + ' '+
+                                        'OFFSET ' + (BATCH_SIZE*i)
+                            });
+                        }
+                        SALESFORCE_HANDLER.query(entityDefQueries)
+                            .on('record', (r) => {
+                                const item = { 
+                                    id: r.DurableId,
+                                    name: r.QualifiedApiName,
+                                    label: r.MasterLabel,
+                                    package: r.NamespacePrefix,
+                                    external: r.ExternalSharingModel,
+                                    internal: r.InternalSharingModel
+                                }
+                                MAP_HANDLER.setValue(records, item.id, item);
+                            })
+                            .on('error', (error) => reject(error))
+                            .on('end', () => resolve(records))
+                            .run();
+                    })
                     .run();
             }
         }));
@@ -498,35 +595,40 @@ OrgCheck.Datasets = {
                                 'FROM PermissionSetGroup ' 
                     }])
                     .on('record', (r, i) => {
-                        if (i === 0) {
-                            const hasMembers = (r.Assignments && r.Assignments.records) ? r.Assignments.records.length > 0 : false;
-                            const item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
-                                name: r.Name,
-                                description: r.Description,
-                                hasLicense: (r.License ? 'yes' : 'no'),
-                                license: (r.License ? r.License.Name : ''),
-                                isCustom: r.IsCustom,
-                                isUndescribedCustom: r.IsCustom && !r.Description,
-                                package: r.NamespacePrefix,
-                                isUnusedCustom: r.IsCustom && !hasMembers,
-                                hasMembers: hasMembers,
-                                isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
-                                createdDate: r.CreatedDate, 
-                                lastModifiedDate: r.LastModifiedDate
-                            };
-                            if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
-                            MAP_HANDLER.setValue(records, item.id, item);
-                        } else {
-                            const item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
-                                name: r.DeveloperName,
-                                description: r.Description,
-                                package: r.NamespacePrefix,
-                                createdDate: r.CreatedDate, 
-                                lastModifiedDate: r.LastModifiedDate
+                        switch (i) {
+                            case 0: { // PermissionSet records
+                                const hasMembers = (r.Assignments && r.Assignments.records) ? r.Assignments.records.length > 0 : false;
+                                const item = {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.Name,
+                                    description: r.Description,
+                                    hasLicense: (r.License ? 'yes' : 'no'),
+                                    license: (r.License ? r.License.Name : ''),
+                                    isCustom: r.IsCustom,
+                                    isUndescribedCustom: r.IsCustom && !r.Description,
+                                    package: r.NamespacePrefix,
+                                    isUnusedCustom: r.IsCustom && !hasMembers,
+                                    hasMembers: hasMembers,
+                                    isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                                    createdDate: r.CreatedDate, 
+                                    lastModifiedDate: r.LastModifiedDate
+                                };
+                                if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                                MAP_HANDLER.setValue(records, item.id, item);
+                                break;
                             }
-                            psgByName2[item.package+'--'+item.name] = item;
+                            default: { // PermissionSetGroup records
+                                const item = {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.DeveloperName,
+                                    description: r.Description,
+                                    package: r.NamespacePrefix,
+                                    createdDate: r.CreatedDate, 
+                                    lastModifiedDate: r.LastModifiedDate
+                                }
+                                psgByName2[item.package+'--'+item.name] = item;
+                                break;
+                            }
                         }
                     })
                     .on('end', () => {
@@ -1359,60 +1461,7 @@ OrgCheck.Datasets = {
 
 /*
 
-    // ========================================================================
-    // PACKAGES
-    // ------------------------------------------------------------------------
-    // List of Packages in Salesforce (metadata, using tooling API). 
-    // This includes the installed packages (with type="Installed"). And 
-    // also the local packages (with type="Local").
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'packages',
-        keycache: 'Packages',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Organization': [ 'NamespacePrefix' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
-                                    'FROM InstalledSubscriberPackage ' 
-                        }, { 
-                            tooling: false,
-                            string: 'SELECT NamespacePrefix '+
-                                    'FROM Organization '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            if (i == 0) {
-                                return { 
-                                    id: v.Id, 
-                                    name: v.SubscriberPackage.Name,
-                                    namespace: v.SubscriberPackage.NamespacePrefix,
-                                    type: 'Installed'
-                                };
-                            } else {
-                                return { 
-                                    id: v.NamespacePrefix, 
-                                    name: v.NamespacePrefix,
-                                    namespace: v.NamespacePrefix, 
-                                    type: 'Local'
-                                };
-                            }
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
+
 
 
 
@@ -1503,64 +1552,4 @@ OrgCheck.Datasets = {
 
 
 
-
-    // ========================================================================
-    // ORG WIDE DEFAULTS
-    // ------------------------------------------------------------------------
-    // Get the list of all org wide default in this org
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'orgWideDefaults',
-        keycache: 'OrgWideDefaults',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    /*'EntityDefinition': [ 'DurableId', 'QualifiedApiName', 'MasterLabel', 
-                                          'ExternalSharingModel', 'InternalSharingModel',
-                                          'NamespacePrefix', 'IsCustomSetting',
-                                          'IsApexTriggerable', 'IsCompactLayoutable' ]*/
-              /*  },
-                onError: reject,
-                onEnd: () => {
-                    // We have some issue calling the Bulk API with jsforce
-                    // As EntityDefinition does not accept querMore, we will trick the system
-                    const MAX_COUNT_ENTITYDEF = 600;
-                    const BATCH_SIZE = 200;
-                    const NUM_LOOP = MAX_COUNT_ENTITYDEF/BATCH_SIZE;
-                    const entityDefQueries = [];
-                    for (let i=0; i<NUM_LOOP; i++) {
-                        entityDefQueries.push({
-                            rest: true,
-                            string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
-                                        'NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE IsCustomSetting = false '+
-                                    'AND IsApexTriggerable = true '+
-                                    'AND IsCompactLayoutable = true '+
-                                    'LIMIT ' + BATCH_SIZE + ' '+
-                                    'OFFSET ' + (BATCH_SIZE*i),
-                            queryMore: false
-                        });
-                    }
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: entityDefQueries,
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return { 
-                                id: v.DurableId,
-                                name: v.QualifiedApiName,
-                                label: v.MasterLabel,
-                                package: v.NamespacePrefix,
-                                external: v.ExternalSharingModel,
-                                internal: v.InternalSharingModel
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));*/
+*/

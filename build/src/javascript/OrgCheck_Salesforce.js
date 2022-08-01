@@ -25,31 +25,43 @@ OrgCheck.Salesforce = {
                 const promises = [];
                 queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
                     const api = (query.tooling === true ? connection.tooling : connection);
-                    const records = [];
-                    api.query(query.string)
-                        .on('record', (record) => { that.fire('record', record, index); records.push(record); })
-                        .on('end', () => resolve(records))
-                        .on('error', (error) => {
+                    let records = [];
+                    const recursive_query = (error, result) => {
+                        if (error) { 
                             if (query.byPasses && query.byPasses.includes(error['errorCode'])) {
                                 resolve();
-                                return;
+                            } else {
+                                error.context = { 
+                                    when: 'While creating a promise to call a SOQL query.',
+                                    what: {
+                                        index: index,
+                                        queryMore: query.queryMore,
+                                        queryString: query.string,
+                                        queryUseTooling: query.tooling
+                                    }
+                                };
+                                reject(error);
                             }
-                            error.context = { 
-                                when: 'While creating a promise to call a SOQL query.',
-                                what: {
-                                    index: index,
-                                    queryMore: query.queryMore,
-                                    queryString: query.string,
-                                    queryUseTooling: query.tooling
-                                }
-                            };
-                            reject(error);
-                        })
-                        .run(); 
-                    // TODO: queryMore to implement here
+                        } else {
+                            records = records.concat(result.records);
+                            if (result.done === true) {
+                                resolve(records);
+                            } else {
+                                api.queryMore(result.nextRecordsUrl, recursive_query);
+                            }
+                        }
+                    }
+                    api.query(query.string, recursive_query);
                 })));
                 Promise.all(promises)
-                    .then((results) => that.fire('end', results))
+                    .then((results) => {
+                        let records = []; 
+                        results.forEach((result) => {
+                            result.forEach((r) => that.fire('record', r));
+                            records = records.concat(result);
+                        });
+                        that.fire('end', records);
+                    })
                     .catch((error) => that.fire('error', error));
             } catch (error) {
                 that.fire('error', error);
@@ -74,6 +86,177 @@ OrgCheck.Salesforce = {
                         that.fire('end', result.sobjects);
                     }
                 });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
+    DescribeProcess: function(connection, secureBindingVariable, casesafeid, dapi, sobjectPackage, sobjectDevName) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        const sobjectFullApiname = (sobjectPackage && sobjectPackage !== '') ? (sobjectPackage+'.'+sobjectDevName) : sobjectDevName;
+        this.run = () => {
+            try {
+                const promises = [];
+                promises.push(new Promise((resolve, reject) => {
+                    connection.sobject(sobjectFullApiname).describe$(function (error, object) {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling an sobject describe.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error)
+                        } else {
+                            resolve(object);
+                        }
+                    });
+                }));
+                promises.push(new Promise((resolve, reject) => {
+                    const query = 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
+                                        '(SELECT Id, Name FROM ApexTriggers), '+
+                                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                            'ValidationName FROM ValidationRules), '+
+                                        '(SELECT Id, Name FROM WebLinks) '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevName)+' '+
+                                        (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : '');
+                    connection.tooling.query(query)
+                        .on('record', (r) => {
+                            resolve(r);
+                        })
+                        .on('error', (error) => {
+                            error.context = { 
+                                when: 'While calling an sobject describe from tooling api.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error);
+                        })
+                        .run();
+                }));
+                promises.push(new Promise((resolve, reject) => {
+                    let request = { 
+                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectFullApiname,
+                        method: 'GET'
+                    };
+                    connection.request(request, (error, response) => {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling /limits endpoint for sobject describe.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error)
+                        } else {
+                            resolve((Array.isArray(response?.sObjects) && response?.sObjects.length == 1) ? response?.sObjects[0].count : 0);
+                        }
+                    });
+                }));
+                Promise.all(promises)
+                    .then((results) => { 
+                        // the first promise was describe
+                        // so we initialize the object with the first result
+                        const object = results[0]; 
+
+                        // the second promise was the soql query on EntityDefinition
+                        // so we get the record of that query and map it to the 
+                        //    previous object.
+                        const record = results[1];
+                        object.id = record.DurableId;
+                        object.description = record.Description;
+                        object.externalSharingModel = record.ExternalSharingModel;
+                        object.internalSharingModel = record.InternalSharingModel;
+                        object.recordCount = results[2]; // the third promise is the number of records!!
+
+                        // 1. Apex Triggers
+                        object.apexTriggers = [];
+                        if (record.ApexTriggers) record.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name
+                        }));
+
+                        // 2. FieldSets
+                        object.fieldSets = [];
+                        if (record.FieldSets) record.FieldSets.records.forEach((r) => object.fieldSets.push({
+                            id: casesafeid(r.Id),
+                            label: r.MasterLabel,
+                            description: r.Description
+                        }));
+
+                        // 3. Page Layouts
+                        object.layouts = [];
+                        if (record.Layouts) record.Layouts.records.forEach((r) => object.layouts.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name,
+                            type: r.LayoutType
+                        }));
+
+                        // 4. Limits
+                        object.limits = [];
+                        if (record.Limits) record.Limits.records.forEach((r) => object.limits.push({
+                            id: casesafeid(r.DurableId),
+                            label: r.Label,
+                            remaining: r.Remaining,
+                            max: r.Max,
+                            type: r.Type
+                        }));
+
+                        // 5. ValidationRules
+                        object.validationRules = [];
+                        if (record.ValidationRules) record.ValidationRules.records.forEach((r) => object.validationRules.push({
+                            id: casesafeid(r.Id),
+                            name: r.ValidationName,
+                            isActive: r.Active,
+                            description: r.Description,
+                            errorDisplayField: r.ErrorDisplayField,
+                            errorMessage: r.ErrorMessage
+                        }));
+                        // 6. WebLinks
+                        object.webLinks = [];
+                        if (record.WebLinks) record.WebLinks.records.forEach((r) => object.webLinks.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name
+                        }));
+
+                        // 7. If any fields, add field dependencies
+                        if (record.Fields) {
+                            // object.fields is already defined! don't erase it!;
+                            const fieldsMapper = {};
+                            const fieldIds = [];
+                            record.Fields.records.forEach((r) => {
+                                const id = r.DurableId.split('.')[1];
+                                fieldsMapper[r.QualifiedApiName] = id;
+                                fieldIds.push(id);
+                            });
+                            object.fields.forEach((f) => f.id = fieldsMapper[f.name]);
+                            dapi(fieldIds, (deps) => {
+                                    object.fieldDependencies = deps;
+                                    // FINALLY (with fields dependencies)!!
+                                    that.fire('end', object);
+                                }, 
+                                (error) => that.fire('error', error)
+                            );
+                        } else {
+                            // FINALLY (without fields!)
+                            that.fire('end', object);
+                        }
+                     })
+                    .catch((error) => that.fire('error', error));
             } catch (error) {
                 that.fire('error', error);
             }
@@ -383,72 +566,17 @@ OrgCheck.Salesforce = {
             return new OrgCheck.Salesforce.GlobalDescribeProcess(CONNECTION);
         }
 
+        this.describe = (sobjectPackage, sobjectDevName) => {
+            return new OrgCheck.Salesforce.DescribeProcess(CONNECTION, this.secureSOQLBindingVariable, 
+                this.salesforceIdFormat, this.dependencyApi, sobjectPackage, sobjectDevName);
+        }
+
         this.readMetadataAtScale = (metadataInformation) => {
             return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, metadataInformation);
         }
 
         this.httpCall = function(partialUrl, optionalPayload) {
             return new OrgCheck.Salesforce.HttpProcess(CONNECTION, partialUrl, optionalPayload);
-        }
-
-        /**
-         * Make sure the current user has enough rights on SObjects (only for REST queries)
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>sobjects</code>: Map with keys as SObject API names and value as an Array of Field API Names</li>
-         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
-         *                <li><code>onError</code>: Callback function to call if there is an error</li>
-         *              </ol>
-         */
-        this.doSecureSobjectReadEnforcement = function(setup) {
-            const queries = [];
-            const currentUser = OrgCheck.localUserId;
-            let sobjectsList = [];
-            let fieldsList = [];
-            for (const [sobject, fields] of Object.entries(setup.sobjects)) {
-                sobjectsList.push(sobject); 
-                fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
-                fields.forEach(f => fieldsList.push(sobject+'.'+f+'.'+currentUser)); 
-                // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
-            }
-            sobjectsList.forEach(sobject =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsReadable '+
-                            'FROM UserEntityAccess '+
-                            'WHERE UserId='+ private_secure_soql(currentUser) +' '+
-                            'AND EntityDefinition.QualifiedApiName = '+ private_secure_soql(sobject) +' '+
-                            'AND IsReadable = false'
-                })
-            );
-            sobjectsList.forEach(field =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsAccessible '+
-                            'FROM UserFieldAccess '+
-                            'WHERE DurableId = '+ private_secure_soql(field) +' '+
-                            'AND IsAccessible = false'
-                })
-            );
-            SALESFORCE_HANDLER.doQueries(
-                queries, 
-                (record) => {}, 
-                (records, size) => { 
-                    if (size > 0) {
-                        setup.onError({
-                            'when': 'FLS/CRUD Enforcement: you need to assign yourself the <b>OrgCheck Users</b> permission set.',
-                            'what': {
-                                'Objects and fields': setup.sobjects,
-                                'Number of FLS or CRUD not compatible': size,
-                                'Details': records
-                            }
-                        });
-                    } else {
-                        setup.onEnd(); 
-                    }
-                },
-                setup.onError
-            );
         }
     }
 }

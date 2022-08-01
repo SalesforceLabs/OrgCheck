@@ -322,12 +322,10 @@
                 salesforce: {
                     describe: {
                         object: function(pckg, obj, success, error) {
-                            private_salesforce_describe_object({
-                                namespaceName: pckg,
-                                objectName: obj, 
-                                callbackSuccess: success,
-                                callbackError: error
-                            });
+                            SALESFORCE_HANDLER.describe(pckg, obj)
+                                .on('error', (e) => error(e))
+                                .on('end', (o) => success(o))
+                                .run();
                         }
                     },
                     apex: {
@@ -1481,6 +1479,51 @@ OrgCheck.Datasets = {
 
         /**
          * ======================================================================
+         * Add the Packages dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'packages', 
+            isCachable: true, 
+            keyCache: 'Packages', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                SALESFORCE_HANDLER.query([{ 
+                        tooling: true,
+                        string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
+                                'FROM InstalledSubscriberPackage ' 
+                    }, { 
+                        string: 'SELECT NamespacePrefix '+
+                                'FROM Organization '
+                    }])
+                    .on('record', (r, i) => {
+                        const item = {};
+                        switch (i) {
+                            case 0: { // InstalledSubscriberPackage records
+                                item.id = r.Id;
+                                item.name = r.SubscriberPackage.Name;
+                                item.namespace = r.SubscriberPackage.NamespacePrefix;
+                                item.type = 'Installed';
+                                break;
+                            }
+                            case 1: { // Organization record (it should be only one!)
+                                item.id = r.NamespacePrefix;
+                                item.name = r.NamespacePrefix;
+                                item.namespace = r.NamespacePrefix;
+                                item.type = 'Local';
+                                break;
+                            }
+                        }
+                        MAP_HANDLER.setValue(records, item.id, item);
+                    })
+                    .on('end', () => resolve(records))
+                    .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
          * Add Objects dataset
          * ======================================================================
          */
@@ -1511,6 +1554,58 @@ OrgCheck.Datasets = {
                     })
                     .on('error', (error) => reject(error))
                     .on('end', () => resolve(records))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add Org Wide Defaults dataset
+         * ======================================================================
+         */
+         private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'orgWideDefaults', 
+            isCachable: true, 
+            keyCache: 'OrgWideDefaults', 
+            retriever: (me, resolve, reject) => {
+                const records = MAP_HANDLER.newMap();
+                // We have some issue calling the Bulk API with jsforce
+                // As EntityDefinition does not accept querMore, we will trick the system
+                SALESFORCE_HANDLER.query([{ string: 'SELECT COUNT() FROM EntityDefinition'}])
+                    .on('error', (error) => reject(error))
+                    .on('end', (result) => {
+                        const nbEntities = result.length || 0;
+                        const BATCH_SIZE = 200;
+                        const NUM_LOOP = nbEntities/BATCH_SIZE;
+                        const entityDefQueries = [];
+                        for (let i=0; i<NUM_LOOP; i++) {
+                            entityDefQueries.push({
+                                string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
+                                            'NamespacePrefix '+
+                                        'FROM EntityDefinition '+
+                                        'WHERE IsCustomSetting = false '+
+                                        'AND IsApexTriggerable = true '+
+                                        'AND IsCompactLayoutable = true '+
+                                        'LIMIT ' + BATCH_SIZE + ' '+
+                                        'OFFSET ' + (BATCH_SIZE*i)
+                            });
+                        }
+                        SALESFORCE_HANDLER.query(entityDefQueries)
+                            .on('record', (r) => {
+                                const item = { 
+                                    id: r.DurableId,
+                                    name: r.QualifiedApiName,
+                                    label: r.MasterLabel,
+                                    package: r.NamespacePrefix,
+                                    external: r.ExternalSharingModel,
+                                    internal: r.InternalSharingModel
+                                }
+                                MAP_HANDLER.setValue(records, item.id, item);
+                            })
+                            .on('error', (error) => reject(error))
+                            .on('end', () => resolve(records))
+                            .run();
+                    })
                     .run();
             }
         }));
@@ -1767,35 +1862,40 @@ OrgCheck.Datasets = {
                                 'FROM PermissionSetGroup ' 
                     }])
                     .on('record', (r, i) => {
-                        if (i === 0) {
-                            const hasMembers = (r.Assignments && r.Assignments.records) ? r.Assignments.records.length > 0 : false;
-                            const item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
-                                name: r.Name,
-                                description: r.Description,
-                                hasLicense: (r.License ? 'yes' : 'no'),
-                                license: (r.License ? r.License.Name : ''),
-                                isCustom: r.IsCustom,
-                                isUndescribedCustom: r.IsCustom && !r.Description,
-                                package: r.NamespacePrefix,
-                                isUnusedCustom: r.IsCustom && !hasMembers,
-                                hasMembers: hasMembers,
-                                isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
-                                createdDate: r.CreatedDate, 
-                                lastModifiedDate: r.LastModifiedDate
-                            };
-                            if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
-                            MAP_HANDLER.setValue(records, item.id, item);
-                        } else {
-                            const item = {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
-                                name: r.DeveloperName,
-                                description: r.Description,
-                                package: r.NamespacePrefix,
-                                createdDate: r.CreatedDate, 
-                                lastModifiedDate: r.LastModifiedDate
+                        switch (i) {
+                            case 0: { // PermissionSet records
+                                const hasMembers = (r.Assignments && r.Assignments.records) ? r.Assignments.records.length > 0 : false;
+                                const item = {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.Name,
+                                    description: r.Description,
+                                    hasLicense: (r.License ? 'yes' : 'no'),
+                                    license: (r.License ? r.License.Name : ''),
+                                    isCustom: r.IsCustom,
+                                    isUndescribedCustom: r.IsCustom && !r.Description,
+                                    package: r.NamespacePrefix,
+                                    isUnusedCustom: r.IsCustom && !hasMembers,
+                                    hasMembers: hasMembers,
+                                    isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                                    createdDate: r.CreatedDate, 
+                                    lastModifiedDate: r.LastModifiedDate
+                                };
+                                if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                                MAP_HANDLER.setValue(records, item.id, item);
+                                break;
                             }
-                            psgByName2[item.package+'--'+item.name] = item;
+                            default: { // PermissionSetGroup records
+                                const item = {
+                                    id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
+                                    name: r.DeveloperName,
+                                    description: r.Description,
+                                    package: r.NamespacePrefix,
+                                    createdDate: r.CreatedDate, 
+                                    lastModifiedDate: r.LastModifiedDate
+                                }
+                                psgByName2[item.package+'--'+item.name] = item;
+                                break;
+                            }
                         }
                     })
                     .on('end', () => {
@@ -2628,60 +2728,7 @@ OrgCheck.Datasets = {
 
 /*
 
-    // ========================================================================
-    // PACKAGES
-    // ------------------------------------------------------------------------
-    // List of Packages in Salesforce (metadata, using tooling API). 
-    // This includes the installed packages (with type="Installed"). And 
-    // also the local packages (with type="Local").
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'packages',
-        keycache: 'Packages',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    'Organization': [ 'NamespacePrefix' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
-                                    'FROM InstalledSubscriberPackage ' 
-                        }, { 
-                            tooling: false,
-                            string: 'SELECT NamespacePrefix '+
-                                    'FROM Organization '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            if (i == 0) {
-                                return { 
-                                    id: v.Id, 
-                                    name: v.SubscriberPackage.Name,
-                                    namespace: v.SubscriberPackage.NamespacePrefix,
-                                    type: 'Installed'
-                                };
-                            } else {
-                                return { 
-                                    id: v.NamespacePrefix, 
-                                    name: v.NamespacePrefix,
-                                    namespace: v.NamespacePrefix, 
-                                    type: 'Local'
-                                };
-                            }
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
+
 
 
 
@@ -2772,67 +2819,7 @@ OrgCheck.Datasets = {
 
 
 
-
-    // ========================================================================
-    // ORG WIDE DEFAULTS
-    // ------------------------------------------------------------------------
-    // Get the list of all org wide default in this org
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'orgWideDefaults',
-        keycache: 'OrgWideDefaults',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                    /*'EntityDefinition': [ 'DurableId', 'QualifiedApiName', 'MasterLabel', 
-                                          'ExternalSharingModel', 'InternalSharingModel',
-                                          'NamespacePrefix', 'IsCustomSetting',
-                                          'IsApexTriggerable', 'IsCompactLayoutable' ]*/
-              /*  },
-                onError: reject,
-                onEnd: () => {
-                    // We have some issue calling the Bulk API with jsforce
-                    // As EntityDefinition does not accept querMore, we will trick the system
-                    const MAX_COUNT_ENTITYDEF = 600;
-                    const BATCH_SIZE = 200;
-                    const NUM_LOOP = MAX_COUNT_ENTITYDEF/BATCH_SIZE;
-                    const entityDefQueries = [];
-                    for (let i=0; i<NUM_LOOP; i++) {
-                        entityDefQueries.push({
-                            rest: true,
-                            string: 'SELECT DurableId, QualifiedApiName, MasterLabel, ExternalSharingModel, InternalSharingModel, '+
-                                        'NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE IsCustomSetting = false '+
-                                    'AND IsApexTriggerable = true '+
-                                    'AND IsCompactLayoutable = true '+
-                                    'LIMIT ' + BATCH_SIZE + ' '+
-                                    'OFFSET ' + (BATCH_SIZE*i),
-                            queryMore: false
-                        });
-                    }
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: entityDefQueries,
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return { 
-                                id: v.DurableId,
-                                name: v.QualifiedApiName,
-                                label: v.MasterLabel,
-                                package: v.NamespacePrefix,
-                                external: v.ExternalSharingModel,
-                                internal: v.InternalSharingModel
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));*//**
+*//**
  * Salesforce module 
  */
 OrgCheck.Salesforce = {
@@ -2859,31 +2846,43 @@ OrgCheck.Salesforce = {
                 const promises = [];
                 queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
                     const api = (query.tooling === true ? connection.tooling : connection);
-                    const records = [];
-                    api.query(query.string)
-                        .on('record', (record) => { that.fire('record', record, index); records.push(record); })
-                        .on('end', () => resolve(records))
-                        .on('error', (error) => {
+                    let records = [];
+                    const recursive_query = (error, result) => {
+                        if (error) { 
                             if (query.byPasses && query.byPasses.includes(error['errorCode'])) {
                                 resolve();
-                                return;
+                            } else {
+                                error.context = { 
+                                    when: 'While creating a promise to call a SOQL query.',
+                                    what: {
+                                        index: index,
+                                        queryMore: query.queryMore,
+                                        queryString: query.string,
+                                        queryUseTooling: query.tooling
+                                    }
+                                };
+                                reject(error);
                             }
-                            error.context = { 
-                                when: 'While creating a promise to call a SOQL query.',
-                                what: {
-                                    index: index,
-                                    queryMore: query.queryMore,
-                                    queryString: query.string,
-                                    queryUseTooling: query.tooling
-                                }
-                            };
-                            reject(error);
-                        })
-                        .run(); 
-                    // TODO: queryMore to implement here
+                        } else {
+                            records = records.concat(result.records);
+                            if (result.done === true) {
+                                resolve(records);
+                            } else {
+                                api.queryMore(result.nextRecordsUrl, recursive_query);
+                            }
+                        }
+                    }
+                    api.query(query.string, recursive_query);
                 })));
                 Promise.all(promises)
-                    .then((results) => that.fire('end', results))
+                    .then((results) => {
+                        let records = []; 
+                        results.forEach((result) => {
+                            result.forEach((r) => that.fire('record', r));
+                            records = records.concat(result);
+                        });
+                        that.fire('end', records);
+                    })
                     .catch((error) => that.fire('error', error));
             } catch (error) {
                 that.fire('error', error);
@@ -2908,6 +2907,177 @@ OrgCheck.Salesforce = {
                         that.fire('end', result.sobjects);
                     }
                 });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
+    DescribeProcess: function(connection, secureBindingVariable, casesafeid, dapi, sobjectPackage, sobjectDevName) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        const sobjectFullApiname = (sobjectPackage && sobjectPackage !== '') ? (sobjectPackage+'.'+sobjectDevName) : sobjectDevName;
+        this.run = () => {
+            try {
+                const promises = [];
+                promises.push(new Promise((resolve, reject) => {
+                    connection.sobject(sobjectFullApiname).describe$(function (error, object) {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling an sobject describe.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error)
+                        } else {
+                            resolve(object);
+                        }
+                    });
+                }));
+                promises.push(new Promise((resolve, reject) => {
+                    const query = 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
+                                        '(SELECT Id, Name FROM ApexTriggers), '+
+                                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                            'ValidationName FROM ValidationRules), '+
+                                        '(SELECT Id, Name FROM WebLinks) '+
+                                    'FROM EntityDefinition '+
+                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevName)+' '+
+                                        (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : '');
+                    connection.tooling.query(query)
+                        .on('record', (r) => {
+                            resolve(r);
+                        })
+                        .on('error', (error) => {
+                            error.context = { 
+                                when: 'While calling an sobject describe from tooling api.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error);
+                        })
+                        .run();
+                }));
+                promises.push(new Promise((resolve, reject) => {
+                    let request = { 
+                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectFullApiname,
+                        method: 'GET'
+                    };
+                    connection.request(request, (error, response) => {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling /limits endpoint for sobject describe.',
+                                what: {
+                                    package: sobjectPackage,
+                                    devName: sobjectDevName,
+                                    fullApiName: sobjectFullApiname
+                                }
+                            };
+                            reject(error)
+                        } else {
+                            resolve((Array.isArray(response?.sObjects) && response?.sObjects.length == 1) ? response?.sObjects[0].count : 0);
+                        }
+                    });
+                }));
+                Promise.all(promises)
+                    .then((results) => { 
+                        // the first promise was describe
+                        // so we initialize the object with the first result
+                        const object = results[0]; 
+
+                        // the second promise was the soql query on EntityDefinition
+                        // so we get the record of that query and map it to the 
+                        //    previous object.
+                        const record = results[1];
+                        object.id = record.DurableId;
+                        object.description = record.Description;
+                        object.externalSharingModel = record.ExternalSharingModel;
+                        object.internalSharingModel = record.InternalSharingModel;
+                        object.recordCount = results[2]; // the third promise is the number of records!!
+
+                        // 1. Apex Triggers
+                        object.apexTriggers = [];
+                        if (record.ApexTriggers) record.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name
+                        }));
+
+                        // 2. FieldSets
+                        object.fieldSets = [];
+                        if (record.FieldSets) record.FieldSets.records.forEach((r) => object.fieldSets.push({
+                            id: casesafeid(r.Id),
+                            label: r.MasterLabel,
+                            description: r.Description
+                        }));
+
+                        // 3. Page Layouts
+                        object.layouts = [];
+                        if (record.Layouts) record.Layouts.records.forEach((r) => object.layouts.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name,
+                            type: r.LayoutType
+                        }));
+
+                        // 4. Limits
+                        object.limits = [];
+                        if (record.Limits) record.Limits.records.forEach((r) => object.limits.push({
+                            id: casesafeid(r.DurableId),
+                            label: r.Label,
+                            remaining: r.Remaining,
+                            max: r.Max,
+                            type: r.Type
+                        }));
+
+                        // 5. ValidationRules
+                        object.validationRules = [];
+                        if (record.ValidationRules) record.ValidationRules.records.forEach((r) => object.validationRules.push({
+                            id: casesafeid(r.Id),
+                            name: r.ValidationName,
+                            isActive: r.Active,
+                            description: r.Description,
+                            errorDisplayField: r.ErrorDisplayField,
+                            errorMessage: r.ErrorMessage
+                        }));
+                        // 6. WebLinks
+                        object.webLinks = [];
+                        if (record.WebLinks) record.WebLinks.records.forEach((r) => object.webLinks.push({
+                            id: casesafeid(r.Id),
+                            name: r.Name
+                        }));
+
+                        // 7. If any fields, add field dependencies
+                        if (record.Fields) {
+                            // object.fields is already defined! don't erase it!;
+                            const fieldsMapper = {};
+                            const fieldIds = [];
+                            record.Fields.records.forEach((r) => {
+                                const id = r.DurableId.split('.')[1];
+                                fieldsMapper[r.QualifiedApiName] = id;
+                                fieldIds.push(id);
+                            });
+                            object.fields.forEach((f) => f.id = fieldsMapper[f.name]);
+                            dapi(fieldIds, (deps) => {
+                                    object.fieldDependencies = deps;
+                                    // FINALLY (with fields dependencies)!!
+                                    that.fire('end', object);
+                                }, 
+                                (error) => that.fire('error', error)
+                            );
+                        } else {
+                            // FINALLY (without fields!)
+                            that.fire('end', object);
+                        }
+                     })
+                    .catch((error) => that.fire('error', error));
             } catch (error) {
                 that.fire('error', error);
             }
@@ -3217,72 +3387,17 @@ OrgCheck.Salesforce = {
             return new OrgCheck.Salesforce.GlobalDescribeProcess(CONNECTION);
         }
 
+        this.describe = (sobjectPackage, sobjectDevName) => {
+            return new OrgCheck.Salesforce.DescribeProcess(CONNECTION, this.secureSOQLBindingVariable, 
+                this.salesforceIdFormat, this.dependencyApi, sobjectPackage, sobjectDevName);
+        }
+
         this.readMetadataAtScale = (metadataInformation) => {
             return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, metadataInformation);
         }
 
         this.httpCall = function(partialUrl, optionalPayload) {
             return new OrgCheck.Salesforce.HttpProcess(CONNECTION, partialUrl, optionalPayload);
-        }
-
-        /**
-         * Make sure the current user has enough rights on SObjects (only for REST queries)
-         * @param setup JSON configuration including:
-         *              <ol>
-         *                <li><code>sobjects</code>: Map with keys as SObject API names and value as an Array of Field API Names</li>
-         *                <li><code>onEnd</code>: Callback function to call with the results from global describe</li>
-         *                <li><code>onError</code>: Callback function to call if there is an error</li>
-         *              </ol>
-         */
-        this.doSecureSobjectReadEnforcement = function(setup) {
-            const queries = [];
-            const currentUser = OrgCheck.localUserId;
-            let sobjectsList = [];
-            let fieldsList = [];
-            for (const [sobject, fields] of Object.entries(setup.sobjects)) {
-                sobjectsList.push(sobject); 
-                fields.filter(f => !f.endsWith('Id') && !f.startsWith('UserPreferences'));
-                fields.forEach(f => fieldsList.push(sobject+'.'+f+'.'+currentUser)); 
-                // Note: UserFieldAccess does not like including Lookup Ids that why we are filtering out 'fields'
-            }
-            sobjectsList.forEach(sobject =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsReadable '+
-                            'FROM UserEntityAccess '+
-                            'WHERE UserId='+ private_secure_soql(currentUser) +' '+
-                            'AND EntityDefinition.QualifiedApiName = '+ private_secure_soql(sobject) +' '+
-                            'AND IsReadable = false'
-                })
-            );
-            sobjectsList.forEach(field =>
-                queries.push({
-                    tooling: true,
-                    string: 'SELECT DurableId, IsAccessible '+
-                            'FROM UserFieldAccess '+
-                            'WHERE DurableId = '+ private_secure_soql(field) +' '+
-                            'AND IsAccessible = false'
-                })
-            );
-            SALESFORCE_HANDLER.doQueries(
-                queries, 
-                (record) => {}, 
-                (records, size) => { 
-                    if (size > 0) {
-                        setup.onError({
-                            'when': 'FLS/CRUD Enforcement: you need to assign yourself the <b>OrgCheck Users</b> permission set.',
-                            'what': {
-                                'Objects and fields': setup.sobjects,
-                                'Number of FLS or CRUD not compatible': size,
-                                'Details': records
-                            }
-                        });
-                    } else {
-                        setup.onEnd(); 
-                    }
-                },
-                setup.onError
-            );
         }
     }
 }/**
@@ -3686,6 +3801,7 @@ OrgCheck.VisualComponents = {
                         informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                     }
                     informationHTML += '<br />';
+                    console.error('OrgCheck - Error #' + i, v);
                 });
                 private_show_modal(
                     'Oh no, OrgCheck had an error!', 

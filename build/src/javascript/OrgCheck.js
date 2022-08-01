@@ -322,12 +322,10 @@
                 salesforce: {
                     describe: {
                         object: function(pckg, obj, success, error) {
-                            private_salesforce_describe_object({
-                                namespaceName: pckg,
-                                objectName: obj, 
-                                callbackSuccess: success,
-                                callbackError: error
-                            });
+                            SALESFORCE_HANDLER.describe(pckg, obj)
+                                .on('error', (e) => error(e))
+                                .on('end', (o) => success(o))
+                                .run();
                         }
                     },
                     apex: {
