@@ -366,6 +366,7 @@ OrgCheck.VisualComponents = {
                         informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                     }
                     informationHTML += '<br />';
+                    console.error('OrgCheck - Error #' + i, v);
                 });
                 private_show_modal(
                     'Oh no, OrgCheck had an error!', 
