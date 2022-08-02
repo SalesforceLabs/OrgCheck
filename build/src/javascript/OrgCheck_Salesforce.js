@@ -430,7 +430,7 @@ OrgCheck.Salesforce = {
                 const elmt = document.getElementById('org-daily-api-requests');
                 if (d && d.DailyApiRequests) {
                     const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
-                    elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+rate.toFixed(3)+'</small></center>';
+                    elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+(rate.toFixed(3)*100)+' %</small></center>';
                     if (rate > 0.9) {
                         elmt.classList.add('slds-theme_error');
                         stopWatcherCallback('Daily API Request is too high...');
