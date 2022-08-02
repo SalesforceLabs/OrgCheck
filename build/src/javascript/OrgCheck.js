@@ -7,21 +7,6 @@
      * OrgCheck Version
      */
     version: 'Hydrogen [H,1]',
-
-    /**
-     * Organization Id where OrgCheck is currently installed
-     */
-    localOrgId: '',
-
-    /**
-     * Current User Id where OrgCheck is currently launched
-     */
-    localUserId: '',
-
-    /**
-     * Current limit informations
-     */
-    limitInfo: {},
    
     /**
      * OrgCheck core
@@ -73,13 +58,6 @@
 
         const ARRAY_HANDLER = new OrgCheck.DataTypes.Collection.ArrayHandler();
 
-        const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
-            modalContentId: setup.htmlModalContentTagId,
-            modalId: setup.htmlModalTagId,
-            modalTitleId: setup.htmlModalTitleTagId,
-            warningMessageId: setup.htmlWarningMessageTagId
-        });
-
         const PROGRESSBAR_HANDLER = new OrgCheck.VisualComponents.ProgressBarHandler({
             spinnerDivId: setup.htmlSpinnerTagId,
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
@@ -92,9 +70,14 @@
             userId: setup.sfLocalCurrentUserId
         });
 
-        // Set global information about org (in case of showError mainly)
-        OrgCheck.localOrgId = SALESFORCE_HANDLER.getOrgId();
-        OrgCheck.localUserId = SALESFORCE_HANDLER.getCurrentUserId();
+        const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
+            modalContentId: setup.htmlModalContentTagId,
+            modalId: setup.htmlModalTagId,
+            modalTitleId: setup.htmlModalTitleTagId,
+            warningMessageId: setup.htmlWarningMessageTagId
+        }, {
+            SalesforceHandler: SALESFORCE_HANDLER
+        });
 
         const DATE_HANDLER = new OrgCheck.DataTypes.Date.Handler({ 
             defaultLanguage: setup.formatDefaultLanguage,
@@ -117,33 +100,6 @@
             ArrayHandler: ARRAY_HANDLER,
             DateHandler: DATE_HANDLER
         });
-
-        // ======================================================
-        // DATASETS LAYER
-        // ======================================================
-
-
-        // ======================================================
-        // CACHE LAYER
-        // ======================================================
-
-        /**
-         * Get metadata item from cache
-         * @param key in cache
-         * @return the value in cache, undefined if not present in cache
-         */
-        this.getMetadataInCache = function(key) {
-            return METADATA_CACHE_HANDLER.getItem(key);
-        };
-        
-        /**
-         * Set metadata item from cache
-         * @param key in cache
-         * @param value in cache
-         */
-        this.setMetadataInCache = function(key, value) {
-            return METADATA_CACHE_HANDLER.setItem(key, value);
-        };
 
         // ======================================================
         // CONTROLLER LAYER 
@@ -354,7 +310,10 @@
                 information: {
                     showMainContent: function() {
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'block';
-                    }
+                    },
+                    getOrgId: SALESFORCE_HANDLER.getOrgId,
+                    getOrgType: SALESFORCE_HANDLER.getOrgType,
+                    getCurrentlUserId: SALESFORCE_HANDLER.getCurrentUserId
                 },
                 preferences: {
                     get: function(key) {

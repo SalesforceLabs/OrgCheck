@@ -322,8 +322,9 @@ OrgCheck.VisualComponents = {
      * Message
      * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
      */
-    MessageHandler: function (configuration) {
+    MessageHandler: function (configuration, handlers) {
 
+        const SALESFORCE_HANDLER = handlers.SalesforceHandler;
         const private_errors = [];
 
         /**
@@ -338,17 +339,17 @@ OrgCheck.VisualComponents = {
                         'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
                         '><br />';
                 let informationHTML = '<b>OrgCheck Information</b><br />';
-                informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
-                informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
-                informationHTML += 'Current running UserId: ' + (OrgCheck && OrgCheck.localUserId ? OrgCheck.localUserId : 'no userId available') + '<br />';
-                informationHTML += 'Current Daily Api Requests: ' + (OrgCheck && OrgCheck.limitInfo && OrgCheck.limitInfo.DailyApiRequests ? ( 'remains: '+OrgCheck.limitInfo.DailyApiRequests.Remaining+' max:'+OrgCheck.limitInfo.DailyApiRequests.Max ) : 'no limit info available') + '<br />';
+                informationHTML += 'Version: ' + SALESFORCE_HANDLER.getApiVersion() + '<br />';
+                informationHTML += 'Installed on OrgId: ' + SALESFORCE_HANDLER.getOrgId() + '<br />';
+                informationHTML += 'Type of this org: ' + SALESFORCE_HANDLER.getOrgType() + '<br />';
+                informationHTML += 'Current running UserId: ' + SALESFORCE_HANDLER.getCurrentUserId() + '<br />';
+                informationHTML += 'Current Daily Api Requests: ' + SALESFORCE_HANDLER.getLimitApiDailyRequest() + '<br />';
                 informationHTML += '<br />';
                 informationHTML += '<b>Navigation Information</b><br />';
                 informationHTML += 'Page: ' + document.location.pathname + '<br />';
                 informationHTML += '<br />';
                 informationHTML += '<b>System Information</b><br />';
                 informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
-                informationHTML += 'Operating System: ' + navigator.platform + '<br />';
                 informationHTML += 'Language: ' + navigator.language + '<br />';
                 informationHTML += '<br />';
                 private_errors.forEach((v, i) => {

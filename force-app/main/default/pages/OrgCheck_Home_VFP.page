@@ -334,6 +334,14 @@
                     const div = helper.html.element.get('div-preferences');
                     [
                         { 
+                            label: 'Security',
+                            options: [
+                                { label: 'I understand that using OrgCheck in Production will increase the Daily API Request Limit, '+
+                                          'which potentially could block for 24 hours my users to use my org. Please consider using '+
+                                          'OrgCheck in a full sandbox for example.', id: 'warning.ByPassUseInProduction' }
+                            ]
+                        },
+                        { 
                             label: 'Roles',
                             options: [
                                 { label: 'Hide external roles (from Community).', id: 'filter.HideExternalRoles' }

@@ -413,6 +413,33 @@ OrgCheck.Salesforce = {
             instanceUrl: ENDPOINT_URL
         });
 
+        let private_org_type;
+        let private_limit_api_req;
+
+        /**
+         * Check if OrgCheck should not be used
+         */
+        CONNECTION.query('SELECT IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
+            .on('record', (r) => {
+                // if the current Org is DE, it's ok to use OrgCheck!
+                if (r.OrganizationType === 'Developer Edition') {
+                    private_org_type = 'Developer Edition';
+                }
+                // if the current Org is a Sandbox, it's ok to use OrgCheck!
+                else if (r.IsSandbox === true) {
+                    private_org_type = 'Sandbox';
+                }
+                // if the current Org is not a Sandbox but a Trial Demo, it's ok to use OrgCheck!
+                else if (r.IsSandbox === false && r.TrialExpirationDate) {
+                    private_org_type = 'TrialOrDemo';
+                }
+                // Other cases need to set a BYPASS (in home page) to continue using the app.
+                else {
+                    private_org_type = 'Production';
+                }
+            })
+            .run();
+
         this.getApiVersion = () => { return API_VERSION; }
 
         this.getEndpointUrl = () => { return ENDPOINT_URL; }
@@ -421,12 +448,16 @@ OrgCheck.Salesforce = {
 
         this.getCurrentUserId = () => { return USER_ID; }
 
+        this.getOrgType = () => { return private_org_type; }
+
+        this.getLimitApiDailyRequest = () => { return private_limit_api_req; }
+
         /**
          * Limits call
          */
         const private_check_limits = () => {
             CONNECTION.limits().then(d => {
-                this.limitInfo = d;
+                private_limit_api_req = d;
                 const elmt = document.getElementById('org-daily-api-requests');
                 if (d && d.DailyApiRequests) {
                     const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;

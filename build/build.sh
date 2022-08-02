@@ -8,12 +8,12 @@
 ## npm install tsc
 
 for f in build/src/javascript/*_*; do
-    uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
-    ## cat "${f}" > /tmp/$(basename $f)
+    ###uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
+     cat "${f}" > /tmp/$(basename $f)
 done
 for f in build/src/javascript/OrgCheck.js; do
-    uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
-    ## cat "${f}" > /tmp/$(basename $f)
+    ###uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
+     cat "${f}" > /tmp/$(basename $f)
 done
 
 (
