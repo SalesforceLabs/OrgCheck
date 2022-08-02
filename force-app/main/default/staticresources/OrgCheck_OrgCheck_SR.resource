@@ -332,35 +332,23 @@
                         runAllLocalTests: function() {
                             return SALESFORCE_HANDLER.httpCall(
                                 '/tooling/runTestsAsynchronous', 
-                                r => console.debug(r), 
-                                r => console.error(r), 
                                 { 
                                     body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": "false" }', 
                                     type: 'application/json' 
                                 }
-                            );
+                            ).run();
                         }
                     },
                     version: {
-                        isOld: function(version) {
-                            return SALESFORCE_HANDLER.isVersionOld(version, 3);
-                        }
+                        isOld: SALESFORCE_HANDLER.isVersionOld
                     }
                 },
                 cache: {
                     metadata: {
-                        clearAll: function() {
-                            METADATA_CACHE_HANDLER.clearAll();
-                        },
-                        keys: function() {
-                            return METADATA_CACHE_HANDLER.keys();
-                        },
-                        sideValues: function(key) {
-                            return METADATA_CACHE_HANDLER.sideValues(key);
-                        },
-                        clear: function(key) {
-                            return METADATA_CACHE_HANDLER.clear(key);
-                        }
+                        clearAll: METADATA_CACHE_HANDLER.clearAll,
+                        keys: METADATA_CACHE_HANDLER.keys,
+                        sideValues: METADATA_CACHE_HANDLER.sideValues,
+                        clear: METADATA_CACHE_HANDLER.clear
                     }
                 },
                 information: {
@@ -382,14 +370,10 @@
                     }
                 },
                 array: {
-                    concat: function(array1, array2, prop) {
-                        return ARRAY_HANDLER.concat(array1, array2, prop);
-                    }
+                    concat: ARRAY_HANDLER.concat
                 },
                 map: {
-                    keys: function(map) {
-                        return MAP_HANDLER.keys(map);
-                    },
+                    keys: MAP_HANDLER.keys,
                     index: function(map, compare_function, filter_function) {
                         let keys = MAP_HANDLER.keys(map);
                         if (filter_function) {
@@ -418,49 +402,27 @@
                 },
                 timestamp: {
                     to: {
-                        datetime: function(ts) {
-                            return DATE_HANDLER.datetimeFormat(ts);
-                        },
-                        date: function(ts) {
-                            return DATE_HANDLER.dateFormat(ts);
-                        }
+                        datetime: DATE_HANDLER.datetimeFormat,
+                        date: DATE_HANDLER.dateFormat
                     }
                 },
                 error: {
-                    show: function(error) {
-                        MSG_HANDLER.showError(error);
-                    }
+                    show: MSG_HANDLER.showError
                 },
                 html: {
                     modal: {
-                        show: function(title, el) {
-                            MSG_HANDLER.showModal(title, el);
-                        }
+                        show: MSG_HANDLER.showModal
                     },
                     message: {
-                        show: function(message, type) {
-                            MSG_HANDLER.showWarning(message);
-                        },
-                        hide: function() {
-                            MSG_HANDLER.hideWarning();
-                        }
+                        show: MSG_HANDLER.showWarning,
+                        hide: MSG_HANDLER.hideWarning
                     },
                     progress: {
-                        show: function() {
-                            PROGRESSBAR_HANDLER.show();
-                        },
-                        hide: function() {
-                            PROGRESSBAR_HANDLER.hide();
-                        },
-                        resetSections: function() {
-                            PROGRESSBAR_HANDLER.reset();
-                        },
-                        addSection: function(sectionName, message) {
-                            PROGRESSBAR_HANDLER.addSection(sectionName, message);
-                        },
-                        setSection: function (sectionName, message, status) {
-                            PROGRESSBAR_HANDLER.setSection(sectionName, message, status);
-                        }
+                        show: PROGRESSBAR_HANDLER.show,
+                        hide: PROGRESSBAR_HANDLER.hide,
+                        resetSections: PROGRESSBAR_HANDLER.reset,
+                        addSection: PROGRESSBAR_HANDLER.addSection,
+                        setSection: PROGRESSBAR_HANDLER.setSection
                     },
                     datatable: {
                         create: function(config) {
@@ -559,13 +521,10 @@
                         }
                     },
                     render: {
-                        format: function(label, ...parameters) {
-                            if (label) return label.replace(/{(\d+)}/g, (m, n) => { return parameters[n] ? parameters[n] : m; });
-                            return '';
-                        },
-                        escape: function(unsafe) { 
-                            return STRING_HANDLER.htmlSecurise(unsafe); 
-                        },
+                        format: STRING_HANDLER.format,
+                        escape: STRING_HANDLER.htmlSecurise,
+                        percentage: STRING_HANDLER.percentage,
+                        shrinkText: STRING_HANDLER.shrink,
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
                             div.innerHTML = '<a>Dependencies <img src="/img/chatter/lookupSearchHover.png" /></a>';
@@ -613,14 +572,6 @@
                             }
                             return 0;
                         },
-                        percentage: function(v) {
-                            if (v) {
-                                const vv = Number.parseFloat(v);
-                                if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
-                            }
-                            if (v === 0) return '0 %';
-                            return '';
-                        },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
                             return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
@@ -637,12 +588,6 @@
                                 case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
                                 default:           return '';
                             }
-                        },
-                        shrinkText: function(value, size=150, appendStr='...') {
-                            if (value && value.length > size) {
-                                return value.substr(0, size) + appendStr;
-                            }
-                            return value;
                         },
                         color: function(label) {
                             switch (label) {
@@ -1082,6 +1027,27 @@ OrgCheck.Cache = {
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#039;");
             };
+
+            this.format = (label, ...params) => {
+                if (label) return label.replace(/{(\d+)}/g, (m, n) => { const v = params[n]; return (v || v === 0) ? v : m; });
+                return '';
+            };
+
+            this.percentage = (v) => {
+                if (v) {
+                    const vv = Number.parseFloat(v);
+                    if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
+                }
+                if (v === 0) return '0 %';
+                return '';
+            };
+
+            this.shrink = (value, size=150, appendStr='...') => {
+                if (value && value.length > size) {
+                    return value.substr(0, size) + appendStr;
+                }
+                return value;
+            };
         }
     },
 
@@ -1152,7 +1118,7 @@ OrgCheck.Cache = {
              * @return if that key is functional (not technical)
              */
             const private_is_safe_key = (key) => {
-                return (key !== configuration.keySize 
+                return (key && key !== configuration.keySize 
                     && !key.startsWith(configuration.keyExcludePrefix));
             }
 
@@ -1573,8 +1539,7 @@ OrgCheck.Datasets = {
                 // As EntityDefinition does not accept querMore, we will trick the system
                 SALESFORCE_HANDLER.query([{ string: 'SELECT COUNT() FROM EntityDefinition'}])
                     .on('error', (error) => reject(error))
-                    .on('end', (result) => {
-                        const nbEntities = result.length || 0;
+                    .on('size', (nbEntities) => {
                         const BATCH_SIZE = 200;
                         const NUM_LOOP = nbEntities/BATCH_SIZE;
                         const entityDefQueries = [];
@@ -2846,7 +2811,7 @@ OrgCheck.Salesforce = {
                 const promises = [];
                 queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
                     const api = (query.tooling === true ? connection.tooling : connection);
-                    let records = [];
+                    let data = [];
                     const recursive_query = (error, result) => {
                         if (error) { 
                             if (query.byPasses && query.byPasses.includes(error['errorCode'])) {
@@ -2864,9 +2829,9 @@ OrgCheck.Salesforce = {
                                 reject(error);
                             }
                         } else {
-                            records = records.concat(result.records);
+                            data = data.concat(result.records);
                             if (result.done === true) {
-                                resolve(records);
+                                resolve({ records: data, totalSize: result.totalSize });
                             } else {
                                 api.queryMore(result.nextRecordsUrl, recursive_query);
                             }
@@ -2877,9 +2842,10 @@ OrgCheck.Salesforce = {
                 Promise.all(promises)
                     .then((results) => {
                         let records = []; 
-                        results.forEach((result) => {
-                            result.forEach((r) => that.fire('record', r));
-                            records = records.concat(result);
+                        results.forEach((result, index) => {
+                            result.records.forEach((r) => that.fire('record', r, index));
+                            records = records.concat(result.records);
+                            that.fire('size', result.totalSize, index);
                         });
                         that.fire('end', records);
                     })
@@ -2916,19 +2882,17 @@ OrgCheck.Salesforce = {
     DescribeProcess: function(connection, secureBindingVariable, casesafeid, dapi, sobjectPackage, sobjectDevName) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
-        const sobjectFullApiname = (sobjectPackage && sobjectPackage !== '') ? (sobjectPackage+'.'+sobjectDevName) : sobjectDevName;
+        const sobjectDevNameNoExt = sobjectDevName.split('__')[(sobjectPackage && sobjectPackage !== '') ? 1 : 0];
         this.run = () => {
             try {
                 const promises = [];
                 promises.push(new Promise((resolve, reject) => {
-                    connection.sobject(sobjectFullApiname).describe$(function (error, object) {
+                    connection.sobject(sobjectDevName).describe$(function (error, object) {
                         if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe.',
                                 what: {
-                                    package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devName: sobjectDevName
                                 }
                             };
                             reject(error)
@@ -2948,28 +2912,29 @@ OrgCheck.Salesforce = {
                                             'ValidationName FROM ValidationRules), '+
                                         '(SELECT Id, Name FROM WebLinks) '+
                                     'FROM EntityDefinition '+
-                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevName)+' '+
+                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
                                         (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : '');
-                    connection.tooling.query(query)
-                        .on('record', (r) => {
-                            resolve(r);
-                        })
-                        .on('error', (error) => {
+                    connection.tooling.query(query, (error, result) => {
+                        if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe from tooling api.',
                                 what: {
+                                    soqlQuery: query,
                                     package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devNameWithoutPrefix: sobjectDevNameNoExt
                                 }
                             };
                             reject(error);
-                        })
-                        .run();
+                        } else if (result.totalSize !== 1) {
+                            resolve();
+                        } else {
+                            resolve(result.records[0]);
+                        }
+                    });
                 }));
                 promises.push(new Promise((resolve, reject) => {
                     let request = { 
-                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectFullApiname,
+                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
                         method: 'GET'
                     };
                     connection.request(request, (error, response) => {
@@ -2977,9 +2942,7 @@ OrgCheck.Salesforce = {
                             error.context = { 
                                 when: 'While calling /limits endpoint for sobject describe.',
                                 what: {
-                                    package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devName: sobjectDevName
                                 }
                             };
                             reject(error)
@@ -2994,26 +2957,37 @@ OrgCheck.Salesforce = {
                         // so we initialize the object with the first result
                         const object = results[0]; 
 
+                        // the third promise is the number of records!!
+                        object.recordCount = results[2]; 
+
                         // the second promise was the soql query on EntityDefinition
                         // so we get the record of that query and map it to the 
                         //    previous object.
-                        const record = results[1];
-                        object.id = record.DurableId;
-                        object.description = record.Description;
-                        object.externalSharingModel = record.ExternalSharingModel;
-                        object.internalSharingModel = record.InternalSharingModel;
-                        object.recordCount = results[2]; // the third promise is the number of records!!
+                        const entityDef = results[1];
+
+                        // If that entity was not found in the tooling API
+                        if (!entityDef) {
+                            // fire the end event with only this version of the object
+                            that.fire('end', object);
+                            return; // and return !
+                        }
+
+                        // Additional information from EntityDefinition
+                        object.id = entityDef.DurableId;
+                        object.description = entityDef.Description;
+                        object.externalSharingModel = entityDef.ExternalSharingModel;
+                        object.internalSharingModel = entityDef.InternalSharingModel;
 
                         // 1. Apex Triggers
                         object.apexTriggers = [];
-                        if (record.ApexTriggers) record.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
+                        if (entityDef.ApexTriggers) entityDef.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
                             id: casesafeid(r.Id),
                             name: r.Name
                         }));
 
                         // 2. FieldSets
                         object.fieldSets = [];
-                        if (record.FieldSets) record.FieldSets.records.forEach((r) => object.fieldSets.push({
+                        if (entityDef.FieldSets) entityDef.FieldSets.records.forEach((r) => object.fieldSets.push({
                             id: casesafeid(r.Id),
                             label: r.MasterLabel,
                             description: r.Description
@@ -3021,7 +2995,7 @@ OrgCheck.Salesforce = {
 
                         // 3. Page Layouts
                         object.layouts = [];
-                        if (record.Layouts) record.Layouts.records.forEach((r) => object.layouts.push({
+                        if (entityDef.Layouts) entityDef.Layouts.records.forEach((r) => object.layouts.push({
                             id: casesafeid(r.Id),
                             name: r.Name,
                             type: r.LayoutType
@@ -3029,7 +3003,7 @@ OrgCheck.Salesforce = {
 
                         // 4. Limits
                         object.limits = [];
-                        if (record.Limits) record.Limits.records.forEach((r) => object.limits.push({
+                        if (entityDef.Limits) entityDef.Limits.records.forEach((r) => object.limits.push({
                             id: casesafeid(r.DurableId),
                             label: r.Label,
                             remaining: r.Remaining,
@@ -3039,7 +3013,7 @@ OrgCheck.Salesforce = {
 
                         // 5. ValidationRules
                         object.validationRules = [];
-                        if (record.ValidationRules) record.ValidationRules.records.forEach((r) => object.validationRules.push({
+                        if (entityDef.ValidationRules) entityDef.ValidationRules.records.forEach((r) => object.validationRules.push({
                             id: casesafeid(r.Id),
                             name: r.ValidationName,
                             isActive: r.Active,
@@ -3049,17 +3023,17 @@ OrgCheck.Salesforce = {
                         }));
                         // 6. WebLinks
                         object.webLinks = [];
-                        if (record.WebLinks) record.WebLinks.records.forEach((r) => object.webLinks.push({
+                        if (entityDef.WebLinks) entityDef.WebLinks.records.forEach((r) => object.webLinks.push({
                             id: casesafeid(r.Id),
                             name: r.Name
                         }));
 
                         // 7. If any fields, add field dependencies
-                        if (record.Fields) {
+                        if (entityDef.Fields) {
                             // object.fields is already defined! don't erase it!;
                             const fieldsMapper = {};
                             const fieldIds = [];
-                            record.Fields.records.forEach((r) => {
+                            entityDef.Fields.records.forEach((r) => {
                                 const id = r.DurableId.split('.')[1];
                                 fieldsMapper[r.QualifiedApiName] = id;
                                 fieldIds.push(id);

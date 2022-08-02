@@ -27,6 +27,27 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#039;");
             };
+
+            this.format = (label, ...params) => {
+                if (label) return label.replace(/{(\d+)}/g, (m, n) => { const v = params[n]; return (v || v === 0) ? v : m; });
+                return '';
+            };
+
+            this.percentage = (v) => {
+                if (v) {
+                    const vv = Number.parseFloat(v);
+                    if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
+                }
+                if (v === 0) return '0 %';
+                return '';
+            };
+
+            this.shrink = (value, size=150, appendStr='...') => {
+                if (value && value.length > size) {
+                    return value.substr(0, size) + appendStr;
+                }
+                return value;
+            };
         }
     },
 
@@ -97,7 +118,7 @@
              * @return if that key is functional (not technical)
              */
             const private_is_safe_key = (key) => {
-                return (key !== configuration.keySize 
+                return (key && key !== configuration.keySize 
                     && !key.startsWith(configuration.keyExcludePrefix));
             }
 

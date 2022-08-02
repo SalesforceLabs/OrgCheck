@@ -192,6 +192,8 @@
                                     if (type === 'KNOWLEDGE_ARTICLES' && d.isKnowledgeArticle === false) return;
                                     if (type === 'CUSTOM_BIG_OBJECTS' && d.isBigObject === false) return;
                                 }
+                                //if (d.isStandardObject === true && d.triggerable === false) return;
+                                if (d.customizable === false) return;
                                 helper.html.picklist.addValue(select, d.developerName, d.label + ' (api=' + d.developerName + ')');
                                 countElementsInSelect++;
                             });
@@ -251,6 +253,9 @@
                                             if (r.type === 'checkbox') {
                                                 return helper.html.render.checkbox(r.value);
                                             }
+                                            if (r.type === 'number') {
+                                                r.value = '' + r.value; // in case 0 we want to display it!
+                                            }
                                             return helper.html.render.escape(r.value);
                                         }}
                                     ],
@@ -264,7 +269,7 @@
                                         { key: 'Feed Enable?', value: object.feedEnabled, type: 'checkbox' },
                                         { key: 'Most Recent Enabled?', value: object.mruEnabled, type: 'checkbox' },
                                         { key: 'Global Search Enabled?', value: object.searchable, type: 'checkbox' },
-                                        { key: 'Record Count (including deleted ones)', value: object.recordCount },
+                                        { key: 'Record Count (including deleted ones)', value: object.recordCount, type: 'number' },
                                         { key: 'Internal Sharing', value: object.internalSharingModel },
                                         { key: 'External Sharing', value: object.externalSharingModel }
                                     ],

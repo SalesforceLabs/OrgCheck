@@ -306,8 +306,7 @@ OrgCheck.Datasets = {
                 // As EntityDefinition does not accept querMore, we will trick the system
                 SALESFORCE_HANDLER.query([{ string: 'SELECT COUNT() FROM EntityDefinition'}])
                     .on('error', (error) => reject(error))
-                    .on('end', (result) => {
-                        const nbEntities = result.length || 0;
+                    .on('size', (nbEntities) => {
                         const BATCH_SIZE = 200;
                         const NUM_LOOP = nbEntities/BATCH_SIZE;
                         const entityDefQueries = [];

@@ -25,7 +25,7 @@ OrgCheck.Salesforce = {
                 const promises = [];
                 queries.forEach((query, index) => promises.push(new Promise((resolve, reject) => {
                     const api = (query.tooling === true ? connection.tooling : connection);
-                    let records = [];
+                    let data = [];
                     const recursive_query = (error, result) => {
                         if (error) { 
                             if (query.byPasses && query.byPasses.includes(error['errorCode'])) {
@@ -43,9 +43,9 @@ OrgCheck.Salesforce = {
                                 reject(error);
                             }
                         } else {
-                            records = records.concat(result.records);
+                            data = data.concat(result.records);
                             if (result.done === true) {
-                                resolve(records);
+                                resolve({ records: data, totalSize: result.totalSize });
                             } else {
                                 api.queryMore(result.nextRecordsUrl, recursive_query);
                             }
@@ -56,9 +56,10 @@ OrgCheck.Salesforce = {
                 Promise.all(promises)
                     .then((results) => {
                         let records = []; 
-                        results.forEach((result) => {
-                            result.forEach((r) => that.fire('record', r));
-                            records = records.concat(result);
+                        results.forEach((result, index) => {
+                            result.records.forEach((r) => that.fire('record', r, index));
+                            records = records.concat(result.records);
+                            that.fire('size', result.totalSize, index);
                         });
                         that.fire('end', records);
                     })
@@ -95,19 +96,17 @@ OrgCheck.Salesforce = {
     DescribeProcess: function(connection, secureBindingVariable, casesafeid, dapi, sobjectPackage, sobjectDevName) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
-        const sobjectFullApiname = (sobjectPackage && sobjectPackage !== '') ? (sobjectPackage+'.'+sobjectDevName) : sobjectDevName;
+        const sobjectDevNameNoExt = sobjectDevName.split('__')[(sobjectPackage && sobjectPackage !== '') ? 1 : 0];
         this.run = () => {
             try {
                 const promises = [];
                 promises.push(new Promise((resolve, reject) => {
-                    connection.sobject(sobjectFullApiname).describe$(function (error, object) {
+                    connection.sobject(sobjectDevName).describe$(function (error, object) {
                         if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe.',
                                 what: {
-                                    package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devName: sobjectDevName
                                 }
                             };
                             reject(error)
@@ -127,28 +126,29 @@ OrgCheck.Salesforce = {
                                             'ValidationName FROM ValidationRules), '+
                                         '(SELECT Id, Name FROM WebLinks) '+
                                     'FROM EntityDefinition '+
-                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevName)+' '+
+                                    'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
                                         (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : '');
-                    connection.tooling.query(query)
-                        .on('record', (r) => {
-                            resolve(r);
-                        })
-                        .on('error', (error) => {
+                    connection.tooling.query(query, (error, result) => {
+                        if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe from tooling api.',
                                 what: {
+                                    soqlQuery: query,
                                     package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devNameWithoutPrefix: sobjectDevNameNoExt
                                 }
                             };
                             reject(error);
-                        })
-                        .run();
+                        } else if (result.totalSize !== 1) {
+                            resolve();
+                        } else {
+                            resolve(result.records[0]);
+                        }
+                    });
                 }));
                 promises.push(new Promise((resolve, reject) => {
                     let request = { 
-                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectFullApiname,
+                        url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
                         method: 'GET'
                     };
                     connection.request(request, (error, response) => {
@@ -156,9 +156,7 @@ OrgCheck.Salesforce = {
                             error.context = { 
                                 when: 'While calling /limits endpoint for sobject describe.',
                                 what: {
-                                    package: sobjectPackage,
-                                    devName: sobjectDevName,
-                                    fullApiName: sobjectFullApiname
+                                    devName: sobjectDevName
                                 }
                             };
                             reject(error)
@@ -173,26 +171,37 @@ OrgCheck.Salesforce = {
                         // so we initialize the object with the first result
                         const object = results[0]; 
 
+                        // the third promise is the number of records!!
+                        object.recordCount = results[2]; 
+
                         // the second promise was the soql query on EntityDefinition
                         // so we get the record of that query and map it to the 
                         //    previous object.
-                        const record = results[1];
-                        object.id = record.DurableId;
-                        object.description = record.Description;
-                        object.externalSharingModel = record.ExternalSharingModel;
-                        object.internalSharingModel = record.InternalSharingModel;
-                        object.recordCount = results[2]; // the third promise is the number of records!!
+                        const entityDef = results[1];
+
+                        // If that entity was not found in the tooling API
+                        if (!entityDef) {
+                            // fire the end event with only this version of the object
+                            that.fire('end', object);
+                            return; // and return !
+                        }
+
+                        // Additional information from EntityDefinition
+                        object.id = entityDef.DurableId;
+                        object.description = entityDef.Description;
+                        object.externalSharingModel = entityDef.ExternalSharingModel;
+                        object.internalSharingModel = entityDef.InternalSharingModel;
 
                         // 1. Apex Triggers
                         object.apexTriggers = [];
-                        if (record.ApexTriggers) record.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
+                        if (entityDef.ApexTriggers) entityDef.ApexTriggers.records.forEach((r) => object.apexTriggers.push({
                             id: casesafeid(r.Id),
                             name: r.Name
                         }));
 
                         // 2. FieldSets
                         object.fieldSets = [];
-                        if (record.FieldSets) record.FieldSets.records.forEach((r) => object.fieldSets.push({
+                        if (entityDef.FieldSets) entityDef.FieldSets.records.forEach((r) => object.fieldSets.push({
                             id: casesafeid(r.Id),
                             label: r.MasterLabel,
                             description: r.Description
@@ -200,7 +209,7 @@ OrgCheck.Salesforce = {
 
                         // 3. Page Layouts
                         object.layouts = [];
-                        if (record.Layouts) record.Layouts.records.forEach((r) => object.layouts.push({
+                        if (entityDef.Layouts) entityDef.Layouts.records.forEach((r) => object.layouts.push({
                             id: casesafeid(r.Id),
                             name: r.Name,
                             type: r.LayoutType
@@ -208,7 +217,7 @@ OrgCheck.Salesforce = {
 
                         // 4. Limits
                         object.limits = [];
-                        if (record.Limits) record.Limits.records.forEach((r) => object.limits.push({
+                        if (entityDef.Limits) entityDef.Limits.records.forEach((r) => object.limits.push({
                             id: casesafeid(r.DurableId),
                             label: r.Label,
                             remaining: r.Remaining,
@@ -218,7 +227,7 @@ OrgCheck.Salesforce = {
 
                         // 5. ValidationRules
                         object.validationRules = [];
-                        if (record.ValidationRules) record.ValidationRules.records.forEach((r) => object.validationRules.push({
+                        if (entityDef.ValidationRules) entityDef.ValidationRules.records.forEach((r) => object.validationRules.push({
                             id: casesafeid(r.Id),
                             name: r.ValidationName,
                             isActive: r.Active,
@@ -228,17 +237,17 @@ OrgCheck.Salesforce = {
                         }));
                         // 6. WebLinks
                         object.webLinks = [];
-                        if (record.WebLinks) record.WebLinks.records.forEach((r) => object.webLinks.push({
+                        if (entityDef.WebLinks) entityDef.WebLinks.records.forEach((r) => object.webLinks.push({
                             id: casesafeid(r.Id),
                             name: r.Name
                         }));
 
                         // 7. If any fields, add field dependencies
-                        if (record.Fields) {
+                        if (entityDef.Fields) {
                             // object.fields is already defined! don't erase it!;
                             const fieldsMapper = {};
                             const fieldIds = [];
-                            record.Fields.records.forEach((r) => {
+                            entityDef.Fields.records.forEach((r) => {
                                 const id = r.DurableId.split('.')[1];
                                 fieldsMapper[r.QualifiedApiName] = id;
                                 fieldIds.push(id);

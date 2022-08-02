@@ -332,35 +332,23 @@
                         runAllLocalTests: function() {
                             return SALESFORCE_HANDLER.httpCall(
                                 '/tooling/runTestsAsynchronous', 
-                                r => console.debug(r), 
-                                r => console.error(r), 
                                 { 
                                     body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": "false" }', 
                                     type: 'application/json' 
                                 }
-                            );
+                            ).run();
                         }
                     },
                     version: {
-                        isOld: function(version) {
-                            return SALESFORCE_HANDLER.isVersionOld(version, 3);
-                        }
+                        isOld: SALESFORCE_HANDLER.isVersionOld
                     }
                 },
                 cache: {
                     metadata: {
-                        clearAll: function() {
-                            METADATA_CACHE_HANDLER.clearAll();
-                        },
-                        keys: function() {
-                            return METADATA_CACHE_HANDLER.keys();
-                        },
-                        sideValues: function(key) {
-                            return METADATA_CACHE_HANDLER.sideValues(key);
-                        },
-                        clear: function(key) {
-                            return METADATA_CACHE_HANDLER.clear(key);
-                        }
+                        clearAll: METADATA_CACHE_HANDLER.clearAll,
+                        keys: METADATA_CACHE_HANDLER.keys,
+                        sideValues: METADATA_CACHE_HANDLER.sideValues,
+                        clear: METADATA_CACHE_HANDLER.clear
                     }
                 },
                 information: {
@@ -382,14 +370,10 @@
                     }
                 },
                 array: {
-                    concat: function(array1, array2, prop) {
-                        return ARRAY_HANDLER.concat(array1, array2, prop);
-                    }
+                    concat: ARRAY_HANDLER.concat
                 },
                 map: {
-                    keys: function(map) {
-                        return MAP_HANDLER.keys(map);
-                    },
+                    keys: MAP_HANDLER.keys,
                     index: function(map, compare_function, filter_function) {
                         let keys = MAP_HANDLER.keys(map);
                         if (filter_function) {
@@ -418,49 +402,27 @@
                 },
                 timestamp: {
                     to: {
-                        datetime: function(ts) {
-                            return DATE_HANDLER.datetimeFormat(ts);
-                        },
-                        date: function(ts) {
-                            return DATE_HANDLER.dateFormat(ts);
-                        }
+                        datetime: DATE_HANDLER.datetimeFormat,
+                        date: DATE_HANDLER.dateFormat
                     }
                 },
                 error: {
-                    show: function(error) {
-                        MSG_HANDLER.showError(error);
-                    }
+                    show: MSG_HANDLER.showError
                 },
                 html: {
                     modal: {
-                        show: function(title, el) {
-                            MSG_HANDLER.showModal(title, el);
-                        }
+                        show: MSG_HANDLER.showModal
                     },
                     message: {
-                        show: function(message, type) {
-                            MSG_HANDLER.showWarning(message);
-                        },
-                        hide: function() {
-                            MSG_HANDLER.hideWarning();
-                        }
+                        show: MSG_HANDLER.showWarning,
+                        hide: MSG_HANDLER.hideWarning
                     },
                     progress: {
-                        show: function() {
-                            PROGRESSBAR_HANDLER.show();
-                        },
-                        hide: function() {
-                            PROGRESSBAR_HANDLER.hide();
-                        },
-                        resetSections: function() {
-                            PROGRESSBAR_HANDLER.reset();
-                        },
-                        addSection: function(sectionName, message) {
-                            PROGRESSBAR_HANDLER.addSection(sectionName, message);
-                        },
-                        setSection: function (sectionName, message, status) {
-                            PROGRESSBAR_HANDLER.setSection(sectionName, message, status);
-                        }
+                        show: PROGRESSBAR_HANDLER.show,
+                        hide: PROGRESSBAR_HANDLER.hide,
+                        resetSections: PROGRESSBAR_HANDLER.reset,
+                        addSection: PROGRESSBAR_HANDLER.addSection,
+                        setSection: PROGRESSBAR_HANDLER.setSection
                     },
                     datatable: {
                         create: function(config) {
@@ -559,13 +521,10 @@
                         }
                     },
                     render: {
-                        format: function(label, ...parameters) {
-                            if (label) return label.replace(/{(\d+)}/g, (m, n) => { return parameters[n] ? parameters[n] : m; });
-                            return '';
-                        },
-                        escape: function(unsafe) { 
-                            return STRING_HANDLER.htmlSecurise(unsafe); 
-                        },
+                        format: STRING_HANDLER.format,
+                        escape: STRING_HANDLER.htmlSecurise,
+                        percentage: STRING_HANDLER.percentage,
+                        shrinkText: STRING_HANDLER.shrink,
                         dependencies: function(id, name, data) {
                             const div = document.createElement('div');
                             div.innerHTML = '<a>Dependencies <img src="/img/chatter/lookupSearchHover.png" /></a>';
@@ -613,14 +572,6 @@
                             }
                             return 0;
                         },
-                        percentage: function(v) {
-                            if (v) {
-                                const vv = Number.parseFloat(v);
-                                if (!Number.isNaN(vv)) return (vv*100).toFixed(2) + ' %';
-                            }
-                            if (v === 0) return '0 %';
-                            return '';
-                        },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
                             return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
@@ -637,12 +588,6 @@
                                 case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
                                 default:           return '';
                             }
-                        },
-                        shrinkText: function(value, size=150, appendStr='...') {
-                            if (value && value.length > size) {
-                                return value.substr(0, size) + appendStr;
-                            }
-                            return value;
                         },
                         color: function(label) {
                             switch (label) {
