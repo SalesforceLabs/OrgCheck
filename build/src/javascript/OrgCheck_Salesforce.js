@@ -390,7 +390,7 @@ OrgCheck.Salesforce = {
 
     /**
      * Salesforce handler
-     * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
+     * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'watchDogCallback'
      */
      Handler: function (configuration) {
 
@@ -413,14 +413,26 @@ OrgCheck.Salesforce = {
             instanceUrl: ENDPOINT_URL
         });
 
+        this.getApiVersion = () => { return API_VERSION; }
+
+        this.getEndpointUrl = () => { return ENDPOINT_URL; }
+
+        this.getOrgId = () => { return ORG_ID; }
+
+        this.getCurrentUserId = () => { return USER_ID; }
+
         let private_org_type;
-        let private_limit_api_req;
+
+        this.getOrgType = () => { return private_org_type; }
 
         /**
          * Check if OrgCheck should not be used
          */
-        CONNECTION.query('SELECT IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
+        const private_check_orgtype = () => {
+            CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
             .on('record', (r) => {
+                let watchDogLevel = 'INFO';
+                let watchDogMessage = 'Your org is all good!';
                 // if the current Org is DE, it's ok to use OrgCheck!
                 if (r.OrganizationType === 'Developer Edition') {
                     private_org_type = 'Developer Edition';
@@ -436,45 +448,63 @@ OrgCheck.Salesforce = {
                 // Other cases need to set a BYPASS (in home page) to continue using the app.
                 else {
                     private_org_type = 'Production';
+                    watchDogLevel = 'ERROR';
+                    watchDogMessage = 'Your org is a Production Org. To bypass this warning, check the security option.';
                 }
+                configuration.watchDogCallback({ 
+                    type: 'OrgTypeProd',
+                    level: watchDogLevel,
+                    message : watchDogMessage,
+                    data: {
+                        orgType: private_org_type, 
+                        orgId: r.Id,
+                        orgName: r.Name
+                    }
+                });
             })
             .run();
+        }
 
-        this.getApiVersion = () => { return API_VERSION; }
+        let private_limits;
 
-        this.getEndpointUrl = () => { return ENDPOINT_URL; }
-
-        this.getOrgId = () => { return ORG_ID; }
-
-        this.getCurrentUserId = () => { return USER_ID; }
-
-        this.getOrgType = () => { return private_org_type; }
-
-        this.getLimitApiDailyRequest = () => { return private_limit_api_req; }
+        this.getLimitApiDailyRequest = () => { return private_limits.DailyApiRequests; }
 
         /**
          * Limits call
          */
         const private_check_limits = () => {
             CONNECTION.limits().then(d => {
-                private_limit_api_req = d;
-                const elmt = document.getElementById('org-daily-api-requests');
+                private_limits = d;
                 if (d && d.DailyApiRequests) {
-                    const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
-                    elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+(rate.toFixed(3)*100)+' %</small></center>';
-                    if (rate > 0.9) {
-                        elmt.classList.add('slds-theme_error');
-                        stopWatcherCallback('Daily API Request is too high...');
-                    } else if (rate > 0.7) {
-                        elmt.classList.add('slds-theme_warning');
-                    } else {
-                        elmt.classList.add('slds-badge_lightest');
+                    const limitUsed = d.DailyApiRequests.Max - d.DailyApiRequests.Remaining;
+                    const limitRate = limitUsed / d.DailyApiRequests.Max;
+                    let watchDogLevel = 'INFO';
+                    let watchDogMessage = 'All good!';
+                    if (limitRate > 0.9) { // 90% !!!
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'You are sooooo near to hit the DailyApiRequests limit, we will stop you there!'
+                    } else if (limitRate > 0.7) { // 70% !!!
+                        watchDogLevel = 'WARNING';
+                        watchDogMessage = 'A little warning about the use of the DailyApiRequests limit...'
                     }
+
+                    configuration.watchDogCallback({ 
+                        type: 'DailyApiRequests',
+                        level: watchDogLevel,
+                        message : watchDogMessage,
+                        data: {
+                            max: d.DailyApiRequests.Max,
+                            left: d.DailyApiRequests.Remaining,
+                            used: limitUsed,
+                            rate: limitRate
+                        }
+                    });
                 }
             });
         }
 
         // let's call it at the beggining
+        private_check_orgtype();
         private_check_limits();
 
         /**

@@ -334,11 +334,11 @@
                     const div = helper.html.element.get('div-preferences');
                     [
                         { 
-                            label: 'Security',
+                            label: 'Security (only applies if you are currently on your Production org!)',
                             options: [
-                                { label: 'I understand that using OrgCheck in Production will increase the Daily API Request Limit, '+
-                                          'which potentially could block for 24 hours my users to use my org. Please consider using '+
-                                          'OrgCheck in a full sandbox for example.', id: 'warning.ByPassUseInProduction' }
+                                { label: 'By unchecking this option, I understand that using OrgCheck in Production will increase the '+
+                                         'Daily API Request Limit, which potentially could block for 24 hours my users to use my org. '+
+                                         'Please consider using OrgCheck in a full sandbox instead.', id: 'warning.ByPassUseInProduction' }
                             ]
                         },
                         { 

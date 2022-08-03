@@ -63,20 +63,61 @@
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
-        const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
-            id: setup.sfLocalAccessToken.split('!')[0],
-            version: setup.sfApiVersion,
-            accessToken: setup.sfLocalAccessToken,
-            userId: setup.sfLocalCurrentUserId
-        });
-
         const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
             warningMessageId: setup.htmlWarningMessageTagId
-        }, {
-            SalesforceHandler: SALESFORCE_HANDLER
+        });
+
+        const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
+            id: setup.sfLocalAccessToken.split('!')[0],
+            version: setup.sfApiVersion,
+            accessToken: setup.sfLocalAccessToken,
+            userId: setup.sfLocalCurrentUserId,
+            watchDogCallback: (d) => { 
+                if (d.level === 'ERROR') {
+                    let stopAndShowError = true;
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItem('Options')['warning.ByPassUseInProduction'] === true) {
+                        stopAndShowError = false;
+                    }
+                    if (stopAndShowError === true) {
+                        const error = new Error();
+                        error.context = { 
+                            when: 'We stopped here because of our Watch Dog Guard! Waouf!',
+                            what: {
+                                level: d.level,
+                                message: d.message,
+                                type: d.type,
+                                data: d.data
+                            }
+                        };
+                        MSG_HANDLER.showError(error, false);
+                    }
+                }
+                switch (d.type) {
+                    case 'OrgTypeProd': {
+                        const elmt = document.getElementById('org-information');
+                        elmt.innerHTML = '<center><small>'+d.data.orgName+'<br />'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
+                        switch (d.level) {
+                            case 'ERROR': elmt.classList.add('slds-theme_error'); break;
+                            case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
+                            default: elmt.classList.add('slds-theme_success'); break;
+                        }
+                        break;
+                    }
+                    case 'DailyApiRequests' : {
+                        const elmt = document.getElementById('org-daily-api-requests');
+                        elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+(d.data.rate*100).toFixed(3)+' %</small></center>';
+                        switch (d.level) {
+                            case 'ERROR': elmt.classList.add('slds-theme_error'); break;
+                            case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
+                            default: elmt.classList.add('slds-badge_lightest'); break;
+                        }
+                        break;
+                    }
+                }
+            }
         });
 
         const DATE_HANDLER = new OrgCheck.DataTypes.Date.Handler({ 
@@ -125,7 +166,7 @@
 
                     // 0. Clean way to show errors
                     const showError = function(error) {
-                        MSG_HANDLER.showError(error);
+                        MSG_HANDLER.showError(error, true, SALESFORCE_HANDLER);
                         //PROGRESSBAR_HANDLER.reset();
                         //PROGRESSBAR_HANDLER.hide();
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
@@ -145,7 +186,7 @@
                         if (!ctlSetup.dependencies) ctlSetup.dependencies = false;
                         if (typeof ctlSetup.dependencies !== 'boolean') throw '"dependencies" property is not a boolean'
                     } catch (error) {
-                        showError({name: error});
+                        showError(error);
                         return;
                     }
 
@@ -366,7 +407,7 @@
                     }
                 },
                 error: {
-                    show: MSG_HANDLER.showError
+                    show: (e) => MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER)
                 },
                 html: {
                     modal: {

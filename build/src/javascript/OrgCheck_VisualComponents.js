@@ -322,57 +322,70 @@ OrgCheck.VisualComponents = {
      * Message
      * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
      */
-    MessageHandler: function (configuration, handlers) {
+    MessageHandler: function (configuration) {
 
-        const SALESFORCE_HANDLER = handlers.SalesforceHandler;
         const private_errors = [];
 
         /**
         * Show error and clean other stuff in the page
         * @param error
+        * @param displayIssueInformation
+        * @param salesforceInfo
         */
-        this.showError = function (error) {
+        this.showError = function (error, displayIssueInformation, salesforceInfo) {
             if (error) {
-                private_errors.push(error);
-                let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
-                commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
-                        'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
-                        '><br />';
-                let informationHTML = '<b>OrgCheck Information</b><br />';
-                informationHTML += 'Version: ' + SALESFORCE_HANDLER.getApiVersion() + '<br />';
-                informationHTML += 'Installed on OrgId: ' + SALESFORCE_HANDLER.getOrgId() + '<br />';
-                informationHTML += 'Type of this org: ' + SALESFORCE_HANDLER.getOrgType() + '<br />';
-                informationHTML += 'Current running UserId: ' + SALESFORCE_HANDLER.getCurrentUserId() + '<br />';
-                informationHTML += 'Current Daily Api Requests: ' + SALESFORCE_HANDLER.getLimitApiDailyRequest() + '<br />';
-                informationHTML += '<br />';
-                informationHTML += '<b>Navigation Information</b><br />';
-                informationHTML += 'Page: ' + document.location.pathname + '<br />';
-                informationHTML += '<br />';
-                informationHTML += '<b>System Information</b><br />';
-                informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
-                informationHTML += 'Language: ' + navigator.language + '<br />';
-                informationHTML += '<br />';
-                private_errors.forEach((v, i) => {
-                    informationHTML += '<b>Error #' + i + ': ' + v.name + '</b><br />';
-                    if (v.context) {
-                        informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
-                        informationHTML += 'What:<ul class="slds-list_dotted">';
-                        for (k in v.context.what) {
-                            const value = v.context.what[k];
-                            informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
+                try {
+                    private_errors.push(error);
+                    let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
+                    if (displayIssueInformation === true) {
+                        commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                            'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
+                            '><br />';
+                    }
+                    let informationHTML = '';
+                    if (salesforceInfo) {
+                        informationHTML += '<b>Salesforce Information</b><br />';
+                        informationHTML += 'Salesforce API Version: ' + salesforceInfo.getApiVersion() + '<br />';
+                        informationHTML += 'Installed on OrgId: ' + salesforceInfo.getOrgId() + '<br />';
+                        informationHTML += 'Type of this org: ' + salesforceInfo.getOrgType() + '<br />';
+                        informationHTML += 'Current running UserId: ' + salesforceInfo.getCurrentUserId() + '<br />';
+                        informationHTML += 'Current Daily Api Requests: ' + JSON.stringify(salesforceInfo.getLimitApiDailyRequest()) + '<br />';
+                        informationHTML += '<br />';
+                    }
+                    if (displayIssueInformation === true) {
+                        informationHTML += '<b>Navigation Information</b><br />';
+                        informationHTML += 'Page: ' + document.location.pathname + '<br />';
+                        informationHTML += '<br />';
+                        informationHTML += '<b>System Information</b><br />';
+                        informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
+                        informationHTML += 'Language: ' + navigator.language + '<br />';
+                        informationHTML += '<br />';
+                    }
+                    private_errors.forEach((v, i) => {
+                        informationHTML += '<b>Issue #' + i + ': ' + v.name + '</b><br />';
+                        if (v.context) {
+                            informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            informationHTML += 'What:<ul class="slds-list_dotted">';
+                            for (k in v.context.what) {
+                                const value = v.context.what[k];
+                                informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
+                            }
+                            informationHTML += '</ul>';
                         }
-                        informationHTML += '</ul>';
-                    }
-                    if (v.stack) {
-                        informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
-                    }
-                    informationHTML += '<br />';
-                    console.error('OrgCheck - Error #' + i, v);
-                });
-                private_show_modal(
-                    'Oh no, OrgCheck had an error!', 
-                    commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
-                );
+                        if (displayIssueInformation === true && v.stack) {
+                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            console.error('OrgCheck - Error #' + i, v);
+                        }
+                        informationHTML += '<br />';
+                    });
+                    private_show_modal(
+                        'Oh no, OrgCheck had an error!', 
+                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
+                    );
+                } catch (e) {
+                    // Just in case we have an error during the showError!!
+                    console.error(e);
+                }
             }
         };
 

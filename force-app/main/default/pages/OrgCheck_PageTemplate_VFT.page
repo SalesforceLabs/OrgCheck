@@ -127,7 +127,7 @@
                                 </svg>
                             </div>
                             <div class="slds-page-header__control slds-align_absolute-center">
-                                <span class="slds-badge slds-theme_success">{!$Organization.Name}<br />{!$Organization.Id}</span>
+                                <span class="slds-badge" id="org-information" />
                             </div>
                             <div class="slds-page-header__control slds-align_absolute-center">
                                 <span class="slds-badge" id="org-daily-api-requests" />
@@ -213,14 +213,6 @@
                     // ========================================================================
                     const ctl = core.getController();
                     const hlp = core.getHelper();
-
-                    if (hlp.information.getOrgType() === 'Developer Edition') {
-                        if (hlp.preferences.get('warning.ByPassUseInProduction') === false) {
-                            hlp.error.showError('You are using OrgCheck in Production! To continue you need to accept the warnings in the home page preference section.');
-                            return;
-                        }
-                    }
-
                     start2(ctl, hlp);
 
                     new OrgCheck.Shortcuts.Manager().register(hlp, {

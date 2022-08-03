@@ -63,20 +63,61 @@
             spinnerMessagesId: setup.htmlSpinnerMessagesTagId
         });
         
-        const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
-            id: setup.sfLocalAccessToken.split('!')[0],
-            version: setup.sfApiVersion,
-            accessToken: setup.sfLocalAccessToken,
-            userId: setup.sfLocalCurrentUserId
-        });
-
         const MSG_HANDLER = new OrgCheck.VisualComponents.MessageHandler({
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
             warningMessageId: setup.htmlWarningMessageTagId
-        }, {
-            SalesforceHandler: SALESFORCE_HANDLER
+        });
+
+        const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
+            id: setup.sfLocalAccessToken.split('!')[0],
+            version: setup.sfApiVersion,
+            accessToken: setup.sfLocalAccessToken,
+            userId: setup.sfLocalCurrentUserId,
+            watchDogCallback: (d) => { 
+                if (d.level === 'ERROR') {
+                    let stopAndShowError = true;
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItem('Options')['warning.ByPassUseInProduction'] === true) {
+                        stopAndShowError = false;
+                    }
+                    if (stopAndShowError === true) {
+                        const error = new Error();
+                        error.context = { 
+                            when: 'We stopped here because of our Watch Dog Guard! Waouf!',
+                            what: {
+                                level: d.level,
+                                message: d.message,
+                                type: d.type,
+                                data: d.data
+                            }
+                        };
+                        MSG_HANDLER.showError(error, false);
+                    }
+                }
+                switch (d.type) {
+                    case 'OrgTypeProd': {
+                        const elmt = document.getElementById('org-information');
+                        elmt.innerHTML = '<center><small>'+d.data.orgName+'<br />'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
+                        switch (d.level) {
+                            case 'ERROR': elmt.classList.add('slds-theme_error'); break;
+                            case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
+                            default: elmt.classList.add('slds-theme_success'); break;
+                        }
+                        break;
+                    }
+                    case 'DailyApiRequests' : {
+                        const elmt = document.getElementById('org-daily-api-requests');
+                        elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+(d.data.rate*100).toFixed(3)+' %</small></center>';
+                        switch (d.level) {
+                            case 'ERROR': elmt.classList.add('slds-theme_error'); break;
+                            case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
+                            default: elmt.classList.add('slds-badge_lightest'); break;
+                        }
+                        break;
+                    }
+                }
+            }
         });
 
         const DATE_HANDLER = new OrgCheck.DataTypes.Date.Handler({ 
@@ -125,7 +166,7 @@
 
                     // 0. Clean way to show errors
                     const showError = function(error) {
-                        MSG_HANDLER.showError(error);
+                        MSG_HANDLER.showError(error, true, SALESFORCE_HANDLER);
                         //PROGRESSBAR_HANDLER.reset();
                         //PROGRESSBAR_HANDLER.hide();
                         document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
@@ -145,7 +186,7 @@
                         if (!ctlSetup.dependencies) ctlSetup.dependencies = false;
                         if (typeof ctlSetup.dependencies !== 'boolean') throw '"dependencies" property is not a boolean'
                     } catch (error) {
-                        showError({name: error});
+                        showError(error);
                         return;
                     }
 
@@ -366,7 +407,7 @@
                     }
                 },
                 error: {
-                    show: MSG_HANDLER.showError
+                    show: (e) => MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER)
                 },
                 html: {
                     modal: {
@@ -3135,7 +3176,7 @@ OrgCheck.Salesforce = {
 
     /**
      * Salesforce handler
-     * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'stopWatcherCallback'
+     * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'watchDogCallback'
      */
      Handler: function (configuration) {
 
@@ -3158,14 +3199,26 @@ OrgCheck.Salesforce = {
             instanceUrl: ENDPOINT_URL
         });
 
+        this.getApiVersion = () => { return API_VERSION; }
+
+        this.getEndpointUrl = () => { return ENDPOINT_URL; }
+
+        this.getOrgId = () => { return ORG_ID; }
+
+        this.getCurrentUserId = () => { return USER_ID; }
+
         let private_org_type;
-        let private_limit_api_req;
+
+        this.getOrgType = () => { return private_org_type; }
 
         /**
          * Check if OrgCheck should not be used
          */
-        CONNECTION.query('SELECT IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
+        const private_check_orgtype = () => {
+            CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
             .on('record', (r) => {
+                let watchDogLevel = 'INFO';
+                let watchDogMessage = 'Your org is all good!';
                 // if the current Org is DE, it's ok to use OrgCheck!
                 if (r.OrganizationType === 'Developer Edition') {
                     private_org_type = 'Developer Edition';
@@ -3181,45 +3234,63 @@ OrgCheck.Salesforce = {
                 // Other cases need to set a BYPASS (in home page) to continue using the app.
                 else {
                     private_org_type = 'Production';
+                    watchDogLevel = 'ERROR';
+                    watchDogMessage = 'Your org is a Production Org. To bypass this warning, check the security option.';
                 }
+                configuration.watchDogCallback({ 
+                    type: 'OrgTypeProd',
+                    level: watchDogLevel,
+                    message : watchDogMessage,
+                    data: {
+                        orgType: private_org_type, 
+                        orgId: r.Id,
+                        orgName: r.Name
+                    }
+                });
             })
             .run();
+        }
 
-        this.getApiVersion = () => { return API_VERSION; }
+        let private_limits;
 
-        this.getEndpointUrl = () => { return ENDPOINT_URL; }
-
-        this.getOrgId = () => { return ORG_ID; }
-
-        this.getCurrentUserId = () => { return USER_ID; }
-
-        this.getOrgType = () => { return private_org_type; }
-
-        this.getLimitApiDailyRequest = () => { return private_limit_api_req; }
+        this.getLimitApiDailyRequest = () => { return private_limits.DailyApiRequests; }
 
         /**
          * Limits call
          */
         const private_check_limits = () => {
             CONNECTION.limits().then(d => {
-                private_limit_api_req = d;
-                const elmt = document.getElementById('org-daily-api-requests');
+                private_limits = d;
                 if (d && d.DailyApiRequests) {
-                    const rate = (d.DailyApiRequests.Max - d.DailyApiRequests.Remaining) / d.DailyApiRequests.Max;
-                    elmt.innerHTML = '<center><small>Daily API Request Limit: <br />'+(rate.toFixed(3)*100)+' %</small></center>';
-                    if (rate > 0.9) {
-                        elmt.classList.add('slds-theme_error');
-                        stopWatcherCallback('Daily API Request is too high...');
-                    } else if (rate > 0.7) {
-                        elmt.classList.add('slds-theme_warning');
-                    } else {
-                        elmt.classList.add('slds-badge_lightest');
+                    const limitUsed = d.DailyApiRequests.Max - d.DailyApiRequests.Remaining;
+                    const limitRate = limitUsed / d.DailyApiRequests.Max;
+                    let watchDogLevel = 'INFO';
+                    let watchDogMessage = 'All good!';
+                    if (limitRate > 0.9) { // 90% !!!
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'You are sooooo near to hit the DailyApiRequests limit, we will stop you there!'
+                    } else if (limitRate > 0.7) { // 70% !!!
+                        watchDogLevel = 'WARNING';
+                        watchDogMessage = 'A little warning about the use of the DailyApiRequests limit...'
                     }
+
+                    configuration.watchDogCallback({ 
+                        type: 'DailyApiRequests',
+                        level: watchDogLevel,
+                        message : watchDogMessage,
+                        data: {
+                            max: d.DailyApiRequests.Max,
+                            left: d.DailyApiRequests.Remaining,
+                            used: limitUsed,
+                            rate: limitRate
+                        }
+                    });
                 }
             });
         }
 
         // let's call it at the beggining
+        private_check_orgtype();
         private_check_limits();
 
         /**
@@ -3721,57 +3792,70 @@ OrgCheck.VisualComponents = {
      * Message
      * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
      */
-    MessageHandler: function (configuration, handlers) {
+    MessageHandler: function (configuration) {
 
-        const SALESFORCE_HANDLER = handlers.SalesforceHandler;
         const private_errors = [];
 
         /**
         * Show error and clean other stuff in the page
         * @param error
+        * @param displayIssueInformation
+        * @param salesforceInfo
         */
-        this.showError = function (error) {
+        this.showError = function (error, displayIssueInformation, salesforceInfo) {
             if (error) {
-                private_errors.push(error);
-                let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
-                commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
-                        'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
-                        '><br />';
-                let informationHTML = '<b>OrgCheck Information</b><br />';
-                informationHTML += 'Version: ' + SALESFORCE_HANDLER.getApiVersion() + '<br />';
-                informationHTML += 'Installed on OrgId: ' + SALESFORCE_HANDLER.getOrgId() + '<br />';
-                informationHTML += 'Type of this org: ' + SALESFORCE_HANDLER.getOrgType() + '<br />';
-                informationHTML += 'Current running UserId: ' + SALESFORCE_HANDLER.getCurrentUserId() + '<br />';
-                informationHTML += 'Current Daily Api Requests: ' + SALESFORCE_HANDLER.getLimitApiDailyRequest() + '<br />';
-                informationHTML += '<br />';
-                informationHTML += '<b>Navigation Information</b><br />';
-                informationHTML += 'Page: ' + document.location.pathname + '<br />';
-                informationHTML += '<br />';
-                informationHTML += '<b>System Information</b><br />';
-                informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
-                informationHTML += 'Language: ' + navigator.language + '<br />';
-                informationHTML += '<br />';
-                private_errors.forEach((v, i) => {
-                    informationHTML += '<b>Error #' + i + ': ' + v.name + '</b><br />';
-                    if (v.context) {
-                        informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
-                        informationHTML += 'What:<ul class="slds-list_dotted">';
-                        for (k in v.context.what) {
-                            const value = v.context.what[k];
-                            informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
+                try {
+                    private_errors.push(error);
+                    let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
+                    if (displayIssueInformation === true) {
+                        commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                            'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
+                            '><br />';
+                    }
+                    let informationHTML = '';
+                    if (salesforceInfo) {
+                        informationHTML += '<b>Salesforce Information</b><br />';
+                        informationHTML += 'Salesforce API Version: ' + salesforceInfo.getApiVersion() + '<br />';
+                        informationHTML += 'Installed on OrgId: ' + salesforceInfo.getOrgId() + '<br />';
+                        informationHTML += 'Type of this org: ' + salesforceInfo.getOrgType() + '<br />';
+                        informationHTML += 'Current running UserId: ' + salesforceInfo.getCurrentUserId() + '<br />';
+                        informationHTML += 'Current Daily Api Requests: ' + JSON.stringify(salesforceInfo.getLimitApiDailyRequest()) + '<br />';
+                        informationHTML += '<br />';
+                    }
+                    if (displayIssueInformation === true) {
+                        informationHTML += '<b>Navigation Information</b><br />';
+                        informationHTML += 'Page: ' + document.location.pathname + '<br />';
+                        informationHTML += '<br />';
+                        informationHTML += '<b>System Information</b><br />';
+                        informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
+                        informationHTML += 'Language: ' + navigator.language + '<br />';
+                        informationHTML += '<br />';
+                    }
+                    private_errors.forEach((v, i) => {
+                        informationHTML += '<b>Issue #' + i + ': ' + v.name + '</b><br />';
+                        if (v.context) {
+                            informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            informationHTML += 'What:<ul class="slds-list_dotted">';
+                            for (k in v.context.what) {
+                                const value = v.context.what[k];
+                                informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
+                            }
+                            informationHTML += '</ul>';
                         }
-                        informationHTML += '</ul>';
-                    }
-                    if (v.stack) {
-                        informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
-                    }
-                    informationHTML += '<br />';
-                    console.error('OrgCheck - Error #' + i, v);
-                });
-                private_show_modal(
-                    'Oh no, OrgCheck had an error!', 
-                    commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
-                );
+                        if (displayIssueInformation === true && v.stack) {
+                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            console.error('OrgCheck - Error #' + i, v);
+                        }
+                        informationHTML += '<br />';
+                    });
+                    private_show_modal(
+                        'Oh no, OrgCheck had an error!', 
+                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
+                    );
+                } catch (e) {
+                    // Just in case we have an error during the showError!!
+                    console.error(e);
+                }
             }
         };
 
