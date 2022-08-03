@@ -1,26 +1,38 @@
 #/bin/bash
 
+UGLIFY_MODE="$1"
+UGLIFY_MODE_ON="on"
+UGLIFY_MODE_OFF="off"
+if [ "X${UGLIFY_MODE}" == "X" ]; then
+    UGLIFY_MODE=${UGLIFY_MODE_ON}
+fi
+echo "Uglify Mode = ${UGLIFY_MODE}"
+echo ""
+
 ### -----------------------
 ### JAVASCRIPT PART
 ### -----------------------
 
-## npm install uglify-js -g
-## npm install tsc
-
-for f in build/src/javascript/*_*; do
-    ###uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
-     cat "${f}" > /tmp/$(basename $f)
+for f in build/src/javascript/OrgCheck_*.js; do
+    if [ "${UGLIFY_MODE}" == "ON" ]; then
+        uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f);
+    else
+        cat "${f}" > /tmp/$(basename $f);
+    fi
 done
 for f in build/src/javascript/OrgCheck.js; do
-    ###uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
-     cat "${f}" > /tmp/$(basename $f)
+    if [ "${UGLIFY_MODE}" == "ON" ]; then
+        uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
+    else
+        cat "${f}" > /tmp/$(basename $f);
+    fi
 done
 
 (
     for f in build/src/javascript/OrgCheck.js; do
         cat /tmp/$(basename $f)
     done
-    for f in build/src/javascript/*_*; do
+    for f in build/src/javascript/OrgCheck_*.js; do
         cat /tmp/$(basename $f)
     done
 ) > force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
