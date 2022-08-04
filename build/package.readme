@@ -1,3 +1,10 @@
+sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg
+sfdx force:source:push --targetusername MyScratchOrg
+sfdx force:org:open --targetusername MyScratchOrg
+sfdx force:user:permset:assign --permsetname OrgCheck_Users --targetusername MyScratchOrg
+
+
+
 ============================================================
 List of usefull commands for packaging
 ============================================================
@@ -7,6 +14,24 @@ sfdx force:package:version:list
 sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
 
 sfdx force:package:version:promote --package OrgCheck@2.1.0-1
+
+
+
+
+============================================================
+List of usefull commands for pushing updates
+============================================================
+
+## List the push request to update to a newer package version
+SELECT Id, PackageVersionId, ScheduledStartTime, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushRequest WHERE SystemModstamp = TODAY
+
+## List all the subscriber part of the previous push request
+SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob where SystemModstamp = today
+
+## List all error you had during the previous push
+SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError where SystemModstamp = TODAY
+
+
 
 
 
