@@ -26,7 +26,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Object_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', formula: (r) => { 
                                         const object = map.objects[r.objectDeveloperName];
                                         let entityUrl = '/'+r.objectId;
                                         let entityLabel = object?.label + (object?.label !== r.objectId ? ' ('+object?.developerName+')' : '');
@@ -41,7 +41,7 @@
                                         }
                                         return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
                                     }},
-                                    { name: '{!$Label.OrgCheck_Type_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => { 
                                         const object = map.objects[r.objectDeveloperName];
                                         let t = '';
                                         if (object) {
@@ -56,34 +56,34 @@
                                         }
                                         return helper.html.render.escape(t);
                                     }},
-                                    { name: '{!$Label.OrgCheck_Field_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.fieldName)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
-                                    { name: '{!$Label.OrgCheck_FullApiName_CL}', property: 'fullName' },
-                                    { name: '{!$Label.OrgCheck_Description_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'fullName' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(r.description);
-                                            return '{!$Label.OrgCheck_SetADescription_CL}';
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!$Label.OrgCheck_NotUsed_CL}';
+                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -104,18 +104,18 @@
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
-                                            return '{!$Label.OrgCheck_NoDependency_CL}';
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.customFields,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true

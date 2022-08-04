@@ -77,43 +77,43 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'isCustom', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isCustom); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_License_CL}', property: 'license' },
-                                    { name: '{!$Label.OrgCheck_UserType_CL}', property: 'userType' },
-                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
-                                    { name: '{!$Label.OrgCheck_NbActiveUsers_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_UserType_CL)}', property: 'userType' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.isUnusedCustom === true) return '{!$Label.OrgCheck_NoUserForThisProfile_CL}'; 
-                                            if (r.membersCount < 101) return helper.html.render.format('{!$Label.OrgCheck_XUsers_CL}', r.membersCount);
-                                            return '{!$Label.OrgCheck_More100Users_CL}';
+                                            if (r.isUnusedCustom === true) return '{!JSENCODE($Label.OrgCheck_NoUserForThisProfile_CL)}'; 
+                                            if (r.membersCount < 101) return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XUsers_CL)}', r.membersCount);
+                                            return '{!JSENCODE($Label.OrgCheck_More100Users_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUnusedCustom === true) return 1;
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_Description_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
-                                            if (r.isUndescribedCustom === true) return '{!$Label.OrgCheck_SetADescription_CL}';
+                                            if (r.isUndescribedCustom === true) return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
                                             return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.profiles,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -125,22 +125,22 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Profile_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         );
                                     }},
-                                    { name: '{!$Label.OrgCheck_Monday_CL}', formula: (r) => { return r.loginHours.monday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.monday.from, r.loginHours.monday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Tuesday_CL}', formula: (r) => { return r.loginHours.tuesday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.tuesday.from,  r.loginHours.tuesday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Wednesday_CL}', formula: (r) => { return r.loginHours.wednesday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.wednesday.from,  r.loginHours.wednesday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Thursday_CL}', formula: (r) => { return r.loginHours.thursday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.thursday.from,  r.loginHours.thursday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Friday_CL}', formula: (r) => { return r.loginHours.friday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.friday.from, r.loginHours.friday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Saturday_CL}', formula: (r) => { return r.loginHours.saturday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.saturday.from,  r.loginHours.saturday.to) : '' }},
-                                    { name: '{!$Label.OrgCheck_Sunday_CL}', formula: (r) => { return r.loginHours.sunday ? helper.html.render.format('{!$Label.OrgCheck_XtoY_CL}', r.loginHours.sunday.from,  r.loginHours.sunday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Monday_CL)}', formula: (r) => { return r.loginHours.monday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.monday.from, r.loginHours.monday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Tuesday_CL)}', formula: (r) => { return r.loginHours.tuesday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.tuesday.from,  r.loginHours.tuesday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Wednesday_CL)}', formula: (r) => { return r.loginHours.wednesday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.wednesday.from,  r.loginHours.wednesday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Thursday_CL)}', formula: (r) => { return r.loginHours.thursday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.thursday.from,  r.loginHours.thursday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Friday_CL)}', formula: (r) => { return r.loginHours.friday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.friday.from, r.loginHours.friday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Saturday_CL)}', formula: (r) => { return r.loginHours.saturday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.saturday.from,  r.loginHours.saturday.to) : '' }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Sunday_CL)}', formula: (r) => { return r.loginHours.sunday ? helper.html.render.format('{!JSENCODE($Label.OrgCheck_XtoY_CL)}', r.loginHours.sunday.from,  r.loginHours.sunday.to) : '' }},
                                 ],
                                 data: map.profiles,
-                                sorting: { name: '{!$Label.OrgCheck_Profile_CL}', order: 'asc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
@@ -153,30 +153,30 @@
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Profile_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Starts_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Starts_CL)}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.startAddress + '<br />');
                                         return html;
                                     }},
-                                    { name: '{!$Label.OrgCheck_Ends_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Ends_CL)}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += i.endAddress + '<br />');
                                         return html;
                                     }},
-                                    { name: '{!$Label.OrgCheck_Description_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', formula: (r) => { 
                                         let html = '';
                                         r.loginIpRanges.forEach(i => html += helper.html.render.escape(i.description) + '<br />');
                                         return html;
                                     }}
                                 ],
                                 data: map.profiles,
-                                sorting: { name: '{!$Label.OrgCheck_Profile_CL}', order: 'asc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
@@ -202,7 +202,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Name_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
@@ -210,28 +210,28 @@
                                             ); 
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_IsGroup_CL}', property: 'isGroup', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isGroup); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'isCustom', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isCustom); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_License_CL}', property: 'license' },
-                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
-                                    { name: '{!$Label.OrgCheck_NbActiveUsers_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 
                                         formula: (r) => { 
                                             if (r.isUnusedCustom === true) return 'No user for this custom permission set!'; 
                                             const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
-                                            if (membersCount < 101) return helper.html.render.format('{!$Label.OrgCheck_XUsers_CL}', membersCount);                                            
-                                            return '{!$Label.OrgCheck_More100Users_CL}';
+                                            if (membersCount < 101) return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XUsers_CL)}', membersCount);                                            
+                                            return '{!JSENCODE($Label.OrgCheck_More100Users_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUnusedCustom === true) return 1;
                                         }
                                     },
 
-                                    { name: '{!$Label.OrgCheck_AssignedUsersProfiles_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_AssignedUsersProfiles_CL)}', formula: (r) => { 
                                         let html = '';
                                         helper.map.iterate2(assignmentsPerPS[r.id]?.uniqueProfiles, function(v, i, l, pid) {
                                             html += helper.html.render.link(
@@ -240,20 +240,20 @@
                                         });
                                         return html;
                                     }},
-                                    { name: '{!$Label.OrgCheck_Description_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
-                                            if (r.isUndescribedCustom === true) return '{!$Label.OrgCheck_SetADescription_CL}';
+                                            if (r.isUndescribedCustom === true) return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
                                             return helper.html.render.escape(r.description);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
                                     },
-                                    { name: '{!$Label.OrgCheck_CreatedDate_CL}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!$Label.OrgCheck_ModifiedDate_CL}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.permissionSets,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -264,20 +264,20 @@
                             // -------------------------------------------
                             if (PREF_HIDE_CRUDS === true) {
                                 const divCRUDs = helper.html.element.get('legend-objectCRUDs');
-                                divCRUDs.innerHTML = '{!$Label.OrgCheck_CRUDMessage_CL}';
+                                divCRUDs.innerHTML = '{!JSENCODE($Label.OrgCheck_CRUDMessage_CL)}';
                             } else {
                                 helper.html.datatable.create({
                                     element: 'datatable-objectCRUDs',
                                     columns: [
-                                        { name: '{!$Label.OrgCheck_Parent_CL}', formula: (r) => { 
+                                        { name: '{!JSENCODE($Label.OrgCheck_Parent_CL)}', formula: (r) => { 
                                             return helper.html.render.link(
                                                 '/'+r.parent.id, 
                                                 helper.html.render.escape(r.parent.name)
                                             ); 
                                         }},
-                                        { name: '{!$Label.OrgCheck_Object_CL}', property: 'sobject' },
-                                        { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' },
-                                        { name: '{!$Label.OrgCheck_Permissions_CL}', formula: (r) => { 
+                                        { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', property: 'sobject' },
+                                        { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
+                                        { name: '{!JSENCODE($Label.OrgCheck_Permissions_CL)}', formula: (r) => { 
                                             let html = '';
                                             if (r.permissions.create === true) html += 'C';
                                             if (r.permissions.read === true) html += 'R';
@@ -289,7 +289,7 @@
                                         }}
                                     ],
                                     data: map.objectCRUDs,
-                                    sorting: { name: '{!$Label.OrgCheck_Object_CL}', order: 'asc' },
+                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
                                     showSearch: true,
                                     showStatistics: true,
                                     showLineCount: true

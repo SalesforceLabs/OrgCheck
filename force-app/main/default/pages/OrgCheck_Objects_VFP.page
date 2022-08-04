@@ -201,14 +201,14 @@
 
                         helper.html.message.hide();
                         if ((namespace || namespace === '') && type && countElementsInSelect === 0) {
-                            const labelType = (type === 'STANDARD_SOBJECTS' ? '{!$Label.OrgCheck_StandardObjects_CL}' :
-                                              (type === 'CUSTOM_SOBJECTS' ? '{!$Label.OrgCheck_CustomObjects_CL}' :
-                                              (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? '{!$Label.OrgCheck_ExternalObjects_CL}' :
-                                              (type === 'CUSTOM_SETTINGS' ? '{!$Label.OrgCheck_CustomSettings_CL}' :
-                                              (type === 'CUSTOM_METADATA_TYPES' ? '{!$Label.OrgCheck_CustomMetadataTypes_CL}' : 
+                            const labelType = (type === 'STANDARD_SOBJECTS' ? '{!JSENCODE($Label.OrgCheck_StandardObjects_CL)}' :
+                                              (type === 'CUSTOM_SOBJECTS' ? '{!JSENCODE($Label.OrgCheck_CustomObjects_CL)}' :
+                                              (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? '{!JSENCODE($Label.OrgCheck_ExternalObjects_CL)}' :
+                                              (type === 'CUSTOM_SETTINGS' ? '{!JSENCODE($Label.OrgCheck_CustomSettings_CL)}' :
+                                              (type === 'CUSTOM_METADATA_TYPES' ? '{!JSENCODE($Label.OrgCheck_CustomMetadataTypes_CL)}' : 
                                               (type === 'CUSTOM_EVENTS' ? 'Platform Events' :
                                               (type === 'KNOWLEDGE_ARTICLES' ? 'Knowledge Articles' :
-                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : '{!$Label.OrgCheck_AllTypes_CL}'))))))));
+                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : '{!JSENCODE($Label.OrgCheck_AllTypes_CL)}'))))))));
                             const html = 
                                 'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
                                 'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
@@ -248,8 +248,8 @@
                                 helper.html.datatable.create({
                                     element: 'datatable-general',
                                     columns: [
-                                        { name: '{!$Label.OrgCheck_Label_CL}', property: 'key' },
-                                        { name: '{!$Label.OrgCheck_Value_CL}', formula: (r) => { 
+                                        { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', property: 'key' },
+                                        { name: '{!JSENCODE($Label.OrgCheck_Value_CL)}', formula: (r) => { 
                                             if (r.type === 'checkbox') {
                                                 return helper.html.render.checkbox(r.value);
                                             }
@@ -260,7 +260,7 @@
                                         }}
                                     ],
                                     data: [
-                                        { key: '{!$Label.OrgCheck_Description_CL}', value: object.description },
+                                        { key: '{!JSENCODE($Label.OrgCheck_Description_CL)}', value: object.description },
                                         { key: 'API Name', value: object.name },
                                         { key: 'Singular Label', value: object.label },
                                         { key: 'Plural Label ', value: object.labelPlural },
@@ -284,7 +284,7 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
                                         columns: [
-                                            { name: '{!$Label.OrgCheck_Label_CL}', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', formula: (r) => { 
                                                 return helper.html.render.link(
                                                     '/lightning/setup/ObjectManager/'+
                                                     (object.id ? object.id : helper.html.render.escape(object.name))+
@@ -293,23 +293,23 @@
                                                     '/view', 
                                                     helper.html.render.escape(r.label)); 
                                             }},
-                                            { name: '{!$Label.OrgCheck_IsCustom_CL}', property: 'custom', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.custom); 
                                             }},
-                                            { name: '{!$Label.OrgCheck_FullApiName_CL}', property: 'name' },
-                                            { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'name' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
                                                     if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
                                                         const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
                                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                        return '{!$Label.OrgCheck_NotUsed_CL}';
+                                                        return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
                                                     }
                                                 },
                                                 scoreFormula: (r) => { 
@@ -339,18 +339,18 @@
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: '{!$Label.OrgCheck_Dependencies_CL}', 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
                                                         const dep = object.fieldDependencies[r.id]; 
                                                         if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                                        return '{!$Label.OrgCheck_NoDependency_CL}';
+                                                        return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                                     }
                                                 }
                                             },
 
                                             { name: 'Tooltip', property: 'inlineHelpText' },
-                                            { name: '{!$Label.OrgCheck_Type_CL}', formula: (r) => {
+                                            { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => {
                                                 let type = r.type;
                                                 switch (r.type) {
                                                     case 'int':
@@ -375,14 +375,14 @@
                                                 return type;
                                             }},
                                             { name: 'Length', type: 'numeric', property: 'length' },
-                                            { name: '{!$Label.OrgCheck_Encrypted_CL}', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
                                             { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
-                                            { name: '{!$Label.OrgCheck_ExternalId_CL}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
-                                            { name: '{!$Label.OrgCheck_Default_CL}', property: 'defaultValue' },
-                                            { name: '{!$Label.OrgCheck_Formula_CL}', property: 'calculatedFormula' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
                                         ],
                                         data: object.fields,
-                                        sorting: { name: '{!$Label.OrgCheck_Label_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -398,9 +398,9 @@
                                         element: 'datatable-relationships',
                                         columns: [
                                             { name: 'Relationship Name', property: 'relationshipName' },
-                                            { name: '{!$Label.OrgCheck_ChildObject_CL}', property: 'childSObject' },
-                                            { name: '{!$Label.OrgCheck_Field_CL}', property: 'field' },
-                                            { name: '{!$Label.OrgCheck_CascadeDelete_CL}', property: 'cascadeDelete', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_ChildObject_CL)}', property: 'childSObject' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'field' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_CascadeDelete_CL)}', property: 'cascadeDelete', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.cascadeDelete); 
                                             }}
                                         ],
@@ -420,20 +420,20 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-recordtypes',
                                         columns: [
-                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
-                                            { name: '{!$Label.OrgCheck_DeveloperName_CL}', property: 'developerName' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'active', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'active', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.active); 
                                             }},
-                                            { name: '{!$Label.OrgCheck_Available_CL}', property: 'available', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Available_CL)}', property: 'available', formula: (r) => { 
                                                 return helper.html.render.checkbox(r.available); 
                                             }},
-                                            { name: '{!$Label.OrgCheck_DefaultMapping_CL}', property: 'defaultRecordTypeMapping' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_DefaultMapping_CL)}', property: 'defaultRecordTypeMapping' }
                                         ],
                                         data: object.recordTypeInfos,
-                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -449,10 +449,10 @@
                                         element: 'datatable-apexTriggers',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' }
                                         ],
                                         data: object.apexTriggers,
-                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -469,7 +469,7 @@
                                         columns: [
                                             { name: 'Id', property: 'id' },
                                             { name: 'Master Label', property: 'label' },
-                                            { name: '{!$Label.OrgCheck_Description_CL}', property: 'description' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' }
                                         ],
                                         data: object.fieldSets,
                                         sorting: { name: 'Master Label', order: 'asc' },
@@ -488,11 +488,11 @@
                                         element: 'datatable-layouts',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
-                                            { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }
                                         ],
                                         data: object.layouts,
-                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -508,8 +508,8 @@
                                         element: 'datatable-limits',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: '{!$Label.OrgCheck_Label_CL}', property: 'label' },
-                                            { name: '{!$Label.OrgCheck_PercentageUsed_CL}', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', property: 'label' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_PercentageUsed_CL)}', type: 'numeric', formula: (r) => { 
                                                 const percentageUsed = (r.max - r.remaining) / r.max;
                                                 const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
                                                 return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
@@ -519,10 +519,10 @@
                                             }},
                                             { name: 'Maximum', type: 'numeric', property: 'max' },
                                             { name: 'Left', type: 'numeric', property: 'remaining' },
-                                            { name: '{!$Label.OrgCheck_Type_CL}', property: 'type' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }
                                         ],
                                         data: object.limits,
-                                        sorting: { name: '{!$Label.OrgCheck_Label_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false
                                     });
@@ -537,14 +537,14 @@
                                         element: 'datatable-validationRules',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
-                                            { name: '{!$Label.OrgCheck_IsActive_CL}', property: 'isActive' },
-                                            { name: '{!$Label.OrgCheck_Description_CL}', property: 'description' },
-                                            { name: '{!$Label.OrgCheck_Field_CL}', property: 'errorDisplayField' },
-                                            { name: '{!$Label.OrgCheck_ErrorMessage_CL}', property: 'errorMessage' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'errorDisplayField' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_ErrorMessage_CL)}', property: 'errorMessage' }
                                         ],
                                         data: object.validationRules,
-                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -560,10 +560,10 @@
                                         element: 'datatable-webLinks',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' }
                                         ],
                                         data: object.webLinks,
-                                        sorting: { name: '{!$Label.OrgCheck_Name_CL}', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -605,14 +605,14 @@
                             helper.html.datatable.create({
                                 element: 'datatable-orgWideDefaults',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Label_CL}', property: 'label' },
-                                    { name: '{!$Label.OrgCheck_Name_CL}', property: 'name' },
-                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'package' },
-                                    { name: '{!$Label.OrgCheck_Internal_CL}', property: 'internal' },
-                                    { name: '{!$Label.OrgCheck_External_CL}', property: 'external' }
+                                    { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', property: 'label' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Internal_CL)}', property: 'internal' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_External_CL)}', property: 'external' }
                                 ],
                                 data: map.orgWideDefaults,
-                                sorting: { name: '{!$Label.OrgCheck_Object_CL}', order: 'asc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
                                 showSearch: false,
                                 showStatistics: false,
                                 showLineCount: true

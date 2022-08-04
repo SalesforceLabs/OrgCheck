@@ -61,7 +61,7 @@
                         if (!uids || (uids && uids.length == 0)) {
                             return '(empty)';
                         }
-                        let htmlContent = '<b>' + helper.html.render.format('{!$Label.OrgCheck_XUsers_CL}', uids.length) + '</b><br />';
+                        let htmlContent = '<b>' + helper.html.render.format('{!JSENCODE($Label.OrgCheck_XUsers_CL)}', uids.length) + '</b><br />';
                         htmlContent += '<ul class="slds-list_dotted">';
                         for (let i=0; i<uids.length; i++) {
                             htmlContent += '<li>' + renderUser(users, uids[i].id, show_photo) + '</li>';
@@ -221,25 +221,25 @@
                             helper.html.datatable.create({
                                 element: 'datatable-publicGroups',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_WithBosses_CL}', property: 'includeBosses', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
                                         return helper.html.render.checkbox(r.includeBosses); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_IncludedGroups_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_IncludedUsers_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_IncludedUsers_CL)}', formula: (r) => { 
                                         return renderUsers(map.users, r.directUsers, true); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_AllActiveUsers_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_AllActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.includesTechnicalGroup === true) return '{!$Label.OrgCheck_IncludesTechGroups_CL}<br />';
+                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                             return renderUsers(map.users, all_distinct_users, true); 
                                         },
@@ -252,7 +252,7 @@
                                     }
                                 ],
                                 data: map.publicGroups,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
                                 showSearch: true,
                                 showStatistics: true
@@ -261,25 +261,25 @@
                             helper.html.datatable.create({
                                 element: 'datatable-queues',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_WithBosses_CL}', property: 'includeBosses', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
                                         return helper.html.render.checkbox(r.includeBosses); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_IncludedGroups_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_IncludedUsers_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_IncludedUsers_CL)}', formula: (r) => { 
                                         return renderUsers(map.users, r.directUsers, true); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_AllActiveUsers_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_AllActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.includesTechnicalGroup === true) return '{!$Label.OrgCheck_IncludesTechGroups_CL}<br />';
+                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                             return renderUsers(map.users, all_distinct_users, true); 
                                         },
@@ -292,7 +292,7 @@
                                     }
                                 ],
                                 data: map.publicGroups,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'queue'; }},
                                 showSearch: true,
                                 showStatistics: true,

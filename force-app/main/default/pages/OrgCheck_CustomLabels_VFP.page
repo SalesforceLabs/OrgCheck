@@ -26,31 +26,31 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: '{!$Label.OrgCheck_Name_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Score_CL}', type: 'numeric', property: '##score##' },
-                                    { name: '{!$Label.OrgCheck_Package_CL}', property: 'namespace' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
-                                    { name: '{!$Label.OrgCheck_Category_CL}', property: 'category' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Category_CL)}', property: 'category' },
                                     { name: 'IsProtected', property: 'protected' },
                                     { name: 'Language', property: 'language' },
-                                    { name: '{!$Label.OrgCheck_Value_CL}', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Value_CL)}', formula: (r) => { 
                                         return helper.html.render.escape(helper.html.render.shrinkText(r.value, 100)); 
                                     }},
-                                    { name: '{!$Label.OrgCheck_Using_CL}', type: 'numeric', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!$Label.OrgCheck_UsedIn_CL}', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!$Label.OrgCheck_NotUsed_CL}';
+                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -66,16 +66,16 @@
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!$Label.OrgCheck_Dependencies_CL}', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return '{!$Label.OrgCheck_NoDependency_CL}';
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                         }
                                     }
                                 ],
                                 data: map.customLabels,
-                                sorting: { name: '{!$Label.OrgCheck_Score_CL}', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
