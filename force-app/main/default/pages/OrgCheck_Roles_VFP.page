@@ -346,7 +346,7 @@
                             html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, helper.html.render.escape(roles_map[node.parent.data].name)) + '</a></b><br />';
                             html += 'Parent Salesforce Id: <b>'+roles_map[node.parent.data].id+'</b><br />';
                             if (roles_map[node.parent.data].developerName) {
-                                html += '{!JSENCODE($Label.OrgCheck_ParentDevName_CL}: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
+                                html += '{!JSENCODE($Label.OrgCheck_ParentDevName_CL)}: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
                             }
                         }
                         helper.html.modal.show('Full information about this role', html);

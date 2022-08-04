@@ -239,7 +239,7 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_AllActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL}<br />';
+                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL)}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                             return renderUsers(map.users, all_distinct_users, true); 
                                         },
@@ -279,7 +279,7 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_AllActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL}<br />';
+                                            if (r.includesTechnicalGroup === true) return '{!JSENCODE($Label.OrgCheck_IncludesTechGroups_CL)}<br />';
                                             const all_distinct_users = helper.array.concat(r.directUsers, r.indirectUsers, 'id');
                                             return renderUsers(map.users, all_distinct_users, true); 
                                         },

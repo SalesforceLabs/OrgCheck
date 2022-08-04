@@ -53,10 +53,10 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_KeyPermissions_CL)}', formula: (r) => {
                                         let html = '';
-                                        if (r.permissions.apiEnabled) html += '{!JSENCODE($Label.OrgCheck_APIEnabled_CL}<br />';
-                                        if (r.permissions.viewSetup) html += '{!JSENCODE($Label.OrgCheck_ViewSetup_CL}<br />';
-                                        if (r.permissions.modifyAllData) html += '{!JSENCODE($Label.OrgCheck_ModifyAllData_CL}<br />';
-                                        if (r.permissions.viewAllData) html += '{!JSENCODE($Label.OrgCheck_ViewAllData_CL}<br />';
+                                        if (r.permissions.apiEnabled) html += '{!JSENCODE($Label.OrgCheck_APIEnabled_CL)}<br />';
+                                        if (r.permissions.viewSetup) html += '{!JSENCODE($Label.OrgCheck_ViewSetup_CL)}<br />';
+                                        if (r.permissions.modifyAllData) html += '{!JSENCODE($Label.OrgCheck_ModifyAllData_CL)}<br />';
+                                        if (r.permissions.viewAllData) html += '{!JSENCODE($Label.OrgCheck_ViewAllData_CL)}<br />';
                                         return html;
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
