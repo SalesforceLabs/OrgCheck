@@ -1,0 +1,8 @@
+List of usefull command:
+
+sfdx force:package:version:list
+
+sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --wait 10
+
+sfdx force:package:version:promote --package OrgCheck@2.1.0-0 
+
