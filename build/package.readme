@@ -1,5 +1,8 @@
+============================================================
+Push source in a scratch org
+============================================================
 sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg
-sfdx force:source:push --targetusername MyScratchOrg
+sfdx force:source:push --targetusername MyScratchOrg --forceoverwrite   
 sfdx force:org:open --targetusername MyScratchOrg
 sfdx force:user:permset:assign --permsetname OrgCheck_Users --targetusername MyScratchOrg
 
@@ -8,11 +11,8 @@ sfdx force:user:permset:assign --permsetname OrgCheck_Users --targetusername MyS
 ============================================================
 List of usefull commands for packaging
 ============================================================
-
 sfdx force:package:version:list
-
 sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-
 sfdx force:package:version:promote --package OrgCheck@2.1.0-1
 
 
