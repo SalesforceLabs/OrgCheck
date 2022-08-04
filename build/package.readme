@@ -1,11 +1,11 @@
 ============================================================
 Push source in a scratch org
 ============================================================
-sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg
+sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg --targetdevhubusername vfinet.devhub@salesforce.com --wait 10
 sfdx force:source:push --targetusername MyScratchOrg --forceoverwrite   
-sfdx force:org:open --targetusername MyScratchOrg
 sfdx force:user:permset:assign --permsetname OrgCheck_Users --targetusername MyScratchOrg
-
+sfdx force:org:open --targetusername MyScratchOrg
+sfdx force:org:delete --targetusername MyScratchOrg 
 
 
 ============================================================
