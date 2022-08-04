@@ -1,8 +1,54 @@
-List of usefull command:
+============================================================
+List of usefull commands for packaging
+============================================================
 
 sfdx force:package:version:list
 
-sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --wait 10
+sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
 
-sfdx force:package:version:promote --package OrgCheck@2.1.0-0 
+sfdx force:package:version:promote --package OrgCheck@2.1.0-1
+
+
+
+============================================================
+Issues with Permission Set including unwanted CRUDs & FLS
+============================================================
+
+If needed, you should emptied the Permission Set (to make sure it does not include any reference to sobjects):
+
+NOTE:
+If the anonymous script ends with "Internal Error", you simply go to the permission set setup, 
+edit one of the CRUD and unselect "Create" for a random object. You save. From there the 
+anonymous script will work again. The SOAP/REST api cannot perform an update.
+
+(
+    echo "List<ObjectPermissions> ops = [SELECT Id, ParentId, SobjectType FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users']; "
+    echo "Database.delete(ops, false); ";
+    echo "List<FieldPermissions> fps = [SELECT Id, ParentId, Field FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_User']; ";
+    echo "Database.delete(fps, false); ";
+) > /tmp/OrgCheck_Users_ObjectPermissions_Removal.apex
+
+for i in {1..3}; do
+    echo "Turn #${i}"
+    nbCRUDs=$( \
+        sfdx force:data:soql:query \
+            --query "SELECT Id FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users'" \
+            --resultformat=csv \
+        | egrep -v '(^(Id$)|()' | wc -l | tr -d ' ' \
+    )
+    nbFLSs=$( \
+        sfdx force:data:soql:query \
+            --query "SELECT Id FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_Users'" \
+            --resultformat=csv \
+        | egrep -v '(^Id$)|()' | wc -l | tr -d ' ' \
+    )
+    echo "Permission Set <OrgCheck_Users> has ${nbCRUDs} CRUDs and ${nbFLSs} FLSs"
+    sfdx force:apex:execute --apexcodefile /tmp/OrgCheck_Users_ObjectPermissions_Removal.apex 2>&1 >/dev/null;
+done
+
+echo "Permission Set <OrgCheck_Users> has now the following CRUDs and FLSs:"
+sfdx force:data:soql:query \
+    --query "SELECT Id, SobjectType, Parent.Name FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users'"
+sfdx force:data:soql:query \
+    --query "SELECT Id, Field, Parent.Name FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_Users'"
 
