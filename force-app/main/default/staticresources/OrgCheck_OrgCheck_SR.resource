@@ -3207,97 +3207,11 @@ OrgCheck.Salesforce = {
 
         this.getCurrentUserId = () => { return USER_ID; }
 
-        let private_org_type;
-
-        this.getOrgType = () => { return private_org_type; }
-
-        /**
-         * Check if OrgCheck should not be used
-         */
-        const private_check_orgtype = () => {
-            CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
-            .on('record', (r) => {
-                let watchDogLevel = 'INFO';
-                let watchDogMessage = 'Your org is all good!';
-                // if the current Org is DE, it's ok to use OrgCheck!
-                if (r.OrganizationType === 'Developer Edition') {
-                    private_org_type = 'Developer Edition';
-                }
-                // if the current Org is a Sandbox, it's ok to use OrgCheck!
-                else if (r.IsSandbox === true) {
-                    private_org_type = 'Sandbox';
-                }
-                // if the current Org is not a Sandbox but a Trial Demo, it's ok to use OrgCheck!
-                else if (r.IsSandbox === false && r.TrialExpirationDate) {
-                    private_org_type = 'TrialOrDemo';
-                }
-                // Other cases need to set a BYPASS (in home page) to continue using the app.
-                else {
-                    private_org_type = 'Production';
-                    watchDogLevel = 'ERROR';
-                    watchDogMessage = 'Your org is a Production Org. To bypass this warning, check the security option.';
-                }
-                configuration.watchDogCallback({ 
-                    type: 'OrgTypeProd',
-                    level: watchDogLevel,
-                    message : watchDogMessage,
-                    data: {
-                        orgType: private_org_type, 
-                        orgId: r.Id,
-                        orgName: r.Name
-                    }
-                });
-            })
-            .run();
-        }
-
-        let private_limits;
-
-        this.getLimitApiDailyRequest = () => { return private_limits.DailyApiRequests; }
-
-        /**
-         * Limits call
-         */
-        const private_check_limits = () => {
-            CONNECTION.limits().then(d => {
-                private_limits = d;
-                if (d && d.DailyApiRequests) {
-                    const limitUsed = d.DailyApiRequests.Max - d.DailyApiRequests.Remaining;
-                    const limitRate = limitUsed / d.DailyApiRequests.Max;
-                    let watchDogLevel = 'INFO';
-                    let watchDogMessage = 'All good!';
-                    if (limitRate > 0.9) { // 90% !!!
-                        watchDogLevel = 'ERROR';
-                        watchDogMessage = 'You are sooooo near to hit the DailyApiRequests limit, we will stop you there!'
-                    } else if (limitRate > 0.7) { // 70% !!!
-                        watchDogLevel = 'WARNING';
-                        watchDogMessage = 'A little warning about the use of the DailyApiRequests limit...'
-                    }
-
-                    configuration.watchDogCallback({ 
-                        type: 'DailyApiRequests',
-                        level: watchDogLevel,
-                        message : watchDogMessage,
-                        data: {
-                            max: d.DailyApiRequests.Max,
-                            left: d.DailyApiRequests.Remaining,
-                            used: limitUsed,
-                            rate: limitRate
-                        }
-                    });
-                }
-            });
-        }
-
-        // let's call it at the beggining
-        private_check_orgtype();
-        private_check_limits();
-
         /**
          * Returns systematically an ID15 based on the ID18
          * @param id to simplify
          */
-        this.salesforceIdFormat = (id) => {
+         this.salesforceIdFormat = (id) => {
             if (id && id.length == 18) return id.substr(0, 15);
             return id;
         };
@@ -3433,7 +3347,133 @@ OrgCheck.Salesforce = {
 
         this.httpCall = function(partialUrl, optionalPayload) {
             return new OrgCheck.Salesforce.HttpProcess(CONNECTION, partialUrl, optionalPayload);
+        }        
+
+        let private_org_type;
+
+        this.getOrgType = () => { return private_org_type; }
+
+        /**
+         * Check if OrgCheck should not be used
+         */
+        const private_check_orgtype = () => {
+            CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
+                .on('record', (r) => {
+                    let watchDogLevel = 'INFO';
+                    let watchDogMessage = 'Your org is all good!';
+                    // if the current Org is DE, it's ok to use OrgCheck!
+                    if (r.OrganizationType === 'Developer Edition') {
+                        private_org_type = 'Developer Edition';
+                    }
+                    // if the current Org is a Sandbox, it's ok to use OrgCheck!
+                    else if (r.IsSandbox === true) {
+                        private_org_type = 'Sandbox';
+                    }
+                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use OrgCheck!
+                    else if (r.IsSandbox === false && r.TrialExpirationDate) {
+                        private_org_type = 'TrialOrDemo';
+                    }
+                    // Other cases need to set a BYPASS (in home page) to continue using the app.
+                    else {
+                        private_org_type = 'Production';
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'Your org is a Production Org. To bypass this warning, check the security option.';
+                    }
+                    configuration.watchDogCallback({ 
+                        type: 'OrgTypeProd',
+                        level: watchDogLevel,
+                        message : watchDogMessage,
+                        data: {
+                            orgType: private_org_type, 
+                            orgId: r.Id,
+                            orgName: r.Name
+                        }
+                    });
+                })
+                .run();
         }
+
+        let private_limits;
+
+        this.getLimitApiDailyRequest = () => { return private_limits?.DailyApiRequests; }
+
+        /**
+         * Limits call
+         */
+        const private_check_limits = () => {
+            CONNECTION.limits().then(d => {
+                private_limits = d;
+                if (d && d.DailyApiRequests) {
+                    const limitUsed = d.DailyApiRequests.Max - d.DailyApiRequests.Remaining;
+                    const limitRate = limitUsed / d.DailyApiRequests.Max;
+                    let watchDogLevel = 'INFO';
+                    let watchDogMessage = 'All good!';
+                    if (limitRate > 0.9) { // 90% !!!
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'You are sooooo near to hit the DailyApiRequests limit, we will stop you there!'
+                    } else if (limitRate > 0.7) { // 70% !!!
+                        watchDogLevel = 'WARNING';
+                        watchDogMessage = 'A little warning about the use of the DailyApiRequests limit...'
+                    }
+
+                    configuration.watchDogCallback({ 
+                        type: 'DailyApiRequests',
+                        level: watchDogLevel,
+                        message : watchDogMessage,
+                        data: {
+                            max: d.DailyApiRequests.Max,
+                            left: d.DailyApiRequests.Remaining,
+                            used: limitUsed,
+                            rate: limitRate
+                        }
+                    });
+                }
+            });
+        }
+
+        let private_user_information;
+
+        this.getUserInformation = () => { return private_user_information; }
+
+        const private_check_security = () => {
+            CONNECTION.query('SELECT Id, Profile.Id, Profile.Name, Profile.PermissionsViewAllData, '+
+                                '(SELECT Id FROM PermissionSetAssignments '+
+                                 'WHERE PermissionSet.NamespacePrefix = \'OrgCheck\' '+
+                                 'AND PermissionSet.Name = \'OrgCheck_Users\') '+
+                             'FROM User '+
+                             'WHERE Id = '+this.secureSOQLBindingVariable(configuration.userId))
+                .on('record', (r) => {
+                    let watchDogLevel = 'INFO';
+                    let watchDogMessage = 'Your user is all good!';
+
+                    if (r.Profile.PermissionsViewAllData === false) {
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'You should be assigned to the System Administrator profile to run OrgCheck.';
+                    }
+                    if (r.PermissionSetAssignments && r.PermissionSetAssignments.records.length !== 1) {
+                        watchDogLevel = 'ERROR';
+                        watchDogMessage = 'You should be assigned to the "OrgCheck Users" permission set in addition to your Admin profile.';
+                    }
+                    configuration.watchDogCallback({ 
+                        type: 'UserSecurity',
+                        level: watchDogLevel,
+                        message : watchDogMessage,
+                        data: {
+                            userId: configuration.userId, 
+                            profileId: r.Profile.Id,
+                            profileName: r.Profile.Name,
+                            profileViewAllData: r.Profile.PermissionsViewAllData,
+                            permissionSetAssignments: r.PermissionSetAssignments
+                        }
+                    });
+                })
+                .run();
+        }
+
+        // let's call it at the beggining
+        private_check_orgtype();
+        private_check_limits();
+        private_check_security();
     }
 }/**
  * Shortcuts module
