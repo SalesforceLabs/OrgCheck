@@ -1,5 +1,11 @@
 {
   "orgName": "vfinet company",
   "edition": "Developer",
-  "features": []
+  "features": [],
+  "settings": {
+    "languageSettings": {
+      "enableTranslationWorkbench":  true,
+      "enableEndUserLanguages": true
+    }
+  }
 }

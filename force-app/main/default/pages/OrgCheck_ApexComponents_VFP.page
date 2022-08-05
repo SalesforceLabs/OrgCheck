@@ -2,86 +2,35 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Apex Classes and Triggers
+            {!$Label.OrgCheck_Apex_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Apex Classes and Triggers Overview
+            {!$Label.OrgCheck_Apex_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>Apex Classes and Triggers</b> in three tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Classes</b> is a tabular list of all the Apex Classes in this org.</li>
-                <li>The second tab called <b>Triggers</b> is a tabular list of all Apex Triggers in this org.</li>
-                <li>The third tab called <b>Object's triggers count</b> is a grouped table that aggregates all triggers per objects in this org.</li>
-            </ul>
-            <br />
-            To make sure you get <b>all the benefits</b> from this page, make sure to follow these steps:
-            <ol class="slds-list_ordered">
-                <li>You <b>compile all classes</b> by selecting the "Plug" button.</li>
-                <li>You <b>run all tests</b> by selecting the "Like" button.</li>
-            </ol>
-            <br />
-            On the Classes table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the class is not used by any other entity (based on the Dependency API), then you get +1. </li>
-                        <li>If the API version of the class is older than 3 year, then you get +1. </li>
-                        <li>If the class needs recompilation, then you get +1. </li>
-                        <li>If the class is not explicitely specifying the sharing, then you get +1. </li>
-                        <li>If the class has not reached a code covergare of <b>85%</b>, then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
-                    it is used and what it is using.</li>
-            </ul>
-            <br />
-            On the Triggers table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the trigger is not used by any other entity (based on the Dependency API), then you get +1. </li>
-                        <li>If the API version of the trigger is older than 3 year, then you get +1. </li>
-                        <li>If the trigger is inactive, then you get +1. </li>
-                        <li>If the trigger is more than 5,000 characters long, then you get +1. </li>
-                        <li>If the trigger is containing SOQL or DML statments, then you get +1. </li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the item has dependencies, you can click on the link "Dependencies" to get a graphical view of where 
-                    it is used and what it is using.</li>
-            </ul>
-            <br />
-            On the Triggers per object table:<br />
-            <ul class="slds-list_dotted">
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the count of active triggers per object is greater that one, you get +1. </li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-            </ul>
-            <br />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description1_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description2_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description3_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description4_CL}" />
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
                 <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Compile all">
+                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
-                        <span class="slds-assistive-text">Compile all</span>
+                        <span class="slds-assistive-text">{!$Label.OrgCheck_CompileAll_CL}</span>
                     </button>
                 </a>
             </div>
             <div class="slds-page-header__control">
                 <a href="/ui/setup/apex/ApexTestQueuePage" target="_blank" rel="external noopener noreferrer">
-                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Unit Tests">
+                    <button id="run-all-tests" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_UnitTests_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#like')}"></use>
                         </svg>
-                        <span class="slds-assistive-text">Unit Tests</span>
+                        <span class="slds-assistive-text">{!$Label.OrgCheck_UnitTests_CL}</span>
                     </button>
                 </a>
             </div>
@@ -89,14 +38,17 @@
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Classes" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">Classes</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Classes_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Triggers" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">Triggers</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Triggers_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Object's triggers count" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">Object's triggers count</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_UnitTests_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
@@ -107,6 +59,9 @@
                 </div>
                 <div id="tab-default-objtriggercounts" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objtriggercounts__item">
                     <div id="datatable-objtriggercounts" />
+                </div>                
+                <div id="tab-default-apextests" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-apextests__item">
+                    <div id="datatable-apextests" />
                 </div>
             </div>
         </apex:define>
@@ -119,7 +74,7 @@
 
                     // RUN CONTROLLER
                     controller.run({
-                        datasets: [ 'apexClasses', 'apexTriggers', 'customObjects' ],
+                        datasets: [ 'apexClasses', 'apexTriggers', 'objects' ],
                         dependencies: true,
                         onRecords: function(map) { 
 
@@ -131,37 +86,36 @@
                             helper.html.datatable.create({
                                 element: 'datatable-classes',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Status', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
                                                 return 'Recompile!';
                                             }
-                                            return 'OK';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.needsRecompilation === true) return 1; 
                                         }
                                     },
-                                    { name: 'Access', property: 'specifiedAccess' },
-                                    { name: 'Abst.?', property: 'isAbstract', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Access_CL)}', property: 'specifiedAccess' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsAbstract_CL)}', property: 'isAbstract', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isAbstract); 
                                     }},
-                                    { name: 'Type', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => { 
                                         if (r.isInterface === true) return 'Interface';
                                         if (r.isEnum === true) return 'Enum';
                                         if (r.isClass === true) return 'Class';
                                         return 'Other';
                                     }},
-                                    { name: 'Implements', formula: (r) => {
+                                    { name: '{!JSENCODE($Label.OrgCheck_Implements_CL)}', formula: (r) => {
                                         let html = ''; 
                                         if (r.interfaces) { 
                                             r.interfaces.forEach(
@@ -170,10 +124,10 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Size', type: 'numeric', property: 'length' },
-                                    { name: 'Methods', type: 'numeric', property: 'methodsCount' },
-                                    { name: 'Inner Cls.', type: 'numeric', property: 'innerClassesCount' },
-                                    { name: 'Annot.', formula: (r) => {
+                                    { name: '{!JSENCODE($Label.OrgCheck_Size_CL)}', type: 'numeric', property: 'length' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Methods_CL)}', type: 'numeric', property: 'methodsCount' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_InnerClasses_CL)}', type: 'numeric', property: 'innerClassesCount' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Annotations_CL)}', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { 
                                             r.annotations.forEach(
@@ -182,24 +136,24 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Sharing', property: 'specifiedSharing', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Sharing_CL)}', property: 'specifiedSharing', 
                                         formula: (r) => {
-                                            if (r.isSharingMissing === true) return 'Not specified!';
-                                            if (r.specifiedSharing === 'n/a') return 'Not Applicable';
+                                            if (r.isSharingMissing === true) return '{!JSENCODE($Label.OrgCheck_NotSpecified_CL)}';
+                                            if (r.specifiedSharing === 'n/a') return '{!JSENCODE($Label.OrgCheck_NotApplicable_CL)}';
                                             return helper.html.render.escape(r.specifiedSharing);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isSharingMissing === true) return 1; 
                                         }
                                     },
-                                    { name: 'Coverage', type: 'numeric', property: 'coverage', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_CodeCverage_CL)}', type: 'numeric', property: 'coverage', 
                                         formula: (r) => { 
                                             if (r.isClass === true) {
                                                 if (r.coverage || r.coverage === 0) return helper.html.render.percentage(r.coverage);
                                                 cntClsNoCoverage++;
-                                                return 'No coverage data';
+                                                return '{!JSENCODE($Label.OrgCheck_NoData_CL)}';
                                             }
-                                            return 'Not Applicable';
+                                            return '{!JSENCODE($Label.OrgCheck_NotApplicable_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isClass === true && (!r.coverage || r.coverage < 0.85)) {
@@ -208,7 +162,7 @@
                                             }
                                         }
                                     },
-                                    { name: 'Related Tests',
+                                    { name: '{!JSENCODE($Label.OrgCheck_RelatedTests_CL)}',
                                         formula: (r) => {
                                             let html = ''; 
                                             if (r.relatedTestClasses) { 
@@ -222,34 +176,102 @@
                                             return html;
                                         }
                                     },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
                                         }
                                     },
-                                    { name: 'Dependencies', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                         }
-                                    }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexClasses,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
+                            });
+
+                            // Render the Apex Unit Tests Classes data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-apextests',
+                                columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
+                                        formula: (r) => {
+                                            if (r.needsRecompilation === true) {
+                                                cntClsToCompile++;
+                                                return 'Recompile!';
+                                            }
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.needsRecompilation === true) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Size_CL)}', type: 'numeric', property: 'length' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_SeeAlllData_CL)}',
+                                        formula: (r) => { 
+                                            return helper.html.render.checkbox(r.isTestSeeAllData);
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.isTestSeeAllData === true) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_NumlberOfAsserts_CL)}', type: 'numeric', property: 'nbSystemAsserts',
+                                        formula: (r) => { 
+                                            if (r.nbSystemAsserts === 0) return '{!JSENCODE($Label.OrgCheck_NotSpecified_CL)}';
+                                            return r.nbSystemAsserts;
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.nbSystemAsserts === 0) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Methods_CL)}', type: 'numeric', property: 'methodsCount' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
+                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
+                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        return helper.html.render.checkbox(false);
+                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
+                                        formula: (r) => { 
+                                            const dep = map.dependencies[r.id]; 
+                                            if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                ],
+                                data: map.apexClasses,
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true; }},
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             let html = '';
@@ -269,11 +291,16 @@
                                 if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
                                 html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
                                 html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
-                                helper.html.element.addClass('run-all-tests', ['slds-theme_warning']);
+                                const runAllTestsButton = helper.html.element.get('run-all-tests');
+                                runAllTestsButton.onclick = (e) => { 
+                                    helper.salesforce.apex.runAllLocalTests();
+                                    return true; 
+                                }
+                                helper.html.element.addClass(runAllTestsButton, ['slds-theme_warning']);
                             }
 
                             if (html) {
-                                helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
                                 helper.html.message.show(html);
                             }
 
@@ -283,20 +310,20 @@
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'API', type: 'numeric', property: 'apiVersion',
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
-                                    { name: 'Package', property: 'namespace' },
-                                    { name: 'Active', property: 'isActive', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.isActive); 
                                         },
@@ -304,12 +331,12 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
-                                    { name: 'Size', type: 'numeric', property: 'length',
+                                    { name: '{!JSENCODE($Label.OrgCheck_Size_CL)}', type: 'numeric', property: 'length',
                                         scoreFormula: (r) => { 
                                             if (r.length > 5000) return 1;
                                         }
                                     },
-                                    { name: 'Contains SOQL', property: 'hasSOQL',
+                                    { name: '{!JSENCODE($Label.OrgCheck_ContainsSoql_CL)}', property: 'hasSOQL',
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.hasSOQL); 
                                         },
@@ -317,7 +344,7 @@
                                             if (r.hasSOQL === true) return 1;
                                         }
                                     },
-                                    { name: 'Contains DML', property: 'hasDML',
+                                    { name: '{!JSENCODE($Label.OrgCheck_ContainsDml_CL)}', property: 'hasDML',
                                         formula: (r) => { 
                                             return helper.html.render.checkbox(r.hasDML); 
                                         },
@@ -325,9 +352,9 @@
                                             if (r.hasDML === true) return 1;
                                         }
                                     },
-                                    { name: 'SObject', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', formula: (r) => { 
                                         const objId = r.sobject;
-                                        const objName = map.customObjects[objId]?.developerName || objId;
+                                        const objName = map.objects[objId]?.label;
                                         // ---
                                         // let's calculate (on the fly) the number of active triggers per object!!
                                         const otc = objectTriggersCountMap[objName] || { 
@@ -339,30 +366,30 @@
                                         else if (r.isActive === false) otc.deactiveTriggerCount++;
                                         objectTriggersCountMap[objName] = otc;
                                         // ---
-                                        return objName;
+                                        return helper.html.render.escape(objName);
                                     }},
-                                    { name : '*Insert', property: 'beforeInsert', formula: (r) => { 
+                                    { name: '*Insert', property: 'beforeInsert', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeInsert); 
                                     }},
-                                    { name : 'Insert*', property: 'afterInsert', formula: (r) => { 
+                                    { name: 'Insert*', property: 'afterInsert', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterInsert); 
                                     }},
-                                    { name : '*Update', property: 'beforeUpdate', formula: (r) => { 
+                                    { name: '*Update', property: 'beforeUpdate', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeUpdate); 
                                     }},
-                                    { name : 'Update*', property: 'afterUpdate', formula: (r) => { 
+                                    { name: 'Update*', property: 'afterUpdate', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterUpdate); 
                                     }},
-                                    { name : '*Delete', property: 'beforeDelete', formula: (r) => { 
+                                    { name: '*Delete', property: 'beforeDelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.beforeDelete); 
                                     }},
-                                    { name : 'Delete*', property: 'afterDelete', formula: (r) => { 
+                                    { name: 'Delete*', property: 'afterDelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterDelete); 
                                     }},
-                                    { name : 'Undelete*', property: 'afterUndelete', formula: (r) => { 
+                                    { name: 'Undelete*', property: 'afterUndelete', formula: (r) => { 
                                         return helper.html.render.checkbox(r.afterUndelete); 
                                     }},
-                                    { name: 'Annotations', formula: (r) => {
+                                    { name: '{!JSENCODE($Label.OrgCheck_Annotations_CL)}', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { 
                                             r.annotations.forEach(
@@ -371,42 +398,46 @@
                                         }
                                         return html;
                                     }},
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Dependencies', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                            return 'No dependency';
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                         }
-                                    }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.apexTriggers,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
 
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-objtriggercounts',
                                 columns: [
-                                    { name: 'Name', property: 'object' },
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Active triggers', type: 'numeric', property: 'activeTriggerCount', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ActiveTriggers_CL)}', type: 'numeric', property: 'activeTriggerCount', 
                                         scoreFormula: (r) => { 
                                             if (r.activeTriggerCount > 1) return 1; 
                                         }
                                     },
-                                    { name: 'Deactive triggers', type: 'numeric', property: 'deactiveTriggerCount' }                                            
+                                    { name: '{!JSENCODE($Label.OrgCheck_UnactiveTriggers_CL)}', type: 'numeric', property: 'deactiveTriggerCount' }                                            
                                 ],
                                 data: objectTriggersCountMap,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                             
                         },

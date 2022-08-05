@@ -1,0 +1,102 @@
+============================================================
+Push source in a scratch org
+============================================================
+sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg --targetdevhubusername vfinet.devhub@salesforce.com --wait 10
+sfdx force:source:push --targetusername MyScratchOrg --forceoverwrite   
+sfdx force:user:permset:assign --targetusername MyScratchOrg --permsetname OrgCheck_Users
+profileName=$(sfdx force:data:soql:query --targetusername MyScratchOrg --query "SELECT Name FROM Profile WHERE UserLicense.MasterLabel = 'Salesforce' AND Name LIKE '%Admin%' AND PermissionsViewAllData = true LIMIT 1" --resultformat=csv | tail -1)      
+sfdx force:user:create --setalias uatuser --definitionfile config/user-uat-def.json "profileName=${profileName}" permsets=OrgCheck_Users --targetusername MyScratchOrg
+
+uatUserId=$(sfdx force:data:soql:query --query "SELECT Id FROM User WHERE Profile.Name = '${profileName}' AND IsActive = true" --resultformat=csv --targetusername MyScratchOrg | tail -1)
+
+## Set French Local/Language
+sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=fr LanguageLocaleKey=fr" --targetusername MyScratchOrg
+
+## Set English Local/Language
+sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=en_US LanguageLocaleKey=en_US" --targetusername MyScratchOrg
+
+## Set Japanese Local/Language
+sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=ja LanguageLocaleKey=ja" --targetusername MyScratchOrg
+
+## In case of persistente language, please close all browsers before launching the next command.
+sfdx force:org:open --targetusername uatuser 
+
+
+sfdx force:user:list --targetusername MyScratchOrg 
+sfdx force:org:open --targetusername MyScratchOrg 
+
+sfdx force:org:delete --targetusername MyScratchOrg 
+
+
+============================================================
+List of usefull commands for packaging
+============================================================
+sfdx force:package:version:list
+sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
+sfdx force:package:version:promote --package OrgCheck@2.1.1-1
+
+
+
+
+============================================================
+List of usefull commands for pushing updates
+============================================================
+
+## List the push request to update to a newer package version
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackageVersionId, ScheduledStartTime, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushRequest WHERE SystemModstamp = TODAY" --resultformat=csv
+
+## List all the subscriber part of the previous push request
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob where SystemModstamp = today" --resultformat=csv
+
+## CHeck the pending and in progress
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob where SystemModstamp = today and status != 'Succeeded' and status != 'failed'" --resultformat=csv
+
+## List all error you had during the previous push
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError where SystemModstamp = TODAY" --resultformat=csv
+
+
+
+
+
+============================================================
+Issues with Permission Set including unwanted CRUDs & FLS
+============================================================
+
+If needed, you should emptied the Permission Set (to make sure it does not include any reference to sobjects):
+
+NOTE:
+If the anonymous script ends with "Internal Error", you simply go to the permission set setup, 
+edit one of the CRUD and unselect "Create" for a random object. You save. From there the 
+anonymous script will work again. The SOAP/REST api cannot perform an update.
+
+(
+    echo "List<ObjectPermissions> ops = [SELECT Id, ParentId, SobjectType FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users']; "
+    echo "Database.delete(ops, false); ";
+    echo "List<FieldPermissions> fps = [SELECT Id, ParentId, Field FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_User']; ";
+    echo "Database.delete(fps, false); ";
+) > /tmp/OrgCheck_Users_ObjectPermissions_Removal.apex
+
+for i in {1..3}; do
+    echo "Turn #${i}"
+    nbCRUDs=$( \
+        sfdx force:data:soql:query \
+            --query "SELECT Id FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users'" \
+            --resultformat=csv \
+        | egrep -v '(^(Id$)|()' | wc -l | tr -d ' ' \
+    )
+    nbFLSs=$( \
+        sfdx force:data:soql:query \
+            --query "SELECT Id FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_Users'" \
+            --resultformat=csv \
+        | egrep -v '(^Id$)|()' | wc -l | tr -d ' ' \
+    )
+    echo "Permission Set <OrgCheck_Users> has ${nbCRUDs} CRUDs and ${nbFLSs} FLSs"
+    sfdx force:apex:execute --apexcodefile /tmp/OrgCheck_Users_ObjectPermissions_Removal.apex 2>&1 >/dev/null;
+done
+
+echo "Permission Set <OrgCheck_Users> has now the following CRUDs and FLSs:"
+sfdx force:data:soql:query \
+    --query "SELECT Id, SobjectType, Parent.Name FROM ObjectPermissions WHERE Parent.Name = 'OrgCheck_Users'"
+sfdx force:data:soql:query \
+    --query "SELECT Id, Field, Parent.Name FROM FieldPermissions WHERE Parent.Name = 'OrgCheck_Users'"
+

@@ -27,7 +27,7 @@
                 .orgcheck-page-description {
                     margin-top: 0.3rem;
                     height: 1rem;
-                    background: rgb(221, 221, 221);
+                    background: rgb(116, 116, 116);
                     border-radius: 10px;
                     padding: 0px 5px 0px 5px;
                     box-shadow: 0 2px 2px 0 rgb(0 0 0 / 10%);
@@ -127,7 +127,10 @@
                                 </svg>
                             </div>
                             <div class="slds-page-header__control slds-align_absolute-center">
-                                <span class="slds-badge slds-theme_success" id="org-id" />
+                                <span class="slds-badge" id="org-information" />
+                            </div>
+                            <div class="slds-page-header__control slds-align_absolute-center">
+                                <span class="slds-badge" id="org-daily-api-requests" />
                             </div>
                         </div>
                     </div>
@@ -152,8 +155,9 @@
                 <div class="slds-media__body"></div>
             </div>
             <div id="spinner" style="display: none;">
-                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
+                <!--<section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
                     <div class="slds-modal__container">
+                            -->
                         <div class="slds-notify_container slds-is-relative" style="z-index: 1;">
                             <div class="slds-notify slds-notify_toast slds-theme_info" role="status">
                                 <span class="slds-assistive-text">Loading...</span>
@@ -166,9 +170,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div><!--
                     </div>
-                </section>
+                </section>-->
             </div>
             <div id="content" style="display: none;">
                 <apex:insert name="html_content_core" />
@@ -190,8 +194,8 @@
                     const SF_API_VERSION = 3 * (THIS_YEAR - 2022) + 53 + (THIS_MONTH <= 2 ? 0 : (THIS_MONTH <= 6 ? 1 : (THIS_MONTH <= 10 ? 2 : 3 )));
                     const core = new OrgCheck.Core({
                         sfApiVersion: SF_API_VERSION,
-                        sfLocalAccessToken: '{!$Api.Session_Id}',
-                        sfLocalCurrentUserId: '{!$User.Id}',
+                        sfLocalAccessToken: '{! JSENCODE($Api.Session_Id) }',
+                        sfLocalCurrentUserId: '{! JSENCODE($User.Id) }',
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
@@ -200,9 +204,9 @@
                         htmlModalTitleTagId: 'modal-heading',
                         htmlMainContentTagId: 'content',
                         formatDefaultDate: 'dd/MM/y',
-                        formatDefaultDatetime: 'dd/MM/y HH:mm:ss'
+                        formatDefaultDatetime: 'dd/MM/y HH:mm:ss',
+                        formatDefaultLanguage: 'en'
                     });
-                    buildDatasets(core);
 
                     // ========================================================================
                     // Finally we call the start2 method for the page to use OrgCheck controller and helper
@@ -211,7 +215,7 @@
                     const hlp = core.getHelper();
                     start2(ctl, hlp);
 
-                    new OrgCheck.ShortcutManager(hlp, {
+                    new OrgCheck.Shortcuts.Manager().register(hlp, {
                         '27': function() { document.getElementById('modal').style.display = 'none'; }
                     });
                 }

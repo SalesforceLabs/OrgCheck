@@ -7,6 +7,9 @@
 .sfdx/
 .localdevserver/
 
+# Salesforce scratch org history
+.sf/
+
 # LWC VSCode autocomplete
 **/lwc/jsconfig.json
 

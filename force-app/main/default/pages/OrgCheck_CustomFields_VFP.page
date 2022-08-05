@@ -2,26 +2,13 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Custom Fields
+            {!$Label.OrgCheck_CustomFields_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Custom Fields Dependency Overview
+            {!$Label.OrgCheck_CustomFields_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page lists all your <b>custom fields</b> and not the standard fields.<br />
-            <br />
-            On this table :<br />
-            <ul class="slds-list_dotted">
-                <li>Each row represents a custom field</li>
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the field is not used by any other entity (based on the Dependency API), then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-                <li>If the field has dependencies, you can click on the link "Dependencies" to get a graphical view of where it is
-                    used and what it is using.</li>
-            </ul>
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_CustomFields_Description_CL}" />
         </apex:define>
         <apex:define name="html_actions">
         </apex:define>
@@ -32,56 +19,71 @@
             <script>
                 function start2(controller, helper) {
                     controller.run({
-                        datasets: [ 'customFields', 'customObjects' ],
+                        datasets: [ 'customFields', 'objects' ],
                         dependencies: true,
                         onRecords: function(map) {
 
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Object Name', formula: (r) => { 
-                                        let entityUrl = '/lightning/setup/ObjectManager/'+r.objectName+'/Details/view';
-                                        let entityName = r.objectName;
-                                        if (r.objectId) {
-                                            switch (map.customObjects[r.objectId]?.type) {
-                                                case 'CustomSetting':      entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId; break;
-                                                case 'CustomObject':       entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';  break;
-                                                case 'CustomEvent':        entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'KnowledgeArticle':   entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;  break;
-                                                case 'ExternalObject':     entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'BigObject':          entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;  break;
-                                                case 'CustomMetadataType': entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId;  break;
-                                                default:                   entityUrl = '/'+r.objectId;
-                                            }
-                                            entityName = map.customObjects[r.objectId]?.developerName;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', formula: (r) => { 
+                                        const object = map.objects[r.objectDeveloperName];
+                                        let entityUrl = '/'+r.objectId;
+                                        let entityLabel = object?.label + (object?.label !== r.objectId ? ' ('+object?.developerName+')' : '');
+                                        if (object) {
+                                            if (r.isCustomSetting === true) entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId;
+                                            if (r.isCustomObject === true || r.isStandardObject === true) entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';
+                                            if (r.isExternalObject === true) entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;
+                                            if (r.isCustomMetadataType === true) entityUrl = '/lightning/setup/CustomMetadata/page?address=%2F'+r.objectId; 
+                                            if (r.isPlatformEvent === true) entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;
+                                            if (r.isBigObject === true) entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;
+                                            if (r.isKnowledgeArticle === true) entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;
                                         }
-                                        return helper.html.render.link(
-                                            entityUrl, 
-                                            helper.html.render.escape(entityName)
-                                        );
+                                        return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
                                     }},
-                                    { name: 'Object Type', formula: (r) => { 
-                                        return r.objectId ? helper.html.render.escape(map.customObjects[r.objectId]?.type) : 'Standard';
+                                    { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => { 
+                                        const object = map.objects[r.objectDeveloperName];
+                                        let t = '';
+                                        if (object) {
+                                            if (object.isCustomSetting === true) t = 'Custom Setting';
+                                            if (object.isCustomObject === true) t = 'Custom Object';
+                                            if (object.isStandardObject === true) t = 'Standard';
+                                            if (object.isExternalObject === true) t = 'External Object';
+                                            if (object.isCustomMetadataType === true) t = 'Custom Metadata Type'; 
+                                            if (object.isPlatformEvent === true) t = 'Platform Event';
+                                            if (object.isBigObject === true) t = 'Big Object';
+                                            if (object.isKnowledgeArticle === true) t = 'Knowledge Article';
+                                        }
+                                        return helper.html.render.escape(t);
                                     }},
-                                    { name: 'Field', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.fieldName)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Package', property: 'packageName' },
-                                    { name: 'Full API Name', property: 'fullName' },
-                                    { name: 'Using', type: 'numeric', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'fullName' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(r.description);
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return 'Not used!';
+                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -102,18 +104,21 @@
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Dependencies', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
                                             const dep = map.dependencies[r.id]; 
                                             if (dep) return helper.html.render.dependencies(r.id, r.fieldName, dep);
-                                            return 'No dependency';
+                                            return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                         }
-                                    }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
                                 ],
                                 data: map.customFields,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                         },
                         actions: { 
