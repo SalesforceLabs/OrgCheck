@@ -3,10 +3,13 @@
 UGLIFY_MODE="$1"
 UGLIFY_MODE_ON="on"
 UGLIFY_MODE_OFF="off"
-if [ "X${UGLIFY_MODE}" == "X" ]; then
-    UGLIFY_MODE=${UGLIFY_MODE_ON}
+if [ "X${UGLIFY_MODE}" == "X${UGLIFY_MODE_OFF}" ]; then
+    echo "Uglify Mode is off"
+    UGLIFY_MODE="${UGLIFY_MODE_OFF}"
+else
+    echo "Uglify Mode is on"
+    UGLIFY_MODE="${UGLIFY_MODE_ON}"
 fi
-echo "Uglify Mode = ${UGLIFY_MODE}"
 echo ""
 
 ### -----------------------
@@ -14,7 +17,7 @@ echo ""
 ### -----------------------
 
 for f in build/src/javascript/OrgCheck_*.js; do
-    if [ "${UGLIFY_MODE}" == "ON" ]; then
+    if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
         uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f);
     else
         cat "${f}" > /tmp/$(basename $f);
@@ -36,6 +39,9 @@ done
         cat /tmp/$(basename $f)
     done
 ) > force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
+
+
+
 
 ## https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
 ## ln -s ../../pre-commit.sh .git/hooks/pre-commit
