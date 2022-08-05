@@ -2,78 +2,50 @@
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
-            Role Hierarchy Advanced Tree
+            {!$Label.OrgCheck_Roles_Title_CL}
         </apex:define>
         <apex:define name="text_page_subtitle">
-            Role Hierarchy Overview
+            {!$Label.OrgCheck_Roles_Subtitle_CL}
         </apex:define>
         <apex:define name="text_page_description">
-            This page illustrates your <b>Role Hierarchy</b> in two tabs:<br />
-            <ul class="slds-list_dotted">
-                <li>The first tab called <b>Role Explorer</b> is showing a graphical view of your role hierarchy</li>
-                <li>The second tab called <b>Role Listing</b> is a tabular list of the corresponding data.</li>
-            </ul>
-            <br />
-            Too many levels in your role hierarchy can lead to bad performance (including sharing calculation). <br />
-            That is why we are giving you an alert if your hierarchy uses more that <b>7 levels</b>.<br />
-            <br />
-            On the graphical view:<br />
-            <ul class="slds-list_dotted">
-                <li>Each <b>box</b> represents a <b>role</b> that are linked to each other following their parent role.</li>
-                <li>The <b>yellow</b> boxes represent roles without any active users</li>
-                <li>The <b>blue</b> boxes represent roles with active users</li>
-                <li>On each box, you can see <b>bubbles</b> in their upper right corner</li>
-                <li>The <b>blue</b> bubbles represent the number of active users (if more than 100 we put 99+)</li>
-                <li>The <b>grey</b> bubbles represent the number of inactive users (if more than 100 we put 99+)</li>
-                <li>You can click on each box to get more details about the corresponding role.</li>
-            </ul>
-            <br />
-            On the tabular table view:<br />
-            <ul class="slds-list_dotted">
-                <li>Each row represents a role</li>
-                <li>The column <b>score</b> is calculated based on the following rules:
-                    <ol class="slds-list_ordered">
-                        <li>If the role contains no active user, then you get +1.</li>
-                        <li>If the role contains more than one inactive user, then you get +1.</li>
-                    </ol>
-                </li>
-                <li>By default, the table is ordered by Score descending, in other words the biggest scores come first.</li>
-            </ul>
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description1_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description2_CL}" />
+            <apex:outputText escape="false" value="{!$Label.OrgCheck_Roles_Description3_CL}" />
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control" style="display: block;">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom out" id="zoom-out-button" aria-controlled-by="tab-default-1">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_ZoomOut_CL}" id="zoom-out-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomout ')}"></use>
                     </svg>
-                    <span class="slds-assistive-text">Zoom out</span>
+                    <span class="slds-assistive-text">{!$Label.OrgCheck_ZoomOut_CL}</span>
                 </button>
             </div>
             <div class="slds-page-header__control" style="display: block;">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom 1:1" id="zoom-reset-button" aria-controlled-by="tab-default-1">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_Zoom1x1_CL}" id="zoom-reset-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#sync ')}"></use>
                     </svg>
-                    <span class="slds-assistive-text">Zoom 1:1</span>
+                    <span class="slds-assistive-text">{!$Label.OrgCheck_Zoom1x1_CL}</span>
                 </button>
             </div>
             <div class="slds-page-header__control" style="display: block;">
-                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="Zoom in" id="zoom-in-button" aria-controlled-by="tab-default-1">
+                <button class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_ZoomIn_CL}" id="zoom-in-button" aria-controlled-by="tab-default-1">
                     <svg class="slds-button__icon" aria-hidden="true">
                         <use href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#zoomin')}"></use>
                     </svg>
-                    <span class="slds-assistive-text">Zoom in</span>
+                    <span class="slds-assistive-text">{!$Label.OrgCheck_ZoomIn_CL}</span>
                 </button>
             </div>
         </apex:define>
         <apex:define name="html_content_core">
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
-                    <li class="slds-tabs_default__item slds-is-active" title="Role Explorer" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-explorer__item">Role Explorer</a>
+                    <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_RoleExplorer_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-explorer__item">{!$Label.OrgCheck_RoleExplorer_CL}</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Role Listing" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">Role Listing</a>
+                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_RoleListing_CL}" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">{!$Label.OrgCheck_RoleListing_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-explorer__item">
@@ -160,13 +132,8 @@
                         // Show alert about too many number of levels in the hierarchy
                         const MAX_LEVEL_DEPTH_ROLES = 7;
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
-                            let html = '';
-                            html += 'You have more than '+MAX_LEVEL_DEPTH_ROLES+' levels of roles in your Role Hierarchy ';
-                            html += '(exactly '+mdepth+' levels).<br />';
-                            html += 'The Role Hierarchy is not there to mimic the hierarchy of your ';
-                            html += 'company, it is there for visibility purpose.<br />';
-                            html += 'Please reduce it!';
-                            helper.html.modal.show('Too many levels in your Role Hierarchy!', html);
+                            const html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_TooManyRoles_CL)}', MAX_LEVEL_DEPTH_ROLES, mdepth);
+                            //helper.html.modal.show('{!JSENCODE($Label.OrgCheck_TooManyLevels_CL)}', html);
                             helper.html.message.show(html);
                         }
                         
@@ -379,7 +346,7 @@
                             html += 'Parent Role: <b>'+helper.html.render.link('/'+roles_map[node.parent.data].id, helper.html.render.escape(roles_map[node.parent.data].name)) + '</a></b><br />';
                             html += 'Parent Salesforce Id: <b>'+roles_map[node.parent.data].id+'</b><br />';
                             if (roles_map[node.parent.data].developerName) {
-                                html += 'Parent Developer Name: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
+                                html += '{!JSENCODE($Label.OrgCheck_ParentDevName_CL)}: <b>'+helper.html.render.escape(roles_map[node.parent.data].developerName)+'</b><br />';
                             }
                         }
                         helper.html.modal.show('Full information about this role', html);
@@ -401,33 +368,36 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
-                                    { name: 'Name', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: 'Score', type: 'numeric', property: '##score##' },
-                                    { name: 'Developer Name', property: 'developerName' },
-                                    { name: 'Number of active members', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_NbActiveMembers_CL)}', type: 'numeric', 
                                         formula: (r) => {
-                                            if (r.hasActiveMembers == false) return 'No active member!';                                
-                                            return r.activeMembersCount + ' active member' + (r.activeMembersCount > 1 ? 's' : '');
+                                            if (r.hasActiveMembers == false) return '{!JSENCODE($Label.OrgCheck_NoActiveMember_CL)}';   
+                                            if (r.activeMembersCount == 1) return '{!JSENCODE($Label.OrgCheck_OneActiveMember_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XActiveMembers_CL)}', r.activeMembersCount);
                                         },
                                         scoreFormula: (r) => {
                                             if (r.hasActiveMembers == false) return 1;
                                         }
                                     },
-                                    { name: 'Number of inactive members', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_NbInactiveMembers_CL)}', type: 'numeric', 
                                         formula: (r) => {
-                                            if (r.hasInactiveMembers === true) return r.inactiveMembersCount + ' inactive member' + (r.inactiveMembersCount > 1 ? 's' : '');
-                                            return 'No inactive member!';                                
+                                            if (r.hasInactiveMembers === false) return '{!JSENCODE($Label.OrgCheck_NoInactiveMember_CL)}';
+                                            if (r.inactiveMembersCount == 1) return '{!JSENCODE($Label.OrgCheck_OneInactiveMember_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XInactiveMembers_CL)}', r.inactiveMembersCount);
+                                            ;                                
                                         },
                                         scoreFormula: (r) => {
                                             if (r.hasInactiveMembers === true) return 1;
                                         }
                                     },
-                                    { name: 'Parent', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_Parent_CL)}', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
                                             return helper.html.render.link(
@@ -435,9 +405,9 @@
                                                 helper.html.render.escape(parent.name)
                                             );
                                         }
-                                        return 'No parent';
+                                        return '{!JSENCODE($Label.OrgCheck_NoParent_CL)}';
                                     }},
-                                    { name: 'Parent Developer Name', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_ParentDevName_CL)}', formula: (r) => { 
                                         if (r.hasParent === true) {
                                             const parent = map.roles[r.parentId];
                                             return helper.html.render.escape(parent.developerName);
@@ -446,12 +416,13 @@
                                     }}
                                 ],
                                 data: map.roles,
-                                sorting: { name: 'Score', order: 'desc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { 
                                     if (r.developerName === '###root###') return false;
                                 }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true
                             });
                             
                             // Render role graphic

@@ -16,7 +16,6 @@
         <members>OrgCheck_Automations_VFP</members>
         <members>OrgCheck_VisualComponents_VFP</members>
         <members>OrgCheck_ApexComponents_VFP</members>
-        <members>OrgCheck_Authorization_VFP</members>
         <members>OrgCheck_Analytics_VFP</members>
         <name>ApexPage</name>
     </types>
@@ -44,12 +43,5 @@
         <members>OrgCheck_Users</members>
         <name>PermissionSet</name>
     </types>
-    <types>
-        <members>OrgCheck_JSForce_SR</members>
-        <members>OrgCheck_D3_SR</members>
-        <members>OrgCheck_OrgCheck_SR</members>
-        <members>OrgCheck_Logos_SR</members>
-        <name>StaticResource</name>
-    </types>
-    <version>53.0</version>
+    <version>55.0</version>
 </Package>
