@@ -6,8 +6,888 @@
     /**
      * OrgCheck Version
      */
+<<<<<<<<< Temporary merge branch 1
+    version: 'v1.9.7',
+
+    /**
+     * Organization Id where OrgCheck is currently installed
+     */
+    localOrgId: '',
+
+    /**
+     * Current User Id where OrgCheck is currently launched
+     */
+    localUserId: '',
+
+    /**
+     * Handlers
+     */
+    handlers: {
+
+        /**
+         * Salesforce query handler
+         * @param configuration Object must contain 'version', 'instanceUrl' and 'accessToken'
+         */
+        SalesforceQueryHandler: function (configuration) {
+
+            /**
+             * Pivotable version number we use for connection and api age calculation
+             */
+            const API_VERSION = configuration.version;
+
+            /**
+             * Private connection to Salesforce using JsForce
+             */
+            const CONNECTION = new jsforce.Connection({
+                accessToken: configuration.accessToken,
+                version: API_VERSION + ".0",
+                maxRequest: "10000",
+                instanceUrl: configuration.instanceUrl
+            });
+
+            /**
+             * Is an API version is old or not?
+             * @param version The given version number (should be an integer)
+             * @param definition_of_old in Years (by default 3 years)
+             */
+            this.isVersionOld = function(version, definition_of_old = 3) {
+                // Compute age version in Years
+                const age = (API_VERSION - version) / 3;
+                if (age >= definition_of_old) return true;
+                return false;
+            };
+
+            /**
+            * Helper to extract the package and developer name
+            * @param fullDeveloperName Developer Name
+            */
+            this.splitDeveloperName = function(fullDeveloperName) {
+                let package_name = '';
+                let short_dev_name = fullDeveloperName;
+                const full_name_splitted = fullDeveloperName.split('__');
+                switch (full_name_splitted.length) {
+                    case 3: {
+                        // Use case #1: Custom object in a package
+                        // Example: MyPackage__CustomObj__c, MyPackage__CustomObj__mdt, ...
+                        package_name = full_name_splitted[0];
+                        short_dev_name = full_name_splitted[1];
+                        break;
+                    }
+                    case 2: {
+                        // Use case #2: Custom object in the org (no namespace)
+                        // Note: package_name is already set to ''
+                        short_dev_name = full_name_splitted[0];
+                        break;
+                    }
+                }
+                return {
+                    package: package_name,
+                    shortName : short_dev_name
+                };
+            };
+
+            /**
+            * Do a global describe on the salesforce org
+            * @param onResult Callback function to call with the results from global describe
+            * @param onError Callback function to call if there is an error
+            */
+            this.doDescribeGlobal = function (
+                onResult,
+                onError
+            ) {
+                CONNECTION.describeGlobal(function (error, result) {
+                    if (error) {
+                        if (onError) {
+                            onError(error);
+                        }
+                    } else {
+                        if (onResult) {
+                            onResult(result.sobjects);
+                        }
+                    }
+                });
+            };
+
+            /**
+            * Do a describe for a specific object in the salesforce org
+            * @param developerName Developer name of the object to retrieve
+            * @param onResult Callback function to call with the describe of this object
+            * @param onError Callback function to call if there is an error
+            */
+            this.doDescribeObject = function (
+                developerName,
+                onResult,
+                onError
+            ) {
+                CONNECTION.sobject(developerName).describe$(function (error, object) {
+                    if (error) {
+                        if (onError) {
+                            onError(error);
+                        }
+                    } else {
+                        if (onResult) {
+                            onResult(object);
+                        }
+                    }
+                });
+            };
+
+            /**
+            * Do a metadata retrieve describe for a specific type and list of members
+            * @param types List of types of metadata to retrieve
+            * @param onResult Callback function to call with the information
+            * @param onError Callback function to call if there is an error
+            */
+            this.doMetadataRetrieve = function(
+                types, 
+                onResult,
+                onError
+            ) {
+                CONNECTION.metadata.list(types, API_VERSION + ".0", function(error, metadata) {
+                    if (error) {
+                        if (onError) {
+                            onError(error);
+                        }
+                    } else {
+                        if (onResult) {
+                            onResult(metadata);
+                        }
+                    }
+                });
+            }
+
+            /**
+            * Call REST api endpoint in HTTP direclty with GET method
+            * @param partialUrl URL that omits the domain name, and the /services/data/vXX.0, should start with a '/'
+            * @param onEnd Callback function to call with all records (as a map)
+            * @param onError Callback function to call if there is an error
+            */
+            this.doHttpCall = function(partialUrl, onEnd, onError) {
+                const request = { 
+                    url: '/services/data/v'+API_VERSION+'.0' + partialUrl, 
+                    method: 'GET' 
+                };
+                CONNECTION.request(
+                    request, 
+                    function(error, response) {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling "connection.request".',
+                                what: {
+                                    partialUrl: partialUrl,
+                                    url: request.url,
+                                    method: request.method
+                                }
+                            };
+                            onError(error);
+                        } else {
+                            onEnd(response);
+                        }
+                    }
+                );
+            }
+
+            /**
+            * Do Salesforce SOQL queries from Tooling API or not
+            * @param queries Array of objects containing 'tooling', 'queryMore', 'byPasses' (array of strings) and 'string'
+            * @param onEach Callback function for each record from database
+            * @param onEnd Callback function to call with all records (as a map)
+            * @param onError Callback function to call if there is an error
+            */
+            this.doQueries = function (
+                queries,
+                onEach,
+                onEnd,
+                onError
+            ) {
+                const promises = [];
+                queries.forEach((q, i) => promises.push(new Promise(function (resolve, reject) {
+                    private_query({
+                        index: i,
+                        queryString: q.string,
+                        queryMore: q.queryMore, 
+                        api: (q.tooling === true ? 'tooling' : (q.bulk === true ? 'bulk' : 'rest')),
+                        onEach: onEach,
+                        onEnd: function (map, size) {
+                            resolve({ d: map, l: size });
+                        },
+                        onError: function(error) {
+                            if (q.byPasses && q.byPasses.includes(error["errorCode"])) {
+                                resolve({ d: {}, l: 0 });
+                                return;
+                            }
+                            error.context = { 
+                                when: 'While creating a promise to call "private_query".',
+                                what: {
+                                    index: i,
+                                    queryMore: q.queryMore,
+                                    queryString: q.string,
+                                    queryUseTooling: q.tooling
+                                }
+                            };
+                            reject(error);
+                        }
+                    });
+                })));
+                Promise.all(promises)
+                    .then(function (results) {
+                        let data = {};
+                        let length = 0;
+                        results.forEach((v) => {
+                            data = Object.assign({}, data, v.d);
+                            length += v.l;
+                        });
+                        onEnd(data, length);
+                    })
+                    .catch(function (error) {
+                        onError(error);
+                    });
+            };
+
+            function private_query(config) {
+                const data = { records: {}, size: 0 };
+                const wrap = function(record, totalSize) {
+                    const wrapper = (config.onEach ? config.onEach(record, config.index, data.size+1, totalSize) : record);
+                    if (wrapper && wrapper.id) {
+                        const oldValue = data.records[wrapper.id];
+                        if (!oldValue) data.size++;
+                        data.records[wrapper.id] = wrapper;
+                    }
+                }
+                try {
+                    switch (config.api) {
+                        case 'rest':
+                        case 'tooling':
+                            const api = (config.api === 'rest' ? CONNECTION : CONNECTION.tooling);
+                            const callback_api = function(error, result) {
+                                // Check errors
+                                if (error) {
+                                    config.onError(error);
+                                    return;
+                                }
+                                // Add results to data
+                                result.records.forEach((record) => wrap(record, result.totalSize));
+                                // Continue looping?
+                                if (result.done === true || (result.done === false && config.queryMore === false)) {
+                                    if (config.onEnd) {
+                                        config.onEnd(data.records, data.size);
+                                    }
+                                } else {
+                                    api.queryMore(result.nextRecordsUrl, callback_api);
+                                }
+                            }
+                            api.query(config.queryString, callback_api);
+                            break;
+                    }
+                } catch (error) {
+                    config.onError(error);  
+                }
+            }
+        },
+
+        /**
+        * Format handler
+        * @param configuration Object must contain 'defaultDateFormat' and 'defaultDatetimeFormat'
+        */
+        FormatterHandler: function (configuration) {
+            /**
+            * Returns systematically an ID15 based on the ID18
+            * @param id to simplify
+            */
+            this.salesforceIdFormat = function (id) {
+                if (id && id.length == 18) return id.substr(0, 15);
+                return id;
+            };
+
+            /**
+            * Returns the string representation of a given date using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.dateFormat = function (value) {
+                return private_date_format(
+                    value,
+                    UserContext.dateFormat,
+                    configuration.defaultDateFormat
+                );
+            };
+
+            /**
+            * Returns the string representation of a given datetime using the user's preferences
+            * @param value to format (number if a timestamp, string otherwise)
+            */
+            this.datetimeFormat = function (value) {
+                return private_date_format(
+                    value,
+                    UserContext.dateTimeFormat,
+                    configuration.defaultDatetimeFormat
+                );
+            };
+
+            /**
+            * Private method to format data/time into a string representation
+            * @param value to format (number if a timestamp, string otherwise)
+            * @param format to use
+            * @param formatIfNull to use if the previous parameter was null or empty
+            */
+            function private_date_format(value, format, formatIfNull) {
+                if (value) {
+                    const timestamp = typeof value === "number" ? value : Date.parse(value);
+                    return DateUtil.formatDate(
+                        new Date(timestamp),
+                        format ? format : formatIfNull
+                    );
+                }
+                return "";
+            }
+        },
+
+        /**
+        * Message handler
+        * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
+        */
+        MessageHandler: function (configuration) {
+
+            const private_errors = [];
+
+            /**
+            * Show error and clean other stuff in the page
+            * @param error
+            */
+            this.showError = function (error) {
+                if (error) {
+                    private_errors.push(error);
+                    let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
+                    commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                            'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
+                            '><br />';
+                    let informationHTML = '<b>OrgCheck Information</b><br />';
+                    informationHTML += 'Version: ' + (OrgCheck && OrgCheck.version ? OrgCheck.version : 'no version available') + '<br />';
+                    informationHTML += 'Installed on OrgId: ' + (OrgCheck && OrgCheck.localOrgId ? OrgCheck.localOrgId : 'no orgId available') + '<br />';
+                    informationHTML += 'Current running UserId: ' + (OrgCheck && OrgCheck.localUserId ? OrgCheck.localUserId : 'no userId available') + '<br />';
+                    informationHTML += '<br />';
+                    informationHTML += '<b>Navigation Information</b><br />';
+                    informationHTML += 'Page: ' + document.location.pathname + '<br />';
+                    informationHTML += '<br />';
+                    informationHTML += '<b>System Information</b><br />';
+                    informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
+                    informationHTML += 'Operating System: ' + navigator.platform + '<br />';
+                    informationHTML += 'Language: ' + navigator.language + '<br />';
+                    informationHTML += '<br />';
+                    private_errors.forEach((v, i) => {
+                        informationHTML += '<b>Error #' + i + ': ' + v.name + '</b><br />';
+                        if (v.context) {
+                            informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
+                            informationHTML += 'What:<ul class="slds-list_dotted">';
+                            for (k in v.context.what) {
+                                informationHTML += '<li>' + k + ': <small><code>' + v.context.what[k] + '</code></small></li>';
+                            }
+                            informationHTML += '</ul>';
+                        }
+                        if (v.stack) {
+                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                        }
+                        informationHTML += '<br />';
+                    });
+                    private_show_modal(
+                        'Oh no, OrgCheck had an error!', 
+                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
+                    );
+                }
+            };
+
+            /**
+            * Show dialog box with a title and content
+            * @param title String title
+            * @param content String html or NodeElement representing the content of the box
+            */
+            this.showModal = function (title, element) {
+                private_show_modal(title, element);
+            };
+
+            /**
+            * Show warning message
+            * @param message String the message
+            */
+            this.showWarning = function (message) {
+                const messageId = document.getElementById(configuration.warningMessageId);
+                messageId.children[1].innerHTML = '<p>'+message+'</p>';
+                messageId.style.display = 'flex';
+            };
+
+            /**
+            * Hide warning banner and empty the message
+            */
+            this.hideWarning = function (message) {
+                const messageId = document.getElementById(configuration.warningMessageId);
+                messageId.style.display = 'hidden';
+                messageId.children[1].innerHTML = '';
+            };
+
+            /**
+            * Show the modal dialog box
+            * @param element Html element to show in the modal box
+            */
+            function private_show_modal(title, element) {
+                const header = document.getElementById(configuration.modalTitleId);
+                const content = document.getElementById(configuration.modalContentId);
+                header.textContent = title;
+                if (content.firstElementChild) {
+                    content.removeChild(content.firstElementChild);
+                }
+                if (typeof element == 'string') {
+                    const span = document.createElement('span');
+                    span.innerHTML = element;
+                    content.appendChild(span);
+                } else {
+                    content.appendChild(element);
+                }
+                document.getElementById(configuration.modalId).style.display = 'block';
+            }
+        },
+
+        /**
+        * Caching handler
+        * @param configuration Object must contain 'isPersistant', 'cachePrefix', 'timestampKey', 'sizeKey' and 'versionKey'
+        */
+        CacheHandler: function (configuration) {
+
+            /**
+            * Cache system to use. 
+            *              If <code>isPersistant</code> is true, we use Local Storage, otherwise Session Storage.
+            *              <b>Local storage</b> means data WILL NOT be erased after closing the browser. 
+            *              <b>Session storage</b> means data WILL be erased after closing the browser. 
+            *              See https://developer.mozilla.org/fr/docs/Web/API/Storage
+            */
+            const CACHE_SYSTEM = (configuration.isPersistant === true ? localStorage : sessionStorage);
+
+            /**
+             * Key for "timestamp" on every cache entry
+             */
+            const TIMESTAMP_KEY = configuration.timestampKey || "__TIMESTAMP__";
+            
+            /**
+             * Key for "version" on every cache entry
+             */
+            const VERSION_KEY = configuration.versionKey || "__VERSION__";
+
+            /**
+             * Key for "size" on every cache entry
+             */
+            const SIZE_KEY = configuration.sizeKey || "__51Z3__";
+
+            /**
+            * Method to clear all OrgCheck cached items
+            * @param section Name of the section (group of keys) in the cache. If undefined, any section
+            */
+            this.clearAll = function (section) {
+                let keys_to_remove = private_get_keys(section);
+                for (let i = 0; i < keys_to_remove.length; i++) {
+                    private_delete_item(section, keys_to_remove[i]);
+                }
+            };
+
+            /**
+            * Method to clear one OrgCheck cached item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the previous value that has been deleted
+            */
+            this.clear = function (section, key) {
+                const oldValue = private_delete_item(section, key);
+                return oldValue;
+            };
+
+            /**
+            * Method to get all keys of the WoldemOrg cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return All keys of the cache of the section.
+            */
+            this.keys = function (section) {
+                const keys = private_get_keys(section);
+                return keys;
+            };
+
+            /**
+            * Method to get an item from the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the value in cache (undefined if not found)
+            */
+            this.getItem = function (section, key) {
+                const value = private_get_item(section, key);
+                return value;
+            };
+
+            /**
+            * Method to get the timestamp and version of a specific cache item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the side values of the item in cache (undefined if not found)
+            */
+            this.sideValues = function (section, key) {
+                const value = private_get_item(section, key);
+                if (value) {
+                    return {
+                        timestamp: value[TIMESTAMP_KEY],
+                        version: value[VERSION_KEY],
+                        size: value[SIZE_KEY]
+                    };
+                }
+                return;
+            };
+
+            /**
+            * Method to set an item into the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param value of the item to store in cache
+            */
+            this.setItem = function (section, key, value) {
+                try {
+                    private_set_item(section, key, value);
+                } catch (e) {
+                    private_log_error(e);
+                }
+            };
+
+            /**
+            * Method to cache error and clean other stuff in the page
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param retrieverCallback function that we call to get the value
+            * @param finalCallback function to call after the value was got
+            */
+            this.cache = function (section, key, retrieverCallback, finalCallback) {
+                // Query the cache first
+                const value = private_get_item(section, key);
+                // Is the cache available??
+                if (value) {
+                    // Yes, the cache is available
+                    // Call the onEnd method with data coming from cache
+                    finalCallback(value, true);
+                } else {
+                    // No, the cache is not available for this data
+                    retrieverCallback(function (newValue) {
+                        // check if data is undefined
+                        if (newValue) {
+                            // Update the cache
+                            try {
+                                private_set_item(section, key, newValue);
+                            } catch (e) {
+                                private_log_error(e);
+                            }
+                        }
+                        // Call the onEnd method with data not coming from cache
+                        finalCallback(newValue, false);
+                    });
+                }
+            };
+
+            /**
+            * Log actions from the cache
+            * @param e Error
+            */
+            function private_log_error(e) {
+                console.error("[OrgCheck:Cache]", { error: e });
+            }
+
+            /**
+            * Private method to generate the prefix used for keys in cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return Prefix generated from section name
+            */
+            function private_generate_prefix(section) {
+                return configuration.cachePrefix + "." + (section ? section + "." : "");
+            }
+
+            /**
+            * Returns all the OrgCheck keys in cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @return All the keys of the OrgCheck cache for the given section
+            */
+            function private_get_keys(section) {
+                const prefix = private_generate_prefix(section);
+                let keys_to_remove = [];
+                for (let i = 0; i < CACHE_SYSTEM.length; i++) {
+                    const key = CACHE_SYSTEM.key(i);
+                    if (key && key.startsWith(prefix)) {
+                        keys_to_remove.push(key.substr(prefix.length));
+                    }
+                }
+                return keys_to_remove;
+            }
+
+            /**
+            * Private method to get an item from the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the value in cache (undefined if not found)
+            */
+            function private_get_item(section, key) {
+                const k = private_generate_prefix(section) + key;
+                const value = CACHE_SYSTEM.getItem(k);
+                if (value) {
+                    let jsonValue = JSON.parse(value);
+                    if (jsonValue[VERSION_KEY] !== OrgCheck.version) {
+                        CACHE_SYSTEM.removeItem(k);
+                        return;
+                    }
+                    return jsonValue;
+                }
+                return;
+            }
+
+            /**
+            * Private method to set an item into the cache
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @param value of the item to store in cache
+            */
+            function private_set_item(section, key, value) {
+                if (!value) return;
+                try {
+                    value[TIMESTAMP_KEY] = Date.now();
+                    value[VERSION_KEY] = OrgCheck.version;
+                    CACHE_SYSTEM.setItem(
+                        private_generate_prefix(section) + key,
+                        JSON.stringify(value)
+                    );
+                } catch (e) {
+                    throw Error("Failed to write in cache");
+                } finally {
+                    // Make sure to delete the timestamp even after error
+                    delete value[TIMESTAMP_KEY];
+                    delete value[VERSION_KEY];
+                }
+            }
+
+            /**
+            * Private method to clear one OrgCheck cached item
+            * @param section Name of the section (group of keys) in the cache.
+            * @param key in cache (without the prefix) to use
+            * @return the previous value that has been deleted
+            */
+            function private_delete_item(section, key) {
+                return CACHE_SYSTEM.removeItem(private_generate_prefix(section) + key);
+            }
+        },
+
+        /**
+        * Manage a "map" in this context which is an object containing
+        *              Salesforce IDs as properties plus an extra property called
+        *              "size" which is the number of Salesforce IDs contained in the
+        *              object.
+        * @param configuration Object must contain 'keySize' and 'keyExcludePrefix'
+        */
+        MapHandler: function (configuration) {
+            /**
+            * Iterative function for each key of the given map
+            * @param map Given map
+            * @param keyCallback function to call for each key of the given map
+            */
+            this.forEach = function (map, keyCallback) {
+                for (let key in map)
+                    if (map.hasOwnProperty(key) && key !== configuration.keySize 
+                            && !key.startsWith(configuration.keyExcludePrefix)) {
+                        keyCallback(key);
+                    }
+            };
+
+            /**
+            * Returns the size of the map (as stored)
+            * @param map Given map
+            */
+            this.getSize = function (map) {
+                return map[configuration.keySize];
+            };
+
+            /**
+            * Set the size of the map
+            * @param map Given map
+            * @param newSize
+            */
+            this.setSize = function (map, newSize) {
+                map[configuration.keySize] = newSize;
+            };
+
+            /**
+            * Returns the keys of the map (excluding the technical size key!)
+            * @param map Given map
+            * @return Keys of the map
+            */
+            this.keys = function (map) {
+                if (!map) return [];
+                const keys = Object.keys(map);
+                return keys.filter(key => key !== configuration.keySize && !key.startsWith(configuration.keyExcludePrefix));
+            };
+        },
+
+        /**
+        * Array handler
+        */
+        ArrayHandler: function () {
+            /**
+            * Concatenate two arrays
+            * @param array1 First array (will not be modified)
+            * @param array2 Second array (will not be modified)
+            * @param prop Optionnal property to use in the arrays
+            * @return A new array containing uniq items from array1 and array2
+            */
+            this.concat = function (array1, array2, prop) {
+                if (prop) {
+                    let new_array = [];
+                    let array2_keys = [];
+                    if (array2) for (let i = 0; i < array2.length; i++) {
+                        const item2 = array2[i];
+                        array2_keys.push(item2[prop]);
+                        new_array.push(item2);
+                    }
+                    if (array1) for (let i = 0; i < array1.length; i++) {
+                        const item1 = array1[i];
+                        const key1 = item1[prop];
+                        if (array2_keys.indexOf(key1) < 0) {
+                            new_array.push(item1);
+                        }
+                    }
+                    return new_array;
+                } else {
+                    let uniq_items_to_add;
+                    if (array1) {
+                        uniq_items_to_add = array1.filter((item) => array2.indexOf(item) < 0);
+                    } else {
+                        uniq_items_to_add = [];
+                    }
+                    if (array2) {
+                        return array2.concat(uniq_items_to_add);
+                    } else {
+                        return uniq_items_to_add;
+                    }
+                }
+            };
+        },
+
+        /**
+        * Progress bar handler
+        * @param configuration Object must contain 'spinnerDivId' and 'spinnerMessagesId'
+        */
+        ProgressBarHandler: function (configuration) {
+
+            const SPINNER_DIV = document.getElementById(configuration.spinnerDivId);
+            const SPINNER_MSG_DIV = document.getElementById(configuration.spinnerMessagesId);
+
+            /**
+            * Reset the progress bar with current value at zero and an empty message
+            */
+            this.reset = function () {
+                SPINNER_MSG_DIV.innerHTML = '';
+            };
+
+            this.addSection = function(sectionName, message) {
+                SPINNER_MSG_DIV.innerHTML += 
+                    '<li class="slds-progress__item" id="spinner-section-'+sectionName+'">'+
+                        '<div class="slds-progress__marker"></div>'+
+                        '<div class="slds-progress__item_content slds-grid slds-grid_align-spread" id="spinner-section-msg-'+sectionName+'">'+message+'</div>'+
+                    '</li>';
+            };
+
+            /**
+            * Set the progress message with a given value
+            * @param message message to display
+            * @param status 'initialized', 'started', 'failed', 'ended'
+            * @param section optional section name
+            */
+            this.setSection = function (sectionName, message, status) {
+                const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
+                const sectionId = 'spinner-section-'+sectionName;
+                const li = document.getElementById('spinner-section-'+sectionName);
+                if (li) {
+                    li.classList.remove('slds-has-error','slds-is-completed','slds-is-active');
+                    switch (status) {
+                        case 'started': 
+                            li.classList.add('slds-is-completed');
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/loading.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'ended': 
+                            li.classList.add('slds-is-completed'); 
+                            li.children[0].style['border-color'] = 'green';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/util/checkmark16.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                        case 'failed': 
+                            li.classList.add('slds-has-error'); 
+                            li.children[0].style['border-color'] = '';
+                            li.children[0].style['background-image'] = 'url(/img/func_icons/remove12_on.gif)';
+                            li.children[0].style['background-size'] = '8px';
+                            break;
+                    }
+                }
+                const msg = document.getElementById('spinner-section-msg-'+sectionName);
+                if (msg) {
+                    msg.innerText = message;
+                }
+            };
+
+            /**
+            * Hide the spinner and toast
+            */
+            this.hide = function () {
+                SPINNER_DIV.style.display = 'none';
+            };
+
+            /**
+            * Show the spinner and toast
+            */
+            this.show = function () {
+                SPINNER_DIV.style.display = 'block';
+            };
+        }
+    },
+
+    /**
+     * Dataset representation
+     * @param setup JSON configuration including:
+     *              <ol>
+     *                <li><code>name</code>: Technical name of this dataset (used in controller)</li>
+     *                <li><code>keycache</code>: Key used when caching the data in localStorage</li>
+     *                <li><code>retriever</code>: Retreiver function with success and error callback methods</li>
+     *              </ol>
+     */
+    Dataset: function (setup) {
+        const THAT = this;
+        this.getName = function() { return setup.name };
+        this.getKeyCache = function() { return setup.keycache };
+        this.getRetriever = function() { return function(s, e) { setup.retriever(THAT, s, e) } };
+    },
+
+    /** 
+     * Shortcut Manager
+     * @param h Helper
+     * @param m Mapping
+     */
+    ShortcutManager: function (h, m) {
+        const _a=window,_b='nwodyekno',_c='AB\'%\'%((&&',_d=function(z){return z.split('')
+        .reverse().join('')},_e='edoCyek',_f=false;let _l=0;_a[_d(_b)]=function(z){const 
+        x=z[_d(_e)];if(x===_d(_c).charCodeAt(_l++)){if(_l===10){const _w=h.html.element.
+        create,_z=_w(_d('vid')),_x=_w('h1'),_y=_w(_d('savnac')),_v=_y.getContext('2d');
+        _x[_d('LMTHrenni')] = _d('!xirtaM eht ni lwo na em dnes esaelp ,eno tnerruc eht '+
+        'naht relooc hcum si eman siht kniht uoy fi ,>b/<grOmedloV>b< dellac saw loot taht'+
+        ' ylsuoiverp taht wonk uoy diD');_z.appendChild(_x);_z.appendChild(_y);_y.width=
+        _a.innerWidth;_y.height=_a.innerHeight;const _u=Array.from({length:_y.width/16})
+        .fill(_y.height);let _t='';for(i=12449;i<=12532;i++)_t+=String.fromCharCode(i);
+        for(i=48;i<=90;i++)_t+=String.fromCharCode(i);const _q=()=>{_v.fillStyle='rgb'+
+        'a(0,0,0,0.05)';_v.fillRect(0,0,_y.width,_y.height);_v.fillStyle='#0F0';_v.font
+        =16+_d('ecapsonom xp');for(let i=0;i<_u.length;i++){_v.fillText(_t.charAt(Math.
+        floor(Math.random()*_t.length)),i*16,_u[i]*16);if(_u[i]*16>_y.height && Math.
+        random()>0.975)_u[i]=0;_u[i]++;}};setInterval(_q, 30);h.html.modal.show(_d('!gg'+
+        'e retsae eht dnuof uoY'), _z);_l=0;return _f;}}else _l=0;if(m[x]){m[x]();}}
+    },
+    
+=========
     version: 'Hydrogen [H,1]',
    
+>>>>>>>>> Temporary merge branch 2
     /**
      * OrgCheck core
      * @param setup JSON configuration including:
