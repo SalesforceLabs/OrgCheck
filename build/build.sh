@@ -24,7 +24,7 @@ for f in build/src/javascript/OrgCheck_*.js; do
     fi
 done
 for f in build/src/javascript/OrgCheck.js; do
-    if [ "${UGLIFY_MODE}" == "ON" ]; then
+    if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
         uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
     else
         cat "${f}" > /tmp/$(basename $f);
