@@ -7,7 +7,7 @@
      * OrgCheck Version
      */
     version: 'Hydrogen [H,1]',
-   
+
     /**
      * OrgCheck core
      * @param setup JSON configuration including:
