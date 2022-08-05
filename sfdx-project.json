@@ -5,7 +5,7 @@
             "default": true,
             "package": "OrgCheck",
             "versionName": "Hydrogen [H,1]",
-            "versionNumber": "2.1.0.NEXT",
+            "versionNumber": "2.1.1.NEXT",
             "versionDescription": "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
@@ -23,9 +23,6 @@
         "OrgCheck@1.9.5-2": "04t7R000000kn71QAA",
         "OrgCheck@1.9.6-1": "04t7R000001IEsAQAW",
         "OrgCheck@1.9.7-2": "04t7R000001IG9JQAW",
-        "OrgCheck@2.1.0-1": "04t7R0000018jkSQAQ",
-        "OrgCheck@2.1.0-2": "04t7R0000018jkXQAQ",
-        "OrgCheck@2.1.0-3": "04t7R0000018jkhQAA",
-        "OrgCheck@2.1.0-4": "04t7R0000018jkmQAA"
+        "OrgCheck@2.1.1-1": "04t7R0000018jlBQAQ"
     }
 }
