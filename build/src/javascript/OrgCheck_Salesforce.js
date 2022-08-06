@@ -650,10 +650,7 @@ OrgCheck.Salesforce = {
         this.getUserInformation = () => { return private_user_information; }
 
         const private_check_security = () => {
-            CONNECTION.query('SELECT Id, Profile.Id, Profile.Name, Profile.PermissionsViewAllData, '+
-                                '(SELECT Id FROM PermissionSetAssignments '+
-                                 'WHERE PermissionSet.NamespacePrefix = \'OrgCheck\' '+
-                                 'AND PermissionSet.Name = \'OrgCheck_Users\') '+
+            CONNECTION.query('SELECT Id, Profile.Id, Profile.Name, Profile.PermissionsViewAllData '+
                              'FROM User '+
                              'WHERE Id = '+this.secureSOQLBindingVariable(configuration.userId))
                 .on('record', (r) => {
@@ -663,10 +660,6 @@ OrgCheck.Salesforce = {
                     if (r.Profile.PermissionsViewAllData === false) {
                         watchDogLevel = 'ERROR';
                         watchDogMessage = 'You should be assigned to the System Administrator profile to run OrgCheck.';
-                    }
-                    if (r.PermissionSetAssignments && r.PermissionSetAssignments.records.length !== 1) {
-                        watchDogLevel = 'ERROR';
-                        watchDogMessage = 'You should be assigned to the "OrgCheck Users" permission set in addition to your Admin profile.';
                     }
                     configuration.watchDogCallback({ 
                         type: 'UserSecurity',
