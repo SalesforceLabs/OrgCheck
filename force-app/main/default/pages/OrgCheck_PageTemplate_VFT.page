@@ -2,9 +2,9 @@
     <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <apex:slds />
         <head>
-            <script src="{!URLFOR($Resource.OrgCheck_D3_SR)}"></script>
-            <script src="{!URLFOR($Resource.OrgCheck_JSForce_SR)}"></script>
-            <script src="{!URLFOR($Resource.OrgCheck_OrgCheck_SR)}"></script>
+            <script src="{!URLFOR($Resource.OrgCheck_SR, 'js/d3.js')}"></script>
+            <script src="{!URLFOR($Resource.OrgCheck_SR, 'js/jsforce.js')}"></script>
+            <script src="{!URLFOR($Resource.OrgCheck_SR, 'js/orgcheck.js')}"></script>
             <apex:insert name="html_additional_scripttags" />
         </head>
         <body class="slds-scope">
@@ -161,8 +161,8 @@
                         <div class="slds-notify_container slds-is-relative" style="z-index: 1;">
                             <div class="slds-notify slds-notify_toast slds-theme_info" role="status">
                                 <span class="slds-assistive-text">Loading...</span>
-                                <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot+Animated.svg')}" width="256" height="256">
-                                    <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot+Animated.svg')}" width="256" height="256" />
+                                <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="256" height="256">
+                                    <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="256" height="256" />
                                 </object>
                                 <div class="slds-notify__content">
                                     <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;" width="100%" height="100%">

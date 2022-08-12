@@ -46,8 +46,8 @@
                                         <table>
                                             <tr>
                                                 <td width="50%">
-                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%">
-                                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Logo.svg')}" width="80%" height="80%" />
+                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="80%" height="80%">
+                                                        <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="80%" height="80%" />
                                                     </object>
                                                 </td>
                                                 <td width="50%">
@@ -60,8 +60,8 @@
                                         <table>
                                             <tr>
                                                 <td width="30%">
-                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%">
-                                                        <img src="{!URLFOR($Resource.OrgCheck_Logos_SR, 'Mascot.svg')}" width="80%" height="80%" />
+                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot.svg')}" width="80%" height="80%">
+                                                        <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot.svg')}" width="80%" height="80%" />
                                                     </object>
                                                 </td>
                                                 <td width="70%">
