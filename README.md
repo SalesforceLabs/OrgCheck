@@ -43,6 +43,9 @@ OrgCheck is available under the [MIT license](LICENSE.md)
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
 - 2022:
+  - Articles on Medium about technical debt in Salesforce orgs:
+    - How to continuously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org? https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a
+    - Five concrete actions to reduce technical debt related to Apex Classes — Reduce Technical Debt series https://medium.com/@vfinet/five-concret-actions-to-reduce-technical-debt-related-to-apex-classes-reduce-technical-debt-f71a31e4b30c
   - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
   - Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
 - 2021: 
