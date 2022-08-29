@@ -23,16 +23,15 @@ permalink: /vision/
 - One day on the AppExchange?
 
 ## What this application contains?
-- 1 Permission Set for users to see the app
 - 1 Custom App
-- 12 Tabs
+- 13 Tabs
 - 1 Visualforce Template
 - 13 Visualforce Pages
-- 4 StaticResource including “jsforce.min.js” and “d3.v5.min.js”
+- 1 StaticResource (zipped) including “jsforce.min.js” and “d3.v5.min.js”
 
 **No more!**
 
 ## Install today!
-<a href="https://sfdc.co/OrgCheck-Install-1_9-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a><br />
-<a href="https://sfdc.co/OrgCheck-Install-1_9-DevOrg"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a><br />
 
