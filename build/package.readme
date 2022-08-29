@@ -33,7 +33,7 @@ List of usefull commands for packaging
 ============================================================
 sfdx force:package:version:list
 sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-sfdx force:package:version:promote --package OrgCheck@2.1.1-1
+sfdx force:package:version:promote --package OrgCheck@2.1.2-0
 
 
 
@@ -46,16 +46,13 @@ List of usefull commands for pushing updates
 sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackageVersionId, ScheduledStartTime, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushRequest WHERE SystemModstamp = TODAY" --resultformat=csv
 
 ## List all the subscriber part of the previous push request
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob where SystemModstamp = today" --resultformat=csv
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY" --resultformat=csv
 
 ## CHeck the pending and in progress
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob where SystemModstamp = today and status != 'Succeeded' and status != 'failed'" --resultformat=csv
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushRequestId, SubscriberOrganizationKey, Status, SystemModstamp, StartTime, EndTime, DurationSeconds FROM PackagePushJob WHERE SystemModstamp = TODAY AND status != 'Succeeded' AND status != 'failed'" --resultformat=csv
 
 ## List all error you had during the previous push
-sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError where SystemModstamp = TODAY" --resultformat=csv
-
-
-
+sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError WHERE SystemModstamp = TODAY" --resultformat=csv
 
 
 ============================================================

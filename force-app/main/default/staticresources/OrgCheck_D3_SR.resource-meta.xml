@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
-    <cacheControl>Private</cacheControl>
-    <contentType>text/javascript</contentType>
-    <description>Data-Driven Documents framework from https://d3js.org/
-Version v7.3.0 minimized at https://registry.npmjs.org/d3/-/d3-7.3.0.tgz</description>
-</StaticResource>

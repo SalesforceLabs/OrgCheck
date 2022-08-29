@@ -16,14 +16,14 @@ echo ""
 ### JAVASCRIPT PART
 ### -----------------------
 
-for f in build/src/javascript/OrgCheck_*.js; do
+for f in build/src/javascript/orgcheck/OrgCheck.*.js; do
     if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
         uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f);
     else
         cat "${f}" > /tmp/$(basename $f);
     fi
 done
-for f in build/src/javascript/OrgCheck.js; do
+for f in build/src/javascript/orgcheck/OrgCheck.js; do
     if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
         uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
     else
@@ -31,16 +31,30 @@ for f in build/src/javascript/OrgCheck.js; do
     fi
 done
 
+rm -Rf build/tmp/*
+rm -Rf build/bin/*
+mkdir build/tmp/js
+mkdir build/tmp/img
+
 (
-    for f in build/src/javascript/OrgCheck.js; do
+    for f in build/src/javascript/orgcheck/OrgCheck.js; do
         cat /tmp/$(basename $f)
     done
-    for f in build/src/javascript/OrgCheck_*.js; do
+    for f in build/src/javascript/orgcheck/OrgCheck.*.js; do
         cat /tmp/$(basename $f)
     done
-) > force-app/main/default/staticresources/OrgCheck_OrgCheck_SR.resource
+) > build/tmp/js/orgcheck.js
 
+cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
+cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
+cp build/src/logos/*.svg build/tmp/img
 
+(
+    cd build/tmp
+    zip -9 ../bin/OrgCheck_SR.zip -r ./*
+)
+
+cp build/bin/OrgCheck_SR.zip force-app/main/default/staticresources/OrgCheck_SR.resource
 
 
 ## https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
@@ -132,4 +146,4 @@ fi
 ### -----------------------
 ### PUSH INTO DEV ORG
 ### -----------------------
-sfdx force:source:deploy -m StaticResource:OrgCheck_OrgCheck_SR,CustomLabels,Translations  1>/dev/null
+### sfdx force:source:deploy -m StaticResource:OrgCheck_OrgCheck_SR,CustomLabels,Translations  1>/dev/null

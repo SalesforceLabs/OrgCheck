@@ -40,9 +40,7 @@ For some orgs that have Apex class not compiling, you can install the package wi
 
 ## Step 3: Permission Set assignment
 
-Once installed, go to your org and assign your Salesforce user to the Permission Set called "OrgCheck Users".
-
-And you are done!
+Once installed, go to the app "OrgCheck", and you are done!
 
 ![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
