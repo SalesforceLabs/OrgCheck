@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>OrgCheck_JSForce_SR</members>
+        <members>OrgCheck_OrgCheck_SR</members>
+        <members>OrgCheck_Logos_SR</members>
+        <members>OrgCheck_D3_SR</members>
+        <name>StaticResource</name>
+    </types>
+    <version>55.0</version>
+</Package>

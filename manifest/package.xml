@@ -40,8 +40,17 @@
         <name>CustomTab</name>
     </types>
     <types>
-        <members>OrgCheck_Users</members>
-        <name>PermissionSet</name>
+        <members>*</members>
+        <name>CustomLabel</name>
+    </types>
+    <types>
+        <members>fr</members>
+        <members>ja</members>
+        <name>Translations</name>
+    </types>
+    <types>
+        <members>OrgCheck_SR</members>
+        <name>StaticResource</name>
     </types>
     <version>55.0</version>
 </Package>
