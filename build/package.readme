@@ -3,7 +3,6 @@ Push source in a scratch org
 ============================================================
 sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg --targetdevhubusername vfinet.devhub@salesforce.com --wait 10
 sfdx force:source:push --targetusername MyScratchOrg --forceoverwrite   
-sfdx force:user:permset:assign --targetusername MyScratchOrg --permsetname OrgCheck_Users
 profileName=$(sfdx force:data:soql:query --targetusername MyScratchOrg --query "SELECT Name FROM Profile WHERE UserLicense.MasterLabel = 'Salesforce' AND Name LIKE '%Admin%' AND PermissionsViewAllData = true LIMIT 1" --resultformat=csv | tail -1)      
 sfdx force:user:create --setalias uatuser --definitionfile config/user-uat-def.json "profileName=${profileName}" permsets=OrgCheck_Users --targetusername MyScratchOrg
 
@@ -31,9 +30,9 @@ sfdx force:org:delete --targetusername MyScratchOrg
 ============================================================
 List of usefull commands for packaging
 ============================================================
-sfdx force:package:version:list
-sfdx force:package:version:create --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-sfdx force:package:version:promote --package OrgCheck@2.1.2-0
+sfdx force:package:version:list --targetdevhubusername vfinet.devhub@salesforce.com 
+sfdx force:package:version:create --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
+sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.1.2-0
 
 
 
