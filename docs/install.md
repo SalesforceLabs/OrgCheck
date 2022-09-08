@@ -14,6 +14,19 @@ permalink: /installation/
 
 ## Step 1: URLs for the installation
 
+OrgCheck is available on the AppExchange as a manage package, or, freely as an unlocked package.
+
+### AppExchange (recommanded)
+
+Go to the AppExchange or go directly to https://sfdc.co/OrgCheck-InstallToday-AppExchange
+
+URL to install Salesforce packages on the AppExchange contain the Salesforce ID of the listing. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
+
+After selecting the previous URL, you were redirected to Salesforce servers.
+If you were not yet authenticated, you will have to sign on using your credentials.
+
+### Unlocked Package (alternative)
+
 Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
 
 | Environment            | URL                                                                                | Action |
