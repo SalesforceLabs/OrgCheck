@@ -39,6 +39,7 @@ OrgCheck is available under the [MIT license](LICENSE.md)
 
 
 ## Some references
+- OrgCheck on the AppExchange: https://appexchange.salesforce.com/appxListingDetail?listingId=a0N4V00000HA0X2UAL
 - Social:
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
