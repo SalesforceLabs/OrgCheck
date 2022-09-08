@@ -18,7 +18,7 @@ OrgCheck is available on the AppExchange as a manage package, or, freely as an u
 
 ### AppExchange (recommanded)
 
-Go to the AppExchange or go directly to https://sfdc.co/OrgCheck-InstallToday-AppExchange
+Go to the AppExchange or go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 
 URL to install Salesforce packages on the AppExchange contain the Salesforce ID of the listing. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
 
