@@ -14,18 +14,19 @@ permalink: /installation/
 
 ## Step 1: URLs for the installation
 
-OrgCheck is available on the AppExchange as a manage package, or, freely as an unlocked package.
+OrgCheck is available on the **AppExchange**, or, as a **standalone package**.
 
 ### AppExchange (recommanded)
 
-Go to the AppExchange or go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
+Go to the AppExchange and serach for "OrgCheck" or "Technical Debt", you will find it.
+Alternativelly you can go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 
-URL to install Salesforce packages on the AppExchange contain the Salesforce ID of the listing. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
-
-After selecting the previous URL, you were redirected to Salesforce servers.
+After selecting the previous URL, you will be redirected to Salesforce servers for authentication.
 If you were not yet authenticated, you will have to sign on using your credentials.
 
-### Unlocked Package (alternative)
+Note: if you had the **standalone package** already installed in you org, you will need to remove it first from your org, and then try again to install the app from AppExchange.
+
+### Standalone Package (alternative)
 
 Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
 
@@ -36,7 +37,7 @@ Go to one of the following URLs depending on the nature of the organization you 
 
 URLs to install Salesforce packages contain the Salesforce ID of the current version of the package. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
 
-After selecting the previous URL, you were redirected to Salesforce servers.
+After selecting the previous URL, you will be redirected to Salesforce servers for authentication.
 If you were not yet authenticated, you will have to sign on using your credentials.
 
 
