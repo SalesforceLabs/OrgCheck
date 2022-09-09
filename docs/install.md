@@ -24,7 +24,7 @@ Alternativelly you can go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange
 After selecting the previous URL, you will be redirected to Salesforce servers for authentication.
 If you were not yet authenticated, you will have to sign on using your credentials.
 
-Note: if you had the **standalone package** already installed in you org, you will need to remove it first from your org, and then try again to install the app from AppExchange.
+Note: if you had the **standalone package** already installed in you org, you will need to remove it first from your org, and then try again to install the app from AppExchange on this particular org.
 
 ### Standalone Package (alternative)
 
@@ -92,4 +92,9 @@ In case you have enabled the "**API Client Whitelisting**" feature, you will nee
  - And assign your user to this additional permission set.
 For more information, you can check that closed issue: https://github.com/VinceFINET/OrgCheck/issues/118
 
-
+### When installing the app from AppExchange I see error like "This package can’t be installed... Package namespace conflict"
+In this case it is more likely that you are trying to install the application from the AppExchange on a Salesforce Organization where the standalone package is already installed.
+This can be explained easily, both app share the same namespace (aka package name).
+So either you keep the standalone package or you remove it and try to install the app from the AppExchange again.
+Both version are FREE anyway and will be maintained!
+It is up to you to choose the one you prefer!
