@@ -16,38 +16,32 @@ permalink: /installation/
 
 OrgCheck is available on the **AppExchange**, or, as a **standalone package**.
 
-### AppExchange (recommanded)
+### AppExchange Package (recommanded)
 
-Go to the AppExchange and serach for "OrgCheck" or "Technical Debt", you will find it.
+Go to the AppExchange and search for "OrgCheck" or "Technical Debt", you will find it.
 Alternativelly you can go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 
-After selecting the previous URL, you will be redirected to Salesforce servers for authentication.
-If you were not yet authenticated, you will have to sign on using your credentials.
+Click on the "**Get It Now**" button and select the environnment you want to install OrgCheck to.
 
-Note: if you had the **standalone package** already installed in you org, you will need to remove it first from your org, and then try again to install the app from AppExchange on this particular org.
+Note: if you had the **standalone package** already installed in this org, you will need to remove it first from your org, and then try again to install the app from AppExchange on this particular org.
 
 ### Standalone Package (alternative)
 
-Go to one of the following URLs depending on the nature of the organization you want to install **OrgCheck**.
+If you want to install the application on a **sandbox**, please [![follow this link](../assets/pngs/Install-SDBX.png)](https://sfdc.co/OrgCheck-InstallToday-SDB)
 
-| Environment            | URL                                                                                | Action |
-| ---------------------- | ---------------------------------------------------------------------------------- | ------ |
-| Sandboxes              | [sfdc.co/OrgCheck-InstallToday-SDB](https://sfdc.co/OrgCheck-InstallToday-SDB)       | [![Deploy OrgCheck on Sandbox](../assets/pngs/Install-SDBX.png)](https://sfdc.co/OrgCheck-InstallToday-SDB) |
-| Developer Edition Orgs | [sfdc.co/OrgCheck-InstallToday-DE](https://sfdc.co/OrgCheck-InstallToday-DE) | [![Deploy OrgCheck on DevOrg](../assets/pngs/Install-DevEdition.png)](https://sfdc.co/OrgCheck-InstallToday-DE) |
+If you want to install the application on a **developer edition org**, please [![follow this other link](../assets/pngs/Install-DevEdition.png)](https://sfdc.co/OrgCheck-InstallToday-DE)
 
-URLs to install Salesforce packages contain the Salesforce ID of the current version of the package. To insure you always **point to the newest version**, we are masking you this detail by using a redirection.
+The previous two links will always **point to the newest version** of the app.
 
-After selecting the previous URL, you will be redirected to Salesforce servers for authentication.
-If you were not yet authenticated, you will have to sign on using your credentials.
+Note: if you had the **appexchange package** already installed in this org, you will need to remove it first from your org, and then try again to install the app from the choosen URL on this particular org.
 
 
 ## Step 2: Install the package
 
-Just like an AppExchange application you have to:
 - Select the profiles -- we recommand to select **Admins Only**
 - Click on "Install" (or "Upgrade")
 
-For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
+Note: For some orgs that have Apex class not compiling, you can install the package without checking Apex classes (advanced setting when installing the app).
 
 ![Installation Notice screenshot](../images/screenshots/OrgCheck-Screenshot-Install.png)
 
@@ -60,18 +54,15 @@ Once installed, go to the app "OrgCheck", and you are done!
 ![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
 
+## The benefits of the AppExchange Package
+
+- The application has been reviewed by Salesforce against typical coding issues that can lead to security breach.
+- In return you can rate and comment the application.
+
 ## The benefits of unlocked package
 
-The application is delivered to you as an **unlocked package**.
-
-This means the installation is pretty much like the installation of a simple AppExchange application.
-
-We are also able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
-
-We made the choice to use a specific **namespace** for this package, which is __OrgCheck__ of course, so that you can identify faster components of this package when browsing the metadata of your org (additionally to the naming convention).
-
-Finally, the content of the application can be modified in your org (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence.
-
+- We are able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
+- The content of the application can be modified in your org (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence. And when we push a new version, your modification will be erased. Use this capability to send us technical feedback and maybe even solutions!
 
 ## Known issues
 
