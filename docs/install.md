@@ -14,9 +14,9 @@ permalink: /installation/
 
 ## Step 1: Go to the AppExchange
 
-- Go to the AppExchange at https://appexchange.salesforce.com
+- Go to the AppExchange at [https://appexchange.salesforce.com](https://appexchange.salesforce.com)
 - Search for "OrgCheck" or "Technical Debt" and hit enter. You should find it!
-- Alternativelly, please [![follow this link](../assets/pngs/Install-AppExchange.png)](https://sfdc.co/OrgCheck-InstallToday-AppExchange) to reach directly the good page.
+- Alternativelly, please [follow this link](https://sfdc.co/OrgCheck-InstallToday-AppExchange) to reach directly the good page.
 
 ## Step 2: Get it now!
 
@@ -53,8 +53,8 @@ The benefits of such a package were:
 - The content of the application can be **modified in your org** (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence. And when we push a new version, your modification will be erased. Use this capability to send us technical feedback and maybe even solutions!
 
 The URLs are still pointing to the latest version of the app and can be reached at:
-- If you want to install the application on a **sandbox**, please [![follow this link](../assets/pngs/Install-SDBX.png)](https://sfdc.co/OrgCheck-InstallToday-SDB)
-- If you want to install the application on a **developer edition org**, please [![follow this other link](../assets/pngs/Install-DevEdition.png)](https://sfdc.co/OrgCheck-InstallToday-DE)
+- If you want to install the application on a **sandbox**, please follow this link: [![install on sandbox](../assets/pngs/Install-SDBX.png)](https://sfdc.co/OrgCheck-InstallToday-SDB)
+- If you want to install the application on a **developer edition org**, please follow this link: [![install on DE](../assets/pngs/Install-DevEdition.png)](https://sfdc.co/OrgCheck-InstallToday-DE)
 
 But the prefered way now is to install the application via the AppExchange.
 
