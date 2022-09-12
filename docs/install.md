@@ -19,7 +19,7 @@ OrgCheck is available on the **AppExchange**, or, as a **standalone package**.
 ### AppExchange Package (recommanded)
 
 Go to the AppExchange and search for "OrgCheck" or "Technical Debt", you will find it.
-Alternativelly you can go directly to [sfdc.co/OrgCheck-InstallToday-AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
+Alternativelly, please [![follow this link](../assets/pngs/Install-AppExchange.png)](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 
 Click on the "**Get It Now**" button and select the environnment you want to install OrgCheck to.
 
