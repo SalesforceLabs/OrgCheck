@@ -1422,7 +1422,7 @@ OrgCheck.Datasets = {
                         }
                         default: { // CronTrigger
                             let jobTypeLabel = '';
-                            switch (r.CronJobDetail.JobType) {
+                            switch (r.CronJobDetail?.JobType) {
                                 case '1': jobTypeLabel = 'Data Export'; break;
                                 case '3': jobTypeLabel = 'Dashboard Refresh'; break;
                                 case '4': jobTypeLabel = 'Reporting Snapshot'; break;
@@ -1433,7 +1433,7 @@ OrgCheck.Datasets = {
                                 case 'A': jobTypeLabel = 'Reporting Notification'; break;
                             }
                             item.id = 'SCHJOBS-'+artificial_id++;
-                            item.name = r.CronJobDetail.Name;
+                            item.name = r.CronJobDetail?.Name || '';
                             item.type = jobTypeLabel;
                             item.nature = 'ScheduledJob';
                             item.status = r.State;
