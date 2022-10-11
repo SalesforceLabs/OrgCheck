@@ -101,7 +101,7 @@ OrgCheck.Salesforce = {
             try {
                 const promises = [];
                 promises.push(new Promise((resolve, reject) => {
-                    connection.sobject(sobjectDevName).describe$(function (error, object) {
+                    connection.sobject(sobjectDevName).describe(function (error, object) {
                         if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe.',
