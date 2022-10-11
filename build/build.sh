@@ -146,4 +146,4 @@ fi
 ### -----------------------
 ### PUSH INTO DEV ORG
 ### -----------------------
-### sfdx force:source:deploy -m StaticResource:OrgCheck_OrgCheck_SR,CustomLabels,Translations  1>/dev/null
+sfdx force:source:deploy -m StaticResource,CustomLabels,Translations  1>/dev/null
