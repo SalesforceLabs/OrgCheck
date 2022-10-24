@@ -45,7 +45,7 @@
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-1" id="tab-default-explorer__item">{!$Label.OrgCheck_RoleExplorer_CL}</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_RoleListing_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">{!$Label.OrgCheck_RoleListing_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-2" id="tab-default-table__item">{!$Label.OrgCheck_RoleListing_CL} <span id="datatable-roles-count" /></a>
                     </li>
                 </ul>
                 <div id="tab-default-1" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-explorer__item">
@@ -367,6 +367,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable',
+                                countElement: 'datatable-roles-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(

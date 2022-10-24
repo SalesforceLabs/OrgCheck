@@ -17,16 +17,16 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="Profiles" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-profiles" id="tab-default-profiles__item">Profiles</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-profiles" id="tab-default-profiles__item">Profiles <span id="datatable-profiles-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="Permission Sets" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-permsets" id="tab-default-permsets__item">Permission Sets</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-permsets" id="tab-default-permsets__item">Permission Sets <span id="datatable-permsets-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="Login Hours Restrictions" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-loginhours" id="tab-default-loginhours__item">Login Hours Restrictions</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-loginhours" id="tab-default-loginhours__item">Login Hours Restrictions <span id="datatable-loginhours-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions <span id="datatable-ipranges-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="Object CRUDs" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objcruds" id="tab-default-objcruds__item">Object CRUDs</a>
@@ -76,6 +76,7 @@
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
+                                countElement: 'datatable-profiles-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -124,6 +125,7 @@
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
+                                countElement: 'datatable-loginhours-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -152,6 +154,7 @@
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
+                                countElement: 'datatable-ipranges-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -201,6 +204,7 @@
                             });
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
+                                countElement: 'datatable-permsets-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 

@@ -29,6 +29,7 @@ OrgCheck.VisualComponents = {
          *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
          *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
          *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
+         *                <li><code>countElement</code>: name of the element that will contain the counter of lines of this table</li>
          *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
          *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
@@ -309,6 +310,18 @@ OrgCheck.VisualComponents = {
                 footer.innerHTML = 'No data to show.';
             } else {
                 footer.innerHTML = '';
+            }
+            if (config.countElement) {
+                const countElement = document.getElementById(config.countElement)
+                if (countElement) {
+                    if (nbBadRows === 0) {
+                        countElement.innerHTML = '';
+                    } else if (nbBadRows === nbRows) {
+                        countElement.innerHTML = '(<font color="red">' + nbBadRows + '</font>)';
+                    } else {
+                        countElement.innerHTML = '(<font color="red">' + nbBadRows + '</font>&nbsp;/&nbsp;' + nbRows + ')';
+                    }
+                }
             }
             table.hidden = false; // make table visible again
             if (firstSortCallback) { 

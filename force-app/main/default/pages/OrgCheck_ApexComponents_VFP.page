@@ -39,19 +39,19 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Classes_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL} <span id="datatable-classes-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="Recompilation needed" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-recompilations" id="tab-default-recompilations__item">Recompilation needed</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-recompilations" id="tab-default-recompilations__item">Recompilation needed <span id="datatable-recompilations-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Triggers_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL} <span id="datatable-triggers-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL} <span id="datatable-objtriggercounts-count" /></a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_UnitTests_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL} <span id="datatable-apextests-count" /></a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
@@ -91,6 +91,7 @@
                             // Render the Apex Compilations data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-recompilations',
+                                countElement: 'datatable-recompilations-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -125,6 +126,7 @@
                             // Render the Apex Classes data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-classes',
+                                countElement: 'datatable-classes-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -241,6 +243,7 @@
                             // Render the Apex Unit Tests Classes data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-apextests',
+                                countElement: 'datatable-apextests-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -338,6 +341,7 @@
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
+                                countElement: 'datatable-triggers-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -452,6 +456,7 @@
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-objtriggercounts',
+                                countElement: 'datatable-objtriggercounts-count',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
