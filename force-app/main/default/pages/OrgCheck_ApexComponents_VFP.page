@@ -39,20 +39,26 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Classes_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Recompilation needed" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-recompilations" id="tab-default-recompilations__item">Recompilation needed</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Triggers_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_UnitTests_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
                     <div id="datatable-classes" />
+                </div>
+                <div id="tab-default-recompilations" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-recompilations__item">
+                    <div id="datatable-recompilations" />
                 </div>
                 <div id="tab-default-triggers" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-triggers__item">
                     <div id="datatable-triggers" />
@@ -82,9 +88,9 @@
                             let cntClsNoCoverage = 0;
                             let cntClsLowCoverage = 0;
 
-                            // Render the Apex Classes data in a table
+                            // Render the Apex Compilations data in a table
                             helper.html.datatable.create({
-                                element: 'datatable-classes',
+                                element: 'datatable-recompilations',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -105,6 +111,29 @@
                                             if (r.needsRecompilation === true) return 1; 
                                         }
                                     },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                ],
+                                data: map.apexClasses,
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
+                                filtering: { formula: (r) => { return r.needsRecompilation === true; }},
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true
+                            });
+
+                            // Render the Apex Classes data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-classes',
+                                columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Access_CL)}', property: 'specifiedAccess' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsAbstract_CL)}', property: 'isAbstract', formula: (r) => { 
                                         return helper.html.render.checkbox(r.isAbstract); 
@@ -203,7 +232,7 @@
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
-                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
@@ -268,7 +297,7 @@
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
-                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
                                 showLineCount: true
