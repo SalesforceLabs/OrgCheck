@@ -253,17 +253,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
-                                        formula: (r) => {
-                                            if (r.needsRecompilation === true) {
-                                                cntClsToCompile++;
-                                                return 'Recompile!';
-                                            }
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (r.needsRecompilation === true) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Size_CL)}', type: 'numeric', property: 'length' },
                                     { name: '{!JSENCODE($Label.OrgCheck_SeeAlllData_CL)}',
                                         formula: (r) => { 
