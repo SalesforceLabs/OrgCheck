@@ -48,6 +48,7 @@
                             // Render the Reports data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-rpt',
+                                appendCountInElement: 'tab-default-rpt__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -82,6 +83,7 @@
                             // Render the Dashboards data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-dsb',
+                                appendCountInElement: 'tab-default-dsb__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(

@@ -51,6 +51,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-workflows',
+                                appendCountInElement: 'tab-default-workflows__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -112,6 +113,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-processbuilders',
+                                appendCountInElement: 'tab-default-processbuilders__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Flow_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -162,6 +164,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-flows',
+                                appendCountInElement: 'tab-default-flows__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Flow_CL)}', formula: (r) => { 
                                         return helper.html.render.link(

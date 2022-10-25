@@ -63,6 +63,7 @@
                             // Render the data in a table for failed Apex Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-apexjobs',
+                                appendCountInElement: 'tab-default-apexjobs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApexContext_CL)}', property: 'context' },
@@ -87,6 +88,7 @@
                             // Render the data in a table for Scheduled Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-scheduledjobs',
+                                appendCountInElement: 'tab-default-scheduledjobs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
@@ -119,6 +121,7 @@
                             // Render the data in a table for Not Scheduled Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-notscheduledjobs',
+                                appendCountInElement: 'tab-default-notscheduledjobs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(

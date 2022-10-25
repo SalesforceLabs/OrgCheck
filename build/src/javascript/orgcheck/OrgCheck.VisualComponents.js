@@ -29,7 +29,7 @@ OrgCheck.VisualComponents = {
          *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
          *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
          *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
-         *                <li><code>countElement</code>: name of the element that will contain the counter of lines of this table</li>
+         *                <li><code>appendCountInElement</code>: name of the element that will contain the counter of bad lines and total lines of this table</li>
          *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
          *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
@@ -303,24 +303,19 @@ OrgCheck.VisualComponents = {
                 }
             });
             if (config.showStatistics === true) {
-                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
-                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
+                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code><font color="red">'+
+                                    nbBadRows+'</font></code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
             }
             if (nbRows == 0) {
                 footer.innerHTML = 'No data to show.';
             } else {
                 footer.innerHTML = '';
             }
-            if (config.countElement) {
-                const countElement = document.getElementById(config.countElement)
-                if (countElement) {
-                    if (nbBadRows === 0) {
-                        countElement.innerHTML = '';
-                    } else if (nbBadRows === nbRows) {
-                        countElement.innerHTML = '(<font color="red">' + nbBadRows + '</font>)';
-                    } else {
-                        countElement.innerHTML = '(<font color="red">' + nbBadRows + '</font>&nbsp;/&nbsp;' + nbRows + ')';
-                    }
+            if (config.appendCountInElement) {
+                const countElement = document.getElementById(config.appendCountInElement)
+                if (countElement && nbBadRows > 0) {
+                    // Warning: do not add any html tag here, if not the link on the tab won't work on them... Thank you!
+                    countElement.innerHTML += ' (' + nbBadRows + '⚠️)';
                 }
             }
             table.hidden = false; // make table visible again

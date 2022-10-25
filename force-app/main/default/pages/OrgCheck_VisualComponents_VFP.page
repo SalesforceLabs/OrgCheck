@@ -67,6 +67,7 @@
                             // Render the Visual Force Pages data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-vfps',
+                                appendCountInElement: 'tab-default-vfps__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -128,6 +129,7 @@
                             // Render the Visual Force Components data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-vfcs',
+                                appendCountInElement: 'tab-default-vfcs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -186,6 +188,7 @@
                             // Render the Lighnting Pages data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-lps',
+                                appendCountInElement: 'tab-default-lps__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -239,6 +242,7 @@
                             // Render the Lighnting Aura Components data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-lacs',
+                                appendCountInElement: 'tab-default-lacs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -297,6 +301,7 @@
                             // Render the Lighnting Web Components data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-lwcs',
+                                appendCountInElement: 'tab-default-lwcs__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(

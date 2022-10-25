@@ -220,6 +220,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-publicGroups',
+                                appendCountInElement: 'tab-default-publicgroups__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -260,6 +261,7 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-queues',
+                                appendCountInElement: 'tab-default-queues__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
