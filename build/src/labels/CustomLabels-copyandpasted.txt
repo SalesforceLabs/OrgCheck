@@ -127,7 +127,6 @@
 <labels><fullName>OrgCheck_NoParent_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>No parent</shortDescription><value>No parent</value></labels>
 <labels><fullName>OrgCheck_NoUserForThisProfile_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>No user for this custom profile!</shortDescription><value>No user for this custom profile!</value></labels>
 <labels><fullName>OrgCheck_ProfilePermSets_Subtitle_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Subtitle of the Profiles and Permission Sets tab in OrgCheck</shortDescription><value>Non User Specific Profile and Permissions Overview</value></labels>
-<labels><fullName>OrgCheck_NotUsed_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Not used!</shortDescription><value>Not used!</value></labels>
 <labels><fullName>OrgCheck_NbActiveMembers_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Number of active members</shortDescription><value>Number of active members</value></labels>
 <labels><fullName>OrgCheck_NbActiveUsers_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Number of active users</shortDescription><value>Number of active users</value></labels>
 <labels><fullName>OrgCheck_NbInactiveMembers_CL</fullName><language>en_US</language><protected>true</protected><shortDescription>Number of inactive members</shortDescription><value>Number of inactive members</value></labels>

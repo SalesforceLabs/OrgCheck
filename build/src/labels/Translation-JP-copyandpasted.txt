@@ -127,7 +127,6 @@
 <customLabels><name>OrgCheck_NoParent_CL</name><label>親がない</label></customLabels>
 <customLabels><name>OrgCheck_NoUserForThisProfile_CL</name><label>このカスタムプロファイルはユーザーに割り当てされていません!</label></customLabels>
 <customLabels><name>OrgCheck_ProfilePermSets_Subtitle_CL</name><label>プロファイルと権限セットの概要</label></customLabels>
-<customLabels><name>OrgCheck_NotUsed_CL</name><label>未使用！</label></customLabels>
 <customLabels><name>OrgCheck_NbActiveMembers_CL</name><label>有効なメンバーの数</label></customLabels>
 <customLabels><name>OrgCheck_NbActiveUsers_CL</name><label>有効なユーザの数</label></customLabels>
 <customLabels><name>OrgCheck_NbInactiveMembers_CL</name><label>無効ユーザの数</label></customLabels>

@@ -103,7 +103,7 @@
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                            return helper.html.render.checkbox(false)
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -162,7 +162,7 @@
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                            return helper.html.render.checkbox(false)
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -216,7 +216,7 @@
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                            return helper.html.render.checkbox(false)
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -275,7 +275,7 @@
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                            return helper.html.render.checkbox(false)
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
@@ -334,7 +334,7 @@
                                         formula: (r) => { 
                                             const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
                                             if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                            return helper.html.render.checkbox(false)
                                         },
                                         scoreFormula: (r) => { 
                                             if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;

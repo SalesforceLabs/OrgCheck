@@ -127,7 +127,6 @@
 <customLabels><name>OrgCheck_NoParent_CL</name><label>Pas de parent</label></customLabels>
 <customLabels><name>OrgCheck_NoUserForThisProfile_CL</name><label>Aucun utilisateur pour ce profil personnalisé!</label></customLabels>
 <customLabels><name>OrgCheck_ProfilePermSets_Subtitle_CL</name><label>Présentation du profil et des autorisations non spécifiques à l&#39;utilisateur</label></customLabels>
-<customLabels><name>OrgCheck_NotUsed_CL</name><label>Non utilisé!</label></customLabels>
 <customLabels><name>OrgCheck_NbActiveMembers_CL</name><label>Nombre de membres actifs</label></customLabels>
 <customLabels><name>OrgCheck_NbActiveUsers_CL</name><label>Nombre d&#39;utilisateurs actifs</label></customLabels>
 <customLabels><name>OrgCheck_NbInactiveMembers_CL</name><label>Nombre de membres inactifs</label></customLabels>
