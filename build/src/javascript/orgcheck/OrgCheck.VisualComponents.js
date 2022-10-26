@@ -328,7 +328,7 @@ OrgCheck.VisualComponents = {
 
     /**
      * Message
-     * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
+     * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessagesId'
      */
     MessageHandler: function (configuration) {
 
@@ -408,21 +408,30 @@ OrgCheck.VisualComponents = {
 
         /**
         * Show warning message
-        * @param message String the message
+        * @param message String or Array<String> the message(s)
         */
         this.showWarning = function (message) {
-            const messageId = document.getElementById(configuration.warningMessageId);
-            messageId.children[1].innerHTML = '<p>'+message+'</p>';
-            messageId.style.display = 'flex';
+            const messages = (Array.isArray(message) ? message : [ message ]); 
+            const nbMessages = messages.length;
+            const warningsDiv = document.getElementById(configuration.warningMessagesId);
+            messages.forEach((msg, idx) => {
+                let warningDiv = warningsDiv.children[0];
+                if (idx > 0) {
+                    warningDiv = warningsDiv.appendChild(warningDiv.cloneNode(true));
+                    warningDiv.style['border-top-style'] = 'dotted';
+                }
+                warningDiv.children[1].innerHTML = '<p>'+msg+'</p>';
+            });
+            warningsDiv.style.display = 'block';
         };
 
         /**
         * Hide warning banner and empty the message
         */
-        this.hideWarning = function (message) {
-            const messageId = document.getElementById(configuration.warningMessageId);
-            messageId.style.display = 'none';
-            messageId.children[1].innerHTML = '';
+        this.hideWarning = function () {
+            const warningsDiv = document.getElementById(configuration.warningMessagesId);
+            warningsDiv.style.display = 'none';
+            //warningsDiv.childNodes[].remove();
         };
 
         /**

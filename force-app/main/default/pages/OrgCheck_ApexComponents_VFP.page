@@ -295,23 +295,26 @@
                                 showLineCount: true
                             });
 
-                            let html = '';
+                            let htmlParagraphs = [];
 
                             // Show alert about recompilation
                             if (cntClsToCompile > 0) {
-                                html += 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
-                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
-                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
+                                htmlParagraphs.push(
+                                    'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />'+
+                                    'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />'+
+                                    'If some classes still need recompilation after this, you need to check them for sure.<br />'
+                                );
                                 helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
                             }
 
                             // Show alert about no code coverage
                             if (cntClsNoCoverage > 0 || cntClsLowCoverage > 0) {
-                                if (html) html += '<br />';
-                                if (cntClsNoCoverage > 0) html += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
-                                if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
-                                html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
-                                html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                let coverageHtml = '';
+                                if (cntClsNoCoverage > 0) coverageHtml += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
+                                if (cntClsLowCoverage > 0) coverageHtml += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
+                                coverageHtml += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
+                                coverageHtml += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                htmlParagraphs.push(coverageHtml);
                                 const runAllTestsButton = helper.html.element.get('run-all-tests');
                                 runAllTestsButton.onclick = (e) => { 
                                     helper.salesforce.apex.runAllLocalTests();
@@ -320,9 +323,8 @@
                                 helper.html.element.addClass(runAllTestsButton, ['slds-theme_warning']);
                             }
 
-                            if (html) {
-                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
-                                helper.html.message.show(html);
+                            if (htmlParagraphs.length > 0) {
+                                helper.html.message.show(htmlParagraphs);
                             }
 
                             const objectTriggersCountMap = {};

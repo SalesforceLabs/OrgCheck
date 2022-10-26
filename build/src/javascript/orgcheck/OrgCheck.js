@@ -22,7 +22,7 @@
      *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
      *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
      *                <li><code>htmlMainContentTagId</code>: HTML Tag Id of the main content zone of the page</li> 
-     *                <li><code>htmlWarningMessageTagId</code>: HTML Tag Id of the message</li>
+     *                <li><code>htmlWarningMessagesTagId</code>: HTML Tag Id of the message</li>
      *                <li><code>formatDefaultDate</code>: Default date format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultDatetime</code>: Default datetime format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultLanguage</code>: Default language format (likely 'en')</li>
@@ -67,7 +67,7 @@
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
-            warningMessageId: setup.htmlWarningMessageTagId
+            warningMessagesId: setup.htmlWarningMessagesTagId
         });
 
         const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({

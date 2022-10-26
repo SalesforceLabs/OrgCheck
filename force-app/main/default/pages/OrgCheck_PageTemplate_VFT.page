@@ -143,16 +143,18 @@
                     <br />
                 </div>
             </div>
-            <div id="warning-message" style="display: none;" class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">
-                <div class="slds-media__figure">
-                    <span class="slds-icon_container slds-icon-utility-warning" title="warning">
-                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
-                        </svg>
-                        <span class="slds-assistive-text">warning</span>
-                    </span>
+            <div id="warning-messages" style="display: none;" >
+                <div class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">
+                    <div class="slds-media__figure">
+                        <span class="slds-icon_container slds-icon-utility-warning" title="warning">
+                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                            </svg>
+                            <span class="slds-assistive-text">warning</span>
+                        </span>
+                    </div>
+                    <div class="slds-media__body"></div>
                 </div>
-                <div class="slds-media__body"></div>
             </div>
             <div id="spinner" style="display: none;">
                 <!--<section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
@@ -199,7 +201,7 @@
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
-                        htmlWarningMessageTagId: 'warning-message',
+                        htmlWarningMessagesTagId: 'warning-messages',
                         htmlModalTagId: 'modal',
                         htmlModalTitleTagId: 'modal-heading',
                         htmlMainContentTagId: 'content',
