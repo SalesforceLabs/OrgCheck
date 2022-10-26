@@ -431,7 +431,10 @@ OrgCheck.VisualComponents = {
         this.hideWarning = function () {
             const warningsDiv = document.getElementById(configuration.warningMessagesId);
             warningsDiv.style.display = 'none';
-            //warningsDiv.childNodes[].remove();
+            // remove previous additional messages (keep the first one only)
+            for (let i=1; i<warningsDiv.childElementCount; i++) {
+                warningsDiv.removeChild(warningsDiv.lastChild);
+            }
         };
 
         /**
