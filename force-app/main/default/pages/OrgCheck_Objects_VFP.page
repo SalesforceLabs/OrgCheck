@@ -318,21 +318,21 @@
                                                     }
                                                 }
                                             },
-                                            { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
+                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Layout' + (count>1?'s':'');
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', object.fieldDependencies[r.id]);
                                                     if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
                                                     return helper.html.render.checkbox(false);
                                                 }
                                             }},
-                                            { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', object.fieldDependencies[r.id]);
                                                     if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');

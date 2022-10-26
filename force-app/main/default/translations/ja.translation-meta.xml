@@ -15,7 +15,7 @@
 <customLabels><name>OrgCheck_OneInactiveMember_CL</name><label>1 無効メンバー</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section2_Subtitle1_CL</name><label>技術的な負債について</label></customLabels>
 <customLabels><name>OrgCheck_Access_CL</name><label>アクセス</label></customLabels>
-<customLabels><name>OrgCheck_Actions_CL</name><label>行動</label></customLabels>
+<customLabels><name>OrgCheck_Actions_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_ActiveTriggers_CL</name><label>アクティブトリガー</label></customLabels>
 <customLabels><name>OrgCheck_Users_Subtitle_CL</name><label>有効なユーザのプロファイルや権限の概要</label></customLabels>
 <customLabels><name>OrgCheck_AllActiveUsers_CL</name><label>全ての有効ユーザー</label></customLabels>
@@ -31,13 +31,13 @@
 <customLabels><name>OrgCheck_APIEnabled_CL</name><label>API有効化</label></customLabels>
 <customLabels><name>OrgCheck_AssignedUsersProfiles_CL</name><label>利用中プロファイル</label></customLabels>
 <customLabels><name>OrgCheck_Automations_Title_CL</name><label>自動化</label></customLabels>
-<customLabels><name>OrgCheck_Available_CL</name><label>利用可能</label></customLabels>
-<customLabels><name>OrgCheck_Batches_Title_CL</name><label>バッチ</label></customLabels>
+<customLabels><name>OrgCheck_Available_CL</name><label>#ERROR!</label></customLabels>
+<customLabels><name>OrgCheck_Batches_Title_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_Batches_Subtitle_CL</name><label>バッチの概要</label></customLabels>
 <customLabels><name>OrgCheck_CascadeDelete_CL</name><label>カスケード削除</label></customLabels>
-<customLabels><name>OrgCheck_Category_CL</name><label>カテゴリー</label></customLabels>
+<customLabels><name>OrgCheck_Category_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_ChildObject_CL</name><label>子オブジェクト</label></customLabels>
-<customLabels><name>OrgCheck_Classes_CL</name><label>クラス</label></customLabels>
+<customLabels><name>OrgCheck_Classes_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_ClassicUI_CL</name><label>Classic</label></customLabels>
 <customLabels><name>OrgCheck_Clear_CL</name><label>クリア</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section6_Subtitle2_CL</name><label>コード</label></customLabels>
@@ -47,7 +47,7 @@
 <customLabels><name>OrgCheck_ContainsDml_CL</name><label>DMLが含まれています</label></customLabels>
 <customLabels><name>OrgCheck_ContainsSoql_CL</name><label>SOQLが含まれています</label></customLabels>
 <customLabels><name>OrgCheck_Count_CL</name><label>カウント</label></customLabels>
-<customLabels><name>OrgCheck_CodeCverage_CL</name><label>カバレッジ</label></customLabels>
+<customLabels><name>OrgCheck_CodeCverage_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_CreatedDate_CL</name><label>作成日</label></customLabels>
 <customLabels><name>OrgCheck_IsCustom_CL</name><label>カスタム</label></customLabels>
 <customLabels><name>OrgCheck_CustomFields_Title_CL</name><label>カスタム項目</label></customLabels>
@@ -60,7 +60,7 @@
 <customLabels><name>OrgCheck_Dashboards_CL</name><label>ダッシュボード</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section6_Subtitle5_CL</name><label>データクレンジング</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section6_Subtitle3_CL</name><label>デバッグログ</label></customLabels>
-<customLabels><name>OrgCheck_Default_CL</name><label>デフォルト</label></customLabels>
+<customLabels><name>OrgCheck_Default_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_DefaultMapping_CL</name><label>デフォルトマッピング</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section6_Subtitle4_CL</name><label>依存関係</label></customLabels>
 <customLabels><name>OrgCheck_Dependencies_CL</name><label>依存関係</label></customLabels>
@@ -69,11 +69,11 @@
 <customLabels><name>OrgCheck_DmlCreates_CL</name><label>DMLは作成します</label></customLabels>
 <customLabels><name>OrgCheck_DmlDeletes_CL</name><label>DML削除</label></customLabels>
 <customLabels><name>OrgCheck_DmlUpdates_CL</name><label>DMLの更新</label></customLabels>
-<customLabels><name>OrgCheck_Encrypted_CL</name><label>暗号化</label></customLabels>
+<customLabels><name>OrgCheck_Encrypted_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_Ends_CL</name><label>終了</label></customLabels>
 <customLabels><name>OrgCheck_ErrorMessage_CL</name><label>エラーメッセージ</label></customLabels>
 <customLabels><name>OrgCheck_Errors_CL</name><label>エラー</label></customLabels>
-<customLabels><name>OrgCheck_External_CL</name><label>外部の</label></customLabels>
+<customLabels><name>OrgCheck_External_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_ExternalObjects_CL</name><label>外部オブジェクト</label></customLabels>
 <customLabels><name>OrgCheck_ExternalId_CL</name><label>外部ID</label></customLabels>
 <customLabels><name>OrgCheck_FailedLogins_CL</name><label>ログイン失敗回数</label></customLabels>
@@ -84,7 +84,7 @@
 <customLabels><name>OrgCheck_FlowVersion_CL</name><label>フローバージョン</label></customLabels>
 <customLabels><name>OrgCheck_Folder_CL</name><label>フォルダ</label></customLabels>
 <customLabels><name>OrgCheck_Format_CL</name><label>フォーマット</label></customLabels>
-<customLabels><name>OrgCheck_Formula_CL</name><label>方式</label></customLabels>
+<customLabels><name>OrgCheck_Formula_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_Friday_CL</name><label>金曜日</label></customLabels>
 <customLabels><name>OrgCheck_FullApiName_CL</name><label>完全なAPI名</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section2_Title_CL</name><label>一般情報</label></customLabels>
@@ -94,12 +94,12 @@
 <customLabels><name>OrgCheck_IncludedUsers_CL</name><label>割り当てられたユーザー</label></customLabels>
 <customLabels><name>OrgCheck_IncludesTechGroups_CL</name><label>技術グループが含まれています</label></customLabels>
 <customLabels><name>OrgCheck_InnerClasses_CL</name><label>内部クラス</label></customLabels>
-<customLabels><name>OrgCheck_Internal_CL</name><label>内部</label></customLabels>
+<customLabels><name>OrgCheck_Internal_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section1_Text1_CL</name><label> &lt;b&gt;OrgCheck&lt;&#x2F;b&gt; の紹介。組織とその技術的負債を迅速に分析するために、設置しやすく使いやすいSalesforceアプリケーション。</label></customLabels>
 <customLabels><name>OrgCheck_IsAbstract_CL</name><label>要約はありますか？</label></customLabels>
-<customLabels><name>OrgCheck_IsActive_CL</name><label>アクティブです</label></customLabels>
-
+<customLabels><name>OrgCheck_IsActive_CL</name><label>#ERROR!</label></customLabels>
 <customLabels><name>OrgCheck_IsGroup_CL</name><label>グループ化？</label></customLabels>
+
 <customLabels><name>OrgCheck_KeyPermissions_CL</name><label>主な権限</label></customLabels>
 <customLabels><name>OrgCheck_Label_CL</name><label>ラベル</label></customLabels>
 <customLabels><name>OrgCheck_LastLogin_CL</name><label>最終ログイン日時</label></customLabels>
@@ -180,9 +180,9 @@
 <customLabels><name>OrgCheck_Objects_Description_CL</name><label>このページでは、2つのタブで &lt;b&gt;オブジェクト&lt;&#x2F;b&gt; の概要を示します。&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;&lt;b&gt;オブジェクトドキュメント&lt;&#x2F;b&gt; と呼ばれる最初のタブは、指定されたオブジェクトのドキュメント全体を提供しています&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;org wide default&lt;&#x2F;b&gt; という2番目のタブは、すべてのオブジェクトの内部共有と外部共有の表のリストです&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
 <customLabels><name>OrgCheck_Roles_Description1_CL</name><label>このページは、2つのタブで &lt;b&gt;役割階層&lt;&#x2F;b&gt; を示しています。&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;&lt;b&gt;役割Explorer&lt;&#x2F;b&gt; と呼ばれる最初のタブは、あなたの役割階層のグラフィカルなビューを示しています&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;ロールリスト&lt;&#x2F;b&gt; と呼ばれる2番目のタブは、対応するデータの表形式リストです。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; 役割の階層のレベルが多すぎると、パフォーマンスが低下する可能性があります（計算の共有を含む）。&lt;br &#x2F;&gt; それが、あなたの階層が &lt;b&gt;7レベル&lt;&#x2F;b&gt; より多くを使用する場合、私たちがあなたにアラートを与えている理由です。&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; </label></customLabels>
 <customLabels><name>OrgCheck_Analytics_Description_CL</name><label>このページには、現在の組織で表示できるすべての &lt;b&gt;レポート&lt;&#x2F;b&gt; および &lt;b&gt;ダッシュボード&lt;&#x2F;b&gt; をリストします。&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; すべてのテーブルで：&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;列 &lt;b&gt;スコア&lt;&#x2F;b&gt; は、次のルールに基づいて計算されます。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;アイテムに説明がない場合、+1を取得します。&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;デフォルトでは、テーブルは下降スコアによって順序付けられます。つまり、最大のスコアが最初に来ます。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
-
 <customLabels><name>OrgCheck_Users_Description_CL</name><label>このページには、組織内のすべての &lt;b&gt;Activeユーザー&lt;&#x2F;b&gt; がリストされています。&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; このテーブルで：&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;各行はアクティブユーザーを表します&lt;&#x2F;li&gt;&lt;li&gt;列 &lt;b&gt;スコア&lt;&#x2F;b&gt; は、次のルールに基づいて計算されます。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;ユーザーがLightning Experienceを使用していない場合は、+1を取得します。&lt;&#x2F;li&gt;&lt;li&gt;ユーザーが記録しない場合、+1を取得します。&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;列 &lt;b&gt;キー許可&lt;&#x2F;b&gt; は、API有効、表示セットアップなどの重要な権限に焦点を当てています。すべてのデータを変更し、すべてのデータを表示します。&lt;&#x2F;li&gt;&lt;li&gt;デフォルトでは、テーブルは下降スコアによって順序付けられます。つまり、最大のスコアが最初に来ます。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
-<customLabels><name>OrgCheck_Apex_Description1_CL</name><label>このページには、4つのタブで &lt;b&gt;apexクラスとトリガー&lt;&#x2F;b&gt; をすべてリストします。&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;&lt;b&gt;クラス&lt;&#x2F;b&gt; という最初のタブは、この組織のすべての頂点クラス（テストではない）の表形式リストです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;Triggers&lt;&#x2F;b&gt; と呼ばれる2番目のタブは、この組織のすべての頂点トリガーの表形式リストです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;オブジェクトのトリガーcount&lt;&#x2F;b&gt; と呼ばれる3番目のタブは、この組織のオブジェクトごとのすべてのトリガーを集約するグループ化されたテーブルです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;単位テスト&lt;&#x2F;b&gt; と呼ばれる4番目のタブは、この組織のすべての頂点テストクラスの表形式リストです。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; &lt;b&gt;このページからすべてのメリット&lt;&#x2F;b&gt; を取得するには、次の手順に従ってください。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;「プラグ」ボタンを選択して、すべてのクラス をコンパイルします。&lt;&#x2F;li&gt;&lt;li&gt;YOU「いいね」ボタンを選択して、すべてのテストを実行します。&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;br &#x2F;&gt; </label></customLabels>
+<customLabels><name>OrgCheck_Apex_Description1_CL</name><label>このページには、4つのタブで &lt;b&gt;apexクラスとトリガー&lt;&#x2F;b&gt; をすべてリストします。&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;&lt;b&gt;クラス&lt;&#x2F;b&gt; という最初のタブは、この組織のすべての頂点クラス（テストではない）の表形式リストです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;Triggers&lt;&#x2F;b&gt; と呼ばれる2番目のタブは、この組織のすべての頂点トリガーの表形式リストです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;オブジェクトのトリガーcount&lt;&#x2F;b&gt; と呼ばれる3番目のタブは、この組織のオブジェクトごとのすべてのトリガーを集約するグループ化されたテーブルです。&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;単位テスト&lt;&#x2F;b&gt; と呼ばれる4番目のタブは、この組織のすべての頂点テストクラスの表形式リストです。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; &lt;b&gt;このページからすべてのメリット&lt;&#x2F;b&gt; を取得するには、次の手順に従ってください。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;「プラグ」ボタンを選択して、すべてのクラスをコンパイルします。&lt;&#x2F;li&gt;&lt;li&gt;YOU「いいね」ボタンを選択して、すべてのテストを実行します。&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;br &#x2F;&gt; </label></customLabels>
+
 <customLabels><name>OrgCheck_CustomFields_Description_CL</name><label>このページには、標準フィールドではなく、すべての &lt;b&gt;カスタムフィールド&lt;&#x2F;b&gt; がリストされています。&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; このテーブルで：&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;各行はカスタムフィールドを表します&lt;&#x2F;li&gt;&lt;li&gt;列 &lt;b&gt;スコア&lt;&#x2F;b&gt; は、次のルールに基づいて計算されます。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;フィールドに説明がない場合、+1を取得します。&lt;&#x2F;li&gt;&lt;li&gt;フィールドが他のエンティティで使用されていない場合（依存関係APIに基づいて）、+1を取得します。&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;デフォルトでは、テーブルは下降スコアによって順序付けられます。つまり、最大のスコアが最初に来ます。&lt;&#x2F;li&gt;&lt;li&gt;フィールドに依存関係がある場合、リンク「依存関係」をクリックして、それがどこにあるかのグラフィックビューを取得できます使用されているものとそれが使用しているもの。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
 <customLabels><name>OrgCheck_CustomLabels_Description_CL</name><label>このページには、すべての &lt;b&gt;カスタムラベル&lt;&#x2F;b&gt; がリストされています。&lt;br &#x2F;&gt; &lt;br &#x2F;&gt; このテーブルで：&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;各行はカスタムラベルを表します&lt;&#x2F;li&gt;&lt;li&gt;列 &lt;b&gt;スコア&lt;&#x2F;b&gt; は、次のルールに基づいて計算されます。&lt;ol class&#x3D;&quot;slds-list_ordered&quot;&gt;&lt;li&gt;カスタムラベルが他のエンティティで使用されていない場合（依存関係APIに基づいて）、+1 を取得します&lt;&#x2F;li&gt;&lt;&#x2F;ol&gt;&lt;&#x2F;li&gt;&lt;li&gt;デフォルトでは、テーブルは下降スコアによって順序付けられます。つまり、最大のスコアが最初に来ます。&lt;&#x2F;li&gt;&lt;li&gt;フィールドに依存関係がある場合、リンク「依存関係」をクリックして、使用されている場所と使用しているもののグラフィカルビューを取得できます。&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;</label></customLabels>
 <customLabels><name>OrgCheck_ProfilePermSets_Description1_CL</name><label>このページには、すべての &lt;b&gt;プロファイルと許可セット&lt;&#x2F;b&gt; が5つのタブにリストされています。&lt;br &#x2F;&gt;&lt;ul class&#x3D;&quot;slds-list_dotted&quot;&gt;&lt;li&gt;&lt;b&gt;プロファイル&lt;&#x2F;b&gt; と呼ばれる最初のタブは、この組織のすべてのプロファイルの表形式リストを提供しています&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;許可セット&lt;&#x2F;b&gt; という2番目のタブは、この組織のすべての許可セットと許可セットグループの表のリストを提供しています&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;ログイン時間制限&lt;&#x2F;b&gt; と呼ばれる3番目のタブは、すべてのプロファイルから一度にログイン時間制限を抽出します&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;IP範囲制限&lt;&#x2F;b&gt; と呼ばれる4番目のタブは、すべてのプロファイルから一度にIP範囲の制限を抽出しています&lt;&#x2F;li&gt;&lt;li&gt;&lt;b&gt;object cruds&lt;&#x2F;b&gt; （beta）と呼ばれる5番目のタブは、プロファイルと許可セットのオブジェクトの権利（作成、読み取り、更新、削除）を表示しています&lt;&#x2F;li&gt;&lt;&#x2F;ul&gt;&lt;br &#x2F;&gt; </label></customLabels>
@@ -197,6 +197,9 @@
 <customLabels><name>OrgCheck_UnactiveTriggers_CL</name><label>Unactiveトリガー</label></customLabels>
 <customLabels><name>OrgCheck_UnitTests_CL</name><label>ユニットテスト</label></customLabels>
 <customLabels><name>OrgCheck_UsedIn_CL</name><label>利用箇所数</label></customLabels>
+<customLabels><name>OrgCheck_UsedInApClass_CL</name><label>ref。頂点クラスで？</label></customLabels>
+<customLabels><name>OrgCheck_UsedInFlow_CL</name><label>ref。流れ？</label></customLabels>
+<customLabels><name>OrgCheck_UsedInLayout_CL</name><label>ref。レイアウト？</label></customLabels>
 <customLabels><name>OrgCheck_UserName_CL</name><label>ユーザー名</label></customLabels>
 <customLabels><name>OrgCheck_UserType_CL</name><label>ユーザー種別</label></customLabels>
 <customLabels><name>OrgCheck_Users_Title_CL</name><label>ユーザー</label></customLabels>
