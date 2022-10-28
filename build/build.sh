@@ -47,7 +47,9 @@ mkdir build/tmp/img
 
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
-cp build/src/logos/*.svg build/tmp/img
+cp build/src/logos/Logo.svg build/tmp/img
+cp build/src/logos/Mascot.svg build/tmp/img
+cp build/src/logos/Mascot+Animated.svg build/tmp/img
 
 (
     cd build/tmp
