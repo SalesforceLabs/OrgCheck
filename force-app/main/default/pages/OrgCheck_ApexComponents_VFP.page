@@ -1,4 +1,4 @@
-<apex:page >
+compile<apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
         <apex:define name="text_page_title">
@@ -15,8 +15,8 @@
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
-                <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
+                <a>
+                    <button id="compile-uncompiled-classes-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -87,6 +87,7 @@
                             let cntClsToCompile = 0;
                             let cntClsNoCoverage = 0;
                             let cntClsLowCoverage = 0;
+                            const classesToCompile = [];
 
                             // Render the Apex Compilations data in a table
                             helper.html.datatable.create({
@@ -103,14 +104,11 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
                                         formula: (r) => {
-                                            if (r.needsRecompilation === true) {
-                                                cntClsToCompile++;
-                                                return 'Recompile!';
-                                            }
+                                            cntClsToCompile++;
+                                            classesToCompile.push(r.id);
+                                            return 'Recompile!';
                                         },
-                                        scoreFormula: (r) => { 
-                                            if (r.needsRecompilation === true) return 1; 
-                                        }
+                                        scoreFormula: (r) => { return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
@@ -301,10 +299,15 @@
                             if (cntClsToCompile > 0) {
                                 htmlParagraphs.push(
                                     'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />'+
-                                    'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />'+
+                                    'Please make sure you click on the <b>plug</b> button in this page to ask for a recompilation of '+(cntClsToCompile>1?'these':'this')+' Apex class'+(cntClsToCompile>1?'es':'')+'.<br />'+
                                     'If some classes still need recompilation after this, you need to check them for sure.<br />'
                                 );
-                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                                const compileClassesButton = helper.html.element.get('compile-uncompiled-classes-button');
+                                compileClassesButton.onclick = (e) => { 
+                                    helper.salesforce.apex.compileClasses(classesToCompile);
+                                    return true; 
+                                }
+                                helper.html.element.addClass(compileClassesButton, ['slds-theme_warning']);
                             }
 
                             // Show alert about no code coverage

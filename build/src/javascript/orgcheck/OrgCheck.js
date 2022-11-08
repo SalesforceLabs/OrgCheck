@@ -320,20 +320,76 @@
                     describe: {
                         object: function(pckg, obj, success, error) {
                             SALESFORCE_HANDLER.describe(pckg, obj)
-                                .on('error', (e) => error(e))
-                                .on('end', (o) => success(o))
+                                .on('error', (e) => { if (error) error(e); })
+                                .on('end', (o) => { if (success) success(o); })
                                 .run();
                         }
                     },
                     apex: {
                         runAllLocalTests: function() {
                             return SALESFORCE_HANDLER.httpCall(
-                                '/tooling/runTestsAsynchronous', 
-                                { 
-                                    body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": "false" }', 
-                                    type: 'application/json' 
-                                }
-                            ).run();
+                                    '/tooling/runTestsAsynchronous', 
+                                    { 
+                                        body: { testLevel: 'RunLocalTests', skipCodeCoverage: false }, 
+                                        type: 'application/json' 
+                                    }
+                                )
+                                .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                .run();
+                        },
+                        compileClasses: function(classIds) {
+                            SALESFORCE_HANDLER.query([{
+                                string: 'SELECT Id, Name, Body '+
+                                        'FROM ApexClass '+
+                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+')'
+                                }])
+                                .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                .on('end', (classes) => { 
+                                    const req = [];
+                                    req.push({
+                                        method: 'POST',
+                                        url: '/services/data/v'+SALESFORCE_HANDLER.getApiVersion()+'.0/tooling/sobjects/MetadataContainer',
+                                        referenceId: 'container',
+                                        body: { Name : 'container'+Date.now() }
+                                    });
+                                    classes.forEach((c, i) => { 
+                                        req.push({
+                                            method: 'POST',
+                                            url: '/services/data/v'+SALESFORCE_HANDLER.getApiVersion()+'.0/tooling/sobjects/ApexClassMember',
+                                            referenceId: 'class'+i,
+                                            body: { MetadataContainerId: '@{container.id}', ContentEntityId: c.Id, Body: c.Body }
+                                        });
+                                    });
+                                    req.push({
+                                        method: 'POST',
+                                        url: '/services/data/v52.0/tooling/sobjects/ContainerAsyncRequest',
+                                        referenceId: 'request',
+                                        body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
+                                    });
+                                    SALESFORCE_HANDLER.httpCall('/tooling/composite', { body: { allOrNone: true, compositeRequest: req }, type: 'application/json' })
+                                        .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                        .on('end', (resp) => { 
+                                            const lastResponse = resp.compositeResponse[resp.compositeResponse.length-1];
+                                            if (lastResponse.httpStatusCode === 201) {
+                                                MSG_HANDLER.showModal(
+                                                    'Asynchronous Compilation Asked',
+                                                    'We asked Salesforce to recompile the following Apex Classes:<br />'+
+                                                    classes.map(c => '- <a href="/'+c.Id+'" target="_blank">'+c.Name+'</a>').join('<br />')+'<br />'+
+                                                    '<br />'+
+                                                    'For more information about the success of this compilation, you can check '+
+                                                    'with Tooling API the status of the following record: <br />'+
+                                                    '<code>'+lastResponse.httpHeaders.Location+'</code><br />'+
+                                                    '<br />'+
+                                                    'In case you need to recompile ALL the classes, go <a href="/01p" target="_blank" '+
+                                                    'rel="external noopener noreferrer">here</a> and click on the link <b>"Compile all classes"</b>.');
+                                            } else {
+                                                MSG_HANDLER.showError(resp, true, SALESFORCE_HANDLER);
+                                            }
+                                        })
+                                        .run();
+                                })
+                                .run();
+                            return true;
                         }
                     },
                     version: {

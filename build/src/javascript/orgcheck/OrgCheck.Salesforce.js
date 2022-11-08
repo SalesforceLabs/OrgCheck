@@ -363,7 +363,7 @@ OrgCheck.Salesforce = {
                 };
                 if (optionalPayload) {
                     request.method = 'POST';
-                    request.body = optionalPayload.body;
+                    request.body = JSON.stringify(optionalPayload.body);
                     request.headers = { "Content-Type": optionalPayload.type };
                 }
                 connection.request(request, (error, response) => {
@@ -387,7 +387,7 @@ OrgCheck.Salesforce = {
             }
         }
     },
-
+    
     /**
      * Salesforce handler
      * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'watchDogCallback'
@@ -472,18 +472,27 @@ OrgCheck.Salesforce = {
         };
 
         /**
-         * Return an SOQL-safer version of the given string value
-         * @param unsafe String to be escaped
+         * Return an SOQL-safer version of given string value(s)
+         * @param unsafe Value(s) to be escaped (Primary type or Array of primary types)
          */
         this.secureSOQLBindingVariable = (unsafe) => {
-            // If unset the default, return value is an empty string
+
+            // If unset, return directly an empty string
             if (!unsafe) return "''";
-            
-            // If not a string typed value, return value is itself (case of a numeric)
-            if (typeof(unsafe) !== 'string') return unsafe;
-            
-            // If a string value, we substitute the quotes
-            return "'" + unsafe.replace(/'/g, "\'") + "'";
+
+            // If already an array of something, use that array, else create a new one with one element
+            const unsafeArray = Array.isArray(unsafe) ? Array.from(unsafe) : [ unsafe ];
+            unsafeArray.forEach((e, i, a) => {
+                if ((!e && e !== false) || (e && typeof(e) == 'object')) { // If unset or not primary type, use an empty string
+                    a[i] = "''";
+                } else if (typeof(e) !== 'string') { // If not a string typed value, return value is itself (case of a numeric)
+                    a[i] = e;
+                } else { // If a string value, we substitute the quotes
+                    a[i] = "'" + e.replace(/'/g, "\'") + "'";
+                }
+            });
+
+            return unsafeArray.join(',');
         };
         
        /**
