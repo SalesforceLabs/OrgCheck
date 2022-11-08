@@ -6,7 +6,7 @@
     /**
      * OrgCheck Version
      */
-    version: 'Hydrogen [H,1]',
+    version: 'Helium [He,2]',
    
     /**
      * OrgCheck core
