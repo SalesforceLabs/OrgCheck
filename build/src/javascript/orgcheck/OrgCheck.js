@@ -98,7 +98,7 @@
                 switch (d.type) {
                     case 'OrgTypeProd': {
                         const elmt = document.getElementById('org-information');
-                        elmt.innerHTML = '<center><small>'+d.data.orgName+'<br />'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
+                        elmt.innerHTML = '<center><small>'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
                         switch (d.level) {
                             case 'ERROR': elmt.classList.add('slds-theme_error'); break;
                             case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
