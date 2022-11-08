@@ -21,6 +21,12 @@
                 .slds-scope table {
                     width: auto;
                 }
+                .orgcheck-page-icon {
+                    font-size: 2.4em;
+                }
+                .orgcheck-page-icon > object {
+                    width: 2.3em;
+                }
                 .orgcheck-page-header {
                     padding-bottom: 0.5rem !important;
                 }
@@ -74,13 +80,8 @@
                 <div class="slds-page-header__row">
                     <div class="slds-page-header__col-title">
                         <div class="slds-media">
-                            <div class="slds-media__figure">
-                                <span class="slds-icon_container slds-icon-standard-opportunity">
-                                    <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
-                                        <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
-                                    </svg>
-                                    <span class="slds-assistive-text"><apex:insert name="text_page_title" /></span>
-                                </span>
+                            <div class="slds-media__figure orgcheck-page-icon">
+                                <apex:insert name="text_page_icon" />
                             </div>
                             <div class="slds-media__body">
                                 <div class="slds-page-header__name">

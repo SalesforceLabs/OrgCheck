@@ -1,11 +1,8 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_ProfilePermSets_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_ProfilePermSets_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">👮</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_ProfilePermSets_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_ProfilePermSets_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description1_CL}" />
             <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description2_CL}" />
