@@ -78,7 +78,7 @@
             watchDogCallback: (d) => { 
                 if (d.level === 'ERROR') {
                     let stopAndShowError = true;
-                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItem('Options')['warning.ByPassUseInProduction'] === true) {
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === true) {
                         stopAndShowError = false;
                     }
                     if (stopAndShowError === true) {
@@ -414,15 +414,10 @@
                 },
                 preferences: {
                     get: function(key) {
-                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
-                        const value = map[key];
-                        if (value === undefined) return true;
-                        return value;
+                        return PREFERENCE_CACHE_HANDLER.getItemProperty('Options', key, true);
                     },
                     set: function(key, value) {
-                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
-                        map[key] = value;
-                        PREFERENCE_CACHE_HANDLER.setItem('Options', map);
+                        PREFERENCE_CACHE_HANDLER.setItemProperty('Options', key, value);
                     }
                 },
                 array: {

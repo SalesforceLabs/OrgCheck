@@ -145,6 +145,32 @@ OrgCheck.Cache = {
         };
 
         /**
+        * Method to get a property of an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @param propertyKey the key of the property within the value in cache
+        * @param defaultPropertyValue if the cache is not present or the property is not set, return that value
+        * @return the value for this property
+        */
+         this.getItemProperty = function (key, propertyKey, defaultPropertyValue) {
+            const value = private_get_item(key) || {};
+            const propertyValue = value[propertyKey];
+            if (propertyValue === undefined) return defaultPropertyValue;
+            return propertyValue;
+        };
+
+        /**
+        * Method to set a property of an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @param propertyKey the key of the property within the value in cache
+        * @param propertyValue the value for this property
+        */
+         this.setItemProperty = function (key, propertyKey, propertyValue) {
+            const value = private_get_item(key) || {};
+            value[propertyKey] = propertyValue;
+            private_set_item(key, value);
+        };
+
+        /**
         * Log actions from the cache
         * @param e Error
         */
