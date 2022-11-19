@@ -368,7 +368,6 @@ OrgCheck.VisualComponents = {
                         informationHTML += 'Page: ' + document.location.pathname + '<br />';
                         informationHTML += '<br />';
                         informationHTML += '<b>System Information</b><br />';
-                        informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
                         informationHTML += 'Language: ' + navigator.language + '<br />';
                         informationHTML += '<br />';
                     }
