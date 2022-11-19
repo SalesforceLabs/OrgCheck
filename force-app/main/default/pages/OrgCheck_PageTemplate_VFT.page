@@ -47,6 +47,16 @@
                     text-align: center;
                     color: white;
                 }
+                th.orgcheck-table-th-vertical {
+                    vertical-align: bottom;
+                    writing-mode: vertical-rl;
+                    text-align: left;
+                    padding: 10px;
+                    transform: rotate(180deg);
+                }
+                th.orgcheck-table-th-vertical > a.slds-th__action {
+                    display: inline-table;
+                }
             </style>
             <div id="modal" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">

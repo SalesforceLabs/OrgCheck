@@ -123,6 +123,9 @@ OrgCheck.VisualComponents = {
                 thHead.setAttribute('scope', 'col');
                 thHead.setAttribute('aria-label', c.name);
                 thHead.classList.add('slds-is-sortable');
+                if (c.orientation === 'vertical') {
+                    thHead.classList.add('orgcheck-table-th-vertical');
+                }
                 const aHead = thHead.appendChild(document.createElement('a'));
                 aHead.classList.add('slds-th__action', 'slds-text-link_reset', 'slds-truncate');
                 aHead.setAttribute('href', 'javascript:void(0);');

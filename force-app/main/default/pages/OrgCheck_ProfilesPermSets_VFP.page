@@ -25,8 +25,8 @@
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Object CRUDs" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objcruds" id="tab-default-objcruds__item">Object CRUDs</a>
+                    <li class="slds-tabs_default__item" title="Comparator" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-comparator" id="tab-default-comparator__item">Comparator</a>
                     </li>
                 </ul>
                 <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
@@ -41,22 +41,81 @@
                 <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
                 </div>
-                <div id="tab-default-objcruds" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objcruds__item">
-                    <div id="legend-objectCRUDs">
-                        Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <span class="slds-icon_container slds-icon-standard-account" title="Select Profiles and/or Permission Sets">
+                                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Select Profiles and/or Permission Sets</span>
+                                            </span>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                                Select Profiles and/or Permission Sets
+                                            </h2>
+                                        </div>
+                                        <div class="slds-no-flex"></div>
+                                    </header>
+                                </div>
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <div class="slds-form-element">
+                                        <label class="slds-form-element__label" for="input-search-comparator">Search</label>
+                                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
+                                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
+                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#search')}"></use>
+                                            </svg>
+                                            <input type="text" id="input-search-comparator" placeholder="Search a profile or a permission set to compare..." class="slds-input" />
+                                        </div>
+                                    </div>
+                                    <div class="slds-dueling-list__column">
+                                        <span class="slds-form-element__label" id="label-103">Results:</span>
+                                        <div class="slds-dueling-list__options" style="width: 100%;">
+                                            <ul aria-describedby="option-drag-label" aria-labelledby="label-103" 
+                                                aria-multiselectable="true" class="slds-listbox slds-listbox_vertical" 
+                                                role="listbox" id="resultlist-search-comparator" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <span class="slds-icon_container slds-icon-standard-account" title="Comparison matrix">
+                                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Comparison matrix</span>
+                                            </span>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                                Comparison matrix
+                                            </h2>
+                                        </div>
+                                        <div class="slds-no-flex"></div>
+                                    </header>
+                                </div>
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <div id="thematrix-comparator" />
+                                </div>
+                            </article>
+                        </div>
                     </div>
-                    <div id="datatable-objectCRUDs" />
                 </div>
             </div>
         </apex:define>
         <apex:define name="html_start_definition_script">
             <script>
                 function start2(controller, helper) {
-
-                    const PREF_HIDE_CRUDS = helper.preferences.get('filter.HideCRUDsProfilesPermSets');
-
-                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments' ];
-                    if (PREF_HIDE_CRUDS === false) profileDatasets.push('objectCRUDs');
 
                     // Initialize TABS bindings
                     helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
@@ -65,8 +124,10 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: profileDatasets,
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments' ],
                         onRecords: function(map) { 
+
+                            const searchComparatorIndexByName = {};
 
                             // -------------------------------------------
                             // PROFILES
@@ -76,6 +137,7 @@
                                 appendCountInElement: 'tab-default-profiles__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
+                                        searchComparatorIndexByName[r.name + ' (profile)'] = { id: r.permissionSetId, type: 'profile' };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -205,6 +267,9 @@
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
+                                            if (r.isGroup === false) {
+                                                searchComparatorIndexByName[r.name + ' (permission set)'] = { id: r.id, type: 'pset' };
+                                            }
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
                                                 helper.html.render.escape(r.name)
@@ -261,42 +326,131 @@
                             });
 
                             // -------------------------------------------
-                            // PROFILE OBJECT CRUDs
+                            // COMPARATOR
                             // -------------------------------------------
-                            if (PREF_HIDE_CRUDS === true) {
-                                const divCRUDs = helper.html.element.get('legend-objectCRUDs');
-                                divCRUDs.innerHTML = '{!JSENCODE($Label.OrgCheck_CRUDMessage_CL)}';
-                            } else {
-                                helper.html.datatable.create({
-                                    element: 'datatable-objectCRUDs',
-                                    columns: [
-                                        { name: '{!JSENCODE($Label.OrgCheck_Parent_CL)}', formula: (r) => { 
-                                            return helper.html.render.link(
-                                                '/'+r.parent.id, 
-                                                helper.html.render.escape(r.parent.name)
-                                            ); 
-                                        }},
-                                        { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', property: 'sobject' },
-                                        { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
-                                        { name: '{!JSENCODE($Label.OrgCheck_Permissions_CL)}', formula: (r) => { 
-                                            let html = '';
-                                            if (r.permissions.create === true) html += 'C';
-                                            if (r.permissions.read === true) html += 'R';
-                                            if (r.permissions.update === true) html += 'U';
-                                            if (r.permissions.delete === true) html += 'D';
-                                            if (r.permissions.viewAll === true) html += ' V';
-                                            if (r.permissions.modifyAll === true) html += ' M';
-                                            return html;
-                                        }}
-                                    ],
-                                    data: map.objectCRUDs,
-                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
-                                    showSearch: true,
-                                    showStatistics: true,
-                                    showLineCount: true
+                            const paintMatrix = function() {
+                                helper.html.datatable.clean('thematrix-comparator');
+                                const columns = [ { name: 'Object', property: 'sobject' } ];
+                                const permissionSetIds = [];
+                                Object.keys(searchComparatorIndexByName)
+                                    .filter(n => searchComparatorIndexByName[n].selected === true)
+                                    .forEach(n => { 
+                                        const id = searchComparatorIndexByName[n].id;
+                                        columns.push({ name: n, property: id, orientation: 'vertical' }); 
+                                        permissionSetIds.push(id);
+                                    });
+                                helper.salesforce.cruds(permissionSetIds, results => { 
+                                    const matrixData = {};
+                                    results.forEach(r => {
+                                        const d = matrixData[r.SobjectType] || { sobject: r.SobjectType };
+                                        d[r.ParentId] = 
+                                            (r.PermissionsCreate === true ? 'C' : '') +
+                                            (r.PermissionsRead === true ? 'R' : '') +
+                                            (r.PermissionsEdit === true ? 'U' : '') +
+                                            (r.PermissionsDelete === true ? 'D' : '') +
+                                            (r.PermissionsViewAllRecords === true ? 'v' : '') +
+                                            (r.PermissionsModifyAllRecords === true ? 'm' : '');
+                                        matrixData[r.SobjectType] = d;
+                                    });
+                                    helper.html.datatable.create({
+                                        element: 'thematrix-comparator',
+                                        columns: columns,
+                                        data: matrixData
+                                    });
+                                }, e => { 
+                                    console.error(e); 
                                 });
-                            }
+                            };
+                            const inputSearch = helper.html.element.get('input-search-comparator');
+                            const resultList = helper.html.element.get('resultlist-search-comparator');
+                            const paintResult = inputSearch.onkeyup = function(e) { 
+                                helper.html.element.removeAllChild(resultList);
+                                Object.keys(searchComparatorIndexByName)
+                                    .filter(name => inputSearch.value.length < 2 || name.toUpperCase().includes(inputSearch.value.toUpperCase()))
+                                    .sort()
+                                    .forEach(name => {
+                                        const result = helper.html.element.create('li');
+                                        helper.html.element.addClass(result, ['slds-listbox__item']);
+                                        const result_div = helper.html.element.create('div');
+                                        helper.html.element.addClass(result_div, ['slds-listbox__option', 'slds-listbox__option_plain', 'slds-media', 'slds-media_small', 'slds-media_inline']);
+                                        const result_span = helper.html.element.create('span');
+                                        helper.html.element.setText(result_span, name);
+                                        helper.html.element.appendChild(result_div, result_span);
+                                        helper.html.element.appendChild(result, result_div);
+                                        helper.html.element.appendChild(resultList, result);
+                                        result.onclick = function(e) {
+                                            searchComparatorIndexByName[name].selected = true;
+                                            paintMatrix();
+                                        };
+                                    });
+                            };
+                            paintResult();
 
+                            /*const crudMap1 = {};
+                            helper.map.iterate2(map.objectCRUDs, function(d, i, s) { 
+                                let index;
+                                if (d.parent.name === 'Analytics Cloud Integration User') index = 0;
+                                else if (d.parent.name === 'Buyer Manager') index = 1;
+                                else if (d.parent.name === 'Read Only') index = 2;
+                                else return;
+                                const record = crudMap1[d.sobject] || {};
+                                if (! record['object']) record['object'] = d.sobject;
+                                record['pset'+index] = 
+                                    (d.permissions.create === true ? 'C' : '') +
+                                    (d.permissions.read === true ? 'R' : '') +
+                                    (d.permissions.update === true ? 'U' : '') +
+                                    (d.permissions.delete === true ? 'D' : '') +
+                                    (d.permissions.viewAll === true ? 'v' : '') +
+                                    (d.permissions.modifyAll === true ? 'm' : '');
+                                crudMap1[d.sobject] = record;
+                            });
+
+                            helper.html.datatable.create({
+                                element: 'datatable-objectCRUDs-1',
+                                columns: [
+                                    { name: 'Object', property: 'object' },
+                                    { name: 'Analytics Cloud Integration User', property: 'pset1' },
+                                    { name: 'Buyer Manager', property: 'pset2' },
+                                    { name: 'Read Only', property: 'pset3' }
+                                ],
+                                data: crudMap1,
+                                sorting: { name: 'Object', order: 'asc' },
+                                showSearch: true,
+                                showLineCount: true
+                            });
+
+                            const crudMap2 = {};
+                            helper.map.iterate2(map.objectCRUDs, function(d, i, s) { 
+                                let index;
+                                if (d.sobject === 'Account') index = 0;
+                                else if (d.sobject === 'Contact') index = 1;
+                                else if (d.sobject === 'Opportunity') index = 2;
+                                else return;
+                                const record = crudMap2[d.parent.name] || {};
+                                if (! record['parent']) record['parent'] = d.parent.name;
+                                record['object'+index] = 
+                                    (d.permissions.create === true ? 'C' : '') +
+                                    (d.permissions.read === true ? 'R' : '') +
+                                    (d.permissions.update === true ? 'U' : '') +
+                                    (d.permissions.delete === true ? 'D' : '') +
+                                    (d.permissions.viewAll === true ? 'v' : '') +
+                                    (d.permissions.modifyAll === true ? 'm' : '');
+                                crudMap2[d.parent.name] = record;
+                            });
+
+                            helper.html.datatable.create({
+                                element: 'datatable-objectCRUDs-2',
+                                columns: [
+                                    { name: 'Profile/PermissionSet', property: 'parent' },
+                                    { name: 'Account', property: 'object1' },
+                                    { name: 'Contact', property: 'object2' },
+                                    { name: 'Opportunity', property: 'object3' }
+                                ],
+                                data: crudMap2,
+                                sorting: { name: 'Profile/PermissionSet', order: 'asc' },
+                                showSearch: true,
+                                showLineCount: true
+                            });*/
                         },
                         actions: {  
                             clearCache: { 

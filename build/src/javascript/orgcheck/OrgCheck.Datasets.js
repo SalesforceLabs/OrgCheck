@@ -511,7 +511,7 @@ OrgCheck.Datasets = {
                 const profileIds = [];
                 const profiles = {};
                 SALESFORCE_HANDLER.query([{
-                        string: 'SELECT ProfileId, Profile.UserType, NamespacePrefix, '+
+                        string: 'SELECT Id, ProfileId, Profile.UserType, NamespacePrefix, '+
                                     '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                                 'FROM PermissionSet '+ // oh yes we are not mistaken!
                                 'WHERE isOwnedByProfile = TRUE'
@@ -532,6 +532,7 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: profileId,
                                     name: r.Name,
+                                    permissionSetId: profileSoql.Id,
                                     loginIpRanges: r.Metadata.loginIpRanges,
                                     description: r.Description,
                                     license: r.Metadata.userLicense,

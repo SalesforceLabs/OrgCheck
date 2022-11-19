@@ -317,6 +317,18 @@
         this.getHelper = function() {
             return {
                 salesforce: {
+                    cruds: function(permissionSets, success, error) {
+                        SALESFORCE_HANDLER.query([{ 
+                            string: 'SELECT ParentId, SobjectType, '+
+                                        'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                        'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                                    'FROM ObjectPermissions '+
+                                    'WHERE ParentId IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(permissionSets)+')'
+                            }])
+                            .on('error', (e) => { if (error) error(e); })
+                            .on('end', (o) => { if (success) success(o); })
+                            .run();
+                    },
                     describe: {
                         object: function(pckg, obj, success, error) {
                             SALESFORCE_HANDLER.describe(pckg, obj)
