@@ -29,6 +29,7 @@ OrgCheck.VisualComponents = {
          *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
          *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
          *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
+         *                <li><code>showSelection</code>: boolean, if <code>true</code>, show an additional 'checkbox' column to perform actions, <code>false</code> by default.</li>
          *                <li><code>appendCountInElement</code>: name of the element that will contain the counter of bad lines and total lines of this table</li>
          *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
@@ -119,6 +120,7 @@ OrgCheck.VisualComponents = {
             const thead = table.appendChild(document.createElement('thead'));
             const trHead = thead.appendChild(document.createElement('tr'));
             if (config.showLineCount === true) config.columns.unshift({ name: '#' });
+            if (config.showSelection) config.columns.unshift({ name: 'Select' });
             const orderingImage = document.createElement('img');
             let firstSortCallback;
             config.columns.forEach((c, i) => {
@@ -224,6 +226,14 @@ OrgCheck.VisualComponents = {
                         return;
                     }
                     const row = isArray ? k : config.data[k];
+                    if (config.showSelection && c.name === 'Select') {
+                        const select = tdBody.appendChild(document.createElement('input'));
+                        select.setAttribute('type', 'checkbox');
+                        select.onclick = (e) => {
+                            config.showSelection.onselect(row, e.target.checked);
+                        };
+                        return;
+                    }
                     let dataDecorated = '';
                     let dataRaw = '';
                     let additiveScore = 0;

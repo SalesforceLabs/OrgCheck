@@ -64,23 +64,7 @@
                                     </header>
                                 </div>
                                 <div class="slds-card__body slds-card__body_inner">
-                                    <div class="slds-form-element">
-                                        <label class="slds-form-element__label" for="input-search-comparator">Search</label>
-                                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_left">
-                                            <svg class="slds-icon slds-input__icon slds-input__icon_left slds-icon-text-default" aria-hidden="true">
-                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#search')}"></use>
-                                            </svg>
-                                            <input type="text" id="input-search-comparator" placeholder="Search a profile or a permission set to compare..." class="slds-input" />
-                                        </div>
-                                    </div>
-                                    <div class="slds-dueling-list__column">
-                                        <span class="slds-form-element__label" id="label-103">Results:</span>
-                                        <div class="slds-dueling-list__options" style="width: 100%;">
-                                            <ul aria-describedby="option-drag-label" aria-labelledby="label-103" 
-                                                aria-multiselectable="true" class="slds-listbox slds-listbox_vertical" 
-                                                role="listbox" id="resultlist-search-comparator" />
-                                        </div>
-                                    </div>
+                                    <div id="datatable-selection-comparator" />
                                 </div>
                             </article>
                         </div>
@@ -127,7 +111,7 @@
                         datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments' ],
                         onRecords: function(map) { 
 
-                            const searchComparatorIndexByName = {};
+                            const allProfilesAndPSets = {};
 
                             // -------------------------------------------
                             // PROFILES
@@ -137,7 +121,7 @@
                                 appendCountInElement: 'tab-default-profiles__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
-                                        searchComparatorIndexByName[r.name + ' (profile)'] = { id: r.permissionSetId, type: 'profile' };
+                                        allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)' };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -268,7 +252,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
                                             if (r.isGroup === false) {
-                                                searchComparatorIndexByName[r.name + ' (permission set)'] = { id: r.id, type: 'pset' };
+                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)' };
                                             }
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
@@ -328,17 +312,29 @@
                             // -------------------------------------------
                             // COMPARATOR
                             // -------------------------------------------
+                            let permissionSetIds = [];
+                            helper.html.datatable.create({
+                                element: 'datatable-selection-comparator',
+                                columns: [
+                                    { name: 'Name', property: 'name' }
+                                ],
+                                data: allProfilesAndPSets,
+                                sorting: { name: 'Name', order: 'asc' },
+                                showSearch: true,
+                                showSelection: { 
+                                    onselect: (r, v) => {
+                                        if (v === true) permissionSetIds.push(r.id);
+                                        else permissionSetIds = permissionSetIds.filter(e => e !== r.id);
+                                        paintMatrix();
+                                    }
+                                }
+                            });
                             const paintMatrix = function() {
                                 helper.html.datatable.clean('thematrix-comparator');
-                                const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom'  } ];
-                                const permissionSetIds = [];
-                                Object.keys(searchComparatorIndexByName)
-                                    .filter(n => searchComparatorIndexByName[n].selected === true)
-                                    .forEach(n => { 
-                                        const id = searchComparatorIndexByName[n].id;
-                                        columns.push({ name: n, property: id, orientation: 'vertical' }); 
-                                        permissionSetIds.push(id);
-                                    });
+                                const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom' } ];
+                                permissionSetIds.forEach(id => { 
+                                    columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
+                                });
                                 helper.salesforce.cruds(permissionSetIds, results => { 
                                     const matrixData = {};
                                     results.forEach(r => {
@@ -357,102 +353,11 @@
                                         element: 'thematrix-comparator',
                                         columns: columns,
                                         data: matrixData,
+                                        sorting: { name: 'Object', order: 'asc' },
                                         columnBordered: true
                                     });
-                                }, e => { 
-                                    console.error(e); 
                                 });
                             };
-                            const inputSearch = helper.html.element.get('input-search-comparator');
-                            const resultList = helper.html.element.get('resultlist-search-comparator');
-                            const paintResult = inputSearch.onkeyup = function(e) { 
-                                helper.html.element.removeAllChild(resultList);
-                                Object.keys(searchComparatorIndexByName)
-                                    .filter(name => inputSearch.value.length < 2 || name.toUpperCase().includes(inputSearch.value.toUpperCase()))
-                                    .sort()
-                                    .forEach(name => {
-                                        const result = helper.html.element.create('li');
-                                        helper.html.element.addClass(result, ['slds-listbox__item']);
-                                        const result_div = helper.html.element.create('div');
-                                        helper.html.element.addClass(result_div, ['slds-listbox__option', 'slds-listbox__option_plain', 'slds-media', 'slds-media_small', 'slds-media_inline']);
-                                        const result_span = helper.html.element.create('span');
-                                        helper.html.element.setText(result_span, name);
-                                        helper.html.element.appendChild(result_div, result_span);
-                                        helper.html.element.appendChild(result, result_div);
-                                        helper.html.element.appendChild(resultList, result);
-                                        result.onclick = function(e) {
-                                            searchComparatorIndexByName[name].selected = true;
-                                            paintMatrix();
-                                        };
-                                    });
-                            };
-                            paintResult();
-
-                            /*const crudMap1 = {};
-                            helper.map.iterate2(map.objectCRUDs, function(d, i, s) { 
-                                let index;
-                                if (d.parent.name === 'Analytics Cloud Integration User') index = 0;
-                                else if (d.parent.name === 'Buyer Manager') index = 1;
-                                else if (d.parent.name === 'Read Only') index = 2;
-                                else return;
-                                const record = crudMap1[d.sobject] || {};
-                                if (! record['object']) record['object'] = d.sobject;
-                                record['pset'+index] = 
-                                    (d.permissions.create === true ? 'C' : '') +
-                                    (d.permissions.read === true ? 'R' : '') +
-                                    (d.permissions.update === true ? 'U' : '') +
-                                    (d.permissions.delete === true ? 'D' : '') +
-                                    (d.permissions.viewAll === true ? 'v' : '') +
-                                    (d.permissions.modifyAll === true ? 'm' : '');
-                                crudMap1[d.sobject] = record;
-                            });
-
-                            helper.html.datatable.create({
-                                element: 'datatable-objectCRUDs-1',
-                                columns: [
-                                    { name: 'Object', property: 'object' },
-                                    { name: 'Analytics Cloud Integration User', property: 'pset1' },
-                                    { name: 'Buyer Manager', property: 'pset2' },
-                                    { name: 'Read Only', property: 'pset3' }
-                                ],
-                                data: crudMap1,
-                                sorting: { name: 'Object', order: 'asc' },
-                                showSearch: true,
-                                showLineCount: true
-                            });
-
-                            const crudMap2 = {};
-                            helper.map.iterate2(map.objectCRUDs, function(d, i, s) { 
-                                let index;
-                                if (d.sobject === 'Account') index = 0;
-                                else if (d.sobject === 'Contact') index = 1;
-                                else if (d.sobject === 'Opportunity') index = 2;
-                                else return;
-                                const record = crudMap2[d.parent.name] || {};
-                                if (! record['parent']) record['parent'] = d.parent.name;
-                                record['object'+index] = 
-                                    (d.permissions.create === true ? 'C' : '') +
-                                    (d.permissions.read === true ? 'R' : '') +
-                                    (d.permissions.update === true ? 'U' : '') +
-                                    (d.permissions.delete === true ? 'D' : '') +
-                                    (d.permissions.viewAll === true ? 'v' : '') +
-                                    (d.permissions.modifyAll === true ? 'm' : '');
-                                crudMap2[d.parent.name] = record;
-                            });
-
-                            helper.html.datatable.create({
-                                element: 'datatable-objectCRUDs-2',
-                                columns: [
-                                    { name: 'Profile/PermissionSet', property: 'parent' },
-                                    { name: 'Account', property: 'object1' },
-                                    { name: 'Contact', property: 'object2' },
-                                    { name: 'Opportunity', property: 'object3' }
-                                ],
-                                data: crudMap2,
-                                sorting: { name: 'Profile/PermissionSet', order: 'asc' },
-                                showSearch: true,
-                                showLineCount: true
-                            });*/
                         },
                         actions: {  
                             clearCache: { 
