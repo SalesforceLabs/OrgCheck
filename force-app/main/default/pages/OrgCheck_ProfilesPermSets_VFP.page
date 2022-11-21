@@ -330,7 +330,7 @@
                             // -------------------------------------------
                             const paintMatrix = function() {
                                 helper.html.datatable.clean('thematrix-comparator');
-                                const columns = [ { name: 'Object', property: 'sobject' } ];
+                                const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom'  } ];
                                 const permissionSetIds = [];
                                 Object.keys(searchComparatorIndexByName)
                                     .filter(n => searchComparatorIndexByName[n].selected === true)
@@ -348,14 +348,16 @@
                                             (r.PermissionsRead === true ? 'R' : '') +
                                             (r.PermissionsEdit === true ? 'U' : '') +
                                             (r.PermissionsDelete === true ? 'D' : '') +
-                                            (r.PermissionsViewAllRecords === true ? 'v' : '') +
-                                            (r.PermissionsModifyAllRecords === true ? 'm' : '');
+                                            (r.PermissionsViewAllRecords === true && r.PermissionsModifyAllRecords === true ? '+' : '') +
+                                            (r.PermissionsViewAllRecords === true ? 'V' : '') +
+                                            (r.PermissionsModifyAllRecords === true ? 'M' : '');
                                         matrixData[r.SobjectType] = d;
                                     });
                                     helper.html.datatable.create({
                                         element: 'thematrix-comparator',
                                         columns: columns,
-                                        data: matrixData
+                                        data: matrixData,
+                                        columnBordered: true
                                     });
                                 }, e => { 
                                     console.error(e); 

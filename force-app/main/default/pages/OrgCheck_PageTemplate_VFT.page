@@ -48,14 +48,21 @@
                     color: white;
                 }
                 th.orgcheck-table-th-vertical {
-                    vertical-align: bottom;
+                    padding-top: 0.7rem !important;
                     writing-mode: vertical-rl;
                     text-align: left;
-                    padding: 10px;
                     transform: rotate(180deg);
                 }
                 th.orgcheck-table-th-vertical > a.slds-th__action {
                     display: inline-table;
+                }
+                th.orgcheck-table-th-vertical > a.slds-th__action > div > span.slds-truncate {
+                    white-space: normal !important;
+                    min-height: 8rem;
+                    max-height: 10rem;
+                }
+                th.orgcheck-table-th-horizontal-bottom {
+                    vertical-align: bottom;
                 }
             </style>
             <div id="modal" style="display: none;">

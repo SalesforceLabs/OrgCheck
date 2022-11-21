@@ -108,6 +108,9 @@ OrgCheck.VisualComponents = {
             }
             const table = main.appendChild(document.createElement('table'));
             table.classList.add('slds-table', 'slds-table_bordered');
+            if (config.columnBordered) {
+                table.classList.add('slds-table_col-bordered');
+            }
             if (config.stickyHeaders) {
                 table.classList.add('slds-table_header-fixed');
             }
@@ -123,9 +126,10 @@ OrgCheck.VisualComponents = {
                 thHead.setAttribute('scope', 'col');
                 thHead.setAttribute('aria-label', c.name);
                 thHead.classList.add('slds-is-sortable');
-                if (c.orientation === 'vertical') {
-                    thHead.classList.add('orgcheck-table-th-vertical');
-                }
+                switch (c.orientation) {
+                    case 'vertical': thHead.classList.add('orgcheck-table-th-vertical'); break;
+                    case 'horizontal-bottom': thHead.classList.add('orgcheck-table-th-horizontal-bottom'); break;
+                } 
                 const aHead = thHead.appendChild(document.createElement('a'));
                 aHead.classList.add('slds-th__action', 'slds-text-link_reset', 'slds-truncate');
                 aHead.setAttribute('href', 'javascript:void(0);');
