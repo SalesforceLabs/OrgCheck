@@ -106,7 +106,16 @@ OrgCheck.VisualComponents = {
                 main.style.height = '100%';
                 main.style.width = 'fit-content';
             }
+
             const table = main.appendChild(document.createElement('table'));
+            const thead = table.appendChild(document.createElement('thead'));
+            const tbody = table.appendChild(document.createElement('tbody'));
+
+            const trHeadShadow = config.stickyHeaders ? tbody.appendChild(document.createElement('tr')) : null;
+            if (trHeadShadow) {
+                trHeadShadow.style.visibility = 'collapse';
+            }
+
             table.classList.add('slds-table', 'slds-table_bordered');
             if (config.columnBordered) {
                 table.classList.add('slds-table_col-bordered');
@@ -116,7 +125,7 @@ OrgCheck.VisualComponents = {
             }
 
             // Add all columns
-            const thead = table.appendChild(document.createElement('thead'));
+            
             const trHead = thead.appendChild(document.createElement('tr'));
             if (config.showLineCount === true) config.columns.unshift({ name: '#' });
             if (config.showSelection) config.columns.unshift({ name: 'Select' });
@@ -143,6 +152,9 @@ OrgCheck.VisualComponents = {
                 ttlHead.classList.add('slds-truncate');
                 ttlHead.setAttribute('title', c.name);
                 ttlHead.textContent = c.name;
+                if (trHeadShadow) {
+                    trHeadShadow.appendChild(document.createElement('th')).textContent = c.name;
+                }
                 if (config.sorting) {
                     aHead.onclick = function(e) { 
                         if (e) {
@@ -170,16 +182,18 @@ OrgCheck.VisualComponents = {
                         items.sort(function compare(a, b) {
                             const ca = a.getElementsByTagName('td')[i];
                             const cb = b.getElementsByTagName('td')[i];
-                            const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
-                            const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
-                            if (isCellNumeric) {
-                                if (va && vb) return (va - vb) * iOrder;
-                                if (va) return iOrder;
-                                if (vb) return -iOrder;
+                            if (ca && cb) {
+                                const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
+                                const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
+                                if (isCellNumeric) {
+                                    if (va && vb) return (va - vb) * iOrder;
+                                    if (va) return iOrder;
+                                    if (vb) return -iOrder;
+                                }
+                                if (va < vb) return -iOrder;
+                                if (va > vb) return iOrder;
+                                return 0;
                             }
-                            if (va < vb) return -iOrder;
-                            if (va > vb) return iOrder;
-                            return 0;
                         });
                         table.hidden = true; // make table invisible while manipulating the DOM
                         let countRow = 1;
@@ -187,7 +201,7 @@ OrgCheck.VisualComponents = {
                             const parent = r.parentNode;
                             const detatchedItem = parent.removeChild(r);
                             parent.appendChild(detatchedItem);
-                            if (config.showLineCount === true) {
+                            if (config.showLineCount === true && !detatchedItem.style.visibility) {
                                 detatchedItem.firstChild.innerText = countRow;
                                 countRow++;
                             }
@@ -204,7 +218,6 @@ OrgCheck.VisualComponents = {
             const iterable = isArray ? config.data : config.datakeys;
 
             // Add the rows
-            const tbody = table.appendChild(document.createElement('tbody'));
             table.hidden = true; // make table invisible while manipulating the DOM
             let nbRows = 0, nbBadRows = 0, sumScore = 0;
             if (iterable) iterable.forEach(k => {

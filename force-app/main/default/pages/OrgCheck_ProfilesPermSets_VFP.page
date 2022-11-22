@@ -359,8 +359,7 @@
                                         columns: columns,
                                         data: matrixData,
                                         sorting: { name: 'Object', order: 'asc' },
-                                        columnBordered: true,
-                                        stickyHeaders: true
+                                        columnBordered: true
                                     });
                                 });
                             };
