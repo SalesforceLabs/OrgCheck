@@ -105,7 +105,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             helper.html.datatable.create({
@@ -156,7 +157,8 @@
                                 filtering: { formula: (r) => { return r.type === 'Workflow' }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             helper.html.datatable.create({
@@ -203,7 +205,8 @@
                                 filtering: { formula: (r) => { return r.type !== 'Workflow' }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                         },
                         actions: { 

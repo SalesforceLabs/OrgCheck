@@ -253,7 +253,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                stickyHeaders: true
                             });
 
                             helper.html.datatable.create({
@@ -295,7 +296,8 @@
                                 filtering: { formula: (r) => { return r.type === 'queue'; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                         },
                         actions: {  

@@ -115,7 +115,8 @@
                                 filtering: { formula: (r) => { return r.needsRecompilation === true; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Apex Classes data in a table
@@ -232,7 +233,8 @@
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Apex Unit Tests Classes data in a table
@@ -287,7 +289,8 @@
                                 filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             let htmlParagraphs = [];
@@ -441,7 +444,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Apex Triggers data in a table
@@ -462,7 +466,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                             
                         },

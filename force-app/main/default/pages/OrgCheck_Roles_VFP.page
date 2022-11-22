@@ -420,7 +420,8 @@
                                 }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                             
                             // Render role graphic

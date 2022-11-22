@@ -189,7 +189,8 @@
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -226,7 +227,8 @@
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -306,7 +308,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -327,7 +330,8 @@
                                         else permissionSetIds = permissionSetIds.filter(e => e !== r.id);
                                         paintMatrix();
                                     }
-                                }
+                                },
+                                stickyHeaders: true
                             });
                             const paintMatrix = function() {
                                 helper.html.datatable.clean('thematrix-comparator');
@@ -354,7 +358,8 @@
                                         columns: columns,
                                         data: matrixData,
                                         sorting: { name: 'Object', order: 'asc' },
-                                        columnBordered: true
+                                        columnBordered: true,
+                                        stickyHeaders: true
                                     });
                                 });
                             };

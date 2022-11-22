@@ -101,11 +101,10 @@ OrgCheck.VisualComponents = {
             if (config.stickyHeaders) {
                 main.classList.add('slds-table--header-fixed_container', 'slds-scrollable_x');
                 main.style.height = '87vh';
-                main.style.width = '100vw';
                 main = main.appendChild(document.createElement('div'));
                 main.classList.add('slds-scrollable');
                 main.style.height = '100%';
-                main.style.width = '100%';
+                main.style.width = 'fit-content';
             }
             const table = main.appendChild(document.createElement('table'));
             table.classList.add('slds-table', 'slds-table_bordered');
