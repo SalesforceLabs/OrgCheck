@@ -44,7 +44,7 @@ open the setup in the right place).
 
 The classes that are from packages that you may not need to worry about (because 
 you cannot change them) will have a specific **ManageableState** value. That is why
-we will use this as a criteria in OrgCheck.
+we will use this as a criteria in Org Check.
 
 ### Where is the code coverage information about Apex Classes in Salesforce?
 
@@ -135,7 +135,7 @@ For each record that returns this query, we will do the following mapping:
 
 ### Code coverage information about Apex Classes
 
-In OrgCheck, we get the global code coverage from Salesforce (table
+In Org Check, we get the global code coverage from Salesforce (table
 ***ApexCodeCoverageAggregate*** in Tooling API) and we also get the 
 list of unit tests that participate in that coverage (table 
 ***ApexCodeCoverage*** in Tooling API).

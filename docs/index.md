@@ -1,13 +1,13 @@
 ---
 layout: default
-title: Welcome to OrgCheck
+title: Welcome to Org Check
 ---
 
 
-# Welcome to OrgCheck
+# Welcome to Org Check
 
 
-## Introducing “OrgCheck”
+## Introducing “Org Check”
 
 Let customers have an application within their Salesforce org to reduce their technical debt continuously.
 

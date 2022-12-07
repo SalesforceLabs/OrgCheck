@@ -6,11 +6,11 @@ permalink: /legal/
 
 # Legal terms
 
-**OrgCheck is free to use, but is not an official Salesforce product.** 
+**Org Check is free to use, but is not an official Salesforce product.** 
 
-OrgCheck has not been officially tested or documented by Salesforce. 
+Org Check has not been officially tested or documented by Salesforce. 
 
-Salesforce support is not available for OrgCheck. 
+Salesforce support is not available for Org Check. 
 
 Support requests for Org Check should be directed to GitHub at <a href="https://github.com/VinceFINET/OrgCheck/issues" target="_blank">https://github.com/VinceFINET/OrgCheck/issues</a>. 
 

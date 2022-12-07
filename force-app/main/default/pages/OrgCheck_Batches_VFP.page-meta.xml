@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Batches Visualforce Page</description>
-    <label>OrgCheck Batches Page</label>
+    <description>Org Check Batches Visualforce Page</description>
+    <label>Org Check Batches Page</label>
 </ApexPage>

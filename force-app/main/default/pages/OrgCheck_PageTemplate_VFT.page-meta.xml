@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Page Template Visualforce Template</description>
-    <label>OrgCheck Page Template</label>
+    <description>Org Check Page Template Visualforce Template</description>
+    <label>Org Check Page Template</label>
 </ApexPage>

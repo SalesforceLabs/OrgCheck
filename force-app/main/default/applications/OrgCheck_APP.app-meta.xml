@@ -4,12 +4,12 @@
         <headerColor>#0097A7</headerColor>
         <shouldOverrideOrgTheme>true</shouldOverrideOrgTheme>
     </brand>
-    <description>OrgCheck - Application admins use to check the health of their org</description>
+    <description>Org Check - Application admins use to check the health of their org</description>
     <formFactors>Small</formFactors>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>true</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>true</isNavPersonalizationDisabled>
-    <label>OrgCheck</label>
+    <label>Org Check</label>
     <navType>Standard</navType>
     <tabs>OrgCheck_Home_TAB</tabs>
     <tabs>OrgCheck_ObjectsDoc_TAB</tabs>

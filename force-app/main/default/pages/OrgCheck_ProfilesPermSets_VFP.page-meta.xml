@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Profiles and Permission Sets Visualforce Page</description>
-    <label>OrgCheck Profiles and Permission Sets Page</label>
+    <description>Org Check Profiles and Permission Sets Visualforce Page</description>
+    <label>Org Check Profiles and Permission Sets Page</label>
 </ApexPage>

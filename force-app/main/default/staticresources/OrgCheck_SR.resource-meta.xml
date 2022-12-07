@@ -2,5 +2,5 @@
 <StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">
     <cacheControl>Private</cacheControl>
     <contentType>application/zip</contentType>
-    <description>OrgCheck js and img resources</description>
+    <description>Org Check js and img resources</description>
 </StaticResource>

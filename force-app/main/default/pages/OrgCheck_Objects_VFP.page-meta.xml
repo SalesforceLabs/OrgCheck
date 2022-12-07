@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Objects Documentation Visualforce Page</description>
-    <label>OrgCheck Objects Documentation Page</label>
+    <description>Org Check Objects Documentation Visualforce Page</description>
+    <label>Org Check Objects Documentation Page</label>
 </ApexPage>

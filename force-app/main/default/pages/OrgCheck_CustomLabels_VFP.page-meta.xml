@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Custom Labels Visualforce Page</description>
-    <label>OrgCheck Custom Labels Page</label>
+    <description>Org Check Custom Labels Visualforce Page</description>
+    <label>Org Check Custom Labels Page</label>
 </ApexPage>

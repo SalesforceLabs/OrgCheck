@@ -93,7 +93,7 @@
 <customLabels><name>OrgCheck_IncludesTechGroups_CL</name><label>技術グループが含まれています</label></customLabels>
 <customLabels><name>OrgCheck_InnerClasses_CL</name><label>内部クラス</label></customLabels>
 <customLabels><name>OrgCheck_Internal_CL</name><label>内部</label></customLabels>
-<customLabels><name>OrgCheck_Home_Section1_Text1_CL</name><label> &lt;b&gt;OrgCheck&lt;&#x2F;b&gt; の紹介。組織とその技術的負債を迅速に分析するために、設置しやすく使いやすいSalesforceアプリケーション。</label></customLabels>
+<customLabels><name>OrgCheck_Home_Section1_Text1_CL</name><label> &lt;b&gt;Org Check&lt;&#x2F;b&gt; の紹介。組織とその技術的負債を迅速に分析するために、設置しやすく使いやすいSalesforceアプリケーション。</label></customLabels>
 <customLabels><name>OrgCheck_IsAbstract_CL</name><label>要約はありますか？</label></customLabels>
 <customLabels><name>OrgCheck_IsActive_CL</name><label>アクティブです</label></customLabels>
 <customLabels><name>OrgCheck_IsGroup_CL</name><label>グループ化？</label></customLabels>
