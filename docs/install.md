@@ -1,10 +1,10 @@
 ---
 layout: default
-title: How to install OrgCheck in your org?
+title: How to install Org Check in your org?
 permalink: /installation/
 ---
 
-# How to install OrgCheck in your org?
+# How to install Org Check in your org?
 
 
 ## Easy to install
@@ -21,7 +21,7 @@ permalink: /installation/
 ## Step 2: Get it now!
 
 - Click on the "**Get It Now**" button on the previous page
-- Select the environnment you want to install OrgCheck to.
+- Select the environnment you want to install Org Check to.
 
 
 
@@ -40,13 +40,13 @@ Note: For some orgs that have Apex class not compiling, you can install the pack
 We do not provide a specific permission set anymore.
 Once installed, go to the app "OrgCheck", and you are done!
 
-![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
+![Welcome in Org Check screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
 ## Known issues
 
 ### I see you also have a standalone package
 
-Historically, OrgCheck was available as an "**unlocked package**".
+Historically, Org Check was available as an "**unlocked package**".
 
 The benefits of such a package were:
 - We are able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
@@ -63,7 +63,7 @@ But the prefered way now is to install the application via the AppExchange.
  - It is more likely a **existing Apex class** in the org you want to analyze that **does not compile** (it happens!).
  - In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the **advanced setting when installing the app**.
 
-### I can't see the OrgCheck application, even if I am SysAdmin
+### I can't see the Org Check application, even if I am SysAdmin
  - The app is called "**OrgCheck**" obviously, maybe you spell it wrong?
  - Did you install the package for a specific set of profiles and maybe you are not part of these ones? (remember we recommended to install the package for admins only...)
  - You should see the application definitly!

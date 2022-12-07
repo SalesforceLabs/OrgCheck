@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Data Store "Packages" in OrgCheck  
+title: Data Store "Packages" in Org Check  
 permalink: /technical/datastores/packages/
 ---
 

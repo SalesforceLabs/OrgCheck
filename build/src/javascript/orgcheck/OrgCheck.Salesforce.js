@@ -577,22 +577,22 @@ OrgCheck.Salesforce = {
         this.getOrgType = () => { return private_org_type; }
 
         /**
-         * Check if OrgCheck should not be used
+         * Check if Org Check should not be used
          */
         const private_check_orgtype = () => {
             CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
                 .on('record', (r) => {
                     let watchDogLevel = 'INFO';
                     let watchDogMessage = 'Your org is all good!';
-                    // if the current Org is DE, it's ok to use OrgCheck!
+                    // if the current Org is DE, it's ok to use Org Check!
                     if (r.OrganizationType === 'Developer Edition') {
                         private_org_type = 'Developer Edition';
                     }
-                    // if the current Org is a Sandbox, it's ok to use OrgCheck!
+                    // if the current Org is a Sandbox, it's ok to use Org Check!
                     else if (r.IsSandbox === true) {
                         private_org_type = 'Sandbox';
                     }
-                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use OrgCheck!
+                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use Org Check!
                     else if (r.IsSandbox === false && r.TrialExpirationDate) {
                         private_org_type = 'TrialOrDemo';
                     }
@@ -668,7 +668,7 @@ OrgCheck.Salesforce = {
 
                     if (r.Profile.PermissionsViewAllData === false) {
                         watchDogLevel = 'ERROR';
-                        watchDogMessage = 'You should be assigned to the System Administrator profile to run OrgCheck.';
+                        watchDogMessage = 'You should be assigned to the System Administrator profile to run Org Check.';
                     }
                     configuration.watchDogCallback({ 
                         type: 'UserSecurity',

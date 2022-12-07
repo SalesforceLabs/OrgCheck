@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Data Store "Workflow Rules" in OrgCheck  
+title: Data Store "Workflow Rules" in Org Check  
 permalink: /technical/datastores/workflowrules/
 ---
 

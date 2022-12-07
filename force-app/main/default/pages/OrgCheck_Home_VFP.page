@@ -202,9 +202,9 @@
                         { 
                             label: 'Security (only applies if you are currently on your Production org!)',
                             options: [
-                                { label: 'By unchecking this option, I understand that using OrgCheck in Production will increase the '+
+                                { label: 'By unchecking this option, I understand that using Org Check in Production will increase the '+
                                          'Daily API Request Limit, which potentially could block for 24 hours my users to use my org. '+
-                                         'Please consider using OrgCheck in a full sandbox instead.', id: 'warning.ByPassUseInProduction' }
+                                         'Please consider using Org Check in a full sandbox instead.', id: 'warning.ByPassUseInProduction' }
                             ]
                         },
                         { 

@@ -4,12 +4,12 @@
  const OrgCheck = {
 
     /**
-     * OrgCheck Version
+     * Org Check Version
      */
     version: 'Helium [He,2]',
    
     /**
-     * OrgCheck core
+     * Org Check core
      * @param setup JSON configuration including:
      *              <ol>
      *                <li><code>sfApiVersion</code>: Salesforce API version to use</li>
@@ -147,7 +147,7 @@
         // ======================================================
 
         /**
-         * The OrgCheck controller
+         * The Org Check controller
          */
         this.getController = function() {
             return {
@@ -312,7 +312,7 @@
         // ======================================================
 
         /**
-         * The OrgCheck helper
+         * The Org Check helper
          */
         this.getHelper = function() {
             return {

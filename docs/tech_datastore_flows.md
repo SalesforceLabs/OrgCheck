@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Data Store "Flows" in OrgCheck  
+title: Data Store "Flows" in Org Check  
 permalink: /technical/datastores/flows/
 ---
 
@@ -24,9 +24,9 @@ In the future we will challenge this by using the **Metadata API**.
 
 In the Tooling API, the metadata information for Flows is located on the object **Flow**.
 
-### How OrgCheck is retreiving the information?
+### How Org Check is retreiving the information?
 
-In OrgCheck we will run the following query on the **Tooling API**:
+In Org Check we will run the following query on the **Tooling API**:
 
 ```SQL
 SELECT Id, FullName, DefinitionId, MasterLabel, 
@@ -43,7 +43,7 @@ in the **Metadata** field:
 
 For each record that returns this query, we will do the following mapping:
 
-| OrgCheck field                   | Formula                                                                                  |
+| Org Check field                   | Formula                                                                                  |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | id                               | simplifySalesforceId(**Id**)                                                             |
 | name                             | **FullName**                                                                             |

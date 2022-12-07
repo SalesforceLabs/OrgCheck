@@ -59,14 +59,14 @@ A complementary tool for the awesome **Salesforce Optimizer**.
 
 
 ## Install today!
-<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="./assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a><br />
-<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="./assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="./assets/pngs/Install-SDBX.png" alt="Deploy Org Check to Salesforce (Sandbox)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="./assets/pngs/Install-DevEdition.png" alt="Deploy Org Check to Salesforce (Dev Edition)"></a><br />
 
 ## Enjoy your ride with Checky (our mascot!)
 - [You want a preview of this application?](preview)
-- [How to install OrgCheck in your org?](installation)
+- [How to install Org Check in your org?](installation)
 - [Why did I create this tool?](vision)
-- [Legal terms: OrgCheck is not a Salesforce product](legal)
+- [Legal terms: Org Check is not a Salesforce product](legal)
 
 
 

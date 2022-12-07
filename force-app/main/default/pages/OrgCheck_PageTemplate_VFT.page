@@ -207,7 +207,7 @@
                 window.onload = function() {
 
                     // ========================================================================
-                    // Initialization of OrgCheck main object called "core"
+                    // Initialization of Org Check main object called "core"
                     // ========================================================================
                     const THIS_YEAR = new Date().getFullYear();
                     const THIS_MONTH = new Date().getMonth() + 1;
@@ -229,7 +229,7 @@
                     });
 
                     // ========================================================================
-                    // Finally we call the start2 method for the page to use OrgCheck controller and helper
+                    // Finally we call the start2 method for the page to use Org Check controller and helper
                     // ========================================================================
                     const ctl = core.getController();
                     const hlp = core.getHelper();

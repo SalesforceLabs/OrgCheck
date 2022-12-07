@@ -6,7 +6,7 @@
             "package": "OrgCheck",
             "versionName": "Helium [He,2]",
             "versionNumber": "2.2.1.NEXT",
-            "versionDescription": "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
+            "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
     "namespace": "OrgCheck",

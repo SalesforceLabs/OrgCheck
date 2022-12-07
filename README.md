@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="docs/assets/pngs/Logo+Mascot-v3.png" width="256" alt="OrgCheck Logo" />
-  <h1>OrgCheck Salesforce Application</h1>
+  <img src="docs/assets/pngs/Logo+Mascot-v3.png" width="256" alt="Org Check Logo" />
+  <h1>Org Check Salesforce Application</h1>
   <p>
-    <b>OrgCheck</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
+    <b>Org Check</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
   </p>
   <a href="https://github.com/VinceFINET/OrgCheck/network/members">
     <img alt="forks on github" src="https://img.shields.io/github/forks/VinceFINET/OrgCheck?style=flat-square&logoColor=blue">
@@ -22,7 +22,7 @@
 </div>
 
 
-## More information about OrgCheck:
+## More information about Org Check:
 - Home: https://vincefinet.github.io/OrgCheck/
 - Preview: https://vincefinet.github.io/OrgCheck/preview/
 - Installation: https://vincefinet.github.io/OrgCheck/installation/
@@ -35,11 +35,11 @@ You can log any issues and new ideas in our tracker: https://github.com/VinceFIN
 
 ## License
 
-OrgCheck is available under the [MIT license](LICENSE.md)
+Org Check is available under the [MIT license](LICENSE.md)
 
 
 ## Some references
-- OrgCheck on the AppExchange: https://sfdc.co/OrgCheck-InstallToday-AppExchange
+- Org Check on the AppExchange: https://sfdc.co/OrgCheck-InstallToday-AppExchange
 - Social:
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
@@ -50,6 +50,6 @@ OrgCheck is available under the [MIT license](LICENSE.md)
   - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
   - Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
 - 2021: 
-  - Albanian Dreamin21, OrgCheck presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
+  - Albanian Dreamin21, Org Check presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
   - Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
   - Salesforce's Ben blog article: https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/

@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Data Stores in OrgCheck  
+title: Data Stores in Org Check  
 permalink: /technical/datastores/
 ---
 
