@@ -372,8 +372,8 @@
                                                 return type;
                                             }},
                                             { name: 'Length', type: 'numeric', property: 'length' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
-                                            { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
+                                            { name: 'Unique', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
                                             { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
