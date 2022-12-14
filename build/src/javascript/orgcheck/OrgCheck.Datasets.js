@@ -358,7 +358,7 @@ OrgCheck.Datasets = {
                                     'DeveloperName, NamespacePrefix, Description, CreatedDate, '+
                                     'LastModifiedDate '+
                                 'FROM CustomField '+
-                                'WHERE ManageableState = \'unmanaged\' ', 
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ', 
                         tooling: true 
                     }])
                     .on('record', (r) => {
@@ -907,7 +907,7 @@ OrgCheck.Datasets = {
                 SALESFORCE_HANDLER.query([{ 
                         string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
                                 'FROM ExternalString '+
-                                'WHERE ManageableState = \'unmanaged\' ',
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
                         tooling: true
                     }])
                     .on('record', (r) => {
@@ -946,7 +946,7 @@ OrgCheck.Datasets = {
                                     'Type, NamespacePrefix, Description, ' +
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM FlexiPage '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -983,7 +983,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM AuraDefinitionBundle '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1058,7 +1058,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexComponent '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1095,7 +1095,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM LightningComponentBundle '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1148,7 +1148,7 @@ OrgCheck.Datasets = {
                                     'Body, LengthWithoutComments, SymbolTable, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexClass '+
-                                'WHERE ManageableState = \'unmanaged\' ',
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
                         tooling: true
                     }, {
                         string: 'SELECT ApexClassId '+
@@ -1274,7 +1274,7 @@ OrgCheck.Datasets = {
                                     'EntityDefinition.QualifiedApiName, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexTrigger '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         if (r.EntityDefinition) {
@@ -1457,99 +1457,3 @@ OrgCheck.Datasets = {
 
      }
 }
-
-
-/*
-
-
-
-
-
-    // ========================================================================
-    // CUSTOM SETTINGS
-    // ------------------------------------------------------------------------
-    // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'customSettings',
-        keycache: 'CustomSettings',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE IsCustomSetting = true ' + 
-                                    'AND NamespacePrefix = NULL '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.DurableId),
-                                name: v.QualifiedApiName,
-                                namespace: v.NamespacePrefix
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-
-
-    // ========================================================================
-    // STATIC RESOURCES
-    // ------------------------------------------------------------------------
-    // Get the list of Static Resources in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'stResources',
-        keycache: 'StaticResources',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, NamespacePrefix '+
-                                    'FROM StaticResource '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                namespace: v.NamespacePrefix
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));                    
-
-
-
-
-
-
-
-*/
