@@ -43,14 +43,14 @@
                 </div>
                 <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
                     <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <div class="slds-col slds-size_11-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
                             <article class="slds-card">
                                 <div class="slds-card__header slds-grid">
                                     <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                         <div class="slds-media__figure">
                                             <span class="slds-icon_container slds-icon-standard-account" title="Select Profiles and/or Permission Sets">
                                                 <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#multi_picklist')}"></use>
                                                 </svg>
                                                 <span class="slds-assistive-text">Select Profiles and/or Permission Sets</span>
                                             </span>
@@ -68,14 +68,23 @@
                                 </div>
                             </article>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12 slds-large-size_8-of-12">
+                        <div class="slds-col slds-size_1-of-12 slds-medium-size_1-of-12 slds-large-size_1-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <br /><br /><br /><br />
+                                    <button id="button-selection-ready" class="slds-button slds-button_stretch slds-button_neutral">&gt;&gt;</button>
+                                    <span id="text-selection" />
+                                </div>
+                            </article>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12 slds-large-size_7-of-12">
                             <article class="slds-card">
                                 <div class="slds-card__header slds-grid">
                                     <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                         <div class="slds-media__figure">
-                                            <span class="slds-icon_container slds-icon-standard-account" title="Comparison matrix">
+                                            <span class="slds-icon_container slds-icon-standard-quip-sheet" title="Comparison matrix">
                                                 <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#user')}"></use>
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#quip_sheet')}"></use>
                                                 </svg>
                                                 <span class="slds-assistive-text">Comparison matrix</span>
                                             </span>
@@ -317,6 +326,8 @@
                             // COMPARATOR
                             // -------------------------------------------
                             let permissionSetIds = [];
+                            const button = helper.html.element.get('button-selection-ready');
+                            const text = helper.html.element.get('text-selection');
                             helper.html.datatable.create({
                                 element: 'datatable-selection-comparator',
                                 columns: [
@@ -327,9 +338,19 @@
                                 showSearch: true,
                                 showSelection: { 
                                     onselect: (r, v) => {
-                                        if (v === true) permissionSetIds.push(r.id);
-                                        else permissionSetIds = permissionSetIds.filter(e => e !== r.id);
-                                        paintMatrix();
+                                        if (v === true) {
+                                            permissionSetIds.push(r.id);
+                                        } else {
+                                            permissionSetIds = permissionSetIds.filter(e => e !== r.id);
+                                        }
+                                        helper.html.element.setText(text, permissionSetIds.length + ' item'+(permissionSetIds.length>1?'s':'')+' selected.');
+                                        if (permissionSetIds.length === 0) {
+                                            button.classList.remove("slds-button_brand");
+                                            button.classList.add("slds-button_neutral");
+                                        } else {
+                                            button.classList.add("slds-button_brand");
+                                            button.classList.remove("slds-button_neutral");
+                                        }
                                     }
                                 },
                                 stickyHeaders: true
@@ -363,6 +384,9 @@
                                     });
                                 });
                             };
+                            button.onclick = function(event) {
+                                paintMatrix();
+                            }
                         },
                         actions: {  
                             clearCache: { 
@@ -384,6 +408,10 @@
                                 table: 'datatable-profileRangeIPs',
                                 visibleTab: 'tab-default-ipranges__item',
                                 filename: 'IPRangesRestrictions'
+                            }, {
+                                table: 'thematrix-comparator',
+                                visibleTab: 'tab-default-comparator__item',
+                                filename: 'CRUD-Comparator'
                             }]
                         }
                     });
