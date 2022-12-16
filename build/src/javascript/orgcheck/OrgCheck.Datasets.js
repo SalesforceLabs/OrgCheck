@@ -869,6 +869,8 @@ OrgCheck.Datasets = {
                                     definitionId: SALESFORCE_HANDLER.salesforceIdFormat(r.DefinitionId),
                                     definitionName: r.MasterLabel,
                                     version: r.VersionNumber,
+                                    apiVersion: r.ApiVersion,
+                                    isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
                                     dmlCreates: r.Metadata.recordCreates?.length || 0,
                                     dmlDeletes: r.Metadata.recordDeletes?.length || 0,
                                     dmlUpdates: r.Metadata.recordUpdates?.length || 0,

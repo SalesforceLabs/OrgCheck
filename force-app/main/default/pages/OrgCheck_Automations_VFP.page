@@ -125,6 +125,11 @@
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
+                                        }
+                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
@@ -177,6 +182,11 @@
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
+                                        scoreFormula: (r) => { 
+                                            if (r.isApiVersionOld === true) return 1; 
+                                        }
+                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }, 
