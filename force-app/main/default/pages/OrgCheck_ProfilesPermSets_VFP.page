@@ -43,7 +43,7 @@
                 </div>
                 <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
                     <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_11-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                        <div class="slds-col slds-size_10-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
                             <article class="slds-card">
                                 <div class="slds-card__header slds-grid">
                                     <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -68,16 +68,19 @@
                                 </div>
                             </article>
                         </div>
-                        <div class="slds-col slds-size_1-of-12 slds-medium-size_1-of-12 slds-large-size_1-of-12">
+                        <div class="slds-col slds-size_2-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
                             <article class="slds-card">
                                 <div class="slds-card__body slds-card__body_inner">
                                     <br /><br /><br /><br />
-                                    <button id="button-selection-ready" class="slds-button slds-button_stretch slds-button_neutral">&gt;&gt;</button>
-                                    <span id="text-selection" />
+                                    <button id="button-compare-cruds" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare CRUDs... &gt;&gt;</button><br />
+                                    <br />
+                                    <button id="button-compare-apps" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare Apps... &gt;&gt;</button><br />
+                                    <br /><br />
+                                    <span id="text-selection">0 item selected</span>
                                 </div>
                             </article>
                         </div>
-                        <div class="slds-col slds-size_1-of-1 slds-medium-size_7-of-12 slds-large-size_7-of-12">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
                             <article class="slds-card">
                                 <div class="slds-card__header slds-grid">
                                     <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -326,7 +329,9 @@
                             // COMPARATOR
                             // -------------------------------------------
                             let permissionSetIds = [];
-                            const button = helper.html.element.get('button-selection-ready');
+                            const buttonCruds = helper.html.element.get('button-compare-cruds');
+                            const buttonApps = helper.html.element.get('button-compare-apps');
+                            const buttons = [ buttonCruds, buttonApps ];
                             const text = helper.html.element.get('text-selection');
                             helper.html.datatable.create({
                                 element: 'datatable-selection-comparator',
@@ -345,47 +350,63 @@
                                         }
                                         helper.html.element.setText(text, permissionSetIds.length + ' item'+(permissionSetIds.length>1?'s':'')+' selected.');
                                         if (permissionSetIds.length === 0) {
-                                            button.classList.remove("slds-button_brand");
-                                            button.classList.add("slds-button_neutral");
+                                            buttons.forEach(b => {
+                                                helper.html.element.enable(b, false);
+                                            });
                                         } else {
-                                            button.classList.add("slds-button_brand");
-                                            button.classList.remove("slds-button_neutral");
+                                            buttons.forEach(b => {
+                                                helper.html.element.enable(b, true);
+                                            });
                                         }
                                     }
                                 },
                                 stickyHeaders: true
                             });
-                            const paintMatrix = function() {
+                            const paintMatrix = function(type) {
                                 helper.html.datatable.clean('thematrix-comparator');
                                 const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom' } ];
                                 permissionSetIds.forEach(id => { 
                                     columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
                                 });
-                                helper.salesforce.cruds(permissionSetIds, results => { 
-                                    const matrixData = {};
-                                    results.forEach(r => {
-                                        const d = matrixData[r.SobjectType] || { sobject: r.SobjectType };
-                                        d[r.ParentId] = 
-                                            (r.PermissionsCreate === true ? 'C' : '') +
-                                            (r.PermissionsRead === true ? 'R' : '') +
-                                            (r.PermissionsEdit === true ? 'U' : '') +
-                                            (r.PermissionsDelete === true ? 'D' : '') +
-                                            (r.PermissionsViewAllRecords === true && r.PermissionsModifyAllRecords === true ? '+' : '') +
-                                            (r.PermissionsViewAllRecords === true ? 'V' : '') +
-                                            (r.PermissionsModifyAllRecords === true ? 'M' : '');
-                                        matrixData[r.SobjectType] = d;
-                                    });
-                                    helper.html.datatable.create({
-                                        element: 'thematrix-comparator',
-                                        columns: columns,
-                                        data: matrixData,
-                                        sorting: { name: 'Object', order: 'asc' },
-                                        columnBordered: true
-                                    });
-                                });
+                                switch (type) {
+                                    case 'cruds': {
+                                        helper.salesforce.cruds(permissionSetIds, results => { 
+                                            const matrixData = {};
+                                            results.forEach(r => {
+                                                const d = matrixData[r.SobjectType] || { sobject: r.SobjectType };
+                                                d[r.ParentId] = 
+                                                    (r.PermissionsCreate === true ? 'C' : '') +
+                                                    (r.PermissionsRead === true ? 'R' : '') +
+                                                    (r.PermissionsEdit === true ? 'U' : '') +
+                                                    (r.PermissionsDelete === true ? 'D' : '') +
+                                                    (r.PermissionsViewAllRecords === true && r.PermissionsModifyAllRecords === true ? '+' : '') +
+                                                    (r.PermissionsViewAllRecords === true ? 'V' : '') +
+                                                    (r.PermissionsModifyAllRecords === true ? 'M' : '');
+                                                matrixData[r.SobjectType] = d;
+                                            });
+                                            helper.html.datatable.create({
+                                                element: 'thematrix-comparator',
+                                                columns: columns,
+                                                data: matrixData,
+                                                sorting: { name: 'Object', order: 'asc' },
+                                                columnBordered: true
+                                            });
+                                        });
+                                        break;
+                                    }
+                                    case 'apps': {
+
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
                             };
-                            button.onclick = function(event) {
-                                paintMatrix();
+                            buttonCruds.onclick = function(event) {
+                                paintMatrix('cruds');
+                            }
+                            buttonApps.onclick = function(event) {
+                                paintMatrix('apps');
                             }
                         },
                         actions: {  

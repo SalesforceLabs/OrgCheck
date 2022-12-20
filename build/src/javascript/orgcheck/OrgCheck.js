@@ -560,6 +560,14 @@
                             if (typeof el === 'string') el = document.getElementById(el);
                             el.textContent = (value ? value : '');
                         },
+                        enable: function(el, value) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            if (value === true) {
+                                el.removeAttribute('disabled');
+                            } else if (value === false) {
+                                el.setAttribute('disabled', 'disabled');
+                            }
+                        },
                         setAttribute: function(el, key, value) {
                             if (typeof el === 'string') el = document.getElementById(el);
                             el.setAttribute(key, value);
