@@ -275,22 +275,48 @@ OrgCheck.Salesforce = {
     MetadataProcess: function(connection, type, members) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
+        const _metadata_api_read = (_type, _members) => {
+            connection.metadata.read(_type, _members, (error, result) => {
+                if (error) {
+                    error.context = { 
+                        when: 'While calling a metadata api read.',
+                        what: {
+                            type: _type,
+                            members: _members
+                        }
+                    };
+                    that.fire('error', error)
+                } else {
+                    that.fire('end', Array.isArray(result) ? result : [ result ]);
+                }
+            });
+        }
         this.run = () => {
             try {
-                connection.metadata.read(type, members, (error, result) => {
-                    if (error) {
-                        error.context = { 
-                            when: 'While calling a metadata api read.',
-                            what: {
-                                type: type,
-                                members: members
+                if (members === '*') {
+                    connection.metadata.list([{ type: type }], connection.version, (error, result) => {
+                        if (error) {
+                            error.context = { 
+                                when: 'While calling a metadata api list.',
+                                what: {
+                                    type: type
+                                }
+                            };
+                            that.fire('error', error);
+                        } else {
+                            const items = Array.isArray(result) ? result : [ result ];
+                            const members = [];
+                            items.forEach(i => members.push(i.fullName));
+                            if (members.length > 0) {
+                                _metadata_api_read(type, members);
+                            } else {
+                                that.fire('end', []);
                             }
-                        };
-                        that.fire('error', error)
-                    } else {
-                        that.fire('end', Array.isArray(result) ? result : [ result ]);
-                    }
-                });
+                        }
+                    });
+                } else {
+                    _read(type, members);
+                }                
             } catch (error) {
                 that.fire('error', error);
             }

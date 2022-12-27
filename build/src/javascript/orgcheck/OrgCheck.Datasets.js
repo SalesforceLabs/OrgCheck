@@ -639,6 +639,30 @@ OrgCheck.Datasets = {
             }
         }));
 
+        
+        /**
+         * ======================================================================
+         * Add the Profile Password Policy dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'profilePasswordPolicies', 
+            isCachable: true, 
+            keyCache: 'ProfilePasswordPolicies', 
+            retriever: (me, resolve, reject) => {
+                SALESFORCE_HANDLER.readMetadata('ProfilePasswordPolicy', '*')
+                    .on('end', (policies) => {
+                        const records = MAP_HANDLER.newMap();
+                        policies.forEach(r => {
+                            MAP_HANDLER.setValue(records, r.profile, r);
+                        });
+                        resolve(records);
+                    })
+                    .on('error', (err) => reject(err))
+                    .run();
+            }
+        }));
+
         /**
          * ======================================================================
          * Add the Role dataset

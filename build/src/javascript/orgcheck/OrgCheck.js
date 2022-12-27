@@ -342,7 +342,7 @@
                             .on('end', () => success(records))
                             .run();
                     },
-                    apps: function(profileNames, permissionSetNames, success, error) {
+                    applicationVisibilities: function(profileNames, permissionSetNames, success, error) {
                         const promises = [];
                         if (profileNames && profileNames.length > 0) {
                             promises.push(new Promise((s, e) => { 

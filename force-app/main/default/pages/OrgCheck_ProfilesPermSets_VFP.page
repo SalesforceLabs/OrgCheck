@@ -25,6 +25,9 @@
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
+                    <li class="slds-tabs_default__item" title="Profile Password Policies" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ppwdpolicies" id="tab-default-ppwdpolicies__item">Profile Password Policies</a>
+                    </li>
                     <li class="slds-tabs_default__item" title="Comparator" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-comparator" id="tab-default-comparator__item">Comparator</a>
                     </li>
@@ -40,6 +43,9 @@
                 </div>
                 <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
+                </div>
+                <div id="tab-default-ppwdpolicies" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ppwdpolicies__item">
+                    <div id="datatable-profilePwdPolicies" />
                 </div>
                 <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
                     <div class="slds-grid slds-gutters">
@@ -75,7 +81,8 @@
                                     <button id="button-compare-cruds" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare CRUDs... &gt;&gt;</button><br />
                                     <br />
                                     <button id="button-compare-apps" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare Apps... &gt;&gt;</button><br />
-                                    <br /><br />
+                                    <br />
+                                    <br />
                                     <span id="text-selection">0 item selected</span>
                                 </div>
                             </article>
@@ -120,7 +127,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments' ],
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profilePasswordPolicies' ],
                         onRecords: function(map) { 
 
                             const allProfilesAndPSets = {};
@@ -238,6 +245,33 @@
                                 data: map.profiles,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
+                                showSearch: false,
+                                showStatistics: false,
+                                showLineCount: true,
+                                stickyHeaders: true
+                            });
+
+                            // -------------------------------------------
+                            // PROFILE PASSWORD POLICIES
+                            // -------------------------------------------
+                            helper.html.datatable.create({
+                                element: 'datatable-profilePwdPolicies',
+                                appendCountInElement: 'tab-default-ppwdpolicies__item',
+                                columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', property: 'profile' },
+                                    { name: 'forgotPasswordRedirect', property: 'forgotPasswordRedirect' },
+                                    { name: 'lockoutInterval', property: 'lockoutInterval' },
+                                    { name: 'maxLoginAttempts', property: 'maxLoginAttempts' },
+                                    { name: 'minimumPasswordLength', property: 'minimumPasswordLength' },
+                                    { name: 'minimumPasswordLifetime', property: 'minimumPasswordLifetime' },
+                                    { name: 'obscure', property: 'obscure' },
+                                    { name: 'passwordComplexity', property: 'passwordComplexity' },
+                                    { name: 'passwordExpiration', property: 'passwordExpiration' },
+                                    { name: 'passwordHistory', property: 'passwordHistory' },
+                                    { name: 'passwordQuestion', property: 'passwordQuestion' }
+                                ],
+                                data: map.profilePasswordPolicies,
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
                                 showSearch: false,
                                 showStatistics: false,
                                 showLineCount: true,
@@ -422,7 +456,7 @@
                                             helper.html.progress.setSection('retrievingPS', 'Retrieving additional information from the Metadata API about permission sets (' + permissionSetFullnames + '). It may take a while...', 'started');
                                         }
                                         
-                                        helper.salesforce.apps(profileFullnames, permissionSetFullnames,
+                                        helper.salesforce.applicationVisibilities(profileFullnames, permissionSetFullnames,
                                             results => { 
                                                 if (profileFullnames.length > 0) {
                                                     helper.html.progress.setSection('retrievingP', 'Retrieving profiles from Metadata API is done! (thank you for your patience)', 'ended');
