@@ -706,6 +706,12 @@
                                 case 'redFlag':    return '<img src="/img/samples/flag_red.gif" alt="red flag" />';
                                 case 'group':      return '<img src="/img/icon/groups24.png" alt="group" />';
                                 case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
+                                case 'star0':      return '<img src="/img/samples/stars_000.gif" alt="star-0" />';
+                                case 'star1':      return '<img src="/img/samples/stars_100.gif" alt="star-1" />';
+                                case 'star2':      return '<img src="/img/samples/stars_200.gif" alt="star-2" />';
+                                case 'star3':      return '<img src="/img/samples/stars_300.gif" alt="star-3" />';
+                                case 'star4':      return '<img src="/img/samples/stars_400.gif" alt="star-4" />';
+                                case 'star5':      return '<img src="/img/samples/stars_500.gif" alt="star-5" />';
                                 default:           return '';
                             }
                         },

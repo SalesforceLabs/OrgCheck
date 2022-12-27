@@ -654,7 +654,20 @@ OrgCheck.Datasets = {
                     .on('end', (policies) => {
                         const records = MAP_HANDLER.newMap();
                         policies.forEach(r => {
-                            MAP_HANDLER.setValue(records, r.profile, r);
+                            const item = {
+                                forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
+                                lockoutInterval: parseInt(r.lockoutInterval),
+                                maxLoginAttempts: parseInt(r.maxLoginAttempts),
+                                minimumPasswordLength: parseInt(r.minimumPasswordLength),
+                                minimumPasswordLifetime: (r.minimumPasswordLifetime === 'true'),
+                                obscure: (r.obscure === 'true'),
+                                passwordComplexity: parseInt(r.passwordComplexity),
+                                passwordExpiration: parseInt(r.passwordExpiration),
+                                passwordHistory: parseInt(r.passwordHistory),
+                                passwordQuestion: (r.passwordQuestion === 'true'),
+                                profile: r.profile
+                            }
+                            MAP_HANDLER.setValue(records, item.profile, item);
                         });
                         resolve(records);
                     })

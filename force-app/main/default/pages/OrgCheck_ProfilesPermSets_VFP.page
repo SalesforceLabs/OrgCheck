@@ -131,6 +131,7 @@
                         onRecords: function(map) { 
 
                             const allProfilesAndPSets = {};
+                            const allProfilesByApiName = {};
 
                             // -------------------------------------------
                             // PROFILES
@@ -141,6 +142,7 @@
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)', profileId: r.id, apiName: r.apiName };
+                                        allProfilesByApiName[r.apiName] = { id: r.id, name: r.name };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -258,17 +260,31 @@
                                 element: 'datatable-profilePwdPolicies',
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', property: 'profile' },
-                                    { name: 'forgotPasswordRedirect', property: 'forgotPasswordRedirect' },
-                                    { name: 'lockoutInterval', property: 'lockoutInterval' },
-                                    { name: 'maxLoginAttempts', property: 'maxLoginAttempts' },
-                                    { name: 'minimumPasswordLength', property: 'minimumPasswordLength' },
-                                    { name: 'minimumPasswordLifetime', property: 'minimumPasswordLifetime' },
-                                    { name: 'obscure', property: 'obscure' },
-                                    { name: 'passwordComplexity', property: 'passwordComplexity' },
-                                    { name: 'passwordExpiration', property: 'passwordExpiration' },
-                                    { name: 'passwordHistory', property: 'passwordHistory' },
-                                    { name: 'passwordQuestion', property: 'passwordQuestion' }
+                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => {
+                                        const profile = allProfilesByApiName[r.profile];
+                                        if (profile) return helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
+                                        return r.profile;
+                                    }},
+                                    { name: 'Forgot Link Expires', property: 'forgotPasswordRedirect', type: 'checkbox', formula: (r) => {
+                                        return helper.html.render.checkbox(r.forgotPasswordRedirect);
+                                    }},
+                                    { name: 'Lockout Interval (min)', property: 'lockoutInterval', type: 'numeric' },
+                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric' },
+                                    { name: 'Min Length', property: 'minimumPasswordLength', type: 'numeric' },
+                                    { name: 'Min Lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', formula: (r) => {
+                                        return helper.html.render.checkbox(r.minimumPasswordLifetime);
+                                    }},
+                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', formula: (r) => {
+                                        return helper.html.render.checkbox(r.obscure);
+                                    }},
+                                    { name: 'Level of complexity', property: 'passwordComplexity', type: 'numeric', formula: (r) => {
+                                        return helper.html.render.icon('star'+r.passwordComplexity);
+                                    }},
+                                    { name: 'Expiration', property: 'passwordExpiration', type: 'numeric' },
+                                    { name: 'History', property: 'passwordHistory', type: 'numeric' },
+                                    { name: 'Question can contain password', property: 'passwordQuestion', formula: (r) => {
+                                        return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true);
+                                    }}
                                 ],
                                 data: map.profilePasswordPolicies,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
