@@ -315,7 +315,7 @@ OrgCheck.Salesforce = {
                         }
                     });
                 } else {
-                    _read(type, members);
+                    _metadata_api_read(type, members);
                 }                
             } catch (error) {
                 that.fire('error', error);
