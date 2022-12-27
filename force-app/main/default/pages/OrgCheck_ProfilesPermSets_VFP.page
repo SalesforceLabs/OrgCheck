@@ -267,7 +267,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
                                             if (r.isGroup === false) {
-                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)', apiName: r.name };
+                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)', apiName: r.apiName };
                                             }
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
@@ -329,7 +329,6 @@
                             // COMPARATOR
                             // -------------------------------------------
                             let selectedProfileAndPermSetIds = []; // includes also the pset ids paired with profiles!
-                            let profileIds = []; // only profile fullnames
                             const buttonCruds = helper.html.element.get('button-compare-cruds');
                             const buttonApps = helper.html.element.get('button-compare-apps');
                             const buttons = [ buttonCruds, buttonApps ];
@@ -346,20 +345,14 @@
                                     onselect: (r, v) => {
                                         if (v === true) {
                                             selectedProfileAndPermSetIds.push(r.id);
-                                            if (r.profileId) profileIds.push(r.profileId);
                                         } else {
                                             selectedProfileAndPermSetIds = selectedProfileAndPermSetIds.filter(e => e !== r.id);
-                                            if (r.profileId) profileIds = profileIds.filter(e => e !== r.profileId);
                                         }
                                         helper.html.element.setText(text, selectedProfileAndPermSetIds.length + ' item'+(selectedProfileAndPermSetIds.length>1?'s':'')+' selected.');
                                         if (selectedProfileAndPermSetIds.length === 0) {
-                                            buttons.forEach(b => {
-                                                helper.html.element.enable(b, false);
-                                            });
+                                            buttons.forEach(b => helper.html.element.enable(b, false));
                                         } else {
-                                            buttons.forEach(b => {
-                                                helper.html.element.enable(b, true);
-                                            });
+                                            buttons.forEach(b => helper.html.element.enable(b, true));
                                         }
                                     }
                                 },
@@ -375,8 +368,8 @@
                                         });
                                         helper.html.progress.resetSections();
                                         helper.html.progress.show();
-                                        helper.html.progress.addSection('retrieving', 
-                                            'Retrieving information about object permissions for selected profiles and permission sets...');
+                                        helper.html.progress.addSection('retrieving', '');
+                                        helper.html.progress.setSection('retrieving', 'Retrieving information about object permissions for selected profiles and permission sets...', 'started');
                                         
                                         helper.salesforce.cruds(selectedProfileAndPermSetIds, 
                                             results => { 
@@ -420,22 +413,28 @@
                                         });
                                         helper.html.progress.resetSections();
                                         helper.html.progress.show();
-                                        helper.html.progress.addSection('retrievingP', 
-                                            'Retrieving additional information from the Metadata API about profiles (' + profileFullnames + ')...');
-                                        helper.html.progress.addSection('retrievingPS', 
-                                            'Retrieving additional information from the Metadata API about permission sets (' + permissionSetFullnames + ')...');
+                                        if (profileFullnames.length > 0) {
+                                            helper.html.progress.addSection('retrievingP', '');
+                                            helper.html.progress.setSection('retrievingP', 'Retrieving additional information from the Metadata API about profiles (' + profileFullnames + '). It may take a while...', 'started');
+                                        }
+                                        if (permissionSetFullnames.length > 0) {
+                                            helper.html.progress.addSection('retrievingPS', '');
+                                            helper.html.progress.setSection('retrievingPS', 'Retrieving additional information from the Metadata API about permission sets (' + permissionSetFullnames + '). It may take a while...', 'started');
+                                        }
                                         
                                         helper.salesforce.apps(profileFullnames, permissionSetFullnames,
                                             results => { 
-                                                helper.html.progress.setSection('retrievingP', 'Retrieving profiles done!', 'ended');
-                                                helper.html.progress.setSection('retrievingPS', 'Retrieving permission sets done!', 'ended');
+                                                if (profileFullnames.length > 0) {
+                                                    helper.html.progress.setSection('retrievingP', 'Retrieving profiles from Metadata API is done! (thank you for your patience)', 'ended');
+                                                }
+                                                if (permissionSetFullnames.length > 0) {
+                                                    helper.html.progress.setSection('retrievingPS', 'Retrieving permission sets from Metadata API is done! (thank you for your patience)', 'ended');
+                                                }
                                                 const matrixData = {};
-                                                results.forEach(p => {
-                                                    p.applicationVisibilities?.forEach(av => {
-                                                        const d = matrixData[av.application] || { app: av.application };
-                                                        d[p.fullName] = (av.visible === 'true' ? 'Visible' : '');
-                                                        matrixData[av.application] = d;
-                                                    });
+                                                results.forEach(r => {
+                                                    const d = matrixData[r.app] || { app: r.app };
+                                                    d[r.parentApiName] = (r.visible === 'true' ? 'Visible' : '');
+                                                    matrixData[r.app] = d;
                                                 });
                                                 helper.html.datatable.create({
                                                     element: 'thematrix-comparator',

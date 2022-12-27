@@ -364,7 +364,12 @@
                             Promise.all(promises)
                                 .then((results) => {
                                     const records = [];
-                                    results.forEach(result => result.forEach(r => records.push(r)));
+                                    results.forEach(result => result.forEach(r => {
+                                        if (r && r.applicationVisibilities) {
+                                            const avs = Array.isArray(r.applicationVisibilities) ? r.applicationVisibilities : [ r.applicationVisibilities ];
+                                            avs.forEach(av => records.push({ parentApiName: r.fullName, app: av.application, visible: av.visible }));
+                                        }
+                                    }));
                                     return records;
                                 })
                                 .catch((err) => error(err))

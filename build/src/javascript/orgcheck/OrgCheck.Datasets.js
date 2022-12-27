@@ -561,6 +561,7 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
                                     name: r.Name,
+                                    apiName: (r.NamespacePrefix ? (r.NamespacePrefix + '__') : '') + r.Name,
                                     description: r.Description,
                                     hasLicense: (r.License ? 'yes' : 'no'),
                                     license: (r.License ? r.License.Name : ''),
