@@ -318,16 +318,60 @@
             return {
                 salesforce: {
                     cruds: function(permissionSets, success, error) {
+                        const records = [];
                         SALESFORCE_HANDLER.query([{ 
-                            string: 'SELECT ParentId, SobjectType, '+
-                                        'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
-                                        'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
-                                    'FROM ObjectPermissions '+
-                                    'WHERE ParentId IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(permissionSets)+')'
+                                string: 'SELECT ParentId, SobjectType, '+
+                                            'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                            'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                                        'FROM ObjectPermissions '+
+                                        'WHERE ParentId IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(permissionSets)+')'
                             }])
+                            .on('record', (r, i) => {
+                                records.push({
+                                    parentId: SALESFORCE_HANDLER.salesforceIdFormat(r.ParentId),
+                                    objectType: r.SobjectType,
+                                    isRead: r.PermissionsRead === true, 
+                                    isCreate: r.PermissionsCreate === true, 
+                                    isEdit: r.PermissionsEdit === true, 
+                                    isDelete: r.PermissionsDelete === true, 
+                                    isViewAll: r.PermissionsViewAllRecords === true, 
+                                    isModifyAll: r.PermissionsModifyAllRecords === true
+                                });
+                            })
                             .on('error', (e) => { if (error) error(e); })
-                            .on('end', (o) => { if (success) success(o); })
+                            .on('end', () => success(records))
                             .run();
+                    },
+                    apps: function(profileNames, permissionSetNames, success, error) {
+                        const promises = [];
+                        if (profileNames && profileNames.length > 0) {
+                            promises.push(new Promise((s, e) => { 
+                                SALESFORCE_HANDLER.readMetadata('Profile', profileNames)
+                                    .on('error', (err) => e(err))
+                                    .on('end', (records) => s(records))
+                                    .run();
+                            }));
+                        }
+                        if (permissionSetNames && permissionSetNames.length > 0) {
+                            promises.push(new Promise((s, e) => { 
+                                SALESFORCE_HANDLER.readMetadata('PermissionSet', permissionSetNames)
+                                    .on('error', (err) => e(err))
+                                    .on('end', (records) => s(records))
+                                    .run();
+                            }));
+                        }
+                        if (promises.length > 0) {
+                            Promise.all(promises)
+                                .then((results) => {
+                                    const records = [];
+                                    results.forEach(result => result.forEach(r => records.push(r)));
+                                    return records;
+                                })
+                                .catch((err) => error(err))
+                                .then((records) => success(records));
+                        } else {
+                            success();
+                        }
                     },
                     describe: {
                         object: function(pckg, obj, success, error) {

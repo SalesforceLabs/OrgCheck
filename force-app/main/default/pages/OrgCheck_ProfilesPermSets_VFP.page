@@ -133,7 +133,7 @@
                                 appendCountInElement: 'tab-default-profiles__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
-                                        allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)' };
+                                        allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)', profileId: r.id, apiName: r.apiName };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -267,7 +267,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
                                             if (r.isGroup === false) {
-                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)' };
+                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)', apiName: r.name };
                                             }
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
@@ -328,7 +328,8 @@
                             // -------------------------------------------
                             // COMPARATOR
                             // -------------------------------------------
-                            let permissionSetIds = [];
+                            let selectedProfileAndPermSetIds = []; // includes also the pset ids paired with profiles!
+                            let profileIds = []; // only profile fullnames
                             const buttonCruds = helper.html.element.get('button-compare-cruds');
                             const buttonApps = helper.html.element.get('button-compare-apps');
                             const buttons = [ buttonCruds, buttonApps ];
@@ -344,12 +345,14 @@
                                 showSelection: { 
                                     onselect: (r, v) => {
                                         if (v === true) {
-                                            permissionSetIds.push(r.id);
+                                            selectedProfileAndPermSetIds.push(r.id);
+                                            if (r.profileId) profileIds.push(r.profileId);
                                         } else {
-                                            permissionSetIds = permissionSetIds.filter(e => e !== r.id);
+                                            selectedProfileAndPermSetIds = selectedProfileAndPermSetIds.filter(e => e !== r.id);
+                                            if (r.profileId) profileIds = profileIds.filter(e => e !== r.profileId);
                                         }
-                                        helper.html.element.setText(text, permissionSetIds.length + ' item'+(permissionSetIds.length>1?'s':'')+' selected.');
-                                        if (permissionSetIds.length === 0) {
+                                        helper.html.element.setText(text, selectedProfileAndPermSetIds.length + ' item'+(selectedProfileAndPermSetIds.length>1?'s':'')+' selected.');
+                                        if (selectedProfileAndPermSetIds.length === 0) {
                                             buttons.forEach(b => {
                                                 helper.html.element.enable(b, false);
                                             });
@@ -364,38 +367,90 @@
                             });
                             const paintMatrix = function(type) {
                                 helper.html.datatable.clean('thematrix-comparator');
-                                const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom' } ];
-                                permissionSetIds.forEach(id => { 
-                                    columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
-                                });
                                 switch (type) {
                                     case 'cruds': {
-                                        helper.salesforce.cruds(permissionSetIds, results => { 
-                                            const matrixData = {};
-                                            results.forEach(r => {
-                                                const d = matrixData[r.SobjectType] || { sobject: r.SobjectType };
-                                                d[r.ParentId] = 
-                                                    (r.PermissionsCreate === true ? 'C' : '') +
-                                                    (r.PermissionsRead === true ? 'R' : '') +
-                                                    (r.PermissionsEdit === true ? 'U' : '') +
-                                                    (r.PermissionsDelete === true ? 'D' : '') +
-                                                    (r.PermissionsViewAllRecords === true && r.PermissionsModifyAllRecords === true ? '+' : '') +
-                                                    (r.PermissionsViewAllRecords === true ? 'V' : '') +
-                                                    (r.PermissionsModifyAllRecords === true ? 'M' : '');
-                                                matrixData[r.SobjectType] = d;
-                                            });
-                                            helper.html.datatable.create({
-                                                element: 'thematrix-comparator',
-                                                columns: columns,
-                                                data: matrixData,
-                                                sorting: { name: 'Object', order: 'asc' },
-                                                columnBordered: true
-                                            });
+                                        const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom' } ];
+                                        selectedProfileAndPermSetIds.forEach(id => { 
+                                            columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
                                         });
+                                        helper.html.progress.resetSections();
+                                        helper.html.progress.show();
+                                        helper.html.progress.addSection('retrieving', 
+                                            'Retrieving information about object permissions for selected profiles and permission sets...');
+                                        
+                                        helper.salesforce.cruds(selectedProfileAndPermSetIds, 
+                                            results => { 
+                                                helper.html.progress.setSection('retrieving', 'Retrieving done!', 'ended');
+                                                const matrixData = {};
+                                                results.forEach(r => {
+                                                    const d = matrixData[r.objectType] || { sobject: r.objectType };
+                                                    d[r.parentId] = 
+                                                        (r.isCreate === true ? 'C' : '') +
+                                                        (r.isRead === true ? 'R' : '') +
+                                                        (r.isEdit === true ? 'U' : '') +
+                                                        (r.isDelete === true ? 'D' : '') +
+                                                        (r.isViewAll === true ? 'V' : '') +
+                                                        (r.isModifyAll === true ? 'M' : '');
+                                                    matrixData[r.objectType] = d;
+                                                });
+                                                helper.html.datatable.create({
+                                                    element: 'thematrix-comparator',
+                                                    columns: columns,
+                                                    data: matrixData,
+                                                    sorting: { name: 'Object', order: 'asc' },
+                                                    columnBordered: true
+                                                });
+                                                helper.html.progress.hide();
+                                            }, 
+                                            error => { 
+                                                helper.html.progress.hide();
+                                                helper.error.show(error); 
+                                            }
+                                        );
                                         break;
                                     }
                                     case 'apps': {
-
+                                        const columns = [ { name: 'Application', property: 'app', orientation: 'horizontal-bottom' } ];
+                                        const profileFullnames = [];
+                                        const permissionSetFullnames = [];
+                                        selectedProfileAndPermSetIds.forEach(id => { 
+                                            const item = allProfilesAndPSets[id];
+                                            (item.profileId ? profileFullnames : permissionSetFullnames).push(item.apiName);
+                                            columns.push({ name: item.name, property: item.apiName, orientation: 'vertical' }); 
+                                        });
+                                        helper.html.progress.resetSections();
+                                        helper.html.progress.show();
+                                        helper.html.progress.addSection('retrievingP', 
+                                            'Retrieving additional information from the Metadata API about profiles (' + profileFullnames + ')...');
+                                        helper.html.progress.addSection('retrievingPS', 
+                                            'Retrieving additional information from the Metadata API about permission sets (' + permissionSetFullnames + ')...');
+                                        
+                                        helper.salesforce.apps(profileFullnames, permissionSetFullnames,
+                                            results => { 
+                                                helper.html.progress.setSection('retrievingP', 'Retrieving profiles done!', 'ended');
+                                                helper.html.progress.setSection('retrievingPS', 'Retrieving permission sets done!', 'ended');
+                                                const matrixData = {};
+                                                results.forEach(p => {
+                                                    p.applicationVisibilities?.forEach(av => {
+                                                        const d = matrixData[av.application] || { app: av.application };
+                                                        d[p.fullName] = (av.visible === 'true' ? 'Visible' : '');
+                                                        matrixData[av.application] = d;
+                                                    });
+                                                });
+                                                helper.html.datatable.create({
+                                                    element: 'thematrix-comparator',
+                                                    columns: columns,
+                                                    data: matrixData,
+                                                    sorting: { name: 'Application', order: 'asc' },
+                                                    columnBordered: true
+                                                });
+                                                helper.html.progress.hide();
+                                            }, 
+                                            error => { 
+                                                helper.html.progress.hide();
+                                                helper.error.show(error); 
+                                            }
+                                        );
                                         break;
                                     }
                                     default:

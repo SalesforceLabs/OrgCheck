@@ -454,49 +454,6 @@ OrgCheck.Datasets = {
                     .run();
             }
         }));
-    
-        /**
-         * ======================================================================
-         * Add the Object CRUDs dataset
-         * ======================================================================
-         */
-        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
-            name: 'objectCRUDs', 
-            isCachable: true, 
-            keyCache: 'ObjectCRUDs', 
-            retriever: (me, resolve, reject) => {
-                const records = MAP_HANDLER.newMap();
-                SALESFORCE_HANDLER.query([{ 
-                        string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
-                                    'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
-                                    'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
-                                'FROM ObjectPermissions '
-                    }])
-                    .on('record', (r) => {
-                        const item = {
-                            id: r.ParentId + r.SobjectType,
-                            sobject: r.SobjectType,
-                            type: (r.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
-                            parent: { 
-                                id: (r.Parent.IsOwnedByProfile ? r.Parent.ProfileId : r.ParentId), 
-                                name: (r.Parent.IsOwnedByProfile ? r.Parent.Profile.Name : r.Parent.Label) 
-                            },
-                            permissions: {
-                                create: r.PermissionsCreate,
-                                read: r.PermissionsRead,
-                                update: r.PermissionsEdit,
-                                delete: r.PermissionsDelete,
-                                viewAll: r.PermissionsViewAllRecords,
-                                modifyAll: r.PermissionsModifyAllRecords
-                            }
-                        };
-                        MAP_HANDLER.setValue(records, item.id, item);
-                    })
-                    .on('end', () => resolve(records))
-                    .on('error', (error) => reject(error))
-                    .run();
-            }
-        }));
         
         /**
          * ======================================================================
@@ -519,11 +476,12 @@ OrgCheck.Datasets = {
                     .on('record', (r) => {
                         const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.ProfileId);
                         profileIds.push(profileId);
+                        r.Id = SALESFORCE_HANDLER.salesforceIdFormat(r.Id);
                         profiles[profileId] = r;
                     })
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Profile', ids: profileIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.Id);
                                 const profileSoql = profiles[profileId];
@@ -532,6 +490,7 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: profileId,
                                     name: r.Name,
+                                    apiName: r.FullName,
                                     permissionSetId: profileSoql.Id,
                                     loginIpRanges: r.Metadata.loginIpRanges,
                                     description: r.Description,
@@ -582,6 +541,7 @@ OrgCheck.Datasets = {
                 const records = MAP_HANDLER.newMap();
                 const psgByName1 = {};
                 const psgByName2 = {};
+                const pSetIds = [];
                 SALESFORCE_HANDLER.query([{
                         string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                     'CreatedDate, LastModifiedDate, '+
@@ -614,6 +574,7 @@ OrgCheck.Datasets = {
                                     lastModifiedDate: r.LastModifiedDate
                                 };
                                 if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                                pSetIds.push(item.id);
                                 MAP_HANDLER.setValue(records, item.id, item);
                                 break;
                             }
@@ -816,7 +777,7 @@ OrgCheck.Datasets = {
                     .on('record', (r) => workflowRuleIds.push(r.Id))
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'WorkflowRule', ids: workflowRuleIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const item =  {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
@@ -861,7 +822,7 @@ OrgCheck.Datasets = {
                     .on('record', (r) => flowIds.push(r.Id))
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Flow', ids: flowIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('Flow', flowIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const item =  {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),

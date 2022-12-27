@@ -272,7 +272,32 @@ OrgCheck.Salesforce = {
         }
     },
 
-    MetadataAtScaleProcess: function(connection, metadataInformation) {
+    MetadataProcess: function(connection, type, members) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                connection.metadata.read(type, members, (error, result) => {
+                    if (error) {
+                        error.context = { 
+                            when: 'While calling a metadata api read.',
+                            what: {
+                                type: type,
+                                members: members
+                            }
+                        };
+                        that.fire('error', error)
+                    } else {
+                        that.fire('end', Array.isArray(result) ? result : [ result ]);
+                    }
+                });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
+    MetadataAtScaleProcess: function(connection, type, ids, byPasses) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
         this.run = () => {
@@ -280,7 +305,7 @@ OrgCheck.Salesforce = {
                 const compositeRequestBodies = [];
                 let currentCompositeRequestBody;
                 const BATCH_MAX_SIZE = 25;
-                metadataInformation.ids.forEach((id) => {
+                ids.forEach((id) => {
                     if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
                         currentCompositeRequestBody = {
                             allOrNone: false,
@@ -289,7 +314,7 @@ OrgCheck.Salesforce = {
                         compositeRequestBodies.push(currentCompositeRequestBody);
                     }
                     currentCompositeRequestBody.compositeRequest.push({ 
-                        url: '/services/data/v'+connection.version+'/tooling/sobjects/' + metadataInformation.type + '/' + id, 
+                        url: '/services/data/v'+connection.version+'/tooling/sobjects/' + type + '/' + id, 
                         method: 'GET',
                         referenceId: id
                     });
@@ -328,13 +353,13 @@ OrgCheck.Salesforce = {
                                     records.push(response.body);
                                 } else {
                                     const errorCode = response.body[0].errorCode;
-                                    if (metadataInformation.byPasses && metadataInformation.byPasses.includes(errorCode) === false) {
+                                    if (byPasses && byPasses.includes(errorCode) === false) {
                                         const error = new Error();
                                         error.context = { 
                                             when: 'After receiving a response with bad HTTP status code.',
                                             what: {
-                                                type: metadataInformation.type,
-                                                ids: metadataInformation.ids,
+                                                type: type,
+                                                ids: ids,
                                                 body: response.body
                                             }
                                         };
@@ -564,8 +589,12 @@ OrgCheck.Salesforce = {
                 this.salesforceIdFormat, this.dependencyApi, sobjectPackage, sobjectDevName);
         }
 
-        this.readMetadataAtScale = (metadataInformation) => {
-            return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, metadataInformation);
+        this.readMetadata = (type, members, byPasses) => {
+            return new OrgCheck.Salesforce.MetadataProcess(CONNECTION, type, members, byPasses);
+        }
+
+        this.readMetadataAtScale = (type, ids, byPasses) => {
+            return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, type, ids, byPasses);
         }
 
         this.httpCall = function(partialUrl, optionalPayload) {
