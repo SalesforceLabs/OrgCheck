@@ -18,9 +18,8 @@ permalink: /vision/
 
 ## Available to anyone
 - Source on a GitHub public repo
-- Package URL without password
+- Available on the AppExchange
 - Support on a public Slack
-- One day on the AppExchange?
 
 ## What this application contains?
 - 1 Custom App
@@ -28,10 +27,11 @@ permalink: /vision/
 - 1 Visualforce Template
 - 13 Visualforce Pages
 - 1 StaticResource (zipped) including “jsforce.min.js” and “d3.v5.min.js”
+- CustomLabel and French and Japanese Translations
 
 **No more!**
 
 ## Install today!
-<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a><br />
-<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy Org Check to Salesforce (Sandbox)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy Org Check to Salesforce (Dev Edition)"></a><br />
 
