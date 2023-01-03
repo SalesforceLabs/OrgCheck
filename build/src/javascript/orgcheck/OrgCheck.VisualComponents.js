@@ -219,6 +219,9 @@ OrgCheck.VisualComponents = {
 
             // Add the rows
             table.hidden = true; // make table invisible while manipulating the DOM
+            if (config.showSelection) {
+                table.style = 'cursor: pointer;';
+            }
             let nbRows = 0, nbBadRows = 0, sumScore = 0;
             if (iterable) iterable.forEach(k => {
                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
@@ -239,10 +242,15 @@ OrgCheck.VisualComponents = {
                     }
                     const row = isArray ? k : config.data[k];
                     if (config.showSelection && c.name === 'Select') {
+                        tdBody.setAttribute('aria-data', false);
                         const select = tdBody.appendChild(document.createElement('input'));
                         select.setAttribute('type', 'checkbox');
                         select.onclick = (e) => {
                             config.showSelection.onselect(row, e.target.checked);
+                            tdBody.setAttribute('aria-data', e.target.checked);
+                        };
+                        trBody.onclick = (e) => {
+                            if (e.target != select) select.click();
                         };
                         return;
                     }
