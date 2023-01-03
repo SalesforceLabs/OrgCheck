@@ -260,34 +260,52 @@
                                 element: 'datatable-profilePwdPolicies',
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => {
-                                        const profile = allProfilesByFullname[r.profileFullName?.toLowerCase()];
-                                        if (profile) return helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
-                                        return r.profileFullName;
-                                    }},
-                                    { name: 'Forgot Link Expires', property: 'forgotPasswordRedirect', type: 'checkbox', formula: (r) => {
-                                        return helper.html.render.checkbox(r.forgotPasswordRedirect);
-                                    }},
-                                    { name: 'Lockout Interval (min)', property: 'lockoutInterval', type: 'numeric' },
-                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric' },
-                                    { name: 'Min Length', property: 'minimumPasswordLength', type: 'numeric' },
-                                    { name: 'Min Lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', formula: (r) => {
-                                        return helper.html.render.checkbox(r.minimumPasswordLifetime);
-                                    }},
-                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', formula: (r) => {
-                                        return helper.html.render.checkbox(r.obscure);
-                                    }},
-                                    { name: 'Level of complexity', property: 'passwordComplexity', type: 'numeric', formula: (r) => {
-                                        return helper.html.render.icon('star'+r.passwordComplexity);
-                                    }},
-                                    { name: 'Expiration', property: 'passwordExpiration', type: 'numeric' },
-                                    { name: 'History', property: 'passwordHistory', type: 'numeric' },
-                                    { name: 'Question can contain password', property: 'passwordQuestion', formula: (r) => {
-                                        return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true);
-                                    }}
+                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', 
+                                        formula: (r) => {
+                                            const profile = allProfilesByFullname[r.profileFullName?.toLowerCase()];
+                                            if (profile) return helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
+                                            return r.profileFullName;
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: 'Forgot Link Expires', property: 'forgotPasswordRedirect', type: 'checkbox', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.forgotPasswordRedirect); }
+                                    },
+                                    { name: 'Lockout Interval (min)', property: 'lockoutInterval', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.lockoutInterval < 3) return 1; }
+                                    },
+                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.maxLoginAttempts > 5) return 1; }
+                                    },
+                                    { name: 'Min Length', property: 'minimumPasswordLength', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.minimumPasswordLength < 8) return 1; }
+                                    },
+                                    { name: 'Min Lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.minimumPasswordLifetime); }
+                                    },
+                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.obscure); }
+                                    },
+                                    { name: 'Level of complexity', property: 'passwordComplexity', type: 'numeric', 
+                                        formula: (r) => { return helper.html.render.icon('star'+r.passwordComplexity); },
+                                        scoreFormula: (r) => { if (r.passwordComplexity < 3) return 1; }
+                                    },
+                                    { name: 'Expiration', property: 'passwordExpiration', type: 'numeric',
+                                        scoreFormula: (r) => { 
+                                            if (r.passwordExpiration > 90) return 1; 
+                                            if (r.passwordExpiration === 0) return 1; 
+                                        }
+                                    },
+                                    { name: 'History', property: 'passwordHistory', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.passwordHistory < 3) return 1; }
+                                    },
+                                    { name: 'Question can contain password', property: 'passwordQuestion', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true); },
+                                        scoreFormula: (r) => { if (r.passwordQuestion !== 1) return 1; }
+                                    }
                                 ],
                                 data: map.profilePasswordPolicies,
-                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', order: 'asc' },
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: false,
                                 showStatistics: false,
                                 showLineCount: true,

@@ -263,7 +263,7 @@ OrgCheck.VisualComponents = {
                             switch (c.type) {
                                 case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
                                 case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
-                                case 'numeric': dataDecorated = dataRaw; break;
+                                case 'numeric': dataDecorated = ''+dataRaw; break;
                             }
                         } else {
                             if (c.formula) dataDecorated = c.formula(row);
