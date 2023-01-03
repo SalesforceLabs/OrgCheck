@@ -9,13 +9,13 @@ title: Welcome to Org Check
 
 ## Introducing “Org Check”
 
-Let customers have an application within their Salesforce org to reduce their technical debt continuously.
+Let admins, devs, customers and partners have an application within their Salesforce org to monitor and help continuously reduce their technical debt.
 
 **How does it work?**
 
 - You install this application directly in the org you want to analyse (sandbox or developer edition).
 - Then, you navigate through the tabs in the app to discover some bad practices in the org.
-- More information at (installation)
+- [Try to install it today in your org!](installation)
 
 
 **What are the use cases of the app?**
