@@ -1,27 +1,27 @@
 ---
 layout: default
-title: How to install OrgCheck in your org?
+title: How to install Org Check in your org?
 permalink: /installation/
 ---
 
-# How to install OrgCheck in your org?
+# How to install Org Check in your org?
 
 
 ## Easy to install
 
-**OrgCheck** is a Salesforce application which can be installed on **any** Salesforce organization **very easily**. No additional infrastructure is required. No additional license. Simple as A.B.C.
+**Org Check** is a Salesforce application which can be installed on **any** Salesforce organization **very easily**. No additional infrastructure is required. No additional license. Simple as A.B.C.
 
 
 ## Step 1: Go to the AppExchange
 
 - Go to the AppExchange at [https://appexchange.salesforce.com](https://appexchange.salesforce.com)
-- Search for "OrgCheck" or "Technical Debt" and hit enter. You should find it!
+- Search for "Org Check" or "Technical Debt" and hit enter. You should find it!
 - Alternativelly, please [follow this link](https://sfdc.co/OrgCheck-InstallToday-AppExchange) to reach directly the good page.
 
 ## Step 2: Get it now!
 
 - Click on the "**Get It Now**" button on the previous page
-- Select the environnment you want to install OrgCheck to.
+- Select the environnment you want to install Org Check to.
 
 
 
@@ -38,15 +38,15 @@ Note: For some orgs that have Apex class not compiling, you can install the pack
 ## Step 3: Permission Set assignment
 
 We do not provide a specific permission set anymore.
-Once installed, go to the app "OrgCheck", and you are done!
+Once installed, go to the app "Org Check", and you are done!
 
-![Welcome in OrgCheck screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
+![Welcome in Org Check screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
 ## Known issues
 
 ### I see you also have a standalone package
 
-Historically, OrgCheck was available as an "**unlocked package**".
+Historically, Org Check was available as an "**unlocked package**".
 
 The benefits of such a package were:
 - We are able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
@@ -63,8 +63,8 @@ But the prefered way now is to install the application via the AppExchange.
  - It is more likely a **existing Apex class** in the org you want to analyze that **does not compile** (it happens!).
  - In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the **advanced setting when installing the app**.
 
-### I can't see the OrgCheck application, even if I am SysAdmin
- - The app is called "**OrgCheck**" obviously, maybe you spell it wrong?
+### I can't see the Org Check application, even if I am SysAdmin
+ - The app is called "**Org Check**" obviously, maybe you spell it wrong?
  - Did you install the package for a specific set of profiles and maybe you are not part of these ones? (remember we recommended to install the package for admins only...)
  - You should see the application definitly!
 
