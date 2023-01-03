@@ -19,6 +19,6 @@ permalink: /preview/
 ![Role Hierarchy tab screenshot](../images/screenshots/OrgCheck-Screenshot-Roles.png)
 
 ## Install today!
-<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy OrgCheck to Salesforce (Sandbox)"></a><br />
-<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy OrgCheck to Salesforce (Dev Edition)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="../assets/pngs/Install-SDBX.png" alt="Deploy Org Check to Salesforce (Sandbox)"></a><br />
+<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="../assets/pngs/Install-DevEdition.png" alt="Deploy Org Check to Salesforce (Dev Edition)"></a><br />
 
