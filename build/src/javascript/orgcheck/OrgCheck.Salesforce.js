@@ -61,7 +61,7 @@ OrgCheck.Salesforce = {
                                 result.records.forEach((r) => that.fire('record', r, index));
                                 records = records.concat(result.records);
                             }
-                            that.fire('size', result.totalSize, index);
+                            that.fire('size', result?.totalSize || 0, index);
                         });
                         that.fire('end', records);
                     })
