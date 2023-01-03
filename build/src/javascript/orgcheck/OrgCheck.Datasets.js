@@ -490,7 +490,7 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: profileId,
                                     name: r.Name,
-                                    apiName: r.FullName,
+                                    apiName: decodeURIComponent(r.FullName), // potentially URL encoded
                                     permissionSetId: profileSoql.Id,
                                     loginIpRanges: r.Metadata.loginIpRanges,
                                     description: r.Description,
@@ -665,9 +665,9 @@ OrgCheck.Datasets = {
                                 passwordExpiration: parseInt(r.passwordExpiration),
                                 passwordHistory: parseInt(r.passwordHistory),
                                 passwordQuestion: (r.passwordQuestion === 'true'),
-                                profile: r.profile
+                                profileFullName: r.profile
                             }
-                            MAP_HANDLER.setValue(records, item.profile, item);
+                            MAP_HANDLER.setValue(records, item.profileFullName, item);
                         });
                         resolve(records);
                     })

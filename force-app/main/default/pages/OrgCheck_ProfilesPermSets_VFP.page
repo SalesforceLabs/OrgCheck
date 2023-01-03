@@ -131,7 +131,7 @@
                         onRecords: function(map) { 
 
                             const allProfilesAndPSets = {};
-                            const allProfilesByApiName = {};
+                            const allProfilesByFullname = {};
 
                             // -------------------------------------------
                             // PROFILES
@@ -142,7 +142,7 @@
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)', profileId: r.id, apiName: r.apiName };
-                                        allProfilesByApiName[r.apiName] = { id: r.id, name: r.name };
+                                        allProfilesByFullname[r.apiName.toLowerCase()] = { id: r.id, name: r.name };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
@@ -261,9 +261,9 @@
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => {
-                                        const profile = allProfilesByApiName[r.profile];
+                                        const profile = allProfilesByFullname[r.profileFullName?.toLowerCase()];
                                         if (profile) return helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
-                                        return r.profile;
+                                        return r.profileFullName;
                                     }},
                                     { name: 'Forgot Link Expires', property: 'forgotPasswordRedirect', type: 'checkbox', formula: (r) => {
                                         return helper.html.render.checkbox(r.forgotPasswordRedirect);
@@ -483,7 +483,7 @@
                                                 const matrixData = {};
                                                 results.forEach(r => {
                                                     const d = matrixData[r.app] || { app: r.app };
-                                                    d[r.parentApiName] = (r.visible === 'true' ? 'Visible' : '');
+                                                    d[r.parentApiName] = (r.visible === true ? 'Visible' : '');
                                                     matrixData[r.app] = d;
                                                 });
                                                 helper.html.datatable.create({
