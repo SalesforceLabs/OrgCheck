@@ -2,8 +2,8 @@ remote_theme: pages-themes/architect@v0.2.0
 plugins:
 - jekyll-remote-theme
 
-show_title: true
-title: Org Check
+show_title: false
+##title: Org Check
 
 show_imagetitle: true
 imagetitle: ./assets/pngs/Logo+Mascot-v3.png
