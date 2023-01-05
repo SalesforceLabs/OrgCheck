@@ -6,7 +6,7 @@ show_title: false
 ##title: Org Check
 
 show_imagetitle: true
-imagetitle: ./assets/pngs/Logo+Mascot-v3.png
+imagetitle: /assets/pngs/Logo+Mascot-v3.png
 
 description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
 
