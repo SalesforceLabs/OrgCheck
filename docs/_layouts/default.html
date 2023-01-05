@@ -21,7 +21,7 @@
       <div class="inner">
         <a href="{{ '/' | absolute_url }}">
           <h1>
-            {% if site.show_imagetitle %}<img src="{{ site.imagetitle }}" />{% endif %}
+            {% if site.show_imagetitle %}<img src="{{ site.imagetitle }}" width="300" />{% endif %}
             {% if site.show_title %}{{ site.title | default: site.github.repository_name }}{% endif %}
           </h1>
         </a>
