@@ -6,70 +6,46 @@ title: Welcome to Org Check
 
 # Welcome to Org Check
 
+Let administrators, developers, customers and partners have an application within 
+their Salesforce org to monitor and help **continuously reduce their technical debt**.
 
-## Introducing “Org Check”
+![Home Page tab screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
 
-Let admins, devs, customers and partners have an application within their Salesforce org to monitor and help continuously reduce their technical debt.
+## Why would you need this application in your org?
 
-**How does it work?**
+Make sure your Salesforce organisation is under control in terms of **technical debt reduction**.
 
-- You install this application directly in the org you want to analyse (sandbox or developer edition).
-- Then, you navigate through the tabs in the app to discover some bad practices in the org.
-- [Try to install it today in your org!](installation)
+You will need org Check to verify some things in your organisation like:
+- Well Described Data Model
+- Useful and meaningful Profiles and Permission Sets
+- Efficent Role Hierarchy
+- Active Users
+- Useful Public Groups and Queues
+- UI and Apex Componants respecting best practices
+- Better Automations
+- etc.
 
+## My Vision of the application
 
-**What are the use cases of the app?**
+This application is **easy to install and easy to use**.
+It requires no additional software or platform whatsoever. 
+All you need is to install the application in your org from the AppExchange.
+No custom object will be added, no external connection, all stays in your browser and your org.
+The app is free of use: open sourced, available on the AppExchange for free and a support on slack and GitHub.
 
-* Data Model
-    * Get all information of an Object in a unique page
-    * List all Org Wide Default in a unique page
-    * Identity custom fields with bad practices
-* Profile and Permission Set
-    * Identity custom profiles that are not assigned
-    * Identity permission sets that are not assigned
-    * Identify permission sets and profiles correlations
-    * List IP and Login Hours restrictions on all profiles
-* Role hierarchy
-    * Check if your role hierarchy is not too deep
-    * Show role hierarchy in a diagram with empty roles identification
-    * List roles with bad practices
-* Users
-    * List users that never logged
-    * Key system permissions for each users
-* Public group and Queues
-    * List groups and queues
-    * Identify all users of groups and queues (recursive computation)
-* UI Composants
-    * List Visual Force pages and components with bad practices
-    * List Aura and LWC components with bad practices
-* Apex Composants
-    * List Apex Classes with bad practices (old API version, no explicit sharing, etc.)
-    * List Triggers with bad practices (contains logic, DML, SOQL, etc.)
-* Automations
-    * Workflow rules without actions
-    * Process Builders / Flows 
-* Batches
-    * Failed jobs
-    * Scheduled jobs
+Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
 
+Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/VinceFINET/OrgCheck/issues.
 
+## How do I install this application?
 
-A complementary tool for the awesome **Salesforce Optimizer**.
+You install this application directly in the org you want to analyse from the AppExchange.
 
+Then, you navigate through the tabs in the app to discover some bad practices in the org.
 
+<a href="https://sfdc.co/OrgCheck-InstallToday-AppExchange" target="_blank"><img width="300" src="./assets/pngs/Install-AppExchange.png" alt="Deploy Org Check from AppExchange"></a><br />
 
-## Install today!
-<a href="https://sfdc.co/OrgCheck-InstallToday-AppExchange"><img width="300" src="./assets/pngs/Install-AppExchange.png" alt="Deploy Org Check from AppExchange"></a><br />
-<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img width="300" src="./assets/pngs/Install-SDBX.png" alt="Deploy Org Check to Salesforce (Sandbox)"></a><br />
-<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img width="300" src="./assets/pngs/Install-DevEdition.png" alt="Deploy Org Check to Salesforce (Dev Edition)"></a><br />
-
-## Enjoy your ride with Checky (our mascot!)
-- [You want a preview of this application?](preview)
-- [How to install Org Check in your org?](installation)
-- [Why did I create this tool?](vision)
-- [Legal terms: Org Check is not a Salesforce product](legal)
-
-
+Any issues installing the application? Please, [go to this dedicated page](installation) about installation, including some frequently asked questions.
 
 ## How to get help and support?
 
