@@ -343,6 +343,37 @@
                             .run();
                     },
                     applicationVisibilities: function(profileNames, permissionSetNames, success, error) {
+                        const metadatas = [];
+                        if (profileNames && profileNames.length > 0) {
+                            metadatas.push({ type: 'Profile', members: profileNames });
+                        }
+                        if (permissionSetNames && permissionSetNames.length > 0) {
+                            metadatas.push({ type: 'PermissionSet', members: permissionSetNames });
+                        }
+                        if (metadatas.length === 0) return success();
+                        SALESFORCE_HANDLER.readMetadata(metadatas)
+                            .on('error', (err) => error(err))
+                            .on('end', (types) => {
+                                const records = [];
+                                types.forEach(type => type.members.forEach(m => {
+                                    const appVisibility = { 
+                                        parentApiName: m.fullName,
+                                        appVisibilities: []
+                                    };
+                                    if (m.applicationVisibilities) {
+                                        const avs = m.applicationVisibilities;
+                                        const avsArray = Array.isArray(avs) ? avs : [ avs ];
+                                        avsArray.forEach(av => appVisibility.appVisibilities.push({ 
+                                            app: av.application,
+                                            visible: av.visible === 'true'
+                                        }));
+                                    }
+                                    records.push(appVisibility);
+                                }));
+                                success(records);
+                            })
+                            .run();
+/*
                         const promises = [];
                         if (profileNames && profileNames.length > 0) {
                             promises.push(new Promise((s, e) => { 
@@ -381,6 +412,7 @@
                         } else {
                             success();
                         }
+                        */
                     },
                     describe: {
                         object: function(pckg, obj, success, error) {

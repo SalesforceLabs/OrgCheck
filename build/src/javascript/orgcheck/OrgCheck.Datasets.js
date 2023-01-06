@@ -639,6 +639,26 @@ OrgCheck.Datasets = {
             }
         }));
 
+        /**
+         * ======================================================================
+         * Add the Settings dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'settings', 
+            isCachable: true, 
+            keyCache: 'Settings', 
+            retriever: (me, resolve, reject) => {
+                SALESFORCE_HANDLER.readMetadata([ { type: 'SecuritySettings', members: [ 'Security' ] } ])
+                    .on('end', (results) => {
+                        const records = MAP_HANDLER.newMap();
+                        if (results && results.length === 1) MAP_HANDLER.setValue(records, 'security', results[0].members[0]);
+                        resolve(records);
+                    })
+                    .on('error', (err) => reject(err))
+                    .run();
+            }
+        }));
         
         /**
          * ======================================================================
@@ -650,10 +670,10 @@ OrgCheck.Datasets = {
             isCachable: true, 
             keyCache: 'ProfilePasswordPolicies', 
             retriever: (me, resolve, reject) => {
-                SALESFORCE_HANDLER.readMetadata('ProfilePasswordPolicy', '*')
+                SALESFORCE_HANDLER.readMetadata([ { type: 'ProfilePasswordPolicy', members: [ '*' ] } ])
                     .on('end', (policies) => {
                         const records = MAP_HANDLER.newMap();
-                        policies.forEach(r => {
+                        if (policies && policies.length === 1) policies[0].members.forEach(r => {
                             const item = {
                                 forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
                                 lockoutInterval: parseInt(r.lockoutInterval),

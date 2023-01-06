@@ -274,51 +274,62 @@ OrgCheck.Salesforce = {
         }
     },
 
-    MetadataProcess: function(connection, type, members) {
+    MetadataProcess: function(connection, metadatas) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
-        const _metadata_api_read = (_type, _members) => {
-            connection.metadata.read(_type, _members, (error, result) => {
-                if (error) {
-                    error.context = { 
-                        when: 'While calling a metadata api read.',
-                        what: {
-                            type: _type,
-                            members: _members
-                        }
-                    };
-                    that.fire('error', error)
-                } else {
-                    that.fire('end', Array.isArray(result) ? result : [ result ]);
-                }
-            });
-        }
         this.run = () => {
             try {
-                if (members === '*') {
-                    connection.metadata.list([{ type: type }], connection.version, (error, result) => {
-                        if (error) {
-                            error.context = { 
-                                when: 'While calling a metadata api list.',
-                                what: {
-                                    type: type
-                                }
-                            };
-                            that.fire('error', error);
-                        } else {
-                            const items = Array.isArray(result) ? result : [ result ];
-                            const members = [];
-                            items.forEach(i => members.push(i.fullName));
-                            if (members.length > 0) {
-                                _metadata_api_read(type, members);
+                const promises1 = [];
+                metadatas.filter(m => m.members.includes('*')).forEach(m => {
+                    promises1.push(new Promise((s, e) => { 
+                        connection.metadata.list([{type: m.type}], connection.version, (error, members) => {
+                            if (error) {
+                                error.context = { 
+                                    when: 'While calling a metadata api list.',
+                                    what: { type: m.type }
+                                };
+                                e(error);    
                             } else {
-                                that.fire('end', []);
+                                m.members = [];
+                                members.forEach(f => { m.members.push(f.fullName); });
+                                s();
                             }
-                        }
+                        });
+                    }));
+                });
+                Promise.all(promises1)
+                    .then(() => {
+                        const promises2 = [];
+                        metadatas.forEach(m => {
+                            while (m.members.length > 0) {
+                                const membersMax10 = m.members.splice(0, 10);
+                                promises2.push(new Promise((s, e) => { 
+                                    connection.metadata.read(m.type, membersMax10, (error, results) => {
+                                        if (error) {
+                                            error.context = { 
+                                                when: 'While calling a metadata api read.',
+                                                what: { type: m.type, members: membersMax10 }
+                                            };
+                                            e(error);   
+                                        } else {
+                                            s({ type: m.type, members: Array.isArray(results) ? results : [ results ] });
+                                        }
+                                    });
+                                }));
+                            }
+                        });
+                        Promise.all(promises2)
+                            .then((results) => {
+                                const records = [];
+                                results.forEach(result => {
+                                    that.fire('record', result);
+                                    records.push(result);
+                                });
+                                return records;
+                            })
+                            .catch((err) => that.fire('error', err))
+                            .then((records) => that.fire('end', records));
                     });
-                } else {
-                    _metadata_api_read(type, members);
-                }                
             } catch (error) {
                 that.fire('error', error);
             }
@@ -617,8 +628,8 @@ OrgCheck.Salesforce = {
                 this.salesforceIdFormat, this.dependencyApi, sobjectPackage, sobjectDevName);
         }
 
-        this.readMetadata = (type, members, byPasses) => {
-            return new OrgCheck.Salesforce.MetadataProcess(CONNECTION, type, members, byPasses);
+        this.readMetadata = (metadatas) => {
+            return new OrgCheck.Salesforce.MetadataProcess(CONNECTION, metadatas);
         }
 
         this.readMetadataAtScale = (type, ids, byPasses) => {

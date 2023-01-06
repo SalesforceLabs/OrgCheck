@@ -127,7 +127,7 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profilePasswordPolicies' ],
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profilePasswordPolicies', 'settings' ],
                         onRecords: function(map) { 
 
                             const allProfilesAndPSets = {};
@@ -272,10 +272,23 @@
                                         formula: (r) => { return helper.html.render.checkbox(r.forgotPasswordRedirect); }
                                     },
                                     { name: 'Lockout Interval (min)', property: 'lockoutInterval', type: 'numeric',
-                                        scoreFormula: (r) => { if (r.lockoutInterval < 3) return 1; }
+                                        scoreFormula: (r) => { 
+                                            switch (map.settings.security.passwordPolicies.lockoutInterval) {
+                                                case 'FifteenMinutes': if (r.lockoutInterval < 15) return 1; break;
+                                                case 'ThirtyMinutes': if (r.lockoutInterval < 30) return 1; break;
+                                                case 'SixtyMinutes': if (r.lockoutInterval < 60) return 1; break;
+                                                case 'Forever': if (r.lockoutInterval === undefined) return 1; break;
+                                            }
+                                        }
                                     },
                                     { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
-                                        scoreFormula: (r) => { if (r.maxLoginAttempts > 5) return 1; }
+                                        scoreFormula: (r) => { 
+                                            switch (map.settings.security.passwordPolicies.maxLoginAttempts) {
+                                                case 'ThreeAttempts': if (r.maxLoginAttempts > 3) return 1; break;
+                                                case 'FiveAttempts': if (r.maxLoginAttempts > 5) return 1; break;
+                                                case 'TenAttempts': if (r.maxLoginAttempts > 10) return 1; break;
+                                            }
+                                        }
                                     },
                                     { name: 'Min Length', property: 'minimumPasswordLength', type: 'numeric',
                                         scoreFormula: (r) => { if (r.minimumPasswordLength < 8) return 1; }
@@ -500,9 +513,15 @@
                                                 }
                                                 const matrixData = {};
                                                 results.forEach(r => {
-                                                    const d = matrixData[r.app] || { app: r.app };
-                                                    d[r.parentApiName] = (r.visible === true ? 'Visible' : '');
-                                                    matrixData[r.app] = d;
+                                                    if (r.appVisibilities.length === 0) {
+                                                        console.log(r.parentApiName + ' has no application visibiliy!');
+                                                    } else {
+                                                        r.appVisibilities.forEach(ap => {
+                                                            const d = matrixData[ap.app] || { app: ap.app };
+                                                            d[r.parentApiName] = (ap.visible === true ? 'Visible' : '');
+                                                            matrixData[ap.app] = d;
+                                                        });
+                                                    }
                                                 });
                                                 helper.html.datatable.create({
                                                     element: 'thematrix-comparator',
