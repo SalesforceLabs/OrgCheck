@@ -9,7 +9,7 @@ title: Welcome to Org Check
 Let administrators, developers, customers and partners have an application within 
 their Salesforce org to monitor and help **continuously reduce their technical debt**.
 
-![Home Page tab screenshot](../images/screenshots/OrgCheck-Screenshot-Home.png)
+![Home Page tab screenshot](./images/screenshots/OrgCheck-Screenshot-Home.png)
 
 ## Why would you need this application in your org?
 
