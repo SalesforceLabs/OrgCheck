@@ -290,15 +290,13 @@
                                                     '/view', 
                                                     helper.html.render.escape(r.label)); 
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.custom); 
-                                            }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'name' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
                                                     const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
                                                     if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                    return helper.html.render.checkbox(false);
+                                                    return helper.html.render.checkbox(false) + ' Using nothing.';
                                                 }
                                             }},
                                             { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
@@ -306,7 +304,7 @@
                                                     if (r.custom === true) {
                                                         const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
                                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                        return helper.html.render.checkbox(false)
+                                                        return helper.html.render.checkbox(false) + ' Not used!';
                                                     }
                                                 },
                                                 scoreFormula: (r) => { 
@@ -372,9 +370,9 @@
                                                 return type;
                                             }},
                                             { name: 'Length', type: 'numeric', property: 'length' },
-                                            { name: 'Unique', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: 'Unique', property: 'unique', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
                                         ],
@@ -397,9 +395,7 @@
                                             { name: 'Relationship Name', property: 'relationshipName' },
                                             { name: '{!JSENCODE($Label.OrgCheck_ChildObject_CL)}', property: 'childSObject' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'field' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_CascadeDelete_CL)}', property: 'cascadeDelete', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.cascadeDelete); 
-                                            }}
+                                            { name: '{!JSENCODE($Label.OrgCheck_CascadeDelete_CL)}', property: 'cascadeDelete', type: 'checkbox' }
                                         ],
                                         data: object.childRelationships,
                                         sorting: { name: 'Relationship Name', order: 'asc' },
@@ -421,12 +417,8 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
                                             { name: 'Master', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'active', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.active); 
-                                            }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_Available_CL)}', property: 'available', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.available); 
-                                            }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'active', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Available_CL)}', property: 'available', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_DefaultMapping_CL)}', property: 'defaultRecordTypeMapping' }
                                         ],
                                         data: object.recordTypeInfos,

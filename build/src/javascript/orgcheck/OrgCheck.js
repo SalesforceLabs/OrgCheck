@@ -130,7 +130,8 @@
 
         const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
             StringHandler: STRING_HANDLER,
-            DateHandler: DATE_HANDLER
+            DateHandler: DATE_HANDLER,
+            MessageHandler: MSG_HANDLER
         });
 
         const DATASETS_HANDLER = new OrgCheck.Datasets.Handler({

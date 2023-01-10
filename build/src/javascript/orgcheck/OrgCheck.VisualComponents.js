@@ -14,12 +14,14 @@ OrgCheck.VisualComponents = {
      *              <ol>
      *                <li><code>StringHandler</code> including method <code>htmlSecurise</code></li>
      *                <li><code>DateHandler</code> including method <code>dateFormat</code> and <code>datetimeFormat</code></li>
+     *                <li><code>MessageHandler</code> including method <code>showModal</code></li>
      *              </ol>
      */
     DatatableHandler: function(handlers) { 
      
         const STRING_HANDLER = handlers.StringHandler;
         const DATE_HANDLER = handlers.DateHandler;
+        const MSG_HANDLER = handlers.MessageHandler;
 
         /**
          * Creates a datatable
@@ -230,17 +232,11 @@ OrgCheck.VisualComponents = {
                 let rowScore = 0;
                 let tdBodyScore = null;
                 const rowBadColumns = [];
+                const row = isArray ? k : config.data[k];
                 config.columns.forEach(c => {
                     const tdBody = trBody.appendChild(document.createElement('td'));
-                    if (c.property === '##score##') {
-                        tdBodyScore = tdBody;
-                        return;
-                    }
-                    if (config.showLineCount === true && c.name === '#') {
-                        tdBody.innerHTML = nbRows;
-                        return;
-                    }
-                    const row = isArray ? k : config.data[k];
+                    if (c.property === '##score##') { tdBodyScore = tdBody; return; }
+                    if (config.showLineCount === true && c.name === '#') { tdBody.innerHTML = nbRows; return; }
                     if (config.showSelection && c.name === 'Select') {
                         tdBody.setAttribute('aria-data', false);
                         const select = tdBody.appendChild(document.createElement('input'));
@@ -264,6 +260,7 @@ OrgCheck.VisualComponents = {
                                 case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
                                 case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
                                 case 'numeric': dataDecorated = ''+dataRaw; break;
+                                case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'un':'')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
                             }
                         } else {
                             if (c.formula) dataDecorated = c.formula(row);
@@ -287,8 +284,8 @@ OrgCheck.VisualComponents = {
                             additiveScore = c.scoreFormula(row);
                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
                                 rowScore += additiveScore;
-                                tdBody.bgColor = '#ffd079';
-                                rowBadColumns.push(c.name);
+                                tdBody.classList.add('orgcheck-table-td-badcell');
+                                rowBadColumns.push({c: c.name, s: additiveScore, d: dataDecorated});
                             }
                         }
                     } catch (e) {
@@ -306,15 +303,9 @@ OrgCheck.VisualComponents = {
                     if (dataDecorated && dataDecorated !== '') {
                         const isArray = (Array.isArray(dataDecorated) === true);
                         if (typeof dataDecorated === 'object' && isArray === false) {
-                            if (additiveScore > 0) {
-                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }       
                             tdBody.appendChild(dataDecorated);
                         } else {
                             let html = '';
-                            if (additiveScore > 0) {
-                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }
                             if (isArray === true) {
                                 dataDecorated.forEach(cnt => html += cnt+'<br />');
                             } else {
@@ -331,10 +322,15 @@ OrgCheck.VisualComponents = {
                     }
                 });
                 if (tdBodyScore && rowScore > 0) {
-                    const msg = 'The badness score is '+rowScore+'. Please check the column'+(rowBadColumns.length>1?'s':'')+' '+rowBadColumns+'. Thank you!';
-                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="'+msg+'" title="'+msg+'" />&nbsp;' + rowScore;
-                    tdBodyScore.bgColor = '#ffd079';
-                    trBody.bgColor = '#ffe099';
+                    let msg = 'The badness score for this row is <b>'+rowScore+'</b><ul class="slds-list_dotted">';
+                    rowBadColumns.forEach(i => msg += '<li>For <b>'+i.c+'</b> you had <b>'+i.d+'</b> (<code>+'+i.s+'</code> to the score)</li>');
+                    msg += '</ul><br /><br />The data for this row is: <br /><pre>'+JSON.stringify(row, null, " ")+'</pre>';
+                    tdBodyScore.innerHTML = rowScore;
+                    tdBodyScore.onclick = (e) => {
+                        MSG_HANDLER.showModal('Why do I have this score for row #'+k+'?', msg);
+                    }
+                    tdBodyScore.classList.add('orgcheck-table-td-badscore');
+                    trBody.classList.add('orgcheck-table-tr-badrow');
                     sumScore += rowScore;
                     nbBadRows++;
                 }

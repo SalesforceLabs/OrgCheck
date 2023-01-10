@@ -226,9 +226,7 @@
                                         ); 
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.includeBosses); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},
@@ -268,9 +266,7 @@
                                         ); 
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.includeBosses); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},

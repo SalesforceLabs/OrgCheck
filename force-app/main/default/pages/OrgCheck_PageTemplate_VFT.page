@@ -64,6 +64,24 @@
                 th.orgcheck-table-th-horizontal-bottom {
                     vertical-align: bottom;
                 }
+                tr.orgcheck-table-tr-badrow {
+                    background-color: #ffe099;
+                }
+                td.orgcheck-table-td-badscore {
+                    background-color: #ffd079;
+                    background-image: url(/img/msg_icons/error16.png);
+                    background-position: left;
+                    background-repeat: no-repeat;
+                    background-size: 11px;
+                    cursor: pointer;
+                }
+                td.orgcheck-table-td-badcell {
+                    background-color: #ffd079;
+                    background-image: url(/img/msg_icons/warning16.png);
+                    background-position: left;
+                    background-repeat: no-repeat;
+                    background-size: 11px;
+                }
             </style>
             <div id="modal" style="display: none;">
                 <section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">

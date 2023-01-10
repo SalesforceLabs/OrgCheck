@@ -149,9 +149,7 @@
                                         ); 
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isCustom); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_UserType_CL)}', property: 'userType' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
@@ -331,12 +329,8 @@
                                             if (r.lockoutInterval < map.settings.security.passwordPolicies.lockoutInterval) return 1;
                                         }
                                     },
-                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.obscure); }
-                                    },
-                                    { name: 'Require min 1 day pwd lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.minimumPasswordLifetime); }
-                                    }
+                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox' },
+                                    { name: 'Require min 1 day pwd lifetime', property: 'minimumPasswordLifetime', type: 'checkbox' }
                                 ],
                                 data: map.profilePasswordPolicies,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -377,13 +371,9 @@
                                             ); 
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isGroup); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isCustom); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 

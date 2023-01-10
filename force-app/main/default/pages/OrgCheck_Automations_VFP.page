@@ -66,10 +66,7 @@
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.isActive); 
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
                                         }
@@ -132,10 +129,7 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.isActive); 
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
                                         }
@@ -190,10 +184,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }, 
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.isActive); 
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
                                         }
