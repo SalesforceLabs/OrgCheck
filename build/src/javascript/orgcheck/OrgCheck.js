@@ -546,6 +546,9 @@
                             const item = map[key];
                             for_each_item_function(item, i, keys.length, key);
                         }
+                    },
+                    setItem: function(map, key, value) {
+                        MAP_HANDLER.setValue(map, key, value);
                     }
                 },
                 timestamp: {
@@ -748,6 +751,7 @@
                                 case 'star3':      return '<img src="/img/samples/stars_300.gif" alt="star-3" />';
                                 case 'star4':      return '<img src="/img/samples/stars_400.gif" alt="star-4" />';
                                 case 'star5':      return '<img src="/img/samples/stars_500.gif" alt="star-5" />';
+                                case 'org':        return '<img src="/img/msg_icons/confirm16.png" alt="org level" />';
                                 default:           return '';
                             }
                         },

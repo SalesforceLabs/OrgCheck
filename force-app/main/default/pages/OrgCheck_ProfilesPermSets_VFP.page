@@ -45,7 +45,7 @@
                     <div id="datatable-profileRangeIPs" />
                 </div>
                 <div id="tab-default-ppwdpolicies" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ppwdpolicies__item">
-                    <div id="datatable-profilePwdPolicies" />
+                    <div id="datatable-pwdPolicies" />
                 </div>
                 <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
                     <div class="slds-grid slds-gutters">
@@ -256,65 +256,86 @@
                             // -------------------------------------------
                             // PROFILE PASSWORD POLICIES
                             // -------------------------------------------
+                            // Let's add the org level password policy in the table!
+                            helper.map.setItem(map.profilePasswordPolicies, '##orgPwdPolicies##', { 
+                                isOrgLevel: true,
+                                name: 'Org Level',
+                                passwordExpiration: map.settings.security.passwordPolicies.expiration,
+                                passwordHistory: map.settings.security.passwordPolicies.historyRestriction,
+                                minimumPasswordLength: map.settings.security.passwordPolicies.minimumPasswordLength,
+                                passwordComplexity: map.settings.security.passwordPolicies.complexity,
+                                passwordQuestion: map.settings.security.passwordPolicies.questionRestriction,
+                                maxLoginAttempts: map.settings.security.passwordPolicies.maxLoginAttempts,
+                                lockoutInterval: map.settings.security.passwordPolicies.lockoutInterval,
+                                obscure : map.settings.security.passwordPolicies.obscureSecretAnswer,
+                                minimumPasswordLifetime : map.settings.security.passwordPolicies.minimumPasswordLifetime
+                            });
                             helper.html.datatable.create({
-                                element: 'datatable-profilePwdPolicies',
+                                element: 'datatable-pwdPolicies',
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', 
+                                    { name: 'Policy', property: 'name',
                                         formula: (r) => {
-                                            const profile = allProfilesByFullname[r.profileFullName?.toLowerCase()];
-                                            if (profile) return helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
-                                            return r.profileFullName;
+                                            if (r.isOrgLevel) {
+                                                return helper.html.render.icon('org') + ' ' + 
+                                                    helper.html.render.link('/lightning/setup/SecurityPolicies/home', 'Org Level');
+                                            }
+                                            const profile = allProfilesByFullname[r.name?.toLowerCase()];
+                                            if (profile) {
+                                                return helper.html.render.icon('user') + ' ' + 
+                                                    helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
+                                            }
+                                            return r.name;
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: 'Forgot Link Expires', property: 'forgotPasswordRedirect', type: 'checkbox', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.forgotPasswordRedirect); }
-                                    },
-                                    { name: 'Lockout Interval (min)', property: 'lockoutInterval', type: 'numeric',
+                                    { name: 'User pwd expire in', property: 'passwordExpiration', type: 'numeric',
                                         scoreFormula: (r) => { 
-                                            switch (map.settings.security.passwordPolicies.lockoutInterval) {
-                                                case 'FifteenMinutes': if (r.lockoutInterval < 15) return 1; break;
-                                                case 'ThirtyMinutes': if (r.lockoutInterval < 30) return 1; break;
-                                                case 'SixtyMinutes': if (r.lockoutInterval < 60) return 1; break;
-                                                case 'Forever': if (r.lockoutInterval === undefined) return 1; break;
-                                            }
+                                            if (r.isOrgLevel) return (r.passwordExpiration > 180) ? 1 : 0; 
+                                            if (r.passwordExpiration > map.settings.security.passwordPolicies.expiration) return 1;
+                                            if (r.passwordExpiration > 90) return 1; 
+                                            if (r.passwordExpiration === 0) return 1; 
                                         }
                                     },
-                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
-                                        scoreFormula: (r) => { 
-                                            switch (map.settings.security.passwordPolicies.maxLoginAttempts) {
-                                                case 'ThreeAttempts': if (r.maxLoginAttempts > 3) return 1; break;
-                                                case 'FiveAttempts': if (r.maxLoginAttempts > 5) return 1; break;
-                                                case 'TenAttempts': if (r.maxLoginAttempts > 10) return 1; break;
-                                            }
-                                        }
+                                    { name: 'Enforce pwd history', property: 'passwordHistory', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.passwordHistory < 3) return 1; }
                                     },
-                                    { name: 'Min Length', property: 'minimumPasswordLength', type: 'numeric',
+                                    { name: 'Min pwd length', property: 'minimumPasswordLength', type: 'numeric',
                                         scoreFormula: (r) => { if (r.minimumPasswordLength < 8) return 1; }
-                                    },
-                                    { name: 'Min Lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.minimumPasswordLifetime); }
-                                    },
-                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.obscure); }
                                     },
                                     { name: 'Level of complexity', property: 'passwordComplexity', type: 'numeric', 
                                         formula: (r) => { return helper.html.render.icon('star'+r.passwordComplexity); },
                                         scoreFormula: (r) => { if (r.passwordComplexity < 3) return 1; }
                                     },
-                                    { name: 'Expiration', property: 'passwordExpiration', type: 'numeric',
-                                        scoreFormula: (r) => { 
-                                            if (r.passwordExpiration > 90) return 1; 
-                                            if (r.passwordExpiration === 0) return 1; 
-                                        }
-                                    },
-                                    { name: 'History', property: 'passwordHistory', type: 'numeric',
-                                        scoreFormula: (r) => { if (r.passwordHistory < 3) return 1; }
-                                    },
-                                    { name: 'Question can contain password', property: 'passwordQuestion', 
+                                    { name: 'Question can contain pwd', property: 'passwordQuestion', 
                                         formula: (r) => { return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true); },
                                         scoreFormula: (r) => { if (r.passwordQuestion !== 1) return 1; }
+                                    },
+                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
+                                        formula: (r) => { 
+                                            if (r.maxLoginAttempts === undefined) return 'No limit';
+                                            return r.lockoutInterval + ' attempts';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.maxLoginAttempts === undefined) return 1; 
+                                            if (r.maxLoginAttempts > map.settings.security.passwordPolicies.maxLoginAttempts) return 1;
+                                        }
+                                    },
+                                    { name: 'Lockout effective period', property: 'lockoutInterval', type: 'numeric',
+                                        formula: (r) => { 
+                                            if (r.lockoutInterval === undefined) return 'Never';
+                                            return r.lockoutInterval + ' minutes';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.lockoutInterval === undefined) return 1; 
+                                            if (r.lockoutInterval < map.settings.security.passwordPolicies.lockoutInterval) return 1;
+                                        }
+                                    },
+                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.obscure); }
+                                    },
+                                    { name: 'Require min 1 day pwd lifetime', property: 'minimumPasswordLifetime', type: 'checkbox', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.minimumPasswordLifetime); }
                                     }
                                 ],
                                 data: map.profilePasswordPolicies,

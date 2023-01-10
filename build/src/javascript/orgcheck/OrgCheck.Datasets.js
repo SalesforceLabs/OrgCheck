@@ -652,7 +652,49 @@ OrgCheck.Datasets = {
                 SALESFORCE_HANDLER.readMetadata([ { type: 'SecuritySettings', members: [ 'Security' ] } ])
                     .on('end', (results) => {
                         const records = MAP_HANDLER.newMap();
-                        if (results && results.length === 1) MAP_HANDLER.setValue(records, 'security', results[0].members[0]);
+                        if (results && results.length === 1) {
+                            const security = results[0].members[0];
+                            const spp = security.passwordPolicies;
+                            // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_securitysettings.htm
+                            switch (spp.complexity) {
+                                case 'NoRestriction': spp.complexity = 0; break;
+                                case 'AlphaNumeric': spp.complexity = 1; break;
+                                case 'SpecialCharacters': spp.complexity = 2; break;
+                                case 'UpperLowerCaseNumeric': spp.complexity = 3; break;
+                                case 'UpperLowerCaseNumericSpecialCharacters': spp.complexity = 4; break;
+                                case 'Any3UpperLowerCaseNumericSpecialCharacters': spp.complexity = 5; break;
+                                default: spp.complexity = undefined;
+                            }
+                            switch (spp.expiration) {
+                                case 'Never': spp.expiration = 0; break;
+                                case 'ThirtyDays': spp.expiration = 30; break;
+                                case 'SixtyDays': spp.expiration = 60; break;
+                                case 'NinetyDays': spp.expiration = 90; break;
+                                case 'SixMonths': spp.expiration = 180; break;
+                                case 'OneYear': spp.expiration = 365; break;
+                                default: spp.expiration = undefined;
+                            }
+                            switch (spp.lockoutInterval) {
+                                case 'FifteenMinutes': spp.lockoutInterval = 15; break;
+                                case 'ThirtyMinutes': spp.lockoutInterval = 30; break;
+                                case 'SixtyMinutes': spp.lockoutInterval = 60; break;
+                                case 'Forever': spp.lockoutInterval = 0; break;
+                                default: spp.lockoutInterval = undefined;
+                            }
+                            switch (spp.maxLoginAttempts) {
+                                case 'NoLimit': spp.maxLoginAttempts = 0; break;
+                                case 'ThreeAttempts': spp.maxLoginAttempts = 3; break;
+                                case 'FiveAttempts': spp.maxLoginAttempts = 5; break;
+                                case 'TenAttempts': spp.maxLoginAttempts = 10; break;
+                                default: spp.maxLoginAttempts = undefined;
+                            }
+                            switch (spp.questionRestriction) {
+                                case 'None': spp.questionRestriction = 0; break;
+                                case 'DoesNotContainPassword': spp.questionRestriction = 1; break;
+                                default: spp.questionRestriction = undefined;
+                            }
+                            MAP_HANDLER.setValue(records, 'security', security);
+                        }
                         resolve(records);
                     })
                     .on('error', (err) => reject(err))
@@ -685,9 +727,9 @@ OrgCheck.Datasets = {
                                 passwordExpiration: parseInt(r.passwordExpiration),
                                 passwordHistory: parseInt(r.passwordHistory),
                                 passwordQuestion: (r.passwordQuestion === 'true'),
-                                profileFullName: r.profile
+                                name: r.profile
                             }
-                            MAP_HANDLER.setValue(records, item.profileFullName, item);
+                            MAP_HANDLER.setValue(records, item.name, item);
                         });
                         resolve(records);
                     })
