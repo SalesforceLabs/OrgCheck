@@ -37,6 +37,7 @@ OrgCheck.VisualComponents = {
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
          *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
          *                <li><code>filtering</code>: JSON, description of an optional filter to apply to the visual representation.</li>
+         *                <li><code>preprocessing</code>: JSON, description of an optional method that will process the row at once and potentially set once massive amount of data (like the dependencies).</li>
          *              </ol>
          */
         this.create = function(config) {
@@ -233,6 +234,7 @@ OrgCheck.VisualComponents = {
                 let tdBodyScore = null;
                 const rowBadColumns = [];
                 const row = isArray ? k : config.data[k];
+                const preprocessedRow = config.preprocessing ? config.preprocessing(row) : undefined;
                 config.columns.forEach(c => {
                     const tdBody = trBody.appendChild(document.createElement('td'));
                     if (c.property === '##score##') { tdBodyScore = tdBody; return; }
@@ -263,7 +265,7 @@ OrgCheck.VisualComponents = {
                                 case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'un':'')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
                             }
                         } else {
-                            if (c.formula) dataDecorated = c.formula(row);
+                            if (c.formula) dataDecorated = c.formula(row, preprocessedRow);
                             if (!c.formula && c.property) dataDecorated = dataRaw;
                             if (c.formula && !c.property) dataRaw = dataDecorated;
                         }
@@ -281,7 +283,7 @@ OrgCheck.VisualComponents = {
                     }
                     try {
                         if (c.scoreFormula) {
-                            additiveScore = c.scoreFormula(row);
+                            additiveScore = c.scoreFormula(row, preprocessedRow);
                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
                                 rowScore += additiveScore;
                                 tdBody.classList.add('orgcheck-table-td-badcell');

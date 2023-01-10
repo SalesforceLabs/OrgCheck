@@ -22,6 +22,12 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable',
+                                preprocessing: (r) => {
+                                    if (r.custom === true) return {
+                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
+                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
+                                    }
+                                },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', formula: (r) => { 
                                         const object = map.objects[r.objectDeveloperName];
@@ -71,20 +77,18 @@
                                             if (!r.description) return 1; 
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                        return helper.html.render.checkbox(false);
-                                    }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
-                                        formula: (r) => { 
-                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
-                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return helper.html.render.checkbox(false) + ' Not used!';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (r.custom === true) {
+                                            if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                            return helper.html.render.checkbox(false);
                                         }
+                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (r.custom === true) {
+                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            return helper.html.render.checkbox(false) + ' Not used!';
+                                        }},
+                                        scoreFormula: (r, pr) => { if (r.custom === true && pr.count_whereIsItUsed === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', map.dependencies[r.id]);

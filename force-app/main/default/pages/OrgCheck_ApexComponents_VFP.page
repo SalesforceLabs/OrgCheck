@@ -123,6 +123,12 @@
                             helper.html.datatable.create({
                                 element: 'datatable-classes',
                                 appendCountInElement: 'tab-default-classes__item',
+                                preprocessing: (r) => {
+                                    return {
+                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
+                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
+                                    }
+                                },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -207,13 +213,12 @@
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
-                                        formula: (r) => { 
-                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
-                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                        formula: (r, pr) => { 
+                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r) => { 
-                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                        scoreFormula: (r, pr) => { 
+                                            if (pr.count_whereIsItUsed === 0) return 1;
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 

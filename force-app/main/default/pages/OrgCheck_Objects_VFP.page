@@ -280,6 +280,12 @@
                                     helper.html.element.show('section-fields', true);
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
+                                        preprocessing: (r) => {
+                                            if (r.custom === true) return {
+                                                count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]),
+                                                count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id])
+                                            }
+                                        },
                                         columns: [
                                             { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', formula: (r) => { 
                                                 return helper.html.render.link(
@@ -292,26 +298,19 @@
                                             }},
                                             { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'name' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
                                                 if (r.custom === true) {
-                                                    const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                                    if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
                                                     return helper.html.render.checkbox(false) + ' Using nothing.';
                                                 }
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
-                                                formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
                                                     if (r.custom === true) {
-                                                        const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
-                                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                                        if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
                                                         return helper.html.render.checkbox(false) + ' Not used!';
                                                     }
                                                 },
-                                                scoreFormula: (r) => { 
-                                                    if (r.custom === true) {
-                                                        if (helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]) === 0) return 1;
-                                                    }
-                                                }
+                                                scoreFormula: (r, pr) => { if (r.custom === true && pr.count_whereIsItUsed === 0) return 1; }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r) => { 
                                                 if (r.custom === true) {
@@ -343,7 +342,6 @@
                                                     }
                                                 }
                                             },
-
                                             { name: 'Tooltip', property: 'inlineHelpText' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => {
                                                 let type = r.type;
