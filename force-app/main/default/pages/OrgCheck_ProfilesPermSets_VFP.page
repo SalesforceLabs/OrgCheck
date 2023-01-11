@@ -312,7 +312,7 @@
                                     { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
                                         formula: (r) => { 
                                             if (r.maxLoginAttempts === undefined) return 'No limit';
-                                            return r.lockoutInterval + ' attempts';
+                                            return r.maxLoginAttempts + ' attempts';
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.maxLoginAttempts === undefined) return 1; 

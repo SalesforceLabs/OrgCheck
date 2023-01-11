@@ -262,7 +262,7 @@ OrgCheck.VisualComponents = {
                                 case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
                                 case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
                                 case 'numeric': dataDecorated = ''+dataRaw; break;
-                                case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'un':'')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
+                                case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'':'un')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
                             }
                         } else {
                             if (c.formula) dataDecorated = c.formula(row, preprocessedRow);
