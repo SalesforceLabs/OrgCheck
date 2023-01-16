@@ -140,6 +140,7 @@
                                 element: 'datatable-profiles',
                                 appendCountInElement: 'tab-default-profiles__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)', profileId: r.id, apiName: r.apiName };
                                         allProfilesByFullname[r.apiName.toLowerCase()] = { id: r.id, name: r.name };
@@ -148,7 +149,6 @@
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_UserType_CL)}', property: 'userType' },
@@ -272,6 +272,7 @@
                                 element: 'datatable-pwdPolicies',
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: 'Policy', property: 'name',
                                         formula: (r) => {
                                             if (r.isOrgLevel) {
@@ -286,7 +287,6 @@
                                             return r.name;
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: 'User pwd expire in', property: 'passwordExpiration', type: 'numeric',
                                         scoreFormula: (r) => { 
                                             if (r.isOrgLevel) return (r.passwordExpiration > 180) ? 1 : 0; 
@@ -360,6 +360,7 @@
                                 element: 'datatable-permissionSets',
                                 appendCountInElement: 'tab-default-permsets__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
                                             if (r.isGroup === false) {
@@ -372,7 +373,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', type: 'checkbox' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },

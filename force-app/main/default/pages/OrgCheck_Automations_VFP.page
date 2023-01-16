@@ -50,13 +50,13 @@
                                 element: 'datatable-workflows',
                                 appendCountInElement: 'tab-default-workflows__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
@@ -110,6 +110,7 @@
                                 element: 'datatable-processbuilders',
                                 appendCountInElement: 'tab-default-processbuilders__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Flow_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.definitionId, 
@@ -128,7 +129,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
@@ -164,6 +164,7 @@
                                 element: 'datatable-flows',
                                 appendCountInElement: 'tab-default-flows__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Flow_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.definitionId, 
@@ -182,7 +183,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Version_CL)}', type: 'numeric', property: 'version' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }, 
                                     { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 

@@ -29,13 +29,13 @@
                                     }
                                 },
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: 'Master Label', property: 'masterLabel' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Category_CL)}', property: 'category' },

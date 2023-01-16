@@ -219,13 +219,13 @@
                                 element: 'datatable-publicGroups',
                                 appendCountInElement: 'tab-default-publicgroups__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
@@ -252,6 +252,7 @@
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
                                 showSearch: true,
                                 showStatistics: true,
+                                showLineCount: true,
                                 stickyHeaders: true
                             });
 
@@ -259,13 +260,13 @@
                                 element: 'datatable-queues',
                                 appendCountInElement: 'tab-default-queues__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 

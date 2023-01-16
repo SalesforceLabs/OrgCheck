@@ -366,13 +366,13 @@
                                 element: 'datatable',
                                 appendCountInElement: 'tab-default-table__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveMembers_CL)}', type: 'numeric', 
                                         formula: (r) => {

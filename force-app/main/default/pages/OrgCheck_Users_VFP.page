@@ -22,6 +22,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_UserName_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
@@ -29,7 +30,6 @@
                                                 helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_LastLogin_CL)}', 
                                         formula: (r) => { 
                                             return (r.neverLogged === false) ? r.lastLogin : '{!JSENCODE($Label.OrgCheck_NeverLoggedIn_CL)}'; 

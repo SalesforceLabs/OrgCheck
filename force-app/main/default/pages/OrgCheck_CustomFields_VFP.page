@@ -23,16 +23,18 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 preprocessing: (r) => {
-                                    if (r.custom === true) return {
+                                    return {
                                         count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
                                         count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
                                     }
                                 },
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', formula: (r) => { 
                                         const object = map.objects[r.objectDeveloperName];
                                         let entityUrl = '/lightning/setup/ObjectManager/'+r.objectId+'/Details/view';
                                         let entityLabel = r.objectDeveloperName;
+                                        let entityAPIName = '';
                                         if (object) {
                                             if (object.isCustomSetting === true) entityUrl = '/lightning/setup/CustomSettings/page?address=%2F'+r.objectId;
                                             else if (object.isExternalObject === true) entityUrl = '/lightning/setup/ExternalObjects/page?address=%2F'+r.objectId;
@@ -40,9 +42,11 @@
                                             else if (object.isPlatformEvent === true) entityUrl = '/lightning/setup/EventObjects/page?address=%2F'+r.objectId;
                                             else if (object.isBigObject === true) entityUrl = '/lightning/setup/BigObjects/page?address=%2F'+r.objectId;
                                             else if (object.isKnowledgeArticle === true) entityUrl = '/lightning/setup/KnowledgeArticles/page?address=%2F'+r.objectId;
-                                            entityLabel = object.label + (object.label !== r.objectId ? ' ('+object.developerName+')' : '');
+                                            entityLabel = object.label;
+                                            if (object.label !== r.objectId) entityAPIName = object.developerName;
                                         }
-                                        return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel));
+                                        return helper.html.render.link(entityUrl, helper.html.render.escape(entityLabel)) + 
+                                            (entityAPIName?('<br /><small><code>'+entityAPIName+'</code></small>'):'');
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => { 
                                         const object = map.objects[r.objectDeveloperName];
@@ -65,30 +69,17 @@
                                             helper.html.render.escape(r.fieldName)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'fullName' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (r.custom === true) {
-                                            if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
-                                            return helper.html.render.checkbox(false);
-                                        }
+                                        if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                        return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (r.custom === true) {
                                             if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
                                             return helper.html.render.checkbox(false) + ' Not used!';
-                                        }},
-                                        scoreFormula: (r, pr) => { if (r.custom === true && pr.count_whereIsItUsed === 0) return 1; }
+                                        }, 
+                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', map.dependencies[r.id]);
@@ -113,7 +104,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.customFields,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },

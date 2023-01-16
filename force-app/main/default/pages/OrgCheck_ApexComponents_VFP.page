@@ -91,8 +91,8 @@
                                 element: 'datatable-recompilations',
                                 appendCountInElement: 'tab-default-recompilations__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
@@ -130,8 +130,8 @@
                                     }
                                 },
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
@@ -245,8 +245,8 @@
                                 element: 'datatable-apextests',
                                 appendCountInElement: 'tab-default-apextests__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
@@ -337,13 +337,13 @@
                                 element: 'datatable-triggers',
                                 appendCountInElement: 'tab-default-triggers__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
@@ -433,8 +433,8 @@
                                 element: 'datatable-objtriggercounts',
                                 appendCountInElement: 'tab-default-objtriggercounts__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ActiveTriggers_CL)}', type: 'numeric', property: 'activeTriggerCount', 
                                         scoreFormula: (r) => { 
                                             if (r.activeTriggerCount > 1) return 1; 

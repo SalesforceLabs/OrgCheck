@@ -62,9 +62,9 @@
                                 element: 'datatable-apexjobs',
                                 appendCountInElement: 'tab-default-apexjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApexContext_CL)}', property: 'context' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status === 'Failed') return 1; 
@@ -87,9 +87,9 @@
                                 element: 'datatable-scheduledjobs',
                                 appendCountInElement: 'tab-default-scheduledjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status !== 'WAITING') return 1; 
@@ -121,13 +121,13 @@
                                 element: 'datatable-notscheduledjobs',
                                 appendCountInElement: 'tab-default-notscheduledjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
