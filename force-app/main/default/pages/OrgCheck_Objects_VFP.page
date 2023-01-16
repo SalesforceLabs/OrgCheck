@@ -257,7 +257,6 @@
                                         }}
                                     ],
                                     data: [
-                                        { key: '{!JSENCODE($Label.OrgCheck_Description_CL)}', value: object.description },
                                         { key: 'API Name', value: object.name },
                                         { key: 'Singular Label', value: object.label },
                                         { key: 'Plural Label ', value: object.labelPlural },
@@ -268,7 +267,8 @@
                                         { key: 'Global Search Enabled?', value: object.searchable, type: 'checkbox' },
                                         { key: 'Record Count (including deleted ones)', value: object.recordCount, type: 'number' },
                                         { key: 'Internal Sharing', value: object.internalSharingModel },
-                                        { key: 'External Sharing', value: object.externalSharingModel }
+                                        { key: 'External Sharing', value: object.externalSharingModel },
+                                        { key: '{!JSENCODE($Label.OrgCheck_Description_CL)}', value: object.description }
                                     ],
                                     showSearch: false
                                 });
@@ -526,9 +526,9 @@
                                             { name: 'Id', property: 'id' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                             { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'errorDisplayField' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_ErrorMessage_CL)}', property: 'errorMessage' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_ErrorMessage_CL)}', property: 'errorMessage' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' }
                                         ],
                                         data: object.validationRules,
                                         sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },

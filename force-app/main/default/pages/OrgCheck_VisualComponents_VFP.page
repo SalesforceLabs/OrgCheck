@@ -86,15 +86,6 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Mobile_CL)}', property: 'mobile', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
                                         const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
                                         if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
@@ -114,7 +105,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.vfPages,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -148,15 +148,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
                                         if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
                                         return helper.html.render.checkbox(false);
@@ -175,8 +166,17 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
-                                ],
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
+                               ],
                                 data: map.vfComponents,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
@@ -204,15 +204,6 @@
                                         ); 
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
                                         if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
                                         return helper.html.render.checkbox(false);
@@ -231,7 +222,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.auraPages,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -265,15 +265,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
                                         if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
                                         return helper.html.render.checkbox(false);
@@ -292,7 +283,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.auraComponents,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -326,15 +326,6 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
                                         if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
                                         return helper.html.render.checkbox(false);
@@ -353,7 +344,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.lwComponents,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },

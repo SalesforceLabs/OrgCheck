@@ -57,15 +57,6 @@
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
-                                        formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
-                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (!r.description) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
@@ -96,7 +87,16 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
+                                        formula: (r) => {
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                            return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (!r.description) return 1; 
+                                        }
+                                    }
                                 ],
                                 data: map.workflows,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -139,6 +139,8 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_DmlCreates_CL)}', property: 'dmlCreates' },
                                     { name: '{!JSENCODE($Label.OrgCheck_DmlDeletes_CL)}', property: 'dmlDeletes' },
                                     { name: '{!JSENCODE($Label.OrgCheck_DmlUpdates_CL)}', property: 'dmlUpdates' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
@@ -147,9 +149,7 @@
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
-                                    },
-                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    }
                                 ],
                                 data: map.flows,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -189,6 +189,8 @@
                                             if (r.isActive === false) return 1; 
                                         }
                                     },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
@@ -197,9 +199,7 @@
                                         scoreFormula: (r) => { 
                                             if (!r.description) return 1; 
                                         }
-                                    },
-                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    }
                                 ],
                                 data: map.flows,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
