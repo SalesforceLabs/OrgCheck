@@ -354,9 +354,9 @@
                         if (metadatas.length === 0) return success();
                         SALESFORCE_HANDLER.readMetadata(metadatas)
                             .on('error', (err) => error(err))
-                            .on('end', (types) => {
+                            .on('end', (response) => {
                                 const records = [];
-                                types.forEach(type => type.members.forEach(m => {
+                                Object.keys(response).forEach(type => response[type].forEach(m => {
                                     const appVisibility = { 
                                         parentApiName: m.fullName,
                                         appVisibilities: []
@@ -374,46 +374,6 @@
                                 success(records);
                             })
                             .run();
-/*
-                        const promises = [];
-                        if (profileNames && profileNames.length > 0) {
-                            promises.push(new Promise((s, e) => { 
-                                SALESFORCE_HANDLER.readMetadata('Profile', profileNames)
-                                    .on('error', (err) => e(err))
-                                    .on('end', (records) => s(records))
-                                    .run();
-                            }));
-                        }
-                        if (permissionSetNames && permissionSetNames.length > 0) {
-                            promises.push(new Promise((s, e) => { 
-                                SALESFORCE_HANDLER.readMetadata('PermissionSet', permissionSetNames)
-                                    .on('error', (err) => e(err))
-                                    .on('end', (records) => s(records))
-                                    .run();
-                            }));
-                        }
-                        if (promises.length > 0) {
-                            Promise.all(promises)
-                                .then((results) => {
-                                    const records = [];
-                                    results.forEach(result => result.forEach(r => {
-                                        if (r && r.applicationVisibilities) {
-                                            const avs = Array.isArray(r.applicationVisibilities) ? r.applicationVisibilities : [ r.applicationVisibilities ];
-                                            avs.forEach(av => records.push({ 
-                                                parentApiName: r.fullName,
-                                                app: av.application,
-                                                visible: av.visible === 'true'
-                                            }));
-                                        }
-                                    }));
-                                    return records;
-                                })
-                                .catch((err) => error(err))
-                                .then((records) => success(records));
-                        } else {
-                            success();
-                        }
-                        */
                     },
                     describe: {
                         object: function(pckg, obj, success, error) {
@@ -720,17 +680,17 @@
                             }
                             return 0;
                         },
-                        whereIsItUsedBy: function(id, typeAPI, data) {
-                            if (data) {
+                        whereIsItUsedBy: function(id, types, data) {
+                            if (data && data.used && types) {
                                 const usedTypes = MAP_HANDLER.keys(data.used);
-                                if (usedTypes && typeAPI) {
-                                    const idx = usedTypes.indexOf(typeAPI);
-                                    if (idx >= 0) {
-                                        return MAP_HANDLER.keys(data.used[typeAPI]).length;
-                                    }
+                                if (usedTypes) {
+                                    const usedBy = {};
+                                    types.filter(t => (usedTypes.indexOf(t) >= 0))
+                                         .forEach(t => { usedBy[t] = MAP_HANDLER.keys(data.used[t]).length; });
+                                    return usedBy;
                                 }
                             }
-                            return 0;
+                            return [];
                         },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';

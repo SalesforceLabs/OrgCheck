@@ -16,17 +16,25 @@
             <script>
                 function start2(controller, helper) {
                     controller.run({
-                        datasets: [ 'customFields', 'objects' ],
+                        datasets: [ 'customFields', 'objects', 'flows' ],
                         dependencies: true,
                         onRecords: function(map) {
 
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 preprocessing: (r) => {
+                                    const usedBy = helper.html.render.whereIsItUsedBy(
+                                        r.id, 
+                                        ['Layout', 'ApexClass', 'Flow'], 
+                                        map.dependencies[r.id]
+                                    );
                                     return {
                                         count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]),
+                                        count_usedInLayout: usedBy['Layout'],
+                                        count_usedInApexClass: usedBy['ApexClass'],
+                                        count_usedInFlow: usedBy['Flow']
+                                    };
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -81,19 +89,16 @@
                                         }, 
                                         scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Layout' + (count>1?'s':'');
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.count_usedInLayout > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInLayout + ' Layout' + (pr.count_usedInLayout>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.count_usedInApexClass > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInApexClass + ' Apex Class' + (pr.count_usedInApexClass>1?'es':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.count_usedInFlow > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInFlow + ' Flow' + (pr.count_usedInFlow>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 

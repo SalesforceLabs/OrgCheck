@@ -650,10 +650,11 @@ OrgCheck.Datasets = {
             keyCache: 'Settings', 
             retriever: (me, resolve, reject) => {
                 SALESFORCE_HANDLER.readMetadata([ { type: 'SecuritySettings', members: [ 'Security' ] } ])
-                    .on('end', (results) => {
+                    .on('end', (response) => {
+                        const securitySettings = response['SecuritySettings'];
                         const records = MAP_HANDLER.newMap();
-                        if (results && results.length === 1) {
-                            const security = results[0].members[0];
+                        if (securitySettings && securitySettings.length == 1) {
+                            const security = securitySettings[0];
                             const spp = security.passwordPolicies;
                             // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_securitysettings.htm
                             switch (spp.complexity) {
@@ -713,24 +714,27 @@ OrgCheck.Datasets = {
             keyCache: 'ProfilePasswordPolicies', 
             retriever: (me, resolve, reject) => {
                 SALESFORCE_HANDLER.readMetadata([ { type: 'ProfilePasswordPolicy', members: [ '*' ] } ])
-                    .on('end', (policies) => {
+                    .on('end', (response) => {
+                        const policies = response['ProfilePasswordPolicy'];
                         const records = MAP_HANDLER.newMap();
-                        if (policies && policies.length === 1) policies[0].members.forEach(r => {
-                            const item = {
-                                forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
-                                lockoutInterval: parseInt(r.lockoutInterval),
-                                maxLoginAttempts: parseInt(r.maxLoginAttempts),
-                                minimumPasswordLength: parseInt(r.minimumPasswordLength),
-                                minimumPasswordLifetime: (r.minimumPasswordLifetime === 'true'),
-                                obscure: (r.obscure === 'true'),
-                                passwordComplexity: parseInt(r.passwordComplexity),
-                                passwordExpiration: parseInt(r.passwordExpiration),
-                                passwordHistory: parseInt(r.passwordHistory),
-                                passwordQuestion: (r.passwordQuestion === 'true'),
-                                name: r.profile
-                            }
-                            MAP_HANDLER.setValue(records, item.name, item);
-                        });
+                        if (policies) {
+                            policies.forEach(r => {
+                                const item = {
+                                    forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
+                                    lockoutInterval: parseInt(r.lockoutInterval),
+                                    maxLoginAttempts: parseInt(r.maxLoginAttempts),
+                                    minimumPasswordLength: parseInt(r.minimumPasswordLength),
+                                    minimumPasswordLifetime: (r.minimumPasswordLifetime === 'true'),
+                                    obscure: (r.obscure === 'true'),
+                                    passwordComplexity: parseInt(r.passwordComplexity),
+                                    passwordExpiration: parseInt(r.passwordExpiration),
+                                    passwordHistory: parseInt(r.passwordHistory),
+                                    passwordQuestion: (r.passwordQuestion === 'true'),
+                                    name: r.profile
+                                }
+                                MAP_HANDLER.setValue(records, item.name, item);
+                            });
+                        };
                         resolve(records);
                     })
                     .on('error', (err) => reject(err))

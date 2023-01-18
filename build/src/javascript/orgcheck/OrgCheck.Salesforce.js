@@ -290,7 +290,7 @@ OrgCheck.Salesforce = {
                                 };
                                 e(error);    
                             } else {
-                                m.members = [];
+                                m.members = m.members.filter(b => b !== '*');
                                 if (members) members.forEach(f => { m.members.push(f.fullName); });
                                 s();
                             }
@@ -320,15 +320,12 @@ OrgCheck.Salesforce = {
                         });
                         Promise.all(promises2)
                             .then((results) => {
-                                const records = [];
-                                results.forEach(result => {
-                                    that.fire('record', result);
-                                    records.push(result);
-                                });
-                                return records;
+                                const response = {};
+                                results.forEach(r => response[r.type] = r.members);
+                                return response;
                             })
                             .catch((err) => that.fire('error', err))
-                            .then((records) => that.fire('end', records));
+                            .then((response) => that.fire('end', response));
                     });
             } catch (error) {
                 that.fire('error', error);
