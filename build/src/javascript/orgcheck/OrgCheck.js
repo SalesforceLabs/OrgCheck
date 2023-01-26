@@ -665,9 +665,15 @@
                             };
                             if (data?.using) MAP_HANDLER.keys(data.using).forEach(u => usage.usingAllCount += MAP_HANDLER.keys(data.using[u]).length);
                             if (data?.used) MAP_HANDLER.keys(data.used).forEach(u => {
-                                const count = MAP_HANDLER.keys(data.used[u]).length;
+                                const keys = MAP_HANDLER.keys(data.used[u]);
+                                const count = keys.length;
+                                let inactiveCount = 0;
                                 usage.usedAllCount += count;
-                                if (usedTypes?.indexOf(u) >= 0) usage['used'+u+'Count'] = count;
+                                if (usedTypes?.indexOf(u) >= 0) {
+                                    usage['used'+u+'Count'] = count;
+                                    keys.forEach(k => { if (data.used[u][k].isActive !== true) inactiveCount++; })
+                                    usage['used'+u+'InactiveCount'] = inactiveCount;
+                                }
                             });
                             return usage;
                         },
