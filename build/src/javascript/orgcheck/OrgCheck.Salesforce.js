@@ -8,6 +8,7 @@ OrgCheck.Salesforce = {
             'error': (error) => { console.error(error); }
         };
         const private_error_event = private_events.error;
+        this.has = (name) => private_events.hasOwnProperty(name);
         this.fire = (name, ...args) => { 
             if (private_events.hasOwnProperty(name)) {
                 private_events[name](...args); 
@@ -17,7 +18,7 @@ OrgCheck.Salesforce = {
         this.run = () => { private_error_event('Run method should be implemented!')};
     },
 
-    SoqlProcess: function(connection, queries) {
+    SoqlProcess: function(connection, queries, returnAsMap, casesafeid) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
         this.run = () => {
@@ -45,7 +46,7 @@ OrgCheck.Salesforce = {
                         } else {
                             data = data.concat(result.records);
                             if (result.done === true) {
-                                resolve({ records: data, totalSize: result.totalSize });
+                                resolve({ records: data, totalSize: result.totalSize, key: query.key });
                             } else {
                                 api.queryMore(result.nextRecordsUrl, recursive_query);
                             }
@@ -55,11 +56,19 @@ OrgCheck.Salesforce = {
                 })));
                 Promise.all(promises)
                     .then((results) => {
-                        let records = []; 
+                        let records = (returnAsMap === true ? new Map() : []); 
                         results.forEach((result, index) => {
                             if (result && result.records) {
-                                result.records.forEach((r) => that.fire('record', r, index));
-                                records = records.concat(result.records);
+                                if (that.has('record')) {
+                                    result.records.forEach((r) => that.fire('record', r, index));
+                                }
+                                if (that.has('end')) {
+                                    if (returnAsMap === true) {
+                                        result.records.forEach((r) => records.set(casesafeid(r[result.key]), r));
+                                    } else {
+                                        result.records.forEach((r) => records.push(r));
+                                    }
+                                }
                             }
                             that.fire('size', result?.totalSize || 0, index);
                         });
@@ -556,7 +565,22 @@ OrgCheck.Salesforce = {
             return unsafeArray.join(',');
         };
         
-       /**
+        const private_split_in_ids = (ids, size, callback) => {
+            let subids = '';
+            ids.forEach((v, i, a) => {
+                const batchFull = (i != 0 && i % size === 0);
+                const lastItem = (i === a.length-1);
+                subids += '\''+v+'\'';
+                if (batchFull === true || lastItem === true) {
+                    callback(subids);
+                    subids = '';
+                } else {
+                    subids += ',';
+                }
+            });
+        };
+
+        /**
          * Call the Dependency API (synchronous version)
          * @param ids Array of IDs that we are interested in
          * @param callbackSuccess Callback method in case of a success with the resulting map
@@ -564,56 +588,71 @@ OrgCheck.Salesforce = {
          */
         this.dependencyApi = (ids, callbackSuccess, callbackError) => {
             if (ids.length == 0) { callbackSuccess(); return; }
-
-            const MAX_IDS_IN_QUERY = 50; // max is 2000 records, so avg of 40 dependencies for each id
             const queries = [];
-            let subids = '';
-            ids.forEach((v, i, a) => {
-                const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
-                const lastItem = (i === a.length-1);
-                subids += '\''+v+'\'';
-                if (batchFull === true || lastItem === true) { 
-                    queries.push({
-                        tooling: true,
-                        string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
-                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
-                                'FROM MetadataComponentDependency '+
-                                'WHERE (RefMetadataComponentId IN (' + subids + ') '+
-                                'OR MetadataComponentId IN (' + subids+ ')) ',
-                        queryMore: false
-                    });
-                    subids = '';
-                } else {
-                    subids += ',';
-                }
+            private_split_in_ids(ids, 50, (subids) => {
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                            'FROM MetadataComponentDependency '+
+                            'WHERE (RefMetadataComponentId IN (' + subids + ') '+
+                            'OR MetadataComponentId IN (' + subids+ ')) ',
+                    queryMore: false
+                });
             });
             const map = {};
-            new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries)
+            const flows = new Map();
+            new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries, false, this.salesforceIdFormat)
                 .on('record', (r) => {
-                    const aId = this.salesforceIdFormat(r.MetadataComponentId);
-                    const aType = r.MetadataComponentType;
-                    const aName = r.MetadataComponentName;
-                    const bId = this.salesforceIdFormat(r.RefMetadataComponentId);
-                    const bType = r.RefMetadataComponentType;
-                    const bName = r.RefMetadataComponentName;
-                    let b = map[bId];
-                    if (!b) b = map[bId] = {};
-                    if (!b.used) b.used = {};
-                    if (!b.used[aType]) b.used[aType] = [];
-                    b.used[aType][aId] = { name: aName };
-                    let a = map[aId];
-                    if (!a) a = map[aId] = {};
-                    if (!a.using) a.using = {};
-                    if (!a.using[bType]) a.using[bType] = [];
-                    a.using[bType][bId] = { name: bName };
+                    const a = { id: this.salesforceIdFormat(r.MetadataComponentId),
+                        type: r.MetadataComponentType, name: r.MetadataComponentName
+                    };
+                    const b = { id: this.salesforceIdFormat(r.RefMetadataComponentId),
+                        type: r.RefMetadataComponentType, name: r.RefMetadataComponentName
+                    };
+
+                    if (!map[b.id]) map[b.id] = {};
+                    if (!map[b.id].used) map[b.id].used = {};
+                    if (!map[b.id].used[a.type]) map[b.id].used[a.type] = [];
+                    map[b.id].used[a.type].push(a);
+
+                    if (!map[a.id]) map[a.id] = {};
+                    if (!map[a.id].using) map[a.id].using = {};
+                    if (!map[a.id].using[b.type]) map[a.id].using[b.type] = [];
+                    map[a.id].using[b.type].push(b);
+
+                    if (a.type === 'Flow') flows.set(a.id, a);
+                    if (b.type === 'Flow') flows.set(b.id, b);
                 })
                 .on('error', (error) => callbackError(error))
-                .on('end', () => callbackSuccess(map))
+                .on('end', () => {
+                    if (flows.size === 0) {
+                        callbackSuccess(map);
+                        return;
+                    }
+                    const additionalQueries = [];
+                    private_split_in_ids(Array.from(flows.keys()), 100, (subids) => {
+                        additionalQueries.push({ tooling: true, string: 'SELECT Id, Status FROM Flow WHERE Id IN (' + subids + ')' });
+                    });
+                    new OrgCheck.Salesforce.SoqlProcess(CONNECTION, additionalQueries, false, this.salesforceIdFormat)
+                        .on('end', (flowsRecords) => {
+                            if (flowsRecords.length > 0) {
+                                flowsRecords.forEach((v) => { flows.get(this.salesforceIdFormat(v.Id)).isActive = (v.Status === 'Active') });
+/*                                map.forEach((v, k) => ['used', 'using'].forEach(d => { 
+                                    // Statuses for Flow: https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_flow.htm
+                                    if (v[d]) v[d]['Flow']?.forEach((r) => r.isActive = (flowsRecords[r.id].Status === 'Active')); 
+                                }));*/
+                            }
+                            callbackSuccess(map);
+                        })
+                        .on('error', (error) => callbackError(error))
+                        .run();
+                })
                 .run();
         };
 
         this.query = (queries) => {
-            return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries);
+            return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries, false, this.salesforceIdFormat);
         }
 
         this.describeGlobal = () => {

@@ -124,10 +124,7 @@
                                 element: 'datatable-classes',
                                 appendCountInElement: 'tab-default-classes__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -207,18 +204,17 @@
                                             return html;
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
                                         formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
                                         scoreFormula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed === 0) return 1;
+                                            if (pr.usedAllCount === 0) return 1;
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -244,6 +240,9 @@
                             helper.html.datatable.create({
                                 element: 'datatable-apextests',
                                 appendCountInElement: 'tab-default-apextests__item',
+                                preprocessing: (r) => {
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
+                                },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
@@ -269,9 +268,8 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Methods_CL)}', type: 'numeric', property: 'methodsCount' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -336,6 +334,9 @@
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
                                 appendCountInElement: 'tab-default-triggers__item',
+                                preprocessing: (r) => {
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
+                                },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
@@ -405,9 +406,8 @@
                                         }
                                         return html;
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 

@@ -282,18 +282,7 @@
                                         element: 'datatable-fields',
                                         preprocessing: (r) => {
                                             if (r.custom === false) return;
-                                            const usedBy = helper.html.render.whereIsItUsedBy(
-                                                r.id, 
-                                                ['Layout', 'ApexClass', 'Flow'], 
-                                                map.dependencies[r.id]
-                                            );
-                                            return {
-                                                count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]),
-                                                count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]),
-                                                count_usedInLayout: usedBy['Layout'],
-                                                count_usedInApexClass: usedBy['ApexClass'],
-                                                count_usedInFlow: usedBy[['Flow'])
-                                            };
+                                            return helper.html.render.dependencyUsage(r.id, object.fieldDependencies[r.id], ['Layout', 'ApexClass', 'Flow']);
                                         },
                                         columns: [
                                             { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', formula: (r) => { 
@@ -308,25 +297,25 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'name' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                                if (pr?.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
-                                                return helper.html.render.checkbox(false) + ' Using nothing.';
+                                                if (pr?.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
+                                                return helper.html.render.checkbox(false);
                                             }},
                                             { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                                    if (pr?.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                                    if (pr?.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                                     return helper.html.render.checkbox(false) + ' Not used!';
                                                 },
-                                                scoreFormula: (r, pr) => { if (pr?.count_whereIsItUsed === 0) return 1; }
+                                                scoreFormula: (r, pr) => { if (pr?.usedAllCount === 0) return 1; }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                                if (pr?.count_usedInLayout > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInLayout + ' Layout' + (pr.count_usedInLayout>1?'s':'');
+                                                if (pr?.usedLayoutCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedLayoutCount + ' Layout' + (pr.usedLayoutCount>1?'s':'');
                                                 return helper.html.render.checkbox(false);
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r) => { 
-                                                if (pr?.count_usedInApexClass > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInApexClass + ' Apex Class' + (pr.count_usedInApexClass>1?'es':'');
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (pr?.usedApexClassCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedApexClassCount + ' Apex Class' + (pr.usedApexClassCount>1?'es':'');
                                                 return helper.html.render.checkbox(false);
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r) => { 
-                                                if (pr?.count_usedInFlow > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_usedInFlow + ' Flow' + (pr.count_usedInFlow>1?'s':'');
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (pr?.usedFlowCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedFlowCount + ' Flow' + (pr.usedFlowCount>1?'s':'');
                                                 return helper.html.render.checkbox(false);
                                             }},
                                             { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -566,7 +555,7 @@
                     // Init the drop down to select the package
                     // =================================
                     controller.run({
-                        datasets: [ 'packages', 'objects', 'orgWideDefaults', 'flows' ],
+                        datasets: [ 'packages', 'objects', 'orgWideDefaults' ],
                         onRecords: function(map) { 
 
                             // Get an index of the map using the specific compare function

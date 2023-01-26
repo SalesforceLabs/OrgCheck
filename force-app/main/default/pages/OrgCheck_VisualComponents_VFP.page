@@ -66,10 +66,7 @@
                                 element: 'datatable-vfps',
                                 appendCountInElement: 'tab-default-vfps__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -86,16 +83,15 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Mobile_CL)}', property: 'mobile', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
+                                        scoreFormula: (r, pr) => { if (pr.usedAllCount === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
@@ -129,10 +125,7 @@
                                 element: 'datatable-vfcs',
                                 appendCountInElement: 'tab-default-vfcs__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -149,14 +142,14 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
+                                        scoreFormula: (r, pr) => { if (pr.usedAllCount === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
@@ -190,10 +183,7 @@
                                 element: 'datatable-lps',
                                 appendCountInElement: 'tab-default-lps__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -205,14 +195,14 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
+                                        scoreFormula: (r, pr) => { if (pr.usedAllCount === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
@@ -246,10 +236,7 @@
                                 element: 'datatable-lacs',
                                 appendCountInElement: 'tab-default-lacs__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
@@ -266,14 +253,14 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
+                                        scoreFormula: (r, pr) => { if (pr.usedAllCount === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 
@@ -307,10 +294,7 @@
                                 element: 'datatable-lwcs',
                                 appendCountInElement: 'tab-default-lwcs__item',
                                 preprocessing: (r) => {
-                                    return {
-                                        count_whereIsItUsed: helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]),
-                                        count_whatIsItUsing: helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id])
-                                    }
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
@@ -327,14 +311,14 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                        if (pr.count_whatIsItUsing > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whatIsItUsing;
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
-                                            if (pr.count_whereIsItUsed > 0) return helper.html.render.checkbox(true) + ' ' + pr.count_whereIsItUsed;
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
                                             return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r, pr) => { if (pr.count_whereIsItUsed === 0) return 1; }
+                                        scoreFormula: (r, pr) => { if (pr.usedAllCount === 0) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                         formula: (r) => { 

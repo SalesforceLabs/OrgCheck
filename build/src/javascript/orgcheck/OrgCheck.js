@@ -652,11 +652,24 @@
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
                                 const information = document.createElement('div');
-                                information.appendChild(private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8'));
+                                information.appendChild(private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8', '#82949e'));
                                 information.appendChild(private_compute_dependencies_tabular('dep2'+id, name, data));
                                 MSG_HANDLER.showModal('Dependencies Graphical and Tabular Information', information); 
                             };
                             return div;
+                        },
+                        dependencyUsage: function(id, data, usedTypes) {
+                            const usage = { 
+                                usingAllCount: 0,
+                                usedAllCount: 0
+                            };
+                            if (data?.using) MAP_HANDLER.keys(data.using).forEach(u => usage.usingAllCount += MAP_HANDLER.keys(data.using[u]).length);
+                            if (data?.used) MAP_HANDLER.keys(data.used).forEach(u => {
+                                const count = MAP_HANDLER.keys(data.used[u]).length;
+                                usage.usedAllCount += count;
+                                if (usedTypes?.indexOf(u) >= 0) usage['used'+u+'Count'] = count;
+                            });
+                            return usage;
                         },
                         whatIsItUsing: function(id, data) {
                             if (data && data.using) {
@@ -780,9 +793,10 @@
          * @param tagId id of the entity
          * @param name of the entity we want to analyze the dependencies
          * @param data Returned by the doSalesforceDAPI method
-         * @param boxColor Color of each box
+         * @param activeBoxColor Color of each box for Active items 
+         * @param deactiveBoxColor Color of each box for Deactivated items
          */
-        function private_compute_dependencies_graph(tagId, name, data, boxColor) {
+        function private_compute_dependencies_graph(tagId, name, data, activeBoxColor, deactiveBoxColor) {
 
             // Some constants
             const BOX_PADDING = 3;
@@ -804,7 +818,7 @@
                         const refs = d[type];
                         const kidsForType = [];
                         for (const rid in refs) {
-                            kidsForType.push({ id: rid, name: refs[rid].name });
+                            kidsForType.push({ id: rid, name: refs[rid].name, isActive: refs[rid].isActive });
                         }
                         e.children.push({ name: type, children: kidsForType });
                     }
@@ -873,7 +887,7 @@
             // --------------------------------
             node.append('rect')
                 .attr('id', function(d, i) { return (tagId + 'zone' + i); })
-                .attr('fill', function(d) { return boxColor; })
+                .attr('fill', function(d) { return d.data.isActive === false ? deactiveBoxColor : activeBoxColor; })
                 .attr('rx', 6)
                 .attr('ry', 6)
                 .attr('x', 0)
@@ -890,7 +904,7 @@
                 .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                 .attr('width', BOX_WIDTH-2*BOX_PADDING)
                 .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + '</span>');
+                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + (d.data.isActive===false?' (not active)':'') + '</span>');
 
             return svg.node();
         };
