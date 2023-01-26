@@ -671,40 +671,6 @@
                             });
                             return usage;
                         },
-                        whatIsItUsing: function(id, data) {
-                            if (data && data.using) {
-                                const types = MAP_HANDLER.keys(data.using);
-                                if (types) {
-                                    let count = 0;
-                                    types.forEach(u => count += MAP_HANDLER.keys(data.using[u]).length);
-                                    return count;
-                                }
-                            }
-                            return 0;
-                        },
-                        whereIsItUsed: function(id, data) {
-                            if (data && data.used) {
-                                const types = MAP_HANDLER.keys(data.used);
-                                if (types) {
-                                    let count = 0;
-                                    types.forEach(u => count += MAP_HANDLER.keys(data.used[u]).length);
-                                    return count;
-                                }
-                            }
-                            return 0;
-                        },
-                        whereIsItUsedBy: function(id, types, data) {
-                            if (data && data.used && types) {
-                                const usedTypes = MAP_HANDLER.keys(data.used);
-                                if (usedTypes) {
-                                    const usedBy = {};
-                                    types.filter(t => (usedTypes.indexOf(t) >= 0))
-                                         .forEach(t => { usedBy[t] = MAP_HANDLER.keys(data.used[t]).length; });
-                                    return usedBy;
-                                }
-                            }
-                            return [];
-                        },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
                             return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
@@ -755,16 +721,17 @@
         function private_compute_dependencies_tabular(tagId, name, data) {
             const tabularView = [];
             ['used', 'using'].forEach(category => {
-                const types = data[category];
-                if (types) for (const type in types) {
-                    const references = types[type];
-                    for (const referenceId in references) {
-                        tabularView.push({ 
-                            target: name, 
-                            relation: category, 
-                            refId: referenceId, 
-                            refName: references[referenceId].name,
-                            refType: type
+                const d = data[category];
+                if (d) {
+                    for (const type in d) {
+                        d[type].forEach(ref => {
+                            tabularView.push({ 
+                                target: name, 
+                                relation: category, 
+                                refId: ref.id, 
+                                refName: ref.name,
+                                refType: type
+                            })
                         });
                     }
                 }
@@ -813,15 +780,8 @@
             };
             rootData.children.forEach(e => {
                 const d = data[e.id];
-                if (d) {
-                    for (const type in d) {
-                        const refs = d[type];
-                        const kidsForType = [];
-                        for (const rid in refs) {
-                            kidsForType.push({ id: rid, name: refs[rid].name, isActive: refs[rid].isActive });
-                        }
-                        e.children.push({ name: type, children: kidsForType });
-                    }
+                if (d) for (const type in d) {
+                    e.children.push({ name: type, children: d[type] });
                 }
             });
             const root = d3.hierarchy(rootData);
