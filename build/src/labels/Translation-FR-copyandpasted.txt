@@ -94,8 +94,8 @@
 <customLabels><name>OrgCheck_InnerClasses_CL</name><label>Classes intérieures</label></customLabels>
 <customLabels><name>OrgCheck_Internal_CL</name><label>Interne</label></customLabels>
 <customLabels><name>OrgCheck_Home_Section1_Text1_CL</name><label> &lt;b&gt;Org Check&lt;&#x2F;b&gt; est une application Salesforce facile à installer et facile à utiliser qui vous permet d&#39;analyser rapidement votre Organisation et sa dette technique.</label></customLabels>
-<customLabels><name>OrgCheck_IsAbstract_CL</name><label>Est le résumé?</label></customLabels>
-<customLabels><name>OrgCheck_IsActive_CL</name><label>C&#39;est actif</label></customLabels>
+<customLabels><name>OrgCheck_IsAbstract_CL</name><label>Abstraite?</label></customLabels>
+<customLabels><name>OrgCheck_IsActive_CL</name><label>Activé?</label></customLabels>
 <customLabels><name>OrgCheck_IsGroup_CL</name><label>Est-il un groupe ?</label></customLabels>
 "
 "<customLabels><name>OrgCheck_KeyPermissions_CL</name><label>Autorisation clé</label></customLabels>
