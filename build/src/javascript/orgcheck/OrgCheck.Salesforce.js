@@ -300,7 +300,7 @@ OrgCheck.Salesforce = {
                                 e(error);    
                             } else {
                                 m.members = m.members.filter(b => b !== '*');
-                                if (members) members.forEach(f => { m.members.push(f.fullName); });
+                                if (members) (Array.isArray(members) ? members : [ members ]).forEach(f => { m.members.push(f.fullName); });
                                 s();
                             }
                         });
