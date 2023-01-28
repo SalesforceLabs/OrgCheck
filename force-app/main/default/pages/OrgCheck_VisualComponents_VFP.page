@@ -297,13 +297,13 @@
                                     return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
                                 },
                                 columns: [
+                                { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => {
                                             if (r.isApiVersionOld === true) return 1;
