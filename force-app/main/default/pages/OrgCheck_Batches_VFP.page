@@ -70,7 +70,7 @@
                                             if (r.status === 'Failed') return 1; 
                                         }
                                     },
-                                    { name: 'Message', property: 'message' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Message_CL)}', property: 'message' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Count_CL)}', type: 'numeric', property: 'numIds' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Errors_CL)}', type: 'numeric', property: 'numErrors' }
                                 ],
@@ -95,7 +95,7 @@
                                             if (r.status !== 'WAITING') return 1; 
                                         }
                                     },
-                                    { name: 'user', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_User_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.userid, 
                                             helper.html.render.escape(map.users[r.userid]?.name || r.userid)
@@ -103,7 +103,7 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Starts_CL)}', property: 'start' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Ends_CL)}', property: 'end' },
-                                    { name: 'timezone', property: 'timezone' }
+                                    { name: '{!JSENCODE($Label.OrgCheck_Timezone_CL)}', property: 'timezone' }
                                 ],
                                 data: map.batches,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'asc' },
@@ -133,14 +133,14 @@
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
                                                 classesToCompile.push(r.id);
-                                                return 'Recompile!';
+                                                return '{!JSENCODE($Label.OrgCheck_AskToRecompile_CL)}';
                                             }
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.needsRecompilation === true) return 1; 
                                         }
                                     },
-                                    { name: 'Is Scheduled?', property: 'isScheduled', type: 'checkbox',
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsScheduled_CL)}', property: 'isScheduled', type: 'checkbox',
                                         scoreFormula: (r) => { if (r.isScheduled !== true) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' }
@@ -155,10 +155,7 @@
 
                             // Show alert about recompilation
                             if (cntClsToCompile > 0) {
-                                let html = 
-                                    'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />'+
-                                    'Please make sure you click on the <b>plug</b> button in this page to ask for a recompilation of '+(cntClsToCompile>1?'these':'this')+' Apex class'+(cntClsToCompile>1?'es':'')+'.<br />'+
-                                    'If some classes still need recompilation after this, you need to check them for sure.<br />';
+                                let html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_RecompilationAlert_CL)}', cntClsToCompile);
                                 helper.html.message.show(html);
                                 const compileClassesButton = helper.html.element.get('compile-uncompiled-classes-button');
                                 compileClassesButton.onclick = (e) => { 

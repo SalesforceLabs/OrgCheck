@@ -103,7 +103,7 @@
                                         formula: (r) => {
                                             cntClsToCompile++;
                                             classesToCompile.push(r.id);
-                                            return 'Recompile!';
+                                            return '{!JSENCODE($Label.OrgCheck_AskToRecompile_CL)}';
                                         },
                                         scoreFormula: (r) => { return 1; }
                                     },
@@ -295,11 +295,7 @@
 
                             // Show alert about recompilation
                             if (cntClsToCompile > 0) {
-                                htmlParagraphs.push(
-                                    'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />'+
-                                    'Please make sure you click on the <b>plug</b> button in this page to ask for a recompilation of '+(cntClsToCompile>1?'these':'this')+' Apex class'+(cntClsToCompile>1?'es':'')+'.<br />'+
-                                    'If some classes still need recompilation after this, you need to check them for sure.<br />'
-                                );
+                                htmlParagraphs.push(helper.html.render.format('{!JSENCODE($Label.OrgCheck_RecompilationAlert_CL)}', cntClsToCompile));
                                 const compileClassesButton = helper.html.element.get('compile-uncompiled-classes-button');
                                 compileClassesButton.onclick = (e) => { 
                                     helper.salesforce.apex.compileClasses(classesToCompile);
@@ -311,10 +307,9 @@
                             // Show alert about no code coverage
                             if (cntClsNoCoverage > 0 || cntClsLowCoverage > 0) {
                                 let coverageHtml = '';
-                                if (cntClsNoCoverage > 0) coverageHtml += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
-                                if (cntClsLowCoverage > 0) coverageHtml += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
-                                coverageHtml += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
-                                coverageHtml += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                if (cntClsNoCoverage > 0) coverageHtml += helper.html.render.format('{!JSENCODE($Label.OrgCheck_CoverageNoCovAlert_CL)}', cntClsNoCoverage);
+                                if (cntClsLowCoverage > 0) coverageHtml += helper.html.render.format('{!JSENCODE($Label.OrgCheck_CoverageLowCovAlert_CL)}', cntClsLowCoverage);
+                                coverageHtml += '{!JSENCODE($Label.OrgCheck_CoverageAlert_CL)}';
                                 htmlParagraphs.push(coverageHtml);
                                 const runAllTestsButton = helper.html.element.get('run-all-tests');
                                 runAllTestsButton.onclick = (e) => { 

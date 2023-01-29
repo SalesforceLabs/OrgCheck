@@ -90,7 +90,7 @@
                                         if (pr.usedFlowCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedFlowCount + ' Flow' + (pr.usedFlowCount>1?'s':'');
                                         return helper.html.render.checkbox(false);
                                     }},
-                                    { name: 'Used in Inactive Flow', type: 'numeric', formula: (r, pr) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_UsedInInactiveFlow_CL)}', type: 'numeric', formula: (r, pr) => { 
                                             if (pr.usedFlowInactiveCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedFlowInactiveCount + ' Flow' + (pr.usedFlowInactiveCount>1?'s':'');
                                             return helper.html.render.checkbox(false);
                                         },
