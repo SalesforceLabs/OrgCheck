@@ -152,13 +152,18 @@ echo "Checking if custom labels and translation are correct (the syntax!)"
     done
     echo '  </body>';
     echo '</html>';
-) > /tmp/testAll.txt
-tidy /tmp/testAll.txt 2>&1 | grep 'Warning' | grep -v 'character code' | sort -t' ' -k2,2n > /tmp/testWarnings
-if [ $(cat /tmp/testWarnings | wc -l | tr -d ' ') -ne 0 ]; then
+) > /tmp/testAll.html
+tidy /tmp/testAll.html 2>/tmp/testAll.err 1>/dev/null 
+cat /tmp/testAll.err | grep -e ' - Warning: ' | grep -v 'character code' | sort -t' ' -k2,2n > /tmp/testWarnings.err
+rm /tmp/testAll.html
+rm /tmp/testAll.err
+if [ $(cat /tmp/testWarnings.err | wc -l | tr -d ' ') -ne 0 ]; then
     echo "WARNINGS:"
-    cat /tmp/testWarnings
+    cat /tmp/testWarnings.err
+    rm /tmp/testWarnings.err
     exit 100;
 fi
+rm /tmp/testWarnings.err
 echo "OK"
 echo ""
 

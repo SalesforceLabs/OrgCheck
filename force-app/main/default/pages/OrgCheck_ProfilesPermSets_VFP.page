@@ -273,11 +273,11 @@
                                 appendCountInElement: 'tab-default-ppwdpolicies__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: 'Policy', property: 'name',
+                                    { name: '{!JSENCODE($Label.OrgCheck_Policy_CL)}', property: 'name',
                                         formula: (r) => {
                                             if (r.isOrgLevel) {
                                                 return helper.html.render.icon('org') + ' ' + 
-                                                    helper.html.render.link('/lightning/setup/SecurityPolicies/home', 'Org Level');
+                                                    helper.html.render.link('/lightning/setup/SecurityPolicies/home', '{!JSENCODE($Label.OrgCheck_OrgLevel_CL)}');
                                             }
                                             const profile = allProfilesByFullname[r.name?.toLowerCase()];
                                             if (profile) {
@@ -287,7 +287,7 @@
                                             return r.name;
                                         }
                                     },
-                                    { name: 'User pwd expire in', property: 'passwordExpiration', type: 'numeric',
+                                    { name: '{!JSENCODE($Label.OrgCheck_UserPwdExpiresIn_CL)}', property: 'passwordExpiration', type: 'numeric',
                                         scoreFormula: (r) => { 
                                             if (r.isOrgLevel) return (r.passwordExpiration > 180) ? 1 : 0; 
                                             if (r.passwordExpiration > map.settings.security.passwordPolicies.expiration) return 1;
@@ -295,42 +295,42 @@
                                             if (r.passwordExpiration === 0) return 1; 
                                         }
                                     },
-                                    { name: 'Enforce pwd history', property: 'passwordHistory', type: 'numeric',
+                                    { name: '{!JSENCODE($Label.OrgCheck_EnforcePwdHistory_CL)}', property: 'passwordHistory', type: 'numeric',
                                         scoreFormula: (r) => { if (r.passwordHistory < 3) return 1; }
                                     },
-                                    { name: 'Min pwd length', property: 'minimumPasswordLength', type: 'numeric',
+                                    { name: '{!JSENCODE($Label.OrgCheck_MinPwdLength_CL)}', property: 'minimumPasswordLength', type: 'numeric',
                                         scoreFormula: (r) => { if (r.minimumPasswordLength < 8) return 1; }
                                     },
-                                    { name: 'Level of complexity', property: 'passwordComplexity', type: 'numeric', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_LevelComplexity_CL)}', property: 'passwordComplexity', type: 'numeric', 
                                         formula: (r) => { return helper.html.render.icon('star'+r.passwordComplexity); },
                                         scoreFormula: (r) => { if (r.passwordComplexity < 3) return 1; }
                                     },
-                                    { name: 'Question can contain pwd', property: 'passwordQuestion', 
+                                    { name: '{!JSENCODE($Label.OrgCheck_QuestionCanHavePwd_CL)}', property: 'passwordQuestion', 
                                         formula: (r) => { return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true); },
                                         scoreFormula: (r) => { if (r.passwordQuestion !== 1) return 1; }
                                     },
-                                    { name: 'Max Login Attempts', property: 'maxLoginAttempts', type: 'numeric',
+                                    { name: '{!JSENCODE($Label.OrgCheck_MaxLoginAttempts_CL)}', property: 'maxLoginAttempts', type: 'numeric',
                                         formula: (r) => { 
-                                            if (r.maxLoginAttempts === undefined) return 'No limit';
-                                            return r.maxLoginAttempts + ' attempts';
+                                            if (r.maxLoginAttempts === undefined) return '{!JSENCODE($Label.OrgCheck_NoLimit_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XAttempts_CL)}', r.maxLoginAttempts);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.maxLoginAttempts === undefined) return 1; 
                                             if (r.maxLoginAttempts > map.settings.security.passwordPolicies.maxLoginAttempts) return 1;
                                         }
                                     },
-                                    { name: 'Lockout effective period', property: 'lockoutInterval', type: 'numeric',
+                                    { name: '{!JSENCODE($Label.OrgCheck_LockoutPeriod_CL)}', property: 'lockoutInterval', type: 'numeric',
                                         formula: (r) => { 
-                                            if (r.lockoutInterval === undefined) return 'Never';
-                                            return r.lockoutInterval + ' minutes';
+                                            if (r.lockoutInterval === undefined) return '{!JSENCODE($Label.OrgCheck_Never_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XMinutes_CL)}', r.maxLoginAttempts);
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.lockoutInterval === undefined) return 1; 
                                             if (r.lockoutInterval < map.settings.security.passwordPolicies.lockoutInterval) return 1;
                                         }
                                     },
-                                    { name: 'Security Question Hidden', property: 'obscure', type: 'checkbox' },
-                                    { name: 'Require min 1 day pwd lifetime', property: 'minimumPasswordLifetime', type: 'checkbox' }
+                                    { name: '{!JSENCODE($Label.OrgCheck_SecurityQuestionHidden_CL)}', property: 'obscure', type: 'checkbox' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Min1DayPwdLifeime_CL)}', property: 'minimumPasswordLifetime', type: 'checkbox' }
                                 ],
                                 data: map.profilePasswordPolicies,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
@@ -378,7 +378,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.isUnusedCustom === true) return 'No user for this custom permission set!'; 
+                                            if (r.isUnusedCustom === true) return '{!JSENCODE($Label.OrgCheck_NoUserForThisPSet_CL)}'; 
                                             const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
                                             if (membersCount < 101) return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XUsers_CL)}', membersCount);                                            
                                             return '{!JSENCODE($Label.OrgCheck_More100Users_CL)}';
@@ -440,7 +440,7 @@
                                         } else {
                                             selectedProfileAndPermSetIds = selectedProfileAndPermSetIds.filter(e => e !== r.id);
                                         }
-                                        helper.html.element.setText(text, selectedProfileAndPermSetIds.length + ' item'+(selectedProfileAndPermSetIds.length>1?'s':'')+' selected.');
+                                        helper.html.element.setText(text, helper.html.render.format('{!JSENCODE($Label.OrgCheck_XItemsSelected_CL)}', selectedProfileAndPermSetIds.length));
                                         if (selectedProfileAndPermSetIds.length === 0) {
                                             buttons.forEach(b => helper.html.element.enable(b, false));
                                         } else {
@@ -454,7 +454,7 @@
                                 helper.html.datatable.clean('thematrix-comparator');
                                 switch (type) {
                                     case 'cruds': {
-                                        const columns = [ { name: 'Object', property: 'sobject', orientation: 'horizontal-bottom' } ];
+                                        const columns = [ { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', property: 'sobject', orientation: 'horizontal-bottom' } ];
                                         selectedProfileAndPermSetIds.forEach(id => { 
                                             columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
                                         });
@@ -482,7 +482,7 @@
                                                     element: 'thematrix-comparator',
                                                     columns: columns,
                                                     data: matrixData,
-                                                    sorting: { name: 'Object', order: 'asc' },
+                                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
                                                     columnBordered: true
                                                 });
                                                 helper.html.progress.hide();
@@ -495,7 +495,7 @@
                                         break;
                                     }
                                     case 'apps': {
-                                        const columns = [ { name: 'Application', property: 'app', orientation: 'horizontal-bottom' } ];
+                                        const columns = [ { name: '{!JSENCODE($Label.OrgCheck_Application_CL)}', property: 'app', orientation: 'horizontal-bottom' } ];
                                         const profileFullnames = [];
                                         const permissionSetFullnames = [];
                                         selectedProfileAndPermSetIds.forEach(id => { 
@@ -538,7 +538,7 @@
                                                     element: 'thematrix-comparator',
                                                     columns: columns,
                                                     data: matrixData,
-                                                    sorting: { name: 'Application', order: 'asc' },
+                                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Application_CL)}', order: 'asc' },
                                                     columnBordered: true
                                                 });
                                                 helper.html.progress.hide();

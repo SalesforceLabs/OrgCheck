@@ -65,19 +65,15 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Actions_CL)}', 
                                         formula: (r) => { 
                                             if (r.noAction === true) {
-                                                return 'No direct action!<br />';
+                                                return '{!JSENCODE($Label.OrgCheck_NoDirectAction_CL)}';
                                             }
                                             let html = '';
                                             r.actions.forEach(
-                                                a => html += 
-                                                    'Direct action: ' + helper.html.render.escape(a.name) +
-                                                        ' (' + helper.html.render.escape(a.type) + ')<br />'
+                                                a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_DirectAction_CL)}', a.name, a.type);
                                             ); 
                                             r.futureActions.forEach(
                                                 tt => tt.actions.forEach(
-                                                    a => html += 
-                                                        'Future action: ' + helper.html.render.escape(a.name) +
-                                                            ' (' + helper.html.render.escape(a.type) + ')<br />'
+                                                    a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_FutureAction_CL)}', a.name, a.type);
                                                 )
                                             );
                                             return html;

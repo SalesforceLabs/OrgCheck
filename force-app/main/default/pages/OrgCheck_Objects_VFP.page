@@ -203,13 +203,10 @@
                                               (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? '{!JSENCODE($Label.OrgCheck_ExternalObjects_CL)}' :
                                               (type === 'CUSTOM_SETTINGS' ? '{!JSENCODE($Label.OrgCheck_CustomSettings_CL)}' :
                                               (type === 'CUSTOM_METADATA_TYPES' ? '{!JSENCODE($Label.OrgCheck_CustomMetadataTypes_CL)}' : 
-                                              (type === 'CUSTOM_EVENTS' ? 'Platform Events' :
-                                              (type === 'KNOWLEDGE_ARTICLES' ? 'Knowledge Articles' :
-                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : '{!JSENCODE($Label.OrgCheck_AllTypes_CL)}'))))))));
-                            const html = 
-                                'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
-                                'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
-                                'Type: <b>'+labelType+'</b><br />';
+                                              (type === 'CUSTOM_EVENTS' ? '{!JSENCODE($Label.OrgCheck_PlatformEvents_CL)}' :
+                                              (type === 'KNOWLEDGE_ARTICLES' ? '{!JSENCODE($Label.OrgCheck_KnowledgeArticles_CL)}' :
+                                              (type === 'CUSTOM_BIG_OBJECTS' ? '{!JSENCODE($Label.OrgCheck_BigObjects_CL)}' : '{!JSENCODE($Label.OrgCheck_AllTypes_CL)}'))))))));
+                            const html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_NoObjectWarning_CL)}', (namespace !== '' ? namespace : '{!JSENCODE($Label.OrgCheck_None_CL)}'), labelType);
                             helper.html.message.show(html);
                         }
                     }
@@ -501,7 +498,7 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_Used_CL)}', type: 'numeric', formula: (r) => { 
                                                 return r.max - r.remaining; 
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_Remaining_CL)}', type: 'numeric', property: 'max' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Maximum_CL)}', type: 'numeric', property: 'max' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Remaining_CL)}', type: 'numeric', property: 'remaining' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }
                                         ],
