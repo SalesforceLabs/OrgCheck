@@ -69,11 +69,11 @@
                                             }
                                             let html = '';
                                             r.actions.forEach(
-                                                a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_DirectAction_CL)}', a.name, a.type);
+                                                a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_DirectAction_CL)}', a.name, a.type)
                                             ); 
                                             r.futureActions.forEach(
                                                 tt => tt.actions.forEach(
-                                                    a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_FutureAction_CL)}', a.name, a.type);
+                                                    a => html += helper.html.render.format('{!JSENCODE($Label.OrgCheck_FutureAction_CL)}', a.name, a.type)
                                                 )
                                             );
                                             return html;
