@@ -1,70 +1,65 @@
 <!DOCTYPE html>
 <html lang="{{ site.lang | default: "en-US" }}">
   <head>
-    <meta charset="UTF-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}" media="screen" type="text/css">
+    <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
 
 {% seo %}
-    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    <!--[if lt IE 9]>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <![endif]-->
+
+    {% include head-custom.html %}
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1><a href="{{ "/" | absolute_url }}">{{ site.title | default: site.github.repository_name }}</a></h1>
-        
-        {% if site.logo %}
-          <img src="{{site.logo | relative_url}}" alt="Logo" />
-        {% endif %}
-
-        <p>{{ site.description | default: site.github.project_tagline }}</p>
-
+    <header>
+      <div class="inner">
+        <a href="{{ '/' | absolute_url }}">
+          <h1>
+            {% if site.show_imagetitle %}<img src="{{ site.imagetitle }}" width="300" />{% endif %}
+            {% if site.show_title %}{{ site.title | default: site.github.repository_name }}{% endif %}
+          </h1>
+        </a>
+        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
         {% if site.github.is_project_page %}
-        <p class="view"><a href="{{ site.github.repository_url }}" target="_blank" rel="external noopener noreferrer" >View the Project on GitHub <small>{{ site.github.repository_nwo }}</small></a></p>
+          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
         {% endif %}
-
         {% if site.github.is_user_page %}
-        <p class="view"><a href="{{ site.github.owner_url }}" target="_blank" rel="author noopener noreferrer">View My GitHub Profile</a></p>
+          <a href="{{ site.github.owner_url }}" class="button"><small>Follow me on</small> GitHub</a>
         {% endif %}
+      </div>
+    </header>
 
-        <p>
-          <strong>Menu:</strong><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_home_url | absolute_url }}">{{ site.page_home_label }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_preview_url | absolute_url }}">{{ site.page_preview_label }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_installation_url | absolute_url }}">{{ site.page_installation_label }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_vision_url | absolute_url }}">{{ site.page_vision_label }}</a><br />
-          &rsaquo; &nbsp; Knowledge Sharing<br />
-          &nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_tech_datastores_url | absolute_url }}">{{ site.page_tech_datastores_label }}</a><br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_tech_ds_apexclasses_url | absolute_url }}">{{ site.page_tech_ds_apexclasses_label }}</a><br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_tech_ds_flows_url | absolute_url }}">{{ site.page_tech_ds_flows_label }}</a><br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_tech_ds_packages_url | absolute_url }}">{{ site.page_tech_ds_packages_label }}</a><br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rsaquo;&rsaquo;&rsaquo; &nbsp; <a style="font-size: smaller" href="{{ site.page_tech_ds_workflowrules_url | absolute_url }}">{{ site.page_tech_ds_workflowrules_label }}</a><br />
-          &rsaquo; &nbsp; <a href="{{ site.page_legal_url | absolute_url }}">{{ site.page_legal_label }}</a><br />
-        </p>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          {{ content }}
+        </section>
 
-        {% if site.show_downloads %}
-        <ul class="downloads">
-          <li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
-          <li><a href="{{ site.github.tar_url }}">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
-        </ul>
-        {% endif %}
-      </header>
-      <section>
+        <aside id="sidebar">
+          {% if site.show_downloads %}
+            <a href="{{ site.github.zip_url }}" class="button">
+              <small>Download</small>
+              .zip file
+            </a>
+            <a href="{{ site.github.tar_url }}" class="button">
+              <small>Download</small>
+              .tar.gz file
+            </a>
+          {% endif %}
 
-      {{ content }}
+          {% if site.github.is_project_page %}
+            <p class="repo-owner"><a href="{{ site.github.repository_url }}">{{ site.github.repository_name }}</a> is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>.</p>
+          {% endif %}
 
-      </section>
-      <footer>
-        {% if site.github.is_project_page %}
-        <p>This project is maintained by <a href="{{ site.github.owner_url }}" target="_blank" rel="author noopener noreferrer">{{ site.github.owner_name }}</a></p>
-        {% endif %}
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</p>
+        </aside>
+      </div>
     </div>
-    <script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>
   </body>
 </html>

@@ -3,9 +3,6 @@
 
 @import "{{ site.theme }}";
 
-header, footer {
-  width: 200px;
-}
-section {
-  width: 570px;
+header {
+  background: #1c6067;
 }
