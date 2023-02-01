@@ -32,7 +32,7 @@ List of usefull commands for packaging
 ============================================================
 sfdx force:package:version:list --targetdevhubusername vfinet.devhub@salesforce.com 
 sfdx force:package:version:create --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.1.2-0
+sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.4.1-0
 
 
 
