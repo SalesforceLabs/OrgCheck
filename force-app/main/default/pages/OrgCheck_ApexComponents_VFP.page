@@ -1,12 +1,9 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Apex_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Apex_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">🔥</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Apex_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Apex_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description1_CL}" />
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Apex_Description2_CL}" />
@@ -15,8 +12,8 @@
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
-                <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
+                <a>
+                    <button id="compile-uncompiled-classes-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -39,20 +36,26 @@
             <div class="slds-tabs_default">
                 <ul class="slds-tabs_default__nav" role="tablist">
                     <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Classes_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-classes" id="tab-default-classes__item">{!$Label.OrgCheck_Classes_CL}</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Recompilation needed" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-recompilations" id="tab-default-recompilations__item">Recompilation needed</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Triggers_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-triggers" id="tab-default-triggers__item">{!$Label.OrgCheck_Triggers_CL}</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_TriggersCount_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="false" aria-controls="tab-default-objtriggercounts" id="tab-default-objtriggercounts__item">{!$Label.OrgCheck_TriggersCount_CL}</a>
                     </li>
                     <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_UnitTests_CL}" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="false" aria-controls="tab-default-apextests" id="tab-default-apextests__item">{!$Label.OrgCheck_UnitTests_CL}</a>
                     </li>
                 </ul>
                 <div id="tab-default-classes" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-classes__item">
                     <div id="datatable-classes" />
+                </div>
+                <div id="tab-default-recompilations" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-recompilations__item">
+                    <div id="datatable-recompilations" />
                 </div>
                 <div id="tab-default-triggers" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-triggers__item">
                     <div id="datatable-triggers" />
@@ -81,13 +84,15 @@
                             let cntClsToCompile = 0;
                             let cntClsNoCoverage = 0;
                             let cntClsLowCoverage = 0;
+                            const classesToCompile = [];
 
-                            // Render the Apex Classes data in a table
+                            // Render the Apex Compilations data in a table
                             helper.html.datatable.create({
-                                element: 'datatable-classes',
+                                element: 'datatable-recompilations',
+                                appendCountInElement: 'tab-default-recompilations__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
@@ -96,19 +101,42 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
                                         formula: (r) => {
-                                            if (r.needsRecompilation === true) {
-                                                cntClsToCompile++;
-                                                return 'Recompile!';
-                                            }
+                                            cntClsToCompile++;
+                                            classesToCompile.push(r.id);
+                                            return '{!JSENCODE($Label.OrgCheck_AskToRecompile_CL)}';
                                         },
+                                        scoreFormula: (r) => { return 1; }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                ],
+                                data: map.apexClasses,
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
+                                filtering: { formula: (r) => { return r.needsRecompilation === true; }},
+                                showSearch: true,
+                                showStatistics: true,
+                                showLineCount: true,
+                                stickyHeaders: true
+                            });
+
+                            // Render the Apex Classes data in a table
+                            helper.html.datatable.create({
+                                element: 'datatable-classes',
+                                appendCountInElement: 'tab-default-classes__item',
+                                preprocessing: (r) => {
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
+                                },
+                                columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
-                                            if (r.needsRecompilation === true) return 1; 
+                                            if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Access_CL)}', property: 'specifiedAccess' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsAbstract_CL)}', property: 'isAbstract', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isAbstract); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsAbstract_CL)}', property: 'isAbstract', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => { 
                                         if (r.isInterface === true) return 'Interface';
                                         if (r.isEnum === true) return 'Enum';
@@ -176,19 +204,17 @@
                                             return html;
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
-                                        formula: (r) => { 
-                                            const count = helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]);
-                                            if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                            return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
+                                        formula: (r, pr) => { 
+                                            if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
+                                            return helper.html.render.checkbox(false) + ' Not used!';
                                         },
-                                        scoreFormula: (r) => { 
-                                            if (helper.html.render.whereIsItUsed(r.id, map.dependencies[r.id]) === 0) return 1;
+                                        scoreFormula: (r, pr) => { 
+                                            if (pr.usedAllCount === 0) return 1;
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -203,40 +229,31 @@
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
-                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === false && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Apex Unit Tests Classes data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-apextests',
+                                appendCountInElement: 'tab-default-apextests__item',
+                                preprocessing: (r) => {
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
+                                },
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { return helper.html.render.link('/'+r.id, r.name); }},
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
-                                        formula: (r) => {
-                                            if (r.needsRecompilation === true) {
-                                                cntClsToCompile++;
-                                                return 'Recompile!';
-                                            }
-                                        },
-                                        scoreFormula: (r) => { 
-                                            if (r.needsRecompilation === true) return 1; 
-                                        }
-                                    },
                                     { name: '{!JSENCODE($Label.OrgCheck_Size_CL)}', type: 'numeric', property: 'length' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_SeeAlllData_CL)}',
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.isTestSeeAllData);
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_SeeAlllData_CL)}', type: 'checkbox', property: 'isTestSeeAllData', 
                                         scoreFormula: (r) => { 
                                             if (r.isTestSeeAllData === true) return 1; 
                                         }
@@ -251,9 +268,8 @@
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Methods_CL)}', type: 'numeric', property: 'methodsCount' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -268,29 +284,33 @@
                                 ],
                                 data: map.apexClasses,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
-                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true; }},
+                                filtering: { formula: (r) => { return r.size !== -1 && r.isTest === true && r.needsRecompilation === false; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
-                            let html = '';
+                            let htmlParagraphs = [];
 
                             // Show alert about recompilation
                             if (cntClsToCompile > 0) {
-                                html += 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
-                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
-                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
-                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                                htmlParagraphs.push(helper.html.render.format('{!JSENCODE($Label.OrgCheck_RecompilationAlert_CL)}', cntClsToCompile));
+                                const compileClassesButton = helper.html.element.get('compile-uncompiled-classes-button');
+                                compileClassesButton.onclick = (e) => { 
+                                    helper.salesforce.apex.compileClasses(classesToCompile);
+                                    return true; 
+                                }
+                                helper.html.element.addClass(compileClassesButton, ['slds-theme_warning']);
                             }
 
                             // Show alert about no code coverage
                             if (cntClsNoCoverage > 0 || cntClsLowCoverage > 0) {
-                                if (html) html += '<br />';
-                                if (cntClsNoCoverage > 0) html += 'You have '+cntClsNoCoverage+' Apex class'+(cntClsNoCoverage>1?'es':'')+' with NO code coverage AT ALL.<br />';
-                                if (cntClsLowCoverage > 0) html += 'You have '+cntClsLowCoverage+' Apex class'+(cntClsLowCoverage>1?'es':'')+' with a code coverage < 85%.<br />';
-                                html += 'Please make sure you click on the <b>like</b> button in this page to go to the setup menu and run all apex unit tests in this org.<br />';
-                                html += 'If some classes still need code coverage after this, you need to check them for sure.<br />';
+                                let coverageHtml = '';
+                                if (cntClsNoCoverage > 0) coverageHtml += helper.html.render.format('{!JSENCODE($Label.OrgCheck_CoverageNoCovAlert_CL)}', cntClsNoCoverage);
+                                if (cntClsLowCoverage > 0) coverageHtml += helper.html.render.format('{!JSENCODE($Label.OrgCheck_CoverageLowCovAlert_CL)}', cntClsLowCoverage);
+                                coverageHtml += '{!JSENCODE($Label.OrgCheck_CoverageAlert_CL)}';
+                                htmlParagraphs.push(coverageHtml);
                                 const runAllTestsButton = helper.html.element.get('run-all-tests');
                                 runAllTestsButton.onclick = (e) => { 
                                     helper.salesforce.apex.runAllLocalTests();
@@ -299,9 +319,8 @@
                                 helper.html.element.addClass(runAllTestsButton, ['slds-theme_warning']);
                             }
 
-                            if (html) {
-                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
-                                helper.html.message.show(html);
+                            if (htmlParagraphs.length > 0) {
+                                helper.html.message.show(htmlParagraphs);
                             }
 
                             const objectTriggersCountMap = {};
@@ -309,24 +328,25 @@
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-triggers',
+                                appendCountInElement: 'tab-default-triggers__item',
+                                preprocessing: (r) => {
+                                    return helper.html.render.dependencyUsage(r.id, map.dependencies[r.id]);
+                                },
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApiVersion_CL)}', type: 'numeric', property: 'apiVersion',
                                         scoreFormula: (r) => { 
                                             if (r.isApiVersionOld === true) return 1; 
                                         }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', 
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.isActive); 
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.isActive === false) return 1; 
                                         }
@@ -344,10 +364,7 @@
                                             if (r.hasSOQL === true) return 1;
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ContainsDml_CL)}', property: 'hasDML',
-                                        formula: (r) => { 
-                                            return helper.html.render.checkbox(r.hasDML); 
-                                        },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ContainsDml_CL)}', property: 'hasDML', type: 'checkbox', 
                                         scoreFormula: (r) => { 
                                             if (r.hasDML === true) return 1;
                                         }
@@ -368,27 +385,13 @@
                                         // ---
                                         return helper.html.render.escape(objName);
                                     }},
-                                    { name: '*Insert', property: 'beforeInsert', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.beforeInsert); 
-                                    }},
-                                    { name: 'Insert*', property: 'afterInsert', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.afterInsert); 
-                                    }},
-                                    { name: '*Update', property: 'beforeUpdate', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.beforeUpdate); 
-                                    }},
-                                    { name: 'Update*', property: 'afterUpdate', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.afterUpdate); 
-                                    }},
-                                    { name: '*Delete', property: 'beforeDelete', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.beforeDelete); 
-                                    }},
-                                    { name: 'Delete*', property: 'afterDelete', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.afterDelete); 
-                                    }},
-                                    { name: 'Undelete*', property: 'afterUndelete', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.afterUndelete); 
-                                    }},
+                                    { name: '*Insert', property: 'beforeInsert', type: 'checkbox' },
+                                    { name: 'Insert*', property: 'afterInsert', type: 'checkbox' },
+                                    { name: '*Update', property: 'beforeUpdate', type: 'checkbox' },
+                                    { name: 'Update*', property: 'afterUpdate', type: 'checkbox' },
+                                    { name: '*Delete', property: 'beforeDelete', type: 'checkbox' },
+                                    { name: 'Delete*', property: 'afterDelete', type: 'checkbox' },
+                                    { name: 'Undelete*', property: 'afterUndelete', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Annotations_CL)}', formula: (r) => {
                                         let html = ''; 
                                         if (r.annotations) { 
@@ -398,9 +401,8 @@
                                         }
                                         return html;
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                        const count = helper.html.render.whatIsItUsing(r.id, map.dependencies[r.id]);
-                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
+                                    { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                        if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
                                         return helper.html.render.checkbox(false);
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
@@ -417,15 +419,17 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Apex Triggers data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-objtriggercounts',
+                                appendCountInElement: 'tab-default-objtriggercounts__item',
                                 columns: [
-                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'object' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ActiveTriggers_CL)}', type: 'numeric', property: 'activeTriggerCount', 
                                         scoreFormula: (r) => { 
                                             if (r.activeTriggerCount > 1) return 1; 
@@ -437,7 +441,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                             
                         },

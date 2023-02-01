@@ -8,6 +8,7 @@ OrgCheck.Salesforce = {
             'error': (error) => { console.error(error); }
         };
         const private_error_event = private_events.error;
+        this.has = (name) => private_events.hasOwnProperty(name);
         this.fire = (name, ...args) => { 
             if (private_events.hasOwnProperty(name)) {
                 private_events[name](...args); 
@@ -17,7 +18,7 @@ OrgCheck.Salesforce = {
         this.run = () => { private_error_event('Run method should be implemented!')};
     },
 
-    SoqlProcess: function(connection, queries) {
+    SoqlProcess: function(connection, queries, returnAsMap, casesafeid) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
         this.run = () => {
@@ -45,7 +46,7 @@ OrgCheck.Salesforce = {
                         } else {
                             data = data.concat(result.records);
                             if (result.done === true) {
-                                resolve({ records: data, totalSize: result.totalSize });
+                                resolve({ records: data, totalSize: result.totalSize, key: query.key });
                             } else {
                                 api.queryMore(result.nextRecordsUrl, recursive_query);
                             }
@@ -55,11 +56,21 @@ OrgCheck.Salesforce = {
                 })));
                 Promise.all(promises)
                     .then((results) => {
-                        let records = []; 
+                        let records = (returnAsMap === true ? new Map() : []); 
                         results.forEach((result, index) => {
-                            result.records.forEach((r) => that.fire('record', r, index));
-                            records = records.concat(result.records);
-                            that.fire('size', result.totalSize, index);
+                            if (result && result.records) {
+                                if (that.has('record')) {
+                                    result.records.forEach((r) => that.fire('record', r, index));
+                                }
+                                if (that.has('end')) {
+                                    if (returnAsMap === true) {
+                                        result.records.forEach((r) => records.set(casesafeid(r[result.key]), r));
+                                    } else {
+                                        result.records.forEach((r) => records.push(r));
+                                    }
+                                }
+                            }
+                            that.fire('size', result?.totalSize || 0, index);
                         });
                         that.fire('end', records);
                     })
@@ -101,7 +112,7 @@ OrgCheck.Salesforce = {
             try {
                 const promises = [];
                 promises.push(new Promise((resolve, reject) => {
-                    connection.sobject(sobjectDevName).describe$(function (error, object) {
+                    connection.sobject(sobjectDevName).describe(function (error, object) {
                         if (error) {
                             error.context = { 
                                 when: 'While calling an sobject describe.',
@@ -127,7 +138,7 @@ OrgCheck.Salesforce = {
                                         '(SELECT Id, Name FROM WebLinks) '+
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
-                                        (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : '');
+                                    (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<Local>\')');
                     connection.tooling.query(query, (error, result) => {
                         if (error) {
                             error.context = { 
@@ -272,7 +283,66 @@ OrgCheck.Salesforce = {
         }
     },
 
-    MetadataAtScaleProcess: function(connection, metadataInformation) {
+    MetadataProcess: function(connection, metadatas) {
+        OrgCheck.Salesforce.AbstractProcess.call(this);
+        const that = this;
+        this.run = () => {
+            try {
+                const promises1 = [];
+                metadatas.filter(m => m.members.includes('*')).forEach(m => {
+                    promises1.push(new Promise((s, e) => { 
+                        connection.metadata.list([{type: m.type}], connection.version, (error, members) => {
+                            if (error) {
+                                error.context = { 
+                                    when: 'While calling a metadata api list.',
+                                    what: { type: m.type }
+                                };
+                                e(error);    
+                            } else {
+                                m.members = m.members.filter(b => b !== '*');
+                                if (members) (Array.isArray(members) ? members : [ members ]).forEach(f => { m.members.push(f.fullName); });
+                                s();
+                            }
+                        });
+                    }));
+                });
+                Promise.all(promises1)
+                    .then(() => {
+                        const promises2 = [];
+                        metadatas.forEach(m => {
+                            while (m.members.length > 0) {
+                                const membersMax10 = m.members.splice(0, 10);
+                                promises2.push(new Promise((s, e) => { 
+                                    connection.metadata.read(m.type, membersMax10, (error, results) => {
+                                        if (error) {
+                                            error.context = { 
+                                                when: 'While calling a metadata api read.',
+                                                what: { type: m.type, members: membersMax10 }
+                                            };
+                                            e(error);   
+                                        } else {
+                                            s({ type: m.type, members: Array.isArray(results) ? results : [ results ] });
+                                        }
+                                    });
+                                }));
+                            }
+                        });
+                        Promise.all(promises2)
+                            .then((results) => {
+                                const response = {};
+                                results.forEach(r => response[r.type] = r.members);
+                                return response;
+                            })
+                            .catch((err) => that.fire('error', err))
+                            .then((response) => that.fire('end', response));
+                    });
+            } catch (error) {
+                that.fire('error', error);
+            }
+        }
+    },
+
+    MetadataAtScaleProcess: function(connection, type, ids, byPasses) {
         OrgCheck.Salesforce.AbstractProcess.call(this);
         const that = this;
         this.run = () => {
@@ -280,7 +350,7 @@ OrgCheck.Salesforce = {
                 const compositeRequestBodies = [];
                 let currentCompositeRequestBody;
                 const BATCH_MAX_SIZE = 25;
-                metadataInformation.ids.forEach((id) => {
+                ids.forEach((id) => {
                     if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
                         currentCompositeRequestBody = {
                             allOrNone: false,
@@ -289,7 +359,7 @@ OrgCheck.Salesforce = {
                         compositeRequestBodies.push(currentCompositeRequestBody);
                     }
                     currentCompositeRequestBody.compositeRequest.push({ 
-                        url: '/services/data/v'+connection.version+'/tooling/sobjects/' + metadataInformation.type + '/' + id, 
+                        url: '/services/data/v'+connection.version+'/tooling/sobjects/' + type + '/' + id, 
                         method: 'GET',
                         referenceId: id
                     });
@@ -328,13 +398,13 @@ OrgCheck.Salesforce = {
                                     records.push(response.body);
                                 } else {
                                     const errorCode = response.body[0].errorCode;
-                                    if (metadataInformation.byPasses && metadataInformation.byPasses.includes(errorCode) === false) {
+                                    if (byPasses && byPasses.includes(errorCode) === false) {
                                         const error = new Error();
                                         error.context = { 
                                             when: 'After receiving a response with bad HTTP status code.',
                                             what: {
-                                                type: metadataInformation.type,
-                                                ids: metadataInformation.ids,
+                                                type: type,
+                                                ids: ids,
                                                 body: response.body
                                             }
                                         };
@@ -363,7 +433,7 @@ OrgCheck.Salesforce = {
                 };
                 if (optionalPayload) {
                     request.method = 'POST';
-                    request.body = optionalPayload.body;
+                    request.body = JSON.stringify(optionalPayload.body);
                     request.headers = { "Content-Type": optionalPayload.type };
                 }
                 connection.request(request, (error, response) => {
@@ -387,7 +457,7 @@ OrgCheck.Salesforce = {
             }
         }
     },
-
+    
     /**
      * Salesforce handler
      * @param configuration Object must contain 'version', 'instanceUrl', 'accessToken', 'watchDogCallback'
@@ -472,21 +542,45 @@ OrgCheck.Salesforce = {
         };
 
         /**
-         * Return an SOQL-safer version of the given string value
-         * @param unsafe String to be escaped
+         * Return an SOQL-safer version of given string value(s)
+         * @param unsafe Value(s) to be escaped (Primary type or Array of primary types)
          */
         this.secureSOQLBindingVariable = (unsafe) => {
-            // If unset the default, return value is an empty string
+
+            // If unset, return directly an empty string
             if (!unsafe) return "''";
-            
-            // If not a string typed value, return value is itself (case of a numeric)
-            if (typeof(unsafe) !== 'string') return unsafe;
-            
-            // If a string value, we substitute the quotes
-            return "'" + unsafe.replace(/'/g, "\'") + "'";
+
+            // If already an array of something, use that array, else create a new one with one element
+            const unsafeArray = Array.isArray(unsafe) ? Array.from(unsafe) : [ unsafe ];
+            unsafeArray.forEach((e, i, a) => {
+                if ((!e && e !== false) || (e && typeof(e) == 'object')) { // If unset or not primary type, use an empty string
+                    a[i] = "''";
+                } else if (typeof(e) !== 'string') { // If not a string typed value, return value is itself (case of a numeric)
+                    a[i] = e;
+                } else { // If a string value, we substitute the quotes
+                    a[i] = "'" + e.replace(/'/g, "\'") + "'";
+                }
+            });
+
+            return unsafeArray.join(',');
         };
         
-       /**
+        const private_split_in_ids = (ids, size, callback) => {
+            let subids = '';
+            ids.forEach((v, i, a) => {
+                const batchFull = (i != 0 && i % size === 0);
+                const lastItem = (i === a.length-1);
+                subids += '\''+v+'\'';
+                if (batchFull === true || lastItem === true) {
+                    callback(subids);
+                    subids = '';
+                } else {
+                    subids += ',';
+                }
+            });
+        };
+
+        /**
          * Call the Dependency API (synchronous version)
          * @param ids Array of IDs that we are interested in
          * @param callbackSuccess Callback method in case of a success with the resulting map
@@ -494,56 +588,71 @@ OrgCheck.Salesforce = {
          */
         this.dependencyApi = (ids, callbackSuccess, callbackError) => {
             if (ids.length == 0) { callbackSuccess(); return; }
-
-            const MAX_IDS_IN_QUERY = 50; // max is 2000 records, so avg of 40 dependencies for each id
             const queries = [];
-            let subids = '';
-            ids.forEach((v, i, a) => {
-                const batchFull = (i != 0 && i % MAX_IDS_IN_QUERY === 0);
-                const lastItem = (i === a.length-1);
-                subids += '\''+v+'\'';
-                if (batchFull === true || lastItem === true) { 
-                    queries.push({
-                        tooling: true,
-                        string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
-                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
-                                'FROM MetadataComponentDependency '+
-                                'WHERE (RefMetadataComponentId IN (' + subids + ') '+
-                                'OR MetadataComponentId IN (' + subids+ ')) ',
-                        queryMore: false
-                    });
-                    subids = '';
-                } else {
-                    subids += ',';
-                }
+            private_split_in_ids(ids, 50, (subids) => {
+                queries.push({
+                    tooling: true,
+                    string: 'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                            'FROM MetadataComponentDependency '+
+                            'WHERE (RefMetadataComponentId IN (' + subids + ') '+
+                            'OR MetadataComponentId IN (' + subids+ ')) ',
+                    queryMore: false
+                });
             });
             const map = {};
-            new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries)
+            const flows = new Map();
+            new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries, false, this.salesforceIdFormat)
                 .on('record', (r) => {
-                    const aId = this.salesforceIdFormat(r.MetadataComponentId);
-                    const aType = r.MetadataComponentType;
-                    const aName = r.MetadataComponentName;
-                    const bId = this.salesforceIdFormat(r.RefMetadataComponentId);
-                    const bType = r.RefMetadataComponentType;
-                    const bName = r.RefMetadataComponentName;
-                    let b = map[bId];
-                    if (!b) b = map[bId] = {};
-                    if (!b.used) b.used = {};
-                    if (!b.used[aType]) b.used[aType] = [];
-                    b.used[aType][aId] = { name: aName };
-                    let a = map[aId];
-                    if (!a) a = map[aId] = {};
-                    if (!a.using) a.using = {};
-                    if (!a.using[bType]) a.using[bType] = [];
-                    a.using[bType][bId] = { name: bName };
+                    const a = { id: this.salesforceIdFormat(r.MetadataComponentId),
+                        type: r.MetadataComponentType, name: r.MetadataComponentName
+                    };
+                    const b = { id: this.salesforceIdFormat(r.RefMetadataComponentId),
+                        type: r.RefMetadataComponentType, name: r.RefMetadataComponentName
+                    };
+
+                    if (!map[b.id]) map[b.id] = {};
+                    if (!map[b.id].used) map[b.id].used = {};
+                    if (!map[b.id].used[a.type]) map[b.id].used[a.type] = [];
+                    map[b.id].used[a.type].push(a);
+
+                    if (!map[a.id]) map[a.id] = {};
+                    if (!map[a.id].using) map[a.id].using = {};
+                    if (!map[a.id].using[b.type]) map[a.id].using[b.type] = [];
+                    map[a.id].using[b.type].push(b);
+
+                    if (a.type === 'Flow') flows.set(a.id, a);
+                    if (b.type === 'Flow') flows.set(b.id, b);
                 })
                 .on('error', (error) => callbackError(error))
-                .on('end', () => callbackSuccess(map))
+                .on('end', () => {
+                    if (flows.size === 0) {
+                        callbackSuccess(map);
+                        return;
+                    }
+                    const additionalQueries = [];
+                    private_split_in_ids(Array.from(flows.keys()), 100, (subids) => {
+                        additionalQueries.push({ tooling: true, string: 'SELECT Id, Status FROM Flow WHERE Id IN (' + subids + ')' });
+                    });
+                    new OrgCheck.Salesforce.SoqlProcess(CONNECTION, additionalQueries, false, this.salesforceIdFormat)
+                        .on('end', (flowsRecords) => {
+                            if (flowsRecords.length > 0) {
+                                flowsRecords.forEach((v) => { flows.get(this.salesforceIdFormat(v.Id)).isActive = (v.Status === 'Active') });
+/*                                map.forEach((v, k) => ['used', 'using'].forEach(d => { 
+                                    // Statuses for Flow: https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_flow.htm
+                                    if (v[d]) v[d]['Flow']?.forEach((r) => r.isActive = (flowsRecords[r.id].Status === 'Active')); 
+                                }));*/
+                            }
+                            callbackSuccess(map);
+                        })
+                        .on('error', (error) => callbackError(error))
+                        .run();
+                })
                 .run();
         };
 
         this.query = (queries) => {
-            return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries);
+            return new OrgCheck.Salesforce.SoqlProcess(CONNECTION, queries, false, this.salesforceIdFormat);
         }
 
         this.describeGlobal = () => {
@@ -555,8 +664,12 @@ OrgCheck.Salesforce = {
                 this.salesforceIdFormat, this.dependencyApi, sobjectPackage, sobjectDevName);
         }
 
-        this.readMetadataAtScale = (metadataInformation) => {
-            return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, metadataInformation);
+        this.readMetadata = (metadatas) => {
+            return new OrgCheck.Salesforce.MetadataProcess(CONNECTION, metadatas);
+        }
+
+        this.readMetadataAtScale = (type, ids, byPasses) => {
+            return new OrgCheck.Salesforce.MetadataAtScaleProcess(CONNECTION, type, ids, byPasses);
         }
 
         this.httpCall = function(partialUrl, optionalPayload) {
@@ -568,22 +681,22 @@ OrgCheck.Salesforce = {
         this.getOrgType = () => { return private_org_type; }
 
         /**
-         * Check if OrgCheck should not be used
+         * Check if Org Check should not be used
          */
         const private_check_orgtype = () => {
             CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
                 .on('record', (r) => {
                     let watchDogLevel = 'INFO';
                     let watchDogMessage = 'Your org is all good!';
-                    // if the current Org is DE, it's ok to use OrgCheck!
+                    // if the current Org is DE, it's ok to use Org Check!
                     if (r.OrganizationType === 'Developer Edition') {
                         private_org_type = 'Developer Edition';
                     }
-                    // if the current Org is a Sandbox, it's ok to use OrgCheck!
+                    // if the current Org is a Sandbox, it's ok to use Org Check!
                     else if (r.IsSandbox === true) {
                         private_org_type = 'Sandbox';
                     }
-                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use OrgCheck!
+                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use Org Check!
                     else if (r.IsSandbox === false && r.TrialExpirationDate) {
                         private_org_type = 'TrialOrDemo';
                     }
@@ -659,7 +772,7 @@ OrgCheck.Salesforce = {
 
                     if (r.Profile.PermissionsViewAllData === false) {
                         watchDogLevel = 'ERROR';
-                        watchDogMessage = 'You should be assigned to the System Administrator profile to run OrgCheck.';
+                        watchDogMessage = 'You should be assigned to the System Administrator profile to run Org Check.';
                     }
                     configuration.watchDogCallback({ 
                         type: 'UserSecurity',

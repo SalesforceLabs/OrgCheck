@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Users Visualforce Page</description>
-    <label>OrgCheck Users Page</label>
+    <description>Org Check Users Visualforce Page</description>
+    <label>Org Check Users Page</label>
 </ApexPage>

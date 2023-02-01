@@ -1,12 +1,12 @@
 ---
 layout: default
-title: Data Stores in OrgCheck  
+title: Data Stores in Org Check  
 permalink: /technical/datastores/
 ---
 
-# Data Stores in OrgCheck
+# Data Stores in Org Check
 
-**OrgCheck** is retrieving data from Salesforce using the REST API, the Tooling API, and the Dependency API.
+**Org Check** is retrieving data from Salesforce using the REST API, the Tooling API, and the Dependency API.
 
 That information is called **Data Stores** and is cached in your browser local cache.
 

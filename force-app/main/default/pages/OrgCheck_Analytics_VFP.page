@@ -1,12 +1,9 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Analytics_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Analytics_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">🤪</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Analytics_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Analytics_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Analytics_Description_CL}" />
         </apex:define>
@@ -48,14 +45,15 @@
                             // Render the Reports data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-rpt',
+                                appendCountInElement: 'tab-default-rpt__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Folder_CL)}', formula: (r) => { 
@@ -64,7 +62,7 @@
                                     { name: '{!JSENCODE($Label.OrgCheck_Format_CL)}', property: 'format' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(r.description);
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
                                             return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
                                         },
                                         scoreFormula: (r) => { 
@@ -76,20 +74,22 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // Render the Dashboards data in a table
                             helper.html.datatable.create({
                                 element: 'datatable-dsb',
+                                appendCountInElement: 'tab-default-dsb__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Folder_CL)}', formula: (r) => { 
@@ -100,7 +100,7 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
-                                            if (r.description) return helper.html.render.escape(r.description);
+                                            if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
                                             return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
                                         },
                                         scoreFormula: (r) => { 
@@ -112,7 +112,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                         },
                         actions: {  

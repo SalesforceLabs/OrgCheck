@@ -1,85 +1,25 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Home_Title_CL} (<script>document.write(OrgCheck.version);</script>)
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Home_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">
+            <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}">
+                <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" />
+            </object>
+        </apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Home_Title_CL} (<script>document.write(OrgCheck.version);</script>)</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Home_Subtitle_CL}</apex:define>
         <apex:define name="html_actions" />
         <apex:define name="html_content_core">
             <div class="slds-brand-band slds-brand-band_cover slds-brand-band_medium slds-template_profile slds-brand-band_group">
                 <div class="slds-grid slds-gutters">
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_3-of-12">
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
                                     <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-opportunity" title="{!$Label.OrgCheck_Home_Section1_Title_CL}">
+                                        <span class="slds-icon_container slds-icon-standard-opportunity" title="{!$Label.OrgCheck_Home_Section2_Title_CL}">
                                             <svg class="slds-icon slds-icon_small" aria-hidden="true">
                                                 <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
-                                            </svg>
-                                            <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section1_Title_CL}</span>
-                                        </span>
-                                    </div>
-                                    <div class="slds-media__body">
-                                        <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
-                                            {!$Label.OrgCheck_Home_Section1_Title_CL}
-                                        </h2>
-                                    </div>
-                                    <div class="slds-no-flex">
-                                    </div>
-                                </header>
-                            </div>
-                            <div class="slds-card__body slds-card__body_inner">
-                                <div class="slds-tabs_default">
-                                    <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section1_Subtitle1_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-10" id="tab-default-welcome__item">{!$Label.OrgCheck_Home_Section1_Subtitle1_CL}</a>
-                                        </li>
-                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section1_Subtitle2_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-11" id="tab-default-support__item">{!$Label.OrgCheck_Home_Section1_Subtitle2_CL}</a>
-                                        </li>
-                                    </ul>
-                                    <div id="tab-default-10" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-welcome__item">
-                                        <table>
-                                            <tr>
-                                                <td width="50%">
-                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="80%" height="80%">
-                                                        <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="80%" height="80%" />
-                                                    </object>
-                                                </td>
-                                                <td width="50%">
-                                                    <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text1_CL}" />
-                                                </td>
-                                            </tr>
-                                        </table>        
-                                    </div>
-                                    <div id="tab-default-11" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-support__item">
-                                        <table>
-                                            <tr>
-                                                <td width="30%">
-                                                    <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot.svg')}" width="80%" height="80%">
-                                                        <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot.svg')}" width="80%" height="80%" />
-                                                    </object>
-                                                </td>
-                                                <td width="70%">
-                                                    <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text2_CL}" />
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-                        <article class="slds-card">
-                            <div class="slds-card__header slds-grid">
-                                <header class="slds-media slds-media_center slds-has-flexi-truncate">
-                                    <div class="slds-media__figure">
-                                        <span class="slds-icon_container slds-icon-standard-observation-component" title="{!$Label.OrgCheck_Home_Section2_Title_CL}">
-                                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                                                <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#observation_component')}"></use>
                                             </svg>
                                             <span class="slds-assistive-text">{!$Label.OrgCheck_Home_Section2_Title_CL}</span>
                                         </span>
@@ -94,82 +34,29 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <div class="slds-tabs_default">
-                                    <ul class="slds-tabs_default__nav" role="tablist">
-                                        <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section2_Subtitle1_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-20" id="tab-default-abouttechdebt__item">{!$Label.OrgCheck_Home_Section2_Subtitle1_CL}</a>
-                                        </li>
-                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section2_Subtitle2_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-21" id="tab-default-legalterms__item">{!$Label.OrgCheck_Home_Section2_Subtitle2_CL}</a>
-                                        </li>
-                                        <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section2_Subtitle3_CL}" role="presentation">
-                                            <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-22" id="tab-default-3rdparty__item">{!$Label.OrgCheck_Home_Section2_Subtitle3_CL}</a>
-                                        </li>
-                                    </ul>
-                                    <div id="tab-default-20" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-abouttechdebt__item">
-                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text1_CL}" />
-                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text2_CL}" />
-                                    </div>
-                                    <div id="tab-default-21" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-tegalterms__item">
-                                        <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text3_CL}" />
-                                    </div>
-                                    <div id="tab-default-22" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-3rdparty__item">
-                                        <b>D3js</b><br />
-                                        WEBSITE: https://d3js.org/<br />
-                                        VERSION: 7.3.0<br />
-                                        SOURCE: https://registry.npmjs.org/d3/-/d3-7.3.0.tgz<br />
-                                        LICENCE:<br />
-                                        <code>
-                                            Copyright 2010-2021 Mike Bostock<br />
-                                            <br />
-                                            Permission to use, copy, modify, and/or distribute this software for any purpose<br />
-                                            with or without fee is hereby granted, provided that the above copyright notice<br />
-                                            and this permission notice appear in all copies.<br />
-                                            <br />
-                                            THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH<br />
-                                            REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND<br />
-                                            FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,<br />
-                                            INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS<br />
-                                            OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER<br />
-                                            TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF<br />
-                                            THIS SOFTWARE.
-                                        </code>
-                                        <br /><br /><br />
-                                        <b>JsForce</b><br />
-                                        WEBSITE: https://jsforce.github.io/<br />
-                                        VERSION: 1.11.0<br />
-                                        SOURCE: https://github.com/jsforce/jsforce/releases/tag/1.11.0<br />
-                                        LICENCE:<br />
-                                        <code>
-                                            (The MIT License)<br />
-                                            <br />
-                                            Copyright (c) 2011 Shinichi Tomita &lt;shinichi.tomita@gmail.com&gt;;<br />
-                                            <br />
-                                            Permission is hereby granted, free of charge, to any person obtaining<br />
-                                            a copy of this software and associated documentation files (the<br />
-                                            'Software'), to deal in the Software without restriction, including<br />
-                                            without limitation the rights to use, copy, modify, merge, publish,<br />
-                                            distribute, sublicense, and/or sell copies of the Software, and to<br />
-                                            permit persons to whom the Software is furnished to do so, subject to<br />
-                                            the following conditions:<br />
-                                            <br />
-                                            The above copyright notice and this permission notice shall be<br />
-                                            included in all copies or substantial portions of the Software.<br />
-                                            <br />
-                                            THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,<br />
-                                            EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<br />
-                                            MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.<br />
-                                            IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY<br />
-                                            CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,<br />
-                                            TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE<br />
-                                            SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<br />
-                                        </code>
-                                    </div>
-                                </div>
+                                <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text1_CL}" /><br /><br />
+                                <b>{!$Label.OrgCheck_Home_Section1_Subtitle2_CL}</b><br />
+                                <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section1_Text2_CL}" />
+                                <br />
+                                <apex:outputText escape="false" value="{!$Label.OrgCheck_Home_Section2_Text3_CL}" />
+                                <br /><br />
+                                <b>{!$Label.OrgCheck_Home_Section2_Subtitle3_CL}</b><br />
+                                <ul class="slds-list_dotted">
+                                    <li><b>D3js</b>: 
+                                        <a href="https://registry.npmjs.org/d3/-/d3-7.3.0.tgz" target="_blank" rel="external noopener noreferrer">7.3.0</a>,  
+                                        distributed under the <a href="https://github.com/d3/d3/blob/main/LICENSE" target="_blank" rel="external noopener noreferrer">ISC license</a>, 
+                                        more info at <a href="https://d3js.org" target="_blank" rel="external noopener noreferrer">https://d3js.org</a>
+                                    </li>
+                                    <li><b>JsForce</b>: 
+                                        <a href="https://github.com/jsforce/jsforce/releases/tag/1.11.0" target="_blank" rel="external noopener noreferrer">1.11.0</a>, 
+                                        distributed under the <a href="https://github.com/jsforce/jsforce/blob/master/LICENSE" target="_blank" rel="external noopener noreferrer">MIT license</a>, 
+                                        more info at <a href="https://jsforce.github.io" target="_blank" rel="external noopener noreferrer">https://jsforce.github.io</a>
+                                    </li>
+                                </ul>
                             </div>
                         </article>
                     </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -221,7 +108,7 @@
                             </div>
                         </article>
                     </div>
-                    <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-large-size_3-of-12">
                         <article class="slds-card">
                             <div class="slds-card__header slds-grid">
                                 <header class="slds-media slds-media_center slds-has-flexi-truncate">
@@ -264,57 +151,36 @@
                                 </header>
                             </div>
                             <div class="slds-card__body slds-card__body_inner">
-                                <ul class="slds-tabs_default__nav" role="tablist">
-                                    <li class="slds-tabs_default__item slds-is-active" title="{!$Label.OrgCheck_Home_Section6_Subtitle1_CL}" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="0" aria-selected="true" aria-controls="tab-default-40" id="tab-default-sfdc__item">{!$Label.OrgCheck_Home_Section6_Subtitle1_CL}</a>
-                                    </li>
-                                    <li class="slds-tabs_default__item " title="{!$Label.OrgCheck_Home_Section6_Subtitle2_CL}" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-41" id="tab-default-scancode__item">{!$Label.OrgCheck_Home_Section6_Subtitle2_CL}</a>
-                                    </li>
-                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle3_CL}" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-2" aria-selected="false" aria-controls="tab-default-42" id="tab-default-deblog__item">{!$Label.OrgCheck_Home_Section6_Subtitle3_CL}</a>
-                                    </li>
-                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle4_CL}" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-3" aria-selected="true" aria-controls="tab-default-43" id="tab-default-deptoo__item">{!$Label.OrgCheck_Home_Section6_Subtitle4_CL}</a>
-                                    </li>
-                                    <li class="slds-tabs_default__item" title="{!$Label.OrgCheck_Home_Section6_Subtitle5_CL}" role="presentation">
-                                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-4" aria-selected="true" aria-controls="tab-default-44" id="tab-default-dataclean__item">{!$Label.OrgCheck_Home_Section6_Subtitle5_CL}</a>
-                                    </li>
+                                <b>{!$Label.OrgCheck_Home_Section6_Subtitle1_CL}</b>
+                                <ul class="slds-list_dotted">
+                                    <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank">Salesforce Optimizer</a></li>
+                                    <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;type=5" target="_blank">Salesforce LEX Readiness Report</a></li>
+                                    <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=%22Permission%20Helper%22&amp;searchType=simpleSearch" target="_blank">Permission Helper (AppExchange / Salesforce Lab)</a></li>
                                 </ul>
-                                <div id="tab-default-40" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-sfdc__item">
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank">Salesforce Optimizer</a></li>
-                                        <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;type=5" target="_blank">Salesforce LEX Readiness Report</a></li>
-                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=%22Permission%20Helper%22&amp;searchType=simpleSearch" target="_blank">Permission Helper (AppExchange / Salesforce Lab)</a></li>
-                                    </ul>
-                                </div>
-                                <div id="tab-default-41" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-scancode__item">
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank">Salesforce Guidelines for secure code</a></li>
-                                        <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank">Apex PMD Rules</a></li>
-                                        <li><a href="https://security.secure.force.com/security/tools/forcecom/scanner" target="_blank">Checkmarx</a></li>
-                                        <li><a href="https://www.getclayton.com/" target="_blank">Clayton</a></li>
-                                        <li><a href="https://www.codescan.io/" target="_blank">Codescan</a></li>
-                                    </ul>
-                                </div>
-                                <div id="tab-default-42" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deblog__item">
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank">Apex Replay Debugger</a></li>
-                                        <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank">Online Debug Log Tree (on github)</a></li>
-                                        <li><a href="http://sfdc-log.herokuapp.com/" target="_blank">Online Debug Log Visualizer (on heroku)</a></li>
-                                    </ul>
-                                </div>
-                                <div id="tab-default-43" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-deptoo__item">
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://happysoup.io/" target="_blank">Happy Soup</a></li>
-                                    </ul>
-                                </div>
-                                <div id="tab-default-44" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-dataclean__item">
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank">RingLead Field Trip</a></li>
-                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank">RingLead Dupe Dive</a></li>
-                                    </ul>
-                                </div>
+                                <br />
+                                <b>{!$Label.OrgCheck_Home_Section6_Subtitle2_CL}</b>
+                                <ul class="slds-list_dotted">
+                                    <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank">Salesforce Guidelines for secure code</a></li>
+                                    <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank">Apex PMD Rules</a></li>
+                                    <li><a href="https://security.secure.force.com/security/tools/forcecom/scanner" target="_blank">Checkmarx</a></li>
+                                    <li><a href="https://www.getclayton.com/" target="_blank">Clayton</a></li>
+                                    <li><a href="https://www.codescan.io/" target="_blank">Codescan</a></li>
+                                </ul>
+                                <br /><b>{!$Label.OrgCheck_Home_Section6_Subtitle3_CL}</b>
+                                <ul class="slds-list_dotted">
+                                    <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank">Apex Replay Debugger</a></li>
+                                    <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank">Online Debug Log Tree (on github)</a></li>
+                                    <li><a href="http://sfdc-log.herokuapp.com/" target="_blank">Online Debug Log Visualizer (on heroku)</a></li>
+                                </ul>
+                                <br /><b>{!$Label.OrgCheck_Home_Section6_Subtitle4_CL}</b>
+                                <ul class="slds-list_dotted">
+                                    <li><a href="https://happysoup.io/" target="_blank">Happy Soup</a></li>
+                                </ul>
+                                <br /><b>{!$Label.OrgCheck_Home_Section6_Subtitle5_CL}</b>
+                                <ul class="slds-list_dotted">
+                                    <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank">RingLead Field Trip</a></li>
+                                    <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank">RingLead Dupe Dive</a></li>
+                                </ul>
                             </div>
                         </article>
                     </div>                    
@@ -336,21 +202,15 @@
                         { 
                             label: 'Security (only applies if you are currently on your Production org!)',
                             options: [
-                                { label: 'By unchecking this option, I understand that using OrgCheck in Production will increase the '+
+                                { label: 'By unchecking this option, I understand that using Org Check in Production will increase the '+
                                          'Daily API Request Limit, which potentially could block for 24 hours my users to use my org. '+
-                                         'Please consider using OrgCheck in a full sandbox instead.', id: 'warning.ByPassUseInProduction' }
+                                         'Please consider using Org Check in a full sandbox instead.', id: 'warning.ByPassUseInProduction' }
                             ]
                         },
                         { 
                             label: 'Roles',
                             options: [
                                 { label: 'Hide external roles (from Community).', id: 'filter.HideExternalRoles' }
-                            ]
-                        },
-                        { 
-                            label: 'Profiles and Permission Sets',
-                            options: [
-                                { label: 'Do not fetch the CRUDs on profiles and permission sets.', id: 'filter.HideCRUDsProfilesPermSets' }
                             ]
                         }
                     ].forEach(p => {

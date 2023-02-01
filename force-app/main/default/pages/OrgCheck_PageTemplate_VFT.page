@@ -21,6 +21,12 @@
                 .slds-scope table {
                     width: auto;
                 }
+                .orgcheck-page-icon {
+                    font-size: 2.4em;
+                }
+                .orgcheck-page-icon > object {
+                    width: 2.3em;
+                }
                 .orgcheck-page-header {
                     padding-bottom: 0.5rem !important;
                 }
@@ -40,6 +46,41 @@
                 .orgcheck-legend {
                     text-align: center;
                     color: white;
+                }
+                th.orgcheck-table-th-vertical {
+                    padding-top: 0.7rem !important;
+                    writing-mode: vertical-rl;
+                    text-align: left;
+                    transform: rotate(180deg);
+                }
+                th.orgcheck-table-th-vertical > a.slds-th__action {
+                    display: inline-table;
+                }
+                th.orgcheck-table-th-vertical > a.slds-th__action > div > span.slds-truncate {
+                    white-space: normal !important;
+                    min-height: 8rem;
+                    max-height: 10rem;
+                }
+                th.orgcheck-table-th-horizontal-bottom {
+                    vertical-align: bottom;
+                }
+                tr.orgcheck-table-tr-badrow {
+                    background-color: #ffe099;
+                }
+                td.orgcheck-table-td-badscore {
+                    background-color: #ffd079;
+                    background-image: url(/img/msg_icons/error16.png);
+                    background-position: left;
+                    background-repeat: no-repeat;
+                    background-size: 11px;
+                    cursor: pointer;
+                }
+                td.orgcheck-table-td-badcell {
+                    background-color: #ffd079;
+                    background-image: url(/img/msg_icons/warning16.png);
+                    background-position: left;
+                    background-repeat: no-repeat;
+                    background-size: 11px;
                 }
             </style>
             <div id="modal" style="display: none;">
@@ -74,13 +115,8 @@
                 <div class="slds-page-header__row">
                     <div class="slds-page-header__col-title">
                         <div class="slds-media">
-                            <div class="slds-media__figure">
-                                <span class="slds-icon_container slds-icon-standard-opportunity">
-                                    <svg class="slds-icon slds-page-header__icon" aria-hidden="true">
-                                        <use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#opportunity')}"></use>
-                                    </svg>
-                                    <span class="slds-assistive-text"><apex:insert name="text_page_title" /></span>
-                                </span>
+                            <div class="slds-media__figure orgcheck-page-icon">
+                                <apex:insert name="text_page_icon" />
                             </div>
                             <div class="slds-media__body">
                                 <div class="slds-page-header__name">
@@ -143,16 +179,18 @@
                     <br />
                 </div>
             </div>
-            <div id="warning-message" style="display: none;" class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">
-                <div class="slds-media__figure">
-                    <span class="slds-icon_container slds-icon-utility-warning" title="warning">
-                        <svg class="slds-icon slds-icon_small" aria-hidden="true">
-                            <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
-                        </svg>
-                        <span class="slds-assistive-text">warning</span>
-                    </span>
+            <div id="warning-messages" style="display: none;" >
+                <div class="slds-scoped-notification slds-media slds-media_center slds-theme_warning" role="status">
+                    <div class="slds-media__figure">
+                        <span class="slds-icon_container slds-icon-utility-warning" title="warning">
+                            <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                            </svg>
+                            <span class="slds-assistive-text">warning</span>
+                        </span>
+                    </div>
+                    <div class="slds-media__body"></div>
                 </div>
-                <div class="slds-media__body"></div>
             </div>
             <div id="spinner" style="display: none;">
                 <!--<section role="dialog" tabindex="-1" aria-labelledby="modal-heading" aria-modal="true" aria-describedby="modal-content-id" class="slds-modal slds-fade-in-open slds-modal_large">
@@ -187,7 +225,7 @@
                 window.onload = function() {
 
                     // ========================================================================
-                    // Initialization of OrgCheck main object called "core"
+                    // Initialization of Org Check main object called "core"
                     // ========================================================================
                     const THIS_YEAR = new Date().getFullYear();
                     const THIS_MONTH = new Date().getMonth() + 1;
@@ -199,7 +237,7 @@
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
-                        htmlWarningMessageTagId: 'warning-message',
+                        htmlWarningMessagesTagId: 'warning-messages',
                         htmlModalTagId: 'modal',
                         htmlModalTitleTagId: 'modal-heading',
                         htmlMainContentTagId: 'content',
@@ -209,7 +247,7 @@
                     });
 
                     // ========================================================================
-                    // Finally we call the start2 method for the page to use OrgCheck controller and helper
+                    // Finally we call the start2 method for the page to use Org Check controller and helper
                     // ========================================================================
                     const ctl = core.getController();
                     const hlp = core.getHelper();

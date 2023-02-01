@@ -14,12 +14,14 @@ OrgCheck.VisualComponents = {
      *              <ol>
      *                <li><code>StringHandler</code> including method <code>htmlSecurise</code></li>
      *                <li><code>DateHandler</code> including method <code>dateFormat</code> and <code>datetimeFormat</code></li>
+     *                <li><code>MessageHandler</code> including method <code>showModal</code></li>
      *              </ol>
      */
     DatatableHandler: function(handlers) { 
      
         const STRING_HANDLER = handlers.StringHandler;
         const DATE_HANDLER = handlers.DateHandler;
+        const MSG_HANDLER = handlers.MessageHandler;
 
         /**
          * Creates a datatable
@@ -29,10 +31,13 @@ OrgCheck.VisualComponents = {
          *                <li><code>showSearch</code>: boolean, if <code>true</code>, show a search box, <code>false</code> by default.</li>
          *                <li><code>showStatistics</code>: boolean, if <code>true</code>, show some stats at the top, <code>false</code> by default.</li>
          *                <li><code>showLineCount</code>: boolean, if <code>true</code>, show an additional '#' column with line count, <code>false</code> by default.</li>
+         *                <li><code>showSelection</code>: boolean, if <code>true</code>, show an additional 'checkbox' column to perform actions, <code>false</code> by default.</li>
+         *                <li><code>appendCountInElement</code>: name of the element that will contain the counter of bad lines and total lines of this table</li>
          *                <li><code>columns</code>: array[JSON], description of each column of the datatable</li>
          *                <li><code>sorting</code>: JSON, describe which initial column will be used to sort data.</li>
          *                <li><code>data</code>: array[JSON], data of the table (as a map with Id as index)</li>
          *                <li><code>filtering</code>: JSON, description of an optional filter to apply to the visual representation.</li>
+         *                <li><code>preprocessing</code>: JSON, description of an optional method that will process the row at once and potentially set once massive amount of data (like the dependencies).</li>
          *              </ol>
          */
         this.create = function(config) {
@@ -99,22 +104,34 @@ OrgCheck.VisualComponents = {
             if (config.stickyHeaders) {
                 main.classList.add('slds-table--header-fixed_container', 'slds-scrollable_x');
                 main.style.height = '87vh';
-                main.style.width = '100vw';
                 main = main.appendChild(document.createElement('div'));
                 main.classList.add('slds-scrollable');
                 main.style.height = '100%';
-                main.style.width = '100%';
+                main.style.width = 'fit-content';
             }
+
             const table = main.appendChild(document.createElement('table'));
+            const thead = table.appendChild(document.createElement('thead'));
+            const tbody = table.appendChild(document.createElement('tbody'));
+
+            const trHeadShadow = config.stickyHeaders ? tbody.appendChild(document.createElement('tr')) : null;
+            if (trHeadShadow) {
+                trHeadShadow.style.visibility = 'collapse';
+            }
+
             table.classList.add('slds-table', 'slds-table_bordered');
+            if (config.columnBordered) {
+                table.classList.add('slds-table_col-bordered');
+            }
             if (config.stickyHeaders) {
                 table.classList.add('slds-table_header-fixed');
             }
 
             // Add all columns
-            const thead = table.appendChild(document.createElement('thead'));
+            
             const trHead = thead.appendChild(document.createElement('tr'));
             if (config.showLineCount === true) config.columns.unshift({ name: '#' });
+            if (config.showSelection) config.columns.unshift({ name: 'Select' });
             const orderingImage = document.createElement('img');
             let firstSortCallback;
             config.columns.forEach((c, i) => {
@@ -122,6 +139,10 @@ OrgCheck.VisualComponents = {
                 thHead.setAttribute('scope', 'col');
                 thHead.setAttribute('aria-label', c.name);
                 thHead.classList.add('slds-is-sortable');
+                switch (c.orientation) {
+                    case 'vertical': thHead.classList.add('orgcheck-table-th-vertical'); break;
+                    case 'horizontal-bottom': thHead.classList.add('orgcheck-table-th-horizontal-bottom'); break;
+                } 
                 const aHead = thHead.appendChild(document.createElement('a'));
                 aHead.classList.add('slds-th__action', 'slds-text-link_reset', 'slds-truncate');
                 aHead.setAttribute('href', 'javascript:void(0);');
@@ -134,6 +155,9 @@ OrgCheck.VisualComponents = {
                 ttlHead.classList.add('slds-truncate');
                 ttlHead.setAttribute('title', c.name);
                 ttlHead.textContent = c.name;
+                if (trHeadShadow) {
+                    trHeadShadow.appendChild(document.createElement('th')).textContent = c.name;
+                }
                 if (config.sorting) {
                     aHead.onclick = function(e) { 
                         if (e) {
@@ -161,16 +185,18 @@ OrgCheck.VisualComponents = {
                         items.sort(function compare(a, b) {
                             const ca = a.getElementsByTagName('td')[i];
                             const cb = b.getElementsByTagName('td')[i];
-                            const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
-                            const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
-                            if (isCellNumeric) {
-                                if (va && vb) return (va - vb) * iOrder;
-                                if (va) return iOrder;
-                                if (vb) return -iOrder;
+                            if (ca && cb) {
+                                const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
+                                const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
+                                if (isCellNumeric) {
+                                    if (va && vb) return (va - vb) * iOrder;
+                                    if (va) return iOrder;
+                                    if (vb) return -iOrder;
+                                }
+                                if (va < vb) return -iOrder;
+                                if (va > vb) return iOrder;
+                                return 0;
                             }
-                            if (va < vb) return -iOrder;
-                            if (va > vb) return iOrder;
-                            return 0;
                         });
                         table.hidden = true; // make table invisible while manipulating the DOM
                         let countRow = 1;
@@ -178,7 +204,7 @@ OrgCheck.VisualComponents = {
                             const parent = r.parentNode;
                             const detatchedItem = parent.removeChild(r);
                             parent.appendChild(detatchedItem);
-                            if (config.showLineCount === true) {
+                            if (config.showLineCount === true && !detatchedItem.style.visibility) {
                                 detatchedItem.firstChild.innerText = countRow;
                                 countRow++;
                             }
@@ -195,8 +221,10 @@ OrgCheck.VisualComponents = {
             const iterable = isArray ? config.data : config.datakeys;
 
             // Add the rows
-            const tbody = table.appendChild(document.createElement('tbody'));
             table.hidden = true; // make table invisible while manipulating the DOM
+            if (config.showSelection) {
+                table.style = 'cursor: pointer;';
+            }
             let nbRows = 0, nbBadRows = 0, sumScore = 0;
             if (iterable) iterable.forEach(k => {
                 if (config.filtering && config.filtering.formula && config.filtering.formula(config.data[k]) === false) return;
@@ -205,17 +233,25 @@ OrgCheck.VisualComponents = {
                 let rowScore = 0;
                 let tdBodyScore = null;
                 const rowBadColumns = [];
+                const row = isArray ? k : config.data[k];
+                const preprocessedRow = config.preprocessing ? config.preprocessing(row) : undefined;
                 config.columns.forEach(c => {
                     const tdBody = trBody.appendChild(document.createElement('td'));
-                    if (c.property === '##score##') {
-                        tdBodyScore = tdBody;
+                    if (c.property === '##score##') { tdBodyScore = tdBody; return; }
+                    if (config.showLineCount === true && c.name === '#') { tdBody.innerHTML = nbRows; return; }
+                    if (config.showSelection && c.name === 'Select') {
+                        tdBody.setAttribute('aria-data', false);
+                        const select = tdBody.appendChild(document.createElement('input'));
+                        select.setAttribute('type', 'checkbox');
+                        select.onclick = (e) => {
+                            config.showSelection.onselect(row, e.target.checked);
+                            tdBody.setAttribute('aria-data', e.target.checked);
+                        };
+                        trBody.onclick = (e) => {
+                            if (e.target != select) select.click();
+                        };
                         return;
                     }
-                    if (config.showLineCount === true && c.name === '#') {
-                        tdBody.innerHTML = nbRows;
-                        return;
-                    }
-                    const row = isArray ? k : config.data[k];
                     let dataDecorated = '';
                     let dataRaw = '';
                     let additiveScore = 0;
@@ -225,10 +261,11 @@ OrgCheck.VisualComponents = {
                             switch (c.type) {
                                 case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
                                 case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
-                                case 'numeric': dataDecorated = dataRaw; break;
+                                case 'numeric': dataDecorated = ''+dataRaw; break;
+                                case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'':'un')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
                             }
                         } else {
-                            if (c.formula) dataDecorated = c.formula(row);
+                            if (c.formula) dataDecorated = c.formula(row, preprocessedRow);
                             if (!c.formula && c.property) dataDecorated = dataRaw;
                             if (c.formula && !c.property) dataRaw = dataDecorated;
                         }
@@ -246,11 +283,11 @@ OrgCheck.VisualComponents = {
                     }
                     try {
                         if (c.scoreFormula) {
-                            additiveScore = c.scoreFormula(row);
+                            additiveScore = c.scoreFormula(row, preprocessedRow);
                             if (additiveScore > 0) { // ensure that the method does not return negative values! ;)
                                 rowScore += additiveScore;
-                                tdBody.bgColor = '#ffd079';
-                                rowBadColumns.push(c.name);
+                                tdBody.classList.add('orgcheck-table-td-badcell');
+                                rowBadColumns.push({c: c.name, s: additiveScore, d: dataDecorated});
                             }
                         }
                     } catch (e) {
@@ -268,15 +305,9 @@ OrgCheck.VisualComponents = {
                     if (dataDecorated && dataDecorated !== '') {
                         const isArray = (Array.isArray(dataDecorated) === true);
                         if (typeof dataDecorated === 'object' && isArray === false) {
-                            if (additiveScore > 0) {
-                                tdBody.innerHTML = '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }       
                             tdBody.appendChild(dataDecorated);
                         } else {
                             let html = '';
-                            if (additiveScore > 0) {
-                                html += '<img src="/img/samples/flag_red.gif" alt="red flag" />&nbsp;';
-                            }
                             if (isArray === true) {
                                 dataDecorated.forEach(cnt => html += cnt+'<br />');
                             } else {
@@ -293,22 +324,34 @@ OrgCheck.VisualComponents = {
                     }
                 });
                 if (tdBodyScore && rowScore > 0) {
-                    const msg = 'The badness score is '+rowScore+'. Please check the column'+(rowBadColumns.length>1?'s':'')+' '+rowBadColumns+'. Thank you!';
-                    tdBodyScore.innerHTML = '<img src="/img/msg_icons/error16.png" alt="'+msg+'" title="'+msg+'" />&nbsp;' + rowScore;
-                    tdBodyScore.bgColor = '#ffd079';
-                    trBody.bgColor = '#ffe099';
+                    let msg = 'The badness score for this row is <b>'+rowScore+'</b><ul class="slds-list_dotted">';
+                    rowBadColumns.forEach(i => msg += '<li>For <b>'+i.c+'</b> you had <b>'+i.d+'</b> (<code>+'+i.s+'</code> to the score)</li>');
+                    msg += '</ul><br /><br />The data for this row is: <br /><pre>'+JSON.stringify(row, null, " ")+'</pre>';
+                    tdBodyScore.innerHTML = rowScore;
+                    tdBodyScore.onclick = (e) => {
+                        MSG_HANDLER.showModal('Why do I have this score for row #'+k+'?', msg);
+                    }
+                    tdBodyScore.classList.add('orgcheck-table-td-badscore');
+                    trBody.classList.add('orgcheck-table-tr-badrow');
                     sumScore += rowScore;
                     nbBadRows++;
                 }
             });
             if (config.showStatistics === true) {
-                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code>'+
-                                    nbBadRows+'</code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
+                counters.innerHTML = 'Total number of rows: <b><code>'+nbRows+'</code></b>, Total number of bad rows: <b><code><font color="red">'+
+                                    nbBadRows+'</font></code></b>, Total sum score: <b><code>'+sumScore+'</code></b>';
             }
             if (nbRows == 0) {
                 footer.innerHTML = 'No data to show.';
             } else {
                 footer.innerHTML = '';
+            }
+            if (config.appendCountInElement) {
+                const countElement = document.getElementById(config.appendCountInElement)
+                if (countElement && nbBadRows > 0) {
+                    // Warning: do not add any html tag here, if not the link on the tab won't work on them... Thank you!
+                    countElement.innerHTML += ' (' + nbBadRows + '⚠️)';
+                }
             }
             table.hidden = false; // make table visible again
             if (firstSortCallback) { 
@@ -320,7 +363,7 @@ OrgCheck.VisualComponents = {
 
     /**
      * Message
-     * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessageId'
+     * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessagesId'
      */
     MessageHandler: function (configuration) {
 
@@ -357,7 +400,6 @@ OrgCheck.VisualComponents = {
                         informationHTML += 'Page: ' + document.location.pathname + '<br />';
                         informationHTML += '<br />';
                         informationHTML += '<b>System Information</b><br />';
-                        informationHTML += 'User Agent: ' + navigator.userAgent + '<br />';
                         informationHTML += 'Language: ' + navigator.language + '<br />';
                         informationHTML += '<br />';
                     }
@@ -374,12 +416,12 @@ OrgCheck.VisualComponents = {
                         }
                         if (displayIssueInformation === true && v.stack) {
                             informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
-                            console.error('OrgCheck - Error #' + i, v);
+                            console.error('Org Check - Error #' + i, v);
                         }
                         informationHTML += '<br />';
                     });
                     private_show_modal(
-                        'Oh no, OrgCheck had an error!', 
+                        'Oh no, Org Check had an error!', 
                         commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
                     );
                 } catch (e) {
@@ -400,21 +442,33 @@ OrgCheck.VisualComponents = {
 
         /**
         * Show warning message
-        * @param message String the message
+        * @param message String or Array<String> the message(s)
         */
         this.showWarning = function (message) {
-            const messageId = document.getElementById(configuration.warningMessageId);
-            messageId.children[1].innerHTML = '<p>'+message+'</p>';
-            messageId.style.display = 'flex';
+            const messages = (Array.isArray(message) ? message : [ message ]); 
+            const nbMessages = messages.length;
+            const warningsDiv = document.getElementById(configuration.warningMessagesId);
+            messages.forEach((msg, idx) => {
+                let warningDiv = warningsDiv.children[0];
+                if (idx > 0) {
+                    warningDiv = warningsDiv.appendChild(warningDiv.cloneNode(true));
+                    warningDiv.style['border-top-style'] = 'dotted';
+                }
+                warningDiv.children[1].innerHTML = '<p>'+msg+'</p>';
+            });
+            warningsDiv.style.display = 'block';
         };
 
         /**
         * Hide warning banner and empty the message
         */
-        this.hideWarning = function (message) {
-            const messageId = document.getElementById(configuration.warningMessageId);
-            messageId.style.display = 'none';
-            messageId.children[1].innerHTML = '';
+        this.hideWarning = function () {
+            const warningsDiv = document.getElementById(configuration.warningMessagesId);
+            warningsDiv.style.display = 'none';
+            // remove previous additional messages (keep the first one only)
+            for (let i=1; i<warningsDiv.childElementCount; i++) {
+                warningsDiv.removeChild(warningsDiv.lastChild);
+            }
         };
 
         /**

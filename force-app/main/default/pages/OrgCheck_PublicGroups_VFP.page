@@ -1,12 +1,9 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_PublicGroups_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_PublicGroups_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">🌶️</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_PublicGroups_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_PublicGroups_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_PublicGroups_Description1_CL}" />
             <apex:outputText escape="false" value="{!$Label.OrgCheck_PublicGroups_Description2_CL}" />
@@ -220,17 +217,16 @@
 
                             helper.html.datatable.create({
                                 element: 'datatable-publicGroups',
+                                appendCountInElement: 'tab-default-publicgroups__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.includeBosses); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},
@@ -255,22 +251,23 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 filtering: { formula: (r) => { return r.type === 'publicGroup'; }},
                                 showSearch: true,
-                                showStatistics: true
+                                showStatistics: true,
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             helper.html.datatable.create({
                                 element: 'datatable-queues',
+                                appendCountInElement: 'tab-default-queues__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.includeBosses); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_WithBosses_CL)}', property: 'includeBosses', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IncludedGroups_CL)}', formula: (r) => { 
                                         return renderGroups(map.publicGroups, map.roles, r.directGroups); 
                                     }},
@@ -296,7 +293,8 @@
                                 filtering: { formula: (r) => { return r.type === 'queue'; }},
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                         },
                         actions: {  

@@ -1,12 +1,9 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Objects_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Objects_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">⚽</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Objects_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Objects_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Objects_Description_CL}" />
         </apex:define>
@@ -124,8 +121,8 @@
                     
                     <!-- RELEATIONSHIPS SECTION -->
                     <div id="section-relationships">
-                        <h1 class="slds-text-heading--small">Relationships</h1>
-                        <div id="datatable-relationships" data-title="Relationships" />
+                        <h1 class="slds-text-heading--small">{!$Label.OrgCheck_Relationships_CL}</h1>
+                        <div id="datatable-relationships" data-title="{!$Label.OrgCheck_Relationships_CL}" />
                     </div>
                 </div>
                 <div id="tab-default-2" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-owd__item">
@@ -206,13 +203,10 @@
                                               (type === 'CUSTOM_EXTERNAL_SOBJECTS' ? '{!JSENCODE($Label.OrgCheck_ExternalObjects_CL)}' :
                                               (type === 'CUSTOM_SETTINGS' ? '{!JSENCODE($Label.OrgCheck_CustomSettings_CL)}' :
                                               (type === 'CUSTOM_METADATA_TYPES' ? '{!JSENCODE($Label.OrgCheck_CustomMetadataTypes_CL)}' : 
-                                              (type === 'CUSTOM_EVENTS' ? 'Platform Events' :
-                                              (type === 'KNOWLEDGE_ARTICLES' ? 'Knowledge Articles' :
-                                              (type === 'CUSTOM_BIG_OBJECTS' ? 'Big Objects' : '{!JSENCODE($Label.OrgCheck_AllTypes_CL)}'))))))));
-                            const html = 
-                                'There is no Object corresponding to your request! Please change either the package or the type.<br />'+
-                                'Package: <b>'+(namespace !== '' ? namespace : 'None')+'</b><br />'+
-                                'Type: <b>'+labelType+'</b><br />';
+                                              (type === 'CUSTOM_EVENTS' ? '{!JSENCODE($Label.OrgCheck_PlatformEvents_CL)}' :
+                                              (type === 'KNOWLEDGE_ARTICLES' ? '{!JSENCODE($Label.OrgCheck_KnowledgeArticles_CL)}' :
+                                              (type === 'CUSTOM_BIG_OBJECTS' ? '{!JSENCODE($Label.OrgCheck_BigObjects_CL)}' : '{!JSENCODE($Label.OrgCheck_AllTypes_CL)}'))))))));
+                            const html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_NoObjectWarning_CL)}', (namespace !== '' ? namespace : '{!JSENCODE($Label.OrgCheck_None_CL)}'), labelType);
                             helper.html.message.show(html);
                         }
                     }
@@ -260,7 +254,6 @@
                                         }}
                                     ],
                                     data: [
-                                        { key: '{!JSENCODE($Label.OrgCheck_Description_CL)}', value: object.description },
                                         { key: 'API Name', value: object.name },
                                         { key: 'Singular Label', value: object.label },
                                         { key: 'Plural Label ', value: object.labelPlural },
@@ -271,7 +264,8 @@
                                         { key: 'Global Search Enabled?', value: object.searchable, type: 'checkbox' },
                                         { key: 'Record Count (including deleted ones)', value: object.recordCount, type: 'number' },
                                         { key: 'Internal Sharing', value: object.internalSharingModel },
-                                        { key: 'External Sharing', value: object.externalSharingModel }
+                                        { key: 'External Sharing', value: object.externalSharingModel },
+                                        { key: '{!JSENCODE($Label.OrgCheck_Description_CL)}', value: object.description }
                                     ],
                                     showSearch: false
                                 });
@@ -283,6 +277,10 @@
                                     helper.html.element.show('section-fields', true);
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
+                                        preprocessing: (r) => {
+                                            if (r.custom === false) return;
+                                            return helper.html.render.dependencyUsage(r.id, object.fieldDependencies[r.id], ['Layout', 'ApexClass', 'Flow']);
+                                        },
                                         columns: [
                                             { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', formula: (r) => { 
                                                 return helper.html.render.link(
@@ -293,52 +291,42 @@
                                                     '/view', 
                                                     helper.html.render.escape(r.label)); 
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.custom); 
-                                            }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'custom', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_FullApiName_CL)}', property: 'name' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r) => { 
-                                                if (r.custom === true) {
-                                                    const count = helper.html.render.whatIsItUsing(r.id, object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                    return helper.html.render.checkbox(false);
-                                                }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Using_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (!pr) return;
+                                                if (pr.usingAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usingAllCount;
+                                                return helper.html.render.checkbox(false);
                                             }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', 
-                                                formula: (r) => { 
-                                                    if (r.custom === true) {
-                                                        const count = helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]);
-                                                        if (count > 0) return helper.html.render.checkbox(true) + ' ' + count;
-                                                        return '{!JSENCODE($Label.OrgCheck_NotUsed_CL)}';
-                                                    }
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedIn_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                    if (!pr) return;
+                                                    if (pr.usedAllCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedAllCount;
+                                                    return helper.html.render.checkbox(false) + ' Not used!';
                                                 },
-                                                scoreFormula: (r) => { 
-                                                    if (r.custom === true) {
-                                                        if (helper.html.render.whereIsItUsed(r.id, object.fieldDependencies[r.id]) === 0) return 1;
-                                                    }
-                                                }
+                                                scoreFormula: (r, pr) => { if (pr?.usedAllCount === 0) return 1; }
                                             },
-                                            { name: 'Used in Page Layout?', type: 'numeric', formula: (r) => { 
-                                                if (r.custom === true) {
-                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'Layout', object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Page Layout' + (count>1?'s':'');
-                                                    return helper.html.render.checkbox(false);
-                                                }
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInLayout_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (!pr) return;
+                                                if (pr.usedLayoutCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedLayoutCount + ' Layout' + (pr.usedLayoutCount>1?'s':'');
+                                                return helper.html.render.checkbox(false);
                                             }},
-                                            { name: 'Used in Apex Class?', type: 'numeric', formula: (r) => { 
-                                                if (r.custom === true) {
-                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'ApexClass', object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Apex Class' + (count>1?'es':'');
-                                                    return helper.html.render.checkbox(false);
-                                                }
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInApClass_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (!pr) return;
+                                                if (pr.usedApexClassCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedApexClassCount + ' Apex Class' + (pr.usedApexClassCount>1?'es':'');
+                                                return helper.html.render.checkbox(false);
                                             }},
-                                            { name: 'Used in Flow?', type: 'numeric', formula: (r) => { 
-                                                if (r.custom === true) {
-                                                    const count = helper.html.render.whereIsItUsedBy(r.id, 'Flow', object.fieldDependencies[r.id]);
-                                                    if (count > 0) return helper.html.render.checkbox(true) + ' ' + count + ' Flow' + (count>1?'s':'');
-                                                    return helper.html.render.checkbox(false);
-                                                }
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInFlow_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                if (!pr) return;
+                                                if (pr.usedFlowCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedFlowCount + ' Flow' + (pr.usedFlowCount>1?'s':'');
+                                                return helper.html.render.checkbox(false);
                                             }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_UsedInInactiveFlow_CL)}', type: 'numeric', formula: (r, pr) => { 
+                                                    if (!pr) return;
+                                                    if (pr.usedFlowInactiveCount > 0) return helper.html.render.checkbox(true) + ' ' + pr.usedFlowInactiveCount + ' Flow' + (pr.usedFlowInactiveCount>1?'s':'');
+                                                    return helper.html.render.checkbox(false);
+                                                },
+                                                scoreFormula: (r, pr) => { if (pr?.usedFlowInactiveCount > 0) return 1; }
+                                            },
                                             { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
                                                 formula: (r) => { 
                                                     if (r.custom === true) {
@@ -348,8 +336,7 @@
                                                     }
                                                 }
                                             },
-
-                                            { name: 'Tooltip', property: 'inlineHelpText' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Tooltips_CL)}', property: 'inlineHelpText' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', formula: (r) => {
                                                 let type = r.type;
                                                 switch (r.type) {
@@ -374,10 +361,10 @@
                                                 }
                                                 return type;
                                             }},
-                                            { name: 'Length', type: 'numeric', property: 'length' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'unique', formula: (r) => { return helper.html.render.checkbox(r.unique); }},
-                                            { name: 'Unique', property: 'encrypted', formula: (r) => { return helper.html.render.checkbox(r.encrypted); }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', formula: (r) => { return helper.html.render.checkbox(r.externalId); }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_Length_CL)}', type: 'numeric', property: 'length' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Unique_CL)}', property: 'unique', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
                                         ],
@@ -397,15 +384,13 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-relationships',
                                         columns: [
-                                            { name: 'Relationship Name', property: 'relationshipName' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'relationshipName' },
                                             { name: '{!JSENCODE($Label.OrgCheck_ChildObject_CL)}', property: 'childSObject' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'field' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_CascadeDelete_CL)}', property: 'cascadeDelete', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.cascadeDelete); 
-                                            }}
+                                            { name: '{!JSENCODE($Label.OrgCheck_CascadeDelete_CL)}', property: 'cascadeDelete', type: 'checkbox' }
                                         ],
                                         data: object.childRelationships,
-                                        sorting: { name: 'Relationship Name', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -422,14 +407,10 @@
                                         columns: [
                                             { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                             { name: '{!JSENCODE($Label.OrgCheck_DeveloperName_CL)}', property: 'developerName' },
-                                            { name: 'Master', property: 'master' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Master_CL)}', property: 'master' },
                                             { name: 'Record Type Id', property: 'recordTypeId' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'active', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.active); 
-                                            }},
-                                            { name: '{!JSENCODE($Label.OrgCheck_Available_CL)}', property: 'available', formula: (r) => { 
-                                                return helper.html.render.checkbox(r.available); 
-                                            }},
+                                            { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'active', type: 'checkbox' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Available_CL)}', property: 'available', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_DefaultMapping_CL)}', property: 'defaultRecordTypeMapping' }
                                         ],
                                         data: object.recordTypeInfos,
@@ -468,11 +449,11 @@
                                         element: 'datatable-fieldSets',
                                         columns: [
                                             { name: 'Id', property: 'id' },
-                                            { name: 'Master Label', property: 'label' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', property: 'label' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' }
                                         ],
                                         data: object.fieldSets,
-                                        sorting: { name: 'Master Label', order: 'asc' },
+                                        sorting: { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', order: 'asc' },
                                         showSearch: false,
                                         showStatistics: false,
                                         showLineCount: true
@@ -514,11 +495,11 @@
                                                 const imgFlag = percentageUsed >= 0.75 ? 'redFlag' : 'greenFlag';
                                                 return helper.html.render.icon(imgFlag) + ' ' + helper.html.render.percentage(percentageUsed);
                                             }},
-                                            { name: 'Used', type: 'numeric', formula: (r) => { 
+                                            { name: '{!JSENCODE($Label.OrgCheck_Used_CL)}', type: 'numeric', formula: (r) => { 
                                                 return r.max - r.remaining; 
                                             }},
-                                            { name: 'Maximum', type: 'numeric', property: 'max' },
-                                            { name: 'Left', type: 'numeric', property: 'remaining' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Maximum_CL)}', type: 'numeric', property: 'max' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Remaining_CL)}', type: 'numeric', property: 'remaining' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' }
                                         ],
                                         data: object.limits,
@@ -539,9 +520,9 @@
                                             { name: 'Id', property: 'id' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                             { name: '{!JSENCODE($Label.OrgCheck_IsActive_CL)}', property: 'isActive' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Field_CL)}', property: 'errorDisplayField' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_ErrorMessage_CL)}', property: 'errorMessage' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_ErrorMessage_CL)}', property: 'errorMessage' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', property: 'description' }
                                         ],
                                         data: object.validationRules,
                                         sorting: { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', order: 'asc' },

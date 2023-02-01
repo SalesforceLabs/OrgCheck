@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>OrgCheck Public Groups Tab</description>
+    <description>Org Check Public Groups Tab</description>
     <label>🌶️ Public Groups</label>
     <motif>Custom73: Highway Sign</motif>
     <page>OrgCheck_PublicGroups_VFP</page>

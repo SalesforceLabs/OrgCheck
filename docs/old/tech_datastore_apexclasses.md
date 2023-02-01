@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Data Store "ApexClasses" in OrgCheck  
+title: Data Store "ApexClasses" in Org Check  
 permalink: /technical/datastores/apexclasses/
 ---
 
@@ -39,12 +39,12 @@ called **SymbolTable** which contains multiple fields.
 
 If for some reason a class was not compiled, the information that relies on it is
 obviously not available. That is why before trying to checking for classes, it is 
-good to go to setup and compile all classes (there is a button in OrgCheck to 
+good to go to setup and compile all classes (there is a button in Org Check to 
 open the setup in the right place).
 
 The classes that are from packages that you may not need to worry about (because 
 you cannot change them) will have a specific **ManageableState** value. That is why
-we will use this as a criteria in OrgCheck.
+we will use this as a criteria in Org Check.
 
 ### Where is the code coverage information about Apex Classes in Salesforce?
 
@@ -89,11 +89,11 @@ that:
 
 
 
-## How OrgCheck is retreiving the information?
+## How Org Check is retreiving the information?
 
 ### Metadata information about Apex Classes
 
-In OrgCheck we will run the following query on the **Tooling API** :
+In Org Check we will run the following query on the **Tooling API** :
 
 ```SQL
 SELECT Id, Name, ApiVersion, NamespacePrefix, Body, 
@@ -111,7 +111,7 @@ Additionaly to the fields described in the SOQL query, we will use the following
 
 For each record that returns this query, we will do the following mapping:
 
-| OrgCheck field                           | Formula                                                                                    |
+| Org Check field                           | Formula                                                                                    |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------ |
 | id                                       | simplifySalesforceId(**Id**)                                                               |
 | name                                     | **Name**                                                                                   |
@@ -135,7 +135,7 @@ For each record that returns this query, we will do the following mapping:
 
 ### Code coverage information about Apex Classes
 
-In OrgCheck, we get the global code coverage from Salesforce (table
+In Org Check, we get the global code coverage from Salesforce (table
 ***ApexCodeCoverageAggregate*** in Tooling API) and we also get the 
 list of unit tests that participate in that coverage (table 
 ***ApexCodeCoverage*** in Tooling API).

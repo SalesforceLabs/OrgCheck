@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>OrgCheck</fullName>
-    <description>OrgCheck</description>
+    <fullName>Org Check</fullName>
+    <description>Org Check</description>
     <types>
         <members>OrgCheck_Home_VFP</members>
         <members>OrgCheck_Objects_VFP</members>

@@ -4,12 +4,12 @@
  const OrgCheck = {
 
     /**
-     * OrgCheck Version
+     * Org Check Version
      */
-    version: 'Hydrogen [H,1]',
+    version: 'Helium [He,2]',
    
     /**
-     * OrgCheck core
+     * Org Check core
      * @param setup JSON configuration including:
      *              <ol>
      *                <li><code>sfApiVersion</code>: Salesforce API version to use</li>
@@ -22,7 +22,7 @@
      *                <li><code>htmlModalTagId</code>: HTML Tag Id of the dialog box zone</li> 
      *                <li><code>htmlModalTitleTagId</code>: HTML Tag Id of the title zone of the dialog box</li> 
      *                <li><code>htmlMainContentTagId</code>: HTML Tag Id of the main content zone of the page</li> 
-     *                <li><code>htmlWarningMessageTagId</code>: HTML Tag Id of the message</li>
+     *                <li><code>htmlWarningMessagesTagId</code>: HTML Tag Id of the message</li>
      *                <li><code>formatDefaultDate</code>: Default date format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultDatetime</code>: Default datetime format (if not specified for the current user)</li> 
      *                <li><code>formatDefaultLanguage</code>: Default language format (likely 'en')</li>
@@ -67,7 +67,7 @@
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
-            warningMessageId: setup.htmlWarningMessageTagId
+            warningMessagesId: setup.htmlWarningMessagesTagId
         });
 
         const SALESFORCE_HANDLER = new OrgCheck.Salesforce.Handler({
@@ -78,7 +78,7 @@
             watchDogCallback: (d) => { 
                 if (d.level === 'ERROR') {
                     let stopAndShowError = true;
-                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItem('Options')['warning.ByPassUseInProduction'] === true) {
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === true) {
                         stopAndShowError = false;
                     }
                     if (stopAndShowError === true) {
@@ -98,7 +98,7 @@
                 switch (d.type) {
                     case 'OrgTypeProd': {
                         const elmt = document.getElementById('org-information');
-                        elmt.innerHTML = '<center><small>'+d.data.orgName+'<br />'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
+                        elmt.innerHTML = '<center><small>'+d.data.orgId+'<br />'+d.data.orgType+'</small></center>';
                         switch (d.level) {
                             case 'ERROR': elmt.classList.add('slds-theme_error'); break;
                             case 'WARNING': elmt.classList.add('slds-theme_warning'); break;
@@ -130,7 +130,8 @@
 
         const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
             StringHandler: STRING_HANDLER,
-            DateHandler: DATE_HANDLER
+            DateHandler: DATE_HANDLER,
+            MessageHandler: MSG_HANDLER
         });
 
         const DATASETS_HANDLER = new OrgCheck.Datasets.Handler({
@@ -147,7 +148,7 @@
         // ======================================================
 
         /**
-         * The OrgCheck controller
+         * The Org Check controller
          */
         this.getController = function() {
             return {
@@ -312,28 +313,141 @@
         // ======================================================
 
         /**
-         * The OrgCheck helper
+         * The Org Check helper
          */
         this.getHelper = function() {
             return {
                 salesforce: {
+                    cruds: function(permissionSets, success, error) {
+                        const records = [];
+                        SALESFORCE_HANDLER.query([{ 
+                                string: 'SELECT ParentId, SobjectType, '+
+                                            'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
+                                            'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
+                                        'FROM ObjectPermissions '+
+                                        'WHERE ParentId IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(permissionSets)+')'
+                            }])
+                            .on('record', (r, i) => {
+                                records.push({
+                                    parentId: SALESFORCE_HANDLER.salesforceIdFormat(r.ParentId),
+                                    objectType: r.SobjectType,
+                                    isRead: r.PermissionsRead === true, 
+                                    isCreate: r.PermissionsCreate === true, 
+                                    isEdit: r.PermissionsEdit === true, 
+                                    isDelete: r.PermissionsDelete === true, 
+                                    isViewAll: r.PermissionsViewAllRecords === true, 
+                                    isModifyAll: r.PermissionsModifyAllRecords === true
+                                });
+                            })
+                            .on('error', (e) => { if (error) error(e); })
+                            .on('end', () => success(records))
+                            .run();
+                    },
+                    applicationVisibilities: function(profileNames, permissionSetNames, success, error) {
+                        const metadatas = [];
+                        if (profileNames && profileNames.length > 0) {
+                            metadatas.push({ type: 'Profile', members: profileNames });
+                        }
+                        if (permissionSetNames && permissionSetNames.length > 0) {
+                            metadatas.push({ type: 'PermissionSet', members: permissionSetNames });
+                        }
+                        if (metadatas.length === 0) return success();
+                        SALESFORCE_HANDLER.readMetadata(metadatas)
+                            .on('error', (err) => error(err))
+                            .on('end', (response) => {
+                                const records = [];
+                                Object.keys(response).forEach(type => response[type].forEach(m => {
+                                    const appVisibility = { 
+                                        parentApiName: m.fullName,
+                                        appVisibilities: []
+                                    };
+                                    if (m.applicationVisibilities) {
+                                        const avs = m.applicationVisibilities;
+                                        const avsArray = Array.isArray(avs) ? avs : [ avs ];
+                                        avsArray.forEach(av => appVisibility.appVisibilities.push({ 
+                                            app: av.application,
+                                            visible: av.visible === 'true'
+                                        }));
+                                    }
+                                    records.push(appVisibility);
+                                }));
+                                success(records);
+                            })
+                            .run();
+                    },
                     describe: {
                         object: function(pckg, obj, success, error) {
                             SALESFORCE_HANDLER.describe(pckg, obj)
-                                .on('error', (e) => error(e))
-                                .on('end', (o) => success(o))
+                                .on('error', (e) => { if (error) error(e); })
+                                .on('end', (o) => { if (success) success(o); })
                                 .run();
                         }
                     },
                     apex: {
                         runAllLocalTests: function() {
                             return SALESFORCE_HANDLER.httpCall(
-                                '/tooling/runTestsAsynchronous', 
-                                { 
-                                    body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": "false" }', 
-                                    type: 'application/json' 
-                                }
-                            ).run();
+                                    '/tooling/runTestsAsynchronous', 
+                                    { 
+                                        body: { testLevel: 'RunLocalTests', skipCodeCoverage: false }, 
+                                        type: 'application/json' 
+                                    }
+                                )
+                                .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                .run();
+                        },
+                        compileClasses: function(classIds) {
+                            SALESFORCE_HANDLER.query([{
+                                string: 'SELECT Id, Name, Body '+
+                                        'FROM ApexClass '+
+                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+')'
+                                }])
+                                .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                .on('end', (classes) => { 
+                                    const req = [];
+                                    req.push({
+                                        method: 'POST',
+                                        url: '/services/data/v'+SALESFORCE_HANDLER.getApiVersion()+'.0/tooling/sobjects/MetadataContainer',
+                                        referenceId: 'container',
+                                        body: { Name : 'container'+Date.now() }
+                                    });
+                                    classes.forEach((c, i) => { 
+                                        req.push({
+                                            method: 'POST',
+                                            url: '/services/data/v'+SALESFORCE_HANDLER.getApiVersion()+'.0/tooling/sobjects/ApexClassMember',
+                                            referenceId: 'class'+i,
+                                            body: { MetadataContainerId: '@{container.id}', ContentEntityId: c.Id, Body: c.Body }
+                                        });
+                                    });
+                                    req.push({
+                                        method: 'POST',
+                                        url: '/services/data/v52.0/tooling/sobjects/ContainerAsyncRequest',
+                                        referenceId: 'request',
+                                        body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
+                                    });
+                                    SALESFORCE_HANDLER.httpCall('/tooling/composite', { body: { allOrNone: true, compositeRequest: req }, type: 'application/json' })
+                                        .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
+                                        .on('end', (resp) => { 
+                                            const lastResponse = resp.compositeResponse[resp.compositeResponse.length-1];
+                                            if (lastResponse.httpStatusCode === 201) {
+                                                MSG_HANDLER.showModal(
+                                                    'Asynchronous Compilation Asked',
+                                                    'We asked Salesforce to recompile the following Apex Classes:<br />'+
+                                                    classes.map(c => '- <a href="/'+c.Id+'" target="_blank">'+c.Name+'</a>').join('<br />')+'<br />'+
+                                                    '<br />'+
+                                                    'For more information about the success of this compilation, you can check '+
+                                                    'with Tooling API the status of the following record: <br />'+
+                                                    '<code>'+lastResponse.httpHeaders.Location+'</code><br />'+
+                                                    '<br />'+
+                                                    'In case you need to recompile ALL the classes, go <a href="/01p" target="_blank" '+
+                                                    'rel="external noopener noreferrer">here</a> and click on the link <b>"Compile all classes"</b>.');
+                                            } else {
+                                                MSG_HANDLER.showError(resp, true, SALESFORCE_HANDLER);
+                                            }
+                                        })
+                                        .run();
+                                })
+                                .run();
+                            return true;
                         }
                     },
                     version: {
@@ -358,15 +472,10 @@
                 },
                 preferences: {
                     get: function(key) {
-                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
-                        const value = map[key];
-                        if (value === undefined) return true;
-                        return value;
+                        return PREFERENCE_CACHE_HANDLER.getItemProperty('Options', key, true);
                     },
                     set: function(key, value) {
-                        const map = PREFERENCE_CACHE_HANDLER.getItem('Options') || {};
-                        map[key] = value;
-                        PREFERENCE_CACHE_HANDLER.setItem('Options', map);
+                        PREFERENCE_CACHE_HANDLER.setItemProperty('Options', key, value);
                     }
                 },
                 array: {
@@ -398,6 +507,9 @@
                             const item = map[key];
                             for_each_item_function(item, i, keys.length, key);
                         }
+                    },
+                    setItem: function(map, key, value) {
+                        MAP_HANDLER.setValue(map, key, value);
                     }
                 },
                 timestamp: {
@@ -497,6 +609,14 @@
                             if (typeof el === 'string') el = document.getElementById(el);
                             el.textContent = (value ? value : '');
                         },
+                        enable: function(el, value) {
+                            if (typeof el === 'string') el = document.getElementById(el);
+                            if (value === true) {
+                                el.removeAttribute('disabled');
+                            } else if (value === false) {
+                                el.setAttribute('disabled', 'disabled');
+                            }
+                        },
                         setAttribute: function(el, key, value) {
                             if (typeof el === 'string') el = document.getElementById(el);
                             el.setAttribute(key, value);
@@ -532,45 +652,30 @@
                             div.style.cursor = 'zoom-in';
                             div.onclick = function() {
                                 const information = document.createElement('div');
-                                information.appendChild(private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8'));
+                                information.appendChild(private_compute_dependencies_graph('dep'+id, name, data, '#5fc9f8', '#82949e'));
                                 information.appendChild(private_compute_dependencies_tabular('dep2'+id, name, data));
                                 MSG_HANDLER.showModal('Dependencies Graphical and Tabular Information', information); 
                             };
                             return div;
                         },
-                        whatIsItUsing: function(id, data) {
-                            if (data && data.using) {
-                                const types = MAP_HANDLER.keys(data.using);
-                                if (types) {
-                                    let count = 0;
-                                    types.forEach(u => count += MAP_HANDLER.keys(data.using[u]).length);
-                                    return count;
+                        dependencyUsage: function(id, data, usedTypes) {
+                            const usage = { 
+                                usingAllCount: 0,
+                                usedAllCount: 0
+                            };
+                            if (data?.using) MAP_HANDLER.keys(data.using).forEach(u => usage.usingAllCount += MAP_HANDLER.keys(data.using[u]).length);
+                            if (data?.used) MAP_HANDLER.keys(data.used).forEach(u => {
+                                const keys = MAP_HANDLER.keys(data.used[u]);
+                                const count = keys.length;
+                                let inactiveCount = 0;
+                                usage.usedAllCount += count;
+                                if (usedTypes?.indexOf(u) >= 0) {
+                                    usage['used'+u+'Count'] = count;
+                                    keys.forEach(k => { if (data.used[u][k].isActive !== true) inactiveCount++; })
+                                    usage['used'+u+'InactiveCount'] = inactiveCount;
                                 }
-                            }
-                            return 0;
-                        },
-                        whereIsItUsed: function(id, data) {
-                            if (data && data.used) {
-                                const types = MAP_HANDLER.keys(data.used);
-                                if (types) {
-                                    let count = 0;
-                                    types.forEach(u => count += MAP_HANDLER.keys(data.used[u]).length);
-                                    return count;
-                                }
-                            }
-                            return 0;
-                        },
-                        whereIsItUsedBy: function(id, typeAPI, data) {
-                            if (data) {
-                                const usedTypes = MAP_HANDLER.keys(data.used);
-                                if (usedTypes && typeAPI) {
-                                    const idx = usedTypes.indexOf(typeAPI);
-                                    if (idx >= 0) {
-                                        return MAP_HANDLER.keys(data.used[typeAPI]).length;
-                                    }
-                                }
-                            }
-                            return 0;
+                            });
+                            return usage;
                         },
                         checkbox: function(b) {
                             if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
@@ -586,6 +691,13 @@
                                 case 'redFlag':    return '<img src="/img/samples/flag_red.gif" alt="red flag" />';
                                 case 'group':      return '<img src="/img/icon/groups24.png" alt="group" />';
                                 case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
+                                case 'star0':      return '<img src="/img/samples/stars_000.gif" alt="star-0" />';
+                                case 'star1':      return '<img src="/img/samples/stars_100.gif" alt="star-1" />';
+                                case 'star2':      return '<img src="/img/samples/stars_200.gif" alt="star-2" />';
+                                case 'star3':      return '<img src="/img/samples/stars_300.gif" alt="star-3" />';
+                                case 'star4':      return '<img src="/img/samples/stars_400.gif" alt="star-4" />';
+                                case 'star5':      return '<img src="/img/samples/stars_500.gif" alt="star-5" />';
+                                case 'org':        return '<img src="/img/msg_icons/confirm16.png" alt="org level" />';
                                 default:           return '';
                             }
                         },
@@ -615,16 +727,17 @@
         function private_compute_dependencies_tabular(tagId, name, data) {
             const tabularView = [];
             ['used', 'using'].forEach(category => {
-                const types = data[category];
-                if (types) for (const type in types) {
-                    const references = types[type];
-                    for (const referenceId in references) {
-                        tabularView.push({ 
-                            target: name, 
-                            relation: category, 
-                            refId: referenceId, 
-                            refName: references[referenceId].name,
-                            refType: type
+                const d = data[category];
+                if (d) {
+                    for (const type in d) {
+                        d[type].forEach(ref => {
+                            tabularView.push({ 
+                                target: name, 
+                                relation: category, 
+                                refId: ref.id, 
+                                refName: ref.name,
+                                refType: type
+                            })
                         });
                     }
                 }
@@ -653,9 +766,10 @@
          * @param tagId id of the entity
          * @param name of the entity we want to analyze the dependencies
          * @param data Returned by the doSalesforceDAPI method
-         * @param boxColor Color of each box
+         * @param activeBoxColor Color of each box for Active items 
+         * @param deactiveBoxColor Color of each box for Deactivated items
          */
-        function private_compute_dependencies_graph(tagId, name, data, boxColor) {
+        function private_compute_dependencies_graph(tagId, name, data, activeBoxColor, deactiveBoxColor) {
 
             // Some constants
             const BOX_PADDING = 3;
@@ -672,15 +786,8 @@
             };
             rootData.children.forEach(e => {
                 const d = data[e.id];
-                if (d) {
-                    for (const type in d) {
-                        const refs = d[type];
-                        const kidsForType = [];
-                        for (const rid in refs) {
-                            kidsForType.push({ id: rid, name: refs[rid].name });
-                        }
-                        e.children.push({ name: type, children: kidsForType });
-                    }
+                if (d) for (const type in d) {
+                    e.children.push({ name: type, children: d[type] });
                 }
             });
             const root = d3.hierarchy(rootData);
@@ -746,7 +853,7 @@
             // --------------------------------
             node.append('rect')
                 .attr('id', function(d, i) { return (tagId + 'zone' + i); })
-                .attr('fill', function(d) { return boxColor; })
+                .attr('fill', function(d) { return d.data.isActive === false ? deactiveBoxColor : activeBoxColor; })
                 .attr('rx', 6)
                 .attr('ry', 6)
                 .attr('x', 0)
@@ -763,7 +870,7 @@
                 .attr('y', - BOX_HEIGHT / 2 + BOX_PADDING)
                 .attr('width', BOX_WIDTH-2*BOX_PADDING)
                 .attr('height', BOX_HEIGHT-2*BOX_PADDING)
-                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + '</span>');
+                .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + (d.data.isActive===false?' (not active)':'') + '</span>');
 
             return svg.node();
         };

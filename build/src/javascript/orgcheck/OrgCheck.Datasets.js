@@ -358,7 +358,7 @@ OrgCheck.Datasets = {
                                     'DeveloperName, NamespacePrefix, Description, CreatedDate, '+
                                     'LastModifiedDate '+
                                 'FROM CustomField '+
-                                'WHERE ManageableState = \'unmanaged\' ', 
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ', 
                         tooling: true 
                     }])
                     .on('record', (r) => {
@@ -454,49 +454,6 @@ OrgCheck.Datasets = {
                     .run();
             }
         }));
-    
-        /**
-         * ======================================================================
-         * Add the Object CRUDs dataset
-         * ======================================================================
-         */
-        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
-            name: 'objectCRUDs', 
-            isCachable: true, 
-            keyCache: 'ObjectCRUDs', 
-            retriever: (me, resolve, reject) => {
-                const records = MAP_HANDLER.newMap();
-                SALESFORCE_HANDLER.query([{ 
-                        string: 'SELECT ParentId, Parent.Profile.Name, Parent.Label, Parent.IsOwnedByProfile, SobjectType, '+
-                                    'PermissionsRead, PermissionsCreate, PermissionsEdit, PermissionsDelete, '+
-                                    'PermissionsViewAllRecords, PermissionsModifyAllRecords '+
-                                'FROM ObjectPermissions '
-                    }])
-                    .on('record', (r) => {
-                        const item = {
-                            id: r.ParentId + r.SobjectType,
-                            sobject: r.SobjectType,
-                            type: (r.Parent.IsOwnedByProfile ? 'profile' : 'permissionSet'),
-                            parent: { 
-                                id: (r.Parent.IsOwnedByProfile ? r.Parent.ProfileId : r.ParentId), 
-                                name: (r.Parent.IsOwnedByProfile ? r.Parent.Profile.Name : r.Parent.Label) 
-                            },
-                            permissions: {
-                                create: r.PermissionsCreate,
-                                read: r.PermissionsRead,
-                                update: r.PermissionsEdit,
-                                delete: r.PermissionsDelete,
-                                viewAll: r.PermissionsViewAllRecords,
-                                modifyAll: r.PermissionsModifyAllRecords
-                            }
-                        };
-                        MAP_HANDLER.setValue(records, item.id, item);
-                    })
-                    .on('end', () => resolve(records))
-                    .on('error', (error) => reject(error))
-                    .run();
-            }
-        }));
         
         /**
          * ======================================================================
@@ -511,7 +468,7 @@ OrgCheck.Datasets = {
                 const profileIds = [];
                 const profiles = {};
                 SALESFORCE_HANDLER.query([{
-                        string: 'SELECT ProfileId, Profile.UserType, NamespacePrefix, '+
+                        string: 'SELECT Id, ProfileId, Profile.UserType, NamespacePrefix, '+
                                     '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
                                 'FROM PermissionSet '+ // oh yes we are not mistaken!
                                 'WHERE isOwnedByProfile = TRUE'
@@ -519,11 +476,12 @@ OrgCheck.Datasets = {
                     .on('record', (r) => {
                         const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.ProfileId);
                         profileIds.push(profileId);
+                        r.Id = SALESFORCE_HANDLER.salesforceIdFormat(r.Id);
                         profiles[profileId] = r;
                     })
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Profile', ids: profileIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const profileId = SALESFORCE_HANDLER.salesforceIdFormat(r.Id);
                                 const profileSoql = profiles[profileId];
@@ -532,6 +490,8 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: profileId,
                                     name: r.Name,
+                                    apiName: decodeURIComponent(r.FullName), // potentially URL encoded
+                                    permissionSetId: profileSoql.Id,
                                     loginIpRanges: r.Metadata.loginIpRanges,
                                     description: r.Description,
                                     license: r.Metadata.userLicense,
@@ -581,6 +541,7 @@ OrgCheck.Datasets = {
                 const records = MAP_HANDLER.newMap();
                 const psgByName1 = {};
                 const psgByName2 = {};
+                const pSetIds = [];
                 SALESFORCE_HANDLER.query([{
                         string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                     'CreatedDate, LastModifiedDate, '+
@@ -600,6 +561,7 @@ OrgCheck.Datasets = {
                                 const item = {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
                                     name: r.Name,
+                                    apiName: (r.NamespacePrefix ? (r.NamespacePrefix + '__') : '') + r.Name,
                                     description: r.Description,
                                     hasLicense: (r.License ? 'yes' : 'no'),
                                     license: (r.License ? r.License.Name : ''),
@@ -613,6 +575,7 @@ OrgCheck.Datasets = {
                                     lastModifiedDate: r.LastModifiedDate
                                 };
                                 if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
+                                pSetIds.push(item.id);
                                 MAP_HANDLER.setValue(records, item.id, item);
                                 break;
                             }
@@ -672,6 +635,109 @@ OrgCheck.Datasets = {
                     })
                     .on('end', () => resolve(records))
                     .on('error', (error) => reject(error))
+                    .run();
+            }
+        }));
+
+        /**
+         * ======================================================================
+         * Add the Settings dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'settings', 
+            isCachable: true, 
+            keyCache: 'Settings', 
+            retriever: (me, resolve, reject) => {
+                SALESFORCE_HANDLER.readMetadata([ { type: 'SecuritySettings', members: [ 'Security' ] } ])
+                    .on('end', (response) => {
+                        const securitySettings = response['SecuritySettings'];
+                        const records = MAP_HANDLER.newMap();
+                        if (securitySettings && securitySettings.length == 1) {
+                            const security = securitySettings[0];
+                            const spp = security.passwordPolicies;
+                            // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_securitysettings.htm
+                            switch (spp.complexity) {
+                                case 'NoRestriction': spp.complexity = 0; break;
+                                case 'AlphaNumeric': spp.complexity = 1; break;
+                                case 'SpecialCharacters': spp.complexity = 2; break;
+                                case 'UpperLowerCaseNumeric': spp.complexity = 3; break;
+                                case 'UpperLowerCaseNumericSpecialCharacters': spp.complexity = 4; break;
+                                case 'Any3UpperLowerCaseNumericSpecialCharacters': spp.complexity = 5; break;
+                                default: spp.complexity = undefined;
+                            }
+                            switch (spp.expiration) {
+                                case 'Never': spp.expiration = 0; break;
+                                case 'ThirtyDays': spp.expiration = 30; break;
+                                case 'SixtyDays': spp.expiration = 60; break;
+                                case 'NinetyDays': spp.expiration = 90; break;
+                                case 'SixMonths': spp.expiration = 180; break;
+                                case 'OneYear': spp.expiration = 365; break;
+                                default: spp.expiration = undefined;
+                            }
+                            switch (spp.lockoutInterval) {
+                                case 'FifteenMinutes': spp.lockoutInterval = 15; break;
+                                case 'ThirtyMinutes': spp.lockoutInterval = 30; break;
+                                case 'SixtyMinutes': spp.lockoutInterval = 60; break;
+                                case 'Forever': spp.lockoutInterval = 0; break;
+                                default: spp.lockoutInterval = undefined;
+                            }
+                            switch (spp.maxLoginAttempts) {
+                                case 'NoLimit': spp.maxLoginAttempts = 0; break;
+                                case 'ThreeAttempts': spp.maxLoginAttempts = 3; break;
+                                case 'FiveAttempts': spp.maxLoginAttempts = 5; break;
+                                case 'TenAttempts': spp.maxLoginAttempts = 10; break;
+                                default: spp.maxLoginAttempts = undefined;
+                            }
+                            switch (spp.questionRestriction) {
+                                case 'None': spp.questionRestriction = 0; break;
+                                case 'DoesNotContainPassword': spp.questionRestriction = 1; break;
+                                default: spp.questionRestriction = undefined;
+                            }
+                            MAP_HANDLER.setValue(records, 'security', security);
+                        }
+                        resolve(records);
+                    })
+                    .on('error', (err) => reject(err))
+                    .run();
+            }
+        }));
+        
+        /**
+         * ======================================================================
+         * Add the Profile Password Policy dataset
+         * ======================================================================
+         */
+        private_datasets.addDataset(new OrgCheck.Datasets.Dataset({
+            name: 'profilePasswordPolicies', 
+            isCachable: true, 
+            keyCache: 'ProfilePasswordPolicies', 
+            retriever: (me, resolve, reject) => {
+                SALESFORCE_HANDLER.readMetadata([ { type: 'ProfilePasswordPolicy', members: [ '*' ] } ])
+                    .on('end', (response) => {
+                        const policies = response['ProfilePasswordPolicy'];
+                        const records = MAP_HANDLER.newMap();
+                        if (policies) {
+                            policies.forEach(r => {
+                                const item = {
+                                    forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
+                                    lockoutInterval: parseInt(r.lockoutInterval),
+                                    maxLoginAttempts: parseInt(r.maxLoginAttempts),
+                                    minimumPasswordLength: parseInt(r.minimumPasswordLength),
+                                    minimumPasswordLifetime: (r.minimumPasswordLifetime === 'true'),
+                                    obscure: (r.obscure === 'true'),
+                                    passwordComplexity: parseInt(r.passwordComplexity),
+                                    passwordExpiration: parseInt(r.passwordExpiration),
+                                    passwordHistory: parseInt(r.passwordHistory),
+                                    passwordQuestion: (r.passwordQuestion === 'true'),
+                                    name: r.profile
+                                }
+                                MAP_HANDLER.setValue(records, item.name, item);
+                            });
+                        };
+                        resolve(records);
+                    })
+                    .on('error', (err) => reject(err))
                     .run();
             }
         }));
@@ -815,7 +881,7 @@ OrgCheck.Datasets = {
                     .on('record', (r) => workflowRuleIds.push(r.Id))
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'WorkflowRule', ids: workflowRuleIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const item =  {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
@@ -860,7 +926,7 @@ OrgCheck.Datasets = {
                     .on('record', (r) => flowIds.push(r.Id))
                     .on('end', () => {
                         const records = MAP_HANDLER.newMap();
-                        SALESFORCE_HANDLER.readMetadataAtScale({ type: 'Flow', ids: flowIds, byPasses: [ 'UNKNOWN_EXCEPTION' ] })
+                        SALESFORCE_HANDLER.readMetadataAtScale('Flow', flowIds, [ 'UNKNOWN_EXCEPTION' ])
                             .on('record', (r) => {
                                 const item =  {
                                     id: SALESFORCE_HANDLER.salesforceIdFormat(r.Id),
@@ -868,6 +934,8 @@ OrgCheck.Datasets = {
                                     definitionId: SALESFORCE_HANDLER.salesforceIdFormat(r.DefinitionId),
                                     definitionName: r.MasterLabel,
                                     version: r.VersionNumber,
+                                    apiVersion: r.ApiVersion,
+                                    isApiVersionOld: SALESFORCE_HANDLER.isVersionOld({ apiVersion: r.ApiVersion }),
                                     dmlCreates: r.Metadata.recordCreates?.length || 0,
                                     dmlDeletes: r.Metadata.recordDeletes?.length || 0,
                                     dmlUpdates: r.Metadata.recordUpdates?.length || 0,
@@ -906,7 +974,7 @@ OrgCheck.Datasets = {
                 SALESFORCE_HANDLER.query([{ 
                         string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
                                 'FROM ExternalString '+
-                                'WHERE ManageableState = \'unmanaged\' ',
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
                         tooling: true
                     }])
                     .on('record', (r) => {
@@ -945,7 +1013,7 @@ OrgCheck.Datasets = {
                                     'Type, NamespacePrefix, Description, ' +
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM FlexiPage '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -982,7 +1050,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM AuraDefinitionBundle '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1057,7 +1125,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexComponent '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1094,7 +1162,7 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM LightningComponentBundle '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         const item = {
@@ -1147,7 +1215,7 @@ OrgCheck.Datasets = {
                                     'Body, LengthWithoutComments, SymbolTable, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexClass '+
-                                'WHERE ManageableState = \'unmanaged\' ',
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
                         tooling: true
                     }, {
                         string: 'SELECT ApexClassId '+
@@ -1273,7 +1341,7 @@ OrgCheck.Datasets = {
                                     'EntityDefinition.QualifiedApiName, '+
                                     'CreatedDate, LastModifiedDate '+
                                 'FROM ApexTrigger '+
-                                'WHERE ManageableState = \'unmanaged\' '
+                                'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
                     }])
                     .on('record', (r) => {
                         if (r.EntityDefinition) {
@@ -1422,7 +1490,7 @@ OrgCheck.Datasets = {
                         }
                         default: { // CronTrigger
                             let jobTypeLabel = '';
-                            switch (r.CronJobDetail.JobType) {
+                            switch (r.CronJobDetail?.JobType) {
                                 case '1': jobTypeLabel = 'Data Export'; break;
                                 case '3': jobTypeLabel = 'Dashboard Refresh'; break;
                                 case '4': jobTypeLabel = 'Reporting Snapshot'; break;
@@ -1433,7 +1501,7 @@ OrgCheck.Datasets = {
                                 case 'A': jobTypeLabel = 'Reporting Notification'; break;
                             }
                             item.id = 'SCHJOBS-'+artificial_id++;
-                            item.name = r.CronJobDetail.Name;
+                            item.name = r.CronJobDetail?.Name || '';
                             item.type = jobTypeLabel;
                             item.nature = 'ScheduledJob';
                             item.status = r.State;
@@ -1456,99 +1524,3 @@ OrgCheck.Datasets = {
 
      }
 }
-
-
-/*
-
-
-
-
-
-    // ========================================================================
-    // CUSTOM SETTINGS
-    // ------------------------------------------------------------------------
-    // Get the list of Custom Settings in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'customSettings',
-        keycache: 'CustomSettings',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT DurableId, QualifiedApiName, NamespacePrefix '+
-                                    'FROM EntityDefinition '+
-                                    'WHERE IsCustomSetting = true ' + 
-                                    'AND NamespacePrefix = NULL '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.DurableId),
-                                name: v.QualifiedApiName,
-                                namespace: v.NamespacePrefix
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));
-
-
-
-    // ========================================================================
-    // STATIC RESOURCES
-    // ------------------------------------------------------------------------
-    // Get the list of Static Resources in Salesforce (metadata, using tooling API)
-    // ========================================================================
-    SALESFORCE_HANDLER.addDataset(new OrgCheck.Dataset({
-        name: 'stResources',
-        keycache: 'StaticResources',
-        retriever: function(me, resolve, reject) {
-            SALESFORCE_HANDLER.doSecureSobjectReadEnforcement({
-                sobjects: {
-                    // Example of enforcement for REST SOQL only (not tooling api)
-                    // 'User': [ 'Id', 'FirstName', 'LastName' ]
-                },
-                onError: reject,
-                onEnd: () => {
-                    SALESFORCE_HANDLER.doSalesforceQueriesWithCache({
-                        mnemonic: this.keycache, 
-                        queries: [ { 
-                            tooling: true, 
-                            string: 'SELECT Id, Name, NamespacePrefix '+
-                                    'FROM StaticResource '+
-                                    'WHERE ManageableState = \'unmanaged\' '
-                        } ],
-                        onEachRecordFromAPI: function(v, i, l, ts) {
-                            return {
-                                id: SALESFORCE_HANDLER.salesforceIdFormat(v.Id),
-                                name: v.Name,
-                                namespace: v.NamespacePrefix
-                            };
-                        }, 
-                        onEndFromCache: resolve,
-                        onError: reject
-                    });
-                }
-            });
-        }
-    }));                    
-
-
-
-
-
-
-
-*/

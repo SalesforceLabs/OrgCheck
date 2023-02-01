@@ -1,11 +1,8 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Users_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Users_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">🧔</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Users_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Users_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Users_Description_CL}" />
         </apex:define>
@@ -25,6 +22,7 @@
                             helper.html.datatable.create({
                                 element: 'datatable',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_UserName_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
@@ -32,7 +30,6 @@
                                                 helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_LastLogin_CL)}', 
                                         formula: (r) => { 
                                             return (r.neverLogged === false) ? r.lastLogin : '{!JSENCODE($Label.OrgCheck_NeverLoggedIn_CL)}'; 
@@ -84,7 +81,8 @@
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
                         },
                         actions: { 

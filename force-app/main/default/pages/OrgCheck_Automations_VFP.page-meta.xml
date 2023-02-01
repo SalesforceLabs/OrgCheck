@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Automations Page</description>
-    <label>OrgCheck Automations Page</label>
+    <description>Org Check Automations Page</description>
+    <label>Org Check Automations Page</label>
 </ApexPage>

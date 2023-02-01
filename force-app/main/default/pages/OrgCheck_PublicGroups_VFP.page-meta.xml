@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Public Group and Queues Visualforce Page</description>
-    <label>OrgCheck Public Groups and Queues Page</label>
+    <description>Org Check Public Group and Queues Visualforce Page</description>
+    <label>Org Check Public Groups and Queues Page</label>
 </ApexPage>

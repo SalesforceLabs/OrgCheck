@@ -44,7 +44,7 @@ OrgCheck.Cache = {
         const SECTION = configuration.section;
 
         /**
-        * Method to clear all OrgCheck cached items
+        * Method to clear all Org Check cached items
         */
         this.clearAll = function () {
             let keys_to_remove = private_get_keys();
@@ -54,7 +54,7 @@ OrgCheck.Cache = {
         };
 
         /**
-        * Method to clear one OrgCheck cached item
+        * Method to clear one Org Check cached item
         * @param key in cache (without the prefix) to use
         * @return the previous value that has been deleted
         */
@@ -145,11 +145,37 @@ OrgCheck.Cache = {
         };
 
         /**
+        * Method to get a property of an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @param propertyKey the key of the property within the value in cache
+        * @param defaultPropertyValue if the cache is not present or the property is not set, return that value
+        * @return the value for this property
+        */
+         this.getItemProperty = function (key, propertyKey, defaultPropertyValue) {
+            const value = private_get_item(key) || {};
+            const propertyValue = value[propertyKey];
+            if (propertyValue === undefined) return defaultPropertyValue;
+            return propertyValue;
+        };
+
+        /**
+        * Method to set a property of an item from the cache
+        * @param key in cache (without the prefix) to use
+        * @param propertyKey the key of the property within the value in cache
+        * @param propertyValue the value for this property
+        */
+         this.setItemProperty = function (key, propertyKey, propertyValue) {
+            const value = private_get_item(key) || {};
+            value[propertyKey] = propertyValue;
+            private_set_item(key, value);
+        };
+
+        /**
         * Log actions from the cache
         * @param e Error
         */
         function private_log_error(e) {
-            console.error("[OrgCheck:Cache]", { error: e });
+            console.error("[Org Check:Cache]", { error: e });
         }
 
         /**
@@ -161,8 +187,8 @@ OrgCheck.Cache = {
         }
 
         /**
-        * Returns all the OrgCheck keys in cache
-        * @return All the keys of the OrgCheck cache for the given section
+        * Returns all the Org Check keys in cache
+        * @return All the keys of the Org Check cache for the given section
         */
         function private_get_keys() {
             const prefix = private_generate_prefix();
@@ -219,7 +245,7 @@ OrgCheck.Cache = {
         }
 
         /**
-        * Private method to clear one OrgCheck cached item
+        * Private method to clear one Org Check cached item
         * @param key in cache (without the prefix) to use
         * @return the previous value that has been deleted
         */

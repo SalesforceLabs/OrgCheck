@@ -3,6 +3,6 @@
     <apiVersion>55.0</apiVersion>
     <availableInTouch>true</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>OrgCheck Analytics Page</description>
-    <label>OrgCheck Analytics Page</label>
+    <description>Org Check Analytics Page</description>
+    <label>Org Check Analytics Page</label>
 </ApexPage>

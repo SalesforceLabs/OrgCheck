@@ -1,11 +1,8 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_ProfilePermSets_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_ProfilePermSets_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">👮</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_ProfilePermSets_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_ProfilePermSets_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description1_CL}" />
             <apex:outputText escape="false" value="{!$Label.OrgCheck_ProfilePermSets_Description2_CL}" />
@@ -28,8 +25,11 @@
                     <li class="slds-tabs_default__item" title="IP Ranges Restrictions" role="presentation">
                         <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ipranges" id="tab-default-ipranges__item">IP Range Restrictions</a>
                     </li>
-                    <li class="slds-tabs_default__item" title="Object CRUDs" role="presentation">
-                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-objcruds" id="tab-default-objcruds__item">Object CRUDs</a>
+                    <li class="slds-tabs_default__item" title="Profile Password Policies" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-ppwdpolicies" id="tab-default-ppwdpolicies__item">Profile Password Policies</a>
+                    </li>
+                    <li class="slds-tabs_default__item" title="Comparator" role="presentation">
+                        <a class="slds-tabs_default__link" href="javascript:void(0);" role="tab" tabindex="-1" aria-selected="false" aria-controls="tab-default-comparator" id="tab-default-comparator__item">Comparator</a>
                     </li>
                 </ul>
                 <div id="tab-default-profiles" class="slds-tabs_default__content slds-show" role="tabpanel" aria-labelledby="tab-default-profiles__item">
@@ -44,22 +44,81 @@
                 <div id="tab-default-ipranges" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ipranges__item">
                     <div id="datatable-profileRangeIPs" />
                 </div>
-                <div id="tab-default-objcruds" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-objcruds__item">
-                    <div id="legend-objectCRUDs">
-                        Legend: <u><b>C</b></u>reate, <u><b>R</b></u>ead, <u><b>U</b></u>pdate, <u><b>D</b></u>elete, <u><b>V</b></u>iew all and <u><b>M</b></u>odify all.<br />
+                <div id="tab-default-ppwdpolicies" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-ppwdpolicies__item">
+                    <div id="datatable-pwdPolicies" />
+                </div>
+                <div id="tab-default-comparator" class="slds-tabs_default__content slds-hide" role="tabpanel" aria-labelledby="tab-default-comparator__item">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_10-of-12 slds-medium-size_4-of-12 slds-large-size_4-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <span class="slds-icon_container slds-icon-standard-account" title="Select Profiles and/or Permission Sets">
+                                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#multi_picklist')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Select Profiles and/or Permission Sets</span>
+                                            </span>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                                Select Profiles and/or Permission Sets
+                                            </h2>
+                                        </div>
+                                        <div class="slds-no-flex"></div>
+                                    </header>
+                                </div>
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <div id="datatable-selection-comparator" />
+                                </div>
+                            </article>
+                        </div>
+                        <div class="slds-col slds-size_2-of-12 slds-medium-size_2-of-12 slds-large-size_2-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <br /><br /><br /><br />
+                                    <button id="button-compare-cruds" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare CRUDs... &gt;&gt;</button><br />
+                                    <br />
+                                    <button id="button-compare-apps" class="slds-button slds-button_stretch slds-button_brand" disabled="disabled">Compare Apps... &gt;&gt;</button><br />
+                                    <br />
+                                    <br />
+                                    <span id="text-selection">0 item selected</span>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_6-of-12">
+                            <article class="slds-card">
+                                <div class="slds-card__header slds-grid">
+                                    <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                                        <div class="slds-media__figure">
+                                            <span class="slds-icon_container slds-icon-standard-quip-sheet" title="Comparison matrix">
+                                                <svg class="slds-icon slds-icon_small" aria-hidden="true">
+                                                    <use href="{!URLFOR($Asset.SLDS, 'assets/icons/standard-sprite/svg/symbols.svg#quip_sheet')}"></use>
+                                                </svg>
+                                                <span class="slds-assistive-text">Comparison matrix</span>
+                                            </span>
+                                        </div>
+                                        <div class="slds-media__body">
+                                            <h2 class="slds-card__header-title slds-card__header-link slds-truncate">
+                                                Comparison matrix
+                                            </h2>
+                                        </div>
+                                        <div class="slds-no-flex"></div>
+                                    </header>
+                                </div>
+                                <div class="slds-card__body slds-card__body_inner">
+                                    <div id="thematrix-comparator" />
+                                </div>
+                            </article>
+                        </div>
                     </div>
-                    <div id="datatable-objectCRUDs" />
                 </div>
             </div>
         </apex:define>
         <apex:define name="html_start_definition_script">
             <script>
                 function start2(controller, helper) {
-
-                    const PREF_HIDE_CRUDS = helper.preferences.get('filter.HideCRUDsProfilesPermSets');
-
-                    const profileDatasets = [ 'profiles', 'permissionSets', 'permissionSetAssignments' ];
-                    if (PREF_HIDE_CRUDS === false) profileDatasets.push('objectCRUDs');
 
                     // Initialize TABS bindings
                     helper.html.tabs.initialize('slds-tabs_default__item', 'slds-tabs_default__content', 'slds-button');
@@ -68,25 +127,29 @@
                     // RUN CONTROLLER
                     // =================================
                     controller.run({
-                        datasets: profileDatasets,
+                        datasets: [ 'profiles', 'permissionSets', 'permissionSetAssignments', 'profilePasswordPolicies', 'settings' ],
                         onRecords: function(map) { 
+
+                            const allProfilesAndPSets = {};
+                            const allProfilesByFullname = {};
 
                             // -------------------------------------------
                             // PROFILES
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profiles',
+                                appendCountInElement: 'tab-default-profiles__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
+                                        allProfilesAndPSets[r.permissionSetId] = { id: r.permissionSetId, name: r.name + ' (profile)', profileId: r.id, apiName: r.apiName };
+                                        allProfilesByFullname[r.apiName.toLowerCase()] = { id: r.id, name: r.name };
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isCustom); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_UserType_CL)}', property: 'userType' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
@@ -100,23 +163,24 @@
                                             if (r.isUnusedCustom === true) return 1;
                                         }
                                     },
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                            return helper.html.render.escape(r.description);
+                                            return helper.html.render.escape(helper.html.render.shrinkText(r.description, 100)); ;
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    },
-                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    }
                                 ],
                                 data: map.profiles,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -124,6 +188,7 @@
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileLoginHours',
+                                appendCountInElement: 'tab-default-loginhours__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -144,7 +209,8 @@
                                 filtering: { formula: (r) => { return r.loginHours ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -152,6 +218,7 @@
                             // -------------------------------------------
                             helper.html.datatable.create({
                                 element: 'datatable-profileRangeIPs',
+                                appendCountInElement: 'tab-default-ipranges__item',
                                 columns: [
                                     { name: '{!JSENCODE($Label.OrgCheck_Profile_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
@@ -180,7 +247,97 @@
                                 filtering: { formula: (r) => { return r.loginIpRanges && r.loginIpRanges.length > 0 ? true : false; }},
                                 showSearch: false,
                                 showStatistics: false,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
+                            });
+
+                            // -------------------------------------------
+                            // PROFILE PASSWORD POLICIES
+                            // -------------------------------------------
+                            // Let's add the org level password policy in the table!
+                            helper.map.setItem(map.profilePasswordPolicies, '##orgPwdPolicies##', { 
+                                isOrgLevel: true,
+                                name: 'Org Level',
+                                passwordExpiration: map.settings.security.passwordPolicies.expiration,
+                                passwordHistory: map.settings.security.passwordPolicies.historyRestriction,
+                                minimumPasswordLength: map.settings.security.passwordPolicies.minimumPasswordLength,
+                                passwordComplexity: map.settings.security.passwordPolicies.complexity,
+                                passwordQuestion: map.settings.security.passwordPolicies.questionRestriction,
+                                maxLoginAttempts: map.settings.security.passwordPolicies.maxLoginAttempts,
+                                lockoutInterval: map.settings.security.passwordPolicies.lockoutInterval,
+                                obscure : map.settings.security.passwordPolicies.obscureSecretAnswer,
+                                minimumPasswordLifetime : map.settings.security.passwordPolicies.minimumPasswordLifetime
+                            });
+                            helper.html.datatable.create({
+                                element: 'datatable-pwdPolicies',
+                                appendCountInElement: 'tab-default-ppwdpolicies__item',
+                                columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Policy_CL)}', property: 'name',
+                                        formula: (r) => {
+                                            if (r.isOrgLevel) {
+                                                return helper.html.render.icon('org') + ' ' + 
+                                                    helper.html.render.link('/lightning/setup/SecurityPolicies/home', '{!JSENCODE($Label.OrgCheck_OrgLevel_CL)}');
+                                            }
+                                            const profile = allProfilesByFullname[r.name?.toLowerCase()];
+                                            if (profile) {
+                                                return helper.html.render.icon('user') + ' ' + 
+                                                    helper.html.render.link('/'+profile.id, helper.html.render.escape(profile.name));
+                                            }
+                                            return r.name;
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_UserPwdExpiresIn_CL)}', property: 'passwordExpiration', type: 'numeric',
+                                        scoreFormula: (r) => { 
+                                            if (r.isOrgLevel) return (r.passwordExpiration > 180) ? 1 : 0; 
+                                            if (r.passwordExpiration > map.settings.security.passwordPolicies.expiration) return 1;
+                                            if (r.passwordExpiration > 90) return 1; 
+                                            if (r.passwordExpiration === 0) return 1; 
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_EnforcePwdHistory_CL)}', property: 'passwordHistory', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.passwordHistory < 3) return 1; }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_MinPwdLength_CL)}', property: 'minimumPasswordLength', type: 'numeric',
+                                        scoreFormula: (r) => { if (r.minimumPasswordLength < 8) return 1; }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_LevelComplexity_CL)}', property: 'passwordComplexity', type: 'numeric', 
+                                        formula: (r) => { return helper.html.render.icon('star'+r.passwordComplexity); },
+                                        scoreFormula: (r) => { if (r.passwordComplexity < 3) return 1; }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_QuestionCanHavePwd_CL)}', property: 'passwordQuestion', 
+                                        formula: (r) => { return helper.html.render.checkbox(r.passwordQuestion === 1 ? false : true); },
+                                        scoreFormula: (r) => { if (r.passwordQuestion !== 1) return 1; }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_MaxLoginAttempts_CL)}', property: 'maxLoginAttempts', type: 'numeric',
+                                        formula: (r) => { 
+                                            if (r.maxLoginAttempts === undefined) return '{!JSENCODE($Label.OrgCheck_NoLimit_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XAttempts_CL)}', r.maxLoginAttempts);
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.maxLoginAttempts === undefined) return 1; 
+                                            if (r.maxLoginAttempts > map.settings.security.passwordPolicies.maxLoginAttempts) return 1;
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_LockoutPeriod_CL)}', property: 'lockoutInterval', type: 'numeric',
+                                        formula: (r) => { 
+                                            if (r.lockoutInterval === undefined) return '{!JSENCODE($Label.OrgCheck_Never_CL)}';
+                                            return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XMinutes_CL)}', r.maxLoginAttempts);
+                                        },
+                                        scoreFormula: (r) => { 
+                                            if (r.lockoutInterval === undefined) return 1; 
+                                            if (r.lockoutInterval < map.settings.security.passwordPolicies.lockoutInterval) return 1;
+                                        }
+                                    },
+                                    { name: '{!JSENCODE($Label.OrgCheck_SecurityQuestionHidden_CL)}', property: 'obscure', type: 'checkbox' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Min1DayPwdLifeime_CL)}', property: 'minimumPasswordLifetime', type: 'checkbox' }
+                                ],
+                                data: map.profilePasswordPolicies,
+                                sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
+                                showSearch: false,
+                                showStatistics: false,
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
@@ -201,27 +358,27 @@
                             });
                             helper.html.datatable.create({
                                 element: 'datatable-permissionSets',
+                                appendCountInElement: 'tab-default-permsets__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', 
                                         formula: (r) => { 
+                                            if (r.isGroup === false) {
+                                                allProfilesAndPSets[r.id] = { id: r.id, name: r.name + ' (permission set)', apiName: r.apiName };
+                                            }
                                             return helper.html.render.link(
                                                 r.isGroup ? ('/'+r.groupId) : ('/'+r.id), 
                                                 helper.html.render.escape(r.name)
                                             ); 
                                         }
                                     },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isGroup); 
-                                    }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', formula: (r) => { 
-                                        return helper.html.render.checkbox(r.isCustom); 
-                                    }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', type: 'checkbox' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 
                                         formula: (r) => { 
-                                            if (r.isUnusedCustom === true) return 'No user for this custom permission set!'; 
+                                            if (r.isUnusedCustom === true) return '{!JSENCODE($Label.OrgCheck_NoUserForThisPSet_CL)}'; 
                                             const membersCount = assignmentsPerPS[r.id]?.assignees?.length || 0;
                                             if (membersCount < 101) return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XUsers_CL)}', membersCount);                                            
                                             return '{!JSENCODE($Label.OrgCheck_More100Users_CL)}';
@@ -240,62 +397,169 @@
                                         });
                                         return html;
                                     }},
+                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}', 
                                         formula: (r) => {
                                             if (r.isUndescribedCustom === true) return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
-                                            return helper.html.render.escape(r.description);
+                                            return helper.html.render.escape(helper.html.render.shrinkText(r.description, 100)); ;
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.isUndescribedCustom === true) return 1;
                                         }
-                                    },
-                                    { name: '{!JSENCODE($Label.OrgCheck_CreatedDate_CL)}', type: 'datetime', property: 'createdDate' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_ModifiedDate_CL)}', type: 'datetime', property: 'lastModifiedDate' }                                    
+                                    }
                                 ],
                                 data: map.permissionSets,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'desc' },
                                 showSearch: true,
                                 showStatistics: true,
-                                showLineCount: true
+                                showLineCount: true,
+                                stickyHeaders: true
                             });
 
                             // -------------------------------------------
-                            // PROFILE OBJECT CRUDs
+                            // COMPARATOR
                             // -------------------------------------------
-                            if (PREF_HIDE_CRUDS === true) {
-                                const divCRUDs = helper.html.element.get('legend-objectCRUDs');
-                                divCRUDs.innerHTML = '{!JSENCODE($Label.OrgCheck_CRUDMessage_CL)}';
-                            } else {
-                                helper.html.datatable.create({
-                                    element: 'datatable-objectCRUDs',
-                                    columns: [
-                                        { name: '{!JSENCODE($Label.OrgCheck_Parent_CL)}', formula: (r) => { 
-                                            return helper.html.render.link(
-                                                '/'+r.parent.id, 
-                                                helper.html.render.escape(r.parent.name)
-                                            ); 
-                                        }},
-                                        { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', property: 'sobject' },
-                                        { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
-                                        { name: '{!JSENCODE($Label.OrgCheck_Permissions_CL)}', formula: (r) => { 
-                                            let html = '';
-                                            if (r.permissions.create === true) html += 'C';
-                                            if (r.permissions.read === true) html += 'R';
-                                            if (r.permissions.update === true) html += 'U';
-                                            if (r.permissions.delete === true) html += 'D';
-                                            if (r.permissions.viewAll === true) html += ' V';
-                                            if (r.permissions.modifyAll === true) html += ' M';
-                                            return html;
-                                        }}
-                                    ],
-                                    data: map.objectCRUDs,
-                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
-                                    showSearch: true,
-                                    showStatistics: true,
-                                    showLineCount: true
-                                });
+                            let selectedProfileAndPermSetIds = []; // includes also the pset ids paired with profiles!
+                            const buttonCruds = helper.html.element.get('button-compare-cruds');
+                            const buttonApps = helper.html.element.get('button-compare-apps');
+                            const buttons = [ buttonCruds, buttonApps ];
+                            const text = helper.html.element.get('text-selection');
+                            helper.html.datatable.create({
+                                element: 'datatable-selection-comparator',
+                                columns: [
+                                    { name: 'Name', property: 'name' }
+                                ],
+                                data: allProfilesAndPSets,
+                                sorting: { name: 'Name', order: 'asc' },
+                                showSearch: true,
+                                showSelection: { 
+                                    onselect: (r, v) => {
+                                        if (v === true) {
+                                            selectedProfileAndPermSetIds.push(r.id);
+                                        } else {
+                                            selectedProfileAndPermSetIds = selectedProfileAndPermSetIds.filter(e => e !== r.id);
+                                        }
+                                        helper.html.element.setText(text, helper.html.render.format('{!JSENCODE($Label.OrgCheck_XItemsSelected_CL)}', selectedProfileAndPermSetIds.length));
+                                        if (selectedProfileAndPermSetIds.length === 0) {
+                                            buttons.forEach(b => helper.html.element.enable(b, false));
+                                        } else {
+                                            buttons.forEach(b => helper.html.element.enable(b, true));
+                                        }
+                                    }
+                                },
+                                stickyHeaders: true
+                            });
+                            const paintMatrix = function(type) {
+                                helper.html.datatable.clean('thematrix-comparator');
+                                switch (type) {
+                                    case 'cruds': {
+                                        const columns = [ { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', property: 'sobject', orientation: 'horizontal-bottom' } ];
+                                        selectedProfileAndPermSetIds.forEach(id => { 
+                                            columns.push({ name: allProfilesAndPSets[id].name, property: id, orientation: 'vertical' }); 
+                                        });
+                                        helper.html.progress.resetSections();
+                                        helper.html.progress.show();
+                                        helper.html.progress.addSection('retrieving', '');
+                                        helper.html.progress.setSection('retrieving', 'Retrieving information about object permissions for selected profiles and permission sets...', 'started');
+                                        
+                                        helper.salesforce.cruds(selectedProfileAndPermSetIds, 
+                                            results => { 
+                                                helper.html.progress.setSection('retrieving', 'Retrieving done!', 'ended');
+                                                const matrixData = {};
+                                                results.forEach(r => {
+                                                    const d = matrixData[r.objectType] || { sobject: r.objectType };
+                                                    d[r.parentId] = 
+                                                        (r.isCreate === true ? 'C' : '') +
+                                                        (r.isRead === true ? 'R' : '') +
+                                                        (r.isEdit === true ? 'U' : '') +
+                                                        (r.isDelete === true ? 'D' : '') +
+                                                        (r.isViewAll === true ? 'V' : '') +
+                                                        (r.isModifyAll === true ? 'M' : '');
+                                                    matrixData[r.objectType] = d;
+                                                });
+                                                helper.html.datatable.create({
+                                                    element: 'thematrix-comparator',
+                                                    columns: columns,
+                                                    data: matrixData,
+                                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Object_CL)}', order: 'asc' },
+                                                    columnBordered: true
+                                                });
+                                                helper.html.progress.hide();
+                                            }, 
+                                            error => { 
+                                                helper.html.progress.hide();
+                                                helper.error.show(error); 
+                                            }
+                                        );
+                                        break;
+                                    }
+                                    case 'apps': {
+                                        const columns = [ { name: '{!JSENCODE($Label.OrgCheck_Application_CL)}', property: 'app', orientation: 'horizontal-bottom' } ];
+                                        const profileFullnames = [];
+                                        const permissionSetFullnames = [];
+                                        selectedProfileAndPermSetIds.forEach(id => { 
+                                            const item = allProfilesAndPSets[id];
+                                            (item.profileId ? profileFullnames : permissionSetFullnames).push(item.apiName);
+                                            columns.push({ name: item.name, property: item.apiName, orientation: 'vertical' }); 
+                                        });
+                                        helper.html.progress.resetSections();
+                                        helper.html.progress.show();
+                                        if (profileFullnames.length > 0) {
+                                            helper.html.progress.addSection('retrievingP', '');
+                                            helper.html.progress.setSection('retrievingP', 'Retrieving additional information from the Metadata API about profiles (' + profileFullnames + '). It may take a while...', 'started');
+                                        }
+                                        if (permissionSetFullnames.length > 0) {
+                                            helper.html.progress.addSection('retrievingPS', '');
+                                            helper.html.progress.setSection('retrievingPS', 'Retrieving additional information from the Metadata API about permission sets (' + permissionSetFullnames + '). It may take a while...', 'started');
+                                        }
+                                        
+                                        helper.salesforce.applicationVisibilities(profileFullnames, permissionSetFullnames,
+                                            results => { 
+                                                if (profileFullnames.length > 0) {
+                                                    helper.html.progress.setSection('retrievingP', 'Retrieving profiles from Metadata API is done! (thank you for your patience)', 'ended');
+                                                }
+                                                if (permissionSetFullnames.length > 0) {
+                                                    helper.html.progress.setSection('retrievingPS', 'Retrieving permission sets from Metadata API is done! (thank you for your patience)', 'ended');
+                                                }
+                                                const matrixData = {};
+                                                results.forEach(r => {
+                                                    if (r.appVisibilities.length === 0) {
+                                                        console.log(r.parentApiName + ' has no application visibiliy!');
+                                                    } else {
+                                                        r.appVisibilities.forEach(ap => {
+                                                            const d = matrixData[ap.app] || { app: ap.app };
+                                                            d[r.parentApiName] = (ap.visible === true ? 'Visible' : '');
+                                                            matrixData[ap.app] = d;
+                                                        });
+                                                    }
+                                                });
+                                                helper.html.datatable.create({
+                                                    element: 'thematrix-comparator',
+                                                    columns: columns,
+                                                    data: matrixData,
+                                                    sorting: { name: '{!JSENCODE($Label.OrgCheck_Application_CL)}', order: 'asc' },
+                                                    columnBordered: true
+                                                });
+                                                helper.html.progress.hide();
+                                            }, 
+                                            error => { 
+                                                helper.html.progress.hide();
+                                                helper.error.show(error); 
+                                            }
+                                        );
+                                        break;
+                                    }
+                                    default:
+                                        break;
+                                }
+                            };
+                            buttonCruds.onclick = function(event) {
+                                paintMatrix('cruds');
                             }
-
+                            buttonApps.onclick = function(event) {
+                                paintMatrix('apps');
+                            }
                         },
                         actions: {  
                             clearCache: { 
@@ -317,6 +581,10 @@
                                 table: 'datatable-profileRangeIPs',
                                 visibleTab: 'tab-default-ipranges__item',
                                 filename: 'IPRangesRestrictions'
+                            }, {
+                                table: 'thematrix-comparator',
+                                visibleTab: 'tab-default-comparator__item',
+                                filename: 'CRUD-Comparator'
                             }]
                         }
                     });

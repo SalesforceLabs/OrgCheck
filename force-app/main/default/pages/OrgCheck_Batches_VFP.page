@@ -1,19 +1,16 @@
 <apex:page >
     <apex:composition template="OrgCheck_PageTemplate_VFT">
         <apex:define name="html_additional_scripttags" />
-        <apex:define name="text_page_title">
-            {!$Label.OrgCheck_Batches_Title_CL}
-        </apex:define>
-        <apex:define name="text_page_subtitle">
-            {!$Label.OrgCheck_Batches_Subtitle_CL}
-        </apex:define>
+        <apex:define name="text_page_icon">🚢</apex:define> 
+        <apex:define name="text_page_title">{!$Label.OrgCheck_Batches_Title_CL}</apex:define>
+        <apex:define name="text_page_subtitle">{!$Label.OrgCheck_Batches_Subtitle_CL}</apex:define>
         <apex:define name="text_page_description">
             <apex:outputText escape="false" value="{!$Label.OrgCheck_Batches_Description_CL}" />
         </apex:define>
         <apex:define name="html_actions">
             <div class="slds-page-header__control">
-                <a href="/01p" target="_blank" rel="external noopener noreferrer">
-                    <button id="compile-all-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}all">
+                <a>
+                    <button id="compile-uncompiled-classes-button" class="slds-button slds-button_icon slds-button_icon-border-filled" title="{!$Label.OrgCheck_CompileAll_CL}">
                         <svg class="slds-button__icon" aria-hidden="true">
                             <use href="{!URLFOR($Asset.SLDS, '/assets/icons/utility-sprite/svg/symbols.svg#apex_plugin')}"></use>
                         </svg>
@@ -63,16 +60,17 @@
                             // Render the data in a table for failed Apex Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-apexjobs',
+                                appendCountInElement: 'tab-default-apexjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
                                     { name: '{!JSENCODE($Label.OrgCheck_ApexContext_CL)}', property: 'context' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status === 'Failed') return 1; 
                                         }
                                     },
-                                    { name: 'Message', property: 'message' },
+                                    { name: '{!JSENCODE($Label.OrgCheck_Message_CL)}', property: 'message' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Count_CL)}', type: 'numeric', property: 'numIds' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Errors_CL)}', type: 'numeric', property: 'numErrors' }
                                 ],
@@ -87,16 +85,17 @@
                             // Render the data in a table for Scheduled Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-scheduledjobs',
+                                appendCountInElement: 'tab-default-scheduledjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', property: 'name' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Type_CL)}', property: 'type' },
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', property: 'status',
                                         scoreFormula: (r) => { 
                                             if (r.status !== 'WAITING') return 1; 
                                         }
                                     },
-                                    { name: 'user', formula: (r) => { 
+                                    { name: '{!JSENCODE($Label.OrgCheck_User_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.userid, 
                                             helper.html.render.escape(map.users[r.userid]?.name || r.userid)
@@ -104,7 +103,7 @@
                                     }},
                                     { name: '{!JSENCODE($Label.OrgCheck_Starts_CL)}', property: 'start' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Ends_CL)}', property: 'end' },
-                                    { name: 'timezone', property: 'timezone' }
+                                    { name: '{!JSENCODE($Label.OrgCheck_Timezone_CL)}', property: 'timezone' }
                                 ],
                                 data: map.batches,
                                 sorting: { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', order: 'asc' },
@@ -115,31 +114,33 @@
                             });
 
                             let cntClsToCompile = 0;
+                            const classesToCompile = [];
 
                             // Render the data in a table for Not Scheduled Jobs
                             helper.html.datatable.create({
                                 element: 'datatable-notscheduledjobs',
+                                appendCountInElement: 'tab-default-notscheduledjobs__item',
                                 columns: [
+                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Name_CL)}', formula: (r) => { 
                                         return helper.html.render.link(
                                             '/'+r.id, 
                                             helper.html.render.escape(r.name)
                                         ); 
                                     }},
-                                    { name: '{!JSENCODE($Label.OrgCheck_Score_CL)}', type: 'numeric', property: '##score##' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Status_CL)}', 
                                         formula: (r) => {
                                             if (r.needsRecompilation === true) {
                                                 cntClsToCompile++;
-                                                return 'Recompile!';
+                                                classesToCompile.push(r.id);
+                                                return '{!JSENCODE($Label.OrgCheck_AskToRecompile_CL)}';
                                             }
                                         },
                                         scoreFormula: (r) => { 
                                             if (r.needsRecompilation === true) return 1; 
                                         }
                                     },
-                                    { name: 'Is Scheduled?', 
-                                        formula: (r) => { return helper.html.render.checkbox(r.isScheduled === true); },
+                                    { name: '{!JSENCODE($Label.OrgCheck_IsScheduled_CL)}', property: 'isScheduled', type: 'checkbox',
                                         scoreFormula: (r) => { if (r.isScheduled !== true) return 1; }
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'namespace' }
@@ -154,12 +155,14 @@
 
                             // Show alert about recompilation
                             if (cntClsToCompile > 0) {
-                                let html = 'You have '+cntClsToCompile+' Apex class'+(cntClsToCompile>1?'es':'')+' that need'+(cntClsToCompile>1?'':'s')+' to be <b>recompiled</b>.<br />';
-                                html += 'Please make sure you click on the <b>plug</b> button in this page to go to the setup menu and recompile all classes in this org.<br />';
-                                html += 'If some classes still need recompilation after this, you need to check them for sure.<br />';
-                                //helper.html.modal.show('Action needed on Apex classes in the Org!', html);
+                                let html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_RecompilationAlert_CL)}', cntClsToCompile);
                                 helper.html.message.show(html);
-                                helper.html.element.addClass('compile-all-button', ['slds-theme_warning']);
+                                const compileClassesButton = helper.html.element.get('compile-uncompiled-classes-button');
+                                compileClassesButton.onclick = (e) => { 
+                                    helper.salesforce.apex.compileClasses(classesToCompile);
+                                    return true; 
+                                }
+                                helper.html.element.addClass(compileClassesButton, ['slds-theme_warning']);
                             }
                         },
                         actions: {  

@@ -1,5 +1,32 @@
 #/bin/bash
 
+
+### --------------------------------------------------------------------------------------------
+### Dependency and other checkings
+### --------------------------------------------------------------------------------------------
+which uglifyjs 1>/dev/null; if [ $? -ne 0 ]; then 
+    echo 'Uglifyjs is not installed. You can install it via $ npm install uglify-js -g'; 
+    exit 1; 
+fi
+which tidy 1>/dev/null; if [ $? -ne 0 ]; then 
+    echo 'Tidy is not installed. You can install it via $ brew tidy'; 
+    exit 1; 
+fi
+if [ $(sfdx force:auth:list --json | wc -l) -le 4 ]; then 
+    echo "There is no Salesforce Org authentified with sfdx yet. Please register one with (for example) $ sfdx force:auth:web:login"; 
+    exit 2; 
+fi
+if [ $(sfdx config:get defaultusername --json | grep 'value' | wc -l) -eq 0 ]; then 
+    echo "There is no Salesforce Default Username defined with sfdx yet. Please register one with $ sfdx config:set defaultusername=<username>"; 
+    exit 3; 
+fi
+
+
+
+### --------------------------------------------------------------------------------------------
+### Argument for this script checkings
+### --------------------------------------------------------------------------------------------
+
 UGLIFY_MODE="$1"
 UGLIFY_MODE_ON="on"
 UGLIFY_MODE_OFF="off"
@@ -12,20 +39,17 @@ else
 fi
 echo ""
 
-### -----------------------
-### JAVASCRIPT PART
-### -----------------------
 
-for f in build/src/javascript/orgcheck/OrgCheck.*.js; do
+
+### --------------------------------------------------------------------------------------------
+### Javascript and static resource build
+### --------------------------------------------------------------------------------------------
+
+echo "Javascript build..."
+for f in build/src/javascript/orgcheck/OrgCheck.*.js build/src/javascript/orgcheck/OrgCheck.js; do
+    echo " - $f"
     if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
         uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f);
-    else
-        cat "${f}" > /tmp/$(basename $f);
-    fi
-done
-for f in build/src/javascript/orgcheck/OrgCheck.js; do
-    if [ "${UGLIFY_MODE}" == "${UGLIFY_MODE_ON}" ]; then
-        uglifyjs --ie --webkit --v8 "${f}" -o /tmp/$(basename $f)
     else
         cat "${f}" > /tmp/$(basename $f);
     fi
@@ -36,14 +60,13 @@ rm -Rf build/bin/*
 mkdir build/tmp/js
 mkdir build/tmp/img
 
+echo " >> into one unique js file"
 (
-    for f in build/src/javascript/orgcheck/OrgCheck.js; do
-        cat /tmp/$(basename $f)
-    done
-    for f in build/src/javascript/orgcheck/OrgCheck.*.js; do
+    for f in build/src/javascript/orgcheck/OrgCheck.js build/src/javascript/orgcheck/OrgCheck.*.js; do
         cat /tmp/$(basename $f)
     done
 ) > build/tmp/js/orgcheck.js
+echo ""
 
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
@@ -51,50 +74,42 @@ cp build/src/logos/Logo.svg build/tmp/img
 cp build/src/logos/Mascot.svg build/tmp/img
 cp build/src/logos/Mascot+Animated.svg build/tmp/img
 
+echo "Making a unique zip file"
 (
     cd build/tmp
     zip -9 ../bin/OrgCheck_SR.zip -r ./*
 )
+echo ""
 
+echo "Transfering the zip into the Salesforce App project"
 cp build/bin/OrgCheck_SR.zip force-app/main/default/staticresources/OrgCheck_SR.resource
+echo ""
 
 
-## https://codeinthehole.com/tips/tips-for-using-a-git-pre-commit-hook/
-## ln -s ../../pre-commit.sh .git/hooks/pre-commit
+### --------------------------------------------------------------------------------------------
+### Custom Labels and Translations build
+### --------------------------------------------------------------------------------------------
 
-##### ln -s ./javascript/build/build-js.sh .git/hooks/pre-commit 
+echo "Custom labels and translations..."
 
-
-
-### -----------------------
-### LABELS PART
-### -----------------------
-
+echo " - transfering custom labels (in English) into the Salesforce App project"
 cat build/src/labels/CustomLabels-copyandpasted.txt \
     | sed -e 's/""/"/g' -e 's/^"//' -e 's/"$//' \
     > force-app/main/default/labels/CustomLabels.labels-meta.xml
 
-
-
-### -----------------------
-### TRANSLATIONS PART
-### -----------------------
-
+echo " - transfering French translations into the Salesforce App project"
 cat build/src/labels/Translation-FR-copyandpasted.txt \
     | sed -e 's/""/"/g' -e 's/^"//' -e 's/"$//' \
     > force-app/main/default/translations/fr.translation-meta.xml
 
+echo " - transfering Japanese translations into the Salesforce App project"
 cat build/src/labels/Translation-JP-copyandpasted.txt \
     | sed -e 's/""/"/g' -e 's/^"//' -e 's/"$//' \
     > force-app/main/default/translations/ja.translation-meta.xml
 
+echo ""
 
-
-
-
-### -----------------------
-### Generate the TEST page
-### -----------------------
+echo "Checking if custom labels and translation are correct (the syntax!)"
 (
     echo '<!DOCTYPE html>';
     echo '<html>';
@@ -137,15 +152,23 @@ cat build/src/labels/Translation-JP-copyandpasted.txt \
     done
     echo '  </body>';
     echo '</html>';
-) > /tmp/testAll.txt
-tidy /tmp/testAll.txt 2>&1 | grep 'Warning' | grep -v 'character code' | sort -t' ' -k2,2n > /tmp/testWarnings
-if [ $(cat /tmp/testWarnings | wc -l | tr -d ' ') -ne 0 ]; then
+) > /tmp/testAll.html
+tidy /tmp/testAll.html 2>/tmp/testAll.err 1>/dev/null 
+cat /tmp/testAll.err | grep -e ' - Warning: ' | grep -v 'character code' | sort -t' ' -k2,2n > /tmp/testWarnings.err
+rm /tmp/testAll.html
+rm /tmp/testAll.err
+if [ $(cat /tmp/testWarnings.err | wc -l | tr -d ' ') -ne 0 ]; then
     echo "WARNINGS:"
-    cat /tmp/testWarnings
+    cat /tmp/testWarnings.err
+    rm /tmp/testWarnings.err
+    exit 100;
 fi
+rm /tmp/testWarnings.err
+echo "OK"
+echo ""
 
-
-### -----------------------
-### PUSH INTO DEV ORG
-### -----------------------
-### sfdx force:source:deploy -m StaticResource:OrgCheck_OrgCheck_SR,CustomLabels,Translations  1>/dev/null
+### --------------------------------------------------------------------------------------------
+### If everything is OK push the resulting built items into dev org
+### --------------------------------------------------------------------------------------------
+echo "Deploying to default org (username=$(sfdx config:get defaultusername --json | grep value | cut -d'"' -f4))"
+sfdx force:source:deploy -m StaticResource,CustomLabels,Translations  1>/dev/null
