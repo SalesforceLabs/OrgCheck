@@ -130,7 +130,6 @@
                         const MAX_LEVEL_DEPTH_ROLES = 7;
                         if (mdepth > MAX_LEVEL_DEPTH_ROLES) {
                             const html = helper.html.render.format('{!JSENCODE($Label.OrgCheck_TooManyRoles_CL)}', MAX_LEVEL_DEPTH_ROLES, mdepth);
-                            //helper.html.modal.show('{!JSENCODE($Label.OrgCheck_TooManyLevels_CL)}', html);
                             helper.html.message.show(html);
                         }
                         
@@ -389,7 +388,6 @@
                                             if (r.hasInactiveMembers === false) return '{!JSENCODE($Label.OrgCheck_NoInactiveMember_CL)}';
                                             if (r.inactiveMembersCount == 1) return '{!JSENCODE($Label.OrgCheck_OneInactiveMember_CL)}';
                                             return helper.html.render.format('{!JSENCODE($Label.OrgCheck_XInactiveMembers_CL)}', r.inactiveMembersCount);
-                                            ;                                
                                         },
                                         scoreFormula: (r) => {
                                             if (r.hasInactiveMembers === true) return 1;
