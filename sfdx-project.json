@@ -3,9 +3,9 @@
         {
             "path": "force-app",
             "default": true,
-            "package": "OrgCheck",
+            "package": "Org Check (unlocked)",
             "versionName": "Helium",
-            "versionNumber": "2.4.1.NEXT",
+            "versionNumber": "2.4.2.NEXT",
             "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
         }
     ],
@@ -26,6 +26,8 @@
         "OrgCheck@2.1.1-1": "04t7R0000018jlBQAQ",
         "OrgCheck@2.1.2-1": "04t7R0000018jlGQAQ",
         "OrgCheck@2.1.3-1": "04t7R0000018jpmQAA",
-        "OrgCheck@2.4.1-1": "04t7R0000018kAfQAI"
+        "OrgCheck@2.4.1-1": "04t7R0000018kAfQAI",
+        "OrgCheck@2.4.1-3": "04t7R0000018kApQAI",
+        "OrgCheck@2.4.2-1": "04t7R0000018kAuQAI"
     }
 }
