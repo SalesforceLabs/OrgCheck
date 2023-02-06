@@ -6,7 +6,7 @@ show_title: false
 ##title: Org Check
 
 show_imagetitle: true
-imagetitle: https://vincefinet.github.io/OrgCheck/assets/pngs/Logo+Mascot-v3.png
+imagetitle: https://SalesforceLabs.github.io/OrgCheck/assets/pngs/Logo+Mascot-v3.png
 
 description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
 
@@ -30,15 +30,3 @@ page_vision_url: /vision
 
 page_legal_label: Legal Terms
 page_legal_url: /legal
-
-
-##page_tech_datastores_label: Data Stores in OrgCheck
-##page_tech_datastores_url: /technical/datastores
-##page_tech_ds_apexclasses_label: Apex Classes
-##page_tech_ds_apexclasses_url: /technical/datastores/apexclasses
-##page_tech_ds_flows_label: Flows
-##page_tech_ds_flows_url: /technical/datastores/flows
-##page_tech_ds_packages_label: Packages
-##page_tech_ds_packages_url: /technical/datastores/packages
-##page_tech_ds_workflowrules_label: Workflow Rules
-##page_tech_ds_workflowrules_url: /technical/datastores/workflowrules
