@@ -43,6 +43,8 @@ Org Check is available under the [MIT license](LICENSE.md)
 - Social:
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
+- 2023:
+  - Salesforce Labs Video: Reduce Technical Debt with Org Check https://www.youtube.com/watch?v=gjv6q-AR1m0
 - 2022:
   - Articles on Medium about technical debt in Salesforce orgs:
     - How to continuously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org? https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a
