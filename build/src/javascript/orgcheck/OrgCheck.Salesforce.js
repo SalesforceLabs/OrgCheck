@@ -138,7 +138,7 @@ OrgCheck.Salesforce = {
                                         '(SELECT Id, Name FROM WebLinks) '+
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
-                                    (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<Local>\')');
+                                    (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<local>\')');
                     connection.tooling.query(query, (error, result) => {
                         if (error) {
                             error.context = { 
