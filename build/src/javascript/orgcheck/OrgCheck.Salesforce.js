@@ -330,7 +330,11 @@ OrgCheck.Salesforce = {
                         Promise.all(promises2)
                             .then((results) => {
                                 const response = {};
-                                results.forEach(r => response[r.type] = r.members);
+                                results.forEach(r => {
+                                    const m = response[r.type] || [];
+                                    m.push(...r.members);
+                                    response[r.type] = m;
+                                });
                                 return response;
                             })
                             .catch((err) => that.fire('error', err))
