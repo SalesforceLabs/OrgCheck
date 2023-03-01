@@ -529,7 +529,11 @@
                                                     } else {
                                                         r.appVisibilities.forEach(ap => {
                                                             const d = matrixData[ap.app] || { app: ap.app };
-                                                            d[r.parentApiName] = (ap.visible === true ? 'Visible' : '');
+                                                            d[r.parentApiName] = (
+                                                                (ap.visible?'Visible':'') + 
+                                                                (ap.visible&&ap.default?' / ':' ') +
+                                                                (ap.default?'Default':'')
+                                                            );
                                                             matrixData[ap.app] = d;
                                                         });
                                                     }
