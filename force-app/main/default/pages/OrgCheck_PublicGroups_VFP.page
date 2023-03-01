@@ -193,13 +193,15 @@
                             helper.map.iterate2(map.publicGroups, function(d, i, s) { 
                                 if (d.type === 'role' || d.type === 'roleAndSub') {
                                     const role = map.roles[d.relatedId];
-                                    d.name = role.name;
-                                    d.developerName = role.developerName;
-                                    d.directMembersCount = role.activeMembersCount;
-                                    d.directUsers = role.activeMembers;
-                                    d.directGroups = [];
-                                    if (d.type === 'role') d.parentId = publicGroupIDsByRoleID[role.parentId];
-                                    if (d.type === 'roleAndSub') d.parentId = publicGroupIDsByRoleAndSubID[role.parentId];
+                                    if (role) {
+                                        d.name = role.name;
+                                        d.developerName = role.developerName;
+                                        d.directMembersCount = role.activeMembersCount;
+                                        d.directUsers = role.activeMembers;
+                                        d.directGroups = [];
+                                        if (d.type === 'role') d.parentId = publicGroupIDsByRoleID[role.parentId];
+                                        if (d.type === 'roleAndSub') d.parentId = publicGroupIDsByRoleAndSubID[role.parentId];
+                                    }
                                 }
                             });
 
