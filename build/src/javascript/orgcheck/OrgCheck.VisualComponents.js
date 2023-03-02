@@ -182,6 +182,7 @@ OrgCheck.VisualComponents = {
                         const iOrder = config.sorting.order === 'asc' ? 1 : -1;
                         const items = [].slice.call(table.rows).slice(1);
                         const isCellNumeric = c.type === 'numeric';
+                        const size = items.length;
                         items.sort(function compare(a, b) {
                             const ca = a.getElementsByTagName('td')[i];
                             const cb = b.getElementsByTagName('td')[i];
@@ -189,9 +190,12 @@ OrgCheck.VisualComponents = {
                                 const va = ca.hasAttribute('aria-data') ? ca.getAttribute('aria-data') : ca.textContent;
                                 const vb = cb.hasAttribute('aria-data') ? cb.getAttribute('aria-data') : cb.textContent;
                                 if (isCellNumeric) {
+                                    if (va === '') return size;
+                                    if (vb === '') return -size;
                                     if (va && vb) return (va - vb) * iOrder;
                                     if (va) return iOrder;
                                     if (vb) return -iOrder;
+                                    return 0;
                                 }
                                 if (va < vb) return -iOrder;
                                 if (va > vb) return iOrder;

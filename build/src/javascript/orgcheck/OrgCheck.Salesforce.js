@@ -138,7 +138,7 @@ OrgCheck.Salesforce = {
                                         '(SELECT Id, Name FROM WebLinks) '+
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
-                                    (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<Local>\')');
+                                    (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<local>\')');
                     connection.tooling.query(query, (error, result) => {
                         if (error) {
                             error.context = { 
@@ -330,7 +330,11 @@ OrgCheck.Salesforce = {
                         Promise.all(promises2)
                             .then((results) => {
                                 const response = {};
-                                results.forEach(r => response[r.type] = r.members);
+                                results.forEach(r => {
+                                    const m = response[r.type] || [];
+                                    m.push(...r.members);
+                                    response[r.type] = m;
+                                });
                                 return response;
                             })
                             .catch((err) => that.fire('error', err))

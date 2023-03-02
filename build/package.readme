@@ -30,10 +30,13 @@ sfdx force:org:delete --targetusername MyScratchOrg
 ============================================================
 List of usefull commands for packaging
 ============================================================
-sfdx force:package:version:list --targetdevhubusername vfinet.devhub@salesforce.com 
-sfdx force:package:version:create --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.4.1-0
+##sfdx force:package:version:list --targetdevhubusername vfinet.devhub@salesforce.com 
+##sfdx force:package:version:create --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
+##sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.4.1-0
 
+sfdx package version list --target-hub-org vfinet.devhub@salesforce.com 
+sfdx package version create --target-hub-org vfinet.devhub@salesforce.com --package OrgCheck --definition-file config/project-scratch-def.json --installation-key-bypass --code-coverage --wait 10
+sfdx package version promote --target-hub-org vfinet.devhub@salesforce.com --package OrgCheck@2.5.0-0
 
 
 

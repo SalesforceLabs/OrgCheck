@@ -374,6 +374,8 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
+                                    { name: '#FLSs', property: 'nbFieldPermissions', formula: (r) => { return r.nbFieldPermissions > 100 ? '100+' : r.nbFieldPermissions; }, type: 'numeric' },
+                                    { name: '#Object CRUDs', property: 'nbObjectPermissions', formula: (r) => { return r.nbObjectPermissions > 100 ? '100+' : r.nbObjectPermissions; }, type: 'numeric' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 
@@ -529,7 +531,11 @@
                                                     } else {
                                                         r.appVisibilities.forEach(ap => {
                                                             const d = matrixData[ap.app] || { app: ap.app };
-                                                            d[r.parentApiName] = (ap.visible === true ? 'Visible' : '');
+                                                            d[r.parentApiName] = (
+                                                                (ap.visible?'Visible':'') + 
+                                                                (ap.visible&&ap.default?' / ':' ') +
+                                                                (ap.default?'Default':'')
+                                                            );
                                                             matrixData[ap.app] = d;
                                                         });
                                                     }

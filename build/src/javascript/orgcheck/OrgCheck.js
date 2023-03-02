@@ -6,7 +6,7 @@
     /**
      * Org Check Version
      */
-    version: 'Helium [He,2]',
+    version: 'Lithium [Li,3]',
    
     /**
      * Org Check core
@@ -366,6 +366,7 @@
                                         const avsArray = Array.isArray(avs) ? avs : [ avs ];
                                         avsArray.forEach(av => appVisibility.appVisibilities.push({ 
                                             app: av.application,
+                                            default: av.default === 'true',
                                             visible: av.visible === 'true'
                                         }));
                                     }
