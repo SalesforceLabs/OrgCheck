@@ -6,7 +6,7 @@
     /**
      * Org Check Version
      */
-    version: 'Helium [He,2]',
+    version: 'Lithium [Li,3]',
    
     /**
      * Org Check core
