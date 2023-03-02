@@ -374,6 +374,8 @@
                                     },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsGroup_CL)}', property: 'isGroup', type: 'checkbox' },
                                     { name: '{!JSENCODE($Label.OrgCheck_IsCustom_CL)}', property: 'isCustom', type: 'checkbox' },
+                                    { name: '#FLS', formula: (r) => { return r.fieldPermissions.length; }, type: 'numeric' },
+                                    { name: '#CRUD', formula: (r) => { return r.objectPermissions.length; }, type: 'numeric' },
                                     { name: '{!JSENCODE($Label.OrgCheck_License_CL)}', property: 'license' },
                                     { name: '{!JSENCODE($Label.OrgCheck_Package_CL)}', property: 'package' },
                                     { name: '{!JSENCODE($Label.OrgCheck_NbActiveUsers_CL)}', 

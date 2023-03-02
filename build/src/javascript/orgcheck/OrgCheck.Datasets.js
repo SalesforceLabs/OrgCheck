@@ -545,7 +545,9 @@ OrgCheck.Datasets = {
                 SALESFORCE_HANDLER.query([{
                         string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                     'CreatedDate, LastModifiedDate, '+
-                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
+                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1), '+ // just to see if used
+                                    '(SELECT SobjectType, Field, PermissionsEdit, PermissionsRead FROM FieldPerms), '+
+                                    '(SELECT SobjectType, PermissionsCreate, PermissionsRead, PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, PermissionsModifyAllRecords FROM ObjectPerms)'+
                                 'FROM PermissionSet '+
                                 'WHERE IsOwnedByProfile = FALSE' 
                     }, {
@@ -572,8 +574,24 @@ OrgCheck.Datasets = {
                                     hasMembers: hasMembers,
                                     isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
                                     createdDate: r.CreatedDate, 
-                                    lastModifiedDate: r.LastModifiedDate
+                                    lastModifiedDate: r.LastModifiedDate,
+                                    fieldPermissions: [],
+                                    objectPermissions: []
                                 };
+                                r.FieldPerms?.records.forEach(fp => item.fieldPermissions.push({ 
+                                    field: fp.SobjectType+'.'+fp.Field, 
+                                    read: fp.PermissionsRead,
+                                    update: fp.PermissionsEdit
+                                }));
+                                r.ObjectPerms?.records.forEach(op => item.objectPermissions.push({
+                                    object: op.SobjectType, 
+                                    create: op.PermissionsCreate, 
+                                    read: op.PermissionsRead,
+                                    update: op.PermissionsEdit,
+                                    delete: op.PermissionsDelete,
+                                    viewAll: op.PermissionsViewAllRecords, 
+                                    modifyAll: op.PermissionsModifyAllRecords
+                                }));
                                 if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
                                 pSetIds.push(item.id);
                                 MAP_HANDLER.setValue(records, item.id, item);
