@@ -545,7 +545,9 @@ OrgCheck.Datasets = {
                 SALESFORCE_HANDLER.query([{
                         string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                     'CreatedDate, LastModifiedDate, '+
-                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1) '+ // just to see if used
+                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1), '+ // just to see if used
+                                    '(SELECT Id FROM FieldPerms LIMIT 101), '+
+                                    '(SELECT Id FROM ObjectPerms LIMIT 101)'+
                                 'FROM PermissionSet '+
                                 'WHERE IsOwnedByProfile = FALSE' 
                     }, {
@@ -572,7 +574,9 @@ OrgCheck.Datasets = {
                                     hasMembers: hasMembers,
                                     isGroup: (r.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
                                     createdDate: r.CreatedDate, 
-                                    lastModifiedDate: r.LastModifiedDate
+                                    lastModifiedDate: r.LastModifiedDate,
+                                    nbFieldPermissions: r.FieldPerms?.records.length || 0,
+                                    nbObjectPermissions: r.ObjectPerms?.records.length || 0
                                 };
                                 if (item.isGroup === true) psgByName1[item.package+'--'+item.name] = item;
                                 pSetIds.push(item.id);
