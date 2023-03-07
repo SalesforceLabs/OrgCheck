@@ -367,7 +367,7 @@ OrgCheck.VisualComponents = {
 
     /**
      * Message
-     * @param configuration Object must contain 'modalContentId', 'modalId', 'warningMessagesId'
+     * @param configuration Object must contain 'modalContentId', 'modalImageId', 'modalId', 'warningMessagesId'
      */
     MessageHandler: function (configuration) {
 
@@ -378,14 +378,16 @@ OrgCheck.VisualComponents = {
         * @param error
         * @param displayIssueInformation
         * @param salesforceInfo
+        * @param imageTitle
+        * @param textTitle
         */
-        this.showError = function (error, displayIssueInformation, salesforceInfo) {
+        this.showError = function (error, displayIssueInformation, salesforceInfo, imageTitle, textTitle) {
             if (error) {
                 try {
                     private_errors.push(error);
                     let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
                     if (displayIssueInformation === true) {
-                        commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                        commonHTML += 'Please go <a href="https://github.com/SalesforceLabs/OrgCheck/issues" '+
                             'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
                             '><br />';
                     }
@@ -425,8 +427,9 @@ OrgCheck.VisualComponents = {
                         informationHTML += '<br />';
                     });
                     private_show_modal(
-                        'Oh no, Org Check had an error!', 
-                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, '')
+                        textTitle || 'Oh no, Org Check had an error!', 
+                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, ''),
+                        imageTitle || '/img/msg_icons/error32.png'
                     );
                 } catch (e) {
                     // Just in case we have an error during the showError!!
@@ -439,9 +442,10 @@ OrgCheck.VisualComponents = {
         * Show dialog box with a title and content
         * @param title String title
         * @param content String html or NodeElement representing the content of the box
+        * @param image the icon or image to show on this modal (optional)
         */
-        this.showModal = function (title, element) {
-            private_show_modal(title, element);
+        this.showModal = function (title, element, image) {
+            private_show_modal(title, element, image);
         };
 
         /**
@@ -477,9 +481,11 @@ OrgCheck.VisualComponents = {
 
         /**
         * Show the modal dialog box
+        * @param title
         * @param element Html element to show in the modal box
+        * @param image Optional image to show in the modal box on the left
         */
-        function private_show_modal(title, element) {
+        function private_show_modal(title, element, image) {
             const header = document.getElementById(configuration.modalTitleId);
             const content = document.getElementById(configuration.modalContentId);
             header.textContent = title;
@@ -492,6 +498,19 @@ OrgCheck.VisualComponents = {
                 content.appendChild(span);
             } else {
                 content.appendChild(element);
+            }
+            if (image) {
+                const imagediv = document.getElementById(configuration.modalImageId);
+                if (imagediv.firstElementChild) {
+                    imagediv.removeChild(imagediv.firstElementChild);
+                }
+                if (typeof image == 'string') {
+                    const img = document.createElement('img');
+                    img.src = image;
+                    imagediv.appendChild(img);
+                } else {
+                    imagediv.appendChild(image);
+                }
             }
             document.getElementById(configuration.modalId).style.display = 'block';
         }
