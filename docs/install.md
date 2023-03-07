@@ -73,7 +73,7 @@ In case you have enabled the "**API Client Whitelisting**" feature, you will nee
  - Create a permission set.
  - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API CLient Whitelisting**" feature -- that's why we can't add it to everybody).
  - And assign your user to this additional permission set.
-For more information, you can check that closed issue: https://github.com/VinceFINET/OrgCheck/issues/118
+For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/118
 
 ### When installing the app from AppExchange I see error like "This package can’t be installed... Package namespace conflict"
 In this case it is more likely that you are trying to install the application from the AppExchange on a Salesforce Organization where the standalone package is already installed.

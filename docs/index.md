@@ -35,7 +35,7 @@ The app is free of use: open sourced, available on the AppExchange for free and 
 
 Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
 
-Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/VinceFINET/OrgCheck/issues.
+Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/SalesforceLabs/OrgCheck/issues.
 
 ## How do I install this application?
 

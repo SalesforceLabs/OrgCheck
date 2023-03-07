@@ -387,7 +387,7 @@ OrgCheck.VisualComponents = {
                     private_errors.push(error);
                     let commonHTML = '<h1 class="slds-text-heading--small"></h1><br /><br />';
                     if (displayIssueInformation === true) {
-                        commonHTML += 'Please go <a href="https://github.com/VinceFINET/OrgCheck/issues" '+
+                        commonHTML += 'Please go <a href="https://github.com/SalesforceLabs/OrgCheck/issues" '+
                             'target="_blank" rel="external noopener noreferrer">here</a> and log an issue with the following information. <br /'+
                             '><br />';
                     }
