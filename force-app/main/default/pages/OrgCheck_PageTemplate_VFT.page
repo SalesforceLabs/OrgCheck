@@ -93,7 +93,10 @@
                                 </svg>
                                 <span class="slds-assistive-text">Close</span>
                             </button>
-                            <h2 id="modal-heading" class="slds-modal__title slds-hyphenate"></h2>
+                            <h2  class="slds-modal__title slds-hyphenate">
+                                <span id="modal-image-id" />
+                                <span id="modal-heading" />
+                            </h2>
                         </header>
                         <div class="slds-modal__content slds-scrollable" id="modal-content-id" style="width: 100%; height: 100%;" width="100%" height="100%" />
                         <footer class="slds-modal__footer">
@@ -237,6 +240,7 @@
                         htmlSpinnerTagId: 'spinner',
                         htmlSpinnerMessagesTagId: 'spinner-messages',
                         htmlModalContentTagId: 'modal-content-id',
+                        htmlModalImageTagId: 'modal-image-id',
                         htmlWarningMessagesTagId: 'warning-messages',
                         htmlModalTagId: 'modal',
                         htmlModalTitleTagId: 'modal-heading',

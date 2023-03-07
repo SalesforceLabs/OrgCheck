@@ -67,6 +67,7 @@
             modalContentId: setup.htmlModalContentTagId,
             modalId: setup.htmlModalTagId,
             modalTitleId: setup.htmlModalTitleTagId,
+            modalImageId: setup.htmlModalImageTagId,
             warningMessagesId: setup.htmlWarningMessagesTagId
         });
 
@@ -92,7 +93,7 @@
                                 data: d.data
                             }
                         };
-                        MSG_HANDLER.showError(error, false);
+                        MSG_HANDLER.showError(error, false, SALESFORCE_HANDLER, '/img/icon/profile32.png', 'WatchDog stopped you here... Waouf!');
                     }
                 }
                 switch (d.type) {
