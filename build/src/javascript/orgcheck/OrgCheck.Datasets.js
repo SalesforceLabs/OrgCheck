@@ -723,6 +723,12 @@ OrgCheck.Datasets = {
                         const records = MAP_HANDLER.newMap();
                         if (policies) {
                             policies.forEach(r => {
+                                if (typeof r.profile !== 'string') {
+                                    // Metadata could return profile pwd policy for deleted profile
+                                    // In this case, r.profile will be equal to { $: {xsi:nil: 'true'} }
+                                    // And we expect r.profile to be the name of the profile so....
+                                    return;
+                                }
                                 const item = {
                                     forgotPasswordRedirect: (r.forgotPasswordRedirect === 'true'),
                                     lockoutInterval: parseInt(r.lockoutInterval),

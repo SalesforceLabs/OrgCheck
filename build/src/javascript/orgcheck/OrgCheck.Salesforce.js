@@ -3,7 +3,11 @@
  */
 OrgCheck.Salesforce = {
     
-    AbstractProcess: function() {
+    AbstractProcess: function(connection) {
+        if (connection && connection.cache) { 
+            // Org Check has its own cache
+            connection.cache.clear(); 
+        }
         const private_events = {
             'error': (error) => { console.error(error); }
         };
@@ -19,7 +23,7 @@ OrgCheck.Salesforce = {
     },
 
     SoqlProcess: function(connection, queries, returnAsMap, casesafeid) {
-        OrgCheck.Salesforce.AbstractProcess.call(this);
+        OrgCheck.Salesforce.AbstractProcess.call(this, connection);
         const that = this;
         this.run = () => {
             try {
@@ -82,7 +86,7 @@ OrgCheck.Salesforce = {
     },
 
     GlobalDescribeProcess: function(connection) {
-        OrgCheck.Salesforce.AbstractProcess.call(this);
+        OrgCheck.Salesforce.AbstractProcess.call(this, connection);
         const that = this;
         this.run = () => {
             try {
@@ -105,7 +109,7 @@ OrgCheck.Salesforce = {
     },
 
     DescribeProcess: function(connection, secureBindingVariable, casesafeid, dapi, sobjectPackage, sobjectDevName) {
-        OrgCheck.Salesforce.AbstractProcess.call(this);
+        OrgCheck.Salesforce.AbstractProcess.call(this, connection);
         const that = this;
         const sobjectDevNameNoExt = sobjectDevName.split('__')[(sobjectPackage && sobjectPackage !== '') ? 1 : 0];
         this.run = () => {
@@ -284,7 +288,7 @@ OrgCheck.Salesforce = {
     },
 
     MetadataProcess: function(connection, metadatas) {
-        OrgCheck.Salesforce.AbstractProcess.call(this);
+        OrgCheck.Salesforce.AbstractProcess.call(this, connection);
         const that = this;
         this.run = () => {
             try {
@@ -347,7 +351,7 @@ OrgCheck.Salesforce = {
     },
 
     MetadataAtScaleProcess: function(connection, type, ids, byPasses) {
-        OrgCheck.Salesforce.AbstractProcess.call(this);
+        OrgCheck.Salesforce.AbstractProcess.call(this, connection);
         const that = this;
         this.run = () => {
             try {
