@@ -278,7 +278,13 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
                                         preprocessing: (r) => {
+                                            // If field is standard then we already know that we won't have any dependency (DAPI only for custom fields!!)
                                             if (r.custom === false) return;
+                                            // If for some reason object does not have the property "fieldDependencies" there is no dependency to show as well
+                                            if (!object.fieldDependencies) return;
+                                            // If for some reason current field has not id there is no dependency to show as well
+                                            if (!r.id) return;
+                                            // ELSE do your thing!!
                                             return helper.html.render.dependencyUsage(r.id, object.fieldDependencies[r.id], ['Layout', 'ApexClass', 'Flow']);
                                         },
                                         columns: [
