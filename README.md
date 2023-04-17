@@ -44,13 +44,16 @@ Org Check is available under the [MIT license](LICENSE.md)
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
 - 2023:
+  - Presentation for Salesforce France Professional Services in a **whole new way** with Jani Souryavongsa https://www.linkedin.com/in/janisouryavongsa)
+  - Pablo Gonzalez blog: 10 Salesforce Open-source Projects for DevOps Engineers https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck
   - Salesforce Labs Video: Reduce Technical Debt with Org Check https://www.youtube.com/watch?v=gjv6q-AR1m0
 - 2022:
   - Articles on Medium about technical debt in Salesforce orgs:
-    - How to continuously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org? https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a
+    - How to contin uously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org? https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a
     - Five concrete actions to reduce technical debt related to Apex Classes — Reduce Technical Debt series https://medium.com/@vfinet/five-concret-actions-to-reduce-technical-debt-related-to-apex-classes-reduce-technical-debt-f71a31e4b30c
   - App Review from Ike Wagh: https://www.youtube.com/watch?v=IG4zzqVsO_8
   - Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)" https://www.youtube.com/watch?v=ZCJ_NH-29I0
+  - Vincent receives the **Edison Delivery Excellence Award for FY22** (Internal Salesforce price) for developing the Org Check app 
 - 2021: 
   - Albanian Dreamin21, Org Check presentation by Sara Sali and Vincent Finet : https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/
   - Unofficial SF blog article: https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/
