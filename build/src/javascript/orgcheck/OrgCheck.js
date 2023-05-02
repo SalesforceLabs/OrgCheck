@@ -79,7 +79,7 @@
             watchDogCallback: (d) => { 
                 if (d.level === 'ERROR') {
                     let stopAndShowError = true;
-                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === true) {
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === false) {
                         stopAndShowError = false;
                     }
                     if (stopAndShowError === true) {
@@ -226,7 +226,6 @@
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
                                 let isSomethingToExport = false;
-                                let reasonNoExport = '';
                                 ctlSetup.actions.exportTable.forEach(d => {
                                     if (d.visibleTab) {
                                         const tab = document.getElementById(d.visibleTab).parentNode;
@@ -248,7 +247,12 @@
                                                 let v = cols[j].attributes['aria-data']?.value || cols[j].innerText;
                                                 v = v.trim() // trim will delete extra spaces (including &nbsp;)
                                                     .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
-                                                if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
+                                                if (v && v.indexOf(',') != -1) {
+                                                    // if v contains ',':
+                                                    //   - escape any double quotes in 'v'
+                                                    //   - add double quotes around 'v'
+                                                    v = '"'+v.replaceAll('"','""')+'"'; 
+                                                }
                                                 row.push(v);
                                             }
                                             data.push(row.join(","));        

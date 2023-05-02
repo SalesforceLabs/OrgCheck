@@ -337,12 +337,15 @@
                                                 formula: (r, pr) => { 
                                                     // If field is standard, show nothing
                                                     if (r.custom === false) return;
-                                                    // If field is custom and NO dependency information for the entire object
-                                                    if (object.fieldDependencies) return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
-                                                    // Note at this point 'pr' is not null which means the 
-                                                    // ELSE
-                                                    const dep = object.fieldDependencies[r.id]; // get dependencies for this field
-                                                    // If field if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                                    // If field is custom and we have some dependencies information for the entire object
+                                                    if (object.fieldDependencies) {
+                                                        // get dependencies for this field
+                                                        const dep = object.fieldDependencies[r.id]; 
+                                                        // If this field has depedencies
+                                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
+                                                    }
+                                                    // Any other case we show "No dependencies"
+                                                    return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                                 }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_Tooltips_CL)}', property: 'inlineHelpText' },
@@ -600,6 +603,10 @@
 
                             // Store all objects
                             allObjects = map.objects;
+
+                            // Select "NO PACKAGE" by default
+                            helper.html.element.get('object-namespace').selectedIndex = 1; // No Package
+                            onChangePackage('NO_PACKAGE');
 
                             helper.html.datatable.create({
                                 element: 'datatable-orgWideDefaults',

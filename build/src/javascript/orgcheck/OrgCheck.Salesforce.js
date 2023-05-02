@@ -116,17 +116,18 @@ OrgCheck.Salesforce = {
             try {
                 const promises = [];
                 promises.push(new Promise((resolve, reject) => {
-                    connection.sobject(sobjectDevName).describe(function (error, object) {
-                        if (error) {
-                            error.context = { 
+                    // describeSObject() method is not cached (compare to describe() method))
+                    connection.describeSObject(sobjectDevName, function (e, o) {
+                        if (e) {
+                            e.context = { 
                                 when: 'While calling an sobject describe.',
                                 what: {
                                     devName: sobjectDevName
                                 }
                             };
-                            reject(error)
+                            reject(e)
                         } else {
-                            resolve(object);
+                            resolve(o);
                         }
                     });
                 }));
@@ -143,9 +144,9 @@ OrgCheck.Salesforce = {
                                     'FROM EntityDefinition '+
                                     'WHERE DeveloperName = '+secureBindingVariable(sobjectDevNameNoExt)+' '+
                                     (sobjectPackage !== '' ? 'AND NamespacePrefix = '+secureBindingVariable(sobjectPackage)+' ' : 'AND PublisherId IN (\'System\', \'<local>\')');
-                    connection.tooling.query(query, (error, result) => {
-                        if (error) {
-                            error.context = { 
+                    connection.tooling.query(query, (e, r) => {
+                        if (e) {
+                            e.context = { 
                                 when: 'While calling an sobject describe from tooling api.',
                                 what: {
                                     soqlQuery: query,
@@ -153,46 +154,47 @@ OrgCheck.Salesforce = {
                                     devNameWithoutPrefix: sobjectDevNameNoExt
                                 }
                             };
-                            reject(error);
-                        } else if (result.totalSize !== 1) {
+                            reject(e);
+                        } else if (r.totalSize !== 1) {
                             resolve();
                         } else {
-                            resolve(result.records[0]);
+                            resolve(r.records[0]);
                         }
                     });
                 }));
                 promises.push(new Promise((resolve, reject) => {
-                    let request = { 
+                    connection.request({ 
                         url: '/services/data/v'+connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
                         method: 'GET'
-                    };
-                    connection.request(request, (error, response) => {
-                        if (error) {
-                            error.context = { 
+                    }, (e, r) => {
+                        if (e) {
+                            e.context = { 
                                 when: 'While calling /limits endpoint for sobject describe.',
                                 what: {
                                     devName: sobjectDevName
                                 }
                             };
-                            reject(error)
+                            reject(e)
                         } else {
-                            resolve((Array.isArray(response?.sObjects) && response?.sObjects.length == 1) ? response?.sObjects[0].count : 0);
+                            resolve((Array.isArray(r?.sObjects) && r?.sObjects.length == 1) ? r?.sObjects[0].count : 0);
                         }
                     });
                 }));
                 Promise.all(promises)
-                    .then((results) => { 
+                    .then((r) => { 
                         // the first promise was describe
                         // so we initialize the object with the first result
-                        const object = results[0]; 
+                        const object = r[0]; 
+                        console.log('*** object=', object);
 
                         // the third promise is the number of records!!
-                        object.recordCount = results[2]; 
+                        object.recordCount = r[2]; 
 
                         // the second promise was the soql query on EntityDefinition
                         // so we get the record of that query and map it to the 
                         //    previous object.
-                        const entityDef = results[1];
+                        const entityDef = r[1];
+                        console.log('*** entityDef=', entityDef);
 
                         // If that entity was not found in the tooling API
                         if (!entityDef) {
@@ -279,16 +281,16 @@ OrgCheck.Salesforce = {
                                     // FINALLY (with fields dependencies)!!
                                     that.fire('end', object);
                                 }, 
-                                (error) => that.fire('error', error)
+                                (e) => that.fire('error', e)
                             );
                         } else {
                             // FINALLY (without fields!)
                             that.fire('end', object);
                         }
                      })
-                    .catch((error) => that.fire('error', error));
-            } catch (error) {
-                that.fire('error', error);
+                    .catch((e) => that.fire('error', e));
+            } catch (e) {
+                that.fire('error', e);
             }
         }
     },
@@ -694,119 +696,94 @@ OrgCheck.Salesforce = {
 
         this.getOrgType = () => { return private_org_type; }
 
-        /**
-         * Check if Org Check should not be used
-         */
-        const private_check_orgtype = () => {
-            CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
-                .on('record', (r) => {
-                    let watchDogLevel = 'INFO';
-                    let watchDogMessage = 'Your org is all good!';
-                    // if the current Org is DE, it's ok to use Org Check!
-                    if (r.OrganizationType === 'Developer Edition') {
-                        private_org_type = 'Developer Edition';
-                    }
-                    // if the current Org is a Sandbox, it's ok to use Org Check!
-                    else if (r.IsSandbox === true) {
-                        private_org_type = 'Sandbox';
-                    }
-                    // if the current Org is not a Sandbox but a Trial Demo, it's ok to use Org Check!
-                    else if (r.IsSandbox === false && r.TrialExpirationDate) {
-                        private_org_type = 'TrialOrDemo';
-                    }
-                    // Other cases need to set a BYPASS (in home page) to continue using the app.
-                    else {
-                        private_org_type = 'Production';
-                        watchDogLevel = 'ERROR';
-                        watchDogMessage = 'Your org is a Production Org. To bypass this warning, check the security option.';
-                    }
-                    configuration.watchDogCallback({ 
-                        type: 'OrgTypeProd',
-                        level: watchDogLevel,
-                        message : watchDogMessage,
-                        data: {
-                            orgType: private_org_type, 
-                            orgId: r.Id,
-                            orgName: r.Name
-                        }
-                    });
-                })
-                .run();
-        }
+        this.getLimitApiDailyRequest = () => { return CONNECTION.limitInfo; }
 
-        let private_limits;
 
-        this.getLimitApiDailyRequest = () => { return private_limits?.DailyApiRequests; }
 
-        /**
-         * Limits call
-         */
-        const private_check_limits = () => {
-            CONNECTION.limits().then(d => {
-                private_limits = d;
-                if (d && d.DailyApiRequests) {
-                    const limitUsed = d.DailyApiRequests.Max - d.DailyApiRequests.Remaining;
-                    const limitRate = limitUsed / d.DailyApiRequests.Max;
+        // ***************************************************************************************
+        // let's call some checkings at the beggining
+        // ***************************************************************************************
+            
+        // 1- Check if Org Check should not be used
+        CONNECTION.query('SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate FROM Organization')
+            .on('record', (r) => {
+                let watchDogLevel = 'INFO';
+                let watchDogMessage = 'Your org is all good!';
+                // if the current Org is DE, it's ok to use Org Check!
+                if (r.OrganizationType === 'Developer Edition') private_org_type = 'Developer Edition';
+                // if the current Org is a Sandbox, it's ok to use Org Check!
+                else if (r.IsSandbox === true) private_org_type = 'Sandbox';
+                // if the current Org is not a Sandbox but a Trial Demo, it's ok to use Org Check!
+                else if (r.IsSandbox === false && r.TrialExpirationDate) private_org_type = 'TrialOrDemo';
+                // Other cases need to set a BYPASS (in home page) to continue using the app.
+                else {
+                    private_org_type = 'Production';
+                    watchDogLevel = 'ERROR';
+                    watchDogMessage = 'Your org is a Production Org. To bypass this warning, uncheck the security option.';
+                }
+                configuration.watchDogCallback({ 
+                    type: 'OrgTypeProd',
+                    level: watchDogLevel,
+                    message : watchDogMessage,
+                    data: {
+                        orgType: private_org_type, 
+                        orgId: r.Id,
+                        orgName: r.Name
+                    }
+                });
+
+                // 2- Check API Usage
+                if (CONNECTION.limitInfo && CONNECTION.limitInfo.apiUsage) {
+                    const apiUsageUsed = CONNECTION.limitInfo.apiUsage.used;
+                    const apiUsageMax = CONNECTION.limitInfo.apiUsage.limit;
+                    const apiUsageRate = apiUsageUsed / apiUsageMax;
                     let watchDogLevel = 'INFO';
                     let watchDogMessage = 'All good!';
-                    if (limitRate > 0.9) { // 90% !!!
+                    if (apiUsageRate > 0.9) { // 90% !!!
                         watchDogLevel = 'ERROR';
                         watchDogMessage = 'You are sooooo near to hit the DailyApiRequests limit, we will stop you there!'
-                    } else if (limitRate > 0.7) { // 70% !!!
+                    } else if (apiUsageRate > 0.7) { // 70% !!!
                         watchDogLevel = 'WARNING';
                         watchDogMessage = 'A little warning about the use of the DailyApiRequests limit...'
                     }
-
                     configuration.watchDogCallback({ 
                         type: 'DailyApiRequests',
                         level: watchDogLevel,
                         message : watchDogMessage,
                         data: {
-                            max: d.DailyApiRequests.Max,
-                            left: d.DailyApiRequests.Remaining,
-                            used: limitUsed,
-                            rate: limitRate
+                            max: apiUsageMax,
+                            left: apiUsageMax - apiUsageUsed,
+                            used: apiUsageUsed,
+                            rate: apiUsageRate
                         }
                     });
                 }
-            });
-        }
-
-        let private_user_information;
-
-        this.getUserInformation = () => { return private_user_information; }
-
-        const private_check_security = () => {
-            CONNECTION.query('SELECT Id, Profile.Id, Profile.Name, Profile.PermissionsViewAllData '+
-                             'FROM User '+
-                             'WHERE Id = '+this.secureSOQLBindingVariable(configuration.userId))
-                .on('record', (r) => {
-                    let watchDogLevel = 'INFO';
-                    let watchDogMessage = 'Your user is all good!';
-
-                    if (r.Profile.PermissionsViewAllData === false) {
-                        watchDogLevel = 'ERROR';
-                        watchDogMessage = 'You should be assigned to the System Administrator profile to run Org Check.';
+            })
+            .run();
+        
+        // 3- Check if current user is System Admin
+        CONNECTION.query('SELECT Id, Profile.Id, Profile.Name, Profile.PermissionsViewAllData '+
+                            'FROM User '+
+                            'WHERE Id = '+this.secureSOQLBindingVariable(configuration.userId))
+            .on('record', (r) => {
+                let watchDogLevel = 'INFO';
+                let watchDogMessage = 'Your user is all good!';
+                if (r.Profile.PermissionsViewAllData === false) {
+                    watchDogLevel = 'ERROR';
+                    watchDogMessage = 'You should be assigned to the System Administrator profile to run Org Check.';
+                }
+                configuration.watchDogCallback({ 
+                    type: 'UserSecurity',
+                    level: watchDogLevel,
+                    message : watchDogMessage,
+                    data: {
+                        userId: configuration.userId, 
+                        profileId: r.Profile.Id,
+                        profileName: r.Profile.Name,
+                        profileViewAllData: r.Profile.PermissionsViewAllData
                     }
-                    configuration.watchDogCallback({ 
-                        type: 'UserSecurity',
-                        level: watchDogLevel,
-                        message : watchDogMessage,
-                        data: {
-                            userId: configuration.userId, 
-                            profileId: r.Profile.Id,
-                            profileName: r.Profile.Name,
-                            profileViewAllData: r.Profile.PermissionsViewAllData,
-                            permissionSetAssignments: r.PermissionSetAssignments
-                        }
-                    });
-                })
-                .run();
-        }
-
-        // let's call it at the beggining
-        private_check_orgtype();
-        private_check_limits();
-        private_check_security();
+                });
+            })
+            .run();
     }
 }
