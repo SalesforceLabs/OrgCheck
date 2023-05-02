@@ -405,7 +405,8 @@
                             SALESFORCE_HANDLER.query([{
                                 string: 'SELECT Id, Name, Body '+
                                         'FROM ApexClass '+
-                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+')'
+                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+') '+
+                                        'LIMIT 25 ' // 25 is the limit of the composite api
                                 }])
                                 .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
                                 .on('end', (classes) => { 
@@ -437,7 +438,7 @@
                                             if (lastResponse.httpStatusCode === 201) {
                                                 MSG_HANDLER.showModal(
                                                     'Asynchronous Compilation Asked',
-                                                    'We asked Salesforce to recompile the following Apex Classes:<br />'+
+                                                    'We asked Salesforce to recompile the following Apex Classes (limit to the first 25):<br />'+
                                                     classes.map(c => '- <a href="/'+c.Id+'" target="_blank">'+c.Name+'</a>').join('<br />')+'<br />'+
                                                     '<br />'+
                                                     'For more information about the success of this compilation, you can check '+
