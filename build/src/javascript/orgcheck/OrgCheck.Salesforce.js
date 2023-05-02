@@ -132,7 +132,7 @@ OrgCheck.Salesforce = {
                 }));
                 promises.push(new Promise((resolve, reject) => {
                     const query = 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                                        '(SELECT Id, DurableId, QualifiedApiName FROM Fields), '+
+                                        '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
                                         '(SELECT Id, Name FROM ApexTriggers), '+
                                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -264,10 +264,16 @@ OrgCheck.Salesforce = {
                             const fieldIds = [];
                             entityDef.Fields.records.forEach((r) => {
                                 const id = r.DurableId.split('.')[1];
-                                fieldsMapper[r.QualifiedApiName] = id;
+                                fieldsMapper[r.QualifiedApiName] = { 'id': id, 'description': r.Description };
                                 fieldIds.push(id);
                             });
-                            object.fields.forEach((f) => f.id = fieldsMapper[f.name]);
+                            object.fields.forEach((f) => {
+                                const mapper = fieldsMapper[f.name];
+                                if (mapper) {
+                                    f.id = mapper.id;
+                                    f.description = mapper.description;
+                                }
+                            });
                             dapi(fieldIds, (deps) => {
                                     object.fieldDependencies = deps;
                                     // FINALLY (with fields dependencies)!!

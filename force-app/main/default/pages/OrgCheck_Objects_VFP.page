@@ -334,12 +334,15 @@
                                                 scoreFormula: (r, pr) => { if (pr?.usedFlowInactiveCount > 0) return 1; }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
-                                                formula: (r) => { 
-                                                    if (r.custom === true) {
-                                                        const dep = object.fieldDependencies[r.id]; 
-                                                        if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                                        return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
-                                                    }
+                                                formula: (r, pr) => { 
+                                                    // If field is standard, show nothing
+                                                    if (r.custom === false) return;
+                                                    // If field is custom and NO dependency information for the entire object
+                                                    if (object.fieldDependencies) return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
+                                                    // Note at this point 'pr' is not null which means the 
+                                                    // ELSE
+                                                    const dep = object.fieldDependencies[r.id]; // get dependencies for this field
+                                                    // If field if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
                                                 }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_Tooltips_CL)}', property: 'inlineHelpText' },
@@ -372,7 +375,16 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}',
+                                                formula: (r) => {
+                                                    if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                                    return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                                },
+                                                scoreFormula: (r) => { 
+                                                    if (!r.description) return 1; 
+                                                }
+                                            }
                                         ],
                                         data: object.fields,
                                         sorting: { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', order: 'asc' },
