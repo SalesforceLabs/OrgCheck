@@ -574,7 +574,7 @@ OrgCheck.Salesforce = {
                 } else if (typeof(e) !== 'string') { // If not a string typed value, return value is itself (case of a numeric)
                     a[i] = e;
                 } else { // If a string value, we substitute the quotes
-                    a[i] = "'" + e.replace(/'/g, "\'") + "'";
+                    a[i] = "'" + e.replace(/'/g, "\\'") + "'";
                 }
             });
 
