@@ -69,7 +69,7 @@
                 }
                 td.orgcheck-table-td-badscore {
                     background-color: #ffd079;
-                    background-image: url(/img/msg_icons/error16.png);
+                    background-image: url(/img/samples/rating1.gif);
                     background-position: left;
                     background-repeat: no-repeat;
                     background-size: 11px;

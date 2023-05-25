@@ -129,10 +129,13 @@
 
         const STRING_HANDLER = new OrgCheck.DataTypes.String.Handler();
 
+        const HTMLTAG_HANDLER = new OrgCheck.VisualComponents.HtmlTagHandler();
+
         const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
             StringHandler: STRING_HANDLER,
             DateHandler: DATE_HANDLER,
-            MessageHandler: MSG_HANDLER
+            MessageHandler: MSG_HANDLER,
+            HtmlTagHandler: HTMLTAG_HANDLER
         });
 
         const DATASETS_HANDLER = new OrgCheck.Datasets.Handler({
@@ -685,41 +688,17 @@
                             return usage;
                         },
                         checkbox: function(b) {
-                            if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
-                            return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
+                            return HTMLTAG_HANDLER.checkbox(b);
                         },
                         link: function(uri, content) {
-                            return '<a href="' + SALESFORCE_HANDLER.getEndpointUrl() + uri + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
+                            return HTMLTAG_HANDLER.link(SALESFORCE_HANDLER.getEndpointUrl(), uri, content);
                         },
                         icon: function(name) {
-                            switch (name) {
-                                // img url check http://www.vermanshul.com/2017/10/quick-tips-salesforce-default-images.html
-                                case 'greenFlag':  return '<img src="/img/samples/flag_green.gif" alt="green flag" />';
-                                case 'redFlag':    return '<img src="/img/samples/flag_red.gif" alt="red flag" />';
-                                case 'group':      return '<img src="/img/icon/groups24.png" alt="group" />';
-                                case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
-                                case 'star0':      return '<img src="/img/samples/stars_000.gif" alt="star-0" />';
-                                case 'star1':      return '<img src="/img/samples/stars_100.gif" alt="star-1" />';
-                                case 'star2':      return '<img src="/img/samples/stars_200.gif" alt="star-2" />';
-                                case 'star3':      return '<img src="/img/samples/stars_300.gif" alt="star-3" />';
-                                case 'star4':      return '<img src="/img/samples/stars_400.gif" alt="star-4" />';
-                                case 'star5':      return '<img src="/img/samples/stars_500.gif" alt="star-5" />';
-                                case 'org':        return '<img src="/img/msg_icons/confirm16.png" alt="org level" />';
-                                default:           return '';
-                            }
+                            return HTMLTAG_HANDLER.icon(name);
                         },
                         color: function(label) {
-                            switch (label) {
-                                case 'highlight':    return '#ffe099';
-                                case 'dark-blue':    return '#147efb';
-                                case 'blue':         return '#5fc9f8';
-                                case 'dark-orange':  return '#fd9426';
-                                case 'orange':       return '#fecb2e';
-                                case 'light-gray':   return '#bfc9ca';
-                                case 'gray':         return '#555555';
-                                default:             return 'red';
-                            }
-                        }, 
+                            return HTMLTAG_HANDLER.color(label);
+                        }
                     }
                 }
             };
