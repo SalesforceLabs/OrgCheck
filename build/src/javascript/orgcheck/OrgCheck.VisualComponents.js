@@ -9,12 +9,13 @@
 OrgCheck.VisualComponents = {
 
     /**
-     * List of decorator handlers needed for this component
+     * Datatable decorator
      * @param handlers JSON configuration including:
      *              <ol>
      *                <li><code>StringHandler</code> including method <code>htmlSecurise</code></li>
      *                <li><code>DateHandler</code> including method <code>dateFormat</code> and <code>datetimeFormat</code></li>
      *                <li><code>MessageHandler</code> including method <code>showModal</code></li>
+     *                <li><code>HtmlTagHandler</code> including method <code>checkbox</code></li>
      *              </ol>
      */
     DatatableHandler: function(handlers) { 
@@ -22,6 +23,7 @@ OrgCheck.VisualComponents = {
         const STRING_HANDLER = handlers.StringHandler;
         const DATE_HANDLER = handlers.DateHandler;
         const MSG_HANDLER = handlers.MessageHandler;
+        const HTMLTAG_HANDLER = handlers.HtmlTagHandler;
 
         /**
          * Creates a datatable
@@ -132,7 +134,7 @@ OrgCheck.VisualComponents = {
             const trHead = thead.appendChild(document.createElement('tr'));
             if (config.showLineCount === true) config.columns.unshift({ name: '#' });
             if (config.showSelection) config.columns.unshift({ name: 'Select' });
-            const orderingImage = document.createElement('img');
+            const orderingImage = document.createElement('span');
             let firstSortCallback;
             config.columns.forEach((c, i) => {
                 const thHead = trHead.appendChild(document.createElement('th'));
@@ -173,10 +175,10 @@ OrgCheck.VisualComponents = {
                         }
                         if (config.sorting.order === 'asc') {
                             thHead.setAttribute('aria-sort', 'ascending');
-                            orderingImage.src = '/img/sort_asc_arrow.gif';
+                            orderingImage.innerHTML = '&nbsp;🔼';
                         } else {
                             thHead.setAttribute('aria-sort', 'descending');
-                            orderingImage.src = '/img/sort_desc_arrow.gif';
+                            orderingImage.innerHTML = '&nbsp;🔽';
                         }
                         grdHead.appendChild(orderingImage);
                         const iOrder = config.sorting.order === 'asc' ? 1 : -1;
@@ -266,7 +268,7 @@ OrgCheck.VisualComponents = {
                                 case 'date': dataDecorated = DATE_HANDLER.dateFormat(dataRaw); break;
                                 case 'datetime': dataDecorated = DATE_HANDLER.datetimeFormat(dataRaw); break;
                                 case 'numeric': dataDecorated = ''+dataRaw; break;
-                                case 'checkbox': dataDecorated = '<img src="/img/checkbox_'+(dataRaw?'':'un')+'checked.gif" alt="'+(dataRaw?'true':'false')+'" />';
+                                case 'checkbox': dataDecorated = HTMLTAG_HANDLER.checkbox(dataRaw);
                             }
                         } else {
                             if (c.formula) dataDecorated = c.formula(row, preprocessedRow);
@@ -354,7 +356,7 @@ OrgCheck.VisualComponents = {
                 const countElement = document.getElementById(config.appendCountInElement)
                 if (countElement && nbBadRows > 0) {
                     // Warning: do not add any html tag here, if not the link on the tab won't work on them... Thank you!
-                    countElement.innerHTML += ' (' + nbBadRows + '⚠️)';
+                    countElement.innerHTML += ' (' + nbBadRows + HTMLTAG_HANDLER.icon('redPin')+')';
                 }
             }
             table.hidden = false; // make table visible again
@@ -366,7 +368,59 @@ OrgCheck.VisualComponents = {
 
 
     /**
-     * Message
+     * HTML Tag decorator 
+     */
+    HtmlTagHandler: function() {
+
+        this.image = function(name) {
+            switch (name) {
+                case 'greenFlag':  return '/img/samples/flag_green.gif';
+                case 'redFlag':    return '/img/samples/flag_red.gif';
+                case 'group':      return '/img/icon/groups24.png';
+                case 'user':       return '/img/icon/alohaProfile16.png';
+                case 'star0':      return '/img/samples/stars_000.gif';
+                case 'star1':      return '/img/samples/stars_100.gif';
+                case 'star2':      return '/img/samples/stars_200.gif';
+                case 'star3':      return '/img/samples/stars_300.gif';
+                case 'star4':      return '/img/samples/stars_400.gif';
+                case 'star5':      return '/img/samples/stars_500.gif';
+                case 'org':        return '/img/msg_icons/confirm16.png';
+                case 'checked':    return '/img/samples/rating5.gif';                
+                case 'unchecked':  return '/img/samples/rating3.gif';
+                case 'redPin':     return '/img/samples/rating1.gif';
+                default:           return '';
+            }
+        };
+
+        this.checkbox = function(b) {
+            return this.icon(b === true ? 'checked' : 'unchecked');
+        };
+
+        this.link = function(endpoint, uri, content) {
+            return '<a href="' + endpoint + uri + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
+        };
+
+        this.icon = function(name) {
+            return '<img src="'+this.image(name)+'" alt="'+name+'" title="'+name+'" style=\"vertical-align: inherit;\" />';
+        };
+
+        this.color = function(label) {
+            switch (label) {
+                case 'highlight':    return '#ffe099';
+                case 'dark-blue':    return '#147efb';
+                case 'blue':         return '#5fc9f8';
+                case 'dark-orange':  return '#fd9426';
+                case 'orange':       return '#fecb2e';
+                case 'light-gray':   return '#bfc9ca';
+                case 'gray':         return '#555555';
+                default:             return 'red';
+            }
+        };
+    },
+
+
+    /**
+     * Message decorator
      * @param configuration Object must contain 'modalContentId', 'modalImageId', 'modalId', 'warningMessagesId'
      */
     MessageHandler: function (configuration) {
@@ -518,7 +572,7 @@ OrgCheck.VisualComponents = {
 
 
     /**
-     * Progress bar
+     * Progress bar decorator
      * @param configuration Object must contain 'spinnerDivId' and 'spinnerMessagesId'
      */
     ProgressBarHandler: function (configuration) {

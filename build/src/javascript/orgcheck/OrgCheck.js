@@ -79,7 +79,7 @@
             watchDogCallback: (d) => { 
                 if (d.level === 'ERROR') {
                     let stopAndShowError = true;
-                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === true) {
+                    if (d.type === 'OrgTypeProd' && PREFERENCE_CACHE_HANDLER.getItemProperty('Options', 'warning.ByPassUseInProduction', true) === false) {
                         stopAndShowError = false;
                     }
                     if (stopAndShowError === true) {
@@ -129,10 +129,13 @@
 
         const STRING_HANDLER = new OrgCheck.DataTypes.String.Handler();
 
+        const HTMLTAG_HANDLER = new OrgCheck.VisualComponents.HtmlTagHandler();
+
         const DATATABLE_HANDLER = new OrgCheck.VisualComponents.DatatableHandler({
             StringHandler: STRING_HANDLER,
             DateHandler: DATE_HANDLER,
-            MessageHandler: MSG_HANDLER
+            MessageHandler: MSG_HANDLER,
+            HtmlTagHandler: HTMLTAG_HANDLER
         });
 
         const DATASETS_HANDLER = new OrgCheck.Datasets.Handler({
@@ -226,7 +229,6 @@
                             const buttonExport = document.getElementById('button-export');
                             buttonExport.onclick = function(e) { 
                                 let isSomethingToExport = false;
-                                let reasonNoExport = '';
                                 ctlSetup.actions.exportTable.forEach(d => {
                                     if (d.visibleTab) {
                                         const tab = document.getElementById(d.visibleTab).parentNode;
@@ -248,7 +250,12 @@
                                                 let v = cols[j].attributes['aria-data']?.value || cols[j].innerText;
                                                 v = v.trim() // trim will delete extra spaces (including &nbsp;)
                                                     .replaceAll('\n', ','); // we used innerText so that \n stays, which is not the case for textContext
-                                                if (v && v.indexOf(',')  != -1) v = '"'+v+'"';
+                                                if (v && v.indexOf(',') != -1) {
+                                                    // if v contains ',':
+                                                    //   - escape any double quotes in 'v'
+                                                    //   - add double quotes around 'v'
+                                                    v = '"'+v.replaceAll('"','""')+'"'; 
+                                                }
                                                 row.push(v);
                                             }
                                             data.push(row.join(","));        
@@ -401,7 +408,8 @@
                             SALESFORCE_HANDLER.query([{
                                 string: 'SELECT Id, Name, Body '+
                                         'FROM ApexClass '+
-                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+')'
+                                        'WHERE Id IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(classIds)+') '+
+                                        'LIMIT 25 ' // 25 is the limit of the composite api
                                 }])
                                 .on('error', (e) => { MSG_HANDLER.showError(e, true, SALESFORCE_HANDLER); })
                                 .on('end', (classes) => { 
@@ -433,7 +441,7 @@
                                             if (lastResponse.httpStatusCode === 201) {
                                                 MSG_HANDLER.showModal(
                                                     'Asynchronous Compilation Asked',
-                                                    'We asked Salesforce to recompile the following Apex Classes:<br />'+
+                                                    'We asked Salesforce to recompile the following Apex Classes (limit to the first 25):<br />'+
                                                     classes.map(c => '- <a href="/'+c.Id+'" target="_blank">'+c.Name+'</a>').join('<br />')+'<br />'+
                                                     '<br />'+
                                                     'For more information about the success of this compilation, you can check '+
@@ -680,41 +688,17 @@
                             return usage;
                         },
                         checkbox: function(b) {
-                            if (b) return '<img src="/img/checkbox_checked.gif" alt="true" />';
-                            return '<img src="/img/checkbox_unchecked.gif" alt="false" />';
+                            return HTMLTAG_HANDLER.checkbox(b);
                         },
                         link: function(uri, content) {
-                            return '<a href="' + SALESFORCE_HANDLER.getEndpointUrl() + uri + '" target="_blank" rel="external noopener noreferrer">' + content + '</a>';
+                            return HTMLTAG_HANDLER.link(SALESFORCE_HANDLER.getEndpointUrl(), uri, content);
                         },
                         icon: function(name) {
-                            switch (name) {
-                                // img url check http://www.vermanshul.com/2017/10/quick-tips-salesforce-default-images.html
-                                case 'greenFlag':  return '<img src="/img/samples/flag_green.gif" alt="green flag" />';
-                                case 'redFlag':    return '<img src="/img/samples/flag_red.gif" alt="red flag" />';
-                                case 'group':      return '<img src="/img/icon/groups24.png" alt="group" />';
-                                case 'user':       return '<img src="/img/icon/alohaProfile16.png" alt="user" />';
-                                case 'star0':      return '<img src="/img/samples/stars_000.gif" alt="star-0" />';
-                                case 'star1':      return '<img src="/img/samples/stars_100.gif" alt="star-1" />';
-                                case 'star2':      return '<img src="/img/samples/stars_200.gif" alt="star-2" />';
-                                case 'star3':      return '<img src="/img/samples/stars_300.gif" alt="star-3" />';
-                                case 'star4':      return '<img src="/img/samples/stars_400.gif" alt="star-4" />';
-                                case 'star5':      return '<img src="/img/samples/stars_500.gif" alt="star-5" />';
-                                case 'org':        return '<img src="/img/msg_icons/confirm16.png" alt="org level" />';
-                                default:           return '';
-                            }
+                            return HTMLTAG_HANDLER.icon(name);
                         },
                         color: function(label) {
-                            switch (label) {
-                                case 'highlight':    return '#ffe099';
-                                case 'dark-blue':    return '#147efb';
-                                case 'blue':         return '#5fc9f8';
-                                case 'dark-orange':  return '#fd9426';
-                                case 'orange':       return '#fecb2e';
-                                case 'light-gray':   return '#bfc9ca';
-                                case 'gray':         return '#555555';
-                                default:             return 'red';
-                            }
-                        }, 
+                            return HTMLTAG_HANDLER.color(label);
+                        }
                     }
                 }
             };

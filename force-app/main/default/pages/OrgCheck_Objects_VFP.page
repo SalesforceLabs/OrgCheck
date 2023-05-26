@@ -278,7 +278,13 @@
                                     helper.html.datatable.create({
                                         element: 'datatable-fields',
                                         preprocessing: (r) => {
+                                            // If field is standard then we already know that we won't have any dependency (DAPI only for custom fields!!)
                                             if (r.custom === false) return;
+                                            // If for some reason object does not have the property "fieldDependencies" there is no dependency to show as well
+                                            if (!object.fieldDependencies) return;
+                                            // If for some reason current field has not id there is no dependency to show as well
+                                            if (!r.id) return;
+                                            // ELSE do your thing!!
                                             return helper.html.render.dependencyUsage(r.id, object.fieldDependencies[r.id], ['Layout', 'ApexClass', 'Flow']);
                                         },
                                         columns: [
@@ -328,12 +334,18 @@
                                                 scoreFormula: (r, pr) => { if (pr?.usedFlowInactiveCount > 0) return 1; }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_Dependencies_CL)}', 
-                                                formula: (r) => { 
-                                                    if (r.custom === true) {
+                                                formula: (r, pr) => { 
+                                                    // If field is standard, show nothing
+                                                    if (r.custom === false) return;
+                                                    // If field is custom and we have some dependencies information for the entire object
+                                                    if (object.fieldDependencies) {
+                                                        // get dependencies for this field
                                                         const dep = object.fieldDependencies[r.id]; 
+                                                        // If this field has depedencies
                                                         if (dep) return helper.html.render.dependencies(r.id, r.name, dep);
-                                                        return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                                     }
+                                                    // Any other case we show "No dependencies"
+                                                    return '{!JSENCODE($Label.OrgCheck_NoDependency_CL)}';
                                                 }
                                             },
                                             { name: '{!JSENCODE($Label.OrgCheck_Tooltips_CL)}', property: 'inlineHelpText' },
@@ -366,7 +378,16 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_Encrypted_CL)}', property: 'encrypted', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
-                                            { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' }
+                                            { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' },
+                                            { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}',
+                                                formula: (r) => {
+                                                    if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));
+                                                    return '{!JSENCODE($Label.OrgCheck_SetADescription_CL)}';
+                                                },
+                                                scoreFormula: (r) => { 
+                                                    if (!r.description) return 1; 
+                                                }
+                                            }
                                         ],
                                         data: object.fields,
                                         sorting: { name: '{!JSENCODE($Label.OrgCheck_Label_CL)}', order: 'asc' },
@@ -582,6 +603,10 @@
 
                             // Store all objects
                             allObjects = map.objects;
+
+                            // Select "NO PACKAGE" by default
+                            helper.html.element.get('object-namespace').selectedIndex = 1; // No Package
+                            onChangePackage('NO_PACKAGE');
 
                             helper.html.datatable.create({
                                 element: 'datatable-orgWideDefaults',

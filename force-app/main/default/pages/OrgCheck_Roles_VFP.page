@@ -149,8 +149,8 @@
                                 if (activeCount > 0) {
                                     d.popup_background_color = helper.html.render.color('blue');
                                     d.active_background_color = helper.html.render.color('dark-blue');
-                                    if (activeCount > 100) {
-                                        d.active_count = '99+';
+                                    if (activeCount > 50) {
+                                        d.active_count = '50+';
                                     }
                                     d.active_show_notif = true;
                                 } else {
@@ -161,8 +161,8 @@
                                 d.inactive_count = inactiveCount;
                                 if (inactiveCount > 0) {
                                     d.inactive_background_color = helper.html.render.color('light-gray');
-                                    if (inactiveCount > 100) {
-                                        d.inactive_count = '99+';
+                                    if (inactiveCount > 50) {
+                                        d.inactive_count = '50+';
                                     }
                                     d.inactive_show_notif = true;
                                 } else {
