@@ -469,7 +469,7 @@ OrgCheck.Datasets = {
                 const profiles = {};
                 SALESFORCE_HANDLER.query([{
                         string: 'SELECT Id, ProfileId, Profile.UserType, NamespacePrefix, '+
-                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 101) '+
+                                    '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) '+
                                 'FROM PermissionSet '+ // oh yes we are not mistaken!
                                 'WHERE isOwnedByProfile = TRUE'
                     }])
@@ -546,8 +546,8 @@ OrgCheck.Datasets = {
                         string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                                     'CreatedDate, LastModifiedDate, '+
                                     '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1), '+ // just to see if used
-                                    '(SELECT Id FROM FieldPerms LIMIT 101), '+
-                                    '(SELECT Id FROM ObjectPerms LIMIT 101)'+
+                                    '(SELECT Id FROM FieldPerms LIMIT 51), '+
+                                    '(SELECT Id FROM ObjectPerms LIMIT 51)'+
                                 'FROM PermissionSet '+
                                 'WHERE IsOwnedByProfile = FALSE' 
                     }, {
