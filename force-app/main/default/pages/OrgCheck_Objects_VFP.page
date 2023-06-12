@@ -379,10 +379,6 @@
                                             { name: '{!JSENCODE($Label.OrgCheck_ExternalId_CL)}', property: 'externalId', type: 'checkbox' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Default_CL)}', property: 'defaultValue' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Formula_CL)}', property: 'calculatedFormula' },
-                                            { name: 'Data Owner Name', property: 'dataOwner' },
-                                            { name: 'Field Usage', property: 'fieldUsage' },
-                                            { name: 'Compliance Categorization', property: 'complianceCategory' },
-                                            { name: 'Data Sensitivity Level', property: 'dataSensitivityLevel' },
                                             { name: '{!JSENCODE($Label.OrgCheck_Description_CL)}',
                                                 formula: (r) => {
                                                     if (r.description) return helper.html.render.escape(helper.html.render.shrinkText(r.description, 50));

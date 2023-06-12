@@ -133,7 +133,7 @@ OrgCheck.Salesforce = {
                 }));
                 promises.push(new Promise((resolve, reject) => {
                     const query = 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                                        '(SELECT Id, DurableId, QualifiedApiName, Description, BusinessOwner.Name, BusinessStatus, ComplianceGroup, SecurityClassification FROM Fields), '+
+                                        '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
                                         '(SELECT Id, Name FROM ApexTriggers), '+
                                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -266,22 +266,14 @@ OrgCheck.Salesforce = {
                             const fieldIds = [];
                             entityDef.Fields.records.forEach((r) => {
                                 const id = r.DurableId.split('.')[1];
-                                fieldsMapper[r.QualifiedApiName] = { 
-                                    'id': id, 
-                                    'description': r.Description,
-                                    'dataOwner': r.BusinessOwner?.Name, // Data Owner Name
-                                    'fieldUsage': r.BusinessStatus, // Field Usage
-                                    'complianceCategory': r.ComplianceGroup, // Compliance Categorization
-                                    'dataSensitivityLevel': r.SecurityClassification // Data Sensitivity Level
-                                };
+                                fieldsMapper[r.QualifiedApiName] = { 'id': id, 'description': r.Description };
                                 fieldIds.push(id);
                             });
                             object.fields.forEach((f) => {
                                 const mapper = fieldsMapper[f.name];
                                 if (mapper) {
-                                    for (const property in mapper) {
-                                        f[property] = mapper[property];
-                                    }
+                                    f.id = mapper.id;
+                                    f.description = mapper.description;
                                 }
                             });
                             dapi(fieldIds, (deps) => {
