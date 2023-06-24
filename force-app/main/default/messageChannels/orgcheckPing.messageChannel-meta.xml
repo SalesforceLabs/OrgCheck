@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>OrgCheckPingMessageChannel</masterLabel>
+    <isExposed>true</isExposed>
+    <description>OrgCheck Ping Message Channel for LWC components</description>
+    <lightningMessageFields>
+        <fieldName>requester</fieldName>
+    </lightningMessageFields>
+</LightningMessageChannel>

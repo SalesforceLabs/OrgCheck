@@ -68,6 +68,10 @@ echo " >> into one unique js file"
 ) > build/tmp/js/orgcheck.js
 echo ""
 
+echo "Launch the scan for Org Check javascript"
+sfdx scanner:run --target 'build/src/javascript/orgcheck/*.js,force-app/**/*.js' --format html > build/reports/report-javascript.html
+sfdx scanner:run --target 'build/src/javascript/orgcheck/*.js,force-app/**/*.js' --format csv > build/reports/report-javascript.csv
+
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
 cp build/src/logos/Logo.svg build/tmp/img
@@ -172,3 +176,4 @@ echo ""
 ### --------------------------------------------------------------------------------------------
 echo "Deploying to default org (username=$(sfdx config:get defaultusername --json | grep value | cut -d'"' -f4))"
 sfdx project deploy start --metadata StaticResource CustomLabels Translations  1>/dev/null
+

@@ -1,0 +1,92 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <lightning-card>
+        <lightning-layout>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                    name="package-filter"
+                    label="Package"
+                    value={settingFilterPackage}
+                    options={settingFilterPackageOptions}
+                    onchange={settingFilterPackageHandleChange} ></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                    name="sobjecttype-filter"
+                    label="SObject Type"
+                    value={settingFilterSObjectType}
+                    options={settingFilterSObjectTypeOptions}
+                    onchange={settingFilterSObjectTypeHandleChange} ></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                    name="sobject-filter"
+                    label="SObject"
+                    value={settingFilterSObject}
+                    options={settingFilterSObjectOptions}
+                    onchange={settingFilterSObjectHandleChange} ></lightning-combobox>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                    name="show-external-roles-filter"
+                    label="Show external roles?"
+                    value={settingShowExternalRoles}
+                    options={settingYesNoOptions}
+                    onchange={settingShowExternalRolesHandleChange} ></lightning-combobox>
+            </lightning-layout-item>
+            <template lwc:if={isCurrentOrgAProduction}>
+                <lightning-layout-item padding="around-small">
+                    <lightning-combobox
+                        name="prod-confirm-watchdog"
+                        label="Do you confirm running Org Check in production?"
+                        value={settingUseInProductionConfirmation}
+                        options={settingYesNoOptions}
+                        onchange={settingUseInProductionConfirmationHandleChange} ></lightning-combobox>
+                </lightning-layout-item>
+            </template>
+            <lightning-layout-item padding="around-small" alignment-bump="left">
+                <lightning-badge label={orgInfo} class={themeForOrgInfo}></lightning-badge><br />
+                <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge><br />
+            </lightning-layout-item>
+        </lightning-layout>
+    </lightning-card>
+    {data}
+    <lightning-tabset variant="scoped">
+        <lightning-tab label="⚽ Objects" onactive={tabHandleActivation}>
+            This is the page for objects
+        </lightning-tab>
+        <lightning-tab label="🥕 Custom Fields" onactive={tabHandleActivation}>
+            <lightning-datatable key-field="customFields" data={customFieldsData} columns={customFieldsColumns}></lightning-datatable>
+        </lightning-tab>
+        <lightning-tab label="🧔 Users" onactive={tabHandleActivation}>
+            <lightning-datatable key-field="users" data={usersData} columns={usersColumns}></lightning-datatable>
+        </lightning-tab>
+        <lightning-tab label="👮 Profiles And PermSets" onactive={tabHandleActivation}>
+            This is the page for profiles
+        </lightning-tab>
+        <lightning-tab label="🐇 Roles" onactive={tabHandleActivation}>
+            This is the page for roles
+        </lightning-tab>
+        <lightning-tab label="🌶️ Public Groups" onactive={tabHandleActivation}>
+            This is the page for public groups and queues
+        </lightning-tab>
+        <lightning-tab label="🤖 Automations" onactive={tabHandleActivation}>
+            This is the page for flow, workflows and process builders
+        </lightning-tab>
+        <lightning-tab label="🎁 Custom Labels" onactive={tabHandleActivation}>
+            This is the page for custom labels
+        </lightning-tab>
+        <lightning-tab label="🥐 Visual Components" onactive={tabHandleActivation}>
+            This is the page for visual components
+        </lightning-tab>
+        <lightning-tab label="🔥 Apex" onactive={tabHandleActivation}>
+            This is the page for apex components
+        </lightning-tab>
+        <lightning-tab label="🤪 Analytics" onactive={tabHandleActivation}>
+            This is the page for analytics
+        </lightning-tab>
+        <lightning-tab label="🚢 Batches" onactive={tabHandleActivation}>
+            This is the page for batches and jobs
+        </lightning-tab>
+    </lightning-tabset>
+</template>
