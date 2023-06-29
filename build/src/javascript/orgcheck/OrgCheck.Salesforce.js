@@ -12,9 +12,9 @@ OrgCheck.Salesforce = {
             'error': (error) => { console.error(error); }
         };
         const private_error_event = private_events.error;
-        this.has = (name) => private_events.hasOwnProperty(name);
+        this.has = (name) => Object.prototype.hasOwnProperty.call(private_events, name);
         this.fire = (name, ...args) => { 
-            if (private_events.hasOwnProperty(name)) {
+            if (Object.prototype.hasOwnProperty.call(private_events, name)) {
                 private_events[name](...args); 
             }
         };
@@ -401,8 +401,9 @@ OrgCheck.Salesforce = {
                                     error.context = { 
                                         when: 'While creating a promise to call the Tooling Composite API.',
                                         what: {
-                                            type: metadataInformation.type,
-                                            ids: metadataInformation.ids,
+                                            type: type,
+                                            ids: ids,
+                                            byPasses: byPasses,
                                             body: requestBody
                                         }
                                     };
@@ -500,7 +501,7 @@ OrgCheck.Salesforce = {
         /**
          * Private connection to Salesforce using JsForce
          */
-        const CONNECTION = new jsforce.Connection({
+        const CONNECTION = new OrgCheck.externalLibs.jsforce.Connection({
             accessToken: configuration.accessToken,
             version: API_VERSION + ".0",
             maxRequest: "10000",

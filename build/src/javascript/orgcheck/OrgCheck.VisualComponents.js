@@ -334,7 +334,7 @@ OrgCheck.VisualComponents = {
                     rowBadColumns.forEach(i => msg += '<li>For <b>'+i.c+'</b> you had <b>'+i.d+'</b> (<code>+'+i.s+'</code> to the score)</li>');
                     msg += '</ul><br /><br />The data for this row is: <br /><pre>'+JSON.stringify(row, null, " ")+'</pre>';
                     tdBodyScore.innerHTML = rowScore;
-                    tdBodyScore.onclick = (e) => {
+                    tdBodyScore.onclick = () => {
                         MSG_HANDLER.showModal('Why do I have this score for row #'+k+'?', msg);
                     }
                     tdBodyScore.classList.add('orgcheck-table-td-badscore');
@@ -401,7 +401,7 @@ OrgCheck.VisualComponents = {
         };
 
         this.icon = function(name) {
-            return '<img src="'+this.image(name)+'" alt="'+name+'" title="'+name+'" style=\"vertical-align: inherit;\" />';
+            return '<img src="'+this.image(name)+'" alt="'+name+'" title="'+name+'" style="vertical-align: inherit;" />';
         };
 
         this.color = function(label) {
@@ -468,21 +468,21 @@ OrgCheck.VisualComponents = {
                         if (v.context) {
                             informationHTML += 'When: <small><code>' + v.context.when + '</code></small><br />';
                             informationHTML += 'What:<ul class="slds-list_dotted">';
-                            for (k in v.context.what) {
+                            for (let k in v.context.what) {
                                 const value = v.context.what[k];
                                 informationHTML += '<li>' + k + ': <small><code>' + (typeof value === 'object' ? JSON.stringify(value) : value) + '</code></small></li>';
                             }
                             informationHTML += '</ul>';
                         }
                         if (displayIssueInformation === true && v.stack) {
-                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/  at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
+                            informationHTML += 'Stack: <br/> <small><code>' + v.stack.replace(/ {2}at /g, '<br />&nbsp;&nbsp;&nbsp;at ') + '</code></small><br />';
                             console.error('Org Check - Error #' + i, v);
                         }
                         informationHTML += '<br />';
                     });
                     private_show_modal(
                         textTitle || 'Oh no, Org Check had an error!', 
-                        commonHTML + informationHTML.replace(/https:\/\/[^\/]*/g, ''),
+                        commonHTML + informationHTML.replace(/https:\/\/[^/]*/g, ''),
                         imageTitle || '/img/msg_icons/error32.png'
                     );
                 } catch (e) {
@@ -508,7 +508,7 @@ OrgCheck.VisualComponents = {
         */
         this.showWarning = function (message) {
             const messages = (Array.isArray(message) ? message : [ message ]); 
-            const nbMessages = messages.length;
+            //const nbMessages = messages.length;
             const warningsDiv = document.getElementById(configuration.warningMessagesId);
             messages.forEach((msg, idx) => {
                 let warningDiv = warningsDiv.children[0];
@@ -602,8 +602,6 @@ OrgCheck.VisualComponents = {
         * @param section optional section name
         */
         this.setSection = function (sectionName, message, status) {
-            const sections = SPINNER_MSG_DIV.getElementsByTagName('li');
-            const sectionId = 'spinner-section-'+sectionName;
             const li = document.getElementById('spinner-section-'+sectionName);
             if (li) {
                 li.classList.remove('slds-has-error','slds-is-completed','slds-is-active');
