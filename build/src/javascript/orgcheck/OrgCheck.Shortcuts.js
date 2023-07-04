@@ -22,8 +22,8 @@
             'naht relooc hcum si eman siht kniht uoy fi ,>b/<grOmedloV>b< dellac saw loot taht'+
             ' ylsuoiverp taht wonk uoy diD');_z.appendChild(_x);_z.appendChild(_y);_y.width=
             _a.innerWidth;_y.height=_a.innerHeight;const _u=Array.from({length:_y.width/16})
-            .fill(_y.height);let _t='';for(i=12449;i<=12532;i++)_t+=String.fromCharCode(i);
-            for(i=48;i<=90;i++)_t+=String.fromCharCode(i);const _q=()=>{_v.fillStyle='rgb'+
+            .fill(_y.height);let _t='';for(let i=12449;i<=12532;i++)_t+=String.fromCharCode(i);
+            for(let i=48;i<=90;i++)_t+=String.fromCharCode(i);const _q=()=>{_v.fillStyle='rgb'+
             'a(0,0,0,0.05)';_v.fillRect(0,0,_y.width,_y.height);_v.fillStyle='#0F0';_v.font
             =16+_d('ecapsonom xp');for(let i=0;i<_u.length;i++){_v.fillText(_t.charAt(Math.
             floor(Math.random()*_t.length)),i*16,_u[i]*16);if(_u[i]*16>_y.height && Math.

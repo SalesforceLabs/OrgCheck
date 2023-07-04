@@ -1,3 +1,5 @@
+/* global d3, jsforce, UserContext, DateUtil */
+
 /**
  * OrgCheck main object
  */
@@ -8,6 +10,19 @@
      */
     version: 'Lithium [Li,3]',
    
+    /**
+     * External libraries
+     * (include on top of the file near global comment for ESLint)
+     */
+    externalLibs: {
+        'd3': d3,
+        'jsforce': jsforce,
+        'salesforce': { 
+            'usercontext': UserContext,
+            'dateutil': DateUtil
+        }
+    },
+
     /**
      * Org Check core
      * @param setup JSON configuration including:
@@ -211,12 +226,12 @@
                     PROGRESSBAR_HANDLER.show();
                     document.getElementById(setup.htmlMainContentTagId).style.display = 'none';
 
-                    // 3. Buttons actions based on the map (from datasets)
-                    const initActions = function(map) {
+                    // 3. Buttons actions
+                    const initActions = function() {
                         // 3.1 Set the clear cache button (if specified)
                         if (ctlSetup.actions && ctlSetup.actions.clearCache && ctlSetup.actions.clearCache.show === true) { 
                             const buttonClearCache = document.getElementById('button-clear-page-cache');
-                            buttonClearCache.onclick = function(e) { 
+                            buttonClearCache.onclick = function() { 
                                 ctlSetup.datasets.forEach(dataset => {
                                     METADATA_CACHE_HANDLER.clear(DATASETS_HANDLER.getDataset(dataset).getKeyCache());
                                 });
@@ -227,7 +242,7 @@
                         // 3.2 Set the export as file button (if specified)
                         if (ctlSetup.actions && ctlSetup.actions.exportTable && Array.isArray(ctlSetup.actions.exportTable)) {
                             const buttonExport = document.getElementById('button-export');
-                            buttonExport.onclick = function(e) { 
+                            buttonExport.onclick = function() { 
                                 let isSomethingToExport = false;
                                 ctlSetup.actions.exportTable.forEach(d => {
                                     if (d.visibleTab) {
@@ -286,7 +301,7 @@
                         ctlSetup.onRecords(map);
                         PROGRESSBAR_HANDLER.setSection('records', 'Records processing ended successfuly', 'ended');
                         PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons starting...', 'started');
-                        initActions(map);
+                        initActions();
                         PROGRESSBAR_HANDLER.setSection('actions', 'Action buttons ended successfuly', 'ended');
                         setTimeout(function() {
                             PROGRESSBAR_HANDLER.hide();
@@ -301,13 +316,13 @@
                         {
                             startDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: starting...', 'started'),
                             successDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended successfuly', 'ended'), 
-                            errorDatasetDecorator: (ds, error) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended with an error', 'failed'),
+                            errorDatasetDecorator: (ds) => PROGRESSBAR_HANDLER.setSection('dataset-'+ds, 'Dataset ['+ds+']: ended with an error', 'failed'),
                             startMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process starting...', 'started'),
                             successMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended successfuly', 'ended'),
-                            errorMappingDecorator: (error) => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed'),
+                            errorMappingDecorator: () => PROGRESSBAR_HANDLER.setSection('mapping', 'Mapping process ended with an error', 'failed'),
                             startDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process starting...', 'started'),
                             successDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended successfuly', 'ended'), 
-                            errorDependenciesDecorator: (error) => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed'),
+                            errorDependenciesDecorator: () => PROGRESSBAR_HANDLER.setSection('dependencies', 'Dependencies process ended with an error', 'failed'),
                             successFinalDecorator: (data) => onEnd(data),
                             errorFinalDecorator: (error) => showError(error)
                         }
@@ -335,7 +350,7 @@
                                         'FROM ObjectPermissions '+
                                         'WHERE ParentId IN ('+SALESFORCE_HANDLER.secureSOQLBindingVariable(permissionSets)+')'
                             }])
-                            .on('record', (r, i) => {
+                            .on('record', (r) => {
                                 records.push({
                                     parentId: SALESFORCE_HANDLER.salesforceIdFormat(r.ParentId),
                                     objectType: r.SobjectType,
@@ -745,7 +760,7 @@
             });
 
             return div;
-        };
+        }
 
         /**
          * Compute the dependencies graph as a SVG graph (with d3)
@@ -776,7 +791,7 @@
                     e.children.push({ name: type, children: d[type] });
                 }
             });
-            const root = d3.hierarchy(rootData);
+            const root = OrgCheck.externalLibs.d3.hierarchy(rootData);
 
             // Set size
             let mdepth = 0;
@@ -788,7 +803,7 @@
             root.dy = width / (root.height + 1);
 
             // Generate tree
-            const tree = d3.tree().nodeSize([root.dx, root.dy])(root);
+            OrgCheck.externalLibs.d3.tree().nodeSize([root.dx, root.dy])(root);
 
             // Define x0 and x1
             let x0 = Infinity;
@@ -800,7 +815,7 @@
             });
 
             // Construction of graph
-            const svg = d3.create('svg')
+            const svg = OrgCheck.externalLibs.d3.create('svg')
                 .attr('id', function(d, i) { return (tagId + 'svg' + i); })
                 .attr('viewBox', [0, 0, width, x1 - x0 + root.dx * 2])
                 .attr('xmlns', 'http://www.w3.org/2000/svg');
@@ -811,7 +826,7 @@
                 .attr('font-size', '10')
                 .attr('transform', `translate(${root.dy / 2},${root.dx - x0})`);
             
-            const link = g.append('g')
+            g.append('g')
                 .attr('id', function(d, i) { return (tagId + 'link' + i); })
                 .attr('fill', 'none')
                 .attr('stroke', '#555')
@@ -820,7 +835,7 @@
                 .selectAll('path')
                 .data(root.links())
                 .join('path')
-                .attr('d', d3.linkHorizontal()
+                .attr('d', OrgCheck.externalLibs.d3.linkHorizontal()
                     .x(function(d) { return d.y+BOX_WIDTH/2; } )
                     .y(function(d) { return d.x; } )
                 );
@@ -859,7 +874,7 @@
                 .append('xhtml').html(d => '<span class="slds-hyphenate" style="text-align: center;">' + STRING_HANDLER.htmlSecurise(d.data.name) + (d.data.isActive===false?' (not active)':'') + '</span>');
 
             return svg.node();
-        };
+        }
 
     }
 };
