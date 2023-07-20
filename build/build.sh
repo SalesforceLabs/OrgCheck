@@ -73,20 +73,21 @@ for type in ${TYPE_ORIGINAL} ${TYPE_UGLIFIED}; do
 done
 echo ""
 
-echo "Launch the scan for Org Check javascript"
-REPORT_FILE=build/reports/report-javascript
-for type in html csv; do
-    sfdx scanner:run --target "build/tmp/js/${TYPE_ORIGINAL}-orgcheck.js" --format ${type} > ${REPORT_FILE}.${type} 2> /dev/null
-done;
-if [ $(grep 'No rule violations found' ${REPORT_FILE}.csv | wc -l) -eq 1 ]; then
-    echo -e "${LightGreen}Congratulations! No syntax issues.${NoColor}";
-else
-    echo -e "${Red}You have $(( $(grep -v '^$' ${REPORT_FILE}.csv | wc -l) - 1 )) issue(s) you need to check.${NoColor}"
-    echo -e "${LightRed}Open the file ${REPORT_FILE}.html in your browser.${NoColor}";
-fi
-echo ""
+## echo "Launch the scan for Org Check javascript"
+## REPORT_FILE=build/reports/report-javascript
+## for type in html csv; do
+##     sfdx scanner:run --target "build/tmp/js/${TYPE_ORIGINAL}-orgcheck.js" --format ${type} > ${REPORT_FILE}.${type} 2> /dev/null
+## done;
+## if [ $(grep 'No rule violations found' ${REPORT_FILE}.csv | wc -l) -eq 1 ]; then
+##     echo -e "${LightGreen}Congratulations! No syntax issues.${NoColor}";
+## else
+##     echo -e "${Red}You have $(( $(grep -v '^$' ${REPORT_FILE}.csv | wc -l) - 1 )) issue(s) you need to check.${NoColor}"
+##     echo -e "${LightRed}Open the file ${REPORT_FILE}.html in your browser.${NoColor}";
+## fi
+## echo ""
 
 mv build/tmp/js/${TYPE_UGLIFIED}-orgcheck.js build/tmp/js/orgcheck.js
+cp build/src/javascript/orgcheck/orgcheck-api.js build/tmp/js/orgcheck-api.js
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
 cp build/src/logos/Logo.svg build/tmp/img

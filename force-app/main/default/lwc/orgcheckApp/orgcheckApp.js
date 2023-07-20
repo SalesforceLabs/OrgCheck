@@ -1,122 +1,158 @@
-import { LightningElement, wire } from 'lwc';
-import { subscribe, unsubscribe, APPLICATION_SCOPE, publish, MessageContext } from 'lightning/messageService';
-import orgcheckFilterEvent from '@salesforce/messageChannel/orgcheckFilter__c';
-import orgcheckPingEvent from '@salesforce/messageChannel/orgcheckPing__c';
+import { LightningElement, api } from 'lwc';
 
-export default class OrgcheckApp extends LightningElement {
+export default class OrgCheckApp extends LightningElement {
 
-    /* ******** */
-    /* SETTINGS */
-    /* ******** */
-    
-    settingFilterPackage = '';
-    settingFilterSObjectType = '';
-    settingFilterSObject = '';
-    settingShowExternalRoles = 'false';
-    settingUseInProductionConfirmation = 'false';
+    @api accessToken;
+    @api userId;
 
-    get settingFilterPackageOptions() {
-        return [
-            { label: 'All packages', value: '' },
-            { label: 'Package1', value: 'ab1' },
-            { label: 'Package2', value: 'cd2' },
-            { label: 'Package3', value: 'ht3' }
+    filterChanged(event) {
+        if (this.#isLoading === true) return;
+        switch (event.detail.what) {
+            case 'package':
+            case 'sobjectType': {
+                const spinner = this.template.querySelector('c-orgcheck-spinner');
+                spinner.open();
+                Promise.all([
+                    new Promise((resolve, reject) => {
+                        spinner.setMessage('objects', 'Updating sobjects...', 'started');
+                        try {
+                            this.populateFilterObjects();
+                        } catch (e) {
+                            spinner.setMessage('objects', 'SObjects were not updated to global filter because of an error!', 'error');
+                            reject(e);
+                        }
+                        spinner.setMessage('objects', 'SObjects updated.', 'done');
+                        resolve();
+                    })
+                ]).then(() => {
+                    spinner.close();
+                }).catch((e) => {
+                    console.error(e);
+                }).finally(() => {
+                });
+                break;
+            }
+            case 'sobjectApiName':
+            case 'showExternalRoles':
+            case 'useInProductionConfirmation':
+            default:
+                // Do nothing
+        }
+    }
+
+    #isLoading;
+    apiLoaded() {
+        this.#isLoading = true;
+        const spinner = this.template.querySelector('c-orgcheck-spinner');
+        spinner.open();
+        Promise.all([
+            new Promise((resolve, reject) => {
+                spinner.setMessage('types', 'Loading types...', 'started');
+                try {
+                    this.populateFilterTypes();
+                } catch (e) {
+                    spinner.setMessage('types', 'Types were not loaded to global filter because of an error!', 'error');
+                    reject(e);
+                }
+                spinner.setMessage('types', 'Types loaded.', 'done');
+                resolve();
+            }),
+            new Promise((resolve, reject) => {
+                spinner.setMessage('packages', 'Loading packages...', 'started');
+                try {
+                    this.populateFilterPackages();
+                } catch (e) {
+                    spinner.setMessage('packages', 'Packages were not loaded to global filter because of an error!', 'error');
+                    reject(e);
+                }
+                spinner.setMessage('packages', 'Packages loaded.', 'done');
+                resolve();
+            }),
+            new Promise((resolve, reject) => {
+                spinner.setMessage('objects', 'Loading sobjects...', 'started');
+                try {
+                    this.populateFilterObjects();
+                } catch (e) {
+                    spinner.setMessage('objects', 'SObjects were not loaded to global filter because of an error!', 'error');
+                    reject(e);
+                }
+                spinner.setMessage('objects', 'SObjects loaded.', 'done');
+                resolve();
+            })
+        ]).then(() => {
+            spinner.close();
+        }).catch((e) => {
+            console.error(e);
+        }).finally(() => {
+            this.#isLoading = false;
+        });
+    }
+
+    apiFailed(event) {
+        console.error(event.detail.from, event.detail.error);
+    }
+
+    async populateFilterPackages() {
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        const filters = this.template.querySelector('c-orgcheck-global-filters');
+        const packages = await orgcheckApi.packages();
+        const data = [ 
+            { label: 'All packages', value: '*' },
+            { label: 'No package', value: '' }
         ];
+        packages.forEach(p => {
+            data.push({
+                label: p.name + ' (api=' + p.namespace + ', type=' + p.type + ')',
+                value: p.namespace
+            });
+        });
+        filters.packageOptions = data;
+        filters.package = '*';
     }
 
-    get settingFilterSObjectTypeOptions() {
-        return [
-            { label: 'All types', value: '' },
-            { label: 'Standard Objects', value: 'STANDARD_SOBJECTS' },
-            { label: 'Custom Objects', value: 'CUSTOM_SOBJECTS' },
-            { label: 'External Objects', value: 'CUSTOM_EXTERNAL_SOBJECTS' },
-            { label: 'Custom Settings', value: 'CUSTOM_SETTINGS' },
-            { label: 'Custom Metadata Types', value: 'CUSTOM_METADATA_TYPES' },
-            { label: 'Platform Events', value: 'CUSTOM_EVENTS' },
-            { label: 'Knowledge Articles', value: 'KNOWLEDGE_ARTICLES' },
-            { label: 'Big Objects', value: 'CUSTOM_BIG_OBJECTS' }
-        ];
+    populateFilterTypes() {
+        const data = [ { label: 'All types', value: '*' } ];
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        orgcheckApi.types().forEach(t => data.push({ label: t.label, value: t.id }));
+        const filters = this.template.querySelector('c-orgcheck-global-filters');
+        filters.sobjectTypeOptions = data;
+        filters.sobjectType = '*';
     }
 
-    get settingFilterSObjectOptions() {
-        return [
-            { label: 'All objects', value: '' },
-        ];
-    }
-
-    get settingYesNoOptions() {
-        return [
-            { label: 'Yes', value: 'true' },
-            { label: 'No', value: 'false' }
-        ];
-    }
-
-    settingFilterPackageHandleChange(event) {
-        this.filterPackage = event.detail.value;
-        this.settingChanged();
-    }
-
-    settingFilterSObjectTypeHandleChange(event) {
-        this.settingFilterSObjectType = event.detail.value;
-        this.settingChanged();
-    }
-
-    settingFilterSObjectHandleChange(event) {
-        this.settingFilterSObject = event.detail.value;
-        this.settingChanged();
-    }
-
-    settingShowExternalRolesHandleChange(event) {
-        this.settingShowExternalRoles = event.detail.value;
-        this.settingChanged();
-    }
-
-    settingUseInProductionConfirmationHandleChange(event) {
-        this.settingUseInProductionConfirmation = event.detail.value;
-        this.settingChanged();
+    async populateFilterObjects() {
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        const filters = this.template.querySelector('c-orgcheck-global-filters');
+        const objects = await orgcheckApi.objects(
+            (this.#isLoading === true ? '*' : filters.package), 
+            (this.#isLoading === true ? '*' : filters.sobjectType)
+        );
+        const data = [ { label: 'All objects', value: '*' } ];
+        objects.forEach(o => {
+            data.push({
+                label: o.label + ' (api=' + o.developerName + (o.package===''?'':(', package=' + o.package)) + ')',
+                value: o.developerName
+            });
+        });
+        filters.sobjectApiNameOptions = data;
+        filters.sobjectApiName = '*';
     }
 
     /* ******** */
     /* ORG INFO */
     /* ******** */
 
-    informationOrgId = '00D7Q00000ADl52UAD';
-    informationOrgType = 'Developer Edition';
-    informationOrgDailyApiLimitRate = 0.127;
-
-    get isCurrentOrgAProduction() {
-        return this.orgType === 'Production';
-    }
-
-    get orgInfo() {
-        return this.orgId + ' (' + this.orgType + ')';
-    }
-
-    get themeForOrgInfo() {
-        if (this.orgType === 'Production' && this.prodUsageConfirmation !== true) return 'slds-theme_error';
-        return 'slds-theme_success';
-    }
-
-    get orgLimit () {
-        return 'Daily API Request Limit: ' + ((this.orgDailyApiLimitRate * 100).toFixed(3)) + ' %';
-    }
-
-    get themeForOrgLimit() {
-        if (this.orgDailyApiLimitRate > 0.9) return 'slds-theme_error';
-        if (this.orgDailyApiLimitRate > 0.7) return 'slds-theme_warning';
-        return 'slds-badge_lightest';
-    }
+    isCurrentOrgAProduction;
 
     /* ********** */
     /* DATATABLES */
     /* ********** */
 
-    customFieldsData = [];
+    customFieldsData;
     customFieldsColumns = [
         { label: '#', fieldName: 'index' },
-        { label: 'Object', fieldName: 'sobject', type: 'url' },
+        { label: 'Object', fieldName: 'sobjectURL', type: 'url', typeAttributes: { label: { fieldName: 'sobjectName' }} },
         { label: 'Type', fieldName: 'type' },
-        { label: 'Field', fieldName: 'field', type: 'url' },
+        { label: 'Field', fieldName: 'fieldURL', type: 'url', typeAttributes: { label: { fieldName: 'fieldName' }} },
         { label: 'Package', fieldName: 'namespace' },
         { label: 'Full API Name', fieldName: 'developerName' },
         { label: 'Using', fieldName: 'using' }
@@ -134,19 +170,38 @@ export default class OrgcheckApp extends LightningElement {
     /* EVENTS */
     /* ****** */
 
-    data = '';
-
-    tabHandleActivation(event) {
-        this.data = 'a tab was clicked: ' + JSON.stringify(event);
+    tabHandleActivation() {
     }
 
-    settingChanged() {
-        this.data = 'filter changed: ' + JSON.stringify({
-            'package': this.settingFilterPackage,
-            'sobjectType': this.settingFilterSObjectType,
-            'sobject': this.settingFilterSObject,
-            'showExternalRoles': this.settingShowExternalRoles,
-            'useInProdConfirm': this.settingUseInProductionConfirmation
-        })
+
+
+    populateCustomFieldData() {
+    /*    this.#orgCheckAPI.getCustomFields(this.settingFilterSObject).then((fields) => {
+            const data = [];
+            fields.forEach(o => {
+                data.push({
+                    index: o.id,
+                    sobjectName: o.objectDeveloperName,
+                    sobjectURL: '/'+o.objectDeveloperName,
+                    type: 'xxx',
+                    fieldName: o.fieldName,
+                    fieldURL: '/'+o.fieldName,
+                    namespace: o.package,
+                    developerName: o.developerName,
+                    using: 'xxx'
+                });
+            });
+            this.customFieldsData = data;
+        }).catch((e) => this.globalCatchError(e));*/
     }
+
+    /* ****** */
+    /* Spinner */
+    /* ****** */
+
+    globalCatchError(error) {
+        this.hideSpinner();
+        console.error(error);
+    }
+
 }

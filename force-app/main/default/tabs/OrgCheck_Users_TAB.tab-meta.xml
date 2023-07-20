@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Org Check Users Tab</description>
-    <label>🧔 Users</label>
-    <motif>Custom15: People</motif>
-    <page>OrgCheck_Users_VFP</page>
-</CustomTab>

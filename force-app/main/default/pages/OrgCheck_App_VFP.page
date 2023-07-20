@@ -1,0 +1,19 @@
+<apex:page>
+    <apex:includeLightning />
+    <script src="{!URLFOR($Resource.OrgCheck_SR, 'js/orgcheck-api.js')}" />
+    <div id="app" style="height: 100vh;" />  
+    <style>
+        .slds-dropdown-trigger_click .slds-dropdown {
+            min-width: fit-content;
+        }
+    </style>
+    <script>
+    $Lightning.use('c:OrgCheck_App_Aura', function() {
+        $Lightning.createComponent('c:orgcheckApp',
+            { accessToken: '{! JSENCODE($Api.Session_Id) }', userId: '{! JSENCODE($User.Id) }' },
+            'app',
+            function(cmp) {}
+        );
+    });
+    </script>
+</apex:page>

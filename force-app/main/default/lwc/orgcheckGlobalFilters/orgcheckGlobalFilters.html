@@ -1,0 +1,46 @@
+<template>
+    <lightning-layout>
+        <lightning-layout-item padding="around-small">
+            <lightning-combobox
+                name="package-filter"
+                label="Package"
+                value={package}
+                options={packageOptions}
+                onchange={packageHandleChange} ></lightning-combobox>
+        </lightning-layout-item>
+        <lightning-layout-item padding="around-small">
+            <lightning-combobox
+                name="sobjecttype-filter"
+                label="SObject Type"
+                value={sobjectType}
+                options={sobjectTypeOptions}
+                onchange={sobjectTypeHandleChange} ></lightning-combobox>
+        </lightning-layout-item>
+        <lightning-layout-item padding="around-small">
+            <lightning-combobox
+                name="sobject-filter"
+                label="SObject"
+                value={sobjectApiName}
+                options={sobjectApiNameOptions}
+                onchange={sobjectApiNameHandleChange} ></lightning-combobox>
+        </lightning-layout-item>
+        <lightning-layout-item padding="around-small">
+            <lightning-combobox
+                name="show-external-roles-filter"
+                label="Show external roles?"
+                value={showExternalRoles}
+                options={yesNoOptions}
+                onchange={showExternalRolesHandleChange} ></lightning-combobox>
+        </lightning-layout-item>
+        <template lwc:if={isCurrentOrgAProduction}>
+            <lightning-layout-item padding="around-small">
+                <lightning-combobox
+                    name="prod-confirm-watchdog"
+                    label="Do you confirm running Org Check in production?"
+                    value={useInProductionConfirmation}
+                    options={yesNoOptions}
+                    onchange={useInProductionConfirmationHandleChange} ></lightning-combobox>
+            </lightning-layout-item>
+        </template>
+    </lightning-layout>
+</template>

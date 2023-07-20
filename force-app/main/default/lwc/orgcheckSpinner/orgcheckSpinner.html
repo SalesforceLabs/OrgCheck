@@ -1,0 +1,21 @@
+<template>
+    <template lwc:if={isShow}>
+        <div class="slds-notify-container slds-is-relative" style="z-index: 1;">
+            <div class="slds-notify slds-notify_toast slds-theme_info" role="status">
+                <span class="slds-assistive-text">Loading...</span>
+                <object type="image/svg+xml" data={spinningURL} width="256" height="256">
+                    <img src={spinningURL} width="256" height="256" />
+                </object>
+                <div class="slds-notification__body">
+                    <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                        <ol id="spinner-messages">
+                            <template for:each={messages} for:item="msg">
+                                <li key={msg.id}>{msg.label} ({msg.status})</li>
+                            </template>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

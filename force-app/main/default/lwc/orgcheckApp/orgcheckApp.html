@@ -1,56 +1,11 @@
 <!-- sldsValidatorIgnore -->
 <template>
-    <lightning-card>
-        <lightning-layout>
-            <lightning-layout-item padding="around-small">
-                <lightning-combobox
-                    name="package-filter"
-                    label="Package"
-                    value={settingFilterPackage}
-                    options={settingFilterPackageOptions}
-                    onchange={settingFilterPackageHandleChange} ></lightning-combobox>
-            </lightning-layout-item>
-            <lightning-layout-item padding="around-small">
-                <lightning-combobox
-                    name="sobjecttype-filter"
-                    label="SObject Type"
-                    value={settingFilterSObjectType}
-                    options={settingFilterSObjectTypeOptions}
-                    onchange={settingFilterSObjectTypeHandleChange} ></lightning-combobox>
-            </lightning-layout-item>
-            <lightning-layout-item padding="around-small">
-                <lightning-combobox
-                    name="sobject-filter"
-                    label="SObject"
-                    value={settingFilterSObject}
-                    options={settingFilterSObjectOptions}
-                    onchange={settingFilterSObjectHandleChange} ></lightning-combobox>
-            </lightning-layout-item>
-            <lightning-layout-item padding="around-small">
-                <lightning-combobox
-                    name="show-external-roles-filter"
-                    label="Show external roles?"
-                    value={settingShowExternalRoles}
-                    options={settingYesNoOptions}
-                    onchange={settingShowExternalRolesHandleChange} ></lightning-combobox>
-            </lightning-layout-item>
-            <template lwc:if={isCurrentOrgAProduction}>
-                <lightning-layout-item padding="around-small">
-                    <lightning-combobox
-                        name="prod-confirm-watchdog"
-                        label="Do you confirm running Org Check in production?"
-                        value={settingUseInProductionConfirmation}
-                        options={settingYesNoOptions}
-                        onchange={settingUseInProductionConfirmationHandleChange} ></lightning-combobox>
-                </lightning-layout-item>
-            </template>
-            <lightning-layout-item padding="around-small" alignment-bump="left">
-                <lightning-badge label={orgInfo} class={themeForOrgInfo}></lightning-badge><br />
-                <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge><br />
-            </lightning-layout-item>
-        </lightning-layout>
-    </lightning-card>
     {data}
+    <lightning-card>
+        <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={apiLoaded} onerror={apiFailed}></c-orgcheck-api>
+        <c-orgcheck-global-filters onchange={filterChanged}></c-orgcheck-global-filters>
+    </lightning-card>
+    <c-orgcheck-spinner></c-orgcheck-spinner>
     <lightning-tabset variant="scoped">
         <lightning-tab label="⚽ Objects" onactive={tabHandleActivation}>
             This is the page for objects
