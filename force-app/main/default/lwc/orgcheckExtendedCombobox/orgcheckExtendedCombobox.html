@@ -1,0 +1,25 @@
+<template>
+    <div class="slds-form-element__control">
+        <div class="slds-combobox_container" style="display: flow;">
+            <div aria-expanded="false" aria-haspopup="listbox" role="combobox">
+                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right" role="none">
+                    <lightning-icon size="x-small" style="margin-top: 4px!important;" class="iconMargin slds-icon slds-input__icon slds-input__icon_right slds-icon-text-default" icon-name="utility:search"></lightning-icon>
+                    <lightning-input type="text" label={label} value={searchLabel} field-level-help={fieldLevelHelp} style={style} ondblclick={showAllOptions} onchange={search} ></lightning-input>
+                </div>
+            </div>
+            <template if:true={itemsFound.length}>
+                <div id="searchResults" class="slds-dropdown slds-dropdown-trigger_click" role="listbox">
+                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                        <template for:each={itemsFound} for:item="item">
+                            <li role="presentation" class="slds-listbox__item" key={item.value}>
+                                <div data-id={item.value} data-name={item.label} onclick={selection} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                    <span class="slds-listbox__option-text_entity">{item.label}</span>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

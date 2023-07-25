@@ -1,47 +1,49 @@
-<!-- sldsValidatorIgnore -->
 <template>
     {data}
     <lightning-card>
         <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={apiLoaded} onerror={apiFailed}></c-orgcheck-api>
-        <c-orgcheck-global-filters onchange={filterChanged}></c-orgcheck-global-filters>
+        <c-orgcheck-global-filters onchange={filterChanged} onvalidatechange={filtersValidated}></c-orgcheck-global-filters>
     </lightning-card>
     <c-orgcheck-spinner></c-orgcheck-spinner>
     <lightning-tabset variant="scoped">
-        <lightning-tab label="⚽ Objects" onactive={tabHandleActivation}>
-            This is the page for objects
+        <lightning-tab value="home" label="Home" onactive={tabHandleActivation}>
+            Welcome in Org Check Beryllium, LWC power!
         </lightning-tab>
-        <lightning-tab label="🥕 Custom Fields" onactive={tabHandleActivation}>
-            <lightning-datatable key-field="customFields" data={customFieldsData} columns={customFieldsColumns}></lightning-datatable>
+        <lightning-tab value="objects" label="⚽ Objects" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-objects></c-orgcheck-tab-objects>
         </lightning-tab>
-        <lightning-tab label="🧔 Users" onactive={tabHandleActivation}>
-            <lightning-datatable key-field="users" data={usersData} columns={usersColumns}></lightning-datatable>
+        <lightning-tab value="customFields" label="🥕 Custom Fields" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-customfields></c-orgcheck-tab-customfields>
         </lightning-tab>
-        <lightning-tab label="👮 Profiles And PermSets" onactive={tabHandleActivation}>
-            This is the page for profiles
+        <lightning-tab value="users" label="🧔 Users" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-users></c-orgcheck-tab-users>
         </lightning-tab>
-        <lightning-tab label="🐇 Roles" onactive={tabHandleActivation}>
-            This is the page for roles
+        <lightning-tab value="profiles" label="👮 Profiles And Permission Sets" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-profiles></c-orgcheck-tab-profiles>
         </lightning-tab>
-        <lightning-tab label="🌶️ Public Groups" onactive={tabHandleActivation}>
-            This is the page for public groups and queues
+        <lightning-tab value="roles" label="🐇 Roles" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-roles></c-orgcheck-tab-roles>
         </lightning-tab>
-        <lightning-tab label="🤖 Automations" onactive={tabHandleActivation}>
-            This is the page for flow, workflows and process builders
+        <lightning-tab value="publicGroups" label="🌶️ Public Groups" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-publicgroups></c-orgcheck-tab-publicgroups>
         </lightning-tab>
-        <lightning-tab label="🎁 Custom Labels" onactive={tabHandleActivation}>
-            This is the page for custom labels
+        <lightning-tab value="automations" label="🤖 Automations" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-automations></c-orgcheck-tab-automations>
         </lightning-tab>
-        <lightning-tab label="🥐 Visual Components" onactive={tabHandleActivation}>
-            This is the page for visual components
+        <lightning-tab value="customLabels" label="🎁 Custom Labels" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-customlabels></c-orgcheck-tab-customlabels>
         </lightning-tab>
-        <lightning-tab label="🔥 Apex" onactive={tabHandleActivation}>
-            This is the page for apex components
+        <lightning-tab value="visualComponents" label="🥐 Visual Components" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-visualcomponents></c-orgcheck-tab-visualcomponents>
         </lightning-tab>
-        <lightning-tab label="🤪 Analytics" onactive={tabHandleActivation}>
-            This is the page for analytics
+        <lightning-tab value="apex" label="🔥 Apex" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-apex></c-orgcheck-tab-apex>
         </lightning-tab>
-        <lightning-tab label="🚢 Batches" onactive={tabHandleActivation}>
-            This is the page for batches and jobs
+        <lightning-tab value="analytics" label="🤪 Analytics" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-analytics></c-orgcheck-tab-analytics>
+        </lightning-tab>
+        <lightning-tab value="batches" label="🚢 Batches" onactive={tabHandleActivation}>
+            <c-orgcheck-tab-batches></c-orgcheck-tab-batches>
         </lightning-tab>
     </lightning-tabset>
 </template>

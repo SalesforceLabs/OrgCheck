@@ -1,0 +1,12 @@
+<template>
+    <template lwc:if={isSObjectSpecified}>
+        Object Api Name is = {sobjectApiName}
+    </template>
+    <template lwc:else>
+        There is no specific object set in the global filter above. <br />
+        <br />
+        Please set the <b>SObject</b> value in the global filter and hit <b>'Use the filters'</b> button to see something here.<br />
+        <br />
+        Thank you!
+    </template>
+</template>

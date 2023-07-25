@@ -2,44 +2,59 @@
     <lightning-layout>
         <lightning-layout-item padding="around-small">
             <lightning-combobox
-                name="package-filter"
+                data-id="package"
                 label="Package"
                 value={package}
+                field-level-help="Optional: You can filter on a specific package."
                 options={packageOptions}
-                onchange={packageHandleChange} ></lightning-combobox>
+                onchange={filterChanged} ></lightning-combobox>
         </lightning-layout-item>
         <lightning-layout-item padding="around-small">
             <lightning-combobox
-                name="sobjecttype-filter"
+                data-id="sobjectType"
                 label="SObject Type"
                 value={sobjectType}
+                field-level-help="Optional: You can filter on a specific type of objects."
                 options={sobjectTypeOptions}
-                onchange={sobjectTypeHandleChange} ></lightning-combobox>
+                onchange={filterChanged} ></lightning-combobox>
         </lightning-layout-item>
         <lightning-layout-item padding="around-small">
-            <lightning-combobox
-                name="sobject-filter"
+            <c-orgcheck-extended-combobox
+                data-id="sobjectApiName"
                 label="SObject"
                 value={sobjectApiName}
+                field-level-help="Optional: You can filter on a specific objects (depends on the package and type selection). Start typing to see matching options, or double-click to see all options..."
                 options={sobjectApiNameOptions}
-                onchange={sobjectApiNameHandleChange} ></lightning-combobox>
+                onchange={filterChanged}></c-orgcheck-extended-combobox>
         </lightning-layout-item>
         <lightning-layout-item padding="around-small">
             <lightning-combobox
-                name="show-external-roles-filter"
+                data-id="showExternalRoles"
                 label="Show external roles?"
                 value={showExternalRoles}
+                field-level-help="Optional: Do you want to see the external roles? (if Partner Community is on, this could be nice)."
                 options={yesNoOptions}
-                onchange={showExternalRolesHandleChange} ></lightning-combobox>
+                onchange={filterChanged} ></lightning-combobox>
         </lightning-layout-item>
         <template lwc:if={isCurrentOrgAProduction}>
             <lightning-layout-item padding="around-small">
                 <lightning-combobox
-                    name="prod-confirm-watchdog"
+                    data-id="useInProductionConfirmation"
                     label="Do you confirm running Org Check in production?"
                     value={useInProductionConfirmation}
+                    field-level-help="Mandatory: You need to confirm this option when using the app from a production org."
                     options={yesNoOptions}
-                    onchange={useInProductionConfirmationHandleChange} ></lightning-combobox>
+                    onchange={filterChanged} ></lightning-combobox>
+            </lightning-layout-item>
+        </template>
+        <template lwc:if={filtersChanged}>
+            <lightning-layout-item padding="around-small">
+                {whichFiltersChanged.length} filter(s) changed<br />
+                <lightning-button 
+                    variant="brand" 
+                    label="Use the filters" 
+                    title="You are ready to use these filters in the app..." 
+                    onclick={propagateValues}></lightning-button>
             </lightning-layout-item>
         </template>
     </lightning-layout>

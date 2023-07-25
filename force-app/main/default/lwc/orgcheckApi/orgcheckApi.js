@@ -6,11 +6,11 @@ import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
 import { loadScript } from 'lightning/platformResourceLoader';
 
 const errorHandling = (me, what, error) => {
-    me.dispatchEvent(new CustomEvent('error', { detail: { from: what, error: error }, bubbles: true }));
+    me.dispatchEvent(new CustomEvent('error', { detail: { from: what, error: error }, bubbles: false }));
 }
 
 const successHandling = (me) => {
-    me.dispatchEvent(new CustomEvent('load', { bubbles: true }));
+    me.dispatchEvent(new CustomEvent('load', { bubbles: false }));
 }
 
 export default class OrgcheckApi extends LightningElement {
@@ -49,6 +49,11 @@ export default class OrgcheckApi extends LightningElement {
     @api objects(packageApiName, sobjectType) {
         this.updateDailyAPILimit();
         return this.#api.getObjects(packageApiName, sobjectType).catch((e) => errorHandling(this, 'objects', e));
+    }
+
+    @api customFields(packageApiName, sobjectType, sobjectApiName) {
+        this.updateDailyAPILimit();
+        return this.#api.getCustomFields(sobjectApiName).catch((e) => errorHandling(this, 'customFields', e));
     }
 
     updateDailyAPILimit() {
