@@ -1,0 +1,87 @@
+<template>
+    <lightning-layout>
+        <lightning-layout-item size="5">
+            <lightning-card icon-name="standard:opportunity" title="General Information">
+                <div class="slds-var-p-horizontal_small">
+                    Introducing <b>Org Check</b>. An easy-to-install and easy-to-use 
+                    Salesforce application in order to quickly analyze your org and 
+                    its technical debt.<br />
+                    <br />
+                    <b>Support and feedback</b>
+                    <ul class="slds-list_dotted">
+                        <li><b>Issues or new ideas?</b> Track them at <a href="https://sfdc.co/OrgCheck-Backlog" 
+                            target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Backlog</a></li>
+                        <li><b>Want to chat with other users?</b> Join us on Slack at <a href="https://sfdc.co/OrgCheck-Community" 
+                            target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Community</a></li>
+                        <li><b>Social Media</b> Like and share posts on <a href="https://www.linkedin.com/company/OrgChecksfdc" 
+                            target="_blank" rel="external noopener noreferrer">LinkedIn</a> and on 
+                            <a href="https://twitter.com/OrgCheckSFDF" target="_blank" rel="external noopener noreferrer">
+                            Twitter</a>!</li>    
+                    </ul>
+                    <br />
+                    <b>Org Check is free to use, but is not an official Salesforce product. </b> Org Check has not 
+                    been officially tested or documented. Salesforce support is not available for Org Check. 
+                    Support requests for Org Check should be directed to GitHub. Source code for Org Check can be 
+                    found on GitHub under separate and different license terms.<br />
+                    <br />
+                    <b>Third party components</b>
+                    <ul class="slds-list_dotted">
+                        <li><b>D3js</b>: distributed under the ISC license, more info at <a href="https://d3js.org" 
+                            target="_blank" rel="external noopener noreferrer">d3js.org</a></li>
+                        <li><b>JsForce</b>: distributed under the MIT license, more info at <a href="https://jsforce.github.io" 
+                            target="_blank" rel="external noopener noreferrer">jsforce.github.io</a></li>
+                    </ul>
+                </div>
+            </lightning-card>
+        </lightning-layout-item>
+        <lightning-layout-item size="4">
+            <lightning-card icon-name="standard:record_lookup" title="Complementary Tools">
+                <div class="slds-var-p-horizontal_small">
+                    <b>Tools from Salesforce</b>
+                    <ul class="slds-list_dotted">
+                        <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank" rel="external noopener noreferrer">Salesforce Optimizer</a></li>
+                        <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;#38;type=5" target="_blank" rel="external noopener noreferrer">Salesforce LEX Readiness Report</a></li>
+                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=%22Permission%20Helper%22&amp;#38;searchType=simpleSearch" target="_blank" rel="external noopener noreferrer">Permission Helper (AppExchange / Salesforce Lab)</a></li>
+                    </ul>
+                    <br />
+                    <b>Code</b>
+                    <ul class="slds-list_dotted">
+                        <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank" rel="external noopener noreferrer">Salesforce Guidelines for secure code</a></li>
+                        <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank" rel="external noopener noreferrer">Apex PMD Rules</a></li>
+                        <li><a href="https://security.secure.force.com/security/tools/forcecom/scanner" target="_blank" rel="external noopener noreferrer">Checkmarx</a></li>
+                        <li><a href="https://www.getclayton.com/" target="_blank" rel="external noopener noreferrer">Clayton</a></li>
+                        <li><a href="https://www.codescan.io/" target="_blank" rel="external noopener noreferrer">Codescan</a></li>
+                    </ul>
+                    <br />
+                    <b>Debug Logs</b>
+                    <ul class="slds-list_dotted">
+                        <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank" rel="external noopener noreferrer">Apex Replay Debugger</a></li>
+                        <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank" rel="external noopener noreferrer">Online Debug Log Tree (on github)</a></li>
+                        <li><a href="http://sfdc-log.herokuapp.com/" target="_blank" rel="external noopener noreferrer">Online Debug Log Visualizer (on heroku)</a></li>
+                    </ul>
+                    <br />
+                    <b>Dependencies</b>
+                    <ul class="slds-list_dotted">
+                        <li><a href="https://happysoup.io/" target="_blank" rel="external noopener noreferrer">Happy Soup</a></li>
+                    </ul>
+                    <br />
+                    <b>Data Cleansing</b>
+                    <ul class="slds-list_dotted">
+                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank" rel="external noopener noreferrer">RingLead Field Trip</a></li>
+                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank" rel="external noopener noreferrer">RingLead Dupe Dive</a></li>
+                    </ul>
+                </div>
+            </lightning-card>
+        </lightning-layout-item>
+        <lightning-layout-item size="3">
+            <lightning-card icon-name="standard:visit_templates" title="Connection with the Organization">
+                <div class="slds-var-p-horizontal_small">
+                    Org Check scans the org where it has been installed<br />
+                    <br />
+                    On the top of each page, you will see the org id (in a badge) 
+                    being used by Org Check. The org Id starts with 00D.<br />
+                </div>
+            </lightning-card>
+        </lightning-layout-item>
+    </lightning-layout>
+</template>

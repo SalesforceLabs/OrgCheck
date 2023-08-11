@@ -8,166 +8,180 @@ const FALSE_AS_STRING = 'false';
 export default class OrgcheckGlobalFilters extends LightningElement {
 
     /** 
-     * Internal value for the package filter
+     * Value for the package filter
      * Any values by default.
      */
-    _package = ANY_VALUES;
+    package = ANY_VALUES;
 
     /** 
-     * Public getter for the package value selected in the filter
-     */
-    @api get package() { return this._package; }
-
-    /** 
-     * Public setter for the package value selected in the filter
-     */
-    set package(value) { this._package = value; }
-
-    /** 
-     * Public getter to know if the package value selected means ANY VALUES
-     */
-    @api get isAnyPackage() { return this._package === ANY_VALUES; }
-
-    /** 
-     * Public getter to know if the package value selected means NO VALUE
-     */
-    @api get isWithoutPackage() { return this._package === NO_VALUE; }
-
-    /** 
-     * Internal value for the object type filter
+     * Value for the object type filter
      * Any values by default.
      */
-    _sobjectType = ANY_VALUES;
+    sobjectType = ANY_VALUES;
 
     /** 
-     * Public getter for the object type value selected in the filter
-     */
-    @api get sobjectType() { return this._sobjectType; }
-
-    /** 
-     * Public setter for the object type value selected in the filter
-     */
-    set sobjectType(value) { this._sobjectType = value; }
-
-    /** 
-     * Public getter to know if the object type value selected means ANY VALUE
-     */
-    @api get isAnySObjectType() { return this._sobjectType === ANY_VALUES; }
-
-    /** 
-     * Internal value for the object name filter
+     * Value for the object name filter
      * Any values by default.
      */
-    _sobjectApiName = ANY_VALUES;
+    sobjectApiName = ANY_VALUES;
 
     /** 
-     * Public getter for the object name value selected in the filter
-     */
-    @api get sobjectApiName() { return this._sobjectApiName; }
-
-    /** 
-     * Public setter for the object name value selected in the filter
-     */
-    set sobjectApiName(value) { this._sobjectApiName = value; }
-
-    /** 
-     * Public getter to know if the object name value selected means ANY VALUE
-     */
-    @api get isAnySObjectApiName() { return this._sobjectApiName === ANY_VALUES; }
-
-    /** 
-     * Public getter for the show external roles option selected in the filter
+     * Show external roles option selected in the filter
      * False by default;
      */
-    @api showExternalRoles = FALSE_AS_STRING;
+    showExternalRoles = FALSE_AS_STRING;
 
     /** 
-     * Public getter for the production by-pass option selected in the filter
+     * Production by-pass option selected in the filter
      * False by default;
      */
-    @api useInProductionConfirmation = FALSE_AS_STRING;
+    useInProductionConfirmation = FALSE_AS_STRING;
+    
+    /** 
+     * Package options
+     */
+    packageOptions;
 
     /** 
-     * Internal value for the package options
+     * SObject type options
      */
-    _packageOptions = [];
+    sobjectTypeOptions;
 
     /** 
-     * Public getter for the list of package options
+     * SObject name options
      */
-    @api get packageOptions() { return this._packageOptions; }
+    sobjectApiNameOptions;
+
+    /** 
+     * Yes/No options
+     */
+    yesNoOptions = [
+        { label: 'Yes', value: TRUE_AS_STRING },
+        { label: 'No', value: FALSE_AS_STRING }
+    ];
 
     /**
-     * Public setter for the list of package options.
+     * Update the list of package options.
      * This method adds systematically the 'All packages' and the 'No package' options on top.
      * It also sets the current filter value back to the 'All packages' option.
+     * 
+     * @param data is an array coming from the Org Check API representing the list of Packages in the org
      */
-    set packageOptions(values) {
-        this._packageOptions = [
-            { label: 'All packages', value: ANY_VALUES },
-            { label: 'No package', value: NO_VALUE }
-        ].concat(values);
-        this._package = ANY_VALUES;
+    @api updatePackageOptions(data) {
+        if (data && data.map) {
+            this.packageOptions = [
+                { label: 'All packages', value: ANY_VALUES },
+                { label: 'No package', value: NO_VALUE }
+            ].concat(data.map(p => { 
+                return {
+                    label: `${p.name} (api=${p.namespace}, type=${p.type}`, 
+                    value: p.id
+                }
+            }));
+            this.package = ANY_VALUES;
+        }
     }
-
-    /** 
-     * Internal value for the object type options
-     */
-    _sobjectTypeOptions = [];
-
-    /** 
-     * Public getter for the list of object type options
-     */
-    @api get sobjectTypeOptions() { return this._sobjectTypeOptions; }
-
+    
     /**
-     * Public setter for the list of object type options.
+     * Update the list of object type options.
      * This method adds systematically the 'All types' option on top.
      * It also sets the current filter value back to the 'All types' option.
+     * 
+     * @param data is an array coming from the Org Check API representing the list of SObject Types in the org
      */
-    set sobjectTypeOptions(values) { 
-        this._sobjectTypeOptions = [ 
-            { label: 'All types', value: ANY_VALUES } 
-        ].concat(values);
-        this._sobjectType = ANY_VALUES;
-     }
-
-    /** 
-     * Internal value for the object name options
-     */
-    _sobjectApiNameOptions = [];
-
-    /** 
-     * Public getter for the list of object name options
-     */
-    @api get sobjectApiNameOptions() { return this._sobjectApiNameOptions; }
+    @api updateSObjectTypeOptions(data) {
+        if (data && data.map) {
+            this.sobjectTypeOptions = [ 
+                { label: 'All types', value: ANY_VALUES } 
+            ].concat(data.map(t => { 
+                return { 
+                    label: t.label, 
+                    value: t.id 
+                }
+            }));
+            this.sobjectType = ANY_VALUES;
+        }
+    }
 
     /**
-     * Public setter for the list of object name options.
+     * Update the list of object name options.
      * This method adds systematically the 'All objects' option on top.
      * It also sets the current filter value back to the 'All objects' option.
+     * 
+     * @param data is an array coming from the Org Check API representing the list of SObjects in the org
      */
-    set sobjectApiNameOptions(values) {
-        this._sobjectApiNameOptions = [ 
-            { label: 'All objects', value: ANY_VALUES } 
-        ].concat(values);
-        this._sobjectApiName = ANY_VALUES;
+    @api updateSObjectApiNameOptions(data) {
+        if (data && data.map) {
+            this.sobjectApiNameOptions = [ 
+                { label: 'All objects', value: ANY_VALUES } 
+            ].concat(data.map(o => {
+                return {
+                    label: `${o.label} (api=${o.name})`, 
+                    value: o.id
+                }
+            }));
+            this.sobjectApiName = ANY_VALUES;
+        }
     }
+
+    /** 
+     * Get selected package value
+     */
+    @api get selectedPackage() { return this.package; }
+
+    /** 
+     * Get selected SObject type value
+     */
+    @api get selectedSObjectType() { return this.sobjectType; }
+
+    /** 
+     * Get selected SObject api name value
+     */
+    @api get selectedSObjectApiName() { return this.sobjectApiName; }
+
+    /** 
+     * Is selected package value means "ANY VALUES" ?
+     */
+    @api get isSelectedPackageAny() { return this.package === ANY_VALUES; }
+
+    /** 
+     * Is selected package value means "NO VALUE" ?
+     */
+    @api get isSelectedPackageNo() { return this.package === NO_VALUE; }
+
+    /** 
+     * Is selected SObject type value means "ANY VALUES" ?
+     */
+    @api get isSelectedSObjectTypeAny() { return this.sobjectType === ANY_VALUES; }
+
+    /** 
+     * Is selected SObject api name value means "ANY VALUES" ?
+     */
+    @api get isSelectedSObjectApiNameAny() { return this.sobjectApiName === ANY_VALUES; }
 
     /**
-     * Public getter for a typical boolean Yes/No options 
+     * This array indicates which filters has changed since last validation
+     * By default, the array is empty.
+     * After validation, the array becomes empty.
+     * After modification in one of the filters, the array will grow if the name 
+     *   of the filter that changed only if it is not yet referenced.
      */
-    get yesNoOptions() {
-        return [
-            { label: 'Yes', value: TRUE_AS_STRING },
-            { label: 'No', value: FALSE_AS_STRING }
-        ];
-    }
-
     @track whichFiltersChanged = [];
 
+    /**
+     * Boolean that indicates if at least one filter has changed.
+     * If true, the whichFiltersChanged property has at least one element.
+     * If false, the whichFiltersChanged property is an empty array.
+     */
     filtersChanged = false;
 
+    /**
+     * Event triggered when one of the filters have changed
+     * This event fire a custom event called 'change' for the parent component, with 'what' property 
+     *   in details, to identified which filter changed.
+     * 
+     * @param event containing the id of the changed filter (identified by data-id property in html view)
+     */
     filterChanged(event) {
         const fieldId = event.target.dataset.id;
         if (this.whichFiltersChanged.includes(fieldId) === false) this.whichFiltersChanged.push(fieldId);
@@ -179,6 +193,11 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         }));
     }
 
+    /**
+     * Event triggered when the user clicks on the validate button
+     * This event fire a custom event called 'validatechange' for the parent component.
+     * this also reset the array and flag back to "no change" statuses.
+     */
     propagateValues() {
         this.dispatchEvent(new CustomEvent('validatechange', { 
             detail: {},

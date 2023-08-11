@@ -39,11 +39,16 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
     
     style;
 
-    showAllOptions() {
+    handleShowAllOptions() {
         this.itemsFound = this.options;
     }
 
-    search(event) {
+    handleFocus(event) {
+        event.target.selectionStart = 0;
+        event.target.selectionEnd = event.target.value.length || 0;
+    }
+
+    handleSearch(event) {
         const searchingValue = event.target.value;
         if (searchingValue && searchingValue.length > 2) {
             const s = searchingValue.toUpperCase();
@@ -60,7 +65,7 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
 
     itemsFound = [];
 
-    selection(event) {
+    handleSelection(event) {
         this.itemsFound = [];
         const id = event.currentTarget.getAttribute('data-id');
         const name = event.currentTarget.getAttribute('data-name');

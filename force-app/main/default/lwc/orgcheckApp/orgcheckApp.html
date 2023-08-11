@@ -1,49 +1,53 @@
 <template>
-    {data}
     <lightning-card>
-        <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={apiLoaded} onerror={apiFailed}></c-orgcheck-api>
-        <c-orgcheck-global-filters onchange={filterChanged} onvalidatechange={filtersValidated}></c-orgcheck-global-filters>
+        <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={handleApiLoaded} onfail={handleApiFailed}></c-orgcheck-api>
+        <c-orgcheck-global-filters onchange={handleFilterChanged} onvalidatechange={handleFiltersValidated}></c-orgcheck-global-filters>
     </lightning-card>
     <c-orgcheck-spinner></c-orgcheck-spinner>
     <lightning-tabset variant="scoped">
-        <lightning-tab value="home" label="Home" onactive={tabHandleActivation}>
-            Welcome in Org Check Beryllium, LWC power!
+        <lightning-tab label="Home" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="welcome" label="Welcome!" onactive={handleSubTabActivation}>
+                    <c-orgcheck-welcome class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-welcome>
+                </lightning-tab>
+                <lightning-tab value="cache-manager" label="Metadata Cache" onactive={handleSubTabActivation}>
+                    <c-orgcheck-cache-manager class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} onremoveallcache={handleRemoveAllCache}></c-orgcheck-cache-manager>
+                </lightning-tab>
+            </lightning-tabset>
         </lightning-tab>
-        <lightning-tab value="objects" label="⚽ Objects" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-objects></c-orgcheck-tab-objects>
+        <lightning-tab label="⚽ Objects" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="object-information" label="Object Documentation" onactive={handleSubTabActivation}>
+                    <c-orgcheck-object-information class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-object-information>
+                </lightning-tab>
+                <lightning-tab value="objects-owd" label="Org Wide Default" onactive={handleSubTabActivation}>
+                    Place for org wide default per objects
+                </lightning-tab>
+            </lightning-tabset>
         </lightning-tab>
-        <lightning-tab value="customFields" label="🥕 Custom Fields" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-customfields></c-orgcheck-tab-customfields>
+        <lightning-tab label="🥕 Custom Fields" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="custom-fields" label="Custom Fields" onactive={handleSubTabActivation}>
+                    <c-orgcheck-custom-fields class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-custom-fields>
+                </lightning-tab>
+            </lightning-tabset>
         </lightning-tab>
-        <lightning-tab value="users" label="🧔 Users" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-users></c-orgcheck-tab-users>
+        <lightning-tab label="🧔 Users" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="users" label="Users" onactive={handleSubTabActivation}>
+                    <c-orgcheck-users class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-users>
+                </lightning-tab>
+            </lightning-tabset>
         </lightning-tab>
-        <lightning-tab value="profiles" label="👮 Profiles And Permission Sets" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-profiles></c-orgcheck-tab-profiles>
-        </lightning-tab>
-        <lightning-tab value="roles" label="🐇 Roles" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-roles></c-orgcheck-tab-roles>
-        </lightning-tab>
-        <lightning-tab value="publicGroups" label="🌶️ Public Groups" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-publicgroups></c-orgcheck-tab-publicgroups>
-        </lightning-tab>
-        <lightning-tab value="automations" label="🤖 Automations" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-automations></c-orgcheck-tab-automations>
-        </lightning-tab>
-        <lightning-tab value="customLabels" label="🎁 Custom Labels" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-customlabels></c-orgcheck-tab-customlabels>
-        </lightning-tab>
-        <lightning-tab value="visualComponents" label="🥐 Visual Components" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-visualcomponents></c-orgcheck-tab-visualcomponents>
-        </lightning-tab>
-        <lightning-tab value="apex" label="🔥 Apex" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-apex></c-orgcheck-tab-apex>
-        </lightning-tab>
-        <lightning-tab value="analytics" label="🤪 Analytics" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-analytics></c-orgcheck-tab-analytics>
-        </lightning-tab>
-        <lightning-tab value="batches" label="🚢 Batches" onactive={tabHandleActivation}>
-            <c-orgcheck-tab-batches></c-orgcheck-tab-batches>
+        <lightning-tab label="👮 Profiles and Permission Sets" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="profiles" label="Profiles" onactive={handleSubTabActivation}>
+                    <c-orgcheck-profiles class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-profiles>
+                </lightning-tab>
+                <lightning-tab value="permission-sets" label="Permission Sets" onactive={handleSubTabActivation}>
+                    <c-orgcheck-permission-sets class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-permission-sets>
+                </lightning-tab>
+            </lightning-tabset>
         </lightning-tab>
     </lightning-tabset>
 </template>

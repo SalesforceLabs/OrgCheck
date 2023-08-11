@@ -2,7 +2,29 @@
   factory(exports) : typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.orgcheck = global.orgcheck || {}));
   })(this, (function (exports) { 'use strict';
-  
+
+class OrgCheckMap {
+    #keys = {};
+    #values = [];
+
+    set(key, value) {
+        if (Object.keys(this.#keys).includes(key) === true) {
+            this.#values[this.#keys[key]] = value;
+        } else {
+            this.#values.push(value);
+            this.#keys[key] = this.#values.length;
+        }
+    }
+
+    get(key) {
+        return this.#values[this.#keys[key]];
+    }
+
+    call(method, callback) {
+        return this.#values[method](callback);
+    }
+}
+
 /**
  * Org Check API main class
  */
@@ -37,7 +59,7 @@ class OrgCheckAPI {
     #salesforcePackages;
 
     /**
-     * List of all 'interesting' objects in your Salesforce Org
+     * OrgCheckMap of all 'interesting' objects in your Salesforce Org
      */
     #salesforceObjects;
 
@@ -261,7 +283,7 @@ class OrgCheckAPI {
             // Requesting information from the current salesforce org
             const objects = await this.#describeGlobal();
 
-            this.#salesforceObjects = [];
+            this.#salesforceObjects = new OrgCheckMap();
 
             // Mapping sobjects records
             objects.filter((r) => r.keyPrefix).forEach(r => {
@@ -275,18 +297,22 @@ class OrgCheckAPI {
                 if (r.name.endsWith('__ka')) oType = 'KNOWLEDGE_ARTICLE';
                 if (r.name.endsWith('__b')) oType = 'CUSTOM_BIG_OBJECT';
                 if (oType) {
-                    this.#salesforceObjects.push({
-                        id: r.name,
-                        label: r.label,
-                        developerName: r.name,
-                        package: this.#getPackageFromName(r.name),
-                        type: oType
-                    });        
+                    this.#salesforceObjects.set(
+                        this.#salesforceIdFormat(r.name),
+                        {
+                            id: r.name,
+                            label: r.label,
+                            name: r.name,
+                            url: '/'+r.name,
+                            package: this.#getPackageFromName(r.name),
+                            type: oType
+                        }
+                    );
                 }
             });
         }
 
-        return this.#salesforceObjects.filter((o) => {
+        return this.#salesforceObjects.call('filter', (o) => {
             if (namespace !== '*' && o.package !== namespace) return false;
             if (type !== '*' && o.type !== type) return false;
             return true;
@@ -294,7 +320,6 @@ class OrgCheckAPI {
     }
 
     async getCustomFields(object) {
-
         const results = await this.#soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinitionId, '+
@@ -304,21 +329,19 @@ class OrgCheckAPI {
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '+
                     (object === '*' ? '' : 'AND EntityDefinition.QualifiedApiName = \''+object+'\'')
         }]);
-
-        const data = [];
-        results[0].records.forEach((r) => data.push({
-            id: this.#salesforceIdFormat(r.Id),
-            objectId: this.#salesforceIdFormat(r.EntityDefinitionId),
-            objectDeveloperName: r.EntityDefinition?.QualifiedApiName,
-            fieldName: r.DeveloperName,
-            developerName: r.DeveloperName,
-            package: r.NamespacePrefix,
-            fullName: r.DeveloperName,
-            description: r.Description,
-            createdDate: r.CreatedDate, 
-            lastModifiedDate: r.LastModifiedDate
-        }));
-        return data;
+        return results[0].records.map(r => {
+            return {
+                id: this.#salesforceIdFormat(r.Id),
+                url: '/'+r.Id,
+                name: r.DeveloperName,
+                label: r.DeveloperName,
+                package: r.NamespacePrefix,
+                description: r.Description,
+                createdDate: r.CreatedDate, 
+                lastModifiedDate: r.LastModifiedDate,
+                object: this.#salesforceObjects.get(r.EntityDefinitionId)
+            }
+        });
     }
 }
 

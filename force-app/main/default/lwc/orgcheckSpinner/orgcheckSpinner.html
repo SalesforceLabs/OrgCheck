@@ -8,9 +8,12 @@
                 </object>
                 <div class="slds-notification__body">
                     <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
-                        <ol id="spinner-messages">
-                            <template for:each={messages} for:item="msg">
-                                <li key={msg.id}>{msg.label} ({msg.status})</li>
+                        <ol class="slds-progress__list">
+                            <template for:each={sections} for:item="msg">
+                                <li key={msg.id} class={msg.liClasses}>
+                                    <div class="slds-progress__marker" style={msg.markerStyle}></div>
+                                    <div class="slds-progress__item_content slds-grid slds-grid_align-spread">[{msg.id}] {msg.label}</div>
+                                </li>
                             </template>
                         </ol>
                     </div>
