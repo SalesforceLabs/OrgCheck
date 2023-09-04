@@ -1,7 +1,8 @@
 import { LightningElement, api } from 'lwc';
 import { METHOD_TYPES, METHOD_PACKAGES, METHOD_OBJECTS,
     METHOD_CUSTOM_FIELD, METHOD_OBJECT_DESCRIBE, 
-    METHOD_PERMISSION_SETS, METHOD_PROFILES, METHOD_USERS } from 'c/orgcheckApi';
+    METHOD_PERMISSION_SETS, METHOD_PROFILES, METHOD_USERS,
+    METHOD_CACHE_MANAGER } from 'c/orgcheckApi';
 import { SECTION_STATUS_STARTED, SECTION_STATUS_IN_PROGRESS,
     SECTION_STATUS_ENDED, SECTION_STATUS_FAILED } from 'c/orgcheckSpinner';
 
@@ -119,9 +120,14 @@ export default class OrgCheckApp extends LightningElement {
         }
     }
 
-    handleRemoveAllCache() {
+    async handleRemoveCache(event) {
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-        orgcheckApi.removeAllCache();
+        if (event.detail.allItems === true) {
+            orgcheckApi.removeAllCache();
+        } else {
+            orgcheckApi.removeCache(event.detail.itemName);
+        }
+        this._updateCurrentTab();
     }
 
     /**
@@ -163,6 +169,7 @@ export default class OrgCheckApp extends LightningElement {
 
         try {
             // Starting message in the spinner
+            spinner.open();
             spinner.setSection(this.#currentTab, 'Update current sub tab...', SECTION_STATUS_STARTED);
 
             // Set the API method to call depending on th current tab
@@ -174,6 +181,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'users':              method = METHOD_USERS;           break;
                 case 'profiles':           method = METHOD_PROFILES;        break;
                 case 'permission-sets':    method = METHOD_PERMISSION_SETS; break;
+                case 'cache-manager':      method = METHOD_CACHE_MANAGER; break;
                 default:                   return;
             }
 
@@ -187,7 +195,7 @@ export default class OrgCheckApp extends LightningElement {
 
             // Ending message in the spinner
             spinner.setSection(this.#currentTab, 'Bravo, the current sub tab was updated!', SECTION_STATUS_ENDED);
-            spinner.close(1000);
+            spinner.close();
 
         } catch (e) {
             // Error message in the spinner

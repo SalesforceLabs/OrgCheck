@@ -18,15 +18,34 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 this.columns.forEach((column, index) => {
                     let ref = row;
                     if (column.data.ref) column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
-                    const cell = {
-                        name: index,
-                        value: ref[column.data.value]
-                    };
-                    cell[`type_${column.type}`] = true;
-                    Object.keys(column.data).forEach(d => {
-                        cell[d] = ref[column.data[d]];
-                    });
-                    item.cells.push(cell);
+                    if (ref) {
+                        const cell = { name: index };
+                        cell[`type_${column.type}`] = true;
+                        if (column.type.endsWith('s')) {
+                            // iterable
+                            if (column.type === 'texts') {
+                                cell.values = ref[column.data.values];
+                            } else {
+                                cell.values = ref[column.data.values].map((v) => {
+                                    if (typeof v === 'string') return v;
+                                    const value = {};
+                                    Object.keys(column.data).filter(d => d !== 'values').forEach(d => {
+                                        value[d] = v[column.data[d]];
+                                    });
+                                    return value;
+                                });
+                            }
+                        } else {
+                            // unique value
+                            cell.value = ref[column.data.value];
+                            Object.keys(column.data).filter(d => d !== 'value').forEach(d => {
+                                cell[d] = ref[column.data[d]];
+                            });
+                        }
+                        item.cells.push(cell);
+                    } else {
+                        console.error('ref is undefined here.', column, row)
+                    }
                 });
                 return item;
             });

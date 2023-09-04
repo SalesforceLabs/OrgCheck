@@ -34,9 +34,9 @@ export default class OrgcheckUsers extends LightningElement {
             { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }},
             { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
             { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
-            { label: 'Key permissions', type: 'texts',    data: { value: 'importantPermissions' }},
-            { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', value: 'id', url: 'url', label: 'name' }},
-            //{ label: 'Permission Sets', type: 'ids',      data: { ref: 'permissionSetRefs', value: 'id', url: 'url', label: 'name' }}
+            { label: 'Key permissions', type: 'texts',    data: { values: 'importantPermissions' }},
+            { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', label: 'name' }},
+            { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', label: 'name' }}
         ];
         this.tableKeyField = 'index';
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));

@@ -1,9 +1,9 @@
 <template>
-    <lightning-card>
+    <div style="padding-bottom: 12px;">
         <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={handleApiLoaded} onfail={handleApiFailed}></c-orgcheck-api>
         <c-orgcheck-global-filters onchange={handleFilterChanged} onvalidatechange={handleFiltersValidated}></c-orgcheck-global-filters>
-    </lightning-card>
-    <c-orgcheck-spinner></c-orgcheck-spinner>
+        <c-orgcheck-spinner></c-orgcheck-spinner>
+    </div>
     <lightning-tabset variant="scoped">
         <lightning-tab label="Home" onactive={handleTabActivation}>
             <lightning-tabset>
@@ -11,7 +11,7 @@
                     <c-orgcheck-welcome class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-welcome>
                 </lightning-tab>
                 <lightning-tab value="cache-manager" label="Metadata Cache" onactive={handleSubTabActivation}>
-                    <c-orgcheck-cache-manager class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} onremoveallcache={handleRemoveAllCache}></c-orgcheck-cache-manager>
+                    <c-orgcheck-cache-manager class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} onremovecache={handleRemoveCache}></c-orgcheck-cache-manager>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

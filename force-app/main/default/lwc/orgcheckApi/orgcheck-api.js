@@ -1,16 +1,11 @@
-
 class SFDC_OrgInformation {
     id;
     name;
     type;
     isProduction;
     localNamespace;
-    constructor(id, name, type, isProduction, localNamespace) { 
-        this.id = id;
-        this.name = name;
-        this.type = type;
-        this.isProduction = isProduction;
-        this.localNamespace = localNamespace;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -23,14 +18,8 @@ class SFDC_Object {
     package;
     typeId;
     typeRef;
-    constructor(id, label, name, apiname, url, namespace, typeId) { 
-        this.id = id;
-        this.label = label;
-        this.name = name;
-        this.apiname = apiname;
-        this.url = url;
-        this.package = namespace;
-        this.typeId = typeId;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -46,9 +35,8 @@ const OBJECTTYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
 class SFDC_ObjectType {
     id;
     label;
-    constructor(id, label) { 
-        this.id = id;
-        this.label = label;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -63,16 +51,8 @@ class SFDC_CustomField {
     lastModifiedDate;
     objectId; 
     objectRef; 
-    constructor(id, url, name, label, namespace, description, createdDate, lastModifiedDate, objectId) { 
-        this.id = id;
-        this.url = url;
-        this.name = name;
-        this.label = label;
-        this.package = namespace;
-        this.description = description;
-        this.createdDate = createdDate;
-        this.lastModifiedDate = lastModifiedDate;
-        this.objectId = objectId;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -81,11 +61,8 @@ class SFDC_Package {
     name;
     namespace;
     type;
-    constructor(id, name, namespace, type) { 
-        this.id = id;
-        this.name = name;
-        this.namespace = namespace;
-        this.type = type;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -103,19 +80,8 @@ class SFDC_User {
     importantPermissions;
     permissionSetIds;
     permissionSetRefs;
-    constructor(id, url, photoUrl, name, lastLogin, neverLogged, numberFailedLogins,
-        lastPasswordChange, profileId, importantPermissions, permissionSetIds) {
-            this.id = id;
-            this.url = url;
-            this.photoUrl = photoUrl;
-            this.name = name;
-            this.lastLogin = lastLogin;
-            this.neverLogged = neverLogged;
-            this.numberFailedLogins = numberFailedLogins;
-            this.lastPasswordChange = lastPasswordChange;
-            this.profileId = profileId;
-            this.importantPermissions = importantPermissions;
-            this.permissionSetIds = permissionSetIds;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
@@ -123,63 +89,142 @@ class SFDC_Profile {
     id;
     url;
     name;
-    constructor(id, url, name) {
-        this.id = id;
-        this.url = url;
-        this.name = name;
+    apiName;
+    description;
+    license;
+    isCustom;
+    isUndescribedCustom;
+    package;
+    isUnusedCustom;
+    memberCounts;
+    hasMembers;
+    createdDate;
+    lastModifiedDate;
+    nbFieldPermissions;
+    nbObjectPermissions;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
+    }
+
+}
+
+class SFDC_PermissionSet {
+    id;
+    url;
+    name;
+    apiName;
+    description;
+    license;
+    isCustom;
+    isUndescribedCustom;
+    package;
+    isUnusedCustom;
+    memberCounts;
+    hasMembers;
+    isGroup;
+    createdDate;
+    lastModifiedDate;
+    nbFieldPermissions;
+    nbObjectPermissions;
+    profileIds;
+    profileRefs;
+    constructor(setup) { 
+        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
 }
 
 class OrgCheckMap {
-    _keys = {};
-    _values = [];
+    #keyIndexes = {};
+    #keys = [];
+    #values = [];
+    #createdDate = new Date();
+    #lastModificationDate = this.#createdDate;
 
     keys() {
-        return Object.keys(this._keys);
+        return Object.keys(this.#keyIndexes);
     }
 
-    hasKey(key) {
-        return this.keys().includes(key) === true;
-    }
-
-    get(key) {
-        return this._values[this._keys[key]];
-    }
-
-    remove(key) {
-        this._values.splice(this._keys[key], 1);
-        delete this._keys[key];
-    }
-
-    removeAll() {
-        this._keys = {};
-        this._values = [];
-    }
-
-    set(key, value) {
-        if (!key) throw new Error(`OrgCheckMap.add(value): Provided 'value' does not have a property called '${this._keyProperty}'. FYI 'value' had the following properties: ${Object.keys(value)}`);
-        if (this.hasKey(key) === true) {
-            this._values[this._keys[key]] = value;
-        } else {
-            this._keys[key] = this._values.length;
-            this._values.push(value);
+    _check_keyDefined(key, method) {
+        if (key === undefined) {
+            throw new Error(`OrgCheckMap.${method}: the given key is undefined.`);
         }
     }
 
+    _check_keyExists(key, method) {
+        const index = this.#keyIndexes[key];
+        if (index === undefined) {
+            throw new Error(`OrgCheckMap.${method}: the given key [${key}] is not found in the map.`);
+        }
+        return index;
+    }
+
+    hasKey(key) {
+        this._check_keyDefined(key, 'hasKey');
+        return this.#keys.includes(key) === true;
+    }
+
+    get(key) {
+        this._check_keyDefined(key, 'get');
+        return this.#values[this._check_keyExists(key, 'get')];
+    }
+
+    remove(key) {
+        this._check_keyDefined(key, 'remove');
+        const index = this._check_keyExists(key, 'remove');
+        this.#keys.splice(index, 1);
+        this.#values.splice(index, 1);
+        delete this.#keyIndexes[key];
+        for (let i = index; i < this.#keys.length; i++) {
+            this.#keyIndexes[this.#keys[i]]--;
+        }
+        this.#lastModificationDate = new Date();
+    }
+
+    removeAll() {
+        this.#keyIndexes = {};
+        this.#keys = [];
+        this.#values = [];
+        this.#lastModificationDate = new Date();
+    }
+
+    set(key, value) {
+        this._check_keyDefined(key, 'set');
+        if (this.#keys.includes(key) === true) {
+            this.#values[this.#keyIndexes[key]] = value;
+        } else {
+            this.#keyIndexes[key] = this.#values.length;
+            this.#keys.push(key);
+            this.#values.push(value);
+        }
+        this.#lastModificationDate = new Date();
+    }
+
+    size() {
+        return this.#values.length;
+    }
+
+    createdDate() {
+        return this.#createdDate;
+    }
+
+    lastModificationDate() {
+        return this.#lastModificationDate;
+    }
+
     filterValues(callback) {
-        return this._values.filter(callback);
+        return this.#values.filter(callback);
     }
 
     mapValues(callback) {
-        return this._values.map(callback);
+        return this.#values.map(callback);
     }
 
     forEachValue(callback) {
-        return this._values.forEach(callback);
+        return this.#values.forEach(callback);
     }
 
     allValues() {
-        return this._values.slice();
+        return this.#values.slice();
     }
 }
 
@@ -196,6 +241,13 @@ const DATASET_CUSTOMFIELDS = 'CustomFields';
 const DATASET_USERS = 'Users';
 const DATASET_PERMISSIONSETS = 'PermissionSets';
 const DATASET_PROFILES = 'Profiles';
+
+class DatasetCacheInfo {
+    name;
+    length;
+    created;
+    modified;
+}
 
 class DatasetManager {
     
@@ -224,13 +276,13 @@ class DatasetManager {
                 else if (organization.IsSandbox === true) type = 'Sandbox';
                 else if (organization.IsSandbox === false && organization.TrialExpirationDate) type = 'TrialOrDemo';
                 else type = 'Production';
-                information.set(organization.Id, new SFDC_OrgInformation(
-                    organization.Id,
-                    organization.Name,
-                    type,
-                    type === 'Production',
-                    organization.NamespacePrefix || ''
-                ));
+                information.set(organization.Id, new SFDC_OrgInformation({
+                    id: organization.Id,
+                    name: organization.Name,
+                    type: type,
+                    isProduction: (type === 'Production'),
+                    localNamespace: (organization.NamespacePrefix || '')
+                }));
                 // Return data
                 resolve(information);
             }).catch(reject);
@@ -252,21 +304,21 @@ class DatasetManager {
                 const packages = new OrgCheckMap();
                 // Set the map (1/2) - installed package
                 results[0].records.forEach((record) => {
-                    packages.set(record.Id, new SFDC_Package(
-                        record.Id,
-                        record.SubscriberPackage.Name,
-                        record.SubscriberPackage.NamespacePrefix,
-                        'Installed'
-                    ));
+                    packages.set(record.Id, new SFDC_Package({
+                        id: record.Id,
+                        name: record.SubscriberPackage.Name,
+                        namespace: record.SubscriberPackage.NamespacePrefix,
+                        type: 'Installed'
+                    }));
                 });
                 // Set the map (2/2) - local package
                 results[1].records.forEach((record) => {
-                    packages.set('<local>', new SFDC_Package(
-                        record.NamespacePrefix, 
-                        record.NamespacePrefix, 
-                        record.NamespacePrefix, 
-                        'Local'
-                    ));
+                    packages.set('<local>', new SFDC_Package({
+                        id: record.NamespacePrefix, 
+                        name: record.NamespacePrefix, 
+                        namespace: record.NamespacePrefix, 
+                        type: 'Local'
+                    }));
                 });
                 // Return data
                 resolve(packages);
@@ -291,7 +343,7 @@ class DatasetManager {
                     { id: OBJECTTYPE_KNOWLEDGE_ARTICLE,       label: 'Knowledge Article' },
                     { id: OBJECTTYPE_CUSTOM_BIG_OBJECT,       label: 'Big Object' }
                 ].forEach((e) => { 
-                    types.set(e.id, new SFDC_ObjectType(e.id, e.label)); 
+                    types.set(e.id, new SFDC_ObjectType({id: e.id, label: e.label})); 
                 });
                 // Return data
                 resolve(types);
@@ -347,15 +399,15 @@ class DatasetManager {
                                 else if (!type) return;
                                 const entity = entitiesByName[object.name];
                                 const id = CASESAFEID(object.name);
-                                objects.set(id, new SFDC_Object(
-                                    id,
-                                    object.label,
-                                    entity.DeveloperName,
-                                    object.name,
-                                    `/${id}`,
-                                    (entity.NamespacePrefix || ''),
-                                    type
-                                ));
+                                objects.set(id, new SFDC_Object({
+                                    id: id,
+                                    label: object.label,
+                                    name: entity.DeveloperName,
+                                    apiname: object.name,
+                                    url: `/${id}`,
+                                    package: (entity.NamespacePrefix || ''),
+                                    typeId: type
+                                }));
                             });
                         // Return data
                         resolve(objects);
@@ -383,17 +435,17 @@ class DatasetManager {
                     .filter((record) => (record.EntityDefinition ? true : false))
                     .forEach((record) => {
                         const id = CASESAFEID(record.Id);
-                        customFields.set(id, new SFDC_CustomField(
-                            id,
-                            '/'+record.Id,
-                            record.DeveloperName,
-                            record.DeveloperName,
-                            record.NamespacePrefix,
-                            record.Description,
-                            record.CreatedDate,
-                            record.LastModifiedDate,
-                            CASESAFEID(record.EntityDefinition.QualifiedApiName)
-                        ));
+                        customFields.set(id, new SFDC_CustomField({
+                            id: id,
+                            url: `/${record.Id}`,
+                            name: record.DeveloperName,
+                            label: record.DeveloperName,
+                            package: record.NamespacePrefix,
+                            description: record.Description,
+                            createdDate: record.CreatedDate,
+                            lastModifiedDate: record.LastModifiedDate,
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
+                        }));
                     });
                 // Return data
                 resolve(customFields);
@@ -441,20 +493,19 @@ class DatasetManager {
                                 }
                             });
                         }
-                        const user = new SFDC_User(
-                            id,
-                            `/${id}`,
-                            record.SmallPhotoUrl,
-                            record.Name,
-                            record.LastLoginDate,
-                            (record.LastLoginDate ? false : true),
-                            record.NumberOfFailedLogins,
-                            record.LastPasswordChangeDate,
-                            CASESAFEID(record.ProfileId),
-                            Object.keys(importantPermissions),
-                            permissionSetRefs
-                        );
-                        users.set(id, user);
+                        users.set(id, new SFDC_User({
+                            id: id,
+                            url: `/${id}`,
+                            photoUrl: record.SmallPhotoUrl,
+                            name: record.Name,
+                            lastLogin: record.LastLoginDate,
+                            neverLogged: (record.LastLoginDate ? false : true),
+                            numberFailedLogins: record.NumberOfFailedLogins,
+                            lastPasswordChange: record.LastPasswordChangeDate,
+                            profileId: CASESAFEID(record.ProfileId),
+                            importantPermissions: Object.keys(importantPermissions).sort(),
+                            permissionSetIds: permissionSetRefs
+                        }));
                     });
                 // Return data
                 resolve(users);
@@ -467,8 +518,11 @@ class DatasetManager {
         this.#retrievers.set(DATASET_PROFILES, (resolve, reject) => {
             // SOQL query on PermissionSet with isOwnedByProfile = TRUE
             sfdcManager.soqlQuery([{ 
-                string: 'SELECT Id, ProfileId, Profile.Name, Profile.UserType, NamespacePrefix, '+
-                            '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) '+
+                string: 'SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, '+
+                            'CreatedDate, LastModifiedDate, '+
+                            '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51), '+
+                            '(SELECT Id FROM FieldPerms LIMIT 51), '+
+                            '(SELECT Id FROM ObjectPerms LIMIT 51)'+
                         'FROM PermissionSet '+ // oh yes we are not mistaken!
                         'WHERE isOwnedByProfile = TRUE'
             }]).then((results) => {
@@ -476,14 +530,27 @@ class DatasetManager {
                 const profiles = new OrgCheckMap();
                 // Set the map
                 results[0].records
-                    .filter((record) => (record.EntityDefinition ? true : false))
                     .forEach((record) => {
-                        const id = CASESAFEID(record.ProfileId);
-                        profiles.set(id, new SFDC_Profile(
-                            id,
-                            '/'+id,
-                            record.Profile?.Name
-                        ));
+                        const profileId = CASESAFEID(record.ProfileId);
+                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;
+                        profiles.set(profileId, new SFDC_Profile({
+                            id: profileId,
+                            url: `/${profileId}`,
+                            name: record.Profile.Name,
+                            apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Profile.Name,
+                            description: record.Profile.Description,
+                            license: (record.License ? record.License.Name : ''),
+                            isCustom: record.IsCustom,
+                            isUndescribedCustom: record.IsCustom && !record.Profile.Description,
+                            package: record.NamespacePrefix,
+                            isUnusedCustom: record.IsCustom && memberCounts === 0,
+                            memberCounts: memberCounts,
+                            hasMembers: memberCounts > 0,
+                            createdDate: record.CreatedDate, 
+                            lastModifiedDate: record.LastModifiedDate,
+                            nbFieldPermissions: record.FieldPerms?.records.length || 0,
+                            nbObjectPermissions: record.ObjectPerms?.records.length || 0
+                        }));                    
                     });
                 // Return data
                 resolve(profiles);
@@ -498,25 +565,58 @@ class DatasetManager {
             sfdcManager.soqlQuery([{ 
                 string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
                             'CreatedDate, LastModifiedDate, '+
-                            '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 1), '+ // just to see if used
+                            '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51), '+
                             '(SELECT Id FROM FieldPerms LIMIT 51), '+
                             '(SELECT Id FROM ObjectPerms LIMIT 51)'+
                         'FROM PermissionSet '+
                         'WHERE IsOwnedByProfile = FALSE' 
+            }, { 
+                string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
+                        'FROM PermissionSetAssignment '+
+                        'WHERE Assignee.IsActive = TRUE '+
+                        'AND PermissionSet.IsOwnedByProfile = FALSE '+
+                        'ORDER BY PermissionSetId '
             }]).then((results) => {
                 // Init the map
                 const permissionSets = new OrgCheckMap();
                 // Set the map
                 results[0].records
-                    .filter((record) => (record.EntityDefinition ? true : false))
                     .forEach((record) => {
                         const id = CASESAFEID(record.Id);
-                        permissionSets.set(id, new SFDC_Profile(
-                            id,
-                            '/'+record.Id,
-                            record.Name
-                        ));
+                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;
+                        permissionSets.set(id, new SFDC_PermissionSet({
+                            id: id,
+                            url: `/${id}`,
+                            name: record.Name,
+                            apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Name,
+                            description: record.Description,
+                            license: (record.License ? record.License.Name : ''),
+                            isCustom: record.IsCustom,
+                            isUndescribedCustom: record.IsCustom && !record.Description,
+                            package: record.NamespacePrefix,
+                            isUnusedCustom: record.IsCustom && memberCounts === 0,
+                            memberCounts: memberCounts,
+                            hasMembers: memberCounts > 0,
+                            isGroup: (record.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                            createdDate: record.CreatedDate, 
+                            lastModifiedDate: record.LastModifiedDate,
+                            nbFieldPermissions: record.FieldPerms?.records.length || 0,
+                            nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                            profileIds: {}
+                        }));
                     });
+                results[1].records
+                    .forEach((record) => {
+                        const permissionSetId = CASESAFEID(record.PermissionSetId);
+                        const profileId = CASESAFEID(record.Assignee.ProfileId);
+                        if (permissionSets.hasKey(permissionSetId)) {
+                            const permissionSet = permissionSets.get(permissionSetId);
+                            if (permissionSet.profileIds[profileId] !== true) permissionSet.profileIds[profileId] = true;
+                        }
+                    });
+                permissionSets.forEachValue((permissionSet) => {
+                    permissionSet.profileIds = Object.keys(permissionSet.profileIds);
+                });
                 // Return data
                 resolve(permissionSets);
             }).catch(reject);
@@ -560,6 +660,26 @@ class DatasetManager {
         });
         return Promise.all(promises).then(() => results);
     }
+
+    getCacheInformation() {
+        return this.#cache.keys().map((datasetName) => {
+            const dataset = this.#cache.get(datasetName);
+            const info = new DatasetCacheInfo();
+            info.name = datasetName;
+            info.length = dataset?.size();
+            info.created = dataset?.createdDate();
+            info.modified = dataset?.lastModificationDate();
+            return info;
+        });
+    }
+
+    removeCache(name) {
+        this.#cache.remove(name);
+    }
+
+    removeAllCache() {
+        this.#cache.removeAll();
+    }
 }
 
 class SFDCConnectionManager {
@@ -589,14 +709,45 @@ class SFDCConnectionManager {
         queries.forEach(q => {
             promises.push(new Promise((resolve, reject) => {
                 const conn = q.tooling === true ? this.#connection.tooling : this.#connection;
-                conn.query(q.string, (e, d) => {
-                  if (e) reject(e);
-                  resolve(d);
-                });
+                const records = [];
+                const recursive_query = (e, d) => {
+                    if (e) { 
+                        if (q.byPasses && q.byPasses.includes(e.errorCode)) {
+                            resolve();
+                        } else {
+                            e.context = { 
+                                when: 'While creating a promise to call a SOQL query.',
+                                what: {
+                                    queryMore: q.queryMore,
+                                    queryString: q.string,
+                                    queryUseTooling: q.tooling
+                                }
+                            };
+                            reject(e);
+                        }
+                    } else {
+                        records.push(... d.records);
+                        if (d.done === true) {
+                            resolve({ records: records });
+                        } else {
+                            conn.queryMore(d.nextRecordsUrl, recursive_query);
+                        }
+                    }
+                }
+                conn.query(q.string, recursive_query);
             }));
         });
         return Promise.all(promises);
     }
+
+
+    /*
+                    const recursive_query = (error, result) => {
+                        
+                    }
+                    api.query(query.string, recursive_query);
+
+    */
 
     /**
      * Method to call a list of sobjects
@@ -675,7 +826,15 @@ export class OrgCheckAPI {
     }
 
     removeAllCache() {
-        this.#datasetManager.removeAll();
+        this.#datasetManager.removeAllCache();
+    }
+
+    removeCache(name) {
+        this.#datasetManager.removeCache(name);
+    }
+
+    getCacheInformation() {
+        return this.#datasetManager.getCacheInformation();
     }
 
     /**
@@ -743,7 +902,6 @@ export class OrgCheckAPI {
         });
         // Return values filtered by inputs
         return objects.filterValues((object) => {
-            if (!object.typeRef) console.error(`this object ${object.id} has no type ref.`);
             if (namespace !== '*' && object.package !== namespace) return false;
             if (type !== '*' && object.typeRef?.id !== type) return false;
             return true;
@@ -770,7 +928,6 @@ export class OrgCheckAPI {
         });
         // Return values filtered by inputs
         return customFields.filterValues((customField) => {
-            if (!customField.objectRef) console.error(`this object ${customField.id} has no object ref.`);
             if (namespace !== '*' && customField.package !== namespace) return false;
             if (objecttype !== '*' && customField.objectRef?.typeRef?.id !== objecttype) return false;
             if (object !== '*' && customField.objectRef?.apiname !== object) return false;
@@ -787,14 +944,18 @@ export class OrgCheckAPI {
      */
     async getPermissionSets(namespace) {
         // Get data
-        const data = await this.#datasetManager.run([DATASET_PERMISSIONSETS]);
+        const data = await this.#datasetManager.run([DATASET_PERMISSIONSETS, DATASET_PROFILES]);
         const permissionSets = data.get(DATASET_PERMISSIONSETS);
+        const profiles = data.get(DATASET_PROFILES);
+        // Augment permission sets with profile references
+        permissionSets.forEachValue((permissionSet) => {
+            permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.hasKey(id)).map((id) => profiles.get(id));
+        });
         // Return values filtered by inputs
-        /*return permissionSets.filterValues((permissionSet) => {
+        return permissionSets.filterValues((permissionSet) => {
             if (namespace !== '*' && permissionSet.package !== namespace) return false;
             return true;
-        });*/
-        return permissionSets.allValues();
+        });
     }
 
     /**
@@ -809,11 +970,10 @@ export class OrgCheckAPI {
         const data = await this.#datasetManager.run([DATASET_PROFILES]);
         const profiles = data.get(DATASET_PROFILES);
         // Return values
-        /*return profiles.filterValues((profile) => {
-            //if (namespace !== '*' && profile.package !== namespace) return false;
+        return profiles.filterValues((profile) => {
+            if (namespace !== '*' && profile.package !== namespace) return false;
             return true;
-        });*/
-        return profiles.allValues();
+        });
     }
 
     /**
@@ -826,11 +986,11 @@ export class OrgCheckAPI {
         const data = await this.#datasetManager.run([DATASET_USERS, DATASET_PROFILES, DATASET_PERMISSIONSETS]);
         const users = data.get(DATASET_USERS);
         const profiles = data.get(DATASET_PROFILES);
-        //const permissionSets = data.get(DATASET_PERMISSIONSETS);
+        const permissionSets = data.get(DATASET_PERMISSIONSETS);
         // Augment users with profile and permission sets references
         users.forEachValue((user) => {
             user.profileRef = profiles.get(user.profileId);
-            //user.permissionSetRefs = user.permissionSetIds.map((permissionSetId) => permissionSets.get(permissionSetId));
+            user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.hasKey(id)).map((id) => permissionSets.get(id));
         });
         // Return values
         return users.allValues();

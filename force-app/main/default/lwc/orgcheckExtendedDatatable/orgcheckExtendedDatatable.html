@@ -35,9 +35,9 @@
                             <template lwc:if={cell.type_id}>
                                 <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
                             </template>
-                            <template lwc:if={cell.type_ids}>
-                                <template for:each={cell.value} for:item="id">
-                                    <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url>
+                            <template lwc:elseif={cell.type_ids}>
+                                <template for:each={cell.values} for:item="id">
+                                    <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
                                 </template>
                             </template>
                             <template lwc:elseif={cell.type_percentage}>
@@ -51,14 +51,14 @@
                                 <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
                             </template>
                             <template lwc:elseif={cell.type_dateTime}>
-                                <lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time>
+                                <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
                             </template>
                             <template lwc:elseif={cell.type_text}>
                                 {cell.value}
                             </template>
                             <template lwc:elseif={cell.type_texts}>
-                                <template for:each={cell.value} for:item="text">
-                                    {text}
+                                <template for:each={cell.values} for:item="text">
+                                    {text}<br key={cell.name} />
                                 </template>
                             </template>
                         </td>

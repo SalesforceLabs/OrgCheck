@@ -11,6 +11,7 @@ export const METHOD_OBJECT_DESCRIBE = 'object-describe';
 export const METHOD_PERMISSION_SETS = 'permission-sets';
 export const METHOD_PROFILES = 'profiles';
 export const METHOD_USERS = 'users';
+export const METHOD_CACHE_MANAGER = 'cache-manager';
 
 export default class OrgcheckApi extends LightningElement {
 
@@ -54,6 +55,10 @@ export default class OrgcheckApi extends LightningElement {
         this.#api.removeAllCache();
     }
 
+    @api removeCache(name) {
+        this.#api.removeCache(name);
+    }
+
     @api async callingApi(method, args) {
 
         const dailyApiLimitRate = this.#api.getOrgDailyApiLimitRate();
@@ -77,6 +82,8 @@ export default class OrgcheckApi extends LightningElement {
                 return this.#api.getProfiles(args.package);
             case METHOD_USERS:
                 return this.#api.getActiveUsers();
+            case METHOD_CACHE_MANAGER:
+                return this.#api.getCacheInformation();
             case METHOD_OBJECT_DESCRIBE:
             default:
                 return Promise.reject(new Error(`Calling the api with method=${method} is not permitted.`));

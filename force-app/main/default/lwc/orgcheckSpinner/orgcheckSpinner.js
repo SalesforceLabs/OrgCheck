@@ -9,10 +9,19 @@ export const SECTION_STATUS_FAILED = 'failed';
 export default class OrgCheckSpinner extends LightningElement {
 
     spinningURL = OrgCheckStaticRessource + '/img/Mascot+Animated.svg';
-    
-    isShow = false;
-    #keysIndex = {};
-    @track sections = [];
+
+    isShow;
+    #keysIndex;
+    @track sections;
+
+    /**
+     * Connected callback function
+     */
+    connectedCallback() {
+        this.isShow = false;
+        this.sections = [];
+        this.#keysIndex = {};
+    }
 
     @api setSection(sectionName, message, status) {
         let item = { 
@@ -46,6 +55,9 @@ export default class OrgCheckSpinner extends LightningElement {
     }
 
     @api open() {
+        this.isShow = false;
+        this.sections = [];
+        this.#keysIndex = {};
         this.isShow = true;
     }
 

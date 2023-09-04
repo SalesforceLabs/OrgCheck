@@ -30,8 +30,19 @@ export default class OrgcheckPermissionsets extends LightningElement {
      */
     connectedCallback() {
         this.tableColumns = [
-            { fieldName: 'index', label: '#' },
-            { fieldName: 'score', label: 'Score' }
+            { label: 'Score',            type: 'numeric',  data: { value: 'score' }},
+            { label: 'Name',             type: 'id',       data: { value: 'id', url: 'url', label: 'name' }},
+            { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
+            { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
+            { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions' }},
+            { label: '#Object CRUDs',    type: 'numeric',  data: { value: 'nbObjectPermissions' }},            
+            { label: 'License',          type: 'text',     data: { value: 'license' }},
+            { label: 'Package',          type: 'text',     data: { value: 'package' }},
+            { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }},
+            { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', url: 'url', label: 'name' }},
+            { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
+            { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
+            { label: 'Description',      type: 'text',     data: { value: 'description' }}
         ];
         this.tableKeyField = 'index';
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));

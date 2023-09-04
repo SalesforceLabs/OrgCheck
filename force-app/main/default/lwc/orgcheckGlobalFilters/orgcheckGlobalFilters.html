@@ -1,61 +1,56 @@
 <template>
-    <lightning-layout>
-        <lightning-layout-item padding="around-small">
+    <ul class="slds-button-group-row">
+        <li class="slds-button-group-item">
             <lightning-combobox
                 data-id="package"
                 label="Package"
                 value={package}
-                field-level-help="Optional: You can filter on a specific package."
                 options={packageOptions}
                 onchange={filterChanged} ></lightning-combobox>
-        </lightning-layout-item>
-        <lightning-layout-item padding="around-small">
+        </li>
+        <li class="slds-button-group-item">
             <lightning-combobox
                 data-id="sobjectType"
                 label="SObject Type"
                 value={sobjectType}
-                field-level-help="Optional: You can filter on a specific type of objects."
                 options={sobjectTypeOptions}
                 onchange={filterChanged} ></lightning-combobox>
-        </lightning-layout-item>
-        <lightning-layout-item padding="around-small">
+        </li>
+        <li class="slds-button-group-item">
             <c-orgcheck-extended-combobox
                 data-id="sobjectApiName"
                 label="SObject"
                 value={sobjectApiName}
-                field-level-help="Optional: You can filter on a specific objects (depends on the package and type selection). Start typing to see matching options, or double-click to see all options..."
                 options={sobjectApiNameOptions}
                 onchange={filterChanged}></c-orgcheck-extended-combobox>
-        </lightning-layout-item>
-        <lightning-layout-item padding="around-small">
+        </li>
+        <li class="slds-button-group-item">
             <lightning-combobox
                 data-id="showExternalRoles"
                 label="Show external roles?"
                 value={showExternalRoles}
-                field-level-help="Optional: Do you want to see the external roles? (if Partner Community is on, this could be nice)."
                 options={yesNoOptions}
                 onchange={filterChanged} ></lightning-combobox>
-        </lightning-layout-item>
+        </li>
         <template lwc:if={isCurrentOrgAProduction}>
-            <lightning-layout-item padding="around-small">
+            <li class="slds-button-group-item">
                 <lightning-combobox
                     data-id="useInProductionConfirmation"
                     label="Do you confirm running Org Check in production?"
                     value={useInProductionConfirmation}
-                    field-level-help="Mandatory: You need to confirm this option when using the app from a production org."
                     options={yesNoOptions}
                     onchange={filterChanged} ></lightning-combobox>
-            </lightning-layout-item>
+            </li>
         </template>
         <template lwc:if={filtersChanged}>
-            <lightning-layout-item padding="around-small">
-                {whichFiltersChanged.length} filter(s) changed<br />
+            <li class="slds-button-group-item">
+                <label class="slds-form-element__label">{whichFiltersChanged.length} filter(s) changed</label><br />
                 <lightning-button 
                     variant="brand" 
-                    label="Use the filters" 
-                    title="You are ready to use these filters in the app..." 
+                    label="Apply" 
+                    title="You are ready to apply these filters in the app..." 
                     onclick={propagateValues}></lightning-button>
-            </lightning-layout-item>
+            </li>
         </template>
-    </lightning-layout>
+    </ul>
 </template>
