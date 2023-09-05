@@ -2,6 +2,8 @@ import { LightningElement, api, track } from 'lwc';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
+    isDataEmpty = true;
+    @api emptyMessage;
     @api showStatistics = false;
     @api showSearch = false;
     @api stickyHeaders = false;
@@ -9,6 +11,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api columns;
     @api keyField;
     @api set rows(rows) { 
+        this.isDataEmpty = (rows ? rows.length === 0 : true);
         if (rows && this.columns) {
             this.data = rows.map((row) => {
                 const item = { 
@@ -43,8 +46,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             });
                         }
                         item.cells.push(cell);
-                    } else {
-                        console.error('ref is undefined here.', column, row)
                     }
                 });
                 return item;
@@ -62,6 +63,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         console.error('IMPLEMENT ME', event);
     }
 
+    /**
+     * Connected callback function
+     */
     connectedCallback() {
     }
 }

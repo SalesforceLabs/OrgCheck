@@ -1,13 +1,8 @@
-<!-- sldsValidatorIgnore -->
 <template>
-    <template lwc:if={isTableEmpty}>
-        There is no permission set to show.
-    </template>
-    <template lwc:else>
-        <c-orgcheck-extended-datatable
-            key-field={tableKeyField} 
-            rows={tableData} 
-            columns={tableColumns}
-            show-row-number-column="true"></c-orgcheck-extended-datatable>
-    </template>
+    <c-orgcheck-extended-datatable
+        empty-message="There is no permission to show."
+        key-field={tableKeyField} 
+        rows={tableData} 
+        columns={tableColumns}
+        show-row-number-column="true"></c-orgcheck-extended-datatable>
 </template>

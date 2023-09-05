@@ -19,57 +19,62 @@
             </lightning-input>
         </div>
     </template>
-    <table class="slds-table slds-table_bordered">
-        <thead>
-            <tr>
-                <template for:each={columns} for:item="column">
-                    <th key={column.label}>{column.label}</th>
-                </template>
-            </tr>
-        </thead>
-        <tbody>
-            <template for:each={rows} for:item="row">
-                <tr key={row.key}>
-                    <template for:each={row.cells} for:item="cell">
-                        <td key={cell.name} data-value={cell.value}>
-                            <template lwc:if={cell.type_id}>
-                                <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
-                            </template>
-                            <template lwc:elseif={cell.type_ids}>
-                                <template for:each={cell.values} for:item="id">
-                                    <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
-                                </template>
-                            </template>
-                            <template lwc:elseif={cell.type_percentage}>
-                                <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
-                            </template>
-                            <template lwc:elseif={cell.type_numeric}>
-                                <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
-                            </template>
-                            <template lwc:elseif={cell.type_boolean}>
-                                <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
-                                <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
-                            </template>
-                            <template lwc:elseif={cell.type_dateTime}>
-                                <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
-                            </template>
-                            <template lwc:elseif={cell.type_text}>
-                                {cell.value}
-                            </template>
-                            <template lwc:elseif={cell.type_texts}>
-                                <template for:each={cell.values} for:item="text">
-                                    {text}<br key={cell.name} />
-                                </template>
-                            </template>
-                        </td>
+    <template lwc:if={isDataEmpty}>
+        {emptyMessage}
+    </template>
+    <template lwc:else>
+        <table class="slds-table slds-table_bordered">
+            <thead>
+                <tr>
+                    <template for:each={columns} for:item="column">
+                        <th key={column.label}>{column.label}</th>
                     </template>
                 </tr>
+            </thead>
+            <tbody>
+                <template for:each={rows} for:item="row">
+                    <tr key={row.key}>
+                        <template for:each={row.cells} for:item="cell">
+                            <td key={cell.name} data-value={cell.value}>
+                                <template lwc:if={cell.type_id}>
+                                    <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
+                                </template>
+                                <template lwc:elseif={cell.type_ids}>
+                                    <template for:each={cell.values} for:item="id">
+                                        <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                    </template>
+                                </template>
+                                <template lwc:elseif={cell.type_percentage}>
+                                    <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
+                                </template>
+                                <template lwc:elseif={cell.type_numeric}>
+                                    <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
+                                </template>
+                                <template lwc:elseif={cell.type_boolean}>
+                                    <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
+                                    <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
+                                </template>
+                                <template lwc:elseif={cell.type_dateTime}>
+                                    <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
+                                </template>
+                                <template lwc:elseif={cell.type_text}>
+                                    {cell.value}
+                                </template>
+                                <template lwc:elseif={cell.type_texts}>
+                                    <template for:each={cell.values} for:item="text">
+                                        {text}<br key={cell.name} />
+                                    </template>
+                                </template>
+                            </td>
+                        </template>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        <span id="footer">
+            <template if:true={areAllRowsInvisible}>
+                No data to show with this filter.
             </template>
-        </tbody>
-    </table>
-    <span id="footer">
-        <template if:true={areAllRowsInvisible}>
-            No data to show with this filter.
-        </template>
-    </span>
+        </span>
+    </template>
 </template>
