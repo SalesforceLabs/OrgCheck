@@ -5,6 +5,13 @@ export default class OrgcheckCacheManager extends LightningElement {
     @track items = [];
 
     /**
+     * Connected callback function
+     */
+    connectedCallback() {
+        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+    }
+    
+    /**
      * Set the component data.
      * 
      * @param {Array<DatasetCacheInfo>} data 
