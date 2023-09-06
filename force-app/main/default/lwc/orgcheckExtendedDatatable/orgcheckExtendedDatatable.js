@@ -16,6 +16,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             this.data = rows.map((row) => {
                 const item = { 
                     key: row[this.keyField], 
+                    visible: true,
                     cells: [] 
                 };
                 this.columns.forEach((column, index) => {
@@ -60,7 +61,24 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     nbRowsVisible = 0;
 
     handleSearch(event) {
-        console.error('IMPLEMENT ME', event);
+        const searchingValue = event.target.value;
+        if (searchingValue && searchingValue.length > 2) {
+            const s = searchingValue.toUpperCase();
+            this.data.forEach((row) => {
+                row.visible = (row.cells.findIndex((cell) => {
+                    if (cell.value !== undefined) {
+                        if (typeof cell.value === 'string') {
+                            return cell.value.toUpperCase().indexOf(s) >= 0;
+                        }
+                    }
+                    return false;
+                }) >= 0);
+            });
+        } else {
+            this.data.forEach((row) => { row.visible = true; });
+        }
+        // we don't want the event to be more propagated
+        event.stopPropagation();
     }
 
     /**

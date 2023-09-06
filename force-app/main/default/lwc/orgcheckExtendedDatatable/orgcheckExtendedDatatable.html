@@ -14,8 +14,8 @@
     <template if:true={showSearch}>
         <div id="search-box">
             <lightning-input 
-                placeholder="Search any field (case sensitive) and press Enter"
-                onkeydown={handleSearch}>
+                placeholder="Search any string field values (more than 2 characters)"
+                onchange={handleSearch}>
             </lightning-input>
         </div>
     </template>
@@ -34,38 +34,40 @@
             <tbody>
                 <template for:each={rows} for:item="row">
                     <tr key={row.key}>
-                        <template for:each={row.cells} for:item="cell">
-                            <td key={cell.name} data-value={cell.value}>
-                                <template lwc:if={cell.type_id}>
-                                    <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
-                                </template>
-                                <template lwc:elseif={cell.type_ids}>
-                                    <template for:each={cell.values} for:item="id">
-                                        <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                        <template if:true={row.visible}>
+                            <template for:each={row.cells} for:item="cell">
+                                <td key={cell.name} data-value={cell.value}>
+                                    <template lwc:if={cell.type_id}>
+                                        <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
                                     </template>
-                                </template>
-                                <template lwc:elseif={cell.type_percentage}>
-                                    <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
-                                </template>
-                                <template lwc:elseif={cell.type_numeric}>
-                                    <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
-                                </template>
-                                <template lwc:elseif={cell.type_boolean}>
-                                    <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
-                                    <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
-                                </template>
-                                <template lwc:elseif={cell.type_dateTime}>
-                                    <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
-                                </template>
-                                <template lwc:elseif={cell.type_text}>
-                                    {cell.value}
-                                </template>
-                                <template lwc:elseif={cell.type_texts}>
-                                    <template for:each={cell.values} for:item="text">
-                                        {text}<br key={cell.name} />
+                                    <template lwc:elseif={cell.type_ids}>
+                                        <template for:each={cell.values} for:item="id">
+                                            <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                        </template>
                                     </template>
-                                </template>
-                            </td>
+                                    <template lwc:elseif={cell.type_percentage}>
+                                        <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
+                                    </template>
+                                    <template lwc:elseif={cell.type_numeric}>
+                                        <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
+                                    </template>
+                                    <template lwc:elseif={cell.type_boolean}>
+                                        <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
+                                        <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
+                                    </template>
+                                    <template lwc:elseif={cell.type_dateTime}>
+                                        <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
+                                    </template>
+                                    <template lwc:elseif={cell.type_text}>
+                                        {cell.value}
+                                    </template>
+                                    <template lwc:elseif={cell.type_texts}>
+                                        <template for:each={cell.values} for:item="text">
+                                            {text}<br key={cell.name} />
+                                        </template>
+                                    </template>
+                                </td>
+                            </template>
                         </template>
                     </tr>
                 </template>
