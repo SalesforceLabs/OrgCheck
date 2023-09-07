@@ -3,6 +3,10 @@ import { LightningElement, api, track } from 'lwc';
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
     isDataEmpty = true;
+    @track data;
+    nbRowsVisible = 0;
+    #searchInput = '';
+    
     @api emptyMessage;
     @api showStatistics = false;
     @api showSearch = false;
@@ -51,19 +55,23 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 });
                 return item;
             });
+            this.filter();
         }
     }
     get rows() { 
         return this.data; 
     }
 
-    @track data;
-    nbRowsVisible = 0;
+    handleSearchInputChanged(event) {
+        this.#searchInput = event.target.value;
+        this.filter();
+        // we don't want the event to be more propagated
+        event.stopPropagation();
+    }
 
-    handleSearch(event) {
-        const searchingValue = event.target.value;
-        if (searchingValue && searchingValue.length > 2) {
-            const s = searchingValue.toUpperCase();
+    filter() {
+        if (this.#searchInput && this.#searchInput.length > 2) {
+            const s = this.#searchInput.toUpperCase();
             this.data.forEach((row) => {
                 row.visible = (row.cells.findIndex((cell) => {
                     if (cell.value !== undefined) {
@@ -77,8 +85,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         } else {
             this.data.forEach((row) => { row.visible = true; });
         }
-        // we don't want the event to be more propagated
-        event.stopPropagation();
     }
 
     /**
