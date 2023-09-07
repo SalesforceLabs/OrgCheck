@@ -73,14 +73,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         if (this.#searchInput && this.#searchInput.length > 2) {
             const s = this.#searchInput.toUpperCase();
             this.data.forEach((row) => {
-                row.visible = (row.cells.findIndex((cell) => {
-                    if (cell.value !== undefined) {
-                        if (typeof cell.value === 'string') {
-                            return cell.value.toUpperCase().indexOf(s) >= 0;
-                        }
-                    }
-                    return false;
-                }) >= 0);
+                row.visible = (
+                    row.cells.findIndex((cell) => {
+                        return Object.values(cell).findIndex((value) => {
+                            return String(value).toUpperCase().indexOf(s) >= 0;
+                        }) >= 0;
+                    }) >= 0
+                );
             });
         } else {
             this.data.forEach((row) => { row.visible = true; });
