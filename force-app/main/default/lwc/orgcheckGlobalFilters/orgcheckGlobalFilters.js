@@ -75,7 +75,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
             ].concat(data.map(p => { 
                 return {
                     label: `${p.name} (api=${p.namespace}, type=${p.type}`, 
-                    value: p.id
+                    value: p.namespace
                 }
             }));
             this.package = ANY_VALUES;
