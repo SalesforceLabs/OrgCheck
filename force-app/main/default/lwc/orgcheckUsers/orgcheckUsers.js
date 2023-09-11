@@ -30,13 +30,14 @@ export default class OrgcheckUsers extends LightningElement {
      */
     connectedCallback() {
         this.tableColumns = [
-            { label: 'User Name',       type: 'id',       data: { value: 'id', url: 'url', label: 'name' }},
+            { label: 'Score',           type: 'numeric',  data: { value: 'score' }, sorted: 'asc' },
+            { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }},
             { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
             { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
             { label: 'Key permissions', type: 'texts',    data: { values: 'importantPermissions' }},
-            { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', label: 'name' }},
-            { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', label: 'name' }}
+            { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
+            { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', value: 'name' }}
         ];
         this.tableKeyField = 'index';
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));

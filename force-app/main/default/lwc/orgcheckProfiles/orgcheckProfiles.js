@@ -30,8 +30,8 @@ export default class OrgcheckProfiles extends LightningElement {
      */
     connectedCallback() { 
         this.tableColumns = [
-            { label: 'Score',           type: 'numeric',  data: { value: 'score' }},
-            { label: 'Name',            type: 'id',       data: { value: 'id', url: 'url', label: 'name' }},
+            { label: 'Score',           type: 'numeric',  data: { value: 'score' }, sorted: 'asc' },
+            { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
             { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions' }},
             { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions' }},            

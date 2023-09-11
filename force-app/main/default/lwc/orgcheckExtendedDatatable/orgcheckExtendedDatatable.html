@@ -26,23 +26,27 @@
         <table class="slds-table slds-table_bordered">
             <thead>
                 <tr>
-                    <template for:each={columns} for:item="column">
-                        <th key={column.label}>{column.label}</th>
+                    <template for:each={_columns} for:item="column">
+                        <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index}>
+                            {column.label}
+                            <template if:true={column.sortedDesc}>&nbsp;🔽</template>
+                            <template if:true={column.sortedAsc}>&nbsp;🔼</template>
+                        </th>
                     </template>
                 </tr>
             </thead>
             <tbody>
-                <template for:each={rows} for:item="row">
+                <template for:each={_rows} for:item="row">
                     <tr key={row.key}>
                         <template if:true={row.visible}>
                             <template for:each={row.cells} for:item="cell">
                                 <td key={cell.name} data-value={cell.value}>
                                     <template lwc:if={cell.type_id}>
-                                        <lightning-formatted-url value={cell.url} tooltip={cell.label} label={cell.label} target="_blank" ></lightning-formatted-url>
+                                        <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
                                     </template>
                                     <template lwc:elseif={cell.type_ids}>
-                                        <template for:each={cell.values} for:item="id">
-                                            <lightning-formatted-url key={id} value={id.url} tooltip={id.label} label={id.label} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                        <template for:each={cell.values} for:item="item">
+                                            <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.name} />
                                         </template>
                                     </template>
                                     <template lwc:elseif={cell.type_percentage}>
@@ -62,8 +66,8 @@
                                         {cell.value}
                                     </template>
                                     <template lwc:elseif={cell.type_texts}>
-                                        <template for:each={cell.values} for:item="text">
-                                            {text}<br key={cell.name} />
+                                        <template for:each={cell.values} for:item="item">
+                                            {item}<br key={cell.name} />
                                         </template>
                                     </template>
                                 </td>

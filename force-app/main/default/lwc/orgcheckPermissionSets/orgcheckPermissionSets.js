@@ -30,8 +30,8 @@ export default class OrgcheckPermissionsets extends LightningElement {
      */
     connectedCallback() {
         this.tableColumns = [
-            { label: 'Score',            type: 'numeric',  data: { value: 'score' }},
-            { label: 'Name',             type: 'id',       data: { value: 'id', url: 'url', label: 'name' }},
+            { label: 'Score',            type: 'numeric',  data: { value: 'score' }, sorted: 'asc' },
+            { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
             { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
             { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions' }},
@@ -39,7 +39,7 @@ export default class OrgcheckPermissionsets extends LightningElement {
             { label: 'License',          type: 'text',     data: { value: 'license' }},
             { label: 'Package',          type: 'text',     data: { value: 'package' }},
             { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }},
-            { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', url: 'url', label: 'name' }},
+            { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', value: 'name', url: 'url' }},
             { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
             { label: 'Description',      type: 'text',     data: { value: 'description' }}
