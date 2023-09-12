@@ -51,6 +51,7 @@ class SFDC_CustomField {
     lastModifiedDate;
     objectId; 
     objectRef; 
+    score;
     constructor(setup) { 
         if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
@@ -80,6 +81,7 @@ class SFDC_User {
     importantPermissions;
     permissionSetIds;
     permissionSetRefs;
+    score;
     constructor(setup) { 
         if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
@@ -102,6 +104,7 @@ class SFDC_Profile {
     lastModifiedDate;
     nbFieldPermissions;
     nbObjectPermissions;
+    score;
     constructor(setup) { 
         if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
@@ -128,6 +131,7 @@ class SFDC_PermissionSet {
     nbObjectPermissions;
     profileIds;
     profileRefs;
+    score;
     constructor(setup) { 
         if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
     }
@@ -231,6 +235,13 @@ class OrgCheckMap {
 const CASESAFEID = (id) => {
     if (id && id.length === 18) return id.substr(0, 15);
     return id;
+}
+
+const ISEMPTY = (value) => {
+    if (!value) return true;
+    if (value.length === 0) return true;
+    if (value.trim && value.trim().length === 0) return true;
+    return false;
 }
 
 const DATASET_ORGINFO = 'OrgInfo';
@@ -434,7 +445,16 @@ class DatasetManager {
                 results[0].records
                     .filter((record) => (record.EntityDefinition ? true : false))
                     .forEach((record) => {
+                        // Get the ID15 of this custom field
                         const id = CASESAFEID(record.Id);
+
+                        // Compute the score of this user, with the following rule:
+                        //  - If the field has no description, then you get +1.
+                        //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                        let score = 0;
+                        if (ISEMPTY(record.Description)) score++;
+                        // TODO: get the DAPI information for this field......
+                        // Add it to the map  
                         customFields.set(id, new SFDC_CustomField({
                             id: id,
                             url: `/${record.Id}`,
@@ -444,7 +464,8 @@ class DatasetManager {
                             description: record.Description,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName),
+                            score: score
                         }));
                     });
                 // Return data
@@ -478,7 +499,10 @@ class DatasetManager {
                 // Set the map
                 results[0].records
                     .forEach((record) => {
+                        // Get the ID15 of this user
                         const id = CASESAFEID(record.Id);
+                        // Check if this user has a set of important permissions in Profile and Permission Sets
+                        // At the same time, set the reference if of its permission sets
                         const importantPermissions = {};
                         const permissionSetRefs = [];
                         if (record.PermissionSetAssignments && record.PermissionSetAssignments.records) {
@@ -493,6 +517,13 @@ class DatasetManager {
                                 }
                             });
                         }
+                        // Compute the score of this user, with the following rule:
+                        //   - If the user is not using Lightning Experience, then you get +1.
+                        //   - If the user never logged, then you get +1.
+                        let score = 0;
+                        if (record.UserPreferencesLightningExperiencePreferred === false) score++;
+                        if (!record.LastLoginDate) score++;
+                        // Add it to the map  
                         users.set(id, new SFDC_User({
                             id: id,
                             url: `/${id}`,
@@ -501,10 +532,12 @@ class DatasetManager {
                             lastLogin: record.LastLoginDate,
                             neverLogged: (record.LastLoginDate ? false : true),
                             numberFailedLogins: record.NumberOfFailedLogins,
+                            onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
                             lastPasswordChange: record.LastPasswordChangeDate,
                             profileId: CASESAFEID(record.ProfileId),
                             importantPermissions: Object.keys(importantPermissions).sort(),
-                            permissionSetIds: permissionSetRefs
+                            permissionSetIds: permissionSetRefs,
+                            score: score
                         }));
                     });
                 // Return data
@@ -531,8 +564,17 @@ class DatasetManager {
                 // Set the map
                 results[0].records
                     .forEach((record) => {
+                        // Get the ID15 of this profile
                         const profileId = CASESAFEID(record.ProfileId);
-                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;
+                        // Get the count of active users assigned to this profile (maximum is 51)
+                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;                        
+                        // Compute the score of this profile, with the following rule:
+                        //   - If it is custom and is not used by any active users, then you get +1.
+                        //   - If it is custom and has no description, then you get +1.
+                        let score = 0;
+                        if (record.IsCustom && memberCounts === 0) score++;
+                        if (record.IsCustom && ISEMPTY(record.Profile.Description)) score++;
+                        // Add it to the map                        
                         profiles.set(profileId, new SFDC_Profile({
                             id: profileId,
                             url: `/${profileId}`,
@@ -549,7 +591,8 @@ class DatasetManager {
                             createdDate: record.CreatedDate, 
                             lastModifiedDate: record.LastModifiedDate,
                             nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                            nbObjectPermissions: record.ObjectPerms?.records.length || 0
+                            nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                            score: score
                         }));                    
                     });
                 // Return data
@@ -582,8 +625,17 @@ class DatasetManager {
                 // Set the map
                 results[0].records
                     .forEach((record) => {
+                        // Get the ID15 of this permission set
                         const id = CASESAFEID(record.Id);
+                        // Get the count of active users assigned to this permission set (maximum is 51)
                         const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;
+                        // Compute the score of this permission set, with the following rule:
+                        //   - If it is custom and is not used by any active users, then you get +1.
+                        //   - If it is custom and has no description, then you get +1.
+                        let score = 0;
+                        if (record.IsCustom && memberCounts === 0) score++;
+                        if (record.IsCustom && ISEMPTY(record.Description)) score++;
+                        // Add it to the map                        
                         permissionSets.set(id, new SFDC_PermissionSet({
                             id: id,
                             url: `/${id}`,
@@ -597,12 +649,13 @@ class DatasetManager {
                             isUnusedCustom: record.IsCustom && memberCounts === 0,
                             memberCounts: memberCounts,
                             hasMembers: memberCounts > 0,
-                            isGroup: (record.Type === 'Group'),     // other values can be 'Regular', 'Standard', 'Session
+                            isGroup: (record.Type === 'Group'), // other values can be 'Regular', 'Standard', 'Session
                             createdDate: record.CreatedDate, 
                             lastModifiedDate: record.LastModifiedDate,
                             nbFieldPermissions: record.FieldPerms?.records.length || 0,
                             nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                            profileIds: {}
+                            profileIds: {},
+                            score: score
                         }));
                     });
                 results[1].records
