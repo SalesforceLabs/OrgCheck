@@ -28,7 +28,6 @@ export default class OrgcheckCustomfields extends LightningElement {
      */
     connectedCallback() {
         this.tableColumns = [
-            { label: 'Score',         type: 'numeric',  data: { value: 'score' }, sorted: 'desc' },
             { label: 'Object',        type: 'id',       data: { ref: 'objectRef', value: 'label', url: 'url' }},
             { label: 'Object Type',   type: 'text',     data: { ref: 'objectRef.typeRef', value: 'label' }},
             { label: 'Field',         type: 'id',       data: { value: 'name', url: 'url' }},

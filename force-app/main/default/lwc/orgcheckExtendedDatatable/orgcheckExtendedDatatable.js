@@ -82,7 +82,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api set columns(columns) {
         if (columns) {
-            this._columns = columns.map((column, index) => { 
+            const _columns = [{ label: 'Score', type: 'numeric', data: { value: 'score' }, isScore: true, sorted: 'desc', sortedDesc: true }];
+            _columns.push(...columns);
+            this._columns = _columns.map((column, index) => { 
                 if (column.sorted) {
                     this.#sortingColumnIndex = index;
                     this.#sortingOrder = column.sorted;
@@ -115,13 +117,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 const item = { 
                     key: rowIndex, 
                     visible: true,
-                    cells: [] 
+                    cells: []
                 };
                 this._columns.forEach((column, columnIndex) => {
                     let ref = row;
                     if (column.data.ref) column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
                     if (ref) {
-                        const cell = { name: columnIndex };
+                        const cell = { key: columnIndex };
                         cell[`type_${column.type}`] = true;
                         if (column.type.endsWith('s')) {
                             // iterable
@@ -148,6 +150,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                                 cell.valueAfterMax = column.data.valueAfterMax;
                             }
                         }
+                        if (column.isScore === true && cell.value > 0) item.cssClass = 'orgcheck-table-tr-badrow';
                         item.cells.push(cell);
                     }
                 });

@@ -1,0 +1,10 @@
+tr.orgcheck-table-tr-badrow {
+    background-color: #ffe099;
+}
+td.orgcheck-table-td-badcell {
+    background-color: #ffd079;
+    background-image: url(/img/msg_icons/warning16.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    background-size: 11px;
+}

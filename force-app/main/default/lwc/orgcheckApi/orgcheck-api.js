@@ -75,6 +75,7 @@ class SFDC_User {
     lastLogin;
     neverLogged;
     numberFailedLogins;
+    onLightningExperience;
     lastPasswordChange;
     profileId;
     profileRef;

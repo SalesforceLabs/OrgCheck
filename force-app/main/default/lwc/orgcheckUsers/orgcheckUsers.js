@@ -28,8 +28,8 @@ export default class OrgcheckUsers extends LightningElement {
      */
     connectedCallback() {
         this.tableColumns = [
-            { label: 'Score',           type: 'numeric',  data: { value: 'score' }, sorted: 'desc' },
             { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
+            { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
             { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }},
             { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
             { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},

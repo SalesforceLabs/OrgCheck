@@ -34,10 +34,10 @@
             </thead>
             <tbody>
                 <template for:each={_rows} for:item="row">
-                    <tr key={row.key}>
+                    <tr key={row.key} class={row.cssClass}>
                         <template if:true={row.visible}>
                             <template for:each={row.cells} for:item="cell">
-                                <td key={cell.name} data-value={cell.value}>
+                                <td key={cell.key} data-value={cell.value}>
                                     <template lwc:if={cell.type_id}>
                                         <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
                                     </template>
@@ -45,7 +45,7 @@
                                         <template lwc:if={cell.values.length}>
                                             <i>{cell.values.length} item(s)</i><br />
                                             <template for:each={cell.values} for:item="item">
-                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
                                             </template>
                                         </template>
                                     </template>
@@ -74,7 +74,7 @@
                                         <template lwc:if={cell.values.length}>
                                             <i>{cell.values.length} item(s)</i><br />
                                             <template for:each={cell.values} for:item="item">
-                                                - {item}<br key={cell.name} />
+                                                - {item}<br key={cell.key} />
                                             </template>
                                         </template>
                                     </template>
