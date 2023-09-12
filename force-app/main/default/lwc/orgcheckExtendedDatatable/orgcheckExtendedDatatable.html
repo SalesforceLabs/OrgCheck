@@ -1,15 +1,12 @@
 <template>
-    <span id="counters"></span>
     <template if:true={showStatistics}>
-        <span id="filter-counters">
-            <template if:true={isFilterOn}>
-                Filter is <b><code>on</code></b>, 
-                Number of visible rows: <b><code>{nbRowsVisible}</code></b>
-            </template>
-            <template if:false={isFilterOn}>
-                Filter is <b><code>off</code></b>
-            </template>
-        </span>
+        Total number of rows: <b><code>{nbRows}</code></b>, Total number of bad rows: 4, Total sum score: 8, 
+        <template if:true={isFilterOn}>
+            Filter is <b><code>on</code></b>, Number of rows that match the filter: <b><code>{nbRowsVisible}</code></b>
+        </template>
+        <template if:false={isFilterOn}>
+            Filter is <b><code>off</code></b>
+        </template>
     </template>
     <template if:true={showSearch}>
         <div id="search-box">
@@ -45,15 +42,23 @@
                                         <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
                                     </template>
                                     <template lwc:elseif={cell.type_ids}>
-                                        <template for:each={cell.values} for:item="item">
-                                            <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                        <template lwc:if={cell.values.length}>
+                                            <i>{cell.values.length} item(s)</i><br />
+                                            <template for:each={cell.values} for:item="item">
+                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.name} />
+                                            </template>
                                         </template>
                                     </template>
                                     <template lwc:elseif={cell.type_percentage}>
                                         <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
                                     </template>
                                     <template lwc:elseif={cell.type_numeric}>
-                                        <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
+                                        <template lwc:if={cell.isMaxReached}>
+                                            {cell.valueAfterMax}
+                                        </template>
+                                        <template lwc:else>
+                                            <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
+                                        </template>
                                     </template>
                                     <template lwc:elseif={cell.type_boolean}>
                                         <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
@@ -66,8 +71,11 @@
                                         {cell.value}
                                     </template>
                                     <template lwc:elseif={cell.type_texts}>
-                                        <template for:each={cell.values} for:item="item">
-                                            {item}<br key={cell.name} />
+                                        <template lwc:if={cell.values.length}>
+                                            <i>{cell.values.length} item(s)</i><br />
+                                            <template for:each={cell.values} for:item="item">
+                                                - {item}<br key={cell.name} />
+                                            </template>
                                         </template>
                                     </template>
                                 </td>

@@ -19,8 +19,6 @@ export default class OrgcheckProfiles extends LightningElement {
 
     tableColumns;
 
-    tableKeyField;
-
     tableData;
 
     isTableEmpty;
@@ -33,16 +31,15 @@ export default class OrgcheckProfiles extends LightningElement {
             { label: 'Score',           type: 'numeric',  data: { value: 'score' }, sorted: 'asc' },
             { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
-            { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions' }},
-            { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions' }},            
+            { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions', max: 50, valueAfterMax: '50+' }},
+            { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
             { label: 'License',         type: 'text',     data: { value: 'license' }},
             { label: 'Package',         type: 'text',     data: { value: 'package' }},
-            { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts' }},
+            { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+' }},
             { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
             { label: 'Description',     type: 'text',     data: { value: 'description' }}
         ];
-        this.tableKeyField = 'index';
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }
 }

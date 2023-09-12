@@ -19,8 +19,6 @@ export default class OrgcheckCustomfields extends LightningElement {
 
     tableColumns;
 
-    tableKeyField;
-
     tableData;
 
     isTableEmpty;
@@ -45,7 +43,6 @@ export default class OrgcheckCustomfields extends LightningElement {
             { label: 'Modified date', type: 'dateTime', data: { value: 'lastModifiedDate' }},
             { label: 'Description',   type: 'text',     data: { value: 'description' }}
         ];
-        this.tableKeyField = 'index';
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }
 }

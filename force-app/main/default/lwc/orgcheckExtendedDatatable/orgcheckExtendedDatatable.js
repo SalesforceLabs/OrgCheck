@@ -2,22 +2,84 @@ import { LightningElement, api, track } from 'lwc';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
+    /**
+     * Is there no records at all to display?
+     */
     isDataEmpty = true;
-    @track _columns;
-    @track _rows;
+
+    /**
+     * If no data then this message will appear instead of the table
+     */
+    @api emptyMessage;
+
+    /**
+     * Is the search is active and records are filtered
+     */
+    isFilterOn = false;
+
+    /**
+     * Total number of rows (even if the filter is on)
+     */
+    nbRows = 0;
+
+    /**
+     * Number of rows that match the filter
+     */
     nbRowsVisible = 0;
     
-    @api emptyMessage;
+    /**
+     * Are the statistics going to be shown on top of the table?
+     */
     @api showStatistics = false;
+    
+    /**
+     * Do you want the search input to be displayed?
+     * And the filter to be enabled?
+     */
     @api showSearch = false;
-    @api stickyHeaders = false;
-    @api columnBordered = false;
-    @api keyField;
 
+    /**
+     * Do you need the headers to stick on top of the screen even if you scroll down?
+     * (not yet implemented)
+     */
+    //@api stickyHeaders = false;
+    
+    /**
+     * Do you need the table to have a border?
+     * (not yet implemented)
+     */
+    //@api columnBordered = false;
+    
+    /**
+     * Internal array of columns
+     */
+    @track _columns;
+
+    /**
+     * Internal array of rows
+     */
+    @track _rows;
+
+    /**
+     * Internal property that indicates the current column index which is used by the sort method
+     */
     #sortingColumnIndex;
+
+    /**
+     * Internal property that indicates the current order which is used by the sort method
+     */
     #sortingOrder;
+
+    /**
+     * Internal property that indicate the current search input index which is used by the filter method
+     */
     #filteringSearchInput;
 
+    /**
+     * Setter for the columns (it will set the internal <code>_columns</code> property)
+     * 
+     * @param {Array<any>} columns 
+     */
     @api set columns(columns) {
         if (columns) {
             this._columns = columns.map((column, index) => { 
@@ -33,23 +95,33 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             });
         }
     }
+
+    /**
+     * Getter for the columns
+     */
     get columns() { 
         return this._columns; 
     }
     
+    /**
+     * Setter for the rows (it will set the internal <code>_rows</code> property).
+     * This method relies on the internal <code>_columns</code> property as well.
+     * 
+     * @param {Array<any>} rows 
+     */
     @api set rows(rows) { 
         if (rows && this._columns) {
-            this._rows = rows.map((row) => {
+            this._rows = rows.map((row, rowIndex) => {
                 const item = { 
-                    key: row[this.keyField], 
+                    key: rowIndex, 
                     visible: true,
                     cells: [] 
                 };
-                this._columns.forEach((column, index) => {
+                this._columns.forEach((column, columnIndex) => {
                     let ref = row;
                     if (column.data.ref) column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
                     if (ref) {
-                        const cell = { name: index };
+                        const cell = { name: columnIndex };
                         cell[`type_${column.type}`] = true;
                         if (column.type.endsWith('s')) {
                             // iterable
@@ -71,21 +143,35 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             Object.keys(column.data).filter(d => d !== 'value').forEach(d => {
                                 cell[d] = ref[column.data[d]];
                             });
+                            if (column.type === 'numeric' && column.data.max && cell.value > column.data.max) {
+                                cell.isMaxReached = true; 
+                                cell.valueAfterMax = column.data.valueAfterMax;
+                            }
                         }
                         item.cells.push(cell);
                     }
                 });
                 return item;
             });
+            this.nbRows = this._rows.length;
+            this.isDataEmpty = (this.nbRows === 0);
             this.filter();
             this.sort();
         }
-        this.isDataEmpty = (rows ? rows.length === 0 : true);
     }
+
+    /**
+     * Getter for the rows
+     */
     get rows() { 
         return this._rows; 
     }
 
+    /**
+     * Handler when a user type a search text in the appropriate input text field
+     * 
+     * @param {Event} event 
+     */
     handleSearchInputChanged(event) {
         this.#filteringSearchInput = event.target.value;
         this.filter();
@@ -93,6 +179,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         event.stopPropagation();
     }
 
+    /**
+     * Handler when a user clicks on a header of the table
+     * 
+     * @param {Event} event 
+     */
     handleSortColumnClick(event) {
         this.#sortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10);
         this.#sortingOrder = 'asc';
@@ -118,9 +209,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         event.stopPropagation();
     }
 
+    /**
+     * Internal filter method which takes into account the <code>#filteringSearchInput</code> property
+     */
     filter() {
         const searchInput = this.#filteringSearchInput;
+        this.nbRowsVisible = 0;
         if (searchInput && searchInput.length > 2) {
+            this.isFilterOn = true;
             const s = searchInput.toUpperCase();
             this._rows.forEach((row) => {
                 row.visible = (
@@ -130,12 +226,17 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                         }) >= 0;
                     }) >= 0
                 );
+                if (row.visible) this.nbRowsVisible++;
             });
         } else {
+            this.isFilterOn = false;
             this._rows.forEach((row) => { row.visible = true; });
         }
     }
 
+    /**
+     * Internal sort method which takes into account the <code>#sortingColumnIndex</code> and <code>sortingOrder</code> properties
+     */
     sort() {
         const columnIndex = this.#sortingColumnIndex;
         const iOrder = this.#sortingOrder === 'asc' ? 1 : -1;
@@ -143,8 +244,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         let value1, value2;
         this._rows.sort((row1, row2) => {
             if (type.endsWith('s')) {
-                value1 = row1.cells[columnIndex].values.length || 0;
-                value2 = row2.cells[columnIndex].values.length || 0;
+                value1 = row1.cells[columnIndex].values.length || undefined;
+                value2 = row2.cells[columnIndex].values.length || undefined;
             } else {
                 value1 = row1.cells[columnIndex].value;
                 value2 = row2.cells[columnIndex].value;
@@ -155,11 +256,5 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             if (!value2 && value2 !== 0) return -1;
             return (value1 < value2 ? -iOrder : iOrder);
         });
-    }
-
-    /**
-     * Connected callback function
-     */
-    connectedCallback() {
     }
 }
