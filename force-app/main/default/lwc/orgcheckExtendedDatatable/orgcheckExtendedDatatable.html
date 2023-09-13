@@ -37,8 +37,11 @@
                     <tr key={row.key} class={row.cssClass}>
                         <template if:true={row.visible}>
                             <template for:each={row.cells} for:item="cell">
-                                <td key={cell.key} data-value={cell.value}>
-                                    <template lwc:if={cell.type_id}>
+                                <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
+                                    <template lwc:if={cell.type_score}>
+                                        {row.score}
+                                    </template>
+                                    <template lwc:elseif={cell.type_id}>
                                         <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
                                     </template>
                                     <template lwc:elseif={cell.type_ids}>
@@ -55,6 +58,9 @@
                                     <template lwc:elseif={cell.type_numeric}>
                                         <template lwc:if={cell.isMaxReached}>
                                             {cell.valueAfterMax}
+                                        </template>
+                                        <template lwc:elseif={cell.isMinReached}>
+                                            {cell.valueBeforeMin}
                                         </template>
                                         <template lwc:else>
                                             <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>

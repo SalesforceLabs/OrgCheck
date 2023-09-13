@@ -82,7 +82,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api set columns(columns) {
         if (columns) {
-            const _columns = [{ label: 'Score', type: 'numeric', data: { value: 'score' }, isScore: true, sorted: 'desc', sortedDesc: true }];
+            const _columns = [{ label: 'Score', type: 'score', data: { value: 'badScore' }, sorted: 'desc' }];
             _columns.push(...columns);
             this._columns = _columns.map((column, index) => { 
                 if (column.sorted) {
@@ -117,7 +117,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 const item = { 
                     key: rowIndex, 
                     visible: true,
-                    cells: []
+                    cells: [] 
                 };
                 this._columns.forEach((column, columnIndex) => {
                     let ref = row;
@@ -126,7 +126,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                         const cell = { key: columnIndex };
                         cell[`type_${column.type}`] = true;
                         if (column.type.endsWith('s')) {
-                            // iterable
+                                // iterable
                             if (column.type === 'texts') {
                                 cell.values = ref[column.data.values];
                             } else {
@@ -145,13 +145,26 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             Object.keys(column.data).filter(d => d !== 'value').forEach(d => {
                                 cell[d] = ref[column.data[d]];
                             });
-                            if (column.type === 'numeric' && column.data.max && cell.value > column.data.max) {
-                                cell.isMaxReached = true; 
-                                cell.valueAfterMax = column.data.valueAfterMax;
+                            if (column.type === 'score') {
+                                item.score = cell.value;
+                                if (cell.value > 0) {
+                                    item.cssClass = 'orgcheck-table-tr-badrow';
+                                    cell.cssClass = 'orgcheck-table-td-badscore';
+                                }
+                            } else if (column.type === 'numeric') {
+                                if (column.data.max && cell.value > column.data.max) {
+                                    cell.isMaxReached = true; 
+                                    cell.valueAfterMax = column.data.valueAfterMax;
+                                } else if (column.data.min && cell.value < column.data.min) {
+                                    cell.isMinReached = true; 
+                                    cell.valueBeforeMin = column.data.valueBeforeMin;
+                                }
                             }
                             if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }
-                        if (column.isScore === true && cell.value > 0) item.cssClass = 'orgcheck-table-tr-badrow';
+                        if (row.badFields && row.badFields.includes && row.badFields.includes(column.data.value)) {
+                            cell.cssClass = 'orgcheck-table-td-badcell';
+                        }
                         item.cells.push(cell);
                     }
                 });

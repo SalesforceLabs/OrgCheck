@@ -34,7 +34,7 @@ export default class OrgcheckProfiles extends LightningElement {
             { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
             { label: 'License',         type: 'text',     data: { value: 'license' }},
             { label: 'Package',         type: 'text',     data: { value: 'package' }},
-            { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+' }},
+            { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
             { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
             { label: 'Description',     type: 'text',     data: { value: 'description', valueIfEmpty: 'No description.' }}
