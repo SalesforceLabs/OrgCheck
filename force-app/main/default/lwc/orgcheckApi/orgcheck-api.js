@@ -1,12 +1,29 @@
+const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring) => {
+    if (setup) {
+        Object.keys(that).forEach((p) => { that[p] = setup[p]; });
+        if (needScoring === true) {
+            that.badScore = 0;
+            that.badFields = [];
+            that.setBadField = (field) => {
+                if (that.badFields.includes(field) === false) {
+                    that.badFields.push(field);
+                    that.badScore = that.badFields.length;
+                }
+            }
+            that.hasBadField = (field) => {
+                return that.badFields.includes(field);
+            }
+        }
+    }
+}
+
 class SFDC_OrgInformation {
     id;
     name;
     type;
     isProduction;
     localNamespace;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
 class SFDC_Object {
@@ -18,9 +35,7 @@ class SFDC_Object {
     package;
     typeId;
     typeRef;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
 const OBJECTTYPE_STANDARD_SOBJECT = 'StandardObject';
@@ -35,9 +50,7 @@ const OBJECTTYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
 class SFDC_ObjectType {
     id;
     label;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this); }
 }
 
 class SFDC_CustomField {
@@ -51,11 +64,7 @@ class SFDC_CustomField {
     lastModifiedDate;
     objectId; 
     objectRef; 
-    badScore;
-    badFields;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
 }
 
 class SFDC_Package {
@@ -63,9 +72,7 @@ class SFDC_Package {
     name;
     namespace;
     type;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
 class SFDC_User {
@@ -83,11 +90,7 @@ class SFDC_User {
     importantPermissions;
     permissionSetIds;
     permissionSetRefs;
-    badScore;
-    badFields;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
 }
 
 class SFDC_Profile {
@@ -98,21 +101,13 @@ class SFDC_Profile {
     description;
     license;
     isCustom;
-    isUndescribedCustom;
     package;
-    isUnusedCustom;
     memberCounts;
-    hasMembers;
     createdDate;
     lastModifiedDate;
     nbFieldPermissions;
     nbObjectPermissions;
-    badScore;
-    badFields;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
-
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
 }
 
 class SFDC_PermissionSet {
@@ -123,11 +118,8 @@ class SFDC_PermissionSet {
     description;
     license;
     isCustom;
-    isUndescribedCustom;
     package;
-    isUnusedCustom;
     memberCounts;
-    hasMembers;
     isGroup;
     createdDate;
     lastModifiedDate;
@@ -135,11 +127,7 @@ class SFDC_PermissionSet {
     nbObjectPermissions;
     profileIds;
     profileRefs;
-    badScore;
-    badFields;
-    constructor(setup) { 
-        if (setup) Object.keys(this).forEach((p) => { this[p] = setup[p]; });
-    }
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
 }
 
 class OrgCheckMap {
@@ -452,15 +440,8 @@ class DatasetManager {
                     .forEach((record) => {
                         // Get the ID15 of this custom field
                         const id = CASESAFEID(record.Id);
-
-                        // Compute the score of this user, with the following rule:
-                        //  - If the field has no description, then you get +1.
-                        //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                        let badFieldsList = [];
-                        if (ISEMPTY(record.Description)) badFieldsList.push('description');
-                        // TODO: get the DAPI information for this field......
-                        // Add it to the map  
-                        customFields.set(id, new SFDC_CustomField({
+                        // Create the SFDC_CustomField instance
+                        const customField = new SFDC_CustomField({
                             id: id,
                             url: `/${record.Id}`,
                             name: record.DeveloperName,
@@ -469,10 +450,14 @@ class DatasetManager {
                             description: record.Description,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName),
-                            badScore: badFieldsList.length,
-                            badFields: badFieldsList
-                        }));
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
+                        });
+                        // Compute the score of this user, with the following rule:
+                        //  - If the field has no description, then you get +1.
+                        //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                        if (ISEMPTY(customField.description)) customField.setBadField('description');
+                        // Add it to the map  
+                        customFields.set(customField.id, customField);
                     });
                 // Return data
                 resolve(customFields);
@@ -523,14 +508,8 @@ class DatasetManager {
                                 }
                             });
                         }
-                        // Compute the score of this user, with the following rule:
-                        //   - If the user is not using Lightning Experience, then you get +1.
-                        //   - If the user never logged, then you get +1.
-                        let badFieldsList = [];
-                        if (record.UserPreferencesLightningExperiencePreferred === false) badFieldsList.push('onLightningExperience');
-                        if (!record.LastLoginDate) badFieldsList.push('lastLogin');
-                        // Add it to the map  
-                        users.set(id, new SFDC_User({
+                        // Create the SFDC_User instance
+                        const user = new SFDC_User({
                             id: id,
                             url: `/${id}`,
                             photoUrl: record.SmallPhotoUrl,
@@ -541,10 +520,15 @@ class DatasetManager {
                             lastPasswordChange: record.LastPasswordChangeDate,
                             profileId: CASESAFEID(record.ProfileId),
                             importantPermissions: Object.keys(importantPermissions).sort(),
-                            permissionSetIds: permissionSetRefs,
-                            badScore: badFieldsList.length,
-                            badFields: badFieldsList
-                        }));
+                            permissionSetIds: permissionSetRefs
+                        });
+                        // Compute the score of this user, with the following rule:
+                        //   - If the user is not using Lightning Experience, then you get +1.
+                        //   - If the user never logged, then you get +1.
+                        if (user.onLightningExperience === false) user.setBadField('onLightningExperience');
+                        if (!user.lastLogin) user.setBadField('lastLogin');
+                        // Add it to the map  
+                        users.set(user.id, user);
                     });
                 // Return data
                 resolve(users);
@@ -572,16 +556,8 @@ class DatasetManager {
                     .forEach((record) => {
                         // Get the ID15 of this profile
                         const profileId = CASESAFEID(record.ProfileId);
-                        // Get the count of active users assigned to this profile (maximum is 51)
-                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;                        
-                        // Compute the score of this profile, with the following rule:
-                        //   - If it is custom and is not used by any active users, then you get +1.
-                        //   - If it is custom and has no description, then you get +1.
-                        let badFieldsList = [];
-                        if (record.IsCustom && memberCounts === 0) badFieldsList.push('memberCounts');
-                        if (record.IsCustom && ISEMPTY(record.Profile.Description)) badFieldsList.push('description');
-                        // Add it to the map                        
-                        profiles.set(profileId, new SFDC_Profile({
+                        // Create the SFDC_Profile instance
+                        const profile = new SFDC_Profile({
                             id: profileId,
                             url: `/${profileId}`,
                             name: record.Profile.Name,
@@ -589,18 +565,20 @@ class DatasetManager {
                             description: record.Profile.Description,
                             license: (record.License ? record.License.Name : ''),
                             isCustom: record.IsCustom,
-                            isUndescribedCustom: record.IsCustom && !record.Profile.Description,
                             package: (record.NamespacePrefix || ''),
-                            isUnusedCustom: record.IsCustom && memberCounts === 0,
-                            memberCounts: memberCounts,
-                            hasMembers: memberCounts > 0,
+                            memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
                             createdDate: record.CreatedDate, 
                             lastModifiedDate: record.LastModifiedDate,
                             nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                            nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                            badScore: badFieldsList.length,
-                            badFields: badFieldsList
-                        }));                    
+                            nbObjectPermissions: record.ObjectPerms?.records.length || 0
+                        });
+                        // Compute the score of this profile, with the following rule:
+                        //   - If it is custom and is not used by any active users, then you get +1.
+                        //   - If it is custom and has no description, then you get +1.
+                        if (profile.isCustom === true && profile.memberCounts === 0) profile.setBadField('memberCounts');
+                        if (profile.isCustom === true && ISEMPTY(profile.description)) profile.setBadField('description');
+                        // Add it to the map                        
+                        profiles.set(profile.id, profile);                    
                     });
                 // Return data
                 resolve(profiles);
@@ -634,16 +612,7 @@ class DatasetManager {
                     .forEach((record) => {
                         // Get the ID15 of this permission set
                         const id = CASESAFEID(record.Id);
-                        // Get the count of active users assigned to this permission set (maximum is 51)
-                        const memberCounts = (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0;
-                        // Compute the score of this permission set, with the following rule:
-                        //   - If it is custom and is not used by any active users, then you get +1.
-                        //   - If it is custom and has no description, then you get +1.
-                        let badFieldsList = [];
-                        if (record.IsCustom && memberCounts === 0) badFieldsList.push('memberCounts');
-                        if (record.IsCustom && ISEMPTY(record.Description)) badFieldsList.push('description');
-                        // Add it to the map                        
-                        permissionSets.set(id, new SFDC_PermissionSet({
+                        const permissionSet = new SFDC_PermissionSet({
                             id: id,
                             url: `/${id}`,
                             name: record.Name,
@@ -651,20 +620,22 @@ class DatasetManager {
                             description: record.Description,
                             license: (record.License ? record.License.Name : ''),
                             isCustom: record.IsCustom,
-                            isUndescribedCustom: record.IsCustom && !record.Description,
                             package: (record.NamespacePrefix || ''),
-                            isUnusedCustom: record.IsCustom && memberCounts === 0,
-                            memberCounts: memberCounts,
-                            hasMembers: memberCounts > 0,
+                            memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
                             isGroup: (record.Type === 'Group'), // other values can be 'Regular', 'Standard', 'Session
                             createdDate: record.CreatedDate, 
                             lastModifiedDate: record.LastModifiedDate,
                             nbFieldPermissions: record.FieldPerms?.records.length || 0,
                             nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                            profileIds: {},
-                            badScore: badFieldsList.length,
-                            badFields: badFieldsList
-                        }));
+                            profileIds: {}
+                        });
+                        // Compute the score of this permission set, with the following rule:
+                        //   - If it is custom and is not used by any active users, then you get +1.
+                        //   - If it is custom and has no description, then you get +1.
+                        if (permissionSet.isCustom === true && permissionSet.memberCounts === 0) permissionSet.setBadField('memberCounts');
+                        if (permissionSet.isCustom === true && ISEMPTY(permissionSet.description)) permissionSet.setBadField('description');
+                        // Add it to the map
+                        permissionSets.set(id, permissionSet);
                     });
                 results[1].records
                     .forEach((record) => {
