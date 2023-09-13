@@ -91,8 +91,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 }
                 return Object.assign({ 
                     index: index, 
-                    sortedAsc: (column.sorted === 'asc'), 
-                    sortedDesc: (column.sorted === 'desc')
+                    cssClass: column.sorted ? `sorted sorted-${column.sorted}` : ''
                 }, column);
             });
         }
@@ -148,8 +147,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             if (column.type === 'score') {
                                 item.score = cell.value;
                                 if (cell.value > 0) {
-                                    item.cssClass = 'orgcheck-table-tr-badrow';
-                                    cell.cssClass = 'orgcheck-table-td-badscore';
+                                    item.cssClass = 'bad';
+                                    cell.cssClass = 'bad badscore';
                                 }
                             } else if (column.type === 'numeric') {
                                 if (column.data.max && cell.value > column.data.max) {
@@ -163,7 +162,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }
                         if (row.badFields && row.badFields.includes && row.badFields.includes(column.data.value)) {
-                            cell.cssClass = 'orgcheck-table-td-badcell';
+                            cell.cssClass = 'bad badcell';
                         }
                         item.cells.push(cell);
                     }
@@ -208,17 +207,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             if (column.index === this.#sortingColumnIndex) {
                 if (!column.sorted || column.sorted === 'desc') {
                     this.#sortingOrder = column.sorted = 'asc';
-                    column.sortedAsc = true;
-                    column.sortedDesc = false;
                 } else {
                     this.#sortingOrder = column.sorted = 'desc';
-                    column.sortedDesc = true;
-                    column.sortedAsc = false;
                 }
+                column.cssClass = `sorted sorted-${column.sorted}`;
             } else {
                 delete column.sorted;
-                delete column.sortedAsc;
-                delete column.sortedDesc;
+                delete column.cssClass;
             }
         });
         this.sort();

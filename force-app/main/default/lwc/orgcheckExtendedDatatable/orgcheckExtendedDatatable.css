@@ -1,19 +1,39 @@
-tr.orgcheck-table-tr-badrow {
+th {
+    cursor: pointer;
+}
+
+th.sorted {
+    background-color: #ededed!important;
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: 11px;
+    padding-right: var(--lwc-squareIconMediumContent, 1rem)!important;
+}
+
+th.sorted-asc {
+    background-image: url(/img/arrowUp.gif);
+}
+
+th.sorted-desc {
+    background-image: url(/img/arrowDown.gif);
+}
+
+tr.bad {
     background-color: #ffe099;
 }
-td.orgcheck-table-td-badscore {
+
+td.bad {
     background-color: #ffd079;
-    background-image: url(/img/samples/rating1.gif);
     background-position: left;
     background-repeat: no-repeat;
     background-size: 11px;
-    padding-left: 1rem;
+    padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
-td.orgcheck-table-td-badcell {
-    background-color: #ffd079;
+
+td.badscore {
+    background-image: url(/img/samples/rating1.gif);
+}
+
+td.badcell {
     background-image: url(/img/msg_icons/warning16.png);
-    background-position: left;
-    background-repeat: no-repeat;
-    background-size: 11px;
-    padding-left: 1rem;
 }

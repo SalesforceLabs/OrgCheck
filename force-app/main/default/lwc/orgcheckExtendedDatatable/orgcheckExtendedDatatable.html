@@ -20,14 +20,12 @@
         {emptyMessage}
     </template>
     <template lwc:else>
-        <table class="slds-table slds-table_bordered">
+        <table class="slds-table slds-table_bordered slds-is-selected slds-cell-wrap">
             <thead>
                 <tr>
                     <template for:each={_columns} for:item="column">
-                        <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index}>
+                        <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index} class={column.cssClass}>
                             {column.label}
-                            <template if:true={column.sortedDesc}>&nbsp;🔽</template>
-                            <template if:true={column.sortedAsc}>&nbsp;🔼</template>
                         </th>
                     </template>
                 </tr>
