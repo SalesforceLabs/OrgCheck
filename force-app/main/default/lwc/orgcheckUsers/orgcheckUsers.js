@@ -30,7 +30,7 @@ export default class OrgcheckUsers extends LightningElement {
         this.tableColumns = [
             { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
-            { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }},
+            { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin', valueIfEmpty: 'Never logged!' }},
             { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
             { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
             { label: 'Key permissions', type: 'texts',    data: { values: 'importantPermissions' }},

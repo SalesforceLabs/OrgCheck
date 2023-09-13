@@ -40,7 +40,7 @@ export default class OrgcheckCustomfields extends LightningElement {
             { label: 'Dependencies',  type: 'numeric',  data: { value: 'dependencies' }},
             { label: 'Created date',  type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date', type: 'dateTime', data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: 'text',     data: { value: 'description' }}
+            { label: 'Description',   type: 'text',     data: { value: 'description', valueIfEmpty: 'No description.' }}
         ];
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }

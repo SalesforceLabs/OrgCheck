@@ -149,6 +149,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                                 cell.isMaxReached = true; 
                                 cell.valueAfterMax = column.data.valueAfterMax;
                             }
+                            if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }
                         if (column.isScore === true && cell.value > 0) item.cssClass = 'orgcheck-table-tr-badrow';
                         item.cells.push(cell);

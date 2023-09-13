@@ -39,7 +39,7 @@ export default class OrgcheckPermissionsets extends LightningElement {
             { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', value: 'name', url: 'url' }},
             { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
-            { label: 'Description',      type: 'text',     data: { value: 'description' }}
+            { label: 'Description',      type: 'text',     data: { value: 'description', valueIfEmpty: 'No description.' }}
         ];
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }
