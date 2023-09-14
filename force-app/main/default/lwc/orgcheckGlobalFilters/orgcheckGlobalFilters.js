@@ -177,8 +177,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
 
     /**
      * Event triggered when one of the filters have changed
-     * This event fire a custom event called 'change' for the parent component, with 'what' property 
-     *   in details, to identified which filter changed.
      * 
      * @param event containing the id of the changed filter (identified by data-id property in html view)
      */
@@ -187,10 +185,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         if (this.whichFiltersChanged.includes(fieldId) === false) this.whichFiltersChanged.push(fieldId);
         this.filtersChanged = true;
         this[fieldId] = event.detail.value;
-        this.dispatchEvent(new CustomEvent('change', { 
-            detail: { what: fieldId }, 
-            bubbles: false 
-        }));
     }
 
     /**

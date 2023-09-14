@@ -1,10 +1,8 @@
 import { LightningElement, api } from 'lwc';
-import { METHOD_TYPES, METHOD_PACKAGES, METHOD_OBJECTS,
+import { METHOD_TYPES_PACKAGES_OBJECTS,
     METHOD_CUSTOM_FIELD, METHOD_OBJECT_DESCRIBE, 
     METHOD_PERMISSION_SETS, METHOD_PROFILES, METHOD_USERS,
     METHOD_CACHE_MANAGER } from 'c/orgcheckApi';
-import { SECTION_STATUS_STARTED, SECTION_STATUS_IN_PROGRESS,
-    SECTION_STATUS_ENDED, SECTION_STATUS_FAILED } from 'c/orgcheckSpinner';
 
 const API_STATE_NOT_LOADED = 'Not Loaded';
 const API_STATE_LOADED = 'Loaded';
@@ -88,7 +86,21 @@ export default class OrgCheckApp extends LightningElement {
      */
     async handleApiLoaded() {
         this.#apiState = API_STATE_LOADED;
-        await this._loadFilters(true, true, true);
+        await this._loadFilters();
+    }
+
+    handleApiLog(event) {
+        const spinner = this.template.querySelector('c-orgcheck-spinner');
+        const s = event.detail.section;
+        const m = event.detail.message;
+        switch(event.detail.status) {
+            case 'begin': spinner.open(); break;
+            case 'section-starts': spinner.sectionStarts(s, m); break;
+            case 'section-in-progress': spinner.sectionContinues(s, m); break;
+            case 'section-ended': spinner.sectionEnded(s, m); break;
+            case 'section-failed': spinner.sectionFailed(s, m); break;
+            default: spinner.close(1000);
+        }
     }
 
     /**
@@ -101,23 +113,8 @@ export default class OrgCheckApp extends LightningElement {
         this.#apiState = API_STATE_FAILED;
         const spinner = this.template.querySelector('c-orgcheck-spinner');
         spinner.open();
-        spinner.setSection('Loading API', `Failed with error: ${event.detail.error.message}`, SECTION_STATUS_FAILED);
+        spinner.sectionFailed('Loading API', `Failed with error: ${event.detail.error.message}`);
         console.error(event.detail.error.stack);
-    }
-
-    /**
-     * Event called when the user changed a value in the global filter.
-     * The idea here is not to apply the new values of the filters in the tabs.
-     * Here, it is more about synchronizing values and options all together within 
-     * the global filter.
-     * This method is async because it awaits for the internal _loadFilters method.
-     * 
-     * @param {Event} event triggered when a filter is changed, thus detail information contains the name of the filter that changed
-     */
-    async handleFilterChanged(event) {
-        if (event.detail.what === 'package' || event.detail.what === 'sobjectType') {
-            await this._loadFilters(false, false, true);
-        }
     }
 
     async handleRemoveCache(event) {
@@ -161,50 +158,27 @@ export default class OrgCheckApp extends LightningElement {
         // In these cases, we stop here
         if (!content || !content.setComponentData) return;
 
-        const spinner = this.template.querySelector('c-orgcheck-spinner');
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-
-        // If components are not yet loaded, we stop there
-        if (!spinner || !orgcheckApi) return;
-
-        try {
-            // Starting message in the spinner
-            spinner.open();
-            spinner.setSection(this.#currentTab, 'Update current sub tab...', SECTION_STATUS_STARTED);
-
-            // Set the API method to call depending on th current tab
-            // If not supported we stop there
-            let method;
-            switch (this.#currentTab) {
-                case 'object-information': method = METHOD_OBJECT_DESCRIBE; break;
-                case 'custom-fields':      method = METHOD_CUSTOM_FIELD;    break;
-                case 'users':              method = METHOD_USERS;           break;
-                case 'profiles':           method = METHOD_PROFILES;        break;
-                case 'permission-sets':    method = METHOD_PERMISSION_SETS; break;
-                case 'cache-manager':      method = METHOD_CACHE_MANAGER; break;
-                default:                   return;
-            }
-
-            // Calling the API
-            spinner.setSection(this.#currentTab, 'Calling API...', 'started');
-            const data = await orgcheckApi.callingApi(method, this._generateArgumentsToCallAPI());
-                
-            // Send data back to the component
-            spinner.setSection(this.#currentTab, 'Send back the data to the component...', SECTION_STATUS_IN_PROGRESS);
-            content.setComponentData(data);
-
-            // Ending message in the spinner
-            spinner.setSection(this.#currentTab, 'Bravo, the current sub tab was updated!', SECTION_STATUS_ENDED);
-            spinner.close();
-
-        } catch (e) {
-            // Error message in the spinner
-            spinner.setSection(this.#currentTab, `We had an error: ${e?.message}`, SECTION_STATUS_FAILED);
-            console.error(e.stack);
+        // Set the API method to call depending on th current tab
+        // If not supported we stop there
+        let method;
+        switch (this.#currentTab) {
+            case 'object-information': method = METHOD_OBJECT_DESCRIBE; break;
+            case 'custom-fields':      method = METHOD_CUSTOM_FIELD;    break;
+            case 'users':              method = METHOD_USERS;           break;
+            case 'profiles':           method = METHOD_PROFILES;        break;
+            case 'permission-sets':    method = METHOD_PERMISSION_SETS; break;
+            case 'cache-manager':      method = METHOD_CACHE_MANAGER; break;
+            default:                   return;
         }
+
+        // Calling the API
+        const data = await this._callingAPI(method);
+            
+        // Send data back to the component
+        if (data) content.setComponentData(data);
     }
 
-    _generateArgumentsToCallAPI() {
+    async _callingAPI(method) {
         const filters = this.template.querySelector('c-orgcheck-global-filters');
         const args = {};
         if (filters.isSelectedPackageAny === true) {
@@ -226,64 +200,22 @@ export default class OrgCheckApp extends LightningElement {
         } else {
             args.sobject = filters.selectedSObjectApiName;
         }
-        return args;
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        const data = await orgcheckApi.callingApi(method, args);
+        return data;
     }
 
     /**
      * Unique method to load or reload filter options and reset selected values accordingly
      * Usage: as this method is async, you should await when calling it!
-     * 
-     * @param {Boolean} loadTypes true if types need to be loaded/reloaded
-     * @param {Boolean} loadPackages true if packages need to be loaded/reloaded
-     * @param {Boolean} loadObjects true if objects need to be loaded/reloaded
      */
-    async _loadFilters(loadTypes, loadPackages, loadObjects) {
-        const spinner = this.template.querySelector('c-orgcheck-spinner');
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+    async _loadFilters() {
         const filters = this.template.querySelector('c-orgcheck-global-filters');
-        spinner.open();
-        let success = true;
-        if (loadTypes === true) {
-            try {
-                spinner.setSection('types', 'Loading types from API...', SECTION_STATUS_STARTED);
-                const data = await orgcheckApi.callingApi(METHOD_TYPES);
-                spinner.setSection('types', `Received ${data?.length} type(s).`, SECTION_STATUS_IN_PROGRESS);
-                filters.updateSObjectTypeOptions(data);
-                spinner.setSection('types', 'Types loaded in global filters.', SECTION_STATUS_ENDED);
-            } catch (e) {
-                spinner.setSection('types', `We had an error: ${e?.message}`, SECTION_STATUS_FAILED);
-                console.error(e.stack);
-                success = false;
-            }
-        }
-        if (loadPackages === true) {
-            try {
-                spinner.setSection('packages', 'Loading packages from API...', SECTION_STATUS_STARTED);
-                const data = await orgcheckApi.callingApi(METHOD_PACKAGES);
-                spinner.setSection('packages', `Received ${data?.length} package(s).`, SECTION_STATUS_IN_PROGRESS);
-                filters.updatePackageOptions(data);
-                spinner.setSection('packages', 'Packages loaded in global filters.', SECTION_STATUS_ENDED);
-            } catch (e) {
-                spinner.setSection('packages', `We had an error: ${e?.message}`, SECTION_STATUS_FAILED);
-                console.error(e.stack);
-                success = false;
-            }
-        }
-        if (loadObjects === true) {
-            try {
-                spinner.setSection('objects', 'Loading SObjects from API for selected package and selected type...', SECTION_STATUS_STARTED);
-                const data = await orgcheckApi.callingApi(METHOD_OBJECTS, this._generateArgumentsToCallAPI());
-                spinner.setSection('objects', `Received ${data?.length} object(s).`, SECTION_STATUS_IN_PROGRESS);
-                filters.updateSObjectApiNameOptions(data);
-                spinner.setSection('objects', 'SObjects loaded in global filters.', SECTION_STATUS_ENDED);
-            } catch (e) {
-                spinner.setSection('objects', `We had an error: ${e?.message}`, SECTION_STATUS_FAILED);
-                console.error(e.stack);
-                success = false;
-            }
-        }
-        if (success === true) {
-            spinner.close();
+        const data = await this._callingAPI(METHOD_TYPES_PACKAGES_OBJECTS);
+        if (data) {
+            filters.updateSObjectTypeOptions(data.types);
+            filters.updatePackageOptions(data.packages);
+            filters.updateSObjectApiNameOptions(data.objects);
         }
     }
 }

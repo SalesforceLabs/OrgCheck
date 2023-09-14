@@ -1,24 +1,35 @@
 <template>
     <template lwc:if={isShow}>
-        <div class="slds-notify-container slds-is-relative" style="z-index: 1;">
-            <div class="slds-notify slds-notify_toast slds-theme_info" role="status">
-                <span class="slds-assistive-text">Loading...</span>
-                <object type="image/svg+xml" data={spinningURL} width="256" height="256">
-                    <img src={spinningURL} width="256" height="256" />
-                </object>
-                <div class="slds-notification__body">
-                    <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
-                        <ol class="slds-progress__list">
-                            <template for:each={sections} for:item="msg">
-                                <li key={msg.id} class={msg.liClasses}>
-                                    <div class="slds-progress__marker" style={msg.markerStyle}></div>
-                                    <div class="slds-progress__item_content slds-grid slds-grid_align-spread">[{msg.id}] {msg.label}</div>
-                                </li>
-                            </template>
-                        </ol>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Org Check is spinning around...</h1>
+                </div>
+                <div class="slds-modal__content">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_1-of-3">
+                            <center>
+                                <object type="image/svg+xml" data={spinningURL} width="256" height="256">
+                                    <img src={spinningURL} width="256" height="256" />
+                                </object>
+                            </center>
+                        </div>
+                        <div class="slds-col slds-size_2-of-3">
+                            <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                                <ol class="slds-progress__list">
+                                    <template for:each={sections} for:item="msg">
+                                        <li key={msg.id} class={msg.liClasses}>
+                                            <div class={msg.markerClasses}></div>
+                                            <div class="slds-progress__item_content slds-grid slds-grid_align-spread">[{msg.id}] {msg.label}</div>
+                                        </li>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
     </template>
 </template>

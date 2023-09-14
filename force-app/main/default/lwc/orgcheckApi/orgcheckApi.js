@@ -1,11 +1,9 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
-import { OrgCheckAPI } from './orgcheck-api';
+import { OrgCheckAPI, OrgCheckLogger } from './orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 
-export const METHOD_TYPES = 'types';
-export const METHOD_PACKAGES = 'packages';
-export const METHOD_OBJECTS = 'objects';
+export const METHOD_TYPES_PACKAGES_OBJECTS = 'types+packages+objects';
 export const METHOD_CUSTOM_FIELD = 'custom-fields';
 export const METHOD_OBJECT_DESCRIBE = 'object-describe';
 export const METHOD_PERMISSION_SETS = 'permission-sets';
@@ -35,7 +33,15 @@ export default class OrgcheckApi extends LightningElement {
                 // eslint-disable-next-line no-undef
                 jsforce,
                 this.accesstoken,
-                this.userid
+                this.userid,
+                new OrgCheckLogger({
+                    begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' }, bubbles: false })); },
+                    sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m }, bubbles: false })); },
+                    sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m }, bubbles: false })); },
+                    sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m }, bubbles: false })); },
+                    sectionFailed: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, message: m }, bubbles: false })); },
+                    end: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end' }, bubbles: false })); }
+                })
             );
             this.#api.getOrgInformation().then((orgInfo) => {
                 this.orgName = `${orgInfo.name} (${orgInfo.id})`;
@@ -68,12 +74,8 @@ export default class OrgcheckApi extends LightningElement {
         else this.themeForOrgLimit = 'slds-badge_lightest';
 
         switch (method) {
-            case METHOD_TYPES:
-                return Promise.resolve(this.#api.getTypes());
-            case METHOD_PACKAGES:
-                return this.#api.getPackages();
-            case METHOD_OBJECTS:
-                return this.#api.getObjects(args.package, args.sobjectType);
+            case METHOD_TYPES_PACKAGES_OBJECTS:
+                return this.#api.getPackagesTypesAndObjects(args.package, args.sobjectType);
             case METHOD_CUSTOM_FIELD:
                 return this.#api.getCustomFields(args.package, args.sobjectType, args.sobject);
             case METHOD_PERMISSION_SETS:

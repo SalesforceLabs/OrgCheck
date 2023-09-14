@@ -293,14 +293,79 @@ class DatasetCacheInfo {
     modified;
 }
 
+export class OrgCheckLogger {
+
+    #setup;
+
+    constructor(setup) {
+        this.#setup = setup;
+    }
+
+    begin() {
+        if (this.#setup.begin) {
+            this.#setup.begin();
+        } else {
+            console.info('Let the show begin...');
+        }
+    }
+
+    sectionStarts(sectionName, message='...') {
+        if (this.#setup.sectionStarts) {
+            this.#setup.sectionStarts(sectionName, message);
+        } else {
+            console.info(sectionName, message);
+        }
+    }
+
+    sectionContinues(sectionName, message='...') {
+        if (this.#setup.sectionContinues) {
+            this.#setup.sectionContinues(sectionName, message);
+        } else {
+            console.info(sectionName, message);
+        }
+    }
+
+    sectionEnded(sectionName, message='...') {
+        if (this.#setup.sectionEnded) {
+            this.#setup.sectionEnded(sectionName, message);
+        } else {
+            console.info(sectionName, message);
+        }
+    }
+
+    sectionFailed(sectionName, message='...') {
+        if (this.#setup.sectionFailed) {
+            this.#setup.sectionFailed(sectionName, message);
+        } else {
+            console.error(sectionName, message);
+        }
+    }
+
+    end() {
+        if (this.#setup.end) {
+            this.#setup.end();
+        } else {
+            console.info('All shows come to an end.');
+        }
+    }
+}
+
 class DatasetManager {
     
     #retrievers;
     #cache;
+    #logger;
 
-    constructor(sfdcManager) {
+    /**
+     * Dataset Manager constructor
+     * 
+     * @param {SFDCConnectionManager} sfdcManager 
+     * @param {OrgCheckLogger} logger
+     */
+    constructor(sfdcManager, logger) {
         this.#retrievers = new OrgCheckMap();
         this.#cache = new OrgCheckMap();
+        this.#logger = logger;
         
         // ***************************
         // Dataset for ORG INFO
@@ -708,21 +773,28 @@ class DatasetManager {
                 throw new Error(`Dataset '${dataset}' is not yet implemented.`);
             }
             promises.push(new Promise((resolve, reject) => {
+                this.#logger.sectionContinues(`DatasetManager:${dataset}:Cache`, 'Checking the cache...');
                 // Check cache if any
                 if (this.#cache.hasKey(dataset) === true) {
                     // Set the results from cache
+                    this.#logger.sectionEnded(`DatasetManager:${dataset}:Cache`, 'There was data in cache!');
                     results.set(dataset, this.#cache.get(dataset));
                     // Resolve
                     resolve();
                     return;
                 }
+                this.#logger.sectionContinues(`DatasetManager:${dataset}:Cache`, 'There was no data in cache.');
+
                 // Calling the retriever
+                this.#logger.sectionContinues(`DatasetManager:${dataset}:Retriever`, 'Calling the retriever...');
                 this.#retrievers.get(dataset)(
                     // success
                     (data) => {
                         // Cache the data
+                        this.#logger.sectionEnded(`DatasetManager:${dataset}:Cache`, 'We save the cache with this data.');
                         this.#cache.set(dataset, data);
                         // Set the results
+                        this.#logger.sectionEnded(`DatasetManager:${dataset}:Retriever`, 'Information retrieved!');
                         results.set(dataset, data);
                         // Resolve
                         resolve();
@@ -730,6 +802,8 @@ class DatasetManager {
                     // error
                     (error) => {
                         // Reject with this error
+                        this.#logger.sectionFailed(`DatasetManager:${dataset}:Cache`, 'Due to an error the cache is still empty');
+                        this.#logger.sectionFailed(`DatasetManager:${dataset}:Retriever`, error.message);
                         reject(error);
                     }
                 );
@@ -920,6 +994,7 @@ export class OrgCheckAPI {
 
     #datasetManager;
     #sfdcManager;
+    #logger;
 
     /**
      * Org Check constructor
@@ -927,11 +1002,13 @@ export class OrgCheckAPI {
      * @param {JsForce} sfdcConnector
      * @param {String} accessToken
      * @param {String} userId
+     * @param {OrgCheckLogger} logger
      */
-    constructor(sfdcConnector, accessToken, userId) {
+    constructor(sfdcConnector, accessToken, userId, logger) {
 
         this.#sfdcManager = new SFDCConnectionManager(sfdcConnector, accessToken, userId);
-        this.#datasetManager = new DatasetManager(this.#sfdcManager);
+        this.#datasetManager = new DatasetManager(this.#sfdcManager, logger);
+        this.#logger = logger;
     }
 
     /**
@@ -989,54 +1066,60 @@ export class OrgCheckAPI {
     }
 
     /**
-     * Get a list of your packages (local and distant) (async method)
+     * Get a list of your packages (local and distant), supported types 
+     *     and objects (async method)
+     * 
+     * @param namespace of the objects you want to list (optional), '*' for any
+     * @param type of the objects you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_Package>}
      */
-    async getPackages() {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_PACKAGES]);
-        const packages = data.get(DATASET_PACKAGES);
-        // Return values
-        return packages.allValues();
-    }
+    async getPackagesTypesAndObjects(namespace, type) {
+        let currentSection = '';
 
-    /**
-     * Get a list of supported types
-     * 
-     * @returns {Array<SFDC_ObjectType>}
-     */
-    async getTypes() {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_OBJECTTYPES]);
-        const types = data.get(DATASET_OBJECTTYPES);
-        // Return values
-        return types.allValues();
-    }
+        // Start the logger
+        this.#logger.begin();
+        try {
 
-    /**
-     * Get a list of objects (async method)
-     * 
-     * @param namespace of the object you want to list (optional), '*' for any
-     * @param type of the object you want to list (optional), '*' for any
-     * 
-     * @returns {Array<SFDC_Object>}
-     */
-    async getObjects(namespace, type) {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_OBJECTS, DATASET_OBJECTTYPES]);
-        const objects = data.get(DATASET_OBJECTS);
-        const types = data.get(DATASET_OBJECTTYPES);
-        // Augment object with type references
-        objects.forEachValue((object) => {
-            object.typeRef = types.get(object.typeId);
-        });
-        // Return values filtered by inputs
-        return objects.filterValues((object) => {
-            if (namespace !== '*' && object.package !== namespace) return false;
-            if (type !== '*' && object.typeRef?.id !== type) return false;
-            return true;
-        });
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_PACKAGES, DATASET_OBJECTTYPES, DATASET_OBJECTS]);
+            const packages = data.get(DATASET_PACKAGES);
+            const types = data.get(DATASET_OBJECTTYPES);
+            const objects = data.get(DATASET_OBJECTS);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Transform
+            currentSection = 'Api:Transform';
+            this.#logger.sectionStarts(currentSection, 'Augment objects with type references...');
+            objects.forEachValue((object) => {
+                object.typeRef = types.get(object.typeId);
+            });
+            this.#logger.sectionContinues(currentSection, 'Filter objects with selected namespace and type...');
+            const finalData = { 
+                packages: packages.allValues(),
+                types: types.allValues(),
+                objects: objects.filterValues((object) => {
+                    if (namespace !== '*' && object.package !== namespace) return false;
+                    if (type !== '*' && object.typeRef?.id !== type) return false;
+                    return true;
+                })
+            };
+            this.#logger.sectionEnded(currentSection, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
     }
 
     /**
@@ -1049,21 +1132,51 @@ export class OrgCheckAPI {
      * @returns {Array<SFDC_CustomField>}
      */
     async getCustomFields(namespace, objecttype, object) {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_CUSTOMFIELDS, DATASET_OBJECTS]);
-        const objects = data.get(DATASET_OBJECTS);
-        const customFields = data.get(DATASET_CUSTOMFIELDS);
-        // Augment custom fields with object references
-        customFields.forEachValue((customField) => {
-            customField.objectRef = objects.get(customField.objectId);
-        });
-        // Return values filtered by inputs
-        return customFields.filterValues((customField) => {
-            if (namespace !== '*' && customField.package !== namespace) return false;
-            if (objecttype !== '*' && customField.objectRef?.typeRef?.id !== objecttype) return false;
-            if (object !== '*' && customField.objectRef?.apiname !== object) return false;
-            return true;
-        });
+        let currentSection = '';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_CUSTOMFIELDS, DATASET_OBJECTTYPES, DATASET_OBJECTS]);
+            const types = data.get(DATASET_OBJECTTYPES);
+            const objects = data.get(DATASET_OBJECTS);
+            const customFields = data.get(DATASET_CUSTOMFIELDS);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Transform
+            currentSection = 'Api:Transform';
+            this.#logger.sectionStarts(currentSection, 'Augment custom fields with object references...');
+            objects.forEachValue((obj) => {
+                obj.typeRef = types.get(obj.typeId);
+            });
+            customFields.forEachValue((customField) => {
+                customField.objectRef = objects.get(customField.objectId);
+            });
+            this.#logger.sectionContinues(currentSection, 'Filter custom fields with selected namespace, type and object...');
+            const finalData = customFields.filterValues((customField) => {
+                if (namespace !== '*' && customField.package !== namespace) return false;
+                if (objecttype !== '*' && customField.objectRef?.typeRef?.id !== objecttype) return false;
+                if (object !== '*' && customField.objectRef?.apiname !== object) return false;
+                return true;
+            });
+            this.#logger.sectionEnded(currentSection, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
     }
 
     /**
@@ -1074,19 +1187,45 @@ export class OrgCheckAPI {
      * @returns {Array<SFDC_PermissionSet>}
      */
     async getPermissionSets(namespace) {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_PERMISSIONSETS, DATASET_PROFILES]);
-        const permissionSets = data.get(DATASET_PERMISSIONSETS);
-        const profiles = data.get(DATASET_PROFILES);
-        // Augment permission sets with profile references
-        permissionSets.forEachValue((permissionSet) => {
-            permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.hasKey(id)).map((id) => profiles.get(id));
-        });
-        // Return values filtered by inputs
-        return permissionSets.filterValues((permissionSet) => {
-            if (namespace !== '*' && permissionSet.package !== namespace) return false;
-            return true;
-        });
+        let currentSection = '';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_PERMISSIONSETS, DATASET_PROFILES]);
+            const permissionSets = data.get(DATASET_PERMISSIONSETS);
+            const profiles = data.get(DATASET_PROFILES);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Transform
+            currentSection = 'Api:Transform';
+            this.#logger.sectionStarts(currentSection, 'Augment permission sets with profile references...');
+            permissionSets.forEachValue((permissionSet) => {
+                permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.hasKey(id)).map((id) => profiles.get(id));
+            });
+            this.#logger.sectionContinues(currentSection, 'Filter permission sets with selected namespace...');
+            const finalData = permissionSets.filterValues((permissionSet) => {
+                if (namespace !== '*' && permissionSet.package !== namespace) return false;
+                return true;
+            });
+            this.#logger.sectionEnded(currentSection, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
     }
 
     /**
@@ -1097,14 +1236,40 @@ export class OrgCheckAPI {
      * @returns {Array<SFDC_Profile>}
      */
     async getProfiles(namespace) {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_PROFILES]);
-        const profiles = data.get(DATASET_PROFILES);
-        // Return values
-        return profiles.filterValues((profile) => {
-            if (namespace !== '*' && profile.package !== namespace) return false;
-            return true;
-        });
+        let currentSection = '';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_PROFILES]);
+            const profiles = data.get(DATASET_PROFILES);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Transform
+            currentSection = 'Api:Transform';
+            this.#logger.sectionStarts(currentSection, 'Filter profiles with selected namespace...');
+            const finalData = profiles.filterValues((profile) => {
+                if (namespace !== '*' && profile.package !== namespace) return false;
+                return true;
+            });
+            this.#logger.sectionEnded(currentSection, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
     }
 
     /**
@@ -1113,17 +1278,44 @@ export class OrgCheckAPI {
      * @returns {Array<SFDC_User>}
      */
     async getActiveUsers() {
-        // Get data
-        const data = await this.#datasetManager.run([DATASET_USERS, DATASET_PROFILES, DATASET_PERMISSIONSETS]);
-        const users = data.get(DATASET_USERS);
-        const profiles = data.get(DATASET_PROFILES);
-        const permissionSets = data.get(DATASET_PERMISSIONSETS);
-        // Augment users with profile and permission sets references
-        users.forEachValue((user) => {
-            user.profileRef = profiles.get(user.profileId);
-            user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.hasKey(id)).map((id) => permissionSets.get(id));
-        });
-        // Return values
-        return users.allValues();
+        let currentSection = '';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_USERS, DATASET_PROFILES, DATASET_PERMISSIONSETS]);
+            const users = data.get(DATASET_USERS);
+            const profiles = data.get(DATASET_PROFILES);
+            const permissionSets = data.get(DATASET_PERMISSIONSETS);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Transform
+            currentSection = 'Api:Transform';
+            this.#logger.sectionStarts(currentSection, 'Augment users with profile and permission set references...');
+            users.forEachValue((user) => {
+                user.profileRef = profiles.get(user.profileId);
+                user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.hasKey(id)).map((id) => permissionSets.get(id));
+            });
+            this.#logger.sectionContinues(currentSection, 'Filter permission sets with selected namespace...');
+            this.#logger.sectionStarts(currentSection, 'Mapping the information...');
+            const finalData = users.allValues();
+            this.#logger.sectionEnded(currentSection, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
     }
 }
