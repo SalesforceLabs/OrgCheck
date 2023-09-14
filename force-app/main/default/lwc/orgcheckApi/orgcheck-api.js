@@ -11,7 +11,8 @@ const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring) => {
                 }
             }
             that.hasBadField = (field) => {
-                return that.badFields.includes(field);
+                if (field) return that.badFields.includes(field);
+                return false;
             }
         }
     }
@@ -23,6 +24,16 @@ class SFDC_OrgInformation {
     type;
     isProduction;
     localNamespace;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_Dependence {
+    id;
+    name;
+    type;
+    refId;
+    refName;
+    refType;
     constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
@@ -64,6 +75,9 @@ class SFDC_CustomField {
     lastModifiedDate;
     objectId; 
     objectRef; 
+    using;
+    referenced;
+    referencedByTypes;
     constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
 }
 
@@ -236,6 +250,32 @@ const ISEMPTY = (value) => {
     if (value.trim && value.trim().length === 0) return true;
     return false;
 }
+
+const SPLIT_IDS_IN_BATCHES = (ids, batchsize, callback) => {
+    if (batchsize <= 0) return;
+    for (let i = 0; i < ids.length; i += batchsize) {
+        callback('\''+ids.slice(i, Math.min(i + batchsize, ids.length)).join('\',\'')+'\'');
+    }
+};
+
+const DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE = (dependencies, whatid) => {
+    const countersByType = {};
+    dependencies.filter(e => e.refId === whatid).forEach(n => { 
+        if (countersByType[n.type] === undefined) {
+            countersByType[n.type] = 0;
+        }
+        countersByType[n.type]++; 
+    });
+    return countersByType;
+};
+
+const DAPI_WHERE_IS_IT_USED = (dependencies, whatid) => {
+    return dependencies.filter(e => e.refId === whatid).map(n => { return { id: n.id, name: n.name, type: n.type }; })
+};
+
+const DAPI_WHAT_IS_IT_USING = (dependencies, whatid) => {
+    return dependencies.filter(e => e.id === whatid).map(n => { return { id: n.refId, name: n.refName, type: n.refType }; })
+};
 
 const DATASET_ORGINFO = 'OrgInfo';
 const DATASET_PACKAGES = 'Packages';
@@ -430,7 +470,8 @@ class DatasetManager {
                 string: 'SELECT Id, EntityDefinition.QualifiedApiName, DeveloperName, NamespacePrefix, '+
                             'Description, CreatedDate, LastModifiedDate '+
                         'FROM CustomField '+
-                        'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')'
+                        'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')',
+                addDependenciesBasedOnField: 'Id'
             }]).then((results) => {
                 // Init the map
                 const customFields = new OrgCheckMap();
@@ -450,12 +491,16 @@ class DatasetManager {
                             description: record.Description,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName),
+                            using: DAPI_WHAT_IS_IT_USING(results[0].dependencies, id),
+                            referenced: DAPI_WHERE_IS_IT_USED(results[0].dependencies, id),
+                            referencedByTypes: DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE(results[0].dependencies, id)
                         });
                         // Compute the score of this user, with the following rule:
                         //  - If the field has no description, then you get +1.
                         //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
                         if (ISEMPTY(customField.description)) customField.setBadField('description');
+                        if (customField.referenced.length === 0) customField.setBadField('referenced');
                         // Add it to the map  
                         customFields.set(customField.id, customField);
                     });
@@ -739,7 +784,7 @@ class SFDCConnectionManager {
     async soqlQuery(queries) {
         const promises = [];
         queries.forEach(q => {
-            promises.push(new Promise((resolve, reject) => {
+            const queryPromise = new Promise((resolve, reject) => {
                 const conn = q.tooling === true ? this.#connection.tooling : this.#connection;
                 const records = [];
                 const recursive_query = (e, d) => {
@@ -767,19 +812,73 @@ class SFDCConnectionManager {
                     }
                 }
                 conn.query(q.string, recursive_query);
-            }));
+            });
+            if (q.addDependenciesBasedOnField) {
+                promises.push(queryPromise
+                    .then((results) => {
+                        // Getting the Ids for DAPI call
+                        const ids = results.records.map((record) => CASESAFEID(record[q.addDependenciesBasedOnField]));
+                        // We are going to split the DAPI calls into batches for <n> ids at the same time
+                        const dapiPromises = [];
+                        SPLIT_IDS_IN_BATCHES(ids, 50, (subids) => {
+                            dapiPromises.push(new Promise((resolve, reject) => {
+                                this.#connection.tooling.query(
+                                    'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                        'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                                    'FROM MetadataComponentDependency '+
+                                    `WHERE (RefMetadataComponentId IN (${subids}) OR MetadataComponentId IN (${subids}))`,
+                                    (e, d) => {
+                                        if (e) {
+                                            e.context = { 
+                                                when: 'While getting the dependencies from DAPI',
+                                                what: {
+                                                    allIds: ids,
+                                                    concernedIds: subids
+                                                }
+                                            };
+                                            reject(e);
+                                        } else {
+                                            resolve(d.records.map((r) => new SFDC_Dependence({
+                                                id: CASESAFEID(r.MetadataComponentId),
+                                                name: r.MetadataComponentName,
+                                                type: r.MetadataComponentType,
+                                                refId: CASESAFEID(r.RefMetadataComponentId),
+                                                refName: r.RefMetadataComponentName,
+                                                refType: r.RefMetadataComponentType
+                                            })));
+                                        }
+                                    }
+                                );
+                            }));
+                        });
+                        return Promise.all(dapiPromises)
+                            .then((allDependencies) => { 
+                                // We are going to append the dependencies in the results
+                                results.dependencies = [];
+                                // We parse all the batches/results from the DAPI
+                                allDependencies.forEach((dependencies) => {
+                                    if (dependencies) {
+                                        // Merge them into one array
+                                        results.dependencies.push(... dependencies);
+                                    }
+                                });
+                                // Return the altered results
+                                return results
+                            })
+                            .catch((error) => {
+                                console.error('Issue while parsing results from DAPI', error);
+                            });
+                    })
+                    .catch((error) => {
+                        console.error('Issue while accessing DAPI', error);
+                    })
+                );
+            } else {
+                promises.push(queryPromise);
+            }
         });
         return Promise.all(promises);
     }
-
-
-    /*
-                    const recursive_query = (error, result) => {
-                        
-                    }
-                    api.query(query.string, recursive_query);
-
-    */
 
     /**
      * Method to call a list of sobjects
@@ -928,7 +1027,7 @@ export class OrgCheckAPI {
         const data = await this.#datasetManager.run([DATASET_OBJECTS, DATASET_OBJECTTYPES]);
         const objects = data.get(DATASET_OBJECTS);
         const types = data.get(DATASET_OBJECTTYPES);
-        // Augment custom fields with object references
+        // Augment object with type references
         objects.forEachValue((object) => {
             object.typeRef = types.get(object.typeId);
         });

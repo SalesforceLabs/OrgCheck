@@ -161,7 +161,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             }
                             if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }
-                        if (row.hasBadField && row.hasBadField(column.data.value)) {
+                        if (row.hasBadField && (
+                                (column.data.ref && row.hasBadField(column.data.ref)) || 
+                                (column.data.value && row.hasBadField(column.data.value))
+                            )) {
                             cell.cssClass = 'bad badcell';
                         }
                         item.cells.push(cell);
