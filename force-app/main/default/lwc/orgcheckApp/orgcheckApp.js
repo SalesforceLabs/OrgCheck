@@ -99,7 +99,7 @@ export default class OrgCheckApp extends LightningElement {
             case 'section-in-progress': spinner.sectionContinues(s, m); break;
             case 'section-ended': spinner.sectionEnded(s, m); break;
             case 'section-failed': spinner.sectionFailed(s, m); break;
-            default: spinner.close(1000);
+            default: spinner.close(500);
         }
     }
 

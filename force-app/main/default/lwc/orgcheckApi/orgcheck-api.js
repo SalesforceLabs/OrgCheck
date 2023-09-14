@@ -1,4 +1,42 @@
-const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring) => {
+const CASESAFEID = (id) => {
+    if (id && id.length === 18) return id.substr(0, 15);
+    return id;
+}
+
+const ISEMPTY = (value) => {
+    if (!value) return true;
+    if (value.length === 0) return true;
+    if (value.trim && value.trim().length === 0) return true;
+    return false;
+}
+
+const SPLIT_IDS_IN_BATCHES = (ids, batchsize, callback) => {
+    if (batchsize <= 0) return;
+    for (let i = 0; i < ids.length; i += batchsize) {
+        callback('\''+ids.slice(i, Math.min(i + batchsize, ids.length)).join('\',\'')+'\'');
+    }
+};
+
+const DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE = (dependencies, whatid) => {
+    const countersByType = {};
+    dependencies.filter(e => e.refId === whatid).forEach(n => { 
+        if (countersByType[n.type] === undefined) {
+            countersByType[n.type] = 0;
+        }
+        countersByType[n.type]++; 
+    });
+    return countersByType;
+};
+
+const DAPI_WHERE_IS_IT_USED = (dependencies, whatid) => {
+    return dependencies.filter(e => e.refId === whatid).map(n => { return { id: n.id, name: n.name, type: n.type }; })
+};
+
+const DAPI_WHAT_IS_IT_USING = (dependencies, whatid) => {
+    return dependencies.filter(e => e.id === whatid).map(n => { return { id: n.refId, name: n.refName, type: n.refType }; })
+};
+
+const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring, retrieveDependenciesFromField) => {
     if (setup) {
         Object.keys(that).forEach((p) => { that[p] = setup[p]; });
         if (needScoring === true) {
@@ -13,6 +51,14 @@ const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring) => {
             that.hasBadField = (field) => {
                 if (field) return that.badFields.includes(field);
                 return false;
+            }
+        }
+        if (retrieveDependenciesFromField) {
+            that.retrieveDependencies = (dependencies) => {
+                const id = that[retrieveDependenciesFromField];
+                that.using = DAPI_WHAT_IS_IT_USING(dependencies, id);
+                that.referenced = DAPI_WHERE_IS_IT_USED(dependencies, id);
+                that.referencedByTypes = DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE(dependencies, id);
             }
         }
     }
@@ -74,11 +120,8 @@ class SFDC_CustomField {
     createdDate;
     lastModifiedDate;
     objectId; 
-    objectRef; 
-    using;
-    referenced;
-    referencedByTypes;
-    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true); }
+    objectRef;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true, 'id'); }
 }
 
 class SFDC_Package {
@@ -238,44 +281,6 @@ class OrgCheckMap {
         return this.#values.slice();
     }
 }
-
-const CASESAFEID = (id) => {
-    if (id && id.length === 18) return id.substr(0, 15);
-    return id;
-}
-
-const ISEMPTY = (value) => {
-    if (!value) return true;
-    if (value.length === 0) return true;
-    if (value.trim && value.trim().length === 0) return true;
-    return false;
-}
-
-const SPLIT_IDS_IN_BATCHES = (ids, batchsize, callback) => {
-    if (batchsize <= 0) return;
-    for (let i = 0; i < ids.length; i += batchsize) {
-        callback('\''+ids.slice(i, Math.min(i + batchsize, ids.length)).join('\',\'')+'\'');
-    }
-};
-
-const DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE = (dependencies, whatid) => {
-    const countersByType = {};
-    dependencies.filter(e => e.refId === whatid).forEach(n => { 
-        if (countersByType[n.type] === undefined) {
-            countersByType[n.type] = 0;
-        }
-        countersByType[n.type]++; 
-    });
-    return countersByType;
-};
-
-const DAPI_WHERE_IS_IT_USED = (dependencies, whatid) => {
-    return dependencies.filter(e => e.refId === whatid).map(n => { return { id: n.id, name: n.name, type: n.type }; })
-};
-
-const DAPI_WHAT_IS_IT_USING = (dependencies, whatid) => {
-    return dependencies.filter(e => e.id === whatid).map(n => { return { id: n.refId, name: n.refName, type: n.refType }; })
-};
 
 const DATASET_ORGINFO = 'OrgInfo';
 const DATASET_PACKAGES = 'Packages';
@@ -556,11 +561,10 @@ class DatasetManager {
                             description: record.Description,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName),
-                            using: DAPI_WHAT_IS_IT_USING(results[0].dependencies, id),
-                            referenced: DAPI_WHERE_IS_IT_USED(results[0].dependencies, id),
-                            referencedByTypes: DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE(results[0].dependencies, id)
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
                         });
+                        // Map the dependencies for this field
+                        customField.retrieveDependencies(results[0].dependencies);
                         // Compute the score of this user, with the following rule:
                         //  - If the field has no description, then you get +1.
                         //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.

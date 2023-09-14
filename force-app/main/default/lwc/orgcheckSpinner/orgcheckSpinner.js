@@ -37,6 +37,7 @@ export default class OrgCheckSpinner extends LightningElement {
         this.isShow = false;
         this.sections = [];
         this.#keysIndex = {};
+        this.#openSince = new Date().getTime();
         this.isShow = true;
     }
 
@@ -51,7 +52,8 @@ export default class OrgCheckSpinner extends LightningElement {
             this.sections = [];
             this.#keysIndex = {};
         };
-        if (waitBeforeClosing && waitBeforeClosing > 0) {
+        const shownFor = new Date().getTime() - this.#openSince;
+        if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
             // eslint-disable-next-line @lwc/lwc/no-async-operation
             setTimeout(realClose, waitBeforeClosing);
         } else {
@@ -64,6 +66,7 @@ export default class OrgCheckSpinner extends LightningElement {
     isShow;
 
     #keysIndex;
+    #openSince;
 
     @track sections;
 
