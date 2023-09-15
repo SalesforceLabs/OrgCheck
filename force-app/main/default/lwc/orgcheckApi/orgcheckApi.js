@@ -1,6 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
-import { OrgCheckAPI, OrgCheckLogger } from './orgcheck-api';
+import { OrgCheckAPI } from './orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export const METHOD_TYPES_PACKAGES_OBJECTS = 'types+packages+objects';
@@ -34,14 +34,14 @@ export default class OrgcheckApi extends LightningElement {
                 jsforce,
                 this.accesstoken,
                 this.userid,
-                new OrgCheckLogger({
+                {
                     begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' }, bubbles: false })); },
                     sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m }, bubbles: false })); },
                     sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m }, bubbles: false })); },
                     sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m }, bubbles: false })); },
                     sectionFailed: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, message: m }, bubbles: false })); },
                     end: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end' }, bubbles: false })); }
-                })
+                }
             );
             this.#api.getOrgInformation().then((orgInfo) => {
                 this.orgName = `${orgInfo.name} (${orgInfo.id})`;

@@ -1,0 +1,58 @@
+<template>
+    <template lwc:if={isShow}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatname} ({whatid}}</h1>
+                </div>
+                <div class="slds-modal__content">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <lightning-card title="This entity is using the following entities" icon-name="utility:arrow_top">
+                                <template lwc:if={dependencies.using.length}>
+                                    <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                                        <ol class="slds-progress__list">
+                                            <template for:each={dependencies.using} for:item="use">
+                                                <li key={use.id} class="slds-progress__item">
+                                                    <div class="slds-progress__marker slds-is-completed"></div>
+                                                    <div class="slds-progress__item_content">[{use.type}] <b>{use.name}</b> (<code>{use.id}</code>)</div>
+                                                </li>
+                                            </template>
+                                        </ol>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    Nothing here.
+                                </template>
+                            </lightning-card>
+                        </div>
+                        <div class="slds-col">
+                            <lightning-card title="This entity is referenced (or used) by the following entities" icon-name="utility:arrow_bottom">
+                                <template lwc:if={dependencies.referenced.length}>
+                                    <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                                        <ol class="slds-progress__list">
+                                            <template for:each={dependencies.referenced} for:item="ref">
+                                                <li key={ref.id} class="slds-progress__item">
+                                                    <div class="slds-progress__marker slds-is-completed"></div>
+                                                    <div class="slds-progress__item_content">[{ref.type}] <b>{ref.name}</b> (<code>{ref.id}</code>)</div>
+                                                </li>
+                                            </template>
+                                        </ol>
+                                    </div>
+                                </template>
+                                <template lwc:else>
+                                    Nothing here.
+                                </template>
+                            </lightning-card>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning-button variant="neutral" label="Close" onclick={handleClose}></lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>

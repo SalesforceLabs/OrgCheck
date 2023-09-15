@@ -1,4 +1,7 @@
 <template>
+    <template if:true={usesDependencyViewer}>
+        <c-orgcheck-dependency-viewer></c-orgcheck-dependency-viewer>
+    </template>
     <template if:true={showStatistics}>
         Total number of rows: <b><code>{nbRows}</code></b>, Total number of bad rows: 4, Total sum score: 8, 
         <template if:true={isFilterOn}>
@@ -38,6 +41,9 @@
                                 <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
                                     <template lwc:if={cell.type_score}>
                                         {row.score}
+                                    </template>
+                                    <template lwc:if={cell.type_dependencyViewer}>
+                                        <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.value} whatid={cell.id} whatname={cell.name}></c-orgcheck-dependency-link>
                                     </template>
                                     <template lwc:elseif={cell.type_id}>
                                         <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>

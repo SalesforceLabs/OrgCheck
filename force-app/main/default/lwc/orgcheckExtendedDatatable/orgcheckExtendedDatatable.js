@@ -28,6 +28,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     nbRowsVisible = 0;
     
     /**
+     * Are we gonna use the dependency viewer in this table?
+     * true if one of the columns are of type ""
+     */
+    usesDependencyViewer = false;
+
+    /**
      * Are the statistics going to be shown on top of the table?
      */
     @api showStatistics = false;
@@ -82,12 +88,16 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api set columns(columns) {
         if (columns) {
+            this.usesDependencyViewer = false;
             const _columns = [{ label: 'Score', type: 'score', data: { value: 'badScore' }, sorted: 'desc' }];
             _columns.push(...columns);
             this._columns = _columns.map((column, index) => { 
                 if (column.sorted) {
                     this.#sortingColumnIndex = index;
                     this.#sortingOrder = column.sorted;
+                }
+                if (this.usesDependencyViewer === false && column.type === 'dependencyViewer') {
+                    this.usesDependencyViewer = true;
                 }
                 return Object.assign({ 
                     index: index, 
@@ -120,7 +130,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 };
                 this._columns.forEach((column, columnIndex) => {
                     let ref = row;
-                    if (column.data.ref) column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
+                    if (column.data.ref) {
+                        column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
+                    }
                     if (ref) {
                         const cell = { key: columnIndex };
                         cell[`type_${column.type}`] = true;
@@ -222,6 +234,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         this.sort();
         // we don't want the event to be more propagated
         event.stopPropagation();
+    }
+
+    async handleViewDependency(event) {
+        const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
+        viewer.open(event.target.whatid, event.target.whatname, event.target.dependencies);
     }
 
     /**

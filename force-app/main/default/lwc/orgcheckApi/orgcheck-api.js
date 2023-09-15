@@ -53,12 +53,12 @@ const MAP_FIELDS_FROM_SETUP = (setup, that, needScoring, retrieveDependenciesFro
                 return false;
             }
         }
-        if (retrieveDependenciesFromField) {
-            that.retrieveDependencies = (dependencies) => {
-                const id = that[retrieveDependenciesFromField];
-                that.using = DAPI_WHAT_IS_IT_USING(dependencies, id);
-                that.referenced = DAPI_WHERE_IS_IT_USED(dependencies, id);
-                that.referencedByTypes = DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE(dependencies, id);
+        if (setup.dependencies && retrieveDependenciesFromField) {
+            const id = that[retrieveDependenciesFromField];
+            that.dependencies = {
+                using: DAPI_WHAT_IS_IT_USING(setup.dependencies, id),
+                referenced: DAPI_WHERE_IS_IT_USED(setup.dependencies, id),
+                referencedByTypes: DAPI_HOW_MANY_TIMES_IS_IT_USED_BY_TYPE(setup.dependencies, id)
             }
         }
     }
@@ -561,15 +561,14 @@ class DatasetManager {
                             description: record.Description,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName)
+                            objectId: CASESAFEID(record.EntityDefinition.QualifiedApiName),
+                            dependencies: results[0].dependencies
                         });
-                        // Map the dependencies for this field
-                        customField.retrieveDependencies(results[0].dependencies);
                         // Compute the score of this user, with the following rule:
                         //  - If the field has no description, then you get +1.
                         //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
                         if (ISEMPTY(customField.description)) customField.setBadField('description');
-                        if (customField.referenced.length === 0) customField.setBadField('referenced');
+                        if (customField.dependencies?.referenced.length === 0) customField.setBadField('dependencies.referenced');
                         // Add it to the map  
                         customFields.set(customField.id, customField);
                     });
@@ -1006,13 +1005,13 @@ export class OrgCheckAPI {
      * @param {JsForce} sfdcConnector
      * @param {String} accessToken
      * @param {String} userId
-     * @param {OrgCheckLogger} logger
+     * @param {JSon} loggerSetup
      */
-    constructor(sfdcConnector, accessToken, userId, logger) {
+    constructor(sfdcConnector, accessToken, userId, loggerSetup) {
 
         this.#sfdcManager = new SFDCConnectionManager(sfdcConnector, accessToken, userId);
-        this.#datasetManager = new DatasetManager(this.#sfdcManager, logger);
-        this.#logger = logger;
+        this.#logger = new OrgCheckLogger(loggerSetup);
+        this.#datasetManager = new DatasetManager(this.#sfdcManager, this.#logger);
     }
 
     /**
