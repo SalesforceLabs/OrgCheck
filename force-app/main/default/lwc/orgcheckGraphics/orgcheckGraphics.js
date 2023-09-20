@@ -43,7 +43,7 @@ export default class OrgcheckGraphics extends LightningElement {
   drawDependencies() {
 
     // Some constants
-    const BOX_HEIGHT = 35;
+    const BOX_HEIGHT = 40;
     const BOX_WIDTH = 200;
     const BOX_TEXT_PADDING = 3;
     const BOX_VERTICAL_PADDING = 5;
@@ -59,11 +59,21 @@ export default class OrgcheckGraphics extends LightningElement {
       }
     }
     const EDGE_BGCOLOR = '#2f89a8';
+    const ESCAPE_DATA = (unsafe) => {
+      if (unsafe === undefined || Number.isNaN(unsafe) || unsafe === null) return '';
+      if (typeof(unsafe) !== 'string') return unsafe;
+      return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+  } ;
     const BOX_INNERHTML = (d) => {
       switch (d.depth) {
-        case 0: return `<center><b>${d.data.label}</b></center>`;
-        case 3: return `<b>${d.data.label}</b><br /><code>${d.data.id}</code>`;
-        default: return `<center>${d.data.label}<br /><code><small>${d.children?.length || 0} ${d.children?.length > 1 ? "items": "item"}</small></code></center>`;
+        case 0: return `<center><b>${ESCAPE_DATA(d.data.label)}</b></center>`;
+        case 3: return `<a href="/${d.data.id}" target="_blank"><b>${ESCAPE_DATA(d.data.label)}</b></a>`;
+        default: return `<center>${ESCAPE_DATA(d.data.label)}<br /><code><small>${d.children?.length || 0} ${d.children?.length > 1 ? "items": "item"}</small></code></center>`;
       }
     }
 
@@ -113,7 +123,7 @@ export default class OrgcheckGraphics extends LightningElement {
     // Construction of graph
     const graph = this.#api.select(this.template.querySelector('.orgcheck-graph'))
       .append('svg')
-      .attr('viewBox', [-100, 0, WIDTH, x1 - x0 + root.dx * 2])
+      .attr('viewBox', [-75, 0, WIDTH, x1 - x0 + root.dx * 2])
       .attr('xmlns', 'http://www.w3.org/2000/svg')
       .append('g')
       .attr('font-family', FONT_FAMILY)
@@ -139,6 +149,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('height', BOX_HEIGHT);
 
     nodes.append('foreignObject')
+      .attr('class', 'slds-scrollable')
       .attr('x', BOX_TEXT_PADDING)
       .attr('y', - BOX_HEIGHT / 2 + BOX_TEXT_PADDING)
       .attr('width', (d) => BOX_WIDTH - 2 * BOX_TEXT_PADDING)
