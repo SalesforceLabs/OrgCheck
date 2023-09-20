@@ -49,5 +49,81 @@
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
+        <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="roles" label="Role Explorer" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="roles" label="Role Listing" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🌶️ Public Groups and Queues" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="public-groups" label="Public Groups" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="queues" label="Queues" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🤖 Automations" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="flows" label="Flows" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="process-builders" label="Process Builders" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="workflows" label="Workflows" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🎁 Custom Labels" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="custom-labels" label="Custom Labels" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🥐 Visual Components" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="visual-force-pages" label="Visual Force Pages" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="visual-force-components" label="Visual Force Components" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="lightning-pages" label="Lightning Pages" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="lightning-aura-components" label="Lightning Aura Components" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="lightning-web-components" label="Lightning Web Components" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🔥 Apex" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="apex-classes" label="Classes" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="apex-recompilation-needed" label="Recompilation needed" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="apex-triggers" label="Triggers" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🤪 Analytics" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="dashboards" label="Dashboards" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="reports" label="Reports" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🚢  Batches" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="schedulable-classes-not-scheduled" label="Schedulable classes not yet scheduled" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="apex-jobs" label="Apex Jobs" onactive={handleSubTabActivation}>
+                </lightning-tab>
+                <lightning-tab value="scheduled-jobs" label="Scheduled Jobs" onactive={handleSubTabActivation}>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
     </lightning-tabset>
 </template>
