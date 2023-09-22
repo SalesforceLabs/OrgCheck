@@ -1,6 +1,111 @@
 <template>
     <template lwc:if={isSObjectSpecified}>
-        Object Api Name is = {sobjectApiName}
+
+        <!-- GENERAL SECTION -->
+        <h1 class="slds-text-heading_small">General information</h1>
+        {object.name}
+        {object.id}
+        {object.label}
+        <br /><br />
+
+        <!-- APEX TRIGGER SECTION -->
+        <template lwc:if={object.apexTriggers.length}>
+            <h1 class="slds-text-heading_small">Apex Triggers</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={apexTriggersColumns}
+                rows={object.apexTriggers}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- FIELD SETS SECTION -->
+        <template lwc:if={object.fieldSets.length}>
+            <h1 class="slds-text-heading_small">Field Sets</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={fieldSetsColumns}
+                rows={object.fieldSets}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+
+        <!-- LAYOUTS SECTION -->
+        <template lwc:if={object.layouts.length}>
+            <h1 class="slds-text-heading_small">Page Layouts</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={layoutsColumns}
+                rows={object.layouts}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+
+        <!-- LIMITS SECTION -->
+        <template lwc:if={object.limits.length}>
+            <h1 class="slds-text-heading_small">Limits</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={limitsColumns}
+                rows={object.limits}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- VALIDATION RULES SECTION -->
+        <template lwc:if={object.validationRules.length}>
+            <h1 class="slds-text-heading_small">Validation Rules</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={validationRulesColumns}
+                rows={object.validationRules}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- WEB LINKS SECTION -->
+        <template lwc:if={object.webLinks.length}>
+            <h1 class="slds-text-heading_small">Web Links</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={webLinksColumns}
+                rows={object.webLinks}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- FIELDS SECTION -->
+        <template lwc:if={object.fields.length}>
+            <h1 class="slds-text-heading_small">Fields</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={fieldsColumns}
+                rows={object.fields}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- RECORD TYPES SECTION -->
+        <template lwc:if={object.recordTypes.length}>
+            <h1 class="slds-text-heading_small">Record Types</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={recordTypesColumns}
+                rows={object.recordTypes}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
+        
+        <!-- RELEATIONSHIPS SECTION -->
+        <template lwc:if={object.relationships.length}>
+            <h1 class="slds-text-heading_small">Relationships</h1>
+            <c-orgcheck-extended-datatable
+                show-row-number-column
+                dont-use-all-space
+                columns={relationshipsColumns}
+                rows={object.relationships}></c-orgcheck-extended-datatable>
+            <br /><br />
+        </template>
     </template>
     <template lwc:else>
         There is no specific object set in the global filter above. <br />

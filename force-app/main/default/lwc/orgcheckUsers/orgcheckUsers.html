@@ -1,9 +1,10 @@
 <template>
     <c-orgcheck-extended-datatable
         empty-message="There is no active user to show."
-        show-search="true"
-        show-statistics="true"
+        show-search
+        show-statistics
+        show-score-column
+        show-row-number-column
         columns={tableColumns}
-        rows={tableData} 
-        show-row-number-column="true"></c-orgcheck-extended-datatable>
+        rows={tableData}></c-orgcheck-extended-datatable>
 </template>

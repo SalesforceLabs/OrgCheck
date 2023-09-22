@@ -23,7 +23,7 @@
         {emptyMessage}
     </template>
     <template lwc:else>
-        <table class="slds-table slds-table_bordered slds-is-selected slds-cell-wrap">
+        <table class="slds-table slds-table_bordered slds-is-selected slds-cell-wrap" style={tableStyle}>
             <thead>
                 <tr>
                     <template for:each={_columns} for:item="column">
@@ -39,6 +39,9 @@
                         <template if:true={row.visible}>
                             <template for:each={row.cells} for:item="cell">
                                 <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
+                                    <template lwc:if={cell.type_index}>
+                                        {row.key}
+                                    </template>
                                     <template lwc:if={cell.type_score}>
                                         {row.score}
                                     </template>

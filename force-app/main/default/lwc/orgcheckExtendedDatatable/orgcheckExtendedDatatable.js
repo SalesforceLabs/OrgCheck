@@ -3,6 +3,15 @@ import { LightningElement, api, track } from 'lwc';
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
+     * Connected callback function
+     */
+    connectedCallback() {
+        if (this.dontUseAllSpace === true) {
+            this.tableStyle = 'width: unset;';
+        }
+    }
+    
+    /**
      * Is there no records at all to display?
      */
     isDataEmpty = true;
@@ -43,6 +52,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * And the filter to be enabled?
      */
     @api showSearch = false;
+
+    @api showScoreColumn = false;
+
+    @api showRowNumberColumn = false;
+
+    @api dontUseAllSpace = false;
+
+    tableStyle = '';
 
     /**
      * Do you need the headers to stick on top of the screen even if you scroll down?
@@ -89,7 +106,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api set columns(columns) {
         if (columns) {
             this.usesDependencyViewer = false;
-            const _columns = [{ label: 'Score', type: 'score', data: { value: 'badScore' }, sorted: 'desc' }];
+            const _columns = [];
+            if (this.showRowNumberColumn === true) {
+                _columns.push({ label: '#', type: 'index' });
+            }
+            if (this.showScoreColumn === true) {
+                _columns.push({ label: 'Score', type: 'score', data: { value: 'badScore' }, sorted: 'desc' });
+            }
             _columns.push(...columns);
             this._columns = _columns.map((column, index) => { 
                 if (column.sorted) {
@@ -130,14 +153,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 };
                 this._columns.forEach((column, columnIndex) => {
                     let ref = row;
-                    if (column.data.ref) {
-                        column.data.ref.split('.').forEach((r) => { ref = ref[r]; });
+                    if (column.data?.ref) {
+                        column.data?.ref.split('.').forEach((r) => { ref = ref[r]; });
                     }
                     if (ref) {
                         const cell = { key: columnIndex };
                         cell[`type_${column.type}`] = true;
                         if (column.type.endsWith('s')) {
-                                // iterable
+                            // Iterable data in a cell
                             if (column.type === 'texts') {
                                 cell.values = ref[column.data.values];
                             } else {
@@ -150,8 +173,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                                     return value;
                                 });
                             }
-                        } else {
-                            // unique value
+                        } else if (column.type !== 'index') {
+                            // Unique value in a cell
                             cell.value = ref[column.data.value];
                             Object.keys(column.data).filter(d => d !== 'value').forEach(d => {
                                 cell[d] = ref[column.data[d]];
@@ -174,8 +197,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                             if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }
                         if (row.hasBadField && (
-                                (column.data.ref && row.hasBadField(column.data.ref)) || 
-                                (column.data.value && row.hasBadField(column.data.value))
+                                (column.data?.ref && row.hasBadField(column.data.ref)) || 
+                                (column.data?.value && row.hasBadField(column.data.value))
                             )) {
                             cell.cssClass = 'bad badcell';
                         }
@@ -258,11 +281,16 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                         }) >= 0;
                     }) >= 0
                 );
-                if (row.visible) this.nbRowsVisible++;
+                if (row.visible === true) {
+                    row.key = ++this.nbRowsVisible;
+                }
             });
         } else {
             this.isFilterOn = false;
-            this._rows.forEach((row) => { row.visible = true; });
+            this._rows.forEach((row, index) => { 
+                row.visible = true; 
+                row.key = index+1;
+            });
         }
     }
 
@@ -270,6 +298,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * Internal sort method which takes into account the <code>#sortingColumnIndex</code> and <code>sortingOrder</code> properties
      */
     sort() {
+        if (this.#sortingColumnIndex === undefined) return;
         const columnIndex = this.#sortingColumnIndex;
         const iOrder = this.#sortingOrder === 'asc' ? 1 : -1;
         const type = this._columns[columnIndex].type;
@@ -287,6 +316,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             if (!value1 && value1 !== 0) return 1;
             if (!value2 && value2 !== 0) return -1;
             return (value1 < value2 ? -iOrder : iOrder);
+        }).forEach((row, index) => { 
+            row.key = index+1; 
         });
     }
 }

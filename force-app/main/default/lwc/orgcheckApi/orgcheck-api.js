@@ -3,6 +3,26 @@ const CASESAFEID = (id) => {
     return id;
 }
 
+const SETUP_URL_FROM_ID = (type, durableId, objectDurableId) => {
+    switch (type) {
+        case 'field':
+            return `/lightning/setup/ObjectManager/${objectDurableId}/FieldsAndRelationships/${durableId}/view`;
+        case 'layout':
+            return `/lightning/setup/ObjectManager/${objectDurableId}/PageLayouts/${durableId}/view`;
+        case 'object':
+            return `/lightning/setup/ObjectManager/${objectDurableId}/Details/view`;
+        case 'validation-rule':
+            return `/lightning/setup/ObjectManager/page?address=%2F${durableId}`;
+        case 'web-link':
+            return `/lightning/setup/ObjectManager/${objectDurableId}/ButtonsLinksActions/${durableId}/view`;
+        case 'record-type':
+            return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
+        default:
+            console.error('type uncovered: ', type);
+            return `/${durableId}`;
+    }
+}
+
 const ISEMPTY = (value) => {
     if (!value) return true;
     if (value.length === 0) return true;
@@ -92,6 +112,91 @@ class SFDC_Object {
     package;
     typeId;
     typeRef;
+    description;
+    externalSharingModel;
+    internalSharingModel;
+    apexTriggers;
+    fieldSets;
+    layouts;
+    limits;
+    validationRules;
+    webLinks;
+    fields;
+    recordTypes;
+    relationships;
+    recordCount;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_ApexTrigger {
+    id;
+    name;
+    url;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_FieldSet {
+    id;
+    label;
+    description;
+    url;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_PageLayout {
+    id;
+    name;
+    type;
+    url;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_ObjectLimit {
+    id;
+    label;
+    remaining;
+    max;
+    used;
+    type;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }    
+}
+
+class SFDC_ValidationRule {
+    id;
+    name;
+    isActive;
+    description;
+    errorDisplayField;
+    errorMessage;
+    url;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }    
+}
+
+class SFDC_WebLink {
+    id;
+    name;
+    url;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_RecordType {
+    id;
+    name;
+    developerName;
+    url;
+    isActive;
+    isAvailable;
+    isDefaultRecordTypeMapping;
+    isMaster;
+    constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
+}
+
+class SFDC_ObjectRelationShip {
+    name;
+    childObject;
+    fieldName;
+    isCascadeDelete;
+    isRestrictedDelete;
     constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
@@ -103,6 +208,17 @@ const OBJECTTYPE_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
 const OBJECTTYPE_CUSTOM_EVENT = 'CustomEvent';
 const OBJECTTYPE_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
 const OBJECTTYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
+
+const OBJECTTYPE = (apiName, isCustomObject, isCustomSetting) => {
+    if (isCustomObject === false) return OBJECTTYPE_STANDARD_SOBJECT;
+    if (isCustomSetting === true) return OBJECTTYPE_CUSTOM_SOBJECT;
+    if (apiName.endsWith('__c')) return OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT;
+    if (apiName.endsWith('__x')) return OBJECTTYPE_CUSTOM_SETTING;
+    if (apiName.endsWith('__mdt')) return OBJECTTYPE_CUSTOM_METADATA_TYPE;
+    if (apiName.endsWith('__e')) return OBJECTTYPE_CUSTOM_EVENT;
+    if (apiName.endsWith('__ka')) return OBJECTTYPE_KNOWLEDGE_ARTICLE;
+    if (apiName.endsWith('__b')) return OBJECTTYPE_CUSTOM_BIG_OBJECT;
+}
 
 class SFDC_ObjectType {
     id;
@@ -121,6 +237,15 @@ class SFDC_CustomField {
     lastModifiedDate;
     objectId; 
     objectRef;
+    isCustom;
+    tooltip;
+    type;
+    length;
+    isUnique;
+    isEncrypted;
+    isExternalId;
+    defaultValue;
+    formula;
     constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, true, 'id'); }
 }
 
@@ -290,6 +415,7 @@ const DATASET_CUSTOMFIELDS = 'CustomFields';
 const DATASET_USERS = 'Users';
 const DATASET_PERMISSIONSETS = 'PermissionSets';
 const DATASET_PROFILES = 'Profiles';
+const DATASET_OBJECT = 'Object';
 
 class DatasetCacheInfo {
     name;
@@ -501,16 +627,8 @@ class DatasetManager {
                         objectsDescription
                             .filter((object) => qualifiedApiNames.includes(object.name))
                             .forEach((object) => {
-                                let type;
-                                if (object.custom === false) type = OBJECTTYPE_STANDARD_SOBJECT;
-                                else if (object.customSetting === true) type = OBJECTTYPE_CUSTOM_SOBJECT;
-                                else if (object.name.endsWith('__c')) type = OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT;
-                                else if (object.name.endsWith('__x')) type = OBJECTTYPE_CUSTOM_SETTING;
-                                else if (object.name.endsWith('__mdt')) type = OBJECTTYPE_CUSTOM_METADATA_TYPE;
-                                else if (object.name.endsWith('__e')) type = OBJECTTYPE_CUSTOM_EVENT;
-                                else if (object.name.endsWith('__ka')) type = OBJECTTYPE_KNOWLEDGE_ARTICLE;
-                                else if (object.name.endsWith('__b')) type = OBJECTTYPE_CUSTOM_BIG_OBJECT;
-                                else if (!type) return;
+                                const type = OBJECTTYPE(object.name, object.custom, object.customSetting)
+                                if (!type) return;
                                 const entity = entitiesByName[object.name];
                                 const id = CASESAFEID(object.name);
                                 objects.set(id, new SFDC_Object({
@@ -518,7 +636,7 @@ class DatasetManager {
                                     label: object.label,
                                     name: entity.DeveloperName,
                                     apiname: object.name,
-                                    url: `/${id}`,
+                                    url: SETUP_URL_FROM_ID('object', id),
                                     package: (entity.NamespacePrefix || ''),
                                     typeId: type
                                 }));
@@ -528,6 +646,207 @@ class DatasetManager {
                     })
                     .catch(reject)
             }).catch(reject);
+        });
+
+        // ***************************
+        // Dataset for OBJECT (with the name of the objet as parameter)
+        // ***************************
+        this.#retrievers.set(DATASET_OBJECT, (resolve, reject, parameters) => {
+            const fullObjectApiName = parameters.object;
+            const splittedApiName = fullObjectApiName.split('__');
+            const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
+            const objectApiNameWithoutExt = splittedApiName.length === 3 ? splittedApiName[2] : splittedApiName[0];
+            const promises = [];
+            promises.push(sfdcManager.describe(fullObjectApiName));
+            promises.push(sfdcManager.soqlQuery([{ 
+                tooling: true,
+                string: 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                            '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
+                            '(SELECT Id, Name FROM ApexTriggers), '+
+                            '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                            '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                            '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                'ValidationName FROM ValidationRules), '+
+                            '(SELECT Id, Name FROM WebLinks) '+
+                        'FROM EntityDefinition '+
+                        `WHERE DeveloperName = '${objectApiNameWithoutExt}' `+
+                        (ISEMPTY(packageName) ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = ${packageName} `)
+            }]));
+            promises.push(sfdcManager.recordCount(fullObjectApiName));
+            Promise.all(promises)
+                .then((r) => {
+                    // the first promise was describe
+                    // so we initialize the object with the first result
+                    const sobjectDescribed = r[0]; 
+
+                    // the second promise was the soql query on EntityDefinition
+                    // so we get the record of that query and map it to the previous object.
+                    const entity = r[1][0].records[0];
+
+                    // If that entity was not found in the tooling API
+                    if (!entity) {
+                        reject(`No entity definition record found for: ${JSON.stringify(parameters)}`)
+                        return;
+                    }
+                    
+                    // the third promise is the number of records!!
+                    const recordCount = r[2]; 
+
+                    const fieldsMapper = {};
+                    if (entity.Fields) entity.Fields.records.forEach((f) => {
+                        fieldsMapper[f.QualifiedApiName] = { 
+                            'id': f.DurableId.split('.')[1], 
+                            'description': f.Description 
+                        };
+                    });
+                    const fields = (
+                        sobjectDescribed.fields ?
+                        sobjectDescribed.fields.map((t) => {
+                            const mapper = fieldsMapper[t.name];
+                            if (mapper) {
+                                t.id = mapper.id;
+                                t.description = mapper.description;
+                            }
+                            return new SFDC_CustomField({ 
+                                id: CASESAFEID(t.id), 
+                                name: t.label, 
+                                label: t.label, 
+                                description: t.description,
+                                isCustom: t.custom,
+                                tooltip: t.inlineHelpText,
+                                type: t.type,
+                                length: t.length,
+                                isUnique: t.unique,
+                                isEncrypted: t.encrypted,
+                                isExternalId: t.externalId,
+                                defaultValue: t.defaultValue,
+                                formula: t.calculatedFormula,
+                                url: SETUP_URL_FROM_ID('field', t.id, entity.DurableId)
+                            });
+                        }) :
+                        []
+                    );
+
+                    const apexTriggers = (
+                        entity.ApexTriggers ? 
+                        entity.ApexTriggers.records.map((t) => new SFDC_ApexTrigger({ 
+                            id: CASESAFEID(t.Id), 
+                            name: t.Name, 
+                            url: SETUP_URL_FROM_ID('apex-trigger', t.Id) 
+                        })) : 
+                        []
+                    );
+
+                    const fieldSets = (
+                        entity.FieldSets ? 
+                        entity.FieldSets.records.map((t) => new SFDC_FieldSet({ 
+                            id: CASESAFEID(t.Id), 
+                            label: t.MasterLabel, 
+                            description: t.Description,
+                            url: SETUP_URL_FROM_ID('field-set', t.Id, entity.DurableId) 
+                        })) : 
+                        []
+                    );
+
+                    const layouts = (
+                        entity.Layouts ? 
+                        entity.Layouts.records.map((t) => new SFDC_PageLayout({ 
+                            id: CASESAFEID(t.Id), 
+                            name: t.Name, 
+                            url: SETUP_URL_FROM_ID('layout', t.Id, entity.DurableId), 
+                            type: t.LayoutType 
+                        })) : 
+                        []
+                    );
+                    
+                    const limits = (
+                        entity.Limits ? entity.Limits.records.map((t) => new SFDC_ObjectLimit({ 
+                            id: CASESAFEID(t.DurableId), 
+                            label: t.Label, 
+                            max: t.Max, 
+                            remaining: t.Remaining, 
+                            used:(t.Max-t.Remaining), 
+                            type: t.Type 
+                        })) : 
+                        []
+                    );
+                    
+                    const validationRules = (
+                        entity.ValidationRules ? 
+                        entity.ValidationRules.records.map((t) => new SFDC_ValidationRule({ 
+                            id: CASESAFEID(t.Id), 
+                            name: t.ValidationName, 
+                            isActive: t.Active,
+                            description: t.Description,
+                            errorDisplayField: t.ErrorDisplayField,
+                            errorMessage: t.ErrorMessage,
+                            url: SETUP_URL_FROM_ID('valdation-rule', t.Id), 
+                        })) : 
+                        []
+                    );
+                    
+                    const webLinks = (
+                        entity.WebLinks ? 
+                        entity.WebLinks.records.map((t) => new SFDC_WebLink({ 
+                            id: CASESAFEID(t.Id), 
+                            name: t.Name, 
+                            url: SETUP_URL_FROM_ID('web-link', t.Id, entity.DurableId) 
+                        })) : 
+                        []
+                    );
+                    
+                    const recordTypes = (
+                        sobjectDescribed.recordTypeInfos ? 
+                        sobjectDescribed.recordTypeInfos.map((t) => new SFDC_RecordType({ 
+                            id: CASESAFEID(t.recordTypeId), 
+                            name: t.name, 
+                            developerName: t.developerName, 
+                            url: SETUP_URL_FROM_ID('record-type', t.recordTypeId, entity.DurableId),
+                            isActive: t.active,
+                            isAvailable: t.available,
+                            isDefaultRecordTypeMapping: t.defaultRecordTypeMapping,
+                            isMaster: t.master 
+                        })) : 
+                        []
+                    );
+                    
+                    const relationships = (
+                        sobjectDescribed.childRelationships ? 
+                        sobjectDescribed.childRelationships.filter((t) => !ISEMPTY(t.relationshipName)).map((t) => new SFDC_ObjectRelationShip({ 
+                            name: t.relationshipName,
+                            childObject: t.childSObject,
+                            fieldName: t.field,
+                            isCascadeDelete: t.cascadeDelete,
+                            isRestrictedDelete: t.restrictedDelete
+                        })) : 
+                        []
+                    );
+
+                    resolve(new SFDC_Object({
+                        id: entity.DurableId,
+                        label: sobjectDescribed.label,
+                        name: '',
+                        apiname: sobjectDescribed.name,
+                        url: SETUP_URL_FROM_ID('object', entity.DurableId),
+                        package: '',
+                        typeId: '',
+                        description: entity.Description,
+                        externalSharingModel: entity.ExternalSharingModel,
+                        internalSharingModel: entity.InternalSharingModel,
+                        apexTriggers: apexTriggers,
+                        fieldSets: fieldSets,
+                        limits: limits,
+                        layouts: layouts,
+                        validationRules: validationRules,
+                        webLinks: webLinks,
+                        fields: fields,
+                        recordTypes: recordTypes,
+                        relationships: relationships,
+                        recordCount: recordCount
+                    }))
+                })
+                .catch(reject);
         });
 
         // ***************************
@@ -772,43 +1091,47 @@ class DatasetManager {
         const results = new OrgCheckMap();
         const promises = [];
         datasets.forEach((dataset) => {
-            if (this.#retrievers.hasKey(dataset) === false) {
-                throw new Error(`Dataset '${dataset}' is not yet implemented.`);
+            const datasetName = (typeof dataset === 'string' ? dataset : dataset.name);
+            const datasetParameters = (typeof dataset === 'string' ? {} : dataset.parameters);
+            if (this.#retrievers.hasKey(datasetName) === false) {
+                throw new Error(`Dataset '${datasetName}' is not yet implemented.`);
             }
             promises.push(new Promise((resolve, reject) => {
-                this.#logger.sectionContinues(`DatasetManager:${dataset}:Cache`, 'Checking the cache...');
+                this.#logger.sectionContinues(`DatasetManager:${datasetName}:Cache`, 'Checking the cache...');
                 // Check cache if any
-                if (this.#cache.hasKey(dataset) === true) {
+                if (this.#cache.hasKey(datasetName) === true) {
                     // Set the results from cache
-                    this.#logger.sectionEnded(`DatasetManager:${dataset}:Cache`, 'There was data in cache!');
-                    results.set(dataset, this.#cache.get(dataset));
+                    this.#logger.sectionEnded(`DatasetManager:${datasetName}:Cache`, 'There was data in cache!');
+                    results.set(datasetName, this.#cache.get(datasetName));
                     // Resolve
                     resolve();
                     return;
                 }
-                this.#logger.sectionContinues(`DatasetManager:${dataset}:Cache`, 'There was no data in cache.');
+                this.#logger.sectionContinues(`DatasetManager:${datasetName}:Cache`, 'There was no data in cache.');
 
                 // Calling the retriever
-                this.#logger.sectionContinues(`DatasetManager:${dataset}:Retriever`, 'Calling the retriever...');
-                this.#retrievers.get(dataset)(
+                this.#logger.sectionContinues(`DatasetManager:${datasetName}:Retriever`, 'Calling the retriever...');
+                this.#retrievers.get(datasetName)(
                     // success
                     (data) => {
                         // Cache the data
-                        this.#logger.sectionEnded(`DatasetManager:${dataset}:Cache`, 'We save the cache with this data.');
-                        this.#cache.set(dataset, data);
+                        this.#logger.sectionEnded(`DatasetManager:${datasetName}:Cache`, 'We save the cache with this data.');
+                        this.#cache.set(datasetName, data);
                         // Set the results
-                        this.#logger.sectionEnded(`DatasetManager:${dataset}:Retriever`, 'Information retrieved!');
-                        results.set(dataset, data);
+                        this.#logger.sectionEnded(`DatasetManager:${datasetName}:Retriever`, 'Information retrieved!');
+                        results.set(datasetName, data);
                         // Resolve
                         resolve();
                     },
                     // error
                     (error) => {
                         // Reject with this error
-                        this.#logger.sectionFailed(`DatasetManager:${dataset}:Cache`, 'Due to an error the cache is still empty');
-                        this.#logger.sectionFailed(`DatasetManager:${dataset}:Retriever`, error.message);
+                        this.#logger.sectionFailed(`DatasetManager:${datasetName}:Cache`, 'Due to an error the cache is still empty');
+                        this.#logger.sectionFailed(`DatasetManager:${datasetName}:Retriever`, error.message);
                         reject(error);
-                    }
+                    },
+                    // Send any parameters if needed
+                    datasetParameters
                 );
             }));
         });
@@ -958,13 +1281,38 @@ class SFDCConnectionManager {
     }
 
     /**
-     * Method to call a list of sobjects
+     * Method to get the list of sobjects
      */
     async describeGlobal() {
         return new Promise((resolve, reject) => {
             this.#connection.describeGlobal((e, d) => {
-                if (e) reject(e);
-                resolve(d.sobjects);
+                if (e) reject(e); else resolve(d.sobjects);
+            });
+        });
+    }
+
+    /**
+     * Method to describe one particular sobject
+     */
+    async describe(sobjectDevName) {
+        return new Promise((resolve, reject) => {
+            // describeSObject() method is not cached (compare to describe() method))
+            this.#connection.describeSObject(sobjectDevName, (e, d) => {
+                if (e) reject(e); else resolve(d);
+            });
+        });
+    }
+    
+    /**
+     * Method to get the record count (recycle bin included) of one particular sobject
+     */
+    async recordCount(sobjectDevName) {
+        return new Promise((resolve, reject) => {
+            this.#connection.request({ 
+                url: '/services/data/v'+this.#connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
+                method: 'GET'
+            }, (e, r) => {
+                if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length == 1) ? r?.sObjects[0].count : 0);
             });
         });
     }
@@ -1310,6 +1658,45 @@ export class OrgCheckAPI {
 
             // Return value
             return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(currentSection, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
+    }
+
+    /**
+     * Get a full description of an object (async method)
+     * 
+     * @param object you want to describe, can't be empty or '*'
+     * 
+     * @returns {Array<SFDC_Object>}
+     */
+    async getObject(object) {
+
+        // Just checking if the object name is given
+        if (ISEMPTY(object) || object === '*') throw new Error('Please specify an object so that we can get its description');
+
+        let currentSection = '';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            currentSection = 'Api:Extract';
+            this.#logger.sectionStarts(currentSection, 'Getting the information...');
+            const data = await this.#datasetManager.run([{ name: DATASET_OBJECT, parameters: { object: object }}]);
+            const objectDescribed = data.get(DATASET_OBJECT);
+            this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
+
+            // Return value
+            return objectDescribed;
 
         } catch(error) {
             // Error handling

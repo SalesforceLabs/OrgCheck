@@ -1,5 +1,9 @@
 import { LightningElement, api } from 'lwc';
 
+const GET_WIDTH_FROM_LABEL = (label) => {
+    return Math.max(20, label?.length);
+}
+
 export default class OrgcheckExtendedCombobox extends LightningElement {
 
     @api label;
@@ -25,7 +29,7 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
             if (s?.length === 1) {
                 const label = s[0].label;
                 this.searchLabel = label;
-                this.style = 'width: '+Math.max(20, label?.length)+'ch';
+                this.inputStyle = `width: ${GET_WIDTH_FROM_LABEL(label)}ch`;
             }
         }
         this.searchValue = value;
@@ -37,7 +41,9 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
 
     searchLabel = '';
     
-    style;
+    inputStyle;
+
+    dropdownStyle;
 
     handleShowAllOptions() {
         this.itemsFound = this.options;
@@ -52,10 +58,18 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
         const searchingValue = event.target.value;
         if (searchingValue && searchingValue.length > 2) {
             const s = searchingValue.toUpperCase();
+            let maxWidth = 0;
             this.itemsFound = this.options.filter(i => {
-                if (i.label.toUpperCase().indexOf(s) >= 0) return true; 
+                if (i.label.toUpperCase().indexOf(s) >= 0) {
+                    const width = GET_WIDTH_FROM_LABEL(i.label);
+                    if (maxWidth < width) {
+                        maxWidth = width;
+                    }
+                    return true; 
+                }
                 return false;
             });
+            this.dropdownStyle = `max-width: ${maxWidth}ch`;
         } else {
             this.itemsFound = [];
         }

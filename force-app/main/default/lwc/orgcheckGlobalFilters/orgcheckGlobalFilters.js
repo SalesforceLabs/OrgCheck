@@ -74,7 +74,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
                 { label: 'No package', value: NO_VALUE }
             ].concat(data.map(p => { 
                 return {
-                    label: `${p.name} (api=${p.namespace}, type=${p.type}`, 
+                    label: `${p.name} (api=${p.namespace}, type=${p.type})`, 
                     value: p.namespace
                 }
             }));
@@ -116,7 +116,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
                 { label: 'All objects', value: ANY_VALUES } 
             ].concat(data.map(o => {
                 return {
-                    label: `${o.label} (api=${o.name})`, 
+                    label: `${o.label} (api=${o.name}, type=${o.typeRef.label})`, 
                     value: o.id
                 }
             }));

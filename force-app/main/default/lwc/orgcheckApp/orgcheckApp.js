@@ -1,8 +1,4 @@
 import { LightningElement, api } from 'lwc';
-import { METHOD_TYPES_PACKAGES_OBJECTS,
-    METHOD_CUSTOM_FIELD, METHOD_OBJECT_DESCRIBE, 
-    METHOD_PERMISSION_SETS, METHOD_PROFILES, METHOD_USERS,
-    METHOD_CACHE_MANAGER } from 'c/orgcheckApi';
 
 const API_STATE_NOT_LOADED = 'Not Loaded';
 const API_STATE_LOADED = 'Loaded';
@@ -82,13 +78,25 @@ export default class OrgCheckApp extends LightningElement {
     /**
      * Method called when the Org Check API component has loaded successfuly.
      * The Org Check API component is a child of this component.
-     * This method is async because it awaits for the internal _loadFilters method.
+     * This method is async because it awaits for the api to return the list of items for the filters.
      */
     async handleApiLoaded() {
         this.#apiState = API_STATE_LOADED;
-        await this._loadFilters();
+
+        const filters = this.template.querySelector('c-orgcheck-global-filters');
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        const data = await orgcheckApi.getPackagesTypesAndObjects('*', '*');
+        if (data) {
+            filters.updateSObjectTypeOptions(data.types);
+            filters.updatePackageOptions(data.packages);
+            filters.updateSObjectApiNameOptions(data.objects);
+        }
     }
 
+    /**
+     * Method called when api needs to log a progress in the UI
+     * Detail of the message should contain a 'status', a 'section' and a 'message'
+     */
     handleApiLog(event) {
         const spinner = this.template.querySelector('c-orgcheck-spinner');
         const s = event.detail.section;
@@ -117,6 +125,13 @@ export default class OrgCheckApp extends LightningElement {
         console.error(event.detail.error.stack);
     }
 
+    /**
+     * Method called when the user ask to remove an item or all the cache in the UI
+     * 
+     * @param {Event} event should contain "allItems" (boolean) and optinally "itemName" (string), if allItems=true 
+     *                      all items should be removed, if not, the "itemName" gives us the name if the cache entry
+     *                      to be removed.
+     */
     async handleRemoveCache(event) {
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
         if (event.detail.allItems === true) {
@@ -158,64 +173,31 @@ export default class OrgCheckApp extends LightningElement {
         // In these cases, we stop here
         if (!content || !content.setComponentData) return;
 
-        // Set the API method to call depending on th current tab
-        // If not supported we stop there
-        let method;
-        switch (this.#currentTab) {
-            case 'object-information': method = METHOD_OBJECT_DESCRIBE; break;
-            case 'custom-fields':      method = METHOD_CUSTOM_FIELD;    break;
-            case 'users':              method = METHOD_USERS;           break;
-            case 'profiles':           method = METHOD_PROFILES;        break;
-            case 'permission-sets':    method = METHOD_PERMISSION_SETS; break;
-            case 'cache-manager':      method = METHOD_CACHE_MANAGER; break;
-            default:                   return;
-        }
+        // Get the global filter parameters
+        const filters = this.template.querySelector('c-orgcheck-global-filters');
+        const namespace = filters.isSelectedPackageAny === true ? '*' : (filters.isSelectedPackageNo === true ? '' : filters.selectedPackage);
+        const sobjectType = filters.isSelectedSObjectTypeAny === true ? '*' : filters.selectedSObjectType;
+        const sobject = filters.isSelectedSObjectApiNameAny === true ? '*' : filters.selectedSObjectApiName;
 
-        // Calling the API
-        const data = await this._callingAPI(method);
+        // Call the API depending on the current tab
+        // If not supported we stop there
+        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        let data, error;
+        try {
+            switch (this.#currentTab) {
+                case 'object-information': data = await orgcheckApi.getObject(sobject); break;
+                case 'custom-fields':      data = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
+                case 'users':              data = await orgcheckApi.getActiveUsers(); break;
+                case 'profiles':           data = await orgcheckApi.getProfiles(namespace); break;
+                case 'permission-sets':    data = await orgcheckApi.getPermissionSets(namespace); break;
+                case 'cache-manager':      data = await orgcheckApi.getCacheInformation(); break;
+                default:                   return;
+            }
+        } catch (e) {
+            error = e;
+        }
             
         // Send data back to the component
-        if (data) content.setComponentData(data);
-    }
-
-    async _callingAPI(method) {
-        const filters = this.template.querySelector('c-orgcheck-global-filters');
-        const args = {};
-        if (filters.isSelectedPackageAny === true) {
-            args.package = '*';
-        } else {
-            if (filters.isSelectedPackageNo === true) {
-                args.package = '';
-            } else {
-                args.package = filters.selectedPackage;
-            }
-        }
-        if (filters.isSelectedSObjectTypeAny === true) {
-            args.sobjectType = '*';
-        } else {
-            args.sobjectType = filters.selectedSObjectType;
-        }
-        if (filters.isSelectedSObjectApiNameAny === true) {
-            args.sobject = '*';
-        } else {
-            args.sobject = filters.selectedSObjectApiName;
-        }
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-        const data = await orgcheckApi.callingApi(method, args);
-        return data;
-    }
-
-    /**
-     * Unique method to load or reload filter options and reset selected values accordingly
-     * Usage: as this method is async, you should await when calling it!
-     */
-    async _loadFilters() {
-        const filters = this.template.querySelector('c-orgcheck-global-filters');
-        const data = await this._callingAPI(METHOD_TYPES_PACKAGES_OBJECTS);
-        if (data) {
-            filters.updateSObjectTypeOptions(data.types);
-            filters.updatePackageOptions(data.packages);
-            filters.updateSObjectApiNameOptions(data.objects);
-        }
+        if (data || error) content.setComponentData(data, error);
     }
 }

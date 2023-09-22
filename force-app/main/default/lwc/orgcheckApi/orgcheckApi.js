@@ -3,14 +3,6 @@ import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
 import { OrgCheckAPI } from './orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 
-export const METHOD_TYPES_PACKAGES_OBJECTS = 'types+packages+objects';
-export const METHOD_CUSTOM_FIELD = 'custom-fields';
-export const METHOD_OBJECT_DESCRIBE = 'object-describe';
-export const METHOD_PERMISSION_SETS = 'permission-sets';
-export const METHOD_PROFILES = 'profiles';
-export const METHOD_USERS = 'users';
-export const METHOD_CACHE_MANAGER = 'cache-manager';
-
 export default class OrgcheckApi extends LightningElement {
 
     @api accesstoken;
@@ -65,30 +57,46 @@ export default class OrgcheckApi extends LightningElement {
         this.#api.removeCache(name);
     }
 
-    @api async callingApi(method, args) {
-
+    _updateLimits() {
         const dailyApiLimitRate = this.#api.getOrgDailyApiLimitRate();
         this.orgLimit = 'Daily API Limit: ' + ((dailyApiLimitRate * 100).toFixed(3)) + ' %';
         if (dailyApiLimitRate > 0.9) this.themeForOrgLimit = 'slds-theme_error';
         else if (dailyApiLimitRate > 0.7) this.themeForOrgLimit = 'slds-theme_warning'
         else this.themeForOrgLimit = 'slds-badge_lightest';
+    }
 
-        switch (method) {
-            case METHOD_TYPES_PACKAGES_OBJECTS:
-                return this.#api.getPackagesTypesAndObjects(args.package, args.sobjectType);
-            case METHOD_CUSTOM_FIELD:
-                return this.#api.getCustomFields(args.package, args.sobjectType, args.sobject);
-            case METHOD_PERMISSION_SETS:
-                return this.#api.getPermissionSets(args.package);
-            case METHOD_PROFILES:
-                return this.#api.getProfiles(args.package);
-            case METHOD_USERS:
-                return this.#api.getActiveUsers();
-            case METHOD_CACHE_MANAGER:
-                return this.#api.getCacheInformation();
-            case METHOD_OBJECT_DESCRIBE:
-            default:
-                return Promise.reject(new Error(`Calling the api with method=${method} is not permitted.`));
-        }
+    @api async getPackagesTypesAndObjects(namespace, sobjectType) {
+        this._updateLimits();
+        return this.#api.getPackagesTypesAndObjects(namespace, sobjectType);
+    }
+
+    @api async getObject(sobject) {
+        this._updateLimits();
+        return this.#api.getObject(sobject);
+    }
+
+    @api async getCustomFields(namespace, sobjectType, sobject) {
+        this._updateLimits();
+        return this.#api.getCustomFields(namespace, sobjectType, sobject);
+    }
+
+    @api async getPermissionSets(namespace) {
+        this._updateLimits();
+        return this.#api.getPermissionSets(namespace);
+    }
+
+    @api async getProfiles(namespace) {
+        this._updateLimits();
+        return this.#api.getProfiles(namespace);
+    }
+
+    @api async getActiveUsers() {
+        this._updateLimits();
+        return this.#api.getActiveUsers();
+    }
+
+    @api async getCacheInformation() {
+        this._updateLimits();
+        return this.#api.getCacheInformation();
     }
 }
