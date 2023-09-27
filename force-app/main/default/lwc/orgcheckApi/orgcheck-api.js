@@ -3,14 +3,59 @@ const CASESAFEID = (id) => {
     return id;
 }
 
-const SETUP_URL_FROM_ID = (type, durableId, objectDurableId) => {
+const OBJECTTYPE_STANDARD_SOBJECT = 'StandardObject';
+const OBJECTTYPE_CUSTOM_SOBJECT = 'CustomObject';
+const OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT = 'ExternalObject';
+const OBJECTTYPE_CUSTOM_SETTING = 'CustomSetting';
+const OBJECTTYPE_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
+const OBJECTTYPE_CUSTOM_EVENT = 'CustomEvent';
+const OBJECTTYPE_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
+const OBJECTTYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
+
+const SETUP_URL_FROM_ID = (type, durableId, objectDurableId, objectType) => {
     switch (type) {
-        case 'field':
-            return `/lightning/setup/ObjectManager/${objectDurableId}/FieldsAndRelationships/${durableId}/view`;
+        case 'field': {
+            switch (objectType) {
+                case OBJECTTYPE_STANDARD_SOBJECT:
+                case OBJECTTYPE_CUSTOM_SOBJECT:
+                    return `/lightning/setup/ObjectManager/${objectDurableId}/FieldsAndRelationships/${durableId}/view`;
+                case OBJECTTYPE_CUSTOM_BIG_OBJECT:
+                    return `/lightning/setup/BigObjects/page?address=%2F${durableId}%3Fsetupid%3DBigObjects`;
+                case OBJECTTYPE_CUSTOM_EVENT:
+                    return `/lightning/setup/EventObjects/page?address=%2F${durableId}%3Fsetupid%3DEventObjects`;
+                case OBJECTTYPE_CUSTOM_SETTING:
+                    return `/lightning/setup/CustomSettings/page?address=%2F${durableId}%3Fsetupid%3DCustomSettings`;
+                case OBJECTTYPE_CUSTOM_METADATA_TYPE:
+                    return `/lightning/setup/CustomMetadata/page?address=%2F${durableId}%3Fsetupid%3DCustomMetadata`;
+                case OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT:
+                    return `/lightning/setup/ExternalObjects/page?address=%2F${durableId}%3Fsetupid%3DExternalObjects`;
+                default:
+                    console.error('field with type object uncovered: ', objectType);
+                    return `/${durableId}`;
+            }
+        }
         case 'layout':
             return `/lightning/setup/ObjectManager/${objectDurableId}/PageLayouts/${durableId}/view`;
-        case 'object':
-            return `/lightning/setup/ObjectManager/${objectDurableId}/Details/view`;
+        case 'object': {
+            switch (objectType) {
+                case OBJECTTYPE_STANDARD_SOBJECT:
+                case OBJECTTYPE_CUSTOM_SOBJECT:
+                    return `/lightning/setup/ObjectManager/${objectDurableId}/Details/view`;
+                case OBJECTTYPE_CUSTOM_BIG_OBJECT:
+                    return `/lightning/setup/BigObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DBigObjects`;
+                case OBJECTTYPE_CUSTOM_EVENT:
+                    return `/lightning/setup/EventObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DEventObjects`;
+                case OBJECTTYPE_CUSTOM_SETTING:
+                    return `/lightning/setup/CustomSettings/page?address=%2F${objectDurableId}%3Fsetupid%3DCustomSettings`;
+                case OBJECTTYPE_CUSTOM_METADATA_TYPE:
+                    return `/lightning/setup/CustomMetadata/page?address=%2F${objectDurableId}%3Fsetupid%3DCustomMetadata`;
+                case OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT:
+                    return `/lightning/setup/ExternalObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DExternalObjects`;
+                default:
+                    console.error('object with type uncovered: ', objectType);
+                    return `/${objectDurableId}`;
+            }
+        }
         case 'validation-rule':
             return `/lightning/setup/ObjectManager/page?address=%2F${durableId}`;
         case 'web-link':
@@ -21,6 +66,14 @@ const SETUP_URL_FROM_ID = (type, durableId, objectDurableId) => {
             return '/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view';
         case 'field-set':
             return '/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view';
+        case 'user':
+            return `/lightning/setup/ManageUsers/page?address=%2F${durableId}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
+        case 'profile':
+            return `/lightning/setup/EnhancedProfiles/page?address=%2F${durableId}`;
+        case 'permission-set':
+            return `/lightning/setup/PermSets/page?address=%2F${durableId}`;
+        case 'permission-set-group':
+            return `/lightning/setup/PermSetGroups/page?address=%2F${durableId}`;
         default:
             console.error('type uncovered: ', type);
             return `/${durableId}`;
@@ -210,24 +263,15 @@ class SFDC_ObjectRelationShip {
     constructor(setup) { MAP_FIELDS_FROM_SETUP(setup, this, false); }
 }
 
-const OBJECTTYPE_STANDARD_SOBJECT = 'StandardObject';
-const OBJECTTYPE_CUSTOM_SOBJECT = 'CustomObject';
-const OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT = 'ExternalObject';
-const OBJECTTYPE_CUSTOM_SETTING = 'CustomSetting';
-const OBJECTTYPE_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
-const OBJECTTYPE_CUSTOM_EVENT = 'CustomEvent';
-const OBJECTTYPE_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
-const OBJECTTYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
-
-const OBJECTTYPE = (apiName, isCustomObject, isCustomSetting) => {
-    if (isCustomObject === false) return OBJECTTYPE_STANDARD_SOBJECT;
-    if (isCustomSetting === true) return OBJECTTYPE_CUSTOM_SOBJECT;
-    if (apiName.endsWith('__c')) return OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT;
-    if (apiName.endsWith('__x')) return OBJECTTYPE_CUSTOM_SETTING;
+const OBJECTTYPE = (apiName, isCustomSetting) => {
+    if (isCustomSetting === true) return OBJECTTYPE_CUSTOM_SETTING;
+    if (apiName.endsWith('__c')) return OBJECTTYPE_CUSTOM_SOBJECT;
+    if (apiName.endsWith('__x')) return OBJECTTYPE_CUSTOM_EXTERNAL_SOBJECT;
     if (apiName.endsWith('__mdt')) return OBJECTTYPE_CUSTOM_METADATA_TYPE;
     if (apiName.endsWith('__e')) return OBJECTTYPE_CUSTOM_EVENT;
     if (apiName.endsWith('__ka')) return OBJECTTYPE_KNOWLEDGE_ARTICLE;
     if (apiName.endsWith('__b')) return OBJECTTYPE_CUSTOM_BIG_OBJECT;
+    return OBJECTTYPE_STANDARD_SOBJECT;
 }
 
 class SFDC_ObjectType {
@@ -637,7 +681,7 @@ class DatasetManager {
                         objectsDescription
                             .filter((object) => qualifiedApiNames.includes(object.name))
                             .forEach((object) => {
-                                const type = OBJECTTYPE(object.name, object.custom, object.customSetting)
+                                const type = OBJECTTYPE(object.name, object.customSetting)
                                 if (!type) return;
                                 const entity = entitiesByName[object.name];
                                 const id = CASESAFEID(object.name);
@@ -646,7 +690,7 @@ class DatasetManager {
                                     label: object.label,
                                     name: entity.DeveloperName,
                                     apiname: object.name,
-                                    url: SETUP_URL_FROM_ID('object', id),
+                                    url: SETUP_URL_FROM_ID('object', '', entity.DurableId, type),
                                     package: (entity.NamespacePrefix || ''),
                                     typeId: type
                                 }));
@@ -670,7 +714,7 @@ class DatasetManager {
             promises.push(sfdcManager.describe(fullObjectApiName));
             promises.push(sfdcManager.soqlQuery([{ 
                 tooling: true,
-                string: 'SELECT DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
                             '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
                             '(SELECT Id, Name FROM ApexTriggers), '+
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
@@ -689,6 +733,7 @@ class DatasetManager {
                     // the first promise was describe
                     // so we initialize the object with the first result
                     const sobjectDescribed = r[0]; 
+                    const sobjectType = OBJECTTYPE(sobjectDescribed.name, sobjectDescribed.customSetting);
 
                     // the second promise was the soql query on EntityDefinition
                     // so we get the record of that query and map it to the previous object.
@@ -732,7 +777,7 @@ class DatasetManager {
                                 isExternalId: t.externalId,
                                 defaultValue: t.defaultValue,
                                 formula: t.calculatedFormula,
-                                url: SETUP_URL_FROM_ID('field', t.id, entity.DurableId)
+                                url: SETUP_URL_FROM_ID('field', t.id, entity.DurableId, sobjectType)
                             });
                         }) :
                         []
@@ -844,9 +889,9 @@ class DatasetManager {
                         keyPrefix: sobjectDescribed.keyPrefix,
                         name: entity.DeveloperName,
                         apiname: sobjectDescribed.name,
-                        url: SETUP_URL_FROM_ID('object', entity.DurableId),
+                        url: SETUP_URL_FROM_ID('object', '', entity.Id, sobjectType),
                         package: (entity.NamespacePrefix || ''),
-                        typeId: OBJECTTYPE(sobjectDescribed.name, sobjectDescribed.custom, sobjectDescribed.customSetting),
+                        typeId: sobjectType,
                         description: entity.Description,
                         externalSharingModel: entity.ExternalSharingModel,
                         internalSharingModel: entity.InternalSharingModel,
@@ -872,8 +917,8 @@ class DatasetManager {
             // SOQL query on CustomField
             sfdcManager.soqlQuery([{ 
                 tooling: true,
-                string: 'SELECT Id, EntityDefinition.QualifiedApiName, DeveloperName, NamespacePrefix, '+
-                            'Description, CreatedDate, LastModifiedDate '+
+                string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, ' +
+                            'DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate '+
                         'FROM CustomField '+
                         'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')',
                 addDependenciesBasedOnField: 'Id'
@@ -889,7 +934,8 @@ class DatasetManager {
                         // Create the SFDC_CustomField instance
                         const customField = new SFDC_CustomField({
                             id: id,
-                            url: `/${record.Id}`,
+                            url: SETUP_URL_FROM_ID('field', record.Id, record.EntityDefinition.QualifiedApiName, 
+                                        OBJECTTYPE(record.EntityDefinition.QualifiedApiName, record.EntityDefinition.IsCustomSetting)),
                             name: record.DeveloperName,
                             label: record.DeveloperName,
                             package: (record.NamespacePrefix || ''),
@@ -959,7 +1005,7 @@ class DatasetManager {
                         // Create the SFDC_User instance
                         const user = new SFDC_User({
                             id: id,
-                            url: `/${id}`,
+                            url: SETUP_URL_FROM_ID('user', id),
                             photoUrl: record.SmallPhotoUrl,
                             name: record.Name,
                             lastLogin: record.LastLoginDate,
@@ -1007,7 +1053,7 @@ class DatasetManager {
                         // Create the SFDC_Profile instance
                         const profile = new SFDC_Profile({
                             id: profileId,
-                            url: `/${profileId}`,
+                            url: SETUP_URL_FROM_ID('profile', profileId),
                             name: record.Profile.Name,
                             apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Profile.Name,
                             description: record.Profile.Description,
@@ -1052,6 +1098,11 @@ class DatasetManager {
                         'WHERE Assignee.IsActive = TRUE '+
                         'AND PermissionSet.IsOwnedByProfile = FALSE '+
                         'ORDER BY PermissionSetId '
+            }, {
+                byPasses: [ 'INVALID_TYPE' ],
+                string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description '+
+                        'FROM PermissionSet '+
+                        'WHERE PermissionSetGroupId != null ' 
             }]).then((results) => {
                 // Init the map
                 const permissionSets = new OrgCheckMap();
@@ -1062,7 +1113,7 @@ class DatasetManager {
                         const id = CASESAFEID(record.Id);
                         const permissionSet = new SFDC_PermissionSet({
                             id: id,
-                            url: `/${id}`,
+                            url: SETUP_URL_FROM_ID('permission-set', id),
                             name: record.Name,
                             apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Name,
                             description: record.Description,
@@ -1070,7 +1121,7 @@ class DatasetManager {
                             isCustom: record.IsCustom,
                             package: (record.NamespacePrefix || ''),
                             memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
-                            isGroup: (record.Type === 'Group'), // other values can be 'Regular', 'Standard', 'Session
+                            isGroup: (record.Type === 'Group'),  // other values can be 'Regular', 'Standard', 'Session
                             createdDate: record.CreatedDate, 
                             lastModifiedDate: record.LastModifiedDate,
                             nbFieldPermissions: record.FieldPerms?.records.length || 0,
@@ -1094,6 +1145,16 @@ class DatasetManager {
                             if (permissionSet.profileIds[profileId] !== true) permissionSet.profileIds[profileId] = true;
                         }
                     });
+                results[2].records
+                    .forEach((record) => {
+                        const permissionSetId = CASESAFEID(record.Id);
+                        const permissionSetGroupId = CASESAFEID(record.PermissionSetGroupId);
+                        if (permissionSets.hasKey(permissionSetId)) {
+                            const permissionSet = permissionSets.get(permissionSetId);
+                            permissionSet.url = SETUP_URL_FROM_ID('permission-set-group', permissionSetGroupId);
+                            permissionSet.isGroup = true;
+                        }
+                    });
                 permissionSets.forEachValue((permissionSet) => {
                     permissionSet.profileIds = Object.keys(permissionSet.profileIds);
                 });
@@ -1109,21 +1170,22 @@ class DatasetManager {
         datasets.forEach((dataset) => {
             const datasetName = (typeof dataset === 'string' ? dataset : dataset.name);
             const datasetParameters = (typeof dataset === 'string' ? {} : dataset.parameters);
+            const datasetCachekey =  (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             if (this.#retrievers.hasKey(datasetName) === false) {
                 throw new Error(`Dataset '${datasetName}' is not yet implemented.`);
             }
             promises.push(new Promise((resolve, reject) => {
-                this.#logger.sectionContinues(`DatasetManager:${datasetName}:Cache`, 'Checking the cache...');
+                this.#logger.sectionContinues(`DatasetManager:${datasetCachekey}:Cache`, 'Checking the cache...');
                 // Check cache if any
-                if (this.#cache.hasKey(datasetName) === true) {
+                if (this.#cache.hasKey(datasetCachekey) === true) {
                     // Set the results from cache
-                    this.#logger.sectionEnded(`DatasetManager:${datasetName}:Cache`, 'There was data in cache!');
-                    results.set(datasetName, this.#cache.get(datasetName));
+                    this.#logger.sectionEnded(`DatasetManager:${datasetCachekey}:Cache`, 'There was data in cache!');
+                    results.set(datasetName, this.#cache.get(datasetCachekey));
                     // Resolve
                     resolve();
                     return;
                 }
-                this.#logger.sectionContinues(`DatasetManager:${datasetName}:Cache`, 'There was no data in cache.');
+                this.#logger.sectionContinues(`DatasetManager:${datasetCachekey}:Cache`, 'There was no data in cache.');
 
                 // Calling the retriever
                 this.#logger.sectionContinues(`DatasetManager:${datasetName}:Retriever`, 'Calling the retriever...');
@@ -1707,7 +1769,7 @@ export class OrgCheckAPI {
             // Extract
             currentSection = 'Api:Extract';
             this.#logger.sectionStarts(currentSection, 'Getting the information...');
-            const data = await this.#datasetManager.run([{ name: DATASET_OBJECT, parameters: { object: object }}]);
+            const data = await this.#datasetManager.run([{ name: DATASET_OBJECT, cacheKey: `${DATASET_OBJECT}_${object}`, parameters: { object: object }}]);
             const objectDescribed = data.get(DATASET_OBJECT);
             this.#logger.sectionEnded(currentSection, 'Information succesfully retrieved!');
 
