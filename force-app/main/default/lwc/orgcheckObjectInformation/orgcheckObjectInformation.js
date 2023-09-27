@@ -5,7 +5,7 @@ export default class OrgcheckObjectInformation extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<DatasetCacheInfo>} data 
+     * @param {SFDC_Object} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {
@@ -14,14 +14,30 @@ export default class OrgcheckObjectInformation extends LightningElement {
             this.isSObjectSpecified = false;
         } else {
             this.object = data;
+            this.objectGeneralInfo = [
+                { label: 'API Name', value: data.apiname },
+                { label: 'Package', value: data.package },
+                { label: 'Singular Label', value: data.label },
+                { label: 'Plural Label', value: data.labelPlural },
+                { label: 'Is Custom?', value: data.isCustom },
+                { label: 'Key Prefix', value: data.keyPrefix },
+                { label: 'Feed Enable?', value: data.isFeedEnabled },
+                { label: 'Most Recent Enabled?', value: data.isMostRecentEnabled },
+                { label: 'Global Search Enabled?', value: data.isSearchable },
+                { label: 'Record Count (including deleted ones)', value: data.recordCount },
+                { label: 'Internal Sharing', value: data.internalSharingModel },
+                { label: 'External Sharing', value: data.externalSharingModel },
+                { label: 'Description', value: data.description }	
+            ];
             this.isSObjectSpecified = true;
         }
     }
     
     @track object;
-
+    objectGeneralInfo;
     isSObjectSpecified;
 
+    generalInfoColumns;
     apexTriggersColumns;
     fieldSetsColumns;
     layoutsColumns;
@@ -36,6 +52,11 @@ export default class OrgcheckObjectInformation extends LightningElement {
      * Connected callback function
      */
     connectedCallback() {
+
+        this.generalInfoColumns = [
+            { label: 'Label',  type: 'text', data: { value: 'label' }},
+            { label: 'Value',  type: 'text', data: { value: 'value' }}
+        ];
         this.apexTriggersColumns = [
             { label: 'Name',  type: 'id', data: { value: 'name', url: 'url' }}
         ];

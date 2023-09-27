@@ -17,6 +17,10 @@ const SETUP_URL_FROM_ID = (type, durableId, objectDurableId) => {
             return `/lightning/setup/ObjectManager/${objectDurableId}/ButtonsLinksActions/${durableId}/view`;
         case 'record-type':
             return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
+        case 'apex-trigger':
+            return '/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view';
+        case 'field-set':
+            return '/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view';
         default:
             console.error('type uncovered: ', type);
             return `/${durableId}`;
@@ -106,6 +110,12 @@ class SFDC_Dependence {
 class SFDC_Object {
     id;
     label;
+    labelPlural;
+    isCustom;
+    isFeedEnabled;
+    isMostRecentEnabled;
+    isSearchable;
+    keyPrefix;
     name;
     apiname;
     url;
@@ -660,7 +670,7 @@ class DatasetManager {
             promises.push(sfdcManager.describe(fullObjectApiName));
             promises.push(sfdcManager.soqlQuery([{ 
                 tooling: true,
-                string: 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                string: 'SELECT DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
                             '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
                             '(SELECT Id, Name FROM ApexTriggers), '+
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
@@ -781,7 +791,7 @@ class DatasetManager {
                             description: t.Description,
                             errorDisplayField: t.ErrorDisplayField,
                             errorMessage: t.ErrorMessage,
-                            url: SETUP_URL_FROM_ID('valdation-rule', t.Id), 
+                            url: SETUP_URL_FROM_ID('validation-rule', t.Id), 
                         })) : 
                         []
                     );
@@ -826,11 +836,17 @@ class DatasetManager {
                     resolve(new SFDC_Object({
                         id: entity.DurableId,
                         label: sobjectDescribed.label,
-                        name: '',
+                        labelPlural: sobjectDescribed.labelPlural,
+                        isCustom: sobjectDescribed.custom,
+                        isFeedEnabled: sobjectDescribed.feedEnabled,
+                        isMostRecentEnabled: sobjectDescribed.mruEnabled,
+                        isSearchable: sobjectDescribed.searchable,
+                        keyPrefix: sobjectDescribed.keyPrefix,
+                        name: entity.DeveloperName,
                         apiname: sobjectDescribed.name,
                         url: SETUP_URL_FROM_ID('object', entity.DurableId),
-                        package: '',
-                        typeId: '',
+                        package: (entity.NamespacePrefix || ''),
+                        typeId: OBJECTTYPE(sobjectDescribed.name, sobjectDescribed.custom, sobjectDescribed.customSetting),
                         description: entity.Description,
                         externalSharingModel: entity.ExternalSharingModel,
                         internalSharingModel: entity.InternalSharingModel,

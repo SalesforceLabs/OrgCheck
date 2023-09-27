@@ -3,9 +3,11 @@
 
         <!-- GENERAL SECTION -->
         <h1 class="slds-text-heading_small">General information</h1>
-        {object.name}
-        {object.id}
-        {object.label}
+        <c-orgcheck-extended-datatable
+            show-row-number-column
+            dont-use-all-space
+            columns={generalInfoColumns}
+            rows={objectGeneralInfo}></c-orgcheck-extended-datatable>
         <br /><br />
 
         <!-- APEX TRIGGER SECTION -->
