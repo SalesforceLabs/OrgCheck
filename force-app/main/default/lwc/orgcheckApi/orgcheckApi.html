@@ -1,7 +1,7 @@
 <template>
     <lightning-layout>
         <lightning-layout-item padding="around-small">
-            <div class="slds-media">
+            <div class="slds-media" ondblclick={handleDebugMode}>
                 <div class="slds-media__figure">
                     <object data={logoURL} type="image/svg+xml" style="width: 4rem;"><img src={logoURL} width="4rem" /></object>
                 </div>
@@ -11,7 +11,15 @@
                             <h1>
                                 <span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span>
                             </h1>
-                            Monitor your org seamlessly<br>
+                            Monitor your org seamlessly<br />
+                            <template lwc:if={isDebug}>
+                                <p style="background-color: black; color: greenyellow;">
+                                    <code>
+                                        <b>DEBUG MODE</b><br />
+                                        Please check the DevTool console for more debugging information...
+                                    </code>
+                                </p>
+                            </template>
                         </div>
                     </div>
                 </div>

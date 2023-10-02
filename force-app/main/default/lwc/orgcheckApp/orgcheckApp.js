@@ -85,11 +85,20 @@ export default class OrgCheckApp extends LightningElement {
 
         const filters = this.template.querySelector('c-orgcheck-global-filters');
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-        const data = await orgcheckApi.getPackagesTypesAndObjects('*', '*');
-        if (data) {
-            filters.updateSObjectTypeOptions(data.types);
-            filters.updatePackageOptions(data.packages);
-            filters.updateSObjectApiNameOptions(data.objects);
+
+        try {
+            const data = await orgcheckApi.getPackagesTypesAndObjects('*', '*');
+            if (data) {
+                filters.updateSObjectTypeOptions(data.types);
+                filters.updatePackageOptions(data.packages);
+                filters.updateSObjectApiNameOptions(data.objects);
+            }    
+        } catch (error) {
+            const spinner = this.template.querySelector('c-orgcheck-spinner');
+            spinner.open();
+            spinner.sectionFailed(`Error while loading the API`, error.message);
+            console.error(error?.message, error?.stack);
+            spinner.canBeClosed();
         }
     }
 
@@ -99,15 +108,23 @@ export default class OrgCheckApp extends LightningElement {
      */
     handleApiLog(event) {
         const spinner = this.template.querySelector('c-orgcheck-spinner');
-        const s = event.detail.section;
-        const m = event.detail.message;
-        switch(event.detail.status) {
-            case 'begin': spinner.open(); break;
-            case 'section-starts': spinner.sectionStarts(s, m); break;
-            case 'section-in-progress': spinner.sectionContinues(s, m); break;
-            case 'section-ended': spinner.sectionEnded(s, m); break;
-            case 'section-failed': spinner.sectionFailed(s, m); break;
-            default: spinner.close(500);
+        if (event.detail.status === 'begin') {
+            spinner.open();
+        } else if (event.detail.status === 'end') {
+            if (event.detail.nbFailures === 0) {
+                spinner.close(500);
+            } else {
+                spinner.canBeClosed();
+            }
+        } else {
+            const s = event.detail.section;
+            const m = event.detail.message;
+            switch(event.detail.status) {
+                case 'section-starts': spinner.sectionStarts(s, m); break;
+                case 'section-in-progress': spinner.sectionContinues(s, m); break;
+                case 'section-ended': spinner.sectionEnded(s, m); break;
+                case 'section-failed': default: spinner.sectionFailed(s, m); break;
+            }        
         }
     }
 
@@ -122,6 +139,7 @@ export default class OrgCheckApp extends LightningElement {
         const spinner = this.template.querySelector('c-orgcheck-spinner');
         spinner.open();
         spinner.sectionFailed('Loading API', `Failed with error: ${event.detail.error.message}`);
+        spinner.canBeClosed();
         console.error(event.detail.error.stack);
     }
 
@@ -194,7 +212,11 @@ export default class OrgCheckApp extends LightningElement {
                 default:                   return;
             }
         } catch (e) {
-            error = e;
+            const spinner = this.template.querySelector('c-orgcheck-spinner');
+            spinner.open();
+            spinner.sectionFailed(`Error while updating current tab called '${nextCurrentTab}'`, e.message);
+            console.error(e?.message, e?.stack);
+            spinner.canBeClosed();
         }
             
         // Send data back to the component

@@ -2,20 +2,20 @@ import { LightningElement, api } from 'lwc';
 
 export default class OrgcheckDependencyViewer extends LightningElement {
 
-    isShow;
+    isShown;
     whatid;
     whatname;
     dependencies;
 
     @api open(whatid, whatname, dependencies) {
-        this.isShow = false;
+        this.isShown = false;
         this.whatid = whatid;
         this.whatname = whatname;
         this.dependencies = dependencies;
-        this.isShow = true;
+        this.isShown = true;
     }
 
     handleClose() {
-        this.isShow = false;
+        this.isShown = false;
     }
 }

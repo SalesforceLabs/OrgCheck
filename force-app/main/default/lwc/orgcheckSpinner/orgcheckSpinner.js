@@ -12,7 +12,8 @@ export default class OrgCheckSpinner extends LightningElement {
      * Connected callback function
      */
     connectedCallback() {
-        this.isShow = false;
+        this.isShown = false;
+        this.isClosable = false;
         this.sections = [];
         this.#keysIndex = {};
     }
@@ -34,11 +35,23 @@ export default class OrgCheckSpinner extends LightningElement {
     }
 
     @api open() {
-        this.isShow = false;
+        if (this.isShown === false) {
+            this.sections = [];
+            this.#keysIndex = {};
+            this.#openSince = new Date().getTime();
+            this.isShown = true;
+            this.isClosable = false;
+        }
+    }
+
+    @api canBeClosed() {
+        this.isClosable = true;
+    }
+
+    handleClose() {
+        this.isShown = false;
         this.sections = [];
         this.#keysIndex = {};
-        this.#openSince = new Date().getTime();
-        this.isShow = true;
     }
 
     /**
@@ -47,12 +60,13 @@ export default class OrgCheckSpinner extends LightningElement {
      * @param {Number} waitBeforeClosing
      */
     @api async close(waitBeforeClosing) {
-        const realClose = () => {
-            this.isShow = false;
-            this.sections = [];
-            this.#keysIndex = {};
-        };
+        this.isClosable = false;
         const shownFor = new Date().getTime() - this.#openSince;
+        const realClose = () => {
+            this.isShown = false;
+            this.sections = [];
+            this.#keysIndex = {};    
+        }
         if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
             // eslint-disable-next-line @lwc/lwc/no-async-operation
             setTimeout(realClose, waitBeforeClosing);
@@ -63,7 +77,8 @@ export default class OrgCheckSpinner extends LightningElement {
 
     spinningURL = OrgCheckStaticRessource + '/img/Mascot+Animated.svg';
 
-    isShow;
+    isShown;
+    isClosable;
 
     #keysIndex;
     #openSince;
