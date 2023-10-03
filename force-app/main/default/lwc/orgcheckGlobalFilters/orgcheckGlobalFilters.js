@@ -176,6 +176,11 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     filtersChanged = false;
 
     /**
+     * Boolean that indicates if at least one filter has changed originally.
+     */
+    filtersOriginallyChanged = false;
+
+    /**
      * Event triggered when one of the filters have changed
      * 
      * @param event containing the id of the changed filter (identified by data-id property in html view)
@@ -185,11 +190,12 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         if (this.whichFiltersChanged.includes(fieldId) === false) this.whichFiltersChanged.push(fieldId);
         this.filtersChanged = true;
         this[fieldId] = event.detail.value;
+        this.filtersOriginallyChanged = true;
     }
 
     /**
      * Event triggered when the user clicks on the validate button
-     * This event fire a custom event called 'validatechange' for the parent component.
+     * This event fires a custom event called 'validatechange' for the parent component.
      * this also reset the array and flag back to "no change" statuses.
      */
     propagateValues() {
@@ -199,5 +205,20 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         }));
         this.whichFiltersChanged = [];
         this.filtersChanged = false;
+        this.filtersOriginallyChanged = true;
+    }
+
+    /**
+     * Event triggered when the user clicks on the reset button
+     * This event reset all the values of the filter and then propagates the values.
+     */
+    resetValues() {
+        this.package = ANY_VALUES;
+        this.sobjectType = ANY_VALUES;
+        this.sobjectApiName = ANY_VALUES;
+        this.showExternalRoles = FALSE_AS_STRING;
+        this.useInProductionConfirmation = FALSE_AS_STRING;
+        this.propagateValues();
+        this.filtersOriginallyChanged = false;
     }
 }
