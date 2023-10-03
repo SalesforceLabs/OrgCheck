@@ -62,7 +62,7 @@ export default class OrgcheckObjectInformation extends LightningElement {
         ];
         this.fieldSetsColumns = [
             { label: 'Name',         type: 'id',    data: { value: 'label', url: 'url' }},
-            { label: 'Description',  type: 'text',  data: { value: 'description' }}
+            { label: 'Description',  type: 'text',  data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
         this.layoutsColumns = [
             { label: 'Name',  type: 'id',    data: { value: 'name', url: 'url' }},
@@ -80,7 +80,7 @@ export default class OrgcheckObjectInformation extends LightningElement {
             { label: 'Is Active?',           type: 'boolean',  data: { value: 'isActive' }},
             { label: 'Error Display Field',  type: 'text',     data: { value: 'errorDisplayField' }},
             { label: 'Error Message',        type: 'text',     data: { value: 'errorMessage' }},
-            { label: 'Description',          type: 'text',     data: { value: 'description' }}
+            { label: 'Description',          type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
         this.webLinksColumns = [
             { label: 'Name',  type: 'id', data: { value: 'name', url: 'url' }}
@@ -96,7 +96,7 @@ export default class OrgcheckObjectInformation extends LightningElement {
             { label: 'External Id',    type: 'boolean',  data: { value: 'isExternalId' }},
             { label: 'Default',        type: 'text',     data: { value: 'defaultValue' }},
             { label: 'Formula',        type: 'text',     data: { value: 'formula' }},
-            { label: 'Description',    type: 'text',     data: { value: 'description' }}
+            { label: 'Description',    type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
         this.recordTypesColumns = [
             { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},

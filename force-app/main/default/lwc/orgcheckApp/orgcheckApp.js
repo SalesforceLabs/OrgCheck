@@ -208,6 +208,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'users':              data = await orgcheckApi.getActiveUsers(); break;
                 case 'profiles':           data = await orgcheckApi.getProfiles(namespace); break;
                 case 'permission-sets':    data = await orgcheckApi.getPermissionSets(namespace); break;
+                case 'custom-labels':      data = await orgcheckApi.getCustomLabels(namespace); break;
                 case 'cache-manager':      data = await orgcheckApi.getCacheInformation(); break;
                 default:                   return;
             }

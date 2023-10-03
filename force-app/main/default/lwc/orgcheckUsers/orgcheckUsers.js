@@ -5,7 +5,7 @@ export default class OrgcheckUsers extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<DatasetCacheInfo>} data 
+     * @param {Array<SFDC_User>} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {

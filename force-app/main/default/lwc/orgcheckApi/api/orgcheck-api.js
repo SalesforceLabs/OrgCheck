@@ -405,4 +405,46 @@ export class OrgCheckAPI {
             this.#logger.end();
         }
     }
+
+    /**
+     * Get a list of custom labels (async method)
+     * 
+     * @param namespace you want to list (optional), '*' for any
+     * 
+     * @returns {Array<SFDC_CustomLabel>}
+     */
+    async getCustomLabels(namespace) {
+        const SECTION = 'CustomLabels';
+
+        // Start the logger
+        this.#logger.begin();
+        try {
+
+            // Extract
+            this.#logger.sectionStarts(SECTION, 'Getting the information...');
+            const data = await this.#datasetManager.run([DATASET_CUSTOMLABELS_ALIAS]);
+            const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);
+            this.#logger.sectionEnded(SECTION, 'Information succesfully retrieved!');
+
+            // Transform
+            this.#logger.sectionContinues(SECTION, 'Filter custom labels with selected namespace...');
+            const finalData = customLabels.filterValues((customLabel) => {
+                if (namespace !== '*' && customLabel.package !== namespace) return false;
+                return true;
+            });
+            this.#logger.sectionEnded(SECTION, 'Done');
+
+            // Return value
+            return finalData;
+
+        } catch(error) {
+            // Error handling
+            this.#logger.sectionFailed(SECTION, error.message);
+            throw error;
+
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
+    }
 }

@@ -5,7 +5,7 @@ export default class OrgcheckProfiles extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<DatasetCacheInfo>} data 
+     * @param {Array<SFDC_Profile>} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {
@@ -38,7 +38,7 @@ export default class OrgcheckProfiles extends LightningElement {
             { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
             { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
-            { label: 'Description',     type: 'text',     data: { value: 'description', valueIfEmpty: 'No description.' }}
+            { label: 'Description',     type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }

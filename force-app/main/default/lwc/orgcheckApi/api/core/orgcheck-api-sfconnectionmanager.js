@@ -50,7 +50,15 @@ export class OrgCheckSalesforceManager {
     
     setupUrl(type, durableId, objectDurableId, objectType) {
         switch (type) {
-            case 'field': {
+
+            /* TYPES that we cannot guess the URL only based on the type and Id (from DAPI) */
+            case 'CustomField': // From DAPI 
+            case 'Layout': // From DAPI 
+                return '';
+            
+            /* FIELD */
+            case 'field': // Org Check specific
+            {
                 switch (objectType) {
                     case OBJECTTYPE_ID_STANDARD_SOBJECT:
                     case OBJECTTYPE_ID_CUSTOM_SOBJECT:
@@ -70,9 +78,14 @@ export class OrgCheckSalesforceManager {
                         return `/${durableId}`;
                 }
             }
-            case 'layout':
+            
+            /* PAGE LAYOUT */
+            case 'layout': // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/PageLayouts/${durableId}/view`;
-            case 'object': {
+            
+            /* OBJECT or ENTITY */
+            case 'object':  // Org Check specific
+            {
                 switch (objectType) {
                     case OBJECTTYPE_ID_STANDARD_SOBJECT:
                     case OBJECTTYPE_ID_CUSTOM_SOBJECT:
@@ -92,24 +105,53 @@ export class OrgCheckSalesforceManager {
                         return `/${objectDurableId}`;
                 }
             }
-            case 'validation-rule':
+            
+            /* VALIDATION RULE */
+            case 'validation-rule': // Org Check specific
                 return `/lightning/setup/ObjectManager/page?address=%2F${durableId}`;
-            case 'web-link':
+            
+            /* WEB LINK OR ACTION */
+            case 'web-link': // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/ButtonsLinksActions/${durableId}/view`;
-            case 'record-type':
+            
+            /* RECORD TYPE */
+            case 'record-type': // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
-            case 'apex-trigger':
+            
+            /* APEX TRIGGER */
+            case 'apex-trigger': // Org Check specific
                 return '/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view';
-            case 'field-set':
+            
+            /* FIELD SET */
+            case 'field-set': // Org Check specific
                 return '/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view';
-            case 'user':
+            
+            /* USER */
+            case 'user': // Org Check specific
                 return `/lightning/setup/ManageUsers/page?address=%2F${durableId}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
-            case 'profile':
+            
+            /* PROFILE */
+            case 'profile': // Org Check specific
                 return `/lightning/setup/EnhancedProfiles/page?address=%2F${durableId}`;
-            case 'permission-set':
+            
+            /* PERMISSION SET */
+            case 'permission-set': // Org Check specific
                 return `/lightning/setup/PermSets/page?address=%2F${durableId}`;
-            case 'permission-set-group':
+            
+            /* PERMISSION SET GROUP */
+            case 'permission-set-group': // Org Check specific
                 return `/lightning/setup/PermSetGroups/page?address=%2F${durableId}`;
+            
+            /* CUSTOM LABEL */
+            case 'custom-label': // Org Check specific
+                return `/lightning/setup/ExternalStrings/page?address=%2F${durableId}`;
+            
+            /* FLOW VERSION */
+            case 'flow': // Org Check specific
+            case 'Flow': // From DAPI 
+                return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
+
+            /* OTHER TYPES */
             default:
                 console.error('type uncovered: ', type);
                 return `/${durableId}`;
@@ -200,9 +242,11 @@ export class OrgCheckSalesforceManager {
                                                 id: this.caseSafeId(e.MetadataComponentId),
                                                 name: e.MetadataComponentName, 
                                                 type: e.MetadataComponentType,
+                                                url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
                                                 refId: this.caseSafeId(e.RefMetadataComponentId), 
                                                 refName: e.RefMetadataComponentName,
-                                                refType: e.RefMetadataComponentType
+                                                refType: e.RefMetadataComponentType,
+                                                refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
                                             }}));
                                         }
                                     }

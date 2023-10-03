@@ -10,7 +10,8 @@ export class OrgCheckDataDependencies {
             return { 
                 id: n.refId, 
                 name: n.refName, 
-                type: n.refType
+                type: n.refType,
+                url: n.refUrl
             }; 
         });
         this.referencedByTypes = {};
@@ -23,7 +24,8 @@ export class OrgCheckDataDependencies {
             return { 
                 id: n.id, 
                 name: n.name, 
-                type: n.type
+                type: n.type,
+                url: n.url
             };
         });
     }

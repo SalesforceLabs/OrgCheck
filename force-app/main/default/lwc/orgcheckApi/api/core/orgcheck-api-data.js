@@ -67,6 +67,6 @@ export class OrgCheckData {
         if (!this.dependencies) {
             throw new Error('Should not call isItReferenced() as this data does not need dependencies.');
         }
-        return this.dependencies.referenced.length === 0;
+        return this.dependencies.referenced.length > 0;
     }
 }

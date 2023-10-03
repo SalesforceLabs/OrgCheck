@@ -78,6 +78,7 @@
         <lightning-tab label="🎁 Custom Labels" onactive={handleTabActivation}>
             <lightning-tabset>
                 <lightning-tab value="custom-labels" label="Custom Labels" onactive={handleSubTabActivation}>
+                    <c-orgcheck-custom-labels class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-custom-labels>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

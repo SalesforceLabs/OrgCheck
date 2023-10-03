@@ -21,7 +21,10 @@
                                                     <template for:each={dependencies.using} for:item="use">
                                                         <li key={use.id} class="slds-progress__item">
                                                             <div class="slds-progress__marker slds-is-completed"></div>
-                                                            <div class="slds-progress__item_content">[{use.type}] <b>{use.name}</b> (<code>{use.id}</code>)</div>
+                                                            <div class="slds-progress__item_content">
+                                                                [{use.type}] <b>{use.name}</b> (<code>{use.id}</code>)
+                                                                <template lwc:if={use.url}>&nbsp;<a href={use.url} target="_blank">Check in setup...</a></template>
+                                                            </div>
                                                         </li>
                                                     </template>
                                                 </ol>
@@ -40,7 +43,10 @@
                                                     <template for:each={dependencies.referenced} for:item="ref">
                                                         <li key={ref.id} class="slds-progress__item">
                                                             <div class="slds-progress__marker slds-is-completed"></div>
-                                                            <div class="slds-progress__item_content">[{ref.type}] <b>{ref.name}</b> (<code>{ref.id}</code>)</div>
+                                                            <div class="slds-progress__item_content">
+                                                                [{ref.type}] <b>{ref.name}</b> (<code>{ref.id}</code>)
+                                                                <template lwc:if={ref.url}>&nbsp;<a href={ref.url} target="_blank">Check in setup...</a></template>
+                                                            </div>
                                                         </li>
                                                     </template>
                                                 </ol>

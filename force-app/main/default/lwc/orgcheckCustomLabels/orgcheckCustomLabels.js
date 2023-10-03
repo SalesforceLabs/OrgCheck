@@ -1,11 +1,11 @@
 import { LightningElement, api } from 'lwc';
 
-export default class OrgcheckCustomfields extends LightningElement {
+export default class OrgcheckCustomLabels extends LightningElement {
 
     /**
      * Set the component data.
      * 
-     * @param {Array<SFDC_Field>} data 
+     * @param {Array<SFDC_CustomLabel>} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {
@@ -23,16 +23,18 @@ export default class OrgcheckCustomfields extends LightningElement {
     tableData;
 
     isTableEmpty;
-    
+
     /**
      * Connected callback function
      */
     connectedCallback() {
         this.tableColumns = [
-            { label: 'Object',              type: 'id',               data: { ref: 'objectRef', value: 'label', url: 'url' }},
-            { label: 'Object Type',         type: 'text',             data: { ref: 'objectRef.typeRef', value: 'label' }},
-            { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
+            { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
             { label: 'Package',             type: 'text',             data: { value: 'package' }},
+            { label: 'Label',               type: 'text',             data: { value: 'label' }},
+            { label: 'Category',            type: 'text',             data: { value: 'category' }},
+            { label: 'Language',            type: 'text',             data: { value: 'language' }},
+            { label: 'Protected?',          type: 'boolean',          data: { value: 'isProtected' }},
             { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
             { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
             { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
@@ -41,7 +43,7 @@ export default class OrgcheckCustomfields extends LightningElement {
             { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
             { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
             { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+            { label: 'Value',               type: 'text',             data: { value: 'value', maximumLength: 30 }}
         ];
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }

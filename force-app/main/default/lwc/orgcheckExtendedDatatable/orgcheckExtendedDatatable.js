@@ -193,6 +193,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                                     cell.isMinReached = true; 
                                     cell.valueBeforeMin = column.data.valueBeforeMin;
                                 }
+                            } else if (column.type === 'text') {
+                                if (column.data.maximumLength && cell.value && cell.value.length > column.data.maximumLength) {
+                                    cell.value = cell.value.substring(0, column.data.maximumLength);
+                                    cell.isValueTruncated = true;
+                                }
                             }
                             if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
                         }

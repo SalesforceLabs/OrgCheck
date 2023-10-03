@@ -151,6 +151,14 @@ export default class OrgcheckApi extends LightningElement {
         return data;
     }
 
+    @api async getCustomLabels(namespace) {
+        this._updateLimits();
+        if (this.isDebug) console.debug(`Calling ASYNC <getCustomLabels> of the API..`);
+        const data = this.#api.getCustomLabels(namespace);
+        if (this.isDebug) console.debug(`Returned from calling <getCustomLabels> with promise`);
+        return data;
+    }
+
     @api async getCacheInformation() {
         this._updateLimits();
         if (this.isDebug) console.debug(`Calling ASYNC <getCacheInformation> of the API..`);

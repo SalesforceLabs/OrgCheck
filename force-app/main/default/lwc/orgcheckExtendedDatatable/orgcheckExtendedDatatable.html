@@ -74,14 +74,23 @@
                                         </template>
                                     </template>
                                     <template lwc:elseif={cell.type_boolean}>
-                                        <template lwc:if={cell.value}><img src="/img/samples/rating5.gif" style="vertical-align: inherit;" /></template>
-                                        <template lwc:else><img src="/img/samples/rating3.gif" style="vertical-align: inherit;" /></template>
+                                        <center>
+                                            <template lwc:if={cell.value}>
+                                                <lightning-icon icon-name="standard:task2" alternative-text="True" size="x-small"></lightning-icon>
+                                            </template>
+                                            <template lwc:else>
+                                                <lightning-icon icon-name="standard:first_non_empty" alternative-text="False" size="x-small"></lightning-icon>
+                                            </template>
+                                        </center>
                                     </template>
                                     <template lwc:elseif={cell.type_dateTime}>
                                         <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
                                     </template>
                                     <template lwc:elseif={cell.type_text}>
                                         {cell.value}
+                                        <template lwc:if={cell.isValueTruncated}>
+                                            ...&nbsp;<lightning-icon icon-name="utility:cut" alternative-text="Truncated text" size="x-small"></lightning-icon>
+                                        </template>
                                     </template>
                                     <template lwc:elseif={cell.type_texts}>
                                         <template lwc:if={cell.values.length}>

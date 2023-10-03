@@ -9,7 +9,8 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
         // SOQL queries on ExternalString
         sfdcManager.soqlQuery([{ 
             tooling: true,
-            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
+            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value, '+
+                        'CreatedDate, LastModifiedDate '+
                     'FROM ExternalString '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
             addDependenciesBasedOnField: 'Id'
@@ -36,6 +37,8 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                         language: record.Language,
                         label: record.MasterLabel,
                         value: record.Value,
+                        createdDate: record.CreatedDate, 
+                        lastModifiedDate: record.LastModifiedDate,
                         isScoreNeeded: true,
                         isDependenciesNeeded: true,
                         dependenciesFor: 'id',

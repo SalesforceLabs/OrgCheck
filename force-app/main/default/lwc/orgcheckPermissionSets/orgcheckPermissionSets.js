@@ -5,7 +5,7 @@ export default class OrgcheckPermissionsets extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<DatasetCacheInfo>} data 
+     * @param {Array<SFDC_PermissionSet>} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {
@@ -40,7 +40,7 @@ export default class OrgcheckPermissionsets extends LightningElement {
             { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', value: 'name', url: 'url' }},
             { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
             { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
-            { label: 'Description',      type: 'text',     data: { value: 'description', valueIfEmpty: 'No description.' }}
+            { label: 'Description',      type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
         this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
     }

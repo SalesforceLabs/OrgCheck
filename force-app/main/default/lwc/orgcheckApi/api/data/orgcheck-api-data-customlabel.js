@@ -10,7 +10,9 @@ export class SFDC_CustomLabel extends OrgCheckData {
     language;
     value;
     url;
-    
+    createdDate;
+    lastModifiedDate;
+
     constructor(setup) {
         super();
         super.initData(setup);
