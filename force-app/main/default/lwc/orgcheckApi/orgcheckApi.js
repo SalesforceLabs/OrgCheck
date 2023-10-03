@@ -56,7 +56,17 @@ export default class OrgcheckApi extends LightningElement {
         return this.#api?.version();
     }
 
-    handleDebugMode() {
+    handleDoubleClick() {
+        this._switchDebugMode();
+    }
+    
+    handleKeyDown(event) {
+        if (event.key === 'Shift') {
+            this._switchDebugMode();
+        }
+    }
+
+    _switchDebugMode() {
         if (this.isDebug === true) {
             this.isDebug = false;
             this.logoURL = NORMAL_LOGO;

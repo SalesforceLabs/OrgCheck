@@ -122,26 +122,7 @@ export class OrgCheckSalesforceManager {
             callback('\''+ids.slice(i, Math.min(i + batchsize, ids.length)).join('\',\'')+'\'');
         }
     }
-    
-    dapiHowManyTimesIsItUsedByType(dependencies, whatid) {
-        const countersByType = {};
-        dependencies.filter(e => e.refId === whatid).forEach(n => { 
-            if (countersByType[n.type] === undefined) {
-                countersByType[n.type] = 0;
-            }
-            countersByType[n.type]++; 
-        });
-        return countersByType;
-    }
-    
-    dapiWhereIsItUsed(dependencies, whatid) {
-        return dependencies.filter(e => e.refId === whatid).map(n => { return { id: n.id, name: n.name, type: n.type }; })
-    }
-    
-    dapiWhatIsItUsing(dependencies, whatid) {
-        return dependencies.filter(e => e.id === whatid).map(n => { return { id: n.refId, name: n.refName, type: n.refType }; })
-    }
-    
+
     getObjectType(apiName, isCustomSetting) {
         if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
         if (apiName.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
@@ -215,32 +196,32 @@ export class OrgCheckSalesforceManager {
                                             };
                                             reject(e);
                                         } else {
-                                            resolve(d.records.map((r) => new SFDC_Dependency({
-                                                id: this.caseSafeId(r.MetadataComponentId),
-                                                name: r.MetadataComponentName,
-                                                type: r.MetadataComponentType,
-                                                refId: this.caseSafeId(r.RefMetadataComponentId),
-                                                refName: r.RefMetadataComponentName,
-                                                refType: r.RefMetadataComponentType
-                                            })));
+                                            resolve(d.records.map((e) => { return {
+                                                id: this.caseSafeId(e.MetadataComponentId),
+                                                name: e.MetadataComponentName, 
+                                                type: e.MetadataComponentType,
+                                                refId: this.caseSafeId(e.RefMetadataComponentId), 
+                                                refName: e.RefMetadataComponentName,
+                                                refType: e.RefMetadataComponentType
+                                            }}));
                                         }
                                     }
                                 );
                             }));
                         });
                         return Promise.all(dapiPromises)
-                            .then((allDependencies) => { 
+                            .then((allDependenciesResults) => { 
                                 // We are going to append the dependencies in the results
-                                results.dependencies = [];
+                                results.allDependencies = [];
                                 // We parse all the batches/results from the DAPI
-                                allDependencies.forEach((dependencies) => {
+                                allDependenciesResults.forEach((dependencies) => {
                                     if (dependencies) {
                                         // Merge them into one array
-                                        results.dependencies.push(... dependencies);
+                                        results.allDependencies.push(... dependencies);
                                     }
                                 });
                                 // Return the altered results
-                                return results
+                                return results;
                             })
                             .catch((error) => {
                                 console.error('Issue while parsing results from DAPI', error);

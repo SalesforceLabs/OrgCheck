@@ -8,10 +8,11 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
         // SOQL queries on ExternalString
         sfdcManager.soqlQuery([{ 
+            tooling: true,
             string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value '+
                     'FROM ExternalString '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            tooling: true
+            addDependenciesBasedOnField: 'Id'
         }]).then((results) => {
 
             // Init the map
@@ -35,7 +36,10 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                         language: record.Language,
                         label: record.MasterLabel,
                         value: record.Value,
-                        isScoreNeeded: true
+                        isScoreNeeded: true,
+                        isDependenciesNeeded: true,
+                        dependenciesFor: 'id',
+                        allDependencies: results[0].allDependencies
                     });
 
                     // Compute the score of this user, with the following rule:

@@ -39,8 +39,10 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         objectId: sfdcManager.caseSafeId(record.EntityDefinition.QualifiedApiName),
-                        dependencies: results[0].dependencies,
-                        isScoreNeeded: true
+                        isScoreNeeded: true,
+                        isDependenciesNeeded: true,
+                        dependenciesFor: 'id',
+                        allDependencies: results[0].allDependencies
                     });
 
                     // Compute the score of this user, with the following rule:
