@@ -1,6 +1,17 @@
 import { OrgCheckMap } from './orgcheck-api-type-map';
 import { OrgCheckLogger } from './orgcheck-api-logger';
-import { OrgCheckDataset } from './orgcheck-api-dataset';
+import { OrgCheckSalesforceManager } from './orgcheck-api-sfconnectionmanager';
+import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
+import { OrgCheckDatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
+import { OrgCheckDatasetObject } from '../dataset/orgcheck-api-dataset-object';
+import { OrgCheckDatasetObjects } from '../dataset/orgcheck-api-dataset-objects';
+import { OrgCheckDatasetObjectTypes } from '../dataset/orgcheck-api-dataset-objecttypes';
+import { OrgCheckDatasetOrgInformation } from '../dataset/orgcheck-api-dataset-orginfo';
+import { OrgCheckDatasetPackages } from '../dataset/orgcheck-api-dataset-packages';
+import { OrgCheckDatasetPermissionSets } from '../dataset/orgcheck-api-dataset-permissionsets';
+import { OrgCheckDatasetProfiles } from '../dataset/orgcheck-api-dataset-profiles';
+import { OrgCheckDatasetUsers } from '../dataset/orgcheck-api-dataset-users';
+import { OrgCheckDatasetVisualForcePages } from '../dataset/orgcheck-api-dataset-visualforcepages';
 
 export class DatasetCacheInfo {
     name;
@@ -14,6 +25,18 @@ export class DatasetRunInformation {
     parameters;
     cacheKey;
 }
+
+export const DATASET_CUSTOMFIELDS_ALIAS = 'custom-fields';
+export const DATASET_CUSTOMLABELS_ALIAS = 'custom-labels';
+export const DATASET_OBJECT_ALIAS = 'object';
+export const DATASET_OBJECTS_ALIAS = 'objects';
+export const DATASET_OBJECTTYPES_ALIAS = 'object-types';
+export const DATASET_ORGINFO_ALIAS = 'org-information';
+export const DATASET_PACKAGES_ALIAS = 'packages';
+export const DATASET_PERMISSIONSETS_ALIAS = 'permission-sets';
+export const DATASET_PROFILES_ALIAS = 'profiles';
+export const DATASET_USERS_ALIAS = 'users';
+export const DATASET_VISUALFORCEPAGES_ALIAS = 'visual-force-pages';
 
 export class OrgCheckDatasetManager {
     
@@ -29,26 +52,30 @@ export class OrgCheckDatasetManager {
      * @param {OrgCheckLogger} logger
      */
     constructor(sfdcManager, logger) {
+        
+        if (sfdcManager instanceof OrgCheckSalesforceManager === false) {
+            throw new Error('The given logger is not an instance of OrgCheckSalesforceManager.');
+        }
         if (logger instanceof OrgCheckLogger === false) {
             throw new Error('The given logger is not an instance of OrgCheckLogger.');
-        } 
+        }
+        
+        this.#sfdcManager = sfdcManager;
         this.#logger = logger;
         this.#datasets = new OrgCheckMap();
         this.#cache = new OrgCheckMap();
-        this.#sfdcManager = sfdcManager;
-    }
 
-    /**
-     * Add a dataset in the manager with a given alias
-     * 
-     * @param {string} alias
-     * @param {OrgCheckDataset} dataset 
-     */
-    register(alias, dataset) {
-        if (dataset instanceof OrgCheckDataset === false) {
-            throw new Error('The given dataset is not an instance of Dataset.');
-        } 
-        this.#datasets.set(alias, dataset);
+        this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
+        this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
+        this.#datasets.set(DATASET_OBJECT_ALIAS, new OrgCheckDatasetObject());
+        this.#datasets.set(DATASET_OBJECTS_ALIAS, new OrgCheckDatasetObjects());
+        this.#datasets.set(DATASET_OBJECTTYPES_ALIAS, new OrgCheckDatasetObjectTypes());
+        this.#datasets.set(DATASET_ORGINFO_ALIAS, new OrgCheckDatasetOrgInformation());
+        this.#datasets.set(DATASET_PACKAGES_ALIAS, new OrgCheckDatasetPackages());
+        this.#datasets.set(DATASET_PERMISSIONSETS_ALIAS, new OrgCheckDatasetPermissionSets());
+        this.#datasets.set(DATASET_PROFILES_ALIAS, new OrgCheckDatasetProfiles());
+        this.#datasets.set(DATASET_USERS_ALIAS, new OrgCheckDatasetUsers());
+        this.#datasets.set(DATASET_VISUALFORCEPAGES_ALIAS, new OrgCheckDatasetVisualForcePages());
     }
 
     /**
@@ -68,30 +95,30 @@ export class OrgCheckDatasetManager {
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const paramaters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             promises.push(new Promise((resolve, reject) => {
-                this.#logger.sectionContinues(`DatasetManager:${cacheKey}:Cache`, 'Checking the cache...');
+                this.#logger.sectionContinues(`[dataset]-${cacheKey}-cache`, 'Checking the cache...');
                 // Check cache if any
                 if (this.#cache.hasKey(cacheKey) === true) {
                     // Set the results from cache
-                    this.#logger.sectionEnded(`DatasetManager:${cacheKey}:Cache`, 'There was data in cache!');
+                    this.#logger.sectionEnded(`[dataset]-${cacheKey}-cache`, 'There was data in cache!');
                     results.set(alias, this.#cache.get(cacheKey));
                     // Resolve
                     resolve();
                     return;
                 }
-                this.#logger.sectionContinues(`DatasetManager:${cacheKey}:Cache`, 'There was no data in cache.');
+                this.#logger.sectionContinues(`[dataset]-${cacheKey}-cache`, 'There was no data in cache.');
 
                 // Calling the retriever
-                this.#logger.sectionContinues(`DatasetManager:${alias}:Retriever`, 'Calling the retriever...');
+                this.#logger.sectionContinues(`[dataset]-${alias}-retriever`, 'Calling the retriever...');
                 this.#datasets.get(alias).run(
                     // sfdc manager
                     this.#sfdcManager,
                     // success
                     (data) => {
                         // Cache the data
-                        this.#logger.sectionEnded(`DatasetManager:${alias}:Cache`, 'We save the cache with this data.');
+                        this.#logger.sectionEnded(`[dataset]-${alias}-cachee`, 'We save the cache with this data.');
                         this.#cache.set(alias, data);
                         // Set the results
-                        this.#logger.sectionEnded(`DatasetManager:${alias}:Retriever`, 'Information retrieved!');
+                        this.#logger.sectionEnded(`[dataset]-${alias}-retriever`, 'Information retrieved!');
                         results.set(alias, data);
                         // Resolve
                         resolve();
@@ -99,8 +126,8 @@ export class OrgCheckDatasetManager {
                     // error
                     (error) => {
                         // Reject with this error
-                        this.#logger.sectionFailed(`DatasetManager:${alias}:Cache`, 'Due to an error the cache is still empty');
-                        this.#logger.sectionFailed(`DatasetManager:${alias}:Retriever`, error.message);
+                        this.#logger.sectionFailed(`[dataset]-${alias}-cache`, 'Due to an error the cache is still empty');
+                        this.#logger.sectionFailed(`[dataset]-${alias}-retriever`, error.message);
                         reject(error);
                     },
                     // Send any parameters if needed
