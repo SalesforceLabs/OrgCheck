@@ -85,6 +85,7 @@
         <lightning-tab label="🥐 Visual Components" onactive={handleTabActivation}>
             <lightning-tabset>
                 <lightning-tab value="visual-force-pages" label="Visual Force Pages" onactive={handleSubTabActivation}>
+                    <c-orgcheck-visual-force-pages class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-visual-force-pages>
                 </lightning-tab>
                 <lightning-tab value="visual-force-components" label="Visual Force Components" onactive={handleSubTabActivation}>
                 </lightning-tab>

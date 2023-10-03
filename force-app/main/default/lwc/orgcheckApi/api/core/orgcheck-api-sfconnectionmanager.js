@@ -143,13 +143,19 @@ export class OrgCheckSalesforceManager {
                 return `/lightning/setup/PermSetGroups/page?address=%2F${durableId}`;
             
             /* CUSTOM LABEL */
-            case 'custom-label': // Org Check specific
+            case 'custom-label': // Org Check specific            
+            case 'CustomLabel': // From DAPI 
                 return `/lightning/setup/ExternalStrings/page?address=%2F${durableId}`;
             
             /* FLOW VERSION */
             case 'flow': // Org Check specific
             case 'Flow': // From DAPI 
                 return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
+
+            /* VISUAL FORCE PAGE */
+            case 'visual-force-page': // Org Check specific
+            case 'ApexPage': // From DAPI 
+                return `/lightning/setup/ApexPages/page?address=%2F${durableId}`;
 
             /* OTHER TYPES */
             default:

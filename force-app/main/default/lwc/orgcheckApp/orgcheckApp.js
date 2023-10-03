@@ -203,13 +203,34 @@ export default class OrgCheckApp extends LightningElement {
         let data, error;
         try {
             switch (this.#currentTab) {
-                case 'object-information': data = await orgcheckApi.getObject(sobject); break;
-                case 'custom-fields':      data = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
-                case 'users':              data = await orgcheckApi.getActiveUsers(); break;
-                case 'profiles':           data = await orgcheckApi.getProfiles(namespace); break;
-                case 'permission-sets':    data = await orgcheckApi.getPermissionSets(namespace); break;
-                case 'custom-labels':      data = await orgcheckApi.getCustomLabels(namespace); break;
-                case 'cache-manager':      data = await orgcheckApi.getCacheInformation(); break;
+                case 'object-information':                 data = await orgcheckApi.getObject(sobject); break;
+                case 'objects-owd':                        console.error('TODO'); break;
+                case 'custom-fields':                      data = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
+                case 'users':                              data = await orgcheckApi.getActiveUsers(); break;
+                case 'profiles':                           data = await orgcheckApi.getProfiles(namespace); break;
+                case 'permission-sets':                    data = await orgcheckApi.getPermissionSets(namespace); break;
+                case 'roles':                              console.error('TODO'); break;
+                case 'public-groups':                      console.error('TODO'); break;
+                case 'queues':                             console.error('TODO'); break;
+                case 'flows"':                             console.error('TODO'); break;
+                case 'process-builders':                   console.error('TODO'); break;
+                case 'workflows':                          console.error('TODO'); break;
+                case 'custom-labels':                      data = await orgcheckApi.getCustomLabels(namespace); break;
+                case 'visual-force-pages':                 data = await orgcheckApi.getVisualForcePages(namespace); break;
+                case 'visual-force-components':            console.error('TODO'); break;
+                case 'lightning-pages':                    console.error('TODO'); break;
+                case 'lightning-aura-components':          console.error('TODO'); break;
+                case 'ightning-web-components':            console.error('TODO'); break;
+                case 'apex-classes':                       console.error('TODO'); break;
+                case 'apex-recompilation-needed':          console.error('TODO'); break;
+                case 'apex-triggers':                      console.error('TODO'); break;
+                case 'apex-unit-tests':                    console.error('TODO'); break;
+                case 'dashboards':                         console.error('TODO'); break;
+                case 'reports" label="Reports':            console.error('TODO'); break;
+                case 'schedulable-classes-not-scheduled':  console.error('TODO'); break;
+                case 'apex-jobs':                          console.error('TODO'); break;
+                case 'scheduled-jobs':                     console.error('TODO'); break;
+                case 'cache-manager':                      data = await orgcheckApi.getCacheInformation(); break;
                 default:                   return;
             }
         } catch (e) {
