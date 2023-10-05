@@ -30,8 +30,6 @@ export default class OrgcheckLightningPages extends LightningElement {
     connectedCallback() {
         this.tableColumns = [
             { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-            { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-            { label: 'Mobile',              type: 'boolean',          data: { value: 'isMobileReady' }},
             { label: 'Package',             type: 'text',             data: { value: 'package' }},
             { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
             { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
