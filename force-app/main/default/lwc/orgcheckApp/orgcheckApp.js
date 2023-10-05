@@ -217,10 +217,10 @@ export default class OrgCheckApp extends LightningElement {
                 case 'workflows':                          console.error('TODO'); break;
                 case 'custom-labels':                      data = await orgcheckApi.getCustomLabels(namespace); break;
                 case 'visual-force-pages':                 data = await orgcheckApi.getVisualForcePages(namespace); break;
-                case 'visual-force-components':            console.error('TODO'); break;
-                case 'lightning-pages':                    console.error('TODO'); break;
-                case 'lightning-aura-components':          console.error('TODO'); break;
-                case 'ightning-web-components':            console.error('TODO'); break;
+                case 'visual-force-components':            data = await orgcheckApi.getVisualForceComponents(namespace); break;
+                case 'lightning-pages':                    data = await orgcheckApi.getLightningPages(namespace); break;
+                case 'lightning-aura-components':          data = await orgcheckApi.getLightningAuraComponets(namespace); break;
+                case 'ightning-web-components':            data = await orgcheckApi.getLightningWebComponents(namespace); break;
                 case 'apex-classes':                       console.error('TODO'); break;
                 case 'apex-recompilation-needed':          console.error('TODO'); break;
                 case 'apex-triggers':                      console.error('TODO'); break;
