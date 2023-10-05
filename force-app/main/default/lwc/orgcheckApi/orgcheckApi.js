@@ -128,7 +128,28 @@ export default class OrgcheckApi extends LightningElement {
         return this.#api.getCustomLabels(namespace);
     }
 
+    @api async getLightningWebComponents(namespace) {
+        this._updateLimits();
+        return this.#api.getLightningWebComponents(namespace);
+    }
+
+    @api async getLightningAuraComponents(namespace) {
+        this._updateLimits();
+        return this.#api.getLightningAuraComponents(namespace);
+    }
+
+    @api async getLightningPages(namespace) {
+        this._updateLimits();
+        return this.#api.getLightningPages(namespace);
+    }
+
+    @api async getVisualForceComponents(namespace) {
+        this._updateLimits();
+        return this.#api.getVisualForceComponents(namespace);
+    }
+
     @api async getVisualForcePages(namespace) {
+        this._updateLimits();
         return this.#api.getVisualForcePages(namespace);
     }
 
