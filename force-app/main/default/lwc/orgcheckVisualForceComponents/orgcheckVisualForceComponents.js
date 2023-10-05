@@ -5,7 +5,7 @@ export default class OrgcheckVisualForceComponents extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<SFDC_VisualForcePage>} data 
+     * @param {Array<SFDC_VisualForceComponent>} data 
      * @param {Error} error (could be null)
      */
     @api setComponentData(data, error) {
@@ -31,7 +31,6 @@ export default class OrgcheckVisualForceComponents extends LightningElement {
         this.tableColumns = [
             { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
             { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-            { label: 'Mobile',              type: 'boolean',          data: { value: 'isMobileReady' }},
             { label: 'Package',             type: 'text',             data: { value: 'package' }},
             { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
             { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
