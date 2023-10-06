@@ -12,6 +12,10 @@ import { OrgCheckDatasetPermissionSets } from '../dataset/orgcheck-api-dataset-p
 import { OrgCheckDatasetProfiles } from '../dataset/orgcheck-api-dataset-profiles';
 import { OrgCheckDatasetUsers } from '../dataset/orgcheck-api-dataset-users';
 import { OrgCheckDatasetVisualForcePages } from '../dataset/orgcheck-api-dataset-visualforcepages';
+import { OrgCheckDatasetVisualForceComponents } from '../dataset/orgcheck-api-dataset-visualforcecomponents';
+import { OrgCheckDatasetLightningAuraComponents } from '../dataset/orgcheck-api-dataset-lighntingauracomponents';
+import { OrgCheckDatasetLightningWebComponents } from '../dataset/orgcheck-api-dataset-lighntingwebcomponents';
+import { OrgCheckDatasetLightningPages } from '../dataset/orgcheck-api-dataset-lighntingpages';
 
 export class DatasetCacheInfo {
     name;
@@ -37,6 +41,10 @@ export const DATASET_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const DATASET_PROFILES_ALIAS = 'profiles';
 export const DATASET_USERS_ALIAS = 'users';
 export const DATASET_VISUALFORCEPAGES_ALIAS = 'visual-force-pages';
+export const DATASET_VISUALFORCEOMPONENTS_ALIAS = 'visual-force-components';
+export const DATASET_LIGHTNINGAURACOMPONENTS_ALIAS = 'lightning-aura-components';
+export const DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS = 'lightning-web-components';
+export const DATASET_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 
 export class OrgCheckDatasetManager {
     
@@ -76,6 +84,10 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_PROFILES_ALIAS, new OrgCheckDatasetProfiles());
         this.#datasets.set(DATASET_USERS_ALIAS, new OrgCheckDatasetUsers());
         this.#datasets.set(DATASET_VISUALFORCEPAGES_ALIAS, new OrgCheckDatasetVisualForcePages());
+        this.#datasets.set(DATASET_VISUALFORCEOMPONENTS_ALIAS, new OrgCheckDatasetVisualForceComponents());
+        this.#datasets.set(DATASET_LIGHTNINGAURACOMPONENTS_ALIAS, new OrgCheckDatasetLightningAuraComponents());
+        this.#datasets.set(DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS, new OrgCheckDatasetLightningWebComponents());
+        this.#datasets.set(DATASET_LIGHTNINGPAGES_ALIAS, new OrgCheckDatasetLightningPages());
     }
 
     /**

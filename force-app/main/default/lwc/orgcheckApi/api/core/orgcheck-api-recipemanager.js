@@ -10,6 +10,11 @@ import { OrgCheckRecipeOrgInformation } from '../recipe/orgcheck-api-recipe-orgi
 import { OrgCheckRecipePermissionSets } from '../recipe/orgcheck-api-recipe-permissionsets';
 import { OrgCheckRecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
 import { OrgCheckRecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-visualforcepages';
+import { OrgCheckRecipeLightningWebComponents } from '../recipe/orgcheck-api-recipe-lightningwebcomponents';
+import { OrgCheckRecipeLightningAuraComponents } from '../recipe/orgcheck-api-recipe-lightningauracomponents';
+import { OrgCheckRecipeLightningPages } from '../recipe/orgcheck-api-recipe-lightningpages';
+import { OrgCheckRecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
+
 
 export const RECIPE_ACTIVEUSERS_ALIAS = 'active-users';
 export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -20,6 +25,10 @@ export const RECIPE_ORGINFO_ALIAS = 'org-information';
 export const RECIPE_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const RECIPE_PROFILES_ALIAS = 'profiles';
 export const RECIPE_VISUALFORCEPAGES_ALIAS = 'visual-force-pages';
+export const RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS = 'lightning-web-components';
+export const RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS = 'lightning-aura-components';
+export const RECIPE_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
+export const RECIPE_VISUALFORCECOMPONENTS_ALIAS = 'visual-force-components';
 
 export class OrgCheckRecipeManager {
 
@@ -55,6 +64,10 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_PERMISSIONSETS_ALIAS, new OrgCheckRecipePermissionSets());
         this.#recipes.set(RECIPE_PROFILES_ALIAS, new OrgCheckRecipeProfiles());
         this.#recipes.set(RECIPE_VISUALFORCEPAGES_ALIAS, new OrgCheckRecipeVisualForcePages());
+        this.#recipes.set(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, new OrgCheckRecipeLightningWebComponents());
+        this.#recipes.set(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, new OrgCheckRecipeLightningAuraComponents());
+        this.#recipes.set(RECIPE_LIGHTNINGPAGES_ALIAS, new OrgCheckRecipeLightningPages());
+        this.#recipes.set(RECIPE_VISUALFORCECOMPONENTS_ALIAS, new OrgCheckRecipeVisualForceComponents());
     }
 
     async run(alias, ...parameters) {

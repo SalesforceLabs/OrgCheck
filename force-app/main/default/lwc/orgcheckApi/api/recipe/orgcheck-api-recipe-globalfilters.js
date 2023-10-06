@@ -8,7 +8,7 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [
@@ -19,9 +19,12 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get a list of packages, types and objects (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * @param {string} namespace you want to list (optional), '*' for any
+     * 
+     * @returns {Any}
      */
     transform(data, namespace, type) {
         const packages = data.get(DATASET_PACKAGES_ALIAS);

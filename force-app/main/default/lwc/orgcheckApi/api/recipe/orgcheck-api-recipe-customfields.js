@@ -8,7 +8,7 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [
@@ -21,11 +21,12 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
     /**
      * Get a list of custom fields (async method)
      * 
-     * @param namespace you want to list (optional), '*' for any
-     * @param object type you want to list (optional), '*' for any
-     * @param object you want to list (optional), '*' for any
+     * @param {OrgCheckMap} data extracted
+     * @param {string} namespace you want to list (optional), '*' for any
+     * @param {string} object type you want to list (optional), '*' for any
+     * @param {string} object you want to list (optional), '*' for any
      * 
-     * @returns {Array<SFDC_CustomField>}
+     * @returns {Array<SFDC_Field>}
      */
     transform(data, namespace, objecttype, object) {
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);

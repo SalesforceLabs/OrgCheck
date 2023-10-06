@@ -6,16 +6,18 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<Any>}
      */
     extract(object) {
         return [{ name: DATASET_OBJECT_ALIAS, cacheKey: `${DATASET_OBJECT_ALIAS}_${object}`, parameters: { object: object }}];
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get the object information (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * 
+     * @returns {SFDC_Object}
      */
     transform(data) {
         return data.get(DATASET_OBJECT_ALIAS);

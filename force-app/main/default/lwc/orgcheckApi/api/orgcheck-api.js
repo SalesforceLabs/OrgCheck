@@ -10,7 +10,11 @@ import { OrgCheckRecipeManager,
     RECIPE_ORGINFO_ALIAS,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
-    RECIPE_VISUALFORCEPAGES_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_VISUALFORCEPAGES_ALIAS,
+    RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS,
+    RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
+    RECIPE_LIGHTNINGPAGES_ALIAS,
+    RECIPE_VISUALFORCECOMPONENTS_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class
@@ -121,6 +125,22 @@ export class OrgCheckAPI {
 
     async getCustomLabels(namespace) {
         return this.#recipeManager.run(RECIPE_CUSTOMLABELS_ALIAS, namespace);
+    }
+
+    async getLightningWebComponents(namespace) {
+        return this.#recipeManager.run(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, namespace);
+    }
+
+    async getLightningAuraComponents(namespace) {
+        return this.#recipeManager.run(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, namespace);
+    }
+
+    async getLightningPages(namespace) {
+        return this.#recipeManager.run(RECIPE_LIGHTNINGPAGES_ALIAS, namespace);
+    }
+
+    async getVisualForceComponents(namespace) {
+        return this.#recipeManager.run(RECIPE_VISUALFORCECOMPONENTS_ALIAS, namespace);
     }
 
     async getVisualForcePages(namespace) {

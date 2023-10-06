@@ -1,4 +1,4 @@
-<apex:page>
+<apex:page >
     <apex:includeLightning />
     <script src="{!URLFOR($Resource.OrgCheck_SR, 'js/orgcheck-api.js')}" />
     <div id="app" style="height: 100vh;" />  

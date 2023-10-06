@@ -6,16 +6,19 @@ export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [DATASET_CUSTOMLABELS_ALIAS];
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get a list of custom labels (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * @param {string} namespace you want to list (optional), '*' for any
+     * 
+     * @returns {Array<SFDC_CustomLabel>}
      */
     transform(data, namespace) {
         const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);

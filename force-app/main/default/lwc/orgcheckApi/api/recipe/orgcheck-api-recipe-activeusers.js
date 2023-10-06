@@ -8,7 +8,7 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [
@@ -20,6 +20,8 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
 
     /**
      * Get a list of active users (async method)
+     * 
+     * @param {OrgCheckMap} data extracted
      * 
      * @returns {Array<SFDC_User>}
      */

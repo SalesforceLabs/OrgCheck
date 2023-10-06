@@ -6,16 +6,18 @@ export class OrgCheckRecipeOrgInformation extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [DATASET_ORGINFO_ALIAS];
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get the information of the current org (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * 
+     * @returns {SFDC_OrgInfo}
      */
     transform(data) {
         const orgInfo = data.get(DATASET_ORGINFO_ALIAS);

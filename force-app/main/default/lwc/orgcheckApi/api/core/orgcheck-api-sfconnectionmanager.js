@@ -49,16 +49,22 @@ export class OrgCheckSalesforceManager {
     }
     
     setupUrl(type, durableId, objectDurableId, objectType) {
+        
         switch (type) {
 
-            /* TYPES that we cannot guess the URL only based on the type and Id (from DAPI) */
+            /*
+              In case the type is from the DAPI, we only have the id and the type from the DAPI (not the 
+                object information). so in this case we cannot point to the direct URL in Lightning Setup. 
+                Let's give it a try by returning just '/' and the id...
+            */
             case 'CustomField': // From DAPI 
             case 'Layout': // From DAPI 
-                return '';
+                return `/${durableId}`;
             
-            /* FIELD */
-            case 'field': // Org Check specific
-            {
+            /*
+              In the following section we have enought information go return the full URL
+            */
+            case 'field': { // Org Check specific
                 switch (objectType) {
                     case OBJECTTYPE_ID_STANDARD_SOBJECT:
                     case OBJECTTYPE_ID_CUSTOM_SOBJECT:
@@ -78,14 +84,10 @@ export class OrgCheckSalesforceManager {
                         return `/${durableId}`;
                 }
             }
-            
-            /* PAGE LAYOUT */
-            case 'layout': // Org Check specific
+            case 'layout': { // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/PageLayouts/${durableId}/view`;
-            
-            /* OBJECT or ENTITY */
-            case 'object':  // Org Check specific
-            {
+            }
+            case 'object': { // Org Check specific
                 switch (objectType) {
                     case OBJECTTYPE_ID_STANDARD_SOBJECT:
                     case OBJECTTYPE_ID_CUSTOM_SOBJECT:
@@ -105,59 +107,59 @@ export class OrgCheckSalesforceManager {
                         return `/${objectDurableId}`;
                 }
             }
-            
-            /* VALIDATION RULE */
             case 'validation-rule': // Org Check specific
+            case 'ValidationRule': { // From DAPI 
                 return `/lightning/setup/ObjectManager/page?address=%2F${durableId}`;
-            
-            /* WEB LINK OR ACTION */
-            case 'web-link': // Org Check specific
+            }
+            case 'web-link': { // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/ButtonsLinksActions/${durableId}/view`;
-            
-            /* RECORD TYPE */
-            case 'record-type': // Org Check specific
+            } 
+            case 'record-type': { // Org Check specific
                 return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
-            
-            /* APEX TRIGGER */
-            case 'apex-trigger': // Org Check specific
+            }
+            case 'apex-trigger': { // Org Check specific
                 return '/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view';
-            
-            /* FIELD SET */
-            case 'field-set': // Org Check specific
+            }            
+            case 'field-set': { // Org Check specific
                 return '/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view';
-            
-            /* USER */
-            case 'user': // Org Check specific
+            }
+            case 'user': { // Org Check specific
                 return `/lightning/setup/ManageUsers/page?address=%2F${durableId}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
-            
-            /* PROFILE */
-            case 'profile': // Org Check specific
+            }
+            case 'profile': { // Org Check specific
                 return `/lightning/setup/EnhancedProfiles/page?address=%2F${durableId}`;
-            
-            /* PERMISSION SET */
-            case 'permission-set': // Org Check specific
+            }
+            case 'permission-set': { // Org Check specific
                 return `/lightning/setup/PermSets/page?address=%2F${durableId}`;
-            
-            /* PERMISSION SET GROUP */
-            case 'permission-set-group': // Org Check specific
+            }
+            case 'permission-set-group': { // Org Check specific
                 return `/lightning/setup/PermSetGroups/page?address=%2F${durableId}`;
-            
-            /* CUSTOM LABEL */
+            }
             case 'custom-label': // Org Check specific            
-            case 'CustomLabel': // From DAPI 
+            case 'CustomLabel': { // From DAPI 
                 return `/lightning/setup/ExternalStrings/page?address=%2F${durableId}`;
-            
-            /* FLOW VERSION */
+            }
             case 'flow': // Org Check specific
-            case 'Flow': // From DAPI 
+            case 'Flow': { // From DAPI 
                 return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
-
-            /* VISUAL FORCE PAGE */
+            }
             case 'visual-force-page': // Org Check specific
-            case 'ApexPage': // From DAPI 
+            case 'ApexPage': { // From DAPI 
                 return `/lightning/setup/ApexPages/page?address=%2F${durableId}`;
-
-            /* OTHER TYPES */
+            }
+            case 'visual-force-component': // Org Check specific
+            case 'ApexComponent': { // From DAPI 
+                return `/lightning/setup/ApexComponent/page?address=%2F${durableId}`;
+            }
+            case 'static-resource': // Org Check specific
+            case 'StaticResource': { // From DAPI 
+                return `/lightning/setup/StaticResources/page?address=%2F${durableId}`;
+            }
+            //CustomSite
+            //CustomTab
+            //ApexClass
+            // User
+            //AuraDefinitionBundle
             default:
                 console.error('type uncovered: ', type);
                 return `/${durableId}`;

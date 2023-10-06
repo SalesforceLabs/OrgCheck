@@ -6,16 +6,19 @@ export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [DATASET_VISUALFORCEPAGES_ALIAS];
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get a list of vf pages (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * @param {string} namespace you want to list (optional), '*' for any
+     * 
+     * @returns {Array<SFDC_VisualForcePage>}
      */
     transform(data, namespace) {
         const pages = data.get(DATASET_VISUALFORCEPAGES_ALIAS);

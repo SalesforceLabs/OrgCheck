@@ -7,7 +7,7 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Any}
+     * @returns {Array<string>}
      */
     extract() {
         return [
@@ -17,9 +17,12 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
     }
 
     /**
-     * Get a list of active users (async method)
+     * Get a list of permission sets (async method)
      * 
-     * @returns {Array<SFDC_User>}
+     * @param {OrgCheckMap} data extracted
+     * @param {string} namespace you want to list (optional), '*' for any
+     * 
+     * @returns {Array<SFDC_PermissionSet>}
      */
     transform(data, namespace) {
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
