@@ -113,6 +113,6 @@ export default class OrgcheckObjectInformation extends LightningElement {
             { label: 'Cascade Delete?',     type: 'boolean',  data: { value: 'isCascadeDelete' }},
             { label: 'Restricted Delete?',  type: 'boolean',  data: { value: 'isRestrictedDelete' }}
         ];
-        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('load'));
     }
 }

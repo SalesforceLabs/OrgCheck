@@ -12,6 +12,6 @@ export default class OrgcheckDependencyLink extends LightningElement {
     }
 
     handleClick() {
-        this.dispatchEvent(new CustomEvent('view', { detail: { whatid: this.whatid, whatname: this.whatname, dependencies: this.dependencies }, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('view', { detail: { whatid: this.whatid, whatname: this.whatname, dependencies: this.dependencies } }));
     }
 }

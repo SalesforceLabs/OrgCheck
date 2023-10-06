@@ -34,21 +34,21 @@ export default class OrgcheckApi extends LightningElement {
                 this.accesstoken,
                 this.userid,
                 {
-                    begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' }, bubbles: false })); },
-                    sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m }, bubbles: false })); },
-                    sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m }, bubbles: false })); },
-                    sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m }, bubbles: false })); },
-                    sectionFailed: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, message: m }, bubbles: false })); },
-                    end: (s, f) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end', nbSuccesses: s, nbFailures: f }, bubbles: false })); }
+                    begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' } })); },
+                    sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m } })); },
+                    sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m } })); },
+                    sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m } })); },
+                    sectionFailed: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, message: m } })); },
+                    end: (s, f) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end', nbSuccesses: s, nbFailures: f } })); }
                 }
             );
             this.#api.getOrgInformation().then((orgInfo) => {
                 this.orgName = `${orgInfo.name} (${orgInfo.id})`;
                 this.orgType = orgInfo.type;
-                this.dispatchEvent(new CustomEvent('load', { bubbles: false }));
+                this.dispatchEvent(new CustomEvent('load'));
             });
         }).catch((e) => {
-            this.dispatchEvent(new CustomEvent('fail', { detail: { error: e }, bubbles: false }));
+            this.dispatchEvent(new CustomEvent('fail', { detail: { error: e } }));
         });
     }
     

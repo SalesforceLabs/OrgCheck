@@ -234,8 +234,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleSearchInputChanged(event) {
         this.#filteringSearchInput = event.target.value;
         this.filter();
-        // we don't want the event to be more propagated
-        event.stopPropagation();
     }
 
     /**
@@ -260,8 +258,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             }
         });
         this.sort();
-        // we don't want the event to be more propagated
-        event.stopPropagation();
     }
 
     async handleViewDependency(event) {

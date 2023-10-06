@@ -45,6 +45,6 @@ export default class OrgcheckCustomLabels extends LightningElement {
             { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
             { label: 'Value',               type: 'text',             data: { value: 'value', maximumLength: 30 }}
         ];
-        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('load'));
     }
 }

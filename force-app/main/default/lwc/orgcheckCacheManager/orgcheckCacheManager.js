@@ -8,7 +8,7 @@ export default class OrgcheckCacheManager extends LightningElement {
      * Connected callback function
      */
     connectedCallback() {
-        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('load'));
     }
     
     /**
@@ -26,10 +26,10 @@ export default class OrgcheckCacheManager extends LightningElement {
     }
 
     handleRemoveAllCache() {
-        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: true }, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: true } }));
     }
 
     handleRemoveOneCache(event) {
-        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: false, itemName: event.srcElement.getAttribute('data-item-name') }, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: false, itemName: event.srcElement.getAttribute('data-item-name') } }));
     }
 }

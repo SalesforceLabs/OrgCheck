@@ -38,6 +38,6 @@ export default class OrgcheckUsers extends LightningElement {
             { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
             { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', value: 'name' }}
         ];
-        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('load'));
     }
 }

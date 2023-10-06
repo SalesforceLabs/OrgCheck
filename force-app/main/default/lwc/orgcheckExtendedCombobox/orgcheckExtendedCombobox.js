@@ -73,8 +73,6 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
         } else {
             this.itemsFound = [];
         }
-        // we don't want the event to be more propagated
-        event.stopPropagation();
     }
 
     itemsFound = [];
@@ -85,7 +83,7 @@ export default class OrgcheckExtendedCombobox extends LightningElement {
         const name = event.currentTarget.getAttribute('data-name');
         if (id && name) {
             this._setValue(id);
-            this.dispatchEvent(new CustomEvent('change', { detail: { value: id, label: name }, bubbles: false }));
+            this.dispatchEvent(new CustomEvent('change', { detail: { value: id, label: name } }));
         }
     }
 } 

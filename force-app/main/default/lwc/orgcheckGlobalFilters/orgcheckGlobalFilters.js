@@ -199,10 +199,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      * this also reset the array and flag back to "no change" statuses.
      */
     propagateValues() {
-        this.dispatchEvent(new CustomEvent('validatechange', { 
-            detail: {},
-            bubbles: false 
-        }));
+        this.dispatchEvent(new CustomEvent('validatechange', { detail: {} }));
         this.whichFiltersChanged = [];
         this.filtersChanged = false;
         this.filtersOriginallyChanged = true;

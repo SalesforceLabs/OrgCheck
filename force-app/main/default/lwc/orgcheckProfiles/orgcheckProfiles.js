@@ -40,6 +40,6 @@ export default class OrgcheckProfiles extends LightningElement {
             { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
             { label: 'Description',     type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
         ];
-        this.dispatchEvent(new CustomEvent('load', { detail: {}, bubbles: false }));
+        this.dispatchEvent(new CustomEvent('load'));
     }
 }
