@@ -26,7 +26,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomField instance
+                    // Create the instance
                     const visualForcePage = new SFDC_VisualForcePage({
                         id: id,
                         url: sfdcManager.setupUrl('visual-force-page', record.Id),

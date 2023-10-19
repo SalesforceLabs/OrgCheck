@@ -26,7 +26,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                     // Get the ID15 of this custom label
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomLabel instance
+                    // Create the instance
                     const customLabel = new SFDC_CustomLabel({
                         id: id,
                         url: sfdcManager.setupUrl('custom-label', record.Id),

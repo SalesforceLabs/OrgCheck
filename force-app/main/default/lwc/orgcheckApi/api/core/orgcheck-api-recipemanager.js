@@ -14,7 +14,8 @@ import { OrgCheckRecipeLightningWebComponents } from '../recipe/orgcheck-api-rec
 import { OrgCheckRecipeLightningAuraComponents } from '../recipe/orgcheck-api-recipe-lightningauracomponents';
 import { OrgCheckRecipeLightningPages } from '../recipe/orgcheck-api-recipe-lightningpages';
 import { OrgCheckRecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
-
+import { OrgCheckRecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
+import { OrgCheckRecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
 
 export const RECIPE_ACTIVEUSERS_ALIAS = 'active-users';
 export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -29,6 +30,8 @@ export const RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS = 'lightning-web-components';
 export const RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS = 'lightning-aura-components';
 export const RECIPE_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 export const RECIPE_VISUALFORCECOMPONENTS_ALIAS = 'visual-force-components';
+export const RECIPE_PUBLICGROUPS_ALIAS = 'public-groups';
+export const RECIPE_QUEUES_ALIAS = 'queues';
 
 export class OrgCheckRecipeManager {
 
@@ -68,6 +71,9 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, new OrgCheckRecipeLightningAuraComponents());
         this.#recipes.set(RECIPE_LIGHTNINGPAGES_ALIAS, new OrgCheckRecipeLightningPages());
         this.#recipes.set(RECIPE_VISUALFORCECOMPONENTS_ALIAS, new OrgCheckRecipeVisualForceComponents());
+        this.#recipes.set(RECIPE_PUBLICGROUPS_ALIAS, new OrgCheckRecipePublicGroups());
+        this.#recipes.set(RECIPE_QUEUES_ALIAS, new OrgCheckRecipeQueues());
+
     }
 
     async run(alias, ...parameters) {

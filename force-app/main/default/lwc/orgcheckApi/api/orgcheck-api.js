@@ -14,7 +14,9 @@ import { OrgCheckRecipeManager,
     RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS,
     RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
     RECIPE_LIGHTNINGPAGES_ALIAS,
-    RECIPE_VISUALFORCECOMPONENTS_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_VISUALFORCECOMPONENTS_ALIAS,
+    RECIPE_PUBLICGROUPS_ALIAS,
+    RECIPE_QUEUES_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class
@@ -147,6 +149,14 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_VISUALFORCEPAGES_ALIAS, namespace);
     }
 
+    async getPublicGroups() {
+        return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS, namespace);
+    }
+
+    async getQueues() {
+        return this.#recipeManager.run(RECIPE_QUEUES_ALIAS, namespace);
+    }
+    
     async getOrgInformation() {
         return this.#recipeManager.run(RECIPE_ORGINFO_ALIAS);
     }

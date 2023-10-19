@@ -52,7 +52,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                         });
                     }
 
-                    // Create the SFDC_User instance
+                    // Create the instance
                     const user = new SFDC_User({
                         id: id,
                         url: sfdcManager.setupUrl('user', id),

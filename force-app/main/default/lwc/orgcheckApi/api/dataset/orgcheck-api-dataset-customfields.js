@@ -27,7 +27,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomField instance
+                    // Create the instance
                     const customField = new SFDC_Field({
                         id: id,
                         url: sfdcManager.setupUrl('field', record.Id, record.EntityDefinition.QualifiedApiName, 

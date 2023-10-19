@@ -153,6 +153,16 @@ export default class OrgcheckApi extends LightningElement {
         return this.#api.getVisualForcePages(namespace);
     }
 
+    @api async getPublicGroups() {
+        this._updateLimits();
+        return this.#api.getPublicGroups();
+    }
+
+    @api async getQueues() {
+        this._updateLimits();
+        return this.#api.getQueues();
+    }
+
     @api async getCacheInformation() {
         this._updateLimits();
         return this.#api.getCacheInformation();

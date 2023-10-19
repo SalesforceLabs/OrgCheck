@@ -27,7 +27,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomField instance
+                    // Create the instance
                     const page = new SFDC_LightningPage({
                         id: id,
                         url: sfdcManager.setupUrl('lightning-page', record.Id),

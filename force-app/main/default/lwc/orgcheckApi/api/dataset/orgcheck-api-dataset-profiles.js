@@ -27,7 +27,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                     // Get the ID15 of this profile
                     const profileId = sfdcManager.caseSafeId(record.ProfileId);
 
-                    // Create the SFDC_Profile instance
+                    // Create the instance
                     const profile = new SFDC_Profile({
                         id: profileId,
                         url: sfdcManager.setupUrl('profile', profileId),

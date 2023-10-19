@@ -26,7 +26,7 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomField instance
+                    // Create the instance
                     const component = new SFDC_VisualForceComponent({
                         id: id,
                         url: sfdcManager.setupUrl('visual-force-component', record.Id),

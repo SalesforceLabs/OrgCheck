@@ -26,7 +26,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the SFDC_CustomField instance
+                    // Create the instance
                     const component = new SFDC_LightningWebComponent({
                         id: id,
                         url: sfdcManager.setupUrl('lightning-web-component', record.Id),
