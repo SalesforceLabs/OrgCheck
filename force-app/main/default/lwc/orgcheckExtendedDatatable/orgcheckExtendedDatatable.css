@@ -37,3 +37,7 @@ td.badscore {
 td.badcell {
     background-image: url(/img/msg_icons/warning16.png);
 }
+
+.centered {
+    text-align: center;
+}

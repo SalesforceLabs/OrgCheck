@@ -150,11 +150,11 @@ export class OrgCheckAPI {
     }
 
     async getPublicGroups() {
-        return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS, namespace);
+        return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS);
     }
 
     async getQueues() {
-        return this.#recipeManager.run(RECIPE_QUEUES_ALIAS, namespace);
+        return this.#recipeManager.run(RECIPE_QUEUES_ALIAS);
     }
     
     async getOrgInformation() {

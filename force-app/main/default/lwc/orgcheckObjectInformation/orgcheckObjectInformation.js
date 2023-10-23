@@ -6,13 +6,9 @@ export default class OrgcheckObjectInformation extends LightningElement {
      * Set the component data.
      * 
      * @param {SFDC_Object} data 
-     * @param {Error} error (could be null)
      */
-    @api setComponentData(data, error) {
-        if (error) {
-            console.error(error, error.message, error.stack);
-            this.isSObjectSpecified = false;
-        } else {
+    @api setComponentData(data) {
+        if (data) {
             this.object = data;
             this.objectGeneralInfo = [
                 { label: 'API Name', value: data.apiname },
@@ -30,6 +26,8 @@ export default class OrgcheckObjectInformation extends LightningElement {
                 { label: 'Description', value: data.description }	
             ];
             this.isSObjectSpecified = true;
+        } else {
+            this.isSObjectSpecified = false;
         }
     }
     

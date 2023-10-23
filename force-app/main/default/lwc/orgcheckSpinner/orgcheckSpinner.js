@@ -30,8 +30,17 @@ export default class OrgCheckSpinner extends LightningElement {
         this._setSection(sectionName, message, SECTION_STATUS_ENDED);
     }
 
-    @api sectionFailed(sectionName, message='...') {
-        this._setSection(sectionName, message, SECTION_STATUS_FAILED);
+    @api sectionFailed(sectionName, error) {
+        if (error) {
+            if (typeof error === 'string') {
+                this._setSection(sectionName, error, SECTION_STATUS_FAILED);
+            } else {
+                this._setSection(sectionName, error.message, SECTION_STATUS_FAILED);
+                this._setErrorDetail(error.stack);
+            }
+        } else {
+            this._setSection(sectionName, 'The error was undefined...', SECTION_STATUS_FAILED);
+        }
     }
 
     @api open() {
@@ -115,5 +124,9 @@ export default class OrgCheckSpinner extends LightningElement {
             const index = this.#keysIndex[item.id];
             this.sections[index] = item;
         }
+    }
+
+    _setErrorDetail(stack) {
+        console.error(stack);
     }
 }

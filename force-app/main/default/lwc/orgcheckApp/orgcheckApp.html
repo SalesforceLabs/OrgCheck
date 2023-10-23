@@ -60,8 +60,10 @@
         <lightning-tab label="🌶️ Public Groups and Queues" onactive={handleTabActivation}>
             <lightning-tabset>
                 <lightning-tab value="public-groups" label="Public Groups" onactive={handleSubTabActivation}>
+                    <c-orgcheck-public-groups class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-public-groups>
                 </lightning-tab>
                 <lightning-tab value="queues" label="Queues" onactive={handleSubTabActivation}>
+                    <c-orgcheck-queues class="orgcheck-subTabContent" onload={handleSubTabContentLoaded}></c-orgcheck-queues>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

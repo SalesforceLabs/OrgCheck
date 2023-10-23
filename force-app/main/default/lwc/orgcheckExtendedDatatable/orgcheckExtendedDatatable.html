@@ -52,10 +52,12 @@
                                         <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
                                     </template>
                                     <template lwc:elseif={cell.type_ids}>
-                                        <template lwc:if={cell.values.length}>
-                                            <i>{cell.values.length} item(s)</i><br />
-                                            <template for:each={cell.values} for:item="item">
-                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
+                                        <template lwc:if={cell.values}>
+                                            <template lwc:if={cell.values.length}>
+                                                <i>{cell.values.length} item(s)</i><br />
+                                                <template for:each={cell.values} for:item="item">
+                                                    - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
+                                                </template>
                                             </template>
                                         </template>
                                     </template>
@@ -74,14 +76,14 @@
                                         </template>
                                     </template>
                                     <template lwc:elseif={cell.type_boolean}>
-                                        <center>
+                                        <div class="centered">
                                             <template lwc:if={cell.value}>
                                                 <lightning-icon icon-name="standard:task2" alternative-text="True" size="x-small"></lightning-icon>
                                             </template>
                                             <template lwc:else>
                                                 <lightning-icon icon-name="standard:first_non_empty" alternative-text="False" size="x-small"></lightning-icon>
                                             </template>
-                                        </center>
+                                        </div>
                                     </template>
                                     <template lwc:elseif={cell.type_dateTime}>
                                         <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
@@ -93,10 +95,12 @@
                                         </template>
                                     </template>
                                     <template lwc:elseif={cell.type_texts}>
-                                        <template lwc:if={cell.values.length}>
-                                            <i>{cell.values.length} item(s)</i><br />
-                                            <template for:each={cell.values} for:item="item">
-                                                - {item}<br key={cell.key} />
+                                        <template lwc:if={cell.values}>
+                                            <template lwc:if={cell.values.length}>
+                                                <i>{cell.values.length} item(s)</i><br />
+                                                <template for:each={cell.values} for:item="item">
+                                                    - {item}<br key={cell.key} />
+                                                </template>
                                             </template>
                                         </template>
                                     </template>

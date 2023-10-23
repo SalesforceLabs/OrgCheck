@@ -12,6 +12,9 @@ export class SFDC_Group extends OrgCheckData {
     indirectUsers;
     isPublicGroup;
     isQueue;
+    isRole;
+    isRoleAndSubordinates;
+    isTechnical;
 
     constructor(setup) {
         super();

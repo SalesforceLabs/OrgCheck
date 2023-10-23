@@ -38,7 +38,7 @@ export default class OrgcheckApi extends LightningElement {
                     sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m } })); },
                     sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m } })); },
                     sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m } })); },
-                    sectionFailed: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, message: m } })); },
+                    sectionFailed: (s, e) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, error: e } })); },
                     end: (s, f) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end', nbSuccesses: s, nbFailures: f } })); }
                 }
             );

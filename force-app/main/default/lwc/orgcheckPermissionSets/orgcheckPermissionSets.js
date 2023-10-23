@@ -6,9 +6,8 @@ export default class OrgcheckPermissionsets extends LightningElement {
      * Set the component data.
      * 
      * @param {Array<SFDC_PermissionSet>} data 
-     * @param {Error} error (could be null)
      */
-    @api setComponentData(data, error) {
+    @api setComponentData(data) {
         if (data && Array.isArray(data) && data.length > 0) {
             this.tableData = data;
             this.isTableEmpty = false;

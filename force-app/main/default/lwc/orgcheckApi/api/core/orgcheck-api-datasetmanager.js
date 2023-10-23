@@ -109,31 +109,34 @@ export class OrgCheckDatasetManager {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const paramaters = (typeof dataset === 'string' ? undefined : dataset.parameters);
+            const sectionCache = `💾 ${cacheKey}`;
+            const sectionRetriever = `📊 ${cacheKey}`;
+
             promises.push(new Promise((resolve, reject) => {
-                this.#logger.sectionContinues(`[dataset]-${cacheKey}-cache`, 'Checking the cache...');
+                this.#logger.sectionContinues(sectionCache, 'Checking the cache...');
                 // Check cache if any
                 if (this.#cache.hasKey(cacheKey) === true) {
                     // Set the results from cache
-                    this.#logger.sectionEnded(`[dataset]-${cacheKey}-cache`, 'There was data in cache!');
+                    this.#logger.sectionEnded(sectionCache, 'There was data in cache!');
                     results.set(alias, this.#cache.get(cacheKey));
                     // Resolve
                     resolve();
                     return;
                 }
-                this.#logger.sectionContinues(`[dataset]-${cacheKey}-cache`, 'There was no data in cache.');
+                this.#logger.sectionContinues(sectionCache, 'There was no data in cache.');
 
                 // Calling the retriever
-                this.#logger.sectionContinues(`[dataset]-${alias}-retriever`, 'Calling the retriever...');
+                this.#logger.sectionContinues(sectionRetriever, 'Calling the retriever...');
                 this.#datasets.get(alias).run(
                     // sfdc manager
                     this.#sfdcManager,
                     // success
                     (data) => {
                         // Cache the data
-                        this.#logger.sectionEnded(`[dataset]-${alias}-cachee`, 'We save the cache with this data.');
+                        this.#logger.sectionEnded(`📊 ${alias} cache`, 'We save the cache with this data.');
                         this.#cache.set(alias, data);
                         // Set the results
-                        this.#logger.sectionEnded(`[dataset]-${alias}-retriever`, 'Information retrieved!');
+                        this.#logger.sectionEnded(sectionRetriever, 'Information retrieved!');
                         results.set(alias, data);
                         // Resolve
                         resolve();
@@ -141,8 +144,8 @@ export class OrgCheckDatasetManager {
                     // error
                     (error) => {
                         // Reject with this error
-                        this.#logger.sectionFailed(`[dataset]-${alias}-cache`, 'Due to an error the cache is still empty');
-                        this.#logger.sectionFailed(`[dataset]-${alias}-retriever`, error.message);
+                        this.#logger.sectionFailed(sectionCache, 'Due to an error the cache is still empty');
+                        this.#logger.sectionFailed(sectionRetriever, error);
                         reject(error);
                     },
                     // Send any parameters if needed

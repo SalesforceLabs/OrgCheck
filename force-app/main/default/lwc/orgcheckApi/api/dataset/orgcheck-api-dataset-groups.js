@@ -23,39 +23,43 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     // Get the ID15 of this custom field
                     const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Dependending on type we create a different instance
-                    let group = undefined;
+                    // Create the instance (common one)
+                    let group = new SFDC_Group({
+                        id: id,
+                        isPublicGroup: record.Type === 'Regular',
+                        isQueue: record.Type === 'Queue',
+                        isRole: record.Type === 'Role',
+                        isRoleAndSubordinates: record.Type === 'RoleAndSubordinates',
+                        directUsers: [],
+                        directGroups: [],
+                        indirectUsers: []
+                    });
+                    // Depending on the type we add some properties
                     switch (record.Type) {
                         case 'Regular': 
                         case 'Queue': {
-                            group = new SFDC_Group({
-                                id: id,
-                                url: sfdcManager.setupUrl('public-group', record.Id),
-                                name: record.Name,
-                                developerName: record.DeveloperName,
-                                includeBosses: record.DoesIncludeBosses,
-                                isPublicGroup: record.Type === 'Regular',
-                                isQueue: record.Type = 'Queue',
-                                directUsers: [],
-                                directGroups: [],
-                                indirectUsers: []
-                            });
+                            group.url = sfdcManager.setupUrl('public-group', record.Id);
+                            group.name = record.Name;
+                            group.developerName = record.DeveloperName;
+                            group.includeBosses = record.DoesIncludeBosses;
+                            group.isTechnical = false;
                             break;
                         }
                         case 'Role':
                         case 'RoleAndSubordinates': {
-                            group = new SFDC_Group({
-                                id: id,
-                                relatedId: sfdcManager.caseSafeId(record.RelatedId),
-                                name: record.Related.Name,
-                                directUsers: [],
-                                directGroups: [],
-                                indirectUsers: []
-                            });
+                            group.url = sfdcManager.setupUrl('role', record.RelatedId);
+                            group.name = record.Related.Name;
+                            group.relatedId = sfdcManager.caseSafeId(record.RelatedId);
+                            group.isTechnical = false;
                             break;
                         }
+                        // case 'AllCustomerPortal':
+                        // case 'Organization':
+                        // case 'PRMOrganization':
                         default: {
-                            console.error(record);
+                            group.name = record.Type;
+                            group.isTechnical = true;
+                            break;
                         }
                     }
 

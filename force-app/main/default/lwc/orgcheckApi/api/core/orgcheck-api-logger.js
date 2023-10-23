@@ -43,12 +43,12 @@ export class OrgCheckLogger {
         }
     }
 
-    sectionFailed(sectionName, message='...') {
+    sectionFailed(sectionName, error) {
         this.#countFailures++;
         if (this.#setup.sectionFailed) {
-            this.#setup.sectionFailed(sectionName, message);
+            this.#setup.sectionFailed(sectionName, error);
         } else {
-            console.error(sectionName, message);
+            console.error(sectionName, error);
         }
     }
 

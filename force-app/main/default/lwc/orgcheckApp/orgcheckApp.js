@@ -96,8 +96,7 @@ export default class OrgCheckApp extends LightningElement {
         } catch (error) {
             const spinner = this.template.querySelector('c-orgcheck-spinner');
             spinner.open();
-            spinner.sectionFailed(`Error while loading the API`, error.message);
-            console.error(error?.message, error?.stack);
+            spinner.sectionFailed('Error while loading the API', error);
             spinner.canBeClosed();
         }
     }
@@ -119,11 +118,12 @@ export default class OrgCheckApp extends LightningElement {
         } else {
             const s = event.detail.section;
             const m = event.detail.message;
+            const e = event.detail.error;
             switch(event.detail.status) {
                 case 'section-starts': spinner.sectionStarts(s, m); break;
                 case 'section-in-progress': spinner.sectionContinues(s, m); break;
                 case 'section-ended': spinner.sectionEnded(s, m); break;
-                case 'section-failed': default: spinner.sectionFailed(s, m); break;
+                case 'section-failed': default: spinner.sectionFailed(s, e); break;
             }        
         }
     }
@@ -138,9 +138,8 @@ export default class OrgCheckApp extends LightningElement {
         this.#apiState = API_STATE_FAILED;
         const spinner = this.template.querySelector('c-orgcheck-spinner');
         spinner.open();
-        spinner.sectionFailed('Loading API', `Failed with error: ${event.detail.error.message}`);
+        spinner.sectionFailed('Loading API', event.detail.error);
         spinner.canBeClosed();
-        console.error(event.detail.error.stack);
     }
 
     /**
@@ -200,7 +199,7 @@ export default class OrgCheckApp extends LightningElement {
         // Call the API depending on the current tab
         // If not supported we stop there
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-        let data, error;
+        let data;
         try {
             switch (this.#currentTab) {
                 case 'object-information':                 data = await orgcheckApi.getObject(sobject); break;
@@ -210,8 +209,8 @@ export default class OrgCheckApp extends LightningElement {
                 case 'profiles':                           data = await orgcheckApi.getProfiles(namespace); break;
                 case 'permission-sets':                    data = await orgcheckApi.getPermissionSets(namespace); break;
                 case 'roles':                              console.error('TODO'); break;
-                case 'public-groups':                      console.error('TODO'); break;
-                case 'queues':                             console.error('TODO'); break;
+                case 'public-groups':                      data = await orgcheckApi.getPublicGroups(); break;
+                case 'queues':                             data = await orgcheckApi.getQueues(); break;
                 case 'flows"':                             console.error('TODO'); break;
                 case 'process-builders':                   console.error('TODO'); break;
                 case 'workflows':                          console.error('TODO'); break;
@@ -220,7 +219,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'visual-force-components':            data = await orgcheckApi.getVisualForceComponents(namespace); break;
                 case 'lightning-pages':                    data = await orgcheckApi.getLightningPages(namespace); break;
                 case 'lightning-aura-components':          data = await orgcheckApi.getLightningAuraComponents(namespace); break;
-                case 'lightning-web-components':            data = await orgcheckApi.getLightningWebComponents(namespace); break;
+                case 'lightning-web-components':           data = await orgcheckApi.getLightningWebComponents(namespace); break;
                 case 'apex-classes':                       console.error('TODO'); break;
                 case 'apex-recompilation-needed':          console.error('TODO'); break;
                 case 'apex-triggers':                      console.error('TODO'); break;
@@ -231,17 +230,16 @@ export default class OrgCheckApp extends LightningElement {
                 case 'apex-jobs':                          console.error('TODO'); break;
                 case 'scheduled-jobs':                     console.error('TODO'); break;
                 case 'cache-manager':                      data = await orgcheckApi.getCacheInformation(); break;
-                default:                   return;
+                default:                                   return;
             }
-        } catch (e) {
+        } catch (error) {
             const spinner = this.template.querySelector('c-orgcheck-spinner');
             spinner.open();
-            spinner.sectionFailed(`Error while updating current tab called '${nextCurrentTab}'`, e.message);
-            console.error(e?.message, e?.stack);
+            spinner.sectionFailed(`Error while updating current tab called '${nextCurrentTab}'`, error);
             spinner.canBeClosed();
         }
             
         // Send data back to the component
-        if (data || error) content.setComponentData(data, error);
+        if (data) content.setComponentData(data);
     }
 }

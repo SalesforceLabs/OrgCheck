@@ -10,12 +10,10 @@
                 </div>
                 <div class="slds-modal__content">
                     <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_1-of-3">
-                            <center>
-                                <object type="image/svg+xml" data={spinningURL} width="256" height="256">
-                                    <img src={spinningURL} width="256" height="256" />
-                                </object>
-                            </center>
+                        <div class="slds-col slds-size_1-of-3 centered">
+                            <object type="image/svg+xml" data={spinningURL} width="256" height="256">
+                                <img src={spinningURL} width="256" height="256" />
+                            </object>
                         </div>
                         <div class="slds-col slds-size_2-of-3">
                             <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
@@ -23,7 +21,7 @@
                                     <template for:each={sections} for:item="msg">
                                         <li key={msg.id} class={msg.liClasses}>
                                             <div class={msg.markerClasses}></div>
-                                            <div class="slds-progress__item_content">[{msg.id}] {msg.label}</div>
+                                            <div class="slds-progress__item_content"><b>{msg.id}</b>  {msg.label}</div>
                                         </li>
                                     </template>
                                 </ol>

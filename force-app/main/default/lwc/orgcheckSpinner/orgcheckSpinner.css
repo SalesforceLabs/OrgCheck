@@ -15,3 +15,7 @@
     background-image: url(/img/func_icons/remove12_on.gif) !important; 
     background-size: 8px !important;
 }
+
+.centered {
+    text-align: center;
+}

@@ -48,7 +48,8 @@ export class OrgCheckData {
 
     hasBadField(field) {
         if (!this.#badFields) {
-            throw new Error('Should not call hasBadField() as this data does not need score.');
+            return false;
+            //throw new Error('Should not call hasBadField() as this data does not need score.');
         }
         if (!field) {
             throw new Error('Field is a mandatory when calling hasBadField()');
