@@ -31,9 +31,9 @@ export default class OrgcheckPublicGroups extends LightningElement {
             { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
             { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
             { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
-            { label: 'Included groups',  type: 'texts',    data: { ref: 'directGroups', value: 'id' }},
-            { label: 'Included users',   type: 'texts',    data: { ref: 'directUsers', value: 'id' }},
-            { label: 'All active users', type: 'texts',    data: { ref: 'indirectUsers', value: 'id' }},
+            { label: 'Included groups',  type: 'ids',      data: { values: 'directGroups', value: 'id', url: 'url' }},
+            { label: 'Included users',   type: 'ids',      data: { values: 'directUsers', value: 'id', url: 'url' }},
+            { label: 'All active users', type: 'ids',      data: { values: 'indirectUsers', value: 'id', url: 'url' }},
         ];
         this.dispatchEvent(new CustomEvent('load'));
     }

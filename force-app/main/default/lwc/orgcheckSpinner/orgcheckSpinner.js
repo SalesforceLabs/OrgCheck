@@ -103,6 +103,8 @@ export default class OrgCheckSpinner extends LightningElement {
         };
         switch (status) {
             case SECTION_STATUS_STARTED: 
+            case SECTION_STATUS_IN_PROGRESS:
+            default:
                 item.liClasses += ' slds-is-completed';
                 item.markerClasses += ' progress-marker-started';
                 break;
@@ -114,8 +116,6 @@ export default class OrgCheckSpinner extends LightningElement {
                 item.liClasses += ' slds-has-error'; 
                 item.markerClasses += ' progress-marker-error';
                 break;
-            case SECTION_STATUS_IN_PROGRESS:
-            default:
         }
         if (Object.keys(this.#keysIndex).includes(item.id) === false) {
             this.#keysIndex[item.id] = this.sections.length;

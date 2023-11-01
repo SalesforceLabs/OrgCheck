@@ -81,7 +81,7 @@ export class OrgCheckRecipeManager {
         if (this.#recipes.hasKey(alias) === false) {
             throw new Error(`The given alias (${alias}) does not correspond to a registered recipe.`);
         } 
-        const section = `⛭ ${alias}`;
+        const section = `RECIPE ${alias}`;
         const recipe = this.#recipes.get(alias);
 
         // Start the logger

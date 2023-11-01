@@ -198,11 +198,17 @@ export default class OrgCheckApp extends LightningElement {
 
         // Call the API depending on the current tab
         // If not supported we stop there
+        // Finally send the data to the content component.
+        // All is surrounded by a try catch that will show error modal if any.
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
+        const spinner = this.template.querySelector('c-orgcheck-spinner');
+        const section = `TAB ${this.#currentTab}`;
         let data;
         try {
+            spinner.open();
+            spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             switch (this.#currentTab) {
-                case 'object-information':                 data = await orgcheckApi.getObject(sobject); break;
+                case 'object-information':                 if (sobject !== '*') data = await orgcheckApi.getObject(sobject); break;
                 case 'objects-owd':                        console.error('TODO'); break;
                 case 'custom-fields':                      data = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              data = await orgcheckApi.getActiveUsers(); break;
@@ -232,14 +238,17 @@ export default class OrgCheckApp extends LightningElement {
                 case 'cache-manager':                      data = await orgcheckApi.getCacheInformation(); break;
                 default:                                   return;
             }
+
+            // Send data back to the component
+            spinner.sectionContinues(section, 'Passing the data to the component');
+            content.setComponentData(data);
+            spinner.sectionEnded(section, 'Done');
+            spinner.close();
+
         } catch (error) {
-            const spinner = this.template.querySelector('c-orgcheck-spinner');
             spinner.open();
-            spinner.sectionFailed(`Error while updating current tab called '${nextCurrentTab}'`, error);
+            spinner.sectionFailed(section, error);
             spinner.canBeClosed();
         }
-            
-        // Send data back to the component
-        if (data) content.setComponentData(data);
     }
 }
