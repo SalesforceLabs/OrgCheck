@@ -6,6 +6,8 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
     run(sfdcManager, resolve, reject) {
 
+        const start2 = Date.now();
+
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
             string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
@@ -29,10 +31,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                         isPublicGroup: record.Type === 'Regular',
                         isQueue: record.Type === 'Queue',
                         isRole: record.Type === 'Role',
-                        isRoleAndSubordinates: record.Type === 'RoleAndSubordinates',
-                        directUsers: [],
-                        directGroups: [],
-                        indirectUsers: []
+                        isRoleAndSubordinates: record.Type === 'RoleAndSubordinates'
                     });
                     // Depending on the type we add some properties
                     switch (record.Type) {
@@ -64,16 +63,21 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     }
 
                     // Handle the group membership
-                    if (record.GroupMembers && record.GroupMembers.records) {
+                    if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records.length > 0) {
+                        group.directUsers = [];
+                        group.directGroups = [];
                         record.GroupMembers.records.forEach((m) => {
-                            const memberId = sfdcManager.caseSafeId(m.UserOrGroupId);
-                            (memberId.startsWith('005') ? group.directUsers : group.directGroups).push({ id: memberId });
+                            const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
+                            (groupMemberId.startsWith('005') ? group.directUsers : group.directGroups).push({ id: groupMemberId, url: '/' });
                         });
                     }
-
+ 
                     // Add it to the map  
                     groups.set(group.id, group);
                 });
+
+            const end2 = Date.now();
+            console.error('dataset-groups.run()', start2, end2, end2-start2);
 
             // Return data
             resolve(groups);

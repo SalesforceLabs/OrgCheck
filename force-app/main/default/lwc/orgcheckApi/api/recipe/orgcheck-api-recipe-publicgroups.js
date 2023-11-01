@@ -20,9 +20,16 @@ export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
      * @returns {Array<SFDC_Group>}
      */
     transform(data) {
+        const start = Date.now();
+
         const groups = data.get(DATASET_GROUPS_ALIAS);
-        return groups.filterValues((group) => {
+        const g = groups.filterValues((group) => {
             return group.isPublicGroup === true;
         });
+
+        const end = Date.now();
+        console.error('recipe-public-groups.run()', start, end, end-start);
+
+        return g;
     }
 }
