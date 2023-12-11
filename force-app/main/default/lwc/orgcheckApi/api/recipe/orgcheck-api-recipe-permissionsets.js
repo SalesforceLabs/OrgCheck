@@ -19,20 +19,27 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
     /**
      * Get a list of permission sets (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_PermissionSet>}
      */
     transform(data, namespace) {
+        // Get data
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
         const profiles = data.get(DATASET_PROFILES_ALIAS);
-        permissionSets.forEachValue((permissionSet) => {
-            permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.hasKey(id)).map((id) => profiles.get(id));
+        // Augment data
+        permissionSets.forEach((permissionSet) => {
+            permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.has(id)).map((id) => profiles.get(id));
         });
-        return permissionSets.filterValues((permissionSet) => {
-            if (namespace !== '*' && permissionSet.package !== namespace) return false;
-            return true;
-        });
+        // Filter data
+        const array = [];
+        for (const permissionSet of permissionSets.values()) {
+            if (namespace === '*' || permissionSet.package === namespace) {
+                array.push(permissionSet);
+            }
+        }
+        // Return data
+        return array;
     }
 }

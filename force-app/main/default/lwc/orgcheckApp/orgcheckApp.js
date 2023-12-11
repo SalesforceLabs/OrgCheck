@@ -89,9 +89,10 @@ export default class OrgCheckApp extends LightningElement {
         try {
             const data = await orgcheckApi.getPackagesTypesAndObjects('*', '*');
             if (data) {
-                filters.updateSObjectTypeOptions(data.types);
-                filters.updatePackageOptions(data.packages);
-                filters.updateSObjectApiNameOptions(data.objects);
+                const dataAsJson = JSON.parse(data);
+                filters.updateSObjectTypeOptions(dataAsJson.types);
+                filters.updatePackageOptions(dataAsJson.packages);
+                filters.updateSObjectApiNameOptions(dataAsJson.objects);
             }    
         } catch (error) {
             const spinner = this.template.querySelector('c-orgcheck-spinner');
@@ -181,15 +182,6 @@ export default class OrgCheckApp extends LightningElement {
         // If the next current tab is specified, we use it to reset the current tab property
         if (nextCurrentTab) this.#currentTab = nextCurrentTab;
 
-        // The tab name (in lightning-tab value property) will match the name of the component
-        const content = this.template.querySelector(`c-orgcheck-${this.#currentTab}`);
-
-        // If we receive null, the content is not existing or not yet loaded
-        // OR
-        // If the content is not implementing the 'setComponentData' method (must be api decorated)
-        // In these cases, we stop here
-        if (!content || !content.setComponentData) return;
-
         // Get the global filter parameters
         const filters = this.template.querySelector('c-orgcheck-global-filters');
         const namespace = filters.isSelectedPackageAny === true ? '*' : (filters.isSelectedPackageNo === true ? '' : filters.selectedPackage);
@@ -203,45 +195,39 @@ export default class OrgCheckApp extends LightningElement {
         const orgcheckApi = this.template.querySelector('c-orgcheck-api');
         const spinner = this.template.querySelector('c-orgcheck-spinner');
         const section = `TAB ${this.#currentTab}`;
-        let data;
         try {
             spinner.open();
             spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             switch (this.#currentTab) {
-                case 'object-information':                 if (sobject !== '*') data = await orgcheckApi.getObject(sobject); break;
-                case 'objects-owd':                        console.error('TODO'); break;
-                case 'custom-fields':                      data = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
-                case 'users':                              data = await orgcheckApi.getActiveUsers(); break;
-                case 'profiles':                           data = await orgcheckApi.getProfiles(namespace); break;
-                case 'permission-sets':                    data = await orgcheckApi.getPermissionSets(namespace); break;
-                case 'roles':                              console.error('TODO'); break;
-                case 'public-groups':                      data = await orgcheckApi.getPublicGroups(); break;
-                case 'queues':                             data = await orgcheckApi.getQueues(); break;
-                case 'flows"':                             console.error('TODO'); break;
-                case 'process-builders':                   console.error('TODO'); break;
-                case 'workflows':                          console.error('TODO'); break;
-                case 'custom-labels':                      data = await orgcheckApi.getCustomLabels(namespace); break;
-                case 'visual-force-pages':                 data = await orgcheckApi.getVisualForcePages(namespace); break;
-                case 'visual-force-components':            data = await orgcheckApi.getVisualForceComponents(namespace); break;
-                case 'lightning-pages':                    data = await orgcheckApi.getLightningPages(namespace); break;
-                case 'lightning-aura-components':          data = await orgcheckApi.getLightningAuraComponents(namespace); break;
-                case 'lightning-web-components':           data = await orgcheckApi.getLightningWebComponents(namespace); break;
-                case 'apex-classes':                       console.error('TODO'); break;
-                case 'apex-recompilation-needed':          console.error('TODO'); break;
-                case 'apex-triggers':                      console.error('TODO'); break;
-                case 'apex-unit-tests':                    console.error('TODO'); break;
-                case 'dashboards':                         console.error('TODO'); break;
-                case 'reports" label="Reports':            console.error('TODO'); break;
-                case 'schedulable-classes-not-scheduled':  console.error('TODO'); break;
-                case 'apex-jobs':                          console.error('TODO'); break;
-                case 'scheduled-jobs':                     console.error('TODO'); break;
-                case 'cache-manager':                      data = await orgcheckApi.getCacheInformation(); break;
-                default:                                   return;
+                case 'object-information':                 if (sobject !== '*') this.objectInformationData = await orgcheckApi.getObject(sobject); else this.objectInformationData = null; break;
+                case 'objects-owd':                        this.objectsOWDTableData = await orgcheckApi.getObjectsOWDs(); break;
+                case 'custom-fields':                      this.customFieldsTableData = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
+                case 'users':                              this.usersTableData = await orgcheckApi.getActiveUsers(); break;
+                case 'profiles':                           this.profilesTableData = await orgcheckApi.getProfiles(namespace); break;
+                case 'permission-sets':                    this.permissionSetsTableData = await orgcheckApi.getPermissionSets(namespace); break;
+                case 'roles':                              this.rolesTableData = await orgcheckApi.getRoles(); break;
+                case 'public-groups':                      this.publicGroupsTableData = await orgcheckApi.getPublicGroups(); break;
+                case 'queues':                             this.queuesTableData = await orgcheckApi.getQueues(); break;
+                case 'flows':                              this.flowsTableData = await orgcheckApi.getFlows(); break;
+                case 'process-builders':                   this.processBuildersTableData = await orgcheckApi.getProcessBuilders(); break;
+                case 'workflows':                          this.workflowsTableData = await orgcheckApi.getWorkflows(); break;
+                case 'custom-labels':                      this.customLabelsTableData = await orgcheckApi.getCustomLabels(namespace); break;
+                case 'visual-force-pages':                 this.visualForcePagesTableData = await orgcheckApi.getVisualForcePages(namespace); break;
+                case 'visual-force-components':            this.visualForceComponentsTableData = await orgcheckApi.getVisualForceComponents(namespace); break;
+                case 'lightning-pages':                    this.lightningPagesTableData = await orgcheckApi.getLightningPages(namespace); break;
+                case 'lightning-aura-components':          this.auraComponentsTableData = await orgcheckApi.getLightningAuraComponents(namespace); break;
+                case 'lightning-web-components':           this.lightningWebComponentsTableData = await orgcheckApi.getLightningWebComponents(namespace); break;
+                case 'apex-classes':                       
+                case 'apex-recompilation-needed':          
+                case 'apex-triggers':                      
+                case 'schedulable-classes-not-scheduled':  
+                case 'apex-jobs':                          
+                case 'apex-unit-tests':                    this.apexClassesTableData = await orgcheckApi.getApexClasses(namespace); break;
+                case 'dashboards':                         this.dashboardsTableData = await orgcheckApi.getDashboards(); break;
+                case 'reports':                            this.reportsTableData = await orgcheckApi.getReports(); break;
+                case 'cache-manager':                      this.cacheManagerData = await orgcheckApi.getCacheInformation(); break;
+                default:
             }
-
-            // Send data back to the component
-            spinner.sectionContinues(section, 'Passing the data to the component');
-            content.setComponentData(data);
             spinner.sectionEnded(section, 'Done');
             spinner.close();
 
@@ -251,4 +237,198 @@ export default class OrgCheckApp extends LightningElement {
             spinner.canBeClosed();
         }
     }
+
+    customFieldsTableColumns = [
+        { label: 'Object',              type: 'id',               data: { ref: 'objectRef', value: 'label', url: 'url' }},
+        { label: 'Object Type',         type: 'text',             data: { ref: 'objectRef.typeRef', value: 'label' }},
+        { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    customFieldsTableData;
+
+    customLabelsTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Label',               type: 'text',             data: { value: 'label' }},
+        { label: 'Category',            type: 'text',             data: { value: 'category' }},
+        { label: 'Language',            type: 'text',             data: { value: 'language' }},
+        { label: 'Protected?',          type: 'boolean',          data: { value: 'isProtected' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Value',               type: 'text',             data: { value: 'value', maximumLength: 30 }}
+    ];
+
+    customLabelsTableData;
+
+    auraComponentsTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    auraComponentsTableData;
+
+    lightningPagesTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    lightningPagesTableData;
+
+    lightningWebComponentsTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ]
+
+    lightningWebComponentsTableData;
+
+    permissionSetsTableColumns = [
+        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
+        { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
+        { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions', max: 50, valueAfterMax: '50+' }},
+        { label: '#Object CRUDs',    type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
+        { label: 'License',          type: 'text',     data: { value: 'license' }},
+        { label: 'Package',          type: 'text',     data: { value: 'package' }},
+        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this permission set!' }},
+        { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', value: 'name', url: 'url' }},
+        { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
+        { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
+        { label: 'Description',      type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    permissionSetsTableData;
+
+    profilesTableColumns = [
+        { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
+        { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions', max: 50, valueAfterMax: '50+' }},
+        { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
+        { label: 'License',         type: 'text',     data: { value: 'license' }},
+        { label: 'Package',         type: 'text',     data: { value: 'package' }},
+        { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
+        { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
+        { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
+        { label: 'Description',     type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    profilesTableData;
+
+    publicGroupsTableColumns = [
+        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
+        { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
+        { label: 'Included groups',  type: 'ids',      data: { values: 'directGroups', value: 'id', url: 'url' }},
+        { label: 'Included users',   type: 'ids',      data: { values: 'directUsers', value: 'id', url: 'url' }},
+        { label: 'All active users', type: 'ids',      data: { values: 'indirectUsers', value: 'id', url: 'url' }},
+    ];
+
+    publicGroupsTableData;
+
+    queuesTableColumns = [
+        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
+        { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
+        { label: 'Included groups',  type: 'texts',    data: { ref: 'directGroups', value: 'id' }},
+        { label: 'Included users',   type: 'texts',    data: { ref: 'directUsers', value: 'id' }},
+        { label: 'All active users', type: 'texts',    data: { ref: 'indirectUsers', value: 'id' }},
+    ];
+
+    queuesTableData;
+
+    usersTableColumns = [
+        { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
+        { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin', valueIfEmpty: 'Never logged!' }},
+        { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
+        { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
+        { label: 'Key permissions', type: 'texts',    data: { values: 'importantPermissions' }},
+        { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
+        { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', value: 'name' }}
+    ];
+
+    usersTableData;
+
+    visualForceComponentsTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    visualForceComponentsTableData;
+
+    visualForcePagesTableColumns = [
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Mobile',              type: 'boolean',          data: { value: 'isMobileReady' }},
+        { label: 'Package',             type: 'text',             data: { value: 'package' }},
+        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
+    visualForcePagesTableData;
+
+    apexClassesTableColumns;
+    apexClassesTableData;
+    apexTriggersTableColumns;
+    apexTriggersTableData;
+    apexTestsTableColumns;
+    apexTestsTableData;
+    
+    dashboardsTableData;
+    reportsTableData;
+    objectsOWDTableData;
+    rolesTableData;
+    flowsTableData;
+    processBuildersTableData;
+    workflowsTableData;
+
+    cacheManagerData;
+
+    objectInformationData;
 }

@@ -15,12 +15,17 @@ export class OrgCheckRecipeOrgInformation extends OrgCheckRecipe {
     /**
      * Get the information of the current org (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * 
      * @returns {SFDC_OrgInfo}
      */
     transform(data) {
-        const orgInfo = data.get(DATASET_ORGINFO_ALIAS);
-        return orgInfo.allValues()[0];
+        // Get data
+        const orgInfoAsMap = data.get(DATASET_ORGINFO_ALIAS);
+        // Augment data
+        // Filter data
+        let orgInfo;
+        orgInfoAsMap.forEach((oi) => orgInfo = oi);
+        return orgInfo;
     }
 }

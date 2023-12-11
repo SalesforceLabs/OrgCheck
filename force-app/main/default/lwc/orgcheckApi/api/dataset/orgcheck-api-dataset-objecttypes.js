@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_ObjectType,
     OBJECTTYPE_ID_STANDARD_SOBJECT, 
     OBJECTTYPE_ID_CUSTOM_SOBJECT, 
@@ -17,7 +16,7 @@ export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
         try {
 
             // Init the map
-            const types = new OrgCheckMap();
+            const types = new Map();
 
             // Set the map
             [

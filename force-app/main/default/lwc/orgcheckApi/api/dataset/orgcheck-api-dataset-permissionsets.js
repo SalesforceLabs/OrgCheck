@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
@@ -29,7 +28,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const permissionSets = new OrgCheckMap();
+            const permissionSets = new Map();
 
             // Set the map
             results[0].records
@@ -69,7 +68,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 .forEach((record) => {
                     const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                     const profileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
-                    if (permissionSets.hasKey(permissionSetId)) {
+                    if (permissionSets.has(permissionSetId)) {
                         const permissionSet = permissionSets.get(permissionSetId);
                         if (permissionSet.profileIds[profileId] !== true) permissionSet.profileIds[profileId] = true;
                     }
@@ -78,13 +77,13 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 .forEach((record) => {
                     const permissionSetId = sfdcManager.caseSafeId(record.Id);
                     const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
-                    if (permissionSets.hasKey(permissionSetId)) {
+                    if (permissionSets.has(permissionSetId)) {
                         const permissionSet = permissionSets.get(permissionSetId);
                         permissionSet.url = sfdcManager.setupUrl('permission-set-group', permissionSetGroupId);
                         permissionSet.isGroup = true;
                     }
                 });
-            permissionSets.forEachValue((permissionSet) => {
+            permissionSets.forEach((permissionSet) => {
                 permissionSet.profileIds = Object.keys(permissionSet.profileIds);
             });
 

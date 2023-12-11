@@ -19,7 +19,7 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
     /**
      * Get the object information (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * 
      * @returns {SFDC_Object}
      */

@@ -1,4 +1,3 @@
-import { OrgCheckMap } from './orgcheck-api-type-map';
 import { OrgCheckLogger } from './orgcheck-api-logger';
 import { OrgCheckSalesforceManager } from './orgcheck-api-sfconnectionmanager';
 import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
@@ -17,6 +16,7 @@ import { OrgCheckDatasetLightningAuraComponents } from '../dataset/orgcheck-api-
 import { OrgCheckDatasetLightningWebComponents } from '../dataset/orgcheck-api-dataset-lighntingwebcomponents';
 import { OrgCheckDatasetLightningPages } from '../dataset/orgcheck-api-dataset-lighntingpages';
 import { OrgCheckDatasetGroups } from '../dataset/orgcheck-api-dataset-groups';
+import { OrgCheckDatasetApexClass } from '../dataset/orgcheck-api-dataset-apexclasses';
 
 export class DatasetCacheInfo {
     name;
@@ -47,6 +47,7 @@ export const DATASET_LIGHTNINGAURACOMPONENTS_ALIAS = 'lightning-aura-components'
 export const DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS = 'lightning-web-components';
 export const DATASET_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 export const DATASET_GROUPS_ALIAS = 'groups';
+export const DATASET_APEXCLASSES_ALIAS = 'apex-classes';
 
 export class OrgCheckDatasetManager {
     
@@ -72,8 +73,8 @@ export class OrgCheckDatasetManager {
         
         this.#sfdcManager = sfdcManager;
         this.#logger = logger;
-        this.#datasets = new OrgCheckMap();
-        this.#cache = new OrgCheckMap();
+        this.#datasets = new Map();
+        this.#cache = new Map();
 
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
@@ -91,30 +92,31 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS, new OrgCheckDatasetLightningWebComponents());
         this.#datasets.set(DATASET_LIGHTNINGPAGES_ALIAS, new OrgCheckDatasetLightningPages());
         this.#datasets.set(DATASET_GROUPS_ALIAS, new OrgCheckDatasetGroups());
+        this.#datasets.set(DATASET_APEXCLASSES_ALIAS, new OrgCheckDatasetApexClass());
     }
 
     /**
      * Run the given list of datasets and return them as a result
      * 
      * @param {Array<DatasetRunInformation>} datasets 
-     * @return OrgCheckMap<Any>
+     * @return Map
      */
     async run(datasets) {
         if (datasets instanceof Array === false) {
             throw new Error('The given datasets is not an instance of Array.');
         }
-        const results = new OrgCheckMap();
+        const results = new Map();
         const promises = [];
         datasets.forEach((dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
-            const paramaters = (typeof dataset === 'string' ? undefined : dataset.parameters);
+            const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             const section = `DATASET ${alias}`;
 
             promises.push(new Promise((resolve, reject) => {
                 this.#logger.sectionContinues(section, `Checking the cache for key=${cacheKey}...`);
                 // Check cache if any
-                if (this.#cache.hasKey(cacheKey) === true) {
+                if (this.#cache.has(cacheKey) === true) {
                     // Set the results from cache
                     this.#logger.sectionEnded(section, 'There was data in cache, we use it!');
                     results.set(alias, this.#cache.get(cacheKey));
@@ -146,7 +148,7 @@ export class OrgCheckDatasetManager {
                         reject(error);
                     },
                     // Send any parameters if needed
-                    paramaters
+                    parameters
                 );
             }));
         });
@@ -156,15 +158,15 @@ export class OrgCheckDatasetManager {
     getCacheInformation() {
         const section = 'DATASET cache-info';
         this.#logger.sectionStarts(section, `Parsing all the dataset cache to answer your request...`);
-        const cacheInformation = this.#cache.keys().map((datasetName) => {
+        const cacheInformation = []; /*this.#cache.keys().map((datasetName) => {
             const dataset = this.#cache.get(datasetName);
             const info = new DatasetCacheInfo();
             info.name = datasetName;
-            info.length = dataset?.size();
-            info.created = dataset?.createdDate();
-            info.modified = dataset?.lastModificationDate();
+            info.length = dataset?.size() || 1;
+            if (dataset?.createdDate) info.created = dataset?.createdDate();
+            if (dataset?.lastModificationDate) info.modified = dataset?.lastModificationDate();
             return info;
-        });
+        });*/
         this.#logger.sectionEnded(section, `Done with ${cacheInformation.length} item(s) scanned.`);
         this.#logger.end();
         return cacheInformation;

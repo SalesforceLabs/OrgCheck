@@ -1,4 +1,15 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
+
+const CELL_PREPARE = (reference, column, cell = {}) => {
+    column.dataProperties.forEach((p) => {
+        cell[p] = reference[column.data[p]];
+    });
+    return cell;
+}
+
+const ROW_CSSCLASS = (row, isVisible) => {
+    return (row.score === 0 ? '': 'bad') + ' ' + (isVisible === true ? '' : 'invisible');
+}
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -7,10 +18,16 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     connectedCallback() {
         if (this.dontUseAllSpace === true) {
-            this.tableStyle = 'width: unset;';
+            this.tableClasses += ' dontuseallspace';
+        }
+        if (this.isColumnBordered === true) {
+            this.tableClasses += ' slds-table_col-bordered';
+        }
+        if (this.isStickyHeaders === true) {
+            this.tableClasses += 'slds-table_header-fixed';
         }
     }
-    
+
     /**
      * Is there no records at all to display?
      */
@@ -22,9 +39,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api emptyMessage;
 
     /**
-     * Is the search is active and records are filtered
+     * Are the statistics going to be shown on top of the table?
      */
-    isFilterOn = false;
+    @api showStatistics = false;
 
     /**
      * Total number of rows (even if the filter is on)
@@ -35,53 +52,80 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * Number of rows that match the filter
      */
     nbRowsVisible = 0;
+
+    /**
+     * Total number of rows that have a bad score (>0)
+     */
+    nbBadRows = 0;
+    
+    /**
+     * Sum of all the bad scores
+     */
+    sumScore = 0;
+
+    /**
+     * Is the search active and records are filtered
+     */
+    isFilterOn = false;
     
     /**
      * Are we gonna use the dependency viewer in this table?
-     * true if one of the columns are of type ""
+     * true if one of the columns are of type "dependencyViewer"
+     * False by default.
      */
     usesDependencyViewer = false;
-
-    /**
-     * Are the statistics going to be shown on top of the table?
-     */
-    @api showStatistics = false;
     
     /**
      * Do you want the search input to be displayed?
      * And the filter to be enabled?
+     * False by default.
      */
     @api showSearch = false;
 
+    /**
+     * Do you want to show the SCORE column in the table?
+     * No need to add it to the columns, flag this property to true
+     * False by default.
+     */
     @api showScoreColumn = false;
 
+    /**
+     * Do you want to show the ROW NUMBER column in the table?
+     * No need to add it to the columns, flag this property to true
+     * False by default.
+     */
     @api showRowNumberColumn = false;
 
+    /**
+     * Do you want the table to use all the horizontal space or not?
+     * False by default.
+     */
     @api dontUseAllSpace = false;
 
-    tableStyle = '';
+    /**
+     * CSS classes for the table
+     */
+    tableClasses = 'slds-table slds-table_bordered slds-is-selected slds-cell-wrap';
 
     /**
      * Do you need the headers to stick on top of the screen even if you scroll down?
-     * (not yet implemented)
      */
-    //@api stickyHeaders = false;
+    @api isStickyHeaders = false;
     
     /**
      * Do you need the table to have a border?
-     * (not yet implemented)
      */
-    //@api columnBordered = false;
+    @api isColumnBordered = false;
     
     /**
      * Internal array of columns
      */
-    @track _columns;
+    #columns;
 
     /**
      * Internal array of rows
      */
-    @track _rows;
+    #rows;
 
     /**
      * Internal property that indicates the current column index which is used by the sort method
@@ -99,13 +143,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     #filteringSearchInput;
 
     /**
-     * Setter for the columns (it will set the internal <code>_columns</code> property)
+     * Setter for the columns (it will set the internal <code>#columns</code> property)
      * 
      * @param {Array<any>} columns 
      */
     @api set columns(columns) {
-        const start = Date.now();
-
         if (columns) {
             this.usesDependencyViewer = false;
             const _columns = [];
@@ -116,127 +158,103 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 _columns.push({ label: 'Score', type: 'score', data: { value: 'badScore' }, sorted: 'desc' });
             }
             _columns.push(...columns);
-            this._columns = _columns.map((column, index) => { 
-                if (column.sorted) {
-                    this.#sortingColumnIndex = index;
-                    this.#sortingOrder = column.sorted;
+            this.#columns = _columns.map((c, i) => { 
+                if (c.sorted) {
+                    this.#sortingColumnIndex = i;
+                    this.#sortingOrder = c.sorted;
                 }
-                if (this.usesDependencyViewer === false && column.type === 'dependencyViewer') {
+                if (this.usesDependencyViewer === false && c.type === 'dependencyViewer') {
                     this.usesDependencyViewer = true;
                 }
-                return Object.assign({ 
-                    index: index, 
-                    cssClass: column.sorted ? `sorted sorted-${column.sorted}` : ''
-                }, column);
+                return Object.assign({
+                    index: i, 
+                    cssClass: c.sorted ? `sorted sorted-${c.sorted}` : '',
+                    dataProperties: c.data ? (Object.keys(c.data).filter((k) => k !== 'ref')) : [],
+                    typeProperty: `is${c.type.charAt(0).toUpperCase()}${c.type.slice(1)}`,
+                    isIterative: c.type.endsWith('s')
+                }, c);
             });
         }
-
-        const end = Date.now();
-        console.error('rows()', start, end, end-start);
-}
-
-    /**
-     * Getter for the columns
-     */
-    get columns() { 
-        return this._columns; 
     }
-    
+   
     /**
-     * Setter for the rows (it will set the internal <code>_rows</code> property).
-     * This method relies on the internal <code>_columns</code> property as well.
+     * Getter for the columns (it will return the internal <code>#columns</code> property)
+     * 
+     * @return {Array<any>} columns 
+     */
+    get columns() {
+        return this.#columns;
+    }
+
+    /**
+     * Setter for the rows (it will set the internal <code>#rows</code> property).
      * 
      * @param {Array<any>} rows 
      */
-    @api set rows(rows) { 
-        const start = Date.now();
-
-        if (rows && this._columns) {
-            this._rows = rows.map((row, rowIndex) => {
-                const item = { 
-                    key: rowIndex, 
-                    visible: true,
-                    cells: [] 
-                };
-                this._columns.forEach((column, columnIndex) => {
-                    let ref = row;
-                    if (column.data?.ref) {
-                        column.data?.ref.split('.').forEach((r) => { ref = ref[r]; });
-                    }
-                    if (ref) {
-                        const cell = { key: columnIndex };
-                        cell[`type_${column.type}`] = true;
-                        if (column.type.endsWith('s')) {
-                            // Iterable data in a cell
-                            const values = ref[column.data.values];
-                            if (column.type === 'texts') {
-                                cell.values = values;
-                            } else {
-                                cell.values = values?.map((v) => {
-                                    if (typeof v === 'string') return v;
-                                    const value = {};
-                                    Object.keys(column.data).filter(d => d !== 'values').forEach(d => {
-                                        value[d] = v[column.data[d]];
-                                    });
-                                    return value;
-                                });
-                            }
-                        } else if (column.type !== 'index') {
-                            // Unique value in a cell
-                            cell.value = ref[column.data.value];
-                            Object.keys(column.data).filter(d => d !== 'value').forEach(d => {
-                                cell[d] = ref[column.data[d]];
-                            });
-                            if (column.type === 'score') {
-                                item.score = cell.value;
-                                if (cell.value > 0) {
-                                    item.cssClass = 'bad';
-                                    cell.cssClass = 'bad badscore';
-                                }
-                            } else if (column.type === 'numeric') {
-                                if (column.data.max && cell.value > column.data.max) {
-                                    cell.isMaxReached = true; 
-                                    cell.valueAfterMax = column.data.valueAfterMax;
-                                } else if (column.data.min && cell.value < column.data.min) {
-                                    cell.isMinReached = true; 
-                                    cell.valueBeforeMin = column.data.valueBeforeMin;
-                                }
-                            } else if (column.type === 'text') {
-                                if (column.data.maximumLength && cell.value && cell.value.length > column.data.maximumLength) {
-                                    cell.value = cell.value.substring(0, column.data.maximumLength);
-                                    cell.isValueTruncated = true;
-                                }
-                            }
-                            if (!cell.value && cell.value !== 0) cell.valueIfEmpty = column.data.valueIfEmpty;
-                        }
-                        if (row.hasBadField && (
-                                (column.data?.ref && row.hasBadField(column.data.ref)) || 
-                                (column.data?.value && row.hasBadField(column.data.value))
-                            )) {
-                            cell.cssClass = 'bad badcell';
-                        }
-                        item.cells.push(cell);
-                    }
-                });
-                return item;
-            });
-            this.nbRows = this._rows.length;
-            this.isDataEmpty = (this.nbRows === 0);
-            this.filter();
-            this.sort();
-
-            const end = Date.now();
-            console.error('rows()', start, end, end-start);
+    @api set rows(rows) {
+        if (!this.#columns) {
+            return;
         }
+        if (rows && typeof rows === 'string') {
+            try {
+                rows = JSON.parse(rows);
+            } catch (e) {
+                rows = undefined;
+            }
+        };
+        if (!rows || Array.isArray(rows) === false) {
+            this.nbRows = 0;
+            this.isDataEmpty = true;
+            return;
+        }
+        // Here 'rows' is defined and is an array
+        this.nbRows = rows.length || 0;
+        if (rows.length !== 0) {
+            this.isDataEmpty = false;
+            //this._filter();
+            //this._sort();
+        } else {
+            this.isDataEmpty = true;
+        }
+        this.#rows = rows.map((r, i) => { 
+            // Initiate the row
+            const row = { 
+                key: i, 
+                cssClass: ROW_CSSCLASS(r, true),
+                score: r.score,
+                cells: []
+            };
+            // Iterate over the columns to prepare the cells of that row
+            this.#columns.forEach((c, j) => {
+                // By default the reference used in the properties is the row itself
+                // Unless the 'ref' property in column.data is specified 
+                let ref = r;
+                if (c.data?.ref) {
+                    c.data?.ref.split('.').forEach((p) => { ref = ref[p]; });
+                }
+                // Prepare the cell information
+                const cell = { key: `${i}.${j}` };
+                cell[c.typeProperty] = true;
+                if (c.isIterative === true) {
+                    cell.values = ref[c.data.values]?.map((d) => CELL_PREPARE(d, c));
+                } else {
+                    CELL_PREPARE(ref, c, cell);
+                }
+                row.cells.push(cell);
+            });
+            return row; 
+        });
     }
 
     /**
-     * Getter for the rows
+     * Getter for the rows (it will return the internal <code>#rows</code> property)
+     * 
+     * @return {Array<any>} rows 
      */
-    get rows() { 
-        return this._rows; 
+    get rows() {
+        return this.#rows;
     }
-
+        
     /**
      * Handler when a user type a search text in the appropriate input text field
      * 
@@ -244,7 +262,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     handleSearchInputChanged(event) {
         this.#filteringSearchInput = event.target.value;
-        this.filter();
+        this._filter();
     }
 
     /**
@@ -255,7 +273,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleSortColumnClick(event) {
         this.#sortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10);
         this.#sortingOrder = 'asc';
-        this._columns.forEach((column) => {
+        this.#columns.forEach((column) => {
             if (column.index === this.#sortingColumnIndex) {
                 if (!column.sorted || column.sorted === 'desc') {
                     this.#sortingOrder = column.sorted = 'asc';
@@ -268,7 +286,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 delete column.cssClass;
             }
         });
-        this.sort();
+        this._sort();
     }
 
     async handleViewDependency(event) {
@@ -279,50 +297,44 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     /**
      * Internal filter method which takes into account the <code>#filteringSearchInput</code> property
      */
-    filter() {
-        const start = Date.now();
-
+    _filter() {
         const searchInput = this.#filteringSearchInput;
         this.nbRowsVisible = 0;
         if (searchInput && searchInput.length > 2) {
             this.isFilterOn = true;
             const s = searchInput.toUpperCase();
-            this._rows.forEach((row) => {
-                row.visible = (
+            this.#rows.forEach((row) => {
+                const rowIsVisible = (
                     row.cells.findIndex((cell) => {
                         return Object.values(cell).findIndex((value) => {
                             return String(value).toUpperCase().indexOf(s) >= 0;
                         }) >= 0;
                     }) >= 0
                 );
-                if (row.visible === true) {
+                if (rowIsVisible === true) {
                     row.key = ++this.nbRowsVisible;
                 }
+                row.cssClass = ROW_CSSCLASS(row, rowIsVisible);
             });
         } else {
             this.isFilterOn = false;
-            this._rows.forEach((row, index) => { 
-                row.visible = true; 
+            this.#rows.forEach((row, index) => { 
+                row.cssClass = ROW_CSSCLASS(row, true);
                 row.key = index+1;
             });
         }
-
-        const end = Date.now();
-        console.error('filter()', start, end, end-start);
     }
 
     /**
      * Internal sort method which takes into account the <code>#sortingColumnIndex</code> and <code>sortingOrder</code> properties
      */
-    sort() {
-        const start = Date.now();
-
+    _sort() {
         if (this.#sortingColumnIndex === undefined) return;
         const columnIndex = this.#sortingColumnIndex;
         const iOrder = this.#sortingOrder === 'asc' ? 1 : -1;
-        const type = this._columns[columnIndex].type;
+        const type = this.#columns[columnIndex].type;
         let value1, value2;
-        this._rows.sort((row1, row2) => {
+        this.#rows.sort((row1, row2) => {
             if (type.endsWith('s')) {
                 value1 = row1.cells[columnIndex].values.length || undefined;
                 value2 = row2.cells[columnIndex].values.length || undefined;
@@ -338,8 +350,5 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         }).forEach((row, index) => { 
             row.key = index+1; 
         });
-
-        const end = Date.now();
-        console.error('sort()', start, end, end-start);
-}
+    }
 }

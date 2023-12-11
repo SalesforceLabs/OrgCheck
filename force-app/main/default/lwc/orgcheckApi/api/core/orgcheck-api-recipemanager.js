@@ -1,6 +1,5 @@
 import { OrgCheckDatasetManager } from './orgcheck-api-datasetmanager';
 import { OrgCheckLogger } from './orgcheck-api-logger';
-import { OrgCheckMap } from './orgcheck-api-type-map';
 import { OrgCheckRecipeActiveUsers } from '../recipe/orgcheck-api-recipe-activeusers';
 import { OrgCheckRecipeCustomFields } from '../recipe/orgcheck-api-recipe-customfields';
 import { OrgCheckRecipeCustomLabels } from '../recipe/orgcheck-api-recipe-customlabels';
@@ -16,6 +15,7 @@ import { OrgCheckRecipeLightningPages } from '../recipe/orgcheck-api-recipe-ligh
 import { OrgCheckRecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
 import { OrgCheckRecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
 import { OrgCheckRecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
+import { OrgCheckRecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
 
 export const RECIPE_ACTIVEUSERS_ALIAS = 'active-users';
 export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -32,6 +32,7 @@ export const RECIPE_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 export const RECIPE_VISUALFORCECOMPONENTS_ALIAS = 'visual-force-components';
 export const RECIPE_PUBLICGROUPS_ALIAS = 'public-groups';
 export const RECIPE_QUEUES_ALIAS = 'queues';
+export const RECIPE_APEXCLASSES_ALIAS = 'apex-classes';
 
 export class OrgCheckRecipeManager {
 
@@ -56,7 +57,7 @@ export class OrgCheckRecipeManager {
 
         this.#datasetManager = datasetManager;
         this.#logger = logger;
-        this.#recipes = new OrgCheckMap();
+        this.#recipes = new Map();
 
         this.#recipes.set(RECIPE_ACTIVEUSERS_ALIAS, new OrgCheckRecipeActiveUsers());
         this.#recipes.set(RECIPE_CUSTOMFIELDS_ALIAS, new OrgCheckRecipeCustomFields());
@@ -73,12 +74,13 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_VISUALFORCECOMPONENTS_ALIAS, new OrgCheckRecipeVisualForceComponents());
         this.#recipes.set(RECIPE_PUBLICGROUPS_ALIAS, new OrgCheckRecipePublicGroups());
         this.#recipes.set(RECIPE_QUEUES_ALIAS, new OrgCheckRecipeQueues());
+        this.#recipes.set(RECIPE_APEXCLASSES_ALIAS, new OrgCheckRecipeApexClasses());
 
     }
 
     async run(alias, ...parameters) {
         // Check if alias is registered
-        if (this.#recipes.hasKey(alias) === false) {
+        if (this.#recipes.has(alias) === false) {
             throw new Error(`The given alias (${alias}) does not correspond to a registered recipe.`);
         } 
         const section = `RECIPE ${alias}`;

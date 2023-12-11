@@ -80,7 +80,7 @@ export class OrgCheckSalesforceManager {
                     case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
                         return `/lightning/setup/ExternalObjects/page?address=%2F${durableId}%3Fsetupid%3DExternalObjects`;
                     default:
-                        console.error('field with type object uncovered: ', objectType);
+                        //////console.error('field with type object uncovered: ', objectType);
                         return `/${durableId}`;
                 }
             }
@@ -103,7 +103,7 @@ export class OrgCheckSalesforceManager {
                     case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
                         return `/lightning/setup/ExternalObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DExternalObjects`;
                     default:
-                        console.error('object with type uncovered: ', objectType);
+                        /////console.error('object with type uncovered: ', objectType);
                         return `/${objectDurableId}`;
                 }
             }
@@ -161,7 +161,7 @@ export class OrgCheckSalesforceManager {
             // User
             //AuraDefinitionBundle
             default:
-                console.error('type uncovered: ', type);
+                //////console.error('type uncovered: ', type);
                 return `/${durableId}`;
         }
     }

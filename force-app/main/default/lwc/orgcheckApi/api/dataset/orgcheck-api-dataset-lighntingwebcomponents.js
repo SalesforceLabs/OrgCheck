@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
 
 export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
@@ -17,7 +16,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const components = new OrgCheckMap();
+            const components = new Map();
 
             // Set the map
             results[0].records

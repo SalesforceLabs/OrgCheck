@@ -21,26 +21,33 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
     /**
      * Get a list of packages, types and objects (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Any}
      */
     transform(data, namespace, type) {
+        // Get data
         const packages = data.get(DATASET_PACKAGES_ALIAS);
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);
         const objects = data.get(DATASET_OBJECTS_ALIAS);
-        objects.forEachValue((object) => {
+        // Augment data
+        objects.forEach((object) => {
             object.typeRef = types.get(object.typeId);
         });
+        // Filter data
+        const array = [];
+        for (const object of objects.values()) {
+            if ((namespace === '*' || object.package === namespace) &&
+                (type === '*' || object.typeRef?.id === type)) {
+                array.push(object);
+            }
+        }
+        // Return data
         return { 
-            packages: packages.allValues(),
-            types: types.allValues(),
-            objects: objects.filterValues((object) => {
-                if (namespace !== '*' && object.package !== namespace) return false;
-                if (type !== '*' && object.typeRef?.id !== type) return false;
-                return true;
-            })
+            packages: [... packages.values()],
+            types: [... types.values()],
+            objects: array
         };
     }
 }

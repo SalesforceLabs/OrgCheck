@@ -15,16 +15,22 @@ export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
     /**
      * Get a list of custom labels (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_CustomLabel>}
      */
     transform(data, namespace) {
+        // Get data
         const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);
-        return customLabels.filterValues((customLabel) => {
-            if (namespace !== '*' && customLabel.package !== namespace) return false;
-            return true;
-        });
+        // Filter data
+        const array = [];
+        for (const customLabel of customLabels.values()) {
+            if (namespace === '*' || customLabel.package === namespace) {
+                array.push(customLabel);
+            }
+        }
+        // Return data
+        return array;
     }
 }

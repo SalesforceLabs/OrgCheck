@@ -11,8 +11,8 @@
                             <div class="slds-progress__item_content">
                                 <b>{item.name}</b>: 
                                 {item.length} item(s) cached, 
-                                Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time>, 
-                                Last modified on <lightning-formatted-date-time value={item.modified}></lightning-formatted-date-time>.
+                                <template lwc:if={item.created}>Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time>, </template>
+                                <template lwc:if={item.modified}>Last modified on <lightning-formatted-date-time value={item.modified}></lightning-formatted-date-time>.</template>
                             </div>
                             <lightning-button label="X" variant="destructive-text" onclick={handleRemoveOneCache} data-item-name={item.name}></lightning-button>
                         </li>

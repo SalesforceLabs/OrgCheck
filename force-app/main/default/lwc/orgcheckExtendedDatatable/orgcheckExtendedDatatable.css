@@ -30,6 +30,11 @@ td.bad {
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
+td.invisible {
+    /*visibility: hidden;*/
+    display: none;
+}
+
 td.badscore {
     background-image: url(/img/samples/rating1.gif);
 }
@@ -38,6 +43,6 @@ td.badcell {
     background-image: url(/img/msg_icons/warning16.png);
 }
 
-.centered {
-    text-align: center;
+table.dontuseallspace {
+    width: unset;
 }

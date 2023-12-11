@@ -33,7 +33,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                         '(SELECT Id, Name FROM WebLinks) '+
                     'FROM EntityDefinition '+
                     `WHERE DeveloperName = '${objectApiNameWithoutExt}' `+
-                    (sfdcManager.isEmpty(packageName) ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = ${packageName} `)
+                    (sfdcManager.isEmpty(packageName) ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
         }]));
         promises.push(sfdcManager.recordCount(fullObjectApiName));
         Promise.all(promises)

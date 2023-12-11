@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
@@ -17,7 +16,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const customFields = new OrgCheckMap();
+            const customFields = new Map();
 
             // Set the map
             results[0].records

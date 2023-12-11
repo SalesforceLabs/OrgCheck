@@ -15,16 +15,22 @@ export class OrgCheckRecipeProfiles extends OrgCheckRecipe {
     /**
      * Get a list of profiles (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_Profile>}
      */
     transform(data, namespace) {
+        // Get data
         const profiles = data.get(DATASET_PROFILES_ALIAS);
-        return profiles.filterValues((profile) => {
-            if (namespace !== '*' && profile.package !== namespace) return false;
-            return true;
-        });
+        // Filter data
+        const array = [];
+        for (const profile of profiles.values()) {
+            if (namespace === '*' || profile.package === namespace) {
+                array.push(profile);
+            }
+        }
+        // Return data
+        return array;
     }
 }

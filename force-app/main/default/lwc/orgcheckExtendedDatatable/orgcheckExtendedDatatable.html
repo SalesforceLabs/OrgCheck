@@ -3,7 +3,7 @@
         <c-orgcheck-dependency-viewer></c-orgcheck-dependency-viewer>
     </template>
     <template if:true={showStatistics}>
-        Total number of rows: <b><code>{nbRows}</code></b>, Total number of bad rows: 4, Total sum score: 8, 
+        Total number of rows: <b><code>{nbRows}</code></b>, Total number of bad rows: <b><code>{nbBadRows}</code></b>, Total sum score: <b><code>{sumScore}</code></b>, 
         <template if:true={isFilterOn}>
             Filter is <b><code>on</code></b>, Number of rows that match the filter: <b><code>{nbRowsVisible}</code></b>
         </template>
@@ -19,103 +19,108 @@
             </lightning-input>
         </div>
     </template>
-    <template lwc:if={isDataEmpty}>
-        {emptyMessage}
-    </template>
-    <template lwc:else>
-        <table class="slds-table slds-table_bordered slds-is-selected slds-cell-wrap" style={tableStyle}>
-            <thead>
-                <tr>
-                    <template for:each={_columns} for:item="column">
-                        <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index} class={column.cssClass}>
-                            {column.label}
-                        </th>
+    <table class={tableClasses}>
+        <thead>
+            <tr>
+                <template for:each={columns} for:item="column">
+                    <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index} class={column.cssClass}>
+                        {column.label}
+                    </th>
+                </template>
+            </tr>            
+        </thead>
+        <tbody>
+            <template for:each={rows} for:item="row">
+                <tr key={row.key} class={row.cssClass}>
+                    <template for:each={row.cells} for:item="cell">
+                        <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
+                            <template lwc:if={cell.isIndex}>
+                                {row.key}
+                            </template>
+                            <template lwc:elseif={cell.isScore}>
+                                {row.score}
+                            </template>
+                            <template lwc:elseif={cell.isDependencyViewer}>
+                                <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.value} whatid={cell.id} whatname={cell.name}></c-orgcheck-dependency-link>
+                            </template>
+                            <template lwc:elseif={cell.isId}>
+                                <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
+                            </template>
+                            <template lwc:elseif={cell.isPercentage}>
+                                <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
+                            </template>
+                            <template lwc:elseif={cell.isNumeric}>
+                                <template lwc:if={cell.isMaxReached}>
+                                    {cell.value}
+                                </template>
+                                <template lwc:elseif={cell.isMinReached}>
+                                    {cell.value}
+                                </template>
+                                <template lwc:else>
+                                    <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
+                                </template>
+                            </template>
+                            <template lwc:elseif={cell.isBoolean}>
+                                <div class="slds-text-align_center">
+                                    <template lwc:if={cell.value}>
+                                        <lightning-icon icon-name="standard:task2" alternative-text="True" size="x-small"></lightning-icon>
+                                    </template>
+                                    <template lwc:else>
+                                        <lightning-icon icon-name="standard:first_non_empty" alternative-text="False" size="x-small"></lightning-icon>
+                                    </template>
+                                </div>
+                            </template>
+                            <template lwc:elseif={cell.isDateTime}>
+                                <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
+                            </template>
+                            <template lwc:elseif={cell.isText}>
+                                {cell.value}
+                                <template lwc:if={cell.isValueTruncated}>
+                                    ...&nbsp;<lightning-icon icon-name="utility:cut" alternative-text="Truncated text" size="x-small"></lightning-icon>
+                                </template>
+                            </template>
+                            {cell.valueIfEmpty}
+                        </td>
                     </template>
                 </tr>
-            </thead>
-            <tbody>
-                <template for:each={_rows} for:item="row">
-                    <tr key={row.key} class={row.cssClass}>
-                        <template if:true={row.visible}>
-                            <template for:each={row.cells} for:item="cell">
-                                <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
-                                    <template lwc:if={cell.type_index}>
-                                        {row.key}
-                                    </template>
-                                    <template lwc:if={cell.type_score}>
-                                        {row.score}
-                                    </template>
-                                    <template lwc:if={cell.type_dependencyViewer}>
-                                        <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.value} whatid={cell.id} whatname={cell.name}></c-orgcheck-dependency-link>
-                                    </template>
-                                    <template lwc:elseif={cell.type_id}>
-                                        <lightning-formatted-url value={cell.url} tooltip={cell.value} label={cell.value} target="_blank" ></lightning-formatted-url>
-                                    </template>
-                                    <template lwc:elseif={cell.type_ids}>
-                                        <template lwc:if={cell.values}>
-                                            <template lwc:if={cell.values.length}>
-                                                <i>{cell.values.length} item(s)</i><br />
-                                                <template for:each={cell.values} for:item="item">
-                                                    - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
-                                                </template>
-                                            </template>
-                                        </template>
-                                    </template>
-                                    <template lwc:elseif={cell.type_percentage}>
-                                        <lightning-formatted-number value={cell.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
-                                    </template>
-                                    <template lwc:elseif={cell.type_numeric}>
-                                        <template lwc:if={cell.isMaxReached}>
-                                            {cell.valueAfterMax}
-                                        </template>
-                                        <template lwc:elseif={cell.isMinReached}>
-                                            {cell.valueBeforeMin}
-                                        </template>
-                                        <template lwc:else>
-                                            <lightning-formatted-number value={cell.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
-                                        </template>
-                                    </template>
-                                    <template lwc:elseif={cell.type_boolean}>
-                                        <div class="centered">
-                                            <template lwc:if={cell.value}>
-                                                <lightning-icon icon-name="standard:task2" alternative-text="True" size="x-small"></lightning-icon>
-                                            </template>
-                                            <template lwc:else>
-                                                <lightning-icon icon-name="standard:first_non_empty" alternative-text="False" size="x-small"></lightning-icon>
-                                            </template>
-                                        </div>
-                                    </template>
-                                    <template lwc:elseif={cell.type_dateTime}>
-                                        <template lwc:if={cell.value}><lightning-formatted-date-time value={cell.value}></lightning-formatted-date-time></template>
-                                    </template>
-                                    <template lwc:elseif={cell.type_text}>
-                                        {cell.value}
-                                        <template lwc:if={cell.isValueTruncated}>
-                                            ...&nbsp;<lightning-icon icon-name="utility:cut" alternative-text="Truncated text" size="x-small"></lightning-icon>
-                                        </template>
-                                    </template>
-                                    <template lwc:elseif={cell.type_texts}>
-                                        <template lwc:if={cell.values}>
-                                            <template lwc:if={cell.values.length}>
-                                                <i>{cell.values.length} item(s)</i><br />
-                                                <template for:each={cell.values} for:item="item">
-                                                    - {item}<br key={cell.key} />
-                                                </template>
-                                            </template>
-                                        </template>
-                                    </template>
-                                    {cell.valueIfEmpty}
-                                </td>
-                            </template>
-                        </template>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
-        <span id="footer">
-            <template if:true={areAllRowsInvisible}>
-                No data to show with this filter.
             </template>
-        </span>
-    </template>
+        </tbody>
+    </table>
+    <!--
+                                <template lwc:elseif={cell.type_ids}>
+                                    <template lwc:if={cell.values}>
+                                        <template lwc:if={cell.values.length}>
+                                            <i>{cell.values.length} item(s)</i><br />
+                                            <template for:each={cell.values} for:item="item">
+                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
+                                            </template>
+                                        </template>
+                                    </template>
+                                </template>
+                                <template lwc:elseif={cell.type_texts}>
+                                    <template lwc:if={cell.values}>
+                                        <template lwc:if={cell.values.length}>
+                                            <i>{cell.values.length} item(s)</i><br />
+                                            <template for:each={cell.values} for:item="item">
+                                                - {item}<br key={cell.key} />
+                                            </template>
+                                        </template>
+                                    </template>
+                                </template>
+                            </td>
+                        </template>
+                    </template>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+    -->
+    <span id="footer">
+        <template lwc:if={isDataEmpty}>
+            {emptyMessage}
+        </template>
+        <template if:true={areAllRowsInvisible}>
+            No data to show with this filter.
+        </template>
+    </span>
 </template>

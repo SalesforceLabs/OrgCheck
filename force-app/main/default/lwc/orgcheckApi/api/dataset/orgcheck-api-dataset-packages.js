@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_Package } from '../data/orgcheck-api-data-package';
 
 export class OrgCheckDatasetPackages extends OrgCheckDataset {
@@ -16,7 +15,7 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const packages = new OrgCheckMap();
+            const packages = new Map();
 
             // Set the map (1/2) - installed package
             results[0].records.forEach((record) => {

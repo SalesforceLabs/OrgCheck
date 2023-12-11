@@ -1,40 +1,19 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api } from 'lwc';
 
 export default class OrgcheckObjectInformation extends LightningElement {
 
-    /**
-     * Set the component data.
-     * 
-     * @param {SFDC_Object} data 
-     */
-    @api setComponentData(data) {
-        if (data) {
-            this.object = data;
-            this.objectGeneralInfo = [
-                { label: 'API Name', value: data.apiname },
-                { label: 'Package', value: data.package },
-                { label: 'Singular Label', value: data.label },
-                { label: 'Plural Label', value: data.labelPlural },
-                { label: 'Is Custom?', value: data.isCustom },
-                { label: 'Key Prefix', value: data.keyPrefix },
-                { label: 'Feed Enable?', value: data.isFeedEnabled },
-                { label: 'Most Recent Enabled?', value: data.isMostRecentEnabled },
-                { label: 'Global Search Enabled?', value: data.isSearchable },
-                { label: 'Record Count (including deleted ones)', value: data.recordCount },
-                { label: 'Internal Sharing', value: data.internalSharingModel },
-                { label: 'External Sharing', value: data.externalSharingModel },
-                { label: 'Description', value: data.description }	
-            ];
-            this.isSObjectSpecified = true;
-        } else {
-            this.isSObjectSpecified = false;
-        }
+    @api set objectInformationData(data) {
+        this.object = data ? JSON.parse(data) : undefined;
+        this.isObjectDefined = data ? true : false;
     }
-    
-    @track object;
-    objectGeneralInfo;
-    isSObjectSpecified;
 
+    get objectInformationData() {
+        return this.object;
+    }
+
+    isObjectDefined;
+    object;
+    
     generalInfoColumns;
     apexTriggersColumns;
     fieldSetsColumns;

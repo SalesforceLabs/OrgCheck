@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
@@ -26,7 +25,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const users = new OrgCheckMap();
+            const users = new Map();
 
             // Set the map
             results[0].records

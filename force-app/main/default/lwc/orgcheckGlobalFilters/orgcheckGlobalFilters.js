@@ -53,6 +53,11 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     sobjectApiNameOptions;
 
     /** 
+     * SObject name original data (used for filtering and generate name options)
+     */
+    sobjectApiNameData;
+
+    /** 
      * Yes/No options
      */
     yesNoOptions = [
@@ -72,11 +77,11 @@ export default class OrgcheckGlobalFilters extends LightningElement {
             this.packageOptions = [
                 { label: 'All packages', value: ANY_VALUES },
                 { label: 'No package', value: NO_VALUE }
-            ].concat(data.map(p => { 
+            ].concat(data.map((p) => {
                 return {
                     label: `${p.name} (api=${p.namespace}, type=${p.type})`, 
                     value: p.namespace
-                }
+                };
             }));
             this.package = ANY_VALUES;
         }
@@ -91,13 +96,13 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      */
     @api updateSObjectTypeOptions(data) {
         if (data && data.map) {
-            this.sobjectTypeOptions = [ 
+            this.sobjectTypeOptions = [
                 { label: 'All types', value: ANY_VALUES } 
-            ].concat(data.map(t => { 
+            ].concat(data.map((t) => {
                 return { 
                     label: t.label, 
                     value: t.id 
-                }
+                };
             }));
             this.sobjectType = ANY_VALUES;
         }
@@ -112,15 +117,31 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      */
     @api updateSObjectApiNameOptions(data) {
         if (data && data.map) {
-            this.sobjectApiNameOptions = [ 
-                { label: 'All objects', value: ANY_VALUES } 
-            ].concat(data.map(o => {
-                return {
-                    label: `${o.label} (api=${o.name}, type=${o.typeRef.label})`, 
-                    value: o.id
-                }
-            }));
+            this.sobjectApiNameData = data;
+            this._setSObjectApiNameOptions();
             this.sobjectApiName = ANY_VALUES;
+        }
+    }
+
+    /**
+     * Internal filtering of object options
+     */
+    _setSObjectApiNameOptions() {
+        if (this.sobjectApiNameData) {
+            this.sobjectApiNameOptions = [
+                { label: 'All objects', value: ANY_VALUES }
+            ].concat(this.sobjectApiNameData
+                .filter((o) => {
+                    return (this.package === ANY_VALUES || this.package === o.package) &&
+                           (this.sobjectType === ANY_VALUES || this.sobjectType === o.typeId)
+                })
+                .map((o) => {
+                    return {
+                        label: `${o.label} (api=${o.name}, type=${o.typeRef.label})`, 
+                        value: o.id
+                    };
+                })
+            );
         }
     }
 
@@ -191,6 +212,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         this.filtersChanged = true;
         this[fieldId] = event.detail.value;
         this.filtersOriginallyChanged = true;
+        if (fieldId === 'sobjectType' || fieldId === 'package') this._setSObjectApiNameOptions();
     }
 
     /**

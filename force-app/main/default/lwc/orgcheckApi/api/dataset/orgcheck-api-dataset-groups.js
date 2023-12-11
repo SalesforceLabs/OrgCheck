@@ -1,12 +1,9 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
     run(sfdcManager, resolve, reject) {
-
-        const start2 = Date.now();
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -16,7 +13,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const groups = new OrgCheckMap();
+            const groups = new Map();
 
             // Set the map
             results[0].records
@@ -75,9 +72,6 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     // Add it to the map  
                     groups.set(group.id, group);
                 });
-
-            const end2 = Date.now();
-            console.error('dataset-groups.run()', start2, end2, end2-start2);
 
             // Return data
             resolve(groups);

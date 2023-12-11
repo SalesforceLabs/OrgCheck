@@ -15,14 +15,21 @@ export class OrgCheckRecipeQueues extends OrgCheckRecipe {
     /**
      * Get a list of queues (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * 
      * @returns {Array<SFDC_Group>}
      */
     transform(data) {
+        // Get data
         const groups = data.get(DATASET_GROUPS_ALIAS);
-        return groups.filterValues((group) => {
-            return group.isQueue === true;
-        });
+        // Filter data
+        const array = [];
+        for (const group of groups.values()) {
+            if (group.isQueue === true) {
+                array.push(group);
+            }
+        }
+        // Return data
+        return array;
     }
 }

@@ -1,5 +1,9 @@
-export class OrgCheckMap {
-    
+ /*
+ export class OrgCheckMap extends Map {
+ 
+   
+   
+
     #keyIndexes = {};
     #keys = [];
     #values = [];
@@ -93,3 +97,5 @@ export class OrgCheckMap {
         return this.#values.slice();
     }
 }
+
+*/

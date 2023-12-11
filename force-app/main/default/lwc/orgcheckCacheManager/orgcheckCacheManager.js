@@ -16,12 +16,16 @@ export default class OrgcheckCacheManager extends LightningElement {
      * 
      * @param {Array<DatasetCacheInfo>} data 
      */
-    @api setComponentData(data) {
+    @api set cacheManagerData(data) {
         if (data && Array.isArray(data) && data.length > 0) {
             this.items = data;
         } else {
             this.items = [];
         }
+    }
+
+    get cacheManagerData() {
+        return this.items;
     }
 
     handleRemoveAllCache() {

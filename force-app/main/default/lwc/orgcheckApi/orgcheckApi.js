@@ -95,76 +95,97 @@ export default class OrgcheckApi extends LightningElement {
 
     @api async getPackagesTypesAndObjects(namespace, sobjectType) {
         this._updateLimits();
-        return this.#api.getPackagesTypesAndObjects(namespace, sobjectType);
+        const data = await this.#api.getPackagesTypesAndObjects(namespace, sobjectType);
+        return JSON.stringify(data);
     }
 
     @api async getObject(sobject) {
         this._updateLimits();
-        return this.#api.getObject(sobject);
+        const data = await this.#api.getObject(sobject);
+        return JSON.stringify(data);
     }
 
     @api async getCustomFields(namespace, sobjectType, sobject) {
         this._updateLimits();
-        return this.#api.getCustomFields(namespace, sobjectType, sobject);
+        const data = await this.#api.getCustomFields(namespace, sobjectType, sobject);
+        return JSON.stringify(data);
     }
 
     @api async getPermissionSets(namespace) {
         this._updateLimits();
-        return this.#api.getPermissionSets(namespace);
+        const data = await this.#api.getPermissionSets(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getProfiles(namespace) {
         this._updateLimits();
-        return this.#api.getProfiles(namespace);
+        const data = await this.#api.getProfiles(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getActiveUsers() {
         this._updateLimits();
-        return this.#api.getActiveUsers();
+        const data = await this.#api.getActiveUsers();
+        return JSON.stringify(data);
     }
 
     @api async getCustomLabels(namespace) {
         this._updateLimits();
-        return this.#api.getCustomLabels(namespace);
+        const data = await this.#api.getCustomLabels(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getLightningWebComponents(namespace) {
         this._updateLimits();
-        return this.#api.getLightningWebComponents(namespace);
+        const data = await this.#api.getLightningWebComponents(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getLightningAuraComponents(namespace) {
         this._updateLimits();
-        return this.#api.getLightningAuraComponents(namespace);
+        const data = await this.#api.getLightningAuraComponents(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getLightningPages(namespace) {
         this._updateLimits();
-        return this.#api.getLightningPages(namespace);
+        const data = await this.#api.getLightningPages(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getVisualForceComponents(namespace) {
         this._updateLimits();
-        return this.#api.getVisualForceComponents(namespace);
+        const data = await this.#api.getVisualForceComponents(namespace);
+        return JSON.stringify(data);
     }
 
     @api async getVisualForcePages(namespace) {
         this._updateLimits();
-        return this.#api.getVisualForcePages(namespace);
+        const data = await this.#api.getVisualForcePages(namespace);
+        return JSON.stringify(data);
     }
 
-    @api async getPublicGroups() {
+    @api async getPublicGroups(namespace) {
         this._updateLimits();
-        return this.#api.getPublicGroups();
+        const data = await this.#api.getPublicGroups(namespace);
+        return JSON.stringify(data);
     }
 
-    @api async getQueues() {
+    @api async getQueues(namespace) {
         this._updateLimits();
-        return this.#api.getQueues();
+        const data = await this.#api.getQueues(namespace);
+        return JSON.stringify(data);
     }
 
-    @api async getCacheInformation() {
+    @api async getCacheInformation(namespace) {
         this._updateLimits();
-        return this.#api.getCacheInformation();
+        const data = await this.#api.getCacheInformation(namespace);
+        return JSON.stringify(data);
+    }
+
+    @api async getApexClasses(namespace) {
+        this._updateLimits();
+        const data = await this.#api.getApexClasses(namespace);
+        return JSON.stringify(data);
     }
 }

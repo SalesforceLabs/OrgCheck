@@ -21,18 +21,21 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
     /**
      * Get a list of active users (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * 
      * @returns {Array<SFDC_User>}
      */
     transform(data) {
+        // Get data
         const users = data.get(DATASET_USERS_ALIAS);
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
-        users.forEachValue((user) => {
+        // Augment data
+        users.forEach((user) => {
             user.profileRef = profiles.get(user.profileId);
-            user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.hasKey(id)).map((id) => permissionSets.get(id));
+            user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.has(id)).map((id) => permissionSets.get(id));
         });
-        return users.allValues();
+        // Return all data
+        return [... users.values()];
     }
 }

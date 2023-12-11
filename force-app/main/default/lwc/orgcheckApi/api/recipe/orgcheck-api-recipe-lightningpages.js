@@ -15,16 +15,22 @@ export class OrgCheckRecipeLightningPages extends OrgCheckRecipe {
     /**
      * Get a list of Ligthning Pages (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_LightningPages>}
      */
     transform(data, namespace) {
+        // Get data
         const pages = data.get(DATASET_LIGHTNINGPAGES_ALIAS);
-        return pages.filterValues((page) => {
-            if (namespace !== '*' && page.package !== namespace) return false;
-            return true;
-        });
+        // Filter data
+        const array = [];
+        for (const page of pages.values()) {
+            if (namespace === '*' || page.package === namespace) {
+                array.push(page);
+            }
+        }
+        // Return data
+        return array;
     }
 }

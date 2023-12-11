@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
@@ -17,7 +16,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const customLabels = new OrgCheckMap();
+            const customLabels = new Map();
 
             // Set the map
             results[0].records

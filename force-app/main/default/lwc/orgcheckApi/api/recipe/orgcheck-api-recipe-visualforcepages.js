@@ -15,16 +15,22 @@ export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
     /**
      * Get a list of vf pages (async method)
      * 
-     * @param {OrgCheckMap} data extracted
+     * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
      * @returns {Array<SFDC_VisualForcePage>}
      */
     transform(data, namespace) {
+        // Get data
         const pages = data.get(DATASET_VISUALFORCEPAGES_ALIAS);
-        return pages.filterValues((customLabel) => {
-            if (namespace !== '*' && customLabel.package !== namespace) return false;
-            return true;
-        });
+        // Filter data
+        const array = [];
+        for (const page of pages.values()) {
+            if (namespace === '*' || page.package === namespace) {
+                array.push(page);
+            }
+        }
+        // Return data
+        return array;
     }
 }

@@ -1,5 +1,4 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { OrgCheckMap } from '../core/orgcheck-api-type-map';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 
 export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
@@ -17,7 +16,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
         }]).then((results) => {
 
             // Init the map
-            const visualForcePages = new OrgCheckMap();
+            const visualForcePages = new Map();
 
             // Set the map
             results[0].records
