@@ -24,6 +24,7 @@ tr.bad {
 
 td.bad {
     background-color: #ffd079;
+    background-image: url(/img/msg_icons/warning16.png);
     background-position: left;
     background-repeat: no-repeat;
     background-size: 11px;

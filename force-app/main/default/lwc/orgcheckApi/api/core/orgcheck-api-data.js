@@ -2,7 +2,8 @@ import { OrgCheckDataDependencies } from './orgcheck-api-data-dependencies';
 
 export class OrgCheckData {
 
-    #badFields;
+    badScore;
+    badFields;
     dependencies;
 
     initData(setup) { 
@@ -14,7 +15,7 @@ export class OrgCheckData {
 
         // If need scoring...
         if (setup.isScoreNeeded === true) {
-            this.#badFields = [];
+            this.badFields = [];
         }
 
         // If dependencies are needed...
@@ -34,34 +35,16 @@ export class OrgCheckData {
     }
 
     setBadField(field) {
-        if (!this.#badFields) {
+        if (!this.badFields) {
             throw new Error('Should not call setBadField() as this data does not need score.');
         }
         if (!field) {
-            throw new Error('Field is a mandatory when calling hasBadField()');
+            throw new Error('Field is a mandatory when calling setBadField()');
         }
-        if (this.#badFields.includes(field) === false) {
-            this.#badFields.push(field);
-            this.badScore = this.#badFields.length;
+        if (this.badFields.includes(field) === false) {
+            this.badFields.push(field);
+            this.badScore = this.badFields.length;
         }
-    }
-
-    hasBadField(field) {
-        if (!this.#badFields) {
-            return false;
-            //throw new Error('Should not call hasBadField() as this data does not need score.');
-        }
-        if (!field) {
-            throw new Error('Field is a mandatory when calling hasBadField()');
-        }
-        return this.#badFields.includes(field);
-    }
-
-    getBadScore() {
-        if (!this.#badFields) {
-            throw new Error('Cannot call getBadScore() because this data does not need score.');
-        }
-        return this.#badFields.length;
     }
 
     isItReferenced() {

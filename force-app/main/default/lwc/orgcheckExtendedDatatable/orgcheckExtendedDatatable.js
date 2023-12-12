@@ -4,11 +4,33 @@ const CELL_PREPARE = (reference, column, cell = {}) => {
     column.dataProperties.forEach((p) => {
         cell[p] = reference[column.data[p]];
     });
-    return cell;
+    switch (column.typeProperty) {
+        case 'isNumeric':
+            if (column.data.max && cell.value > column.data.max) {
+                cell.value = column.data.valueAfterMax;
+                cell.isMaxReached = true;
+            } else if (column.data.min && cell.value < column.data.min) {
+                cell.value = column.data.valueBeforeMin;
+                cell.isMinReached = true;
+            }
+            break;
+        case 'isText':
+            if (column.data.valueIfEmpty && cell.value.length === 0) {
+                cell.value = column.data.valueIfEmpty;
+            } else if (column.data.maximumLength && cell.value.length > column.data.maximumLength) {
+                cell.value = cell.value.substr(0, column.data.maximumLength)+'...';
+                cell.isValueTruncated = true;
+            }
+            break;
+    }
+}
+
+const CELL_CSSCLASS = (row, data) => {
+    return (row.badFields?.includes((data?.ref || data?.value)) === false ? '': 'bad');
 }
 
 const ROW_CSSCLASS = (row, isVisible) => {
-    return (row.score === 0 ? '': 'bad') + ' ' + (isVisible === true ? '' : 'invisible');
+    return (row.badScore === 0 ? '': 'bad') + ' ' + (isVisible === true ? '' : 'invisible');
 }
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
@@ -211,7 +233,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         this.nbRows = rows.length || 0;
         if (rows.length !== 0) {
             this.isDataEmpty = false;
-            //this._filter();
             //this._sort();
         } else {
             this.isDataEmpty = true;
@@ -221,7 +242,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             const row = { 
                 key: i, 
                 cssClass: ROW_CSSCLASS(r, true),
-                score: r.score,
+                score: r.badScore,
                 cells: []
             };
             // Iterate over the columns to prepare the cells of that row
@@ -233,7 +254,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     c.data?.ref.split('.').forEach((p) => { ref = ref[p]; });
                 }
                 // Prepare the cell information
-                const cell = { key: `${i}.${j}` };
+                const cell = { 
+                    key: `${i}.${j}`,
+                    cssClass: CELL_CSSCLASS(r, c.data) 
+                };
                 cell[c.typeProperty] = true;
                 if (c.isIterative === true) {
                     cell.values = ref[c.data.values]?.map((d) => CELL_PREPARE(d, c));
