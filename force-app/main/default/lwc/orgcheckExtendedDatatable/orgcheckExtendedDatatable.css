@@ -30,8 +30,7 @@ td.bad {
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
-td.invisible {
-    /*visibility: hidden;*/
+tr.invisible {
     display: none;
 }
 
