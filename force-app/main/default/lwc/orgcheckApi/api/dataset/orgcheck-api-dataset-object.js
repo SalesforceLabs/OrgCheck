@@ -17,7 +17,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const fullObjectApiName = parameters.object;
         const splittedApiName = fullObjectApiName.split('__');
         const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
-        const objectApiNameWithoutExt = splittedApiName.length === 3 ? splittedApiName[2] : splittedApiName[0];
+        const objectApiNameWithoutExt = splittedApiName.length === 3 ? splittedApiName[1] : splittedApiName[0];
         const promises = [];
         promises.push(sfdcManager.describe(fullObjectApiName));
         promises.push(sfdcManager.soqlQuery([{ 

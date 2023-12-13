@@ -326,7 +326,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'License',          type: 'text',     data: { value: 'license' }},
         { label: 'Package',          type: 'text',     data: { value: 'package' }},
         { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this permission set!' }},
-        { label: 'Users\' profiles', type: 'ids',      data: { values: 'profileRefs', value: 'name', url: 'url' }},
+        { label: 'Users\' profiles', type: 'ids',      data: { ref: 'profileRefs', value: 'name', url: 'url' }},
         { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
         { label: 'Description',      type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
@@ -353,9 +353,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
         { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',      data: { values: 'directGroups', value: 'id', url: 'url' }},
-        { label: 'Included users',   type: 'ids',      data: { values: 'directUsers', value: 'id', url: 'url' }},
-        { label: 'All active users', type: 'ids',      data: { values: 'indirectUsers', value: 'id', url: 'url' }},
+        { label: 'Included groups',  type: 'ids',      data: { ref: 'directGroups', value: 'id', url: 'url' }},
+        { label: 'Included users',   type: 'ids',      data: { ref: 'directUsers', value: 'id', url: 'url' }},
+        { label: 'All active users', type: 'ids',      data: { ref: 'indirectUsers', value: 'id', url: 'url' }},
     ];
 
     publicGroupsTableData;
@@ -364,9 +364,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
         { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'texts',    data: { ref: 'directGroups', value: 'id' }},
-        { label: 'Included users',   type: 'texts',    data: { ref: 'directUsers', value: 'id' }},
-        { label: 'All active users', type: 'texts',    data: { ref: 'indirectUsers', value: 'id' }},
+        { label: 'Included groups',  type: 'ids',      data: { ref: 'directGroups', value: 'id' }},
+        { label: 'Included users',   type: 'ids',      data: { ref: 'directUsers', value: 'id' }},
+        { label: 'All active users', type: 'ids',      data: { ref: 'indirectUsers', value: 'id' }},
     ];
 
     queuesTableData;
@@ -377,9 +377,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin', valueIfEmpty: 'Never logged!' }},
         { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
         { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
-        { label: 'Key permissions', type: 'texts',    data: { values: 'importantPermissions' }},
+        { label: 'Key permissions', type: 'texts',    data: { ref: 'importantPermissions' }},
         { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
-        { label: 'Permission Sets', type: 'ids',      data: { values: 'permissionSetRefs', url: 'url', value: 'name' }}
+        { label: 'Permission Sets', type: 'ids',      data: { ref: 'permissionSetRefs', url: 'url', value: 'name' }}
     ];
 
     usersTableData;

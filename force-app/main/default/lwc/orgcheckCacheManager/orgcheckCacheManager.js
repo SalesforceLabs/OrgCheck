@@ -17,7 +17,13 @@ export default class OrgcheckCacheManager extends LightningElement {
      * @param {Array<DatasetCacheInfo>} data 
      */
     @api set cacheManagerData(data) {
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (data && typeof data === 'string') {
+            try {
+                this.items = JSON.parse(data);
+            } catch (e) {
+                this.items = [];
+            }
+        } else if (data && Array.isArray(data) && data.length > 0) {
             this.items = data;
         } else {
             this.items = [];

@@ -3,13 +3,17 @@
         <c-orgcheck-dependency-viewer></c-orgcheck-dependency-viewer>
     </template>
     <template if:true={showStatistics}>
-        Total number of rows: <b><code>{nbRows}</code></b>, Total number of bad rows: <b><code>{nbBadRows}</code></b>, Total sum score: <b><code>{sumScore}</code></b>, 
+        Total number of rows: <b><code>{nbRows}</code></b>,&nbsp;
+        Total number of bad rows: <b><code>{nbBadRows}</code></b>,&nbsp;
+        Total sum score: <b><code>{sumScore}</code></b>,&nbsp;
         <template if:true={isFilterOn}>
-            Filter is <b><code>on</code></b>, Number of rows that match the filter: <b><code>{nbRowsVisible}</code></b>
+            Filter is <b><code>on</code></b>,&nbsp;
+            Number of rows that match the filter: <b><code>{nbRowsVisible}</code></b>,&nbsp;
         </template>
         <template if:false={isFilterOn}>
-            Filter is <b><code>off</code></b>
+            Filter is <b><code>off</code></b>,&nbsp;
         </template>
+        Sorted by <b><code>{sortingField}</code></b> (<b><code>{sortingOrder}</code></b>)&nbsp;
     </template>
     <template if:true={showSearch}>
         <div id="search-box">
@@ -19,7 +23,7 @@
             </lightning-input>
         </div>
     </template>
-    <table class={tableClasses}>
+    <table class={tableClasses} data-last-changed={lastChange}>
         <thead>
             <tr>
                 <template for:each={columns} for:item="column">
@@ -35,10 +39,13 @@
                     <template for:each={row.cells} for:item="cell">
                         <td key={cell.key} data-value={cell.value} class={cell.cssClass}>
                             <template lwc:if={cell.isIndex}>
-                                {row.key}
+                                {row.index}
                             </template>
                             <template lwc:elseif={cell.isScore}>
                                 {row.score}
+                            </template>
+                            <template lwc:elseif={cell.isEmpty}>
+                                {cell.value}
                             </template>
                             <template lwc:elseif={cell.isDependencyViewer}>
                                 <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.value} whatid={cell.id} whatname={cell.name}></c-orgcheck-dependency-link>
@@ -76,45 +83,36 @@
                             <template lwc:elseif={cell.isText}>
                                 {cell.value}
                                 <template lwc:if={cell.isValueTruncated}>
-                                    ...&nbsp;<lightning-icon icon-name="utility:cut" alternative-text="Truncated text" size="x-small"></lightning-icon>
+                                    &nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon>
                                 </template>
                             </template>
-                            {cell.valueIfEmpty}
+                            <template lwc:elseif={cell.isTexts}>
+                                <i>{cell.values.length} item(s)</i><br />
+                                <template for:each={cell.values} for:item="item">
+                                    - {item.value}
+                                    <template lwc:if={item.isValueTruncated}>
+                                        &nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon>
+                                    </template>
+                                    <br key={cell.key} />
+                                </template>
+                            </template>
+                            <template lwc:elseif={cell.isIds}>
+                                <i>{cell.values.length} item(s)</i><br />
+                                <template for:each={cell.values} for:item="item">
+                                    <template lwc:if={item}>
+                                        - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
+                                    </template>
+                                </template>
+                            </template>
+                            <template lwc:else>
+                                type we don't have yet for {cell.value}
+                            </template>
                         </td>
                     </template>
                 </tr>
             </template>
         </tbody>
     </table>
-    <!--
-                                <template lwc:elseif={cell.type_ids}>
-                                    <template lwc:if={cell.values}>
-                                        <template lwc:if={cell.values.length}>
-                                            <i>{cell.values.length} item(s)</i><br />
-                                            <template for:each={cell.values} for:item="item">
-                                                - <lightning-formatted-url key={item} value={item.url} tooltip={item.value} label={item.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />
-                                            </template>
-                                        </template>
-                                    </template>
-                                </template>
-                                <template lwc:elseif={cell.type_texts}>
-                                    <template lwc:if={cell.values}>
-                                        <template lwc:if={cell.values.length}>
-                                            <i>{cell.values.length} item(s)</i><br />
-                                            <template for:each={cell.values} for:item="item">
-                                                - {item}<br key={cell.key} />
-                                            </template>
-                                        </template>
-                                    </template>
-                                </template>
-                            </td>
-                        </template>
-                    </template>
-                </tr>
-            </template>
-        </tbody>
-    </table>
-    -->
     <span id="footer">
         <template lwc:if={isDataEmpty}>
             {emptyMessage}

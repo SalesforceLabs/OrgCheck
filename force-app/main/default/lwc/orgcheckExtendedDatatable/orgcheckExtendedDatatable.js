@@ -1,36 +1,44 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
 
 const CELL_PREPARE = (reference, column, cell = {}) => {
-    column.dataProperties.forEach((p) => {
-        cell[p] = reference[column.data[p]];
-    });
-    switch (column.typeProperty) {
-        case 'isNumeric':
-            if (column.data.max && cell.value > column.data.max) {
-                cell.value = column.data.valueAfterMax;
-                cell.isMaxReached = true;
-            } else if (column.data.min && cell.value < column.data.min) {
-                cell.value = column.data.valueBeforeMin;
-                cell.isMinReached = true;
-            }
-            break;
-        case 'isText':
-            if (column.data.valueIfEmpty && cell.value.length === 0) {
-                cell.value = column.data.valueIfEmpty;
-            } else if (column.data.maximumLength && cell.value.length > column.data.maximumLength) {
-                cell.value = cell.value.substr(0, column.data.maximumLength)+'...';
-                cell.isValueTruncated = true;
-            }
-            break;
+    if (column.dataProperties.length > 0) {
+        column.dataProperties.forEach((p) => {
+            cell[p] = reference[column.data[p]];
+        });
+    } else {
+        cell.value = reference;
     }
+    if (column.data?.valueIfEmpty && !cell.value) {
+        cell.value = column.data.valueIfEmpty;
+        cell.isEmpty = true;
+    } else {
+        switch (column.typeProperty) {
+            case 'isNumeric':
+                    if (column.data.max && cell.value > column.data.max) {
+                    cell.value = column.data.valueAfterMax;
+                    cell.isMaxReached = true;
+                } else if (column.data.min && cell.value < column.data.min) {
+                    cell.value = column.data.valueBeforeMin;
+                    cell.isMinReached = true;
+                }
+                break;
+            case 'isText':
+                if (column.data.maximumLength && cell.value.length > column.data.maximumLength) {
+                    cell.value = cell.value.substr(0, column.data.maximumLength);
+                    cell.isValueTruncated = true;
+                }
+                break;
+        }
+    }
+    return cell;
 }
 
 const CELL_CSSCLASS = (row, data) => {
-    return (row.badFields?.includes((data?.ref || data?.value)) === false ? '': 'bad');
+    return (row.badFields && row.badFields.includes(data?.ref || data?.value) === true) ? 'bad' : '';
 }
 
-const ROW_CSSCLASS = (row, isVisible) => {
-    return (row.badScore === 0 ? '': 'bad') + ' ' + (isVisible === true ? '' : 'invisible');
+const ROW_CSSCLASS = (row, showScore) => {
+    return ((showScore === true && row.badScore > 0)? 'bad': '') + ' ' + (row.isInvisible === true ? 'invisible' : '');
 }
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
@@ -160,9 +168,24 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     #sortingOrder;
 
     /**
+     * Label of the field the table is sorted by
+     */
+    sortingField
+
+    /**
+     * Order of the sorting (ascending or descending)
+     */
+    sortingOrder
+
+    /**
      * Internal property that indicate the current search input index which is used by the filter method
      */
     #filteringSearchInput;
+
+    /** 
+     * Date of the last change occured in the table (filtering, sorting, new data, etc...)
+     */
+    lastChange;
 
     /**
      * Setter for the columns (it will set the internal <code>#columns</code> property)
@@ -224,6 +247,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 rows = undefined;
             }
         };
+        this.nbBadRows = 0;
+        this.sumScore = 0;
         if (!rows || Array.isArray(rows) === false) {
             this.nbRows = 0;
             this.isDataEmpty = true;
@@ -231,20 +256,20 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         }
         // Here 'rows' is defined and is an array
         this.nbRows = rows.length || 0;
-        if (rows.length !== 0) {
-            this.isDataEmpty = false;
-            //this._sort();
-        } else {
-            this.isDataEmpty = true;
-        }
+        this.isDataEmpty = (this.nbRows === 0);
         this.#rows = rows.map((r, i) => { 
             // Initiate the row
             const row = { 
                 key: i, 
-                cssClass: ROW_CSSCLASS(r, true),
+                index: i+1,
+                cssClass: ROW_CSSCLASS(r, true, this.showScoreColumn),
                 score: r.badScore,
                 cells: []
             };
+            if (row.score > 0) {
+                this.nbBadRows++;
+                this.sumScore += row.score;
+            }
             // Iterate over the columns to prepare the cells of that row
             this.#columns.forEach((c, j) => {
                 // By default the reference used in the properties is the row itself
@@ -260,7 +285,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 };
                 cell[c.typeProperty] = true;
                 if (c.isIterative === true) {
-                    cell.values = ref[c.data.values]?.map((d) => CELL_PREPARE(d, c));
+                    cell.values = ref?.map((r) => CELL_PREPARE(r, c)) || [];
                 } else {
                     CELL_PREPARE(ref, c, cell);
                 }
@@ -268,6 +293,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             });
             return row; 
         });
+        this._sort();
     }
 
     /**
@@ -336,17 +362,22 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     }) >= 0
                 );
                 if (rowIsVisible === true) {
-                    row.key = ++this.nbRowsVisible;
+                    delete row.isInvisible;
+                    row.index = ++this.nbRowsVisible;
+                } else {
+                    row.isInvisible = true;
                 }
-                row.cssClass = ROW_CSSCLASS(row, rowIsVisible);
+                row.cssClass = ROW_CSSCLASS(row, this.showScoreColumn);
             });
         } else {
             this.isFilterOn = false;
-            this.#rows.forEach((row, index) => { 
-                row.cssClass = ROW_CSSCLASS(row, true);
-                row.key = index+1;
+            this.#rows.forEach((row, i) => { 
+                row.isInvisible = false;
+                row.index = i+1;
+                row.cssClass = ROW_CSSCLASS(row, true, this.showScoreColumn);
             });
         }
+        this.lastChange = new Date();
     }
 
     /**
@@ -356,10 +387,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         if (this.#sortingColumnIndex === undefined) return;
         const columnIndex = this.#sortingColumnIndex;
         const iOrder = this.#sortingOrder === 'asc' ? 1 : -1;
-        const type = this.#columns[columnIndex].type;
+        const isIterative = this.#columns[columnIndex].isIterative;
         let value1, value2;
+        let index = 0;
         this.#rows.sort((row1, row2) => {
-            if (type.endsWith('s')) {
+            if (isIterative === true) {
                 value1 = row1.cells[columnIndex].values.length || undefined;
                 value2 = row2.cells[columnIndex].values.length || undefined;
             } else {
@@ -371,8 +403,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             if (!value1 && value1 !== 0) return 1;
             if (!value2 && value2 !== 0) return -1;
             return (value1 < value2 ? -iOrder : iOrder);
-        }).forEach((row, index) => { 
-            row.key = index+1; 
+        }).forEach((row) => { 
+            if (!row.isInvisible) {
+                row.index = ++index; 
+            }
         });
+        this.sortingField = this.#columns[columnIndex].label;
+        this.sortingOrder = this.#sortingOrder === 'asc' ? 'ascending' : 'descending';
+        this.lastChange = new Date();
     }
 }

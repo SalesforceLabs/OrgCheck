@@ -158,15 +158,15 @@ export class OrgCheckDatasetManager {
     getCacheInformation() {
         const section = 'DATASET cache-info';
         this.#logger.sectionStarts(section, `Parsing all the dataset cache to answer your request...`);
-        const cacheInformation = []; /*this.#cache.keys().map((datasetName) => {
-            const dataset = this.#cache.get(datasetName);
+        const cacheInformation = [];
+        for (const [datasetName, dataset] of this.#cache.entries()) {
             const info = new DatasetCacheInfo();
             info.name = datasetName;
-            info.length = dataset?.size() || 1;
+            info.length = dataset?.size || 1;
             if (dataset?.createdDate) info.created = dataset?.createdDate();
             if (dataset?.lastModificationDate) info.modified = dataset?.lastModificationDate();
-            return info;
-        });*/
+            cacheInformation.push(info);
+        };
         this.#logger.sectionEnded(section, `Done with ${cacheInformation.length} item(s) scanned.`);
         this.#logger.end();
         return cacheInformation;
@@ -177,6 +177,6 @@ export class OrgCheckDatasetManager {
     }
 
     removeAllCache() {
-        this.#cache.removeAll();
+        this.#cache.clear();
     }
 }
