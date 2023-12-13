@@ -14,6 +14,6 @@
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <label>Org Check</label>
     <navType>Standard</navType>
-    <tabs>Org_Check_Home_TAB</tabs>
+    <tabs>OrgCheck_App_TAB</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
