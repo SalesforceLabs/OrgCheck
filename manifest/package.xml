@@ -10,9 +10,5 @@
         <members>OrgCheck_App_TAB</members>
         <name>CustomTab</name>
     </types>
-    <types>
-        <members>OrgCheck_Splash_LNK</members>
-        <name>CustomPageWebLink</name>
-    </types>
     <version>55.0</version>
 </Package>
