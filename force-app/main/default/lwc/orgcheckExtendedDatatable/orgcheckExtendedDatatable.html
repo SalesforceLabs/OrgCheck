@@ -6,13 +6,23 @@
         <lightning-layout-item>
             <template if:true={showStatistics}>
                 <div>
-                    <span class="slds-badge">There are {nbAllRows} rows and {nbBadRows} bad rows.</span>
+                    <template if:false={nbBadRows}>
+                        <span class="slds-badge slds-theme_success">There are {nbAllRows} rows.</span>
+                    </template>
+                    <template if:true={nbBadRows}>
+                        <span class="slds-badge slds-theme_warning">There are {nbAllRows} rows including {nbBadRows} bad rows.</span>
+                    </template>
                     <template if:true={isFilterOn}>
-                        <span class="slds-badge">There are {nbFilteredRows} rows matching your filter.</span>
+                        <template if:false={nbFilteredRows}>
+                            <span class="slds-badge slds-theme_warning">There is no row matching your filter.</span>
+                        </template>
+                        <template if:true={nbFilteredRows}>
+                            <span class="slds-badge slds-theme_success">There are {nbFilteredRows} rows matching your filter.</span>
+                        </template>
                     </template>
                     <template if:true={isInfiniteScrolling}>
                         <template if:true={isInfiniteScrollingMoreData}>
-                            <span class="slds-badge">For performance, we are showing only the first {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
+                            <span class="slds-badge slds-badge_inverse">For performance, we are showing only the first {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
                         </template>
                     </template>
                     <span class="slds-badge">Table is sorted by field "{sortingField}" in {sortingOrder} order.</span>
@@ -23,14 +33,14 @@
         <template if:true={isInfiniteScrolling}>
             <template if:true={isInfiniteScrollingMoreData}>
                 <lightning-layout-item>
-                    <lightning-button label="More rows" title="More rows" onclick={handleLoadMoreData} icon-name="utility:chevrondown"></lightning-button>
+                    <lightning-button label="More rows" title="More rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadMoreData} icon-name="utility:chevrondown"></lightning-button>
                 </lightning-layout-item>
                 <lightning-layout-item>
-                    <lightning-button label="All rows" title="All rows" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
+                    <lightning-button label="All rows" title="All rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
                 </lightning-layout-item>
             </template>
             <lightning-layout-item>
-                <lightning-button label="Export" title="Export" icon-name="utility:download"></lightning-button>
+                <lightning-button label="Export" title="Export" variant="brand" class="slds-var-m-left_x-small" icon-name="utility:download"></lightning-button>
             </lightning-layout-item>
     </template>
     </lightning-layout>
@@ -133,10 +143,9 @@
         <template if:true={isInfiniteScrolling}>
             <template if:true={isInfiniteScrollingMoreData}>
                 <lightning-layout horizontal-align="center">
-                    <lightning-layout-item>
-                        <lightning-button label="More rows" title="More rows" onclick={handleLoadMoreData} icon-name="utility:chevrondown"></lightning-button>
-                        <lightning-icon icon-name="utility:threedots" alternative-text="separator" title="separator"></lightning-icon>
-                        <lightning-button label="All rows" title="All rows" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
+                    <lightning-layout-item padding="around-small">
+                        <lightning-button label="More rows" title="More rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadMoreData} icon-name="utility:chevrondown"></lightning-button>
+                        <lightning-button label="All rows" title="All rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
             </template>
