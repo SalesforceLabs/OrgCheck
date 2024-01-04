@@ -1,9 +1,10 @@
 th {
     cursor: pointer;
+    border-width: 3px;
 }
 
 th.sorted {
-    background-color: #ededed!important;
+    background-color: #d4d4d4!important;
     background-position: right;
     background-repeat: no-repeat;
     background-size: 11px;
@@ -24,25 +25,24 @@ tr.bad {
 
 td.bad {
     background-color: #ffd079;
-    background-image: url(/img/msg_icons/warning16.png);
+    background-image: url(/img/msg_icons/error16.png);
     background-position: left;
     background-repeat: no-repeat;
     background-size: 11px;
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
-tr.invisible {
-    display: none;
-}
-
 td.badscore {
     background-image: url(/img/samples/rating1.gif);
-}
-
-td.badcell {
-    background-image: url(/img/msg_icons/warning16.png);
+    cursor: pointer;
 }
 
 table.dontuseallspace {
     width: unset;
+}
+
+th.sticky {
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+    z-index: 1000; /* when scrolling the header should stay on top */
 }

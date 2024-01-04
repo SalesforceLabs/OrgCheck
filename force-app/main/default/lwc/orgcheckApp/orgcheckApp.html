@@ -1,6 +1,37 @@
 <template>
     <div style="padding-bottom: 12px;">
-        <c-orgcheck-api accesstoken={accessToken} userid={userId} onload={handleApiLoaded} onfail={handleApiFailed} onlog={handleApiLog}></c-orgcheck-api>
+        <lightning-layout>
+            <lightning-layout-item padding="around-small">
+                <div class="slds-media" tabindex="0">
+                    <div class="slds-media__figure">
+                        <object data={logoURL} type="image/svg+xml" style="width: 4rem;"><img src={logoURL} width="4rem" /></object>
+                    </div>
+                    <div class="slds-media__body">
+                        <div class="slds-page-header__name">
+                            <div class="slds-page-header__name-title">
+                                <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
+                                Monitor your org seamlessly<br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" alignment-bump="left">
+                <!-- Actions -->
+                <lightning-button label="Export" title="Export" icon-name="utility:share_mobile" class="slds-var-m-left_x-small"></lightning-button>
+                <lightning-button label="Refresh" title="Refresh" icon-name="utility:refresh" class="slds-var-m-left_x-small"></lightning-button>
+                <!-- Separator -->
+                <lightning-icon icon-name="utility:threedots_vertical" alternative-text="separator" title="separator" class="slds-var-m-left_x-small"></lightning-icon>
+                <!-- Org information -->
+                <div class="slds-var-m-left_x-small" style="text-align: center; display: inline-table; vertical-align: middle;">
+                    <lightning-badge label={orgName}></lightning-badge>
+                    <br />
+                    <lightning-badge label={orgType} class={themeForOrgType}></lightning-badge>
+                    &nbsp;
+                    <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge>
+                </div>    
+            </lightning-layout-item>
+        </lightning-layout>
         <c-orgcheck-global-filters onvalidatechange={handleFiltersValidated}></c-orgcheck-global-filters>
         <c-orgcheck-spinner></c-orgcheck-spinner>
     </div>
@@ -34,6 +65,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=5
+                        infinite-scrolling-additional-nb-rows=5
                         columns={customFieldsTableColumns}
                         rows={customFieldsTableData}></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -48,6 +83,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={usersTableColumns}
                         rows={usersTableData}></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -62,6 +101,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={profilesTableColumns}
                         rows={profilesTableData}></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -72,6 +115,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={permissionSetsTableColumns}
                         rows={permissionSetsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -94,6 +141,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={publicGroupsTableColumns}
                         rows={publicGroupsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -104,6 +155,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={queuesTableColumns}
                         rows={queuesTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -128,6 +183,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={customLabelsTableColumns}
                         rows={customLabelsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -142,6 +201,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={visualForcePagesTableColumns}
                         rows={visualForcePagesTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -152,6 +215,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={visualForceComponentsTableColumns}
                         rows={visualForceComponentsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -162,6 +229,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={lightningPagesTableColumns}
                         rows={lightningPagesTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
@@ -172,6 +243,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={auraComponentsTableColumns}
                         rows={auraComponentsTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -182,6 +257,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={lightningWebComponentsTableColumns}
                         rows={lightningWebComponentsTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -196,6 +275,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={apexClassesTableColumns}
                         rows={apexClassesTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -208,6 +291,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={apexTriggersTableColumns}
                         rows={apexTriggersTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
@@ -218,6 +305,10 @@
                         show-statistics
                         show-score-column
                         show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
                         columns={apexTestsTableColumns}
                         rows={apexTestsTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>

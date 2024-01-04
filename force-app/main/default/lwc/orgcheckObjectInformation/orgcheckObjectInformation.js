@@ -3,7 +3,7 @@ import { LightningElement, api } from 'lwc';
 export default class OrgcheckObjectInformation extends LightningElement {
 
     @api set objectInformationData(data) {
-        this.object = data ? JSON.parse(data) : undefined;
+        this.object = data;
         this.isObjectDefined = data ? true : false;
     }
 

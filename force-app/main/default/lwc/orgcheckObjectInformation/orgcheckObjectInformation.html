@@ -1,8 +1,11 @@
 <template>
     <template if:true={isObjectDefined}>
 
+        <h1 class="slds-text-heading_large">{object.label} ({object.apiname})</h1>
+        <br /><br />
+
         <!-- GENERAL SECTION -->
-        <h1 class="slds-text-heading_medium">General information about {object.label} ({object.apiname})</h1>
+        <h1 class="slds-text-heading_medium">General information</h1>
         <div class="slds-grid slds-gutters">
             <div class="slds-col">
                 <div class="slds-has-divider--bottom"><lightning-input type="text" label="API Name" value={object.apiname} read-only></lightning-input></div>

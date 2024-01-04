@@ -29,7 +29,7 @@ export class OrgCheckAPI {
      * 
      * @return String representation of the Org Check version in a form of Element [El,n]
      */
-    version() {
+    getVersion() {
         return 'Beryllium [Be,4]';
     }
 
@@ -67,7 +67,7 @@ export class OrgCheckAPI {
         this.#datasetManager = new OrgCheckDatasetManager(this.#sfdcManager, this.#logger);
         this.#recipeManager = new OrgCheckRecipeManager(this.#datasetManager, this.#logger);
     }
-
+    
     /**
      * Remove all cache from dataset manager
      */
@@ -102,6 +102,10 @@ export class OrgCheckAPI {
         return this.#sfdcManager.getOrgLimits();
     }
     
+    async getOrganizationInformation() {
+        return this.#recipeManager.run(RECIPE_ORGINFO_ALIAS);
+    }
+
     async getPackagesTypesAndObjects(namespace, sobjectType) {
         return this.#recipeManager.run(RECIPE_GLOBALFILTERS_ALIAS, namespace, sobjectType);
     }
@@ -160,9 +164,5 @@ export class OrgCheckAPI {
     
     async getApexClasses(namespace) {
         return this.#recipeManager.run(RECIPE_APEXCLASSES_ALIAS, namespace);
-    }
-
-    async getOrgInformation() {
-        return this.#recipeManager.run(RECIPE_ORGINFO_ALIAS);
     }
 }

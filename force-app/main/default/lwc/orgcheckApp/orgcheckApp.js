@@ -1,17 +1,21 @@
+import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+import { OrgCheckAPI } from './api/orgcheck-api';
+import { loadScript } from 'lightning/platformResourceLoader';
 import { LightningElement, api } from 'lwc';
-
-const API_STATE_NOT_LOADED = 'Not Loaded';
-const API_STATE_LOADED = 'Loaded';
-const API_STATE_FAILED = 'Failed';
 
 export default class OrgCheckApp extends LightningElement {
 
-    /** 
-     * {String} accessToken Access Token of the current user
-     *                      This value is decorated by "api" so it can be passed by the parent.
-     *                      Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
+    /**
+     * {URL} logoURL URL for the logo in the header
      */
-    @api accessToken;
+    logoURL = OrgCheckStaticRessource + '/img/Logo.svg';
+
+    orgCheckVersion;
+    orgName;
+    orgType;
+    themeForOrgType;
+    orgLimit;
+    themeForOrgLimit;
 
     /**
      * {String} userId Salesforce Id of the current user passed by Visual Force page
@@ -21,17 +25,35 @@ export default class OrgCheckApp extends LightningElement {
     @api userId;
 
     /** 
-     * {String} #apiState State of the Org Check API
-     *                    This property is private
-     *                    Can be one of the three values: 'Not Loaded' (default), 'Loaded' or 'Failed'
+     * {String} accessToken Access Token of the current user
+     *                      This value is decorated by "api" so it can be passed by the parent.
+     *                      Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
      */
-    #apiState = API_STATE_NOT_LOADED;
+    @api accessToken;
 
     /**
      * {String} #currentTab The name of the currently selected tab
      *                      This property is private
      */
     #currentTab;
+
+    /**
+     * {OrgCheckAPI} #api The OrgCheck api
+     */
+    #api;
+
+    #hasRenderOnce = false;
+    #spinner;
+    #filters;
+
+    renderedCallback() {
+        if (this.#hasRenderOnce === false && this.accessToken) {
+            this.#hasRenderOnce = true;
+            this.#spinner = this.template.querySelector('c-orgcheck-spinner');
+            this.#filters = this.template.querySelector('c-orgcheck-global-filters');
+            this._loadAPI();
+        }
+    }
 
     /**
      * After changing the filters value, a button appears on the UI.
@@ -76,74 +98,6 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     /**
-     * Method called when the Org Check API component has loaded successfuly.
-     * The Org Check API component is a child of this component.
-     * This method is async because it awaits for the api to return the list of items for the filters.
-     */
-    async handleApiLoaded() {
-        this.#apiState = API_STATE_LOADED;
-
-        const filters = this.template.querySelector('c-orgcheck-global-filters');
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-
-        try {
-            const data = await orgcheckApi.getPackagesTypesAndObjects('*', '*');
-            if (data) {
-                const dataAsJson = JSON.parse(data);
-                filters.updateSObjectTypeOptions(dataAsJson.types);
-                filters.updatePackageOptions(dataAsJson.packages);
-                filters.updateSObjectApiNameOptions(dataAsJson.objects);
-            }    
-        } catch (error) {
-            const spinner = this.template.querySelector('c-orgcheck-spinner');
-            spinner.open();
-            spinner.sectionFailed('Error while loading the API', error);
-            spinner.canBeClosed();
-        }
-    }
-
-    /**
-     * Method called when api needs to log a progress in the UI
-     * Detail of the message should contain a 'status', a 'section' and a 'message'
-     */
-    handleApiLog(event) {
-        const spinner = this.template.querySelector('c-orgcheck-spinner');
-        if (event.detail.status === 'begin') {
-            spinner.open();
-        } else if (event.detail.status === 'end') {
-            if (event.detail.nbFailures === 0) {
-                spinner.close(500);
-            } else {
-                spinner.canBeClosed();
-            }
-        } else {
-            const s = event.detail.section;
-            const m = event.detail.message;
-            const e = event.detail.error;
-            switch(event.detail.status) {
-                case 'section-starts': spinner.sectionStarts(s, m); break;
-                case 'section-in-progress': spinner.sectionContinues(s, m); break;
-                case 'section-ended': spinner.sectionEnded(s, m); break;
-                case 'section-failed': default: spinner.sectionFailed(s, e); break;
-            }        
-        }
-    }
-
-    /**
-     * Method called when the Org Check API component has failed miserably.
-     * The Org Check API component is a child of this component.
-     * 
-     * @param {Event} event triggered when the Org Check API has failed, thus its detail information contains the origin and the error message
-     */
-    handleApiFailed(event) {
-        this.#apiState = API_STATE_FAILED;
-        const spinner = this.template.querySelector('c-orgcheck-spinner');
-        spinner.open();
-        spinner.sectionFailed('Loading API', event.detail.error);
-        spinner.canBeClosed();
-    }
-
-    /**
      * Method called when the user ask to remove an item or all the cache in the UI
      * 
      * @param {Event} event should contain "allItems" (boolean) and optinally "itemName" (string), if allItems=true 
@@ -151,13 +105,50 @@ export default class OrgCheckApp extends LightningElement {
      *                      to be removed.
      */
     async handleRemoveCache(event) {
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
         if (event.detail.allItems === true) {
-            orgcheckApi.removeAllCache();
+            this.#api.removeAllCache();
         } else {
-            orgcheckApi.removeCache(event.detail.itemName);
+            this.#api.removeCache(event.detail.itemName);
         }
         this._updateCurrentTab();
+    }
+
+    _loadAPI() {
+        Promise.all([
+            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js')
+        ]).then(() => {
+            this.#api = new OrgCheckAPI(
+                // eslint-disable-next-line no-undef
+                jsforce,
+                this.accessToken,
+                this.userId,
+                {
+                    begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' } })); },
+                    sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m } })); },
+                    sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m } })); },
+                    sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m } })); },
+                    sectionFailed: (s, e) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, error: e } })); },
+                    end: (s, f) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end', nbSuccesses: s, nbFailures: f } })); }
+                }
+            );
+            this.accessToken = ''; // reset the accessToken so we do not store it anymore
+            this.orgCheckVersion = this.#api.getVersion();
+            this.#api.getOrganizationInformation().then((orgInfo) => {
+                this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+                this.orgType = orgInfo.type;
+            }).catch((error) => {
+                this.#spinner.sectionFailed('Error while getting information of the org from API', error);
+            });
+            this.#api.getPackagesTypesAndObjects('*', '*').then((data) => {
+                this.#filters.updateSObjectTypeOptions(data.types);
+                this.#filters.updatePackageOptions(data.packages);
+                this.#filters.updateSObjectApiNameOptions(data.objects);
+            }).catch((error) => {
+                this.#spinner.sectionFailed('Error while getting filters values from API', error);
+            });
+        }).catch((error) => {
+            this.#spinner.sectionFailed('Error while loading API', error);
+        });
     }
 
     /**
@@ -174,7 +165,7 @@ export default class OrgCheckApp extends LightningElement {
     async _updateCurrentTab(nextCurrentTab) {
 
         // If for some reason the api is not yet loaded, we stop there
-        if (this.#apiState !== API_STATE_LOADED) return;
+        if (!this.#api) return;
 
         // If the next current tab is the same as the current one, we stop here
         if (nextCurrentTab && nextCurrentTab === this.#currentTab) return;
@@ -183,58 +174,53 @@ export default class OrgCheckApp extends LightningElement {
         if (nextCurrentTab) this.#currentTab = nextCurrentTab;
 
         // Get the global filter parameters
-        const filters = this.template.querySelector('c-orgcheck-global-filters');
-        const namespace = filters.isSelectedPackageAny === true ? '*' : (filters.isSelectedPackageNo === true ? '' : filters.selectedPackage);
-        const sobjectType = filters.isSelectedSObjectTypeAny === true ? '*' : filters.selectedSObjectType;
-        const sobject = filters.isSelectedSObjectApiNameAny === true ? '*' : filters.selectedSObjectApiName;
+        const namespace = this.#filters.isSelectedPackageAny === true ? '*' : (this.#filters.isSelectedPackageNo === true ? '' : this.#filters.selectedPackage);
+        const sobjectType = this.#filters.isSelectedSObjectTypeAny === true ? '*' : this.#filters.selectedSObjectType;
+        const sobject = this.#filters.isSelectedSObjectApiNameAny === true ? '*' : this.#filters.selectedSObjectApiName;
 
         // Call the API depending on the current tab
         // If not supported we stop there
         // Finally send the data to the content component.
         // All is surrounded by a try catch that will show error modal if any.
-        const orgcheckApi = this.template.querySelector('c-orgcheck-api');
-        const spinner = this.template.querySelector('c-orgcheck-spinner');
         const section = `TAB ${this.#currentTab}`;
         try {
-            spinner.open();
-            spinner.sectionStarts(section, 'Call the corresponding Org Check API');
+            this.#spinner.open();
+            this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             switch (this.#currentTab) {
-                case 'object-information':                 if (sobject !== '*') this.objectInformationData = await orgcheckApi.getObject(sobject); else this.objectInformationData = null; break;
-                case 'objects-owd':                        this.objectsOWDTableData = await orgcheckApi.getObjectsOWDs(); break;
-                case 'custom-fields':                      this.customFieldsTableData = await orgcheckApi.getCustomFields(namespace, sobjectType, sobject); break;
-                case 'users':                              this.usersTableData = await orgcheckApi.getActiveUsers(); break;
-                case 'profiles':                           this.profilesTableData = await orgcheckApi.getProfiles(namespace); break;
-                case 'permission-sets':                    this.permissionSetsTableData = await orgcheckApi.getPermissionSets(namespace); break;
-                case 'roles':                              this.rolesTableData = await orgcheckApi.getRoles(); break;
-                case 'public-groups':                      this.publicGroupsTableData = await orgcheckApi.getPublicGroups(); break;
-                case 'queues':                             this.queuesTableData = await orgcheckApi.getQueues(); break;
-                case 'flows':                              this.flowsTableData = await orgcheckApi.getFlows(); break;
-                case 'process-builders':                   this.processBuildersTableData = await orgcheckApi.getProcessBuilders(); break;
-                case 'workflows':                          this.workflowsTableData = await orgcheckApi.getWorkflows(); break;
-                case 'custom-labels':                      this.customLabelsTableData = await orgcheckApi.getCustomLabels(namespace); break;
-                case 'visual-force-pages':                 this.visualForcePagesTableData = await orgcheckApi.getVisualForcePages(namespace); break;
-                case 'visual-force-components':            this.visualForceComponentsTableData = await orgcheckApi.getVisualForceComponents(namespace); break;
-                case 'lightning-pages':                    this.lightningPagesTableData = await orgcheckApi.getLightningPages(namespace); break;
-                case 'lightning-aura-components':          this.auraComponentsTableData = await orgcheckApi.getLightningAuraComponents(namespace); break;
-                case 'lightning-web-components':           this.lightningWebComponentsTableData = await orgcheckApi.getLightningWebComponents(namespace); break;
+                case 'object-information':                 if (sobject !== '*') this.objectInformationData = await this.#api.getObject(sobject); else this.objectInformationData = null; break;
+                case 'objects-owd':                        this.objectsOWDTableData = await this.#api.getObjectsOWDs(); break;
+                case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
+                case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
+                case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
+                case 'permission-sets':                    this.permissionSetsTableData = await this.#api.getPermissionSets(namespace); break;
+                case 'roles':                              this.rolesTableData = await this.#api.getRoles(); break;
+                case 'public-groups':                      this.publicGroupsTableData = await this.#api.getPublicGroups(); break;
+                case 'queues':                             this.queuesTableData = await this.#api.getQueues(); break;
+                case 'flows':                              this.flowsTableData = await this.#api.getFlows(); break;
+                case 'process-builders':                   this.processBuildersTableData = await this.#api.getProcessBuilders(); break;
+                case 'workflows':                          this.workflowsTableData = await this.#api.getWorkflows(); break;
+                case 'custom-labels':                      this.customLabelsTableData = await this.#api.getCustomLabels(namespace); break;
+                case 'visual-force-pages':                 this.visualForcePagesTableData = await this.#api.getVisualForcePages(namespace); break;
+                case 'visual-force-components':            this.visualForceComponentsTableData = await this.#api.getVisualForceComponents(namespace); break;
+                case 'lightning-pages':                    this.lightningPagesTableData = await this.#api.getLightningPages(namespace); break;
+                case 'lightning-aura-components':          this.auraComponentsTableData = await this.#api.getLightningAuraComponents(namespace); break;
+                case 'lightning-web-components':           this.lightningWebComponentsTableData = await this.#api.getLightningWebComponents(namespace); break;
                 case 'apex-classes':                       
                 case 'apex-recompilation-needed':          
                 case 'apex-triggers':                      
                 case 'schedulable-classes-not-scheduled':  
                 case 'apex-jobs':                          
-                case 'apex-unit-tests':                    this.apexClassesTableData = await orgcheckApi.getApexClasses(namespace); break;
-                case 'dashboards':                         this.dashboardsTableData = await orgcheckApi.getDashboards(); break;
-                case 'reports':                            this.reportsTableData = await orgcheckApi.getReports(); break;
-                case 'cache-manager':                      this.cacheManagerData = await orgcheckApi.getCacheInformation(); break;
+                case 'apex-unit-tests':                    this.apexClassesTableData = await this.#api.getApexClasses(namespace); break;
+                case 'dashboards':                         this.dashboardsTableData = await this.#api.getDashboards(); break;
+                case 'reports':                            this.reportsTableData = await this.#api.getReports(); break;
+                case 'cache-manager':                      this.cacheManagerData = await this.#api.getCacheInformation(); break;
                 default:
             }
-            spinner.sectionEnded(section, 'Done');
-            spinner.close();
+            this.#spinner.sectionEnded(section, 'Done');
+            this.#spinner.close();
 
         } catch (error) {
-            spinner.open();
-            spinner.sectionFailed(section, error);
-            spinner.canBeClosed();
+            this.#spinner.sectionFailed(section, error);
         }
     }
 
