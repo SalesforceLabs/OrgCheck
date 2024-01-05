@@ -21,7 +21,8 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
             // Some information are not in the global describe, we need to append them with EntityDefinition soql query
             promises.push(sfdcManager.soqlQuery([{ 
                 tooling: true,
-                string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName '+
+                string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, '+
+                            'ExternalSharingModel, InternalSharingModel '+
                         'FROM EntityDefinition ' +
                         `WHERE PublisherId IN ('System', '<local>', '${localNamespace}') ` +
                         'AND keyPrefix <> null '+
@@ -55,7 +56,9 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                                 apiname: object.name,
                                 url: sfdcManager.setupUrl('object', '', entity.DurableId, type),
                                 package: (entity.NamespacePrefix || ''),
-                                typeId: type
+                                typeId: type,
+                                externalSharingModel: entity.ExternalSharingModel,
+                                internalSharingModel: entity.InternalSharingModel
                             }));
                         });
 

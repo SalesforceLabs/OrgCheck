@@ -3,6 +3,19 @@ import { OrgCheckAPI } from './api/orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { LightningElement, api } from 'lwc';
 
+const SPINNER_LOGGER_END = (spinner, nbSuccesses, nbFailures) => { 
+    if (nbFailures === 0) {
+        spinner.close(); 
+    } else {
+        spinner.canBeClosed();
+    }
+}
+
+const SPINNER_LOGGER_LASTFAILURE = (spinner, section, error) => {
+    spinner.sectionFailed(section, error);
+    spinner.canBeClosed();
+}
+
 export default class OrgCheckApp extends LightningElement {
 
     /**
@@ -113,6 +126,9 @@ export default class OrgCheckApp extends LightningElement {
         this._updateCurrentTab();
     }
 
+    /**
+     * Internal method to load the Org Check API and its dependencies
+     */ 
     _loadAPI() {
         Promise.all([
             loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js')
@@ -123,12 +139,12 @@ export default class OrgCheckApp extends LightningElement {
                 this.accessToken,
                 this.userId,
                 {
-                    begin: () => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'begin' } })); },
-                    sectionStarts: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-starts', section: s, message: m } })); },
-                    sectionContinues: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-in-progress', section: s, message: m } })); },
-                    sectionEnded: (s, m) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-ended', section: s, message: m } })); },
-                    sectionFailed: (s, e) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'section-failed', section: s, error: e } })); },
-                    end: (s, f) => { this.dispatchEvent(new CustomEvent('log', { detail: { status: 'end', nbSuccesses: s, nbFailures: f } })); }
+                    begin: () => { this.#spinner.open(); },
+                    sectionStarts: (s, m) => { this.#spinner.sectionStarts(s, m); },
+                    sectionContinues: (s, m) => { this.#spinner.sectionContinues(s, m); },
+                    sectionEnded: (s, m) => { this.#spinner.sectionEnded(s, m); },
+                    sectionFailed: (s, e) => { this.#spinner.sectionFailed(s, e); },
+                    end: (s, f) => { SPINNER_LOGGER_END(this.#spinner, s, f); }
                 }
             );
             this.accessToken = ''; // reset the accessToken so we do not store it anymore
@@ -137,17 +153,17 @@ export default class OrgCheckApp extends LightningElement {
                 this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
                 this.orgType = orgInfo.type;
             }).catch((error) => {
-                this.#spinner.sectionFailed('Error while getting information of the org from API', error);
+                SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting information of the org from API', error);
             });
             this.#api.getPackagesTypesAndObjects('*', '*').then((data) => {
                 this.#filters.updateSObjectTypeOptions(data.types);
                 this.#filters.updatePackageOptions(data.packages);
                 this.#filters.updateSObjectApiNameOptions(data.objects);
             }).catch((error) => {
-                this.#spinner.sectionFailed('Error while getting filters values from API', error);
+                SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting filters values from API', error);
             });
         }).catch((error) => {
-            this.#spinner.sectionFailed('Error while loading API', error);
+            SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while loading API', error);
         });
     }
 
@@ -188,7 +204,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             switch (this.#currentTab) {
                 case 'object-information':                 if (sobject !== '*') this.objectInformationData = await this.#api.getObject(sobject); else this.objectInformationData = null; break;
-                case 'objects-owd':                        this.objectsOWDTableData = await this.#api.getObjectsOWDs(); break;
+                case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
                 case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
@@ -220,7 +236,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.close();
 
         } catch (error) {
-            this.#spinner.sectionFailed(section, error);
+            SPINNER_LOGGER_LASTFAILURE(this.#spinner, section, error);
         }
     }
 
@@ -408,7 +424,17 @@ export default class OrgCheckApp extends LightningElement {
     
     dashboardsTableData;
     reportsTableData;
+
+    objectsOWDTableColumns = [
+        { label: 'Label',            type: 'text',  data: { value: 'label' }, sorted: 'asc'},
+        { label: 'Name',             type: 'text',  data: { value: 'name' }},
+        { label: 'Package',          type: 'text',  data: { value: 'package' }},
+        { label: 'Internal',         type: 'text',  data: { value: 'internalSharingModel' }},
+        { label: 'External',         type: 'text',  data: { value: 'externalSharingModel' }}
+    ];
+
     objectsOWDTableData;
+
     rolesTableData;
     flowsTableData;
     processBuildersTableData;

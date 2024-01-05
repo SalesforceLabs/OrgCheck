@@ -3,8 +3,8 @@ import { LightningElement, api, track } from 'lwc';
 const TYPE_INDEX = 'index';
 const TYPE_SCORE = 'score';
 
-const SORT_ODER_ASC = 'asc';
-const SORT_ODER_DESC = 'desc';
+const SORT_ORDER_ASC = 'asc';
+const SORT_ORDER_DESC = 'desc';
 
 const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
     if (column.dataProperties.length > 0) {
@@ -226,7 +226,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 _columns.push({ label: '#', type: TYPE_INDEX });
             }
             if (this.showScoreColumn === true) {
-                _columns.push({ label: 'Score', type: TYPE_SCORE, data: { value: 'badScore' }, sorted: SORT_ODER_DESC });
+                _columns.push({ label: 'Score', type: TYPE_SCORE, data: { value: 'badScore' }, sorted: SORT_ORDER_DESC });
             }
             _columns.push(...columns);
             this.#columns = _columns.map((c, i) => { 
@@ -358,13 +358,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     handleSortColumnClick(event) {
         this.#sortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10);
-        this.#sortingOrder = SORT_ODER_ASC;
+        this.#sortingOrder = SORT_ORDER_ASC;
         this.#columns.forEach((column) => {
             if (column.index === this.#sortingColumnIndex) {
-                if (!column.sorted || column.sorted === SORT_ODER_DESC) {
-                    this.#sortingOrder = column.sorted = SORT_ODER_ASC;
+                if (!column.sorted || column.sorted === SORT_ORDER_DESC) {
+                    this.#sortingOrder = column.sorted = SORT_ORDER_ASC;
                 } else {
-                    this.#sortingOrder = column.sorted = SORT_ODER_DESC;
+                    this.#sortingOrder = column.sorted = SORT_ORDER_DESC;
                 }
             } else {
                 delete column.sorted;
@@ -426,7 +426,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _sortAllRows() {
         if (this.#sortingColumnIndex === undefined) return;
         const columnIndex = this.#sortingColumnIndex;
-        const iOrder = this.#sortingOrder === SORT_ODER_ASC ? 1 : -1;
+        const iOrder = this.#sortingOrder === SORT_ORDER_ASC ? 1 : -1;
         const isIterative = this.#columns[columnIndex].isIterative;
         let value1, value2;
         let index = 0;
@@ -449,7 +449,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             }
         });
         this.sortingField = this.#columns[columnIndex].label;
-        this.sortingOrder = this.#sortingOrder === SORT_ODER_ASC ? 'ascending' : 'descending';
+        this.sortingOrder = this.#sortingOrder === SORT_ORDER_ASC ? 'ascending' : 'descending';
     }
 
     /**

@@ -52,7 +52,17 @@
                     <c-orgcheck-object-information class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} object-information-data={objectInformationData}></c-orgcheck-object-information>
                 </lightning-tab>
                 <lightning-tab value="objects-owd" label="Org Wide Default" onactive={handleSubTabActivation}>
-                    Place for org wide default per objects
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no org wide default to show."
+                        show-search
+                        show-statistics
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={objectsOWDTableColumns}
+                        rows={objectsOWDTableData}></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
