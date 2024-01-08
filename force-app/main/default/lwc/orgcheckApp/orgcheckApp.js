@@ -228,6 +228,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'apex-enums':                         this.apexEnumssTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isEnum === true); break;
                 case 'apex-unit-tests':                    this.apexTestsTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isTest === true); break;
                 case 'apex-recompilation-needed':          this.apexUncompiledTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.needsRecompilation === true); break;
+                case 'apex-triggers':                      this.apexTriggersTableData = await this.#api.getApexTriggers(namespace); break;
                 case 'dashboards':                         this.dashboardsTableData = await this.#api.getDashboards(); break;
                 case 'reports':                            this.reportsTableData = await this.#api.getReports(); break;
                 case 'cache-manager':                      this.cacheManagerData = await this.#api.getCacheInformation(); break;
@@ -455,8 +456,29 @@ export default class OrgCheckApp extends LightningElement {
 
     apexUncompiledTableData;
 
-    apexTriggersTableColumns;
-    
+    apexTriggersTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Object',        type: 'id',               data: { ref: 'objectRef', value: 'name', url: 'url' }},
+        { label: 'Active?',       type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'Has SOQL?',     type: 'boolean',          data: { value: 'hasSOQL' }},
+        { label: 'Has DML?',      type: 'boolean',          data: { value: 'hasDML' }},
+        { label: '*Insert',       type: 'boolean',          data: { value: 'beforeInsert' }},
+        { label: 'Insert*',       type: 'boolean',          data: { value: 'afterInsert' }},
+        { label: '*Update',       type: 'boolean',          data: { value: 'beforeUpdate' }},
+        { label: 'Update*',       type: 'boolean',          data: { value: 'afterUpdate' }},
+        { label: '*Delete',       type: 'boolean',          data: { value: 'beforeDelete' }},
+        { label: 'Delete*',       type: 'boolean',          data: { value: 'afterDelete' }},
+        { label: 'Undelete',      type: 'boolean',          data: { value: 'afterUndelete' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+
     apexTriggersTableData;
     
     apexEnumsTableColumns = [

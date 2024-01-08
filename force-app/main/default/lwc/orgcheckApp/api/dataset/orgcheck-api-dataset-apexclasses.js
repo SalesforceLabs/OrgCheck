@@ -6,7 +6,7 @@ const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 
 const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
 const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
 
-export class OrgCheckDatasetApexClass extends OrgCheckDataset {
+export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
     run(sfdcManager, resolve, reject) {
 

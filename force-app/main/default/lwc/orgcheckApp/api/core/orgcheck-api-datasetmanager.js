@@ -16,7 +16,8 @@ import { OrgCheckDatasetLightningAuraComponents } from '../dataset/orgcheck-api-
 import { OrgCheckDatasetLightningWebComponents } from '../dataset/orgcheck-api-dataset-lighntingwebcomponents';
 import { OrgCheckDatasetLightningPages } from '../dataset/orgcheck-api-dataset-lighntingpages';
 import { OrgCheckDatasetGroups } from '../dataset/orgcheck-api-dataset-groups';
-import { OrgCheckDatasetApexClass } from '../dataset/orgcheck-api-dataset-apexclasses';
+import { OrgCheckDatasetApexClasses } from '../dataset/orgcheck-api-dataset-apexclasses';
+import { OrgCheckDatasetApexTriggers } from '../dataset/orgcheck-api-dataset-apextriggers';
 
 export class DatasetCacheInfo {
     name;
@@ -48,6 +49,7 @@ export const DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS = 'lightning-web-components';
 export const DATASET_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 export const DATASET_GROUPS_ALIAS = 'groups';
 export const DATASET_APEXCLASSES_ALIAS = 'apex-classes';
+export const DATASET_APEXTRIGGERS_ALIAS = 'apex-triggers';
 
 export class OrgCheckDatasetManager {
     
@@ -92,7 +94,8 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS, new OrgCheckDatasetLightningWebComponents());
         this.#datasets.set(DATASET_LIGHTNINGPAGES_ALIAS, new OrgCheckDatasetLightningPages());
         this.#datasets.set(DATASET_GROUPS_ALIAS, new OrgCheckDatasetGroups());
-        this.#datasets.set(DATASET_APEXCLASSES_ALIAS, new OrgCheckDatasetApexClass());
+        this.#datasets.set(DATASET_APEXCLASSES_ALIAS, new OrgCheckDatasetApexClasses());
+        this.#datasets.set(DATASET_APEXTRIGGERS_ALIAS, new OrgCheckDatasetApexTriggers());
     }
 
     /**

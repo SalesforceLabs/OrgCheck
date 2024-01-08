@@ -16,6 +16,7 @@ import { OrgCheckRecipeVisualForceComponents } from '../recipe/orgcheck-api-reci
 import { OrgCheckRecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
 import { OrgCheckRecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
 import { OrgCheckRecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
+import { OrgCheckRecipeApexTriggers } from '../recipe/orgcheck-api-recipe-apextriggers';
 
 export const RECIPE_ACTIVEUSERS_ALIAS = 'active-users';
 export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -33,6 +34,7 @@ export const RECIPE_VISUALFORCECOMPONENTS_ALIAS = 'visual-force-components';
 export const RECIPE_PUBLICGROUPS_ALIAS = 'public-groups';
 export const RECIPE_QUEUES_ALIAS = 'queues';
 export const RECIPE_APEXCLASSES_ALIAS = 'apex-classes';
+export const RECIPE_APEXTRIGGERS_ALIAS = 'apex-triggers';
 
 export class OrgCheckRecipeManager {
 
@@ -75,7 +77,7 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_PUBLICGROUPS_ALIAS, new OrgCheckRecipePublicGroups());
         this.#recipes.set(RECIPE_QUEUES_ALIAS, new OrgCheckRecipeQueues());
         this.#recipes.set(RECIPE_APEXCLASSES_ALIAS, new OrgCheckRecipeApexClasses());
-
+        this.#recipes.set(RECIPE_APEXTRIGGERS_ALIAS, new OrgCheckRecipeApexTriggers());
     }
 
     async run(alias, ...parameters) {
