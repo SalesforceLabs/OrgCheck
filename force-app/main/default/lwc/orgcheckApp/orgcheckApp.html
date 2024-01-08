@@ -293,6 +293,18 @@
                         rows={apexClassesTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-recompilation-needed" label="Recompilation needed" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Uncopmiled Class to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexUncompiledTableColumns}
+                        rows={apexUncompiledTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-triggers" label="Triggers" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -307,6 +319,48 @@
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexTriggersTableColumns}
                         rows={apexTriggersTableData} ></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-enums" label="Enum Classes" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Enum to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexEnumsTableColumns}
+                        rows={apexEnumssTableData} ></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-abstract" label="Abstract Classes" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Abstract Class to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexAbstractTableColumns}
+                        rows={apexAbstractTableData} ></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-interfaces" label="Interfaces" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Interfaces to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexInterfacesTableColumns}
+                        rows={apexInterfacesTableData} ></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable

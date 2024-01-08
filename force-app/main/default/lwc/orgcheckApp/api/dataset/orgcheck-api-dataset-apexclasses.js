@@ -17,7 +17,8 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexClass '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            tooling: true
+            tooling: true,
+            addDependenciesBasedOnField: 'Id'
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
                     'FROM ApexCodeCoverage',
@@ -43,6 +44,7 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                 .forEach((record) => {
                     const apexClass = new SFDC_ApexClass({
                         id: sfdcManager.caseSafeId(record.Id),
+                        url: sfdcManager.setupUrl('apex-class', record.Id),
                         name: record.Name,
                         apiVersion: record.ApiVersion,
                         package: record.NamespacePrefix,
@@ -55,9 +57,14 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                         length: record.LengthWithoutComments,
                         needsRecompilation: (!record.SymbolTable ? true : false),
                         coverage: 0, // by default no coverage!
-                        relatedTestClasses: new Set(),
+                        relatedTestClasses: [],
+                        relatedClasses: [],
                         createdDate: record.CreatedDate,
-                        lastModifiedDate: record.LastModifiedDate
+                        lastModifiedDate: record.LastModifiedDate,
+                        isScoreNeeded: true,
+                        isDependenciesNeeded: true,
+                        dependenciesFor: 'id',
+                        allDependencies: results[0].allDependencies
                     });
                     // Get information directly from the source code (if available)
                     if (record.Body) {
@@ -70,6 +77,7 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                         apexClass.innerClassesCount = record.SymbolTable.innerClasses.length || 0;
                         apexClass.interfaces = record.SymbolTable.interfaces;
                         apexClass.methodsCount = record.SymbolTable.methods.length || 0;
+                        apexClass.extends = record.SymbolTable.parentClass;
                         if (record.SymbolTable.tableDeclaration) {
                             apexClass.annotations = record.SymbolTable.tableDeclaration.annotations;
                             if (record.SymbolTable.tableDeclaration.modifiers) {
@@ -87,8 +95,18 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                             }
                         }
                     }
+                    // Defin type
+                    if (apexClass.isTest === true) {
+                        apexClass.type = 'test';
+                    } else if (apexClass.isInterface === true) {
+                        apexClass.type = 'interface';
+                    } else if (apexClass.isEnum === true) {
+                        apexClass.type = 'enum';
+                    } else {
+                        apexClass.type = 'class';
+                    }
                     // Refine sharing spec
-                    if (apexClass.isEnum === true || apexClass.isInterface === true) apexClass.specifiedSharing = 'n/a';
+                    if (apexClass.isEnum === true || apexClass.isInterface === true) apexClass.specifiedSharing = 'Not applicable';
                     if (apexClass.isTest === false && apexClass.isClass === true && !apexClass.specifiedSharing) {
                         apexClass.isSharingMissing = true;
                     }
@@ -101,6 +119,8 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                 });
 
             // Part 2- add the related tests to apex classes
+            const relatedTestsByApexClass = new Map();
+            const relatedClassesByApexTest = new Map();
             results[1].records
                 .filter((record) => {
                     return classesMap.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId));
@@ -109,8 +129,17 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                     // Get the ID15 of the class that is tested and the test class
                     const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                     const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
-                    classesMap.get(id).relatedTestClasses.add(testId);
+                    if (relatedTestsByApexClass.has(id) === false) relatedTestsByApexClass.set(id, new Set());
+                    if (relatedClassesByApexTest.has(testId) === false) relatedClassesByApexTest.set(testId, new Set());
+                    relatedTestsByApexClass.get(id).add(testId);
+                    relatedClassesByApexTest.get(testId).add(id);
                 });
+            relatedTestsByApexClass.forEach((relatedTestsIds, apexClassId) => {
+                classesMap.get(apexClassId).relatedTestClasses = Array.from(relatedTestsIds).map((id) => classesMap.get(id));
+            });
+            relatedClassesByApexTest.forEach((relatedClassesIds, apexTestId) => {
+                classesMap.get(apexTestId).relatedClasses = Array.from(relatedClassesIds).map((id) => classesMap.get(id));
+            });
 
             // Part 3- add the aggregate code coverage to apex classes
             results[2].records
@@ -133,6 +162,17 @@ export class OrgCheckDatasetApexClass extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.ApexClassId);
                     classesMap.get(id).isScheduled = true;
                 });
+
+            // Compute the score of this class, with the following rule:
+            //  - If the class uses a very old API version, then you get +1.
+            classesMap.forEach((apexClass) => {
+                if (sfdcManager.isVersionOld(apexClass.apiVersion)) apexClass.setBadField('apiVersion');
+                if (apexClass.isTest === true && apexClass.nbSystemAsserts === 0) apexClass.setBadField('nbSystemAsserts');
+                if (apexClass.isSharingMissing === true) apexClass.setBadField('specifiedSharing');
+                if (apexClass.needsRecompilation === true) apexClass.setBadField('name');
+                if (apexClass.coverage < 0.75) apexClass.setBadField('coverage');
+                if (apexClass.isItReferenced() === false) apexClass.setBadField('dependencies.referenced');
+            });
 
             // Return data
             resolve(classesMap);

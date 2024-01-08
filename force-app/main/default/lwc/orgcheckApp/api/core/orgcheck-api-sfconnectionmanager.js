@@ -14,6 +14,11 @@ export class SOQLQueryInformation {
 export class OrgCheckSalesforceManager {
 
     /**
+     * API Version used to make the connection
+     */
+    #apiVersion;
+
+    /**
      * JSForce connection to your Salesforce org
      */
     #connection;
@@ -34,12 +39,26 @@ export class OrgCheckSalesforceManager {
             version: SF_API_VERSION + '.0',
             maxRequest: '10000'
         });
+
+        this.#apiVersion = SF_API_VERSION;
     }
 
     isEmpty(value) {
         if (!value) return true;
         if (value.length === 0) return true;
         if (value.trim && value.trim().length === 0) return true;
+        return false;
+    }
+
+    /**
+     * Is an API version is old or not?
+     * @param version The given version number (should be an integer)
+     * @param definition_of_old in Years (by default 3 years)
+     */
+    isVersionOld(version, definition_of_old = 3) {
+        // Compute age version in Years
+        const age = (this.#apiVersion - version) / 3;
+        if (age >= definition_of_old) return true;
         return false;
     }
 
@@ -80,7 +99,6 @@ export class OrgCheckSalesforceManager {
                     case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
                         return `/lightning/setup/ExternalObjects/page?address=%2F${durableId}%3Fsetupid%3DExternalObjects`;
                     default:
-                        //////console.error('field with type object uncovered: ', objectType);
                         return `/${durableId}`;
                 }
             }
@@ -103,7 +121,6 @@ export class OrgCheckSalesforceManager {
                     case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
                         return `/lightning/setup/ExternalObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DExternalObjects`;
                     default:
-                        /////console.error('object with type uncovered: ', objectType);
                         return `/${objectDurableId}`;
                 }
             }
@@ -157,11 +174,13 @@ export class OrgCheckSalesforceManager {
             }
             //CustomSite
             //CustomTab
-            //ApexClass
+            case 'apex-class': // Org Check specific
+            case 'ApexClass': { // From DAPI 
+                return `/lightning/setup/ApexClasses/page?address=%2F${durableId}`;
+            }
             // User
             //AuraDefinitionBundle
             default:
-                //////console.error('type uncovered: ', type);
                 return `/${durableId}`;
         }
     }

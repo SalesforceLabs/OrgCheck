@@ -7,8 +7,8 @@ export class SFDC_ApexClass extends OrgCheckData {
     apiVersion;
     package;
     isTest;
-    isTestSeeAllData;
     nbSystemAsserts;
+    type;
     isAbstract;
     isClass;
     isEnum;
@@ -17,13 +17,16 @@ export class SFDC_ApexClass extends OrgCheckData {
     innerClassesCount;
     isScheduled;
     interfaces;
+    extends;
     methodsCount;
     annotations;
     specifiedSharing;
+    specifiedAccess;
     length;
     needsRecompilation;
     coverage;
     relatedTestClasses;
+    relatedClasses;
     createdDate;
     lastModifiedDate;
 

@@ -105,7 +105,9 @@
                                 <template lwc:else>{cell.data.value}</template>
                             </template>
                             <template lwc:elseif={cell.isTexts}>
-                                <i>{cell.data.values.length} item(s)</i><br />
+                                <template lwc:if={cell.data.values.length}>
+                                    <small><i>{cell.data.values.length} item(s)</i></small><br />
+                                </template>
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item.isValueTruncated}>
                                         - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon>
@@ -117,7 +119,9 @@
                                 </template>
                             </template>
                             <template lwc:elseif={cell.isIds}>
-                                <i>{cell.data.values.length} item(s)</i><br />
+                                <template lwc:if={cell.data.values.length}>
+                                    <small><i>{cell.data.values.length} item(s)</i></small><br />
+                                </template>
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank" ></lightning-formatted-url><br key={cell.key} />

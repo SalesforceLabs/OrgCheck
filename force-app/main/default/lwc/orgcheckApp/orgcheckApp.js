@@ -221,12 +221,13 @@ export default class OrgCheckApp extends LightningElement {
                 case 'lightning-pages':                    this.lightningPagesTableData = await this.#api.getLightningPages(namespace); break;
                 case 'lightning-aura-components':          this.auraComponentsTableData = await this.#api.getLightningAuraComponents(namespace); break;
                 case 'lightning-web-components':           this.lightningWebComponentsTableData = await this.#api.getLightningWebComponents(namespace); break;
-                case 'apex-classes':                       
-                case 'apex-recompilation-needed':          
-                case 'apex-triggers':                      
-                case 'schedulable-classes-not-scheduled':  
-                case 'apex-jobs':                          
-                case 'apex-unit-tests':                    this.apexClassesTableData = await this.#api.getApexClasses(namespace); break;
+                case 'apex-classes':                       this.apexClassesTableData = (await this.#api.getApexClasses(namespace)).filter((r) => 
+                                                                r.isClass === true && r.isTest === false && r.isAbstract === false && r.needsRecompilation === false); break;
+                case 'apex-abstract':                      this.apexAbstractTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isAbstract === true); break;
+                case 'apex-interfaces':                    this.apexInterfacesTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isInterface === true); break;
+                case 'apex-enums':                         this.apexEnumssTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isEnum === true); break;
+                case 'apex-unit-tests':                    this.apexTestsTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isTest === true); break;
+                case 'apex-recompilation-needed':          this.apexUncompiledTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.needsRecompilation === true); break;
                 case 'dashboards':                         this.dashboardsTableData = await this.#api.getDashboards(); break;
                 case 'reports':                            this.reportsTableData = await this.#api.getReports(); break;
                 case 'cache-manager':                      this.cacheManagerData = await this.#api.getCacheInformation(); break;
@@ -246,14 +247,14 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Package',             type: 'text',             data: { value: 'package' }},
         { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
         { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
         { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
         { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
         { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     customFieldsTableData;
@@ -266,55 +267,55 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Language',            type: 'text',             data: { value: 'language' }},
         { label: 'Protected?',          type: 'boolean',          data: { value: 'isProtected' }},
         { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
         { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
         { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
         { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
         { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Value',               type: 'text',             data: { value: 'value', maximumLength: 30 }}
+        { label: 'Value',               type: 'text',             data: { value: 'value'}, modifier: { maximumLength: 30 }}
     ];
 
     customLabelsTableData;
 
     auraComponentsTableColumns = [
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     auraComponentsTableData;
 
     lightningPagesTableColumns = [
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     lightningPagesTableData;
 
     lightningWebComponentsTableColumns = [
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ]
 
     lightningWebComponentsTableData;
@@ -323,15 +324,15 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
         { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
-        { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions', max: 50, valueAfterMax: '50+' }},
-        { label: '#Object CRUDs',    type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
+        { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
+        { label: '#Object CRUDs',    type: 'numeric',  data: { value: 'nbObjectPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},            
         { label: 'License',          type: 'text',     data: { value: 'license' }},
         { label: 'Package',          type: 'text',     data: { value: 'package' }},
-        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this permission set!' }},
+        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }, modifier: { max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this permission set!' }},
         { label: 'Users\' profiles', type: 'ids',      data: { ref: 'profileRefs', value: 'name', url: 'url' }},
         { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
-        { label: 'Description',      type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',      type: 'text',     data: { value: 'description'}, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     permissionSetsTableData;
@@ -339,36 +340,36 @@ export default class OrgCheckApp extends LightningElement {
     profilesTableColumns = [
         { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
-        { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions', max: 50, valueAfterMax: '50+' }},
-        { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions', max: 50, valueAfterMax: '50+' }},            
+        { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
+        { label: '#Object CRUDs',   type: 'numeric',  data: { value: 'nbObjectPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},            
         { label: 'License',         type: 'text',     data: { value: 'license' }},
         { label: 'Package',         type: 'text',     data: { value: 'package' }},
-        { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts', max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
+        { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts' }, modifier: { max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
         { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
-        { label: 'Description',     type: 'text',     data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',     type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     profilesTableData;
 
     publicGroupsTableColumns = [
-        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
-        { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',      data: { ref: 'directGroups', value: 'id', url: 'url' }},
-        { label: 'Included users',   type: 'ids',      data: { ref: 'directUsers', value: 'id', url: 'url' }},
-        { label: 'All active users', type: 'ids',      data: { ref: 'indirectUsers', value: 'id', url: 'url' }},
+        { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
+        { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
+        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroups', value: 'id', url: 'url' }},
+        { label: 'Included users',   type: 'ids',     data: { ref: 'directUsers', value: 'id', url: 'url' }},
+        { label: 'All active users', type: 'ids',     data: { ref: 'indirectUsers', value: 'id', url: 'url' }},
     ];
 
     publicGroupsTableData;
 
     queuesTableColumns = [
-        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',   type: 'text',     data: { value: 'developerName' }},
-        { label: 'With bosses?',     type: 'boolean',  data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',      data: { ref: 'directGroups', value: 'id' }},
-        { label: 'Included users',   type: 'ids',      data: { ref: 'directUsers', value: 'id' }},
-        { label: 'All active users', type: 'ids',      data: { ref: 'indirectUsers', value: 'id' }},
+        { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
+        { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
+        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroups', value: 'id' }},
+        { label: 'Included users',   type: 'ids',     data: { ref: 'directUsers', value: 'id' }},
+        { label: 'All active users', type: 'ids',     data: { ref: 'indirectUsers', value: 'id' }},
     ];
 
     queuesTableData;
@@ -376,7 +377,7 @@ export default class OrgCheckApp extends LightningElement {
     usersTableColumns = [
         { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
-        { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin', valueIfEmpty: 'Never logged!' }},
+        { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
         { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
         { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
         { label: 'Key permissions', type: 'texts',    data: { ref: 'importantPermissions' }},
@@ -387,42 +388,155 @@ export default class OrgCheckApp extends LightningElement {
     usersTableData;
 
     visualForceComponentsTableColumns = [
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description'}, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     visualForceComponentsTableData;
 
     visualForcePagesTableColumns = [
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',         type: 'numeric',          data: { value: 'apiVersion' }},
-        { label: 'Mobile',              type: 'boolean',          data: { value: 'isMobileReady' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length', min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description', maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Mobile',        type: 'boolean',          data: { value: 'isMobileReady' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 
     visualForcePagesTableData;
 
-    apexClassesTableColumns;
+    apexClassesTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Access',        type: 'text',             data: { value: 'specifiedAccess' }},
+        { label: 'Implements',    type: 'texts',            data: { ref: 'interfaces' }},
+        { label: 'Extends',       type: 'text',             data: { ref: 'extends' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Inner Classes', type: 'numeric',          data: { value: 'innerClassesCount' }},
+        { label: 'Annotations',   type: 'texts',            data: { ref: 'annotations', value: 'name' }},
+        { label: 'Sharing',       type: 'text',             data: { ref: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+        { label: 'Coverage',      type: 'percentage',       data: { ref: 'coverage' }},
+        { label: 'Related Tests', type: 'ids',              data: { ref: 'relatedTestClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+
     apexClassesTableData;
+    
+    apexUncompiledTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Coverage',      type: 'percentage',       data: { ref: 'coverage' }},
+        { label: 'Related Tests', type: 'ids',              data: { ref: 'relatedTestClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+
+    apexUncompiledTableData;
+
     apexTriggersTableColumns;
+    
     apexTriggersTableData;
-    apexTestsTableColumns;
+    
+    apexEnumsTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Access',        type: 'text',             data: { value: 'specifiedAccess' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+    
+    apexEnumssTableData;
+
+    apexAbstractTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Access',        type: 'text',             data: { value: 'specifiedAccess' }},
+        { label: 'Type',          type: 'text',             data: { value: 'type' }},
+        { label: 'Implements',    type: 'texts',            data: { ref: 'interfaces' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Inner Classes', type: 'numeric',          data: { value: 'innerClassesCount' }},
+        { label: 'Annotations',   type: 'texts',            data: { ref: 'annotations', value: 'name' }},
+        { label: 'Sharing',       type: 'text',             data: { ref: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+        { label: 'Coverage',      type: 'percentage',       data: { ref: 'coverage' }},
+        { label: 'Related Tests', type: 'ids',              data: { ref: 'relatedTestClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+    
+    apexAbstractTableData;
+    
+    apexInterfacesTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Access',        type: 'text',             data: { value: 'specifiedAccess' }},
+        { label: 'Implements',    type: 'texts',            data: { ref: 'interfaces' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Annotations',   type: 'texts',            data: { ref: 'annotations', value: 'name' }},
+        { label: 'Coverage',      type: 'percentage',       data: { ref: 'coverage' }},
+        { label: 'Related Tests', type: 'ids',              data: { ref: 'relatedTestClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+    
+    apexInterfacesTableData;
+
+    apexTestsTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Inner Classes', type: 'numeric',          data: { value: 'innerClassesCount' }},
+        { label: 'Sharing',       type: 'text',             data: { ref: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+        { label: 'Covering',      type: 'ids',              data: { ref: 'relatedClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+    
     apexTestsTableData;
     
     dashboardsTableData;
+    
     reportsTableData;
 
     objectsOWDTableColumns = [
@@ -436,8 +550,11 @@ export default class OrgCheckApp extends LightningElement {
     objectsOWDTableData;
 
     rolesTableData;
+
     flowsTableData;
+    
     processBuildersTableData;
+    
     workflowsTableData;
 
     cacheManagerData;

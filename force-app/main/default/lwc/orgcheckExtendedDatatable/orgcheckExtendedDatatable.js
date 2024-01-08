@@ -14,23 +14,23 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
     } else {
         cell.data.value = reference;
     }
-    if (column.data?.valueIfEmpty && !cell.data.value) {
-        cell.data.decoratedValue = column.data.valueIfEmpty;
+    if (column.modifier?.valueIfEmpty && !cell.data.value) {
+        cell.data.decoratedValue = column.modifier.valueIfEmpty;
         cell.isEmpty = true;
     } else {
         switch (column.typeProperty) {
             case 'isNumeric':
-                if (column.data.max && cell.data.value > column.data.max) {
-                    cell.data.decoratedValue = column.data.valueAfterMax;
+                if (column.modifier?.max && cell.data.value > column.modifier.max) {
+                    cell.data.decoratedValue = column.modifier.valueAfterMax;
                     cell.isMaxReached = true;
-                } else if (column.data.min && cell.data.value < column.data.min) {
-                    cell.data.decoratedValue = column.data.valueBeforeMin;
+                } else if (column.modifier?.min && cell.data.value < column.modifier.min) {
+                    cell.data.decoratedValue = column.modifier.valueBeforeMin;
                     cell.isMinReached = true;
                 }
                 break;
             case 'isText':
-                if (column.data.maximumLength && cell.data.value.length > column.data.maximumLength) {
-                    cell.data.decoratedValue = cell.data.value.substr(0, column.data.maximumLength);
+                if (column.modifier?.maximumLength && cell.data.value.length > column.modifier.maximumLength) {
+                    cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
                     cell.isValueTruncated = true;
                 }
                 break;
