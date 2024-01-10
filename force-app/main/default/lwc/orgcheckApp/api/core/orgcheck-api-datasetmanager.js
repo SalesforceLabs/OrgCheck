@@ -18,6 +18,7 @@ import { OrgCheckDatasetLightningPages } from '../dataset/orgcheck-api-dataset-l
 import { OrgCheckDatasetGroups } from '../dataset/orgcheck-api-dataset-groups';
 import { OrgCheckDatasetApexClasses } from '../dataset/orgcheck-api-dataset-apexclasses';
 import { OrgCheckDatasetApexTriggers } from '../dataset/orgcheck-api-dataset-apextriggers';
+import { OrgCheckDatasetUserRoles } from '../dataset/orgcheck-api-dataset-userroles';
 
 export class DatasetCacheInfo {
     name;
@@ -50,6 +51,7 @@ export const DATASET_LIGHTNINGPAGES_ALIAS = 'lightning-pages';
 export const DATASET_GROUPS_ALIAS = 'groups';
 export const DATASET_APEXCLASSES_ALIAS = 'apex-classes';
 export const DATASET_APEXTRIGGERS_ALIAS = 'apex-triggers';
+export const DATASET_USERROLES_ALIAS = 'user-roles';
 
 export class OrgCheckDatasetManager {
     
@@ -96,6 +98,7 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_GROUPS_ALIAS, new OrgCheckDatasetGroups());
         this.#datasets.set(DATASET_APEXCLASSES_ALIAS, new OrgCheckDatasetApexClasses());
         this.#datasets.set(DATASET_APEXTRIGGERS_ALIAS, new OrgCheckDatasetApexTriggers());
+        this.#datasets.set(DATASET_USERROLES_ALIAS, new OrgCheckDatasetUserRoles());
     }
 
     /**

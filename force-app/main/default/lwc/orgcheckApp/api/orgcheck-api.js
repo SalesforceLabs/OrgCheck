@@ -18,7 +18,8 @@ import { OrgCheckRecipeManager,
     RECIPE_PUBLICGROUPS_ALIAS,
     RECIPE_QUEUES_ALIAS, 
     RECIPE_APEXCLASSES_ALIAS, 
-    RECIPE_APEXTRIGGERS_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_APEXTRIGGERS_ALIAS,
+    RECIPE_USERROLES_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class
@@ -169,5 +170,9 @@ export class OrgCheckAPI {
 
     async getApexTriggers(namespace) {
         return this.#recipeManager.run(RECIPE_APEXTRIGGERS_ALIAS, namespace);
+    }
+
+    async getRoles() {
+        return this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
     }
 }
