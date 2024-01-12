@@ -136,9 +136,22 @@
         </lightning-tab>
         <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
             <lightning-tabset>
-                <lightning-tab value="roles" label="Role Explorer" onactive={handleSubTabActivation}>
+                <lightning-tab label="Role Explorer" onactive={handleSubTabActivation}>
+                    this is the explorer
                 </lightning-tab>
                 <lightning-tab value="roles" label="Role Listing" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no role to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={rolesTableColumns}
+                        rows={rolesTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

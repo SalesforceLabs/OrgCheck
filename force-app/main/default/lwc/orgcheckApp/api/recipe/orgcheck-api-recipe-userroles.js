@@ -33,13 +33,23 @@ export class OrgCheckRecipeUserRoles extends OrgCheckRecipe {
             if (userRole.hasActiveMembers === true) {
                 userRole.activeMemberRefs = userRole.activeMemberIds.map((id) => users.get(id));
             }
+            if (userRole.hasParent === true) {
+                userRole.parentRef = userRoles.get(userRole.parentId);
+            }
         });
 
         // Filter data
         const array = [];
-        // TODO use includesExternalRoles
-        for (const userRole of userRoles.values()) {
-            array.push(userRole);
+        if (includesExternalRoles === true) {
+            // in this case do not filter!
+            for (const userRole of userRoles.values()) {
+                array.push(userRole);
+            }
+        } else {
+            // in this case please filter
+            for (const userRole of userRoles.values()) {
+                if (userRole.isExternal === false) array.push(userRole);
+            }
         }
         // Return data
         return array;

@@ -63,7 +63,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
 
                     // Compute the score of this user role, with the following rule:
                     //  - If the role has no active user in it, then you get +1.
-                    if (userRole.activeMembersCount === 0) userRole.setBadField('activeMemberRefs');
+                    if (userRole.activeMembersCount === 0) userRole.setBadField('activeMembersCount');
                     // Add it to the map  
                     userRoles.set(userRole.id, userRole);
                 });

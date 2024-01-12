@@ -7,6 +7,7 @@ export class SFDC_UserRole extends OrgCheckData {
     apiname;
     url;
     parentId;
+    parentRef;
     hasParent;
     activeMembersCount;
     activeMemberIds;

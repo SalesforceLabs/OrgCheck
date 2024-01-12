@@ -7,12 +7,12 @@ const SORT_ORDER_ASC = 'asc';
 const SORT_ORDER_DESC = 'desc';
 
 const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
-    if (column.dataProperties.length > 0) {
+    if (reference && column.dataProperties.length > 0) {
         column.dataProperties.forEach((p) => {
             cell.data[p] = reference[column.data[p]];
         });
     } else {
-        cell.data.value = reference;
+        cell.data.value = reference || '';
     }
     if (column.modifier?.valueIfEmpty && !cell.data.value) {
         cell.data.decoratedValue = column.modifier.valueIfEmpty;

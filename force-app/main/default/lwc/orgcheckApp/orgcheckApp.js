@@ -571,6 +571,14 @@ export default class OrgCheckApp extends LightningElement {
 
     objectsOWDTableData;
 
+    rolesTableColumns = [
+        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',              type: 'text',  data: { value: 'apiname' }},
+        { label: 'Number of active members',    type: 'numeric',  data: { value: 'activeMembersCount' }},
+        { label: 'Number of inactive members',  type: 'numeric',  data: { value: 'inactiveMembersCount' }},
+        { label: 'Parent',                      type: 'id',  data: { ref: 'parentRef', value: 'name', url: 'url' }}
+    ];
+
     rolesTableData;
 
     flowsTableData;
