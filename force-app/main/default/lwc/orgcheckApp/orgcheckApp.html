@@ -136,10 +136,14 @@
         </lightning-tab>
         <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
             <lightning-tabset>
-                <lightning-tab label="Role Explorer" onactive={handleSubTabActivation}>
-                    this is the explorer
+                <lightning-tab value="roles-explorer" label="Role Explorer" onactive={handleSubTabActivation}>
+                    <c-orgcheck-graphics 
+                        name="Role Hierarchy" 
+                        box-color-decorator={roleBoxColorsDecorator}
+                        box-inner-html-decorator={roleBoxInnerHtmlDecorator}
+                        source={rolesTree}></c-orgcheck-graphics>
                 </lightning-tab>
-                <lightning-tab value="roles" label="Role Listing" onactive={handleSubTabActivation}>
+                <lightning-tab value="roles-listing" label="Role Listing" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no role to show."
                         show-search

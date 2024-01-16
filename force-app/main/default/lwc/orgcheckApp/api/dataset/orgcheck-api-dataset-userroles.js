@@ -15,16 +15,6 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
             // Init the map
             const userRoles = new Map();
 
-            // Make sure we have a unique root
-            const ROOT_ID = '###root###';
-            const ROOT_ROLE = new SFDC_UserRole({
-                id: ROOT_ID,
-                name: 'Role Hierarchy',
-                developerName: ROOT_ID,
-                parentId: null
-            });
-            userRoles.set(ROOT_ID, ROOT_ROLE);
-
             // Set the map
             results[0].records
                 .forEach((record) => {
@@ -38,7 +28,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                         url: sfdcManager.setupUrl('user-role', record.Id),
                         name: record.Name,
                         apiname: record.DeveloperName,
-                        parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId) : ROOT_ID,
+                        parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId) : undefined,
                         hasParent: record.ParentRoleId ? true : false,
                         activeMembersCount: 0,
                         activeMemberIds: [],

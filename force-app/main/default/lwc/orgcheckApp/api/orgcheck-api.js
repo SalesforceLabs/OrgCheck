@@ -175,4 +175,39 @@ export class OrgCheckAPI {
     async getRoles() {
         return this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
     }
+
+    async getRolesTree() {
+        const allRoles = await this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
+        const root = { 
+            id: '##root##', 
+            label: 'Role Hierarchy', 
+            children: [] 
+        };
+        try {
+            
+            const parentNodes = new Map();
+            parentNodes.set(root.id, root);
+
+            // Parenting kids to their parent
+            allRoles.forEach((r) => { 
+                const node = { id: r.id, label: r.name };
+                const parentId = r.hasParent === true ? r.parentId : root.id;
+                if (parentNodes.has(parentId) === false) { parentNodes.set(r.parentId, { children: [] }) }
+                parentNodes.get(parentId).children.push(node);
+            });
+
+            // Reparenting all the rest of the parents
+            parentNodes.forEach((parent) => {
+                parent.children.forEach((child) => { 
+                    if (parentNodes.has(child.id)) { 
+                        child.children = parentNodes.get(child.id).children; 
+                    }
+                });
+            });
+        } catch (error) {
+            console.error(error);
+        }
+
+        return root;
+    }
 }

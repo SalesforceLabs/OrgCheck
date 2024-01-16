@@ -203,13 +203,21 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.open();
             this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             switch (this.#currentTab) {
-                case 'object-information':                 if (sobject !== '*') this.objectInformationData = await this.#api.getObject(sobject); else this.objectInformationData = null; break;
+                case 'object-information': {
+                    if (sobject !== '*') {
+                        this.objectInformationData = await this.#api.getObject(sobject); 
+                    } else {
+                        this.objectInformationData = null; 
+                    }
+                    break;
+                }
                 case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
                 case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
                 case 'permission-sets':                    this.permissionSetsTableData = await this.#api.getPermissionSets(namespace); break;
-                case 'roles':                              this.rolesTableData = await this.#api.getRoles(); break;
+                case 'roles-listing':                      this.rolesTableData = await this.#api.getRoles(); break;
+                case 'roles-explorer':                     this.rolesTree = await this.#api.getRolesTree(); break;
                 case 'public-groups':                      this.publicGroupsTableData = await this.#api.getPublicGroups(); break;
                 case 'queues':                             this.queuesTableData = await this.#api.getQueues(); break;
                 case 'flows':                              this.flowsTableData = await this.#api.getFlows(); break;
@@ -580,6 +588,20 @@ export default class OrgCheckApp extends LightningElement {
     ];
 
     rolesTableData;
+
+    roleBoxColorsDecorator = (d) => {
+        if (d?.children?.length === 0) return 'red';
+        return '#5fc9f8';
+    };
+
+    roleBoxInnerHtmlDecorator = (d) => {
+        if (d?.depth === 0) {
+            return `<center><b>${d.data.label}</b></center>`;
+        }
+        return `<center>${d.data.label}</center>`;
+    }
+
+    rolesTree;
 
     flowsTableData;
     

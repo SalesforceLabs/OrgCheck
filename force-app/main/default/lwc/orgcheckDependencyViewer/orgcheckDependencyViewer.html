@@ -4,57 +4,47 @@
             <div class="slds-modal__container">
                 <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
                 <div class="slds-modal__header">
-                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatname} ({whatid}}</h1>
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatname} ({whatid})</h1>
                 </div>
                 <div class="slds-modal__content slds-scrollable">
                     <lightning-tabset variant="scoped">
                         <lightning-tab label="Graphical View">
-                            <c-orgcheck-graphics name={whatname} dependencies={dependencies}></c-orgcheck-graphics>
+                            <c-orgcheck-graphics 
+                                name={whatname}
+                                box-color-decorator={dependencyBoxColorsDecorator}
+                                box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
+                                source={dependencyTreeByType}></c-orgcheck-graphics>
                         </lightning-tab>
                         <lightning-tab label="Tabular View">
                             <div class="slds-grid slds-gutters">
                                 <div class="slds-col">
                                     <lightning-card title="This entity is using the following entities" icon-name="utility:arrow_top">
-                                        <template lwc:if={dependencies.using.length}>
-                                            <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
-                                                <ol class="slds-progress__list">
-                                                    <template for:each={dependencies.using} for:item="use">
-                                                        <li key={use.id} class="slds-progress__item">
-                                                            <div class="slds-progress__marker slds-is-completed"></div>
-                                                            <div class="slds-progress__item_content">
-                                                                [{use.type}] <b>{use.name}</b> (<code>{use.id}</code>)
-                                                                <template lwc:if={use.url}>&nbsp;<a href={use.url} target="_blank">Check in setup...</a></template>
-                                                            </div>
-                                                        </li>
-                                                    </template>
-                                                </ol>
-                                            </div>
-                                        </template>
-                                        <template lwc:else>
-                                            Nothing here.
-                                        </template>
+                                        <c-orgcheck-extended-datatable
+                                            empty-message="Nothing here."
+                                            show-search
+                                            show-statistics
+                                            show-row-number-column
+                                            is-sticky-headers
+                                            is-infinite-scrolling
+                                            infinite-scrolling-initial-nb-rows=200
+                                            infinite-scrolling-additional-nb-rows=100
+                                            columns={dependencyColumns}
+                                            rows={dependencyData.using} ></c-orgcheck-extended-datatable>
                                     </lightning-card>
                                 </div>
                                 <div class="slds-col">
                                     <lightning-card title="This entity is referenced (or used) by the following entities" icon-name="utility:arrow_bottom">
-                                        <template lwc:if={dependencies.referenced.length}>
-                                            <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
-                                                <ol class="slds-progress__list">
-                                                    <template for:each={dependencies.referenced} for:item="ref">
-                                                        <li key={ref.id} class="slds-progress__item">
-                                                            <div class="slds-progress__marker slds-is-completed"></div>
-                                                            <div class="slds-progress__item_content">
-                                                                [{ref.type}] <b>{ref.name}</b> (<code>{ref.id}</code>)
-                                                                <template lwc:if={ref.url}>&nbsp;<a href={ref.url} target="_blank">Check in setup...</a></template>
-                                                            </div>
-                                                        </li>
-                                                    </template>
-                                                </ol>
-                                            </div>
-                                        </template>
-                                        <template lwc:else>
-                                            Nothing here.
-                                        </template>
+                                        <c-orgcheck-extended-datatable
+                                            empty-message="Nothing here."
+                                            show-search
+                                            show-statistics
+                                            show-row-number-column
+                                            is-sticky-headers
+                                            is-infinite-scrolling
+                                            infinite-scrolling-initial-nb-rows=200
+                                            infinite-scrolling-additional-nb-rows=100
+                                            columns={dependencyColumns}
+                                            rows={dependencyData.referenced} ></c-orgcheck-extended-datatable>
                                     </lightning-card>
                                 </div>
                             </div>
