@@ -177,37 +177,38 @@ export class OrgCheckAPI {
     }
 
     async getRolesTree() {
+        // Get data
         const allRoles = await this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
-        const root = { 
-            id: '##root##', 
-            label: 'Role Hierarchy', 
-            children: [] 
-        };
-        try {
-            
-            const parentNodes = new Map();
-            parentNodes.set(root.id, root);
-
-            // Parenting kids to their parent
-            allRoles.forEach((r) => { 
-                const node = { id: r.id, label: r.name };
-                const parentId = r.hasParent === true ? r.parentId : root.id;
-                if (parentNodes.has(parentId) === false) { parentNodes.set(r.parentId, { children: [] }) }
-                parentNodes.get(parentId).children.push(node);
-            });
-
-            // Reparenting all the rest of the parents
-            parentNodes.forEach((parent) => {
-                parent.children.forEach((child) => { 
-                    if (parentNodes.has(child.id)) { 
-                        child.children = parentNodes.get(child.id).children; 
-                    }
-                });
-            });
-        } catch (error) {
-            console.error(error);
-        }
-
-        return root;
+        // Create a map that stores all nodes
+        // Where:
+        //   - key is the id of the node (string)
+        //   - value is the node with properties: 
+        //        * 'id' (mandatory string), 
+        //        * 'children' (optional array), and,
+        //        * 'record' (undefined for root, mandatory for other than root -- of type: SFDC_UserRole)
+        const allNodes = new Map();
+        // Key for artificial ROOT
+        const ROOT_KEY = '##i am root##';
+        // Note that 'allRoles' is an 'Array'
+        allRoles.forEach((role) => { 
+            // is this node already registered? if false create (with no children!) and set in the map
+            if (allNodes.has(role.id) === false) { allNodes.set(role.id, { id: role.id }) }
+            // get a reference to this node
+            const node = allNodes.get(role.id);
+            // if that node just got registered, it has no 'record' yet
+            // if that node was previously a parent (and got registered at that time), it has no 'record' yet
+            if (!node.record) node.record = role; // for this reasons, we set the record property if not set
+            // get the id of its parent (if no parent using the artificial 'root' node)
+            const parentId = role.hasParent === true ? role.parentId : ROOT_KEY;
+            // is the parent already registered? if false create (with no record!) and set in the map
+            if (allNodes.has(parentId) === false) { allNodes.set(parentId, { id: parentId }) }
+            // get a reference to this parent node
+            const parentNode = allNodes.get(parentId);
+            // if that parent just got registered, it has no 'children' yet
+            // if that parent was previously a child (and got registered at that time), it has no 'children' yet
+            if (!parentNode.children) parentNode.children = []; // for this reasons, we set the children property if not set
+            parentNode.children.push(node);
+        });
+        return allNodes.get(ROOT_KEY);
     }
 }

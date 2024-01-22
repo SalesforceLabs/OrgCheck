@@ -589,16 +589,15 @@ export default class OrgCheckApp extends LightningElement {
 
     rolesTableData;
 
-    roleBoxColorsDecorator = (d) => {
-        if (d?.children?.length === 0) return 'red';
+    roleBoxColorsDecorator = (depth, nbChildren, data) => {
+        if (depth === 0) return '#2f89a8';
+        if (data.record.hasActiveMembers === false) return '#fdc223';
         return '#5fc9f8';
     };
 
-    roleBoxInnerHtmlDecorator = (d) => {
-        if (d?.depth === 0) {
-            return `<center><b>${d.data.label}</b></center>`;
-        }
-        return `<center>${d.data.label}</center>`;
+    roleBoxInnerHtmlDecorator = (depth, nbChildren, data) => {
+        if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
+        return `<center><b>${data.record.name}</b><br />${data.record.apiname}</center>`;
     }
 
     rolesTree;

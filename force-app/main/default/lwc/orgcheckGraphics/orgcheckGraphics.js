@@ -52,10 +52,8 @@ export default class OrgcheckGraphics extends LightningElement {
   @api boxTextPadding = 3;
   @api boxVerticalPadding = 5;
   @api boxHorizontalPadding = 50;
-
-  @api boxColorDecorator = (d) => { return d ? '#5fc9f8' : 'red' };
-  @api boxInnerHtmlDecorator = (d) => { return d ? JSON.stringify(d) : ''; };
-
+  @api boxColorDecorator = (...args) => { console.debug(args); return 'red'; };
+  @api boxInnerHtmlDecorator = (...args) => { console.debug(args); return 'Todo!'; };
   @api edgeColor = '#2f89a8';
   @api fontFamily = 'Salesforce Sans,Arial,sans-serif';
   @api fontSize = 10;
@@ -90,14 +88,20 @@ export default class OrgcheckGraphics extends LightningElement {
 
     // Define x0 and x1
     let x0 = Infinity;
-    let x1 = -x0;
+    let x1 = -Infinity;
     root.each(d => {
         if (d.x > x1) x1 = d.x;
         if (d.x < x0) x0 = d.x;
     });
 
+    // Get the main tag 
+    const mainTag = this.template.querySelector('.orgcheck-graph');
+
+    // Clean previous graph if needed
+    this.#api.select(mainTag).selectAll('*').remove();
+    
     // Construction of graph
-    const graph = this.#api.select(this.template.querySelector('.orgcheck-graph'))
+    const graph = this.#api.select(mainTag)
       .append('svg')
       .attr('viewBox', [-75, 0, WIDTH, x1 - x0 + root.dx * 2])
       .attr('xmlns', 'http://www.w3.org/2000/svg')
@@ -116,7 +120,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('transform', function(d) { return `translate(${d.y},${d.x})`; });
 
     nodes.append('rect')
-      .attr('fill', this.boxColorDecorator)
+      .attr('fill', (d) => { return this.boxColorDecorator(d.depth, d.children?.length || 0, d.data); })
       .attr('rx', 6)
       .attr('ry', 6)
       .attr('x', 0)
@@ -130,7 +134,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('y', - this.boxHeight / 2 + this.boxTextPadding)
       .attr('width', (d) => this.boxWidth - 2 * this.boxTextPadding)
       .attr('height', this.boxHeight - 2 * this.boxTextPadding)
-      .append('xhtml').html(this.boxInnerHtmlDecorator);
+      .append('xhtml').html((d) => { return this.boxInnerHtmlDecorator(d.depth, d.children?.length || 0, d.data); });
       
     // Generate EDGES
     graph.append('g')

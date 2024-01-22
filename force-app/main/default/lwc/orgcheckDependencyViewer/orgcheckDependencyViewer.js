@@ -18,22 +18,22 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     whatname;
     dependencyData;
     dependencyTreeByType;
-    dependencyBoxColorsDecorator = (d) => {
-        switch (d?.depth) {
+    dependencyBoxColorsDecorator = (depth) => {
+        switch (depth) {
             case 0: return '#2f89a8'; break;
             case 1: return '#3fb9b8'; break;
             case 2: return '#4fb9c8'; break;
             case 3: return '#5fc9f8'; break;
         }
     };
-    dependencyBoxInnerHtmlDecorator = (d) => {
-        switch (d?.depth) {
-            case 0: return `<center><b>${ESCAPE_DATA(d.data.label)}</b></center>`;
+    dependencyBoxInnerHtmlDecorator = (depth, nbChildren, data) => {
+        switch (depth) {
+            case 0: return `<center><b>${ESCAPE_DATA(data.label)}</b></center>`;
             case 3: {
-                if (d.data.url) return `<a href="${d.data.url}" target="_blank"><b>${ESCAPE_DATA(d.data.label)}</b></a>`;
-                return `<b>${ESCAPE_DATA(d.data.label)}</b>`;
+                if (data.url) return `<a href="${data.url}" target="_blank"><b>${ESCAPE_DATA(data.label)}</b></a>`;
+                return `<b>${ESCAPE_DATA(data.label)}</b>`;
             }
-            default: return `<center>${ESCAPE_DATA(d.data.label)}<br /><code><small>${d.children?.length || 0} ${d.children?.length > 1 ? "items": "item"}</small></code></center>`;
+            default: return `<center>${ESCAPE_DATA(data.label)}<br /><code><small>${nbChildren} ${nbChildren > 1 ? "items": "item"}</small></code></center>`;
         }
     };
     dependencyColumns = [
