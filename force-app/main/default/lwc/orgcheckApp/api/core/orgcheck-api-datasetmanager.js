@@ -20,6 +20,7 @@ import { OrgCheckDatasetApexClasses } from '../dataset/orgcheck-api-dataset-apex
 import { OrgCheckDatasetApexTriggers } from '../dataset/orgcheck-api-dataset-apextriggers';
 import { OrgCheckDatasetUserRoles } from '../dataset/orgcheck-api-dataset-userroles';
 import { OrgCheckDatasetFlows } from '../dataset/orgcheck-api-dataset-flows';
+import { OrgCheckDatasetWorkflows } from '../dataset/orgcheck-api-dataset-workflows';
 
 export class DatasetCacheInfo {
     name;
@@ -54,6 +55,7 @@ export const DATASET_APEXCLASSES_ALIAS = 'apex-classes';
 export const DATASET_APEXTRIGGERS_ALIAS = 'apex-triggers';
 export const DATASET_USERROLES_ALIAS = 'user-roles';
 export const DATASET_FLOWS_ALIAS = 'flows';
+export const DATASET_WORKFLOWS_ALIAS = 'workflows';
 
 export class OrgCheckDatasetManager {
     
@@ -102,6 +104,7 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_APEXTRIGGERS_ALIAS, new OrgCheckDatasetApexTriggers());
         this.#datasets.set(DATASET_USERROLES_ALIAS, new OrgCheckDatasetUserRoles());
         this.#datasets.set(DATASET_FLOWS_ALIAS, new OrgCheckDatasetFlows());
+        this.#datasets.set(DATASET_WORKFLOWS_ALIAS, new OrgCheckDatasetWorkflows());
     }
 
     /**
