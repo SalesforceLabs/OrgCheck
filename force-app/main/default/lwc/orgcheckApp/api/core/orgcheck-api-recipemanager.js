@@ -18,6 +18,7 @@ import { OrgCheckRecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
 import { OrgCheckRecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
 import { OrgCheckRecipeApexTriggers } from '../recipe/orgcheck-api-recipe-apextriggers';
 import { OrgCheckRecipeUserRoles } from '../recipe/orgcheck-api-recipe-userroles';
+import { OrgCheckRecipeWorkflows } from '../recipe/orgcheck-api-recipe-workflows';
 
 export const RECIPE_ACTIVEUSERS_ALIAS = 'active-users';
 export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -37,6 +38,7 @@ export const RECIPE_QUEUES_ALIAS = 'queues';
 export const RECIPE_APEXCLASSES_ALIAS = 'apex-classes';
 export const RECIPE_APEXTRIGGERS_ALIAS = 'apex-triggers';
 export const RECIPE_USERROLES_ALIAS = 'user-roles';
+export const RECIPE_WORKFLOWS_ALIAS = 'workflows';
 
 export class OrgCheckRecipeManager {
 
@@ -81,6 +83,7 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_APEXCLASSES_ALIAS, new OrgCheckRecipeApexClasses());
         this.#recipes.set(RECIPE_APEXTRIGGERS_ALIAS, new OrgCheckRecipeApexTriggers());
         this.#recipes.set(RECIPE_USERROLES_ALIAS, new OrgCheckRecipeUserRoles());
+        this.#recipes.set(RECIPE_WORKFLOWS_ALIAS, new OrgCheckRecipeWorkflows());
     }
 
     async run(alias, ...parameters) {

@@ -19,7 +19,8 @@ import { OrgCheckRecipeManager,
     RECIPE_QUEUES_ALIAS, 
     RECIPE_APEXCLASSES_ALIAS, 
     RECIPE_APEXTRIGGERS_ALIAS,
-    RECIPE_USERROLES_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_USERROLES_ALIAS,
+    RECIPE_WORKFLOWS_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class
@@ -210,5 +211,9 @@ export class OrgCheckAPI {
             parentNode.children.push(node);
         });
         return allNodes.get(ROOT_KEY);
+    }
+
+    async getWorkflows() {
+        return this.#recipeManager.run(RECIPE_WORKFLOWS_ALIAS);
     }
 }

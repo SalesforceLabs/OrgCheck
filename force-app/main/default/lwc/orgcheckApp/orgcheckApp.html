@@ -198,6 +198,18 @@
                 <lightning-tab value="process-builders" label="Process Builders" onactive={handleSubTabActivation}>
                 </lightning-tab>
                 <lightning-tab value="workflows" label="Workflows" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no workflow to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={workflowsTableColumns}
+                        rows={workflowsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

@@ -606,6 +606,11 @@ export default class OrgCheckApp extends LightningElement {
     
     processBuildersTableData;
     
+    workflowsTableColumns = [
+        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',              type: 'text',  data: { value: 'apiname' }}
+    ];
+    
     workflowsTableData;
 
     cacheManagerData;

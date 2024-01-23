@@ -1,5 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { SFDC_Workflow } from '../data/orgcheck-api-data-flow';
+import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
