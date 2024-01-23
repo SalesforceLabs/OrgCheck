@@ -20,7 +20,8 @@ import { OrgCheckRecipeManager,
     RECIPE_APEXCLASSES_ALIAS, 
     RECIPE_APEXTRIGGERS_ALIAS,
     RECIPE_USERROLES_ALIAS,
-    RECIPE_WORKFLOWS_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_FLOWS_ALIAS,
+    RECIPE_PROCESSBUILDERS_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class
@@ -215,5 +216,13 @@ export class OrgCheckAPI {
 
     async getWorkflows() {
         return this.#recipeManager.run(RECIPE_WORKFLOWS_ALIAS);
+    }
+
+    async getFlows() {
+        return this.#recipeManager.run(RECIPE_FLOWS_ALIAS);
+    }
+
+    async getProcessBuilders() {
+        return this.#recipeManager.run(RECIPE_PROCESSBUILDERS_ALIAS);
     }
 }
