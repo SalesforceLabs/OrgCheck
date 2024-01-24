@@ -3,7 +3,7 @@ import { SFDC_Object } from '../data/orgcheck-api-data-object';
 
 export class OrgCheckDatasetObjects extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         sfdcManager.soqlQuery([{ 
             string: 'SELECT NamespacePrefix FROM Organization'

@@ -3,7 +3,7 @@ import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 
 export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL queries on ExternalString
         sfdcManager.soqlQuery([{ 
@@ -16,6 +16,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
             const userRoles = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} User Roles...`);
             results[0].records
                 .forEach((record) => {
 

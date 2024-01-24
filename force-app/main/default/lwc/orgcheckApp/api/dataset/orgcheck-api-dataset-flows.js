@@ -3,7 +3,7 @@ import { SFDC_Flow } from '../data/orgcheck-api-data-flow';
 
 export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // List all ids for Flows and Process Builders
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -14,14 +14,17 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         }]).then((results) => {
             
             // List of flow ids
+            localLogger.log(`Parsing ${results[0].records.length} Flows...`);
             const flowIds = results[0].records.map((record) => record.Id);
 
             // Init the map
             const flows = new Map();
 
             // Get information about flows and process builders using metadata
+            localLogger.log(`Calling Composite Tooling API to get Metadata information about ${flowIds.length} flows...`);
             sfdcManager.readMetadataAtScale('Flow', flowIds, [ 'UNKNOWN_EXCEPTION' ])
                 .then((records) => {
+                    localLogger.log(`Parsing ${records.length} Flows...`);
                     records.forEach((record)=> {
                         
                         // Get the ID15 of this user

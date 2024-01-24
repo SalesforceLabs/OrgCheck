@@ -3,7 +3,7 @@ import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage'
 
 export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
             const visualForcePages = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Apex Pages...`);
             results[0].records
                 .forEach((record) => {
 

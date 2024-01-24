@@ -3,7 +3,7 @@ import { SFDC_OrgInformation } from '../data/orgcheck-api-data-orginfo';
 
 export class OrgCheckDatasetOrgInformation extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL queries on InstalledSubscriberPackage and Organization
         sfdcManager.soqlQuery([{ 

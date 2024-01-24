@@ -3,7 +3,7 @@ import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 
 export class OrgCheckDatasetProfiles extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on PermissionSet with isOwnedByProfile = TRUE
         sfdcManager.soqlQuery([{ 
@@ -20,6 +20,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
             const profiles = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Profiles...`);
             results[0].records
                 .forEach((record) => {
 

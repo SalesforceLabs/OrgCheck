@@ -142,6 +142,8 @@ export class OrgCheckDatasetManager {
                 this.#datasets.get(alias).run(
                     // sfdc manager
                     this.#sfdcManager,
+                    // local logger
+                    { log: (msg) => { this.#logger.sectionContinues(section, msg); }},
                     // success
                     (data) => {
                         // Cache the data

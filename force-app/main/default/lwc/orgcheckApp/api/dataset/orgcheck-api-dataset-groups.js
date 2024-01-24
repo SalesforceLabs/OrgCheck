@@ -3,7 +3,7 @@ import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -16,6 +16,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             const groups = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Groups...`);
             results[0].records
                 .forEach((record) => {
 

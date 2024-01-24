@@ -3,7 +3,7 @@ import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on PermissionSet
         sfdcManager.soqlQuery([{ 
@@ -31,6 +31,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             const permissionSets = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Permission Sets...`);
             results[0].records
                 .forEach((record) => {
 
@@ -64,6 +65,8 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                     // Add it to the map
                     permissionSets.set(id, permissionSet);
                 });
+
+            localLogger.log(`Parsing ${results[1].records.length} Permission Set Assignments...`);
             results[1].records
                 .forEach((record) => {
                     const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
@@ -73,6 +76,8 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                         if (permissionSet.profileIds[profileId] !== true) permissionSet.profileIds[profileId] = true;
                     }
                 });
+
+            localLogger.log(`Parsing ${results[2].records.length} Permission Set Groups...`);
             results[2].records
                 .forEach((record) => {
                     const permissionSetId = sfdcManager.caseSafeId(record.Id);

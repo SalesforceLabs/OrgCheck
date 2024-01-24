@@ -8,7 +8,7 @@ const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 
 
 export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on Apex Classes, Apex Coverage and Apex Jobs
         sfdcManager.soqlQuery([{
@@ -40,6 +40,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             // Set the map
 
             // Part 1- define the apex classes
+            localLogger.log(`Parsing ${results[0].records.length} Apex Classes...`);
             results[0].records
                 .forEach((record) => {
                     const apexClass = new SFDC_ApexClass({
@@ -119,6 +120,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 });
 
             // Part 2- add the related tests to apex classes
+            localLogger.log(`Parsing ${results[1].records.length} Apex Code Coverages...`);
             const relatedTestsByApexClass = new Map();
             const relatedClassesByApexTest = new Map();
             results[1].records
@@ -142,6 +144,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             });
 
             // Part 3- add the aggregate code coverage to apex classes
+            localLogger.log(`Parsing ${results[2].records.length} Apex Code Coverage Aggregates...`);
             results[2].records
                 .filter((record) => {
                     return classesMap.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId));
@@ -153,6 +156,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 });
 
             // Part 4- add if class is scheduled
+            localLogger.log(`Parsing ${results[3].records.length} Schedule Apex Classes...`);
             results[3].records
                 .filter((record) => {
                     return classesMap.has(sfdcManager.caseSafeId(record.ApexClassId));

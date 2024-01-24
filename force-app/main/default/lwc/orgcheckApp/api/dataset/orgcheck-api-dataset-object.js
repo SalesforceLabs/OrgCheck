@@ -12,7 +12,7 @@ import { SFDC_ObjectRelationShip } from '../data/orgcheck-api-data-objectrelatio
 
 export class OrgCheckDatasetObject extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject, parameters) {
+    run(sfdcManager, localLogger, resolve, reject, parameters) {
 
         const fullObjectApiName = parameters.object;
         const splittedApiName = fullObjectApiName.split('__');

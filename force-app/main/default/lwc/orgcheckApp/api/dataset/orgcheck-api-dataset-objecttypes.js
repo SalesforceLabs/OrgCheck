@@ -11,7 +11,7 @@ import { SFDC_ObjectType,
 
 export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         try {
 

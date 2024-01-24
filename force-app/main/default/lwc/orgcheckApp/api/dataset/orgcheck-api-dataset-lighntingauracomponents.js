@@ -3,7 +3,7 @@ import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightning
 
 export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,7 @@ export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
             const components = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Aura Definition Bundles...`);
             results[0].records
                 .forEach((record) => {
 

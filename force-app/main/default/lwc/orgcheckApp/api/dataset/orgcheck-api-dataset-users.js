@@ -3,7 +3,7 @@ import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         const IMPORTANT_PERMISSIONS = [ 'ApiEnabled', 'ViewSetup', 'ModifyAllData', 'ViewAllData' ];
 
@@ -28,6 +28,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
             const users = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Users...`);
             results[0].records
                 .forEach((record) => {
 

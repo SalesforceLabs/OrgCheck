@@ -3,7 +3,7 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
             const customFields = new Map();
 
             // Set the map
+            localLogger.log(`Parsing ${results[0].records.length} Custom Fields...`);
             results[0].records
                 .filter((record) => (record.EntityDefinition ? true : false))
                 .forEach((record) => {

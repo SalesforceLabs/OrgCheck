@@ -6,7 +6,7 @@ const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)");
 
 export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // SOQL query on Apex Classes, Apex Coverage and Apex Jobs
         sfdcManager.soqlQuery([{
@@ -31,6 +31,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
             // Set the map
 
             // Part 1- define the apex classes
+            localLogger.log(`Parsing ${results[0].records.length} Apex Triggers...`);
             results[0].records
                 .forEach((record) => {
                     const apexTrigger = new SFDC_ApexTrigger({

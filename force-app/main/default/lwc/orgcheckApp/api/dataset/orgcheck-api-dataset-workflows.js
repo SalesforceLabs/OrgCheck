@@ -3,7 +3,7 @@ import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
-    run(sfdcManager, resolve, reject) {
+    run(sfdcManager, localLogger, resolve, reject) {
 
         // List all ids for Workflow Rules
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -13,6 +13,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         }]).then((results) => {
             
             // List of flow ids
+            localLogger.log(`Parsing ${results[0].records.length} Workflows...`);
             const workflowRuleIds = results[0].records.map((record) => record.Id);
 
             // Init the map
@@ -21,6 +22,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
             // Get information about flows and process builders using metadata
             sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
                 .then((records) => {
+                    localLogger.log(`Parsing ${records.length} Workflows...`);
                     records.forEach((record)=> {
                         
                         // Get the ID15 of this user
