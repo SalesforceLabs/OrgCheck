@@ -6,6 +6,12 @@ const TYPE_SCORE = 'score';
 const SORT_ORDER_ASC = 'asc';
 const SORT_ORDER_DESC = 'desc';
 
+const OBJECT_TO_STRING = (template, object) => {
+    return template.replace(/{([A-Za-z0-9]+)}/g, function (match, property) {
+        return typeof object[property] === 'undefined' ? match : object[property];
+    });
+}
+
 const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
     if (reference && column.dataProperties.length > 0) {
         column.dataProperties.forEach((p) => {
@@ -29,9 +35,16 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
                 }
                 break;
             case 'isText':
+            case 'isTexts':
                 if (column.modifier?.maximumLength && cell.data.value.length > column.modifier.maximumLength) {
                     cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
                     cell.isValueTruncated = true;
+                }
+                break;
+            case 'isObject':
+            case 'isObjects':
+                if (column.modifier?.template) {
+                    cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
                 }
                 break;
         }
@@ -199,6 +212,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     #sortingOrder;
 
     /**
+     * Is the table sorted implicitely or explicitely?
+     */
+    @track isSorted = false;
+
+    /**
      * Label of the field the table is sorted by
      */
     @track sortingField
@@ -263,7 +281,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Array<any>} rows 
      */
     @api set rows(rows) {
-        if (!rows) return;
+        if (!this.#columns) {
+            console.error('setRows() called but no columns yet...');
+            return;
+        }
+        if (!rows) {
+            console.error('setRows() called but given "rows" is undefined');
+            return;
+        }
 
         this.nbAllRows = rows.length || 0;
         this.isDataEmpty = (this.nbAllRows === 0);
@@ -424,7 +449,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * Internal sort method which takes into account the <code>#sortingColumnIndex</code> and <code>sortingOrder</code> properties
      */
     _sortAllRows() {
-        if (this.#sortingColumnIndex === undefined) return;
+        if (this.#sortingColumnIndex === undefined) {
+            this.isSorted = false;
+            return;
+        }
         const columnIndex = this.#sortingColumnIndex;
         const iOrder = this.#sortingOrder === SORT_ORDER_ASC ? 1 : -1;
         const isIterative = this.#columns[columnIndex].isIterative;
@@ -448,6 +476,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 row.index = ++index; 
             }
         });
+        this.isSorted = true;
         this.sortingField = this.#columns[columnIndex].label;
         this.sortingOrder = this.#sortingOrder === SORT_ORDER_ASC ? 'ascending' : 'descending';
     }

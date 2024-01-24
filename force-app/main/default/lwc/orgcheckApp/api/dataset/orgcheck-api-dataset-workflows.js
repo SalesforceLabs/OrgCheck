@@ -32,14 +32,55 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                             name: record.FullName,
                             url: sfdcManager.setupUrl('workflow', id),
                             description: record.Metadata.description,
-                            actions: record.Metadata.actions || [],
-                            futureActions: record.Metadata.workflowTimeTriggers || [],
                             isActive: record.Metadata.active,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            noAction: true
+                            hasAction: true,
+                            futureActions: [],
+                            emptyTimeTriggers: [],
+                            description: record.description,
+                            isScoreNeeded: true
                         });
-                        workflow.noAction = (workflow.actions.length == 0 && workflow.futureActions.length == 0);
+                        const directActions = record.Metadata.actions;
+                        if (directActions) {
+                            workflow.actions = directActions.map((action) => { 
+                                return { name: action.name, type: action.type }; 
+                            });
+                        } else {
+                            workflow.actions = [];
+                        }
+                        const timeTriggers = record.Metadata.workflowTimeTriggers;
+                        if (timeTriggers) {
+                            timeTriggers.forEach((tt) => {
+                                const field = tt.offsetFromField || 'TriggerDate';
+                                if (tt.actions.length === 0) {
+                                    workflow.emptyTimeTriggers.push({
+                                        field: field,
+                                        delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
+                                    });
+                                } else {
+                                    tt.actions.forEach((action) => {
+                                        workflow.futureActions.push({ 
+                                            name: action.name, 
+                                            type: action.type, 
+                                            field: field,
+                                            delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}` 
+                                        });
+                                    })
+                                }
+                            });
+                        }
+                        workflow.hasAction = (workflow.actions.length === 0 && workflow.futureActions.length === 0);
+
+                        // Compute the score of this workflow, with the following rule:
+                        //  - If the workflow is not active, then you get +1.
+                        //  - If the workflow ihas no action (either direct or future), then you get +1.
+                        //  - If the workflow has timetrigger with no action, then you get +1.
+                        //  - If the field has no description, then you get +1.
+                        if (workflow.isActive === false) workflow.setBadField('isActive');
+                        if (workflow.hasAction === false) workflow.setBadField('hasAction');
+                        if (workflow.emptyTimeTriggers.length > 0) workflow.setBadField('emptyTimeTriggers');
+                        if (sfdcManager.isEmpty(workflow.description)) workflow.setBadField('description');
 
                         // Add it to the map  
                         workflows.set(workflow.id, workflow);

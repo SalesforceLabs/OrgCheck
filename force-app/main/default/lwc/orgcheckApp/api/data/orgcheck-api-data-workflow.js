@@ -7,10 +7,11 @@ export class SFDC_Workflow extends OrgCheckData {
     description;
     actions;
     futureActions;
+    emptyTimeTriggers;
     isActive;
     createdDate;
     lastModifiedDate;
-    noAction;
+    hasAction;
 
     constructor(setup) {
         super();

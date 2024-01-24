@@ -639,7 +639,15 @@ export default class OrgCheckApp extends LightningElement {
     processBuildersTableData;
     
     workflowsTableColumns = [
-        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }}
+        { label: 'Name',              type: 'id',          data: { value: 'name', url: 'url' }},
+        { label: 'Is Active',         type: 'boolean',     data: { value: 'isActive' }},
+        { label: 'Has Actions',       type: 'boolean',     data: { value: 'hasAction' }},
+        { label: 'Direct Actions',    type: 'objects',     data: { ref: 'actions' }, modifier: { template: '{name} ({type})' }},
+        { label: 'Empty Timetrigger', type: 'objects',     data: { ref: 'emptyTimeTriggers' }, modifier: { template: '{field} after {delay}' }},
+        { label: 'Future Actions',    type: 'objects',     data: { ref: 'futureActions' }, modifier: { template: '{field} after {delay}: {name} ({type})' }},
+        { label: 'Created date',      type: 'dateTime',    data: { value: 'createdDate' }},
+        { label: 'Modified date',     type: 'dateTime',    data: { value: 'lastModifiedDate' }},
+        { label: 'Description',       type: 'text',        data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
     
     workflowsTableData;
