@@ -20,8 +20,8 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
             // Get information about flows and process builders using metadata
             sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
-                .then((results) => {
-                    results[0].forEach((record)=> {
+                .then((records) => {
+                    records.forEach((record)=> {
                         
                         // Get the ID15 of this user
                         const id = sfdcManager.caseSafeId(record.Id);
@@ -44,10 +44,11 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                         // Add it to the map  
                         workflows.set(workflow.id, workflow);
                     });
-                });
 
-            // Return data
-            resolve(workflows);
+                    // Return data
+                    resolve(workflows);
+                    
+                }).catch(reject);
         }).catch(reject);
     } 
 }

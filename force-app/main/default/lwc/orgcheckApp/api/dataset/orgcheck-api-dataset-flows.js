@@ -9,6 +9,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         // (only ids because metadata can't be read via SOQL in bulk!
         sfdcManager.soqlQuery([{ 
             string: 'SELECT Id FROM Flow', 
+            addDependenciesBasedOnField: 'Id',
             tooling: true 
         }]).then((results) => {
             
@@ -20,8 +21,8 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
             // Get information about flows and process builders using metadata
             sfdcManager.readMetadataAtScale('Flow', flowIds, [ 'UNKNOWN_EXCEPTION' ])
-                .then((results) => {
-                    results[0].forEach((record)=> {
+                .then((records) => {
+                    records.forEach((record)=> {
                         
                         // Get the ID15 of this user
                         const id = sfdcManager.caseSafeId(record.Id);
@@ -42,20 +43,33 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             description: record.Description,
                             type: record.ProcessType,
                             createdDate: record.CreatedDate,
-                            lastModifiedDate: record.LastModifiedDate
+                            lastModifiedDate: record.LastModifiedDate,
+                            isScoreNeeded: true,
+                            isDependenciesNeeded: true,
+                            dependenciesFor: 'id',
+                            allDependencies: results[0].allDependencies
                         });
                         record.Metadata.processMetadataValues?.forEach(m => {
                             if (m.name === 'ObjectType') flow.sobject = m.value.stringValue;
                             if (m.name === 'TriggerType') flow.triggerType = m.value.stringValue;
                         });
 
+                        // Compute the score of this flow, with the following rule:
+                        //  - If the flow is not active, then you get +1.
+                        //  - If no description, then you get +1.
+                        //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                        if (flow.isActive === false) flow.setBadField('isActive');
+                        if (sfdcManager.isEmpty(flow.description)) flow.setBadField('description');
+                        if (flow.isItReferenced() === false) flow.setBadField('dependencies.referenced');
+
                         // Add it to the map  
                         flows.set(flow.id, flow);
                     });
-                });
 
-            // Return data
-            resolve(flows);
+                    // Return data
+                    resolve(flows);
+
+                }).catch(reject);
         }).catch(reject);
     } 
 }

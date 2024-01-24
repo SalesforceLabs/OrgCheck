@@ -194,8 +194,32 @@
         <lightning-tab label="🤖 Automations" onactive={handleTabActivation}>
             <lightning-tabset>
                 <lightning-tab value="flows" label="Flows" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no flow to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={flowsTableColumns}
+                        rows={flowsTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="process-builders" label="Process Builders" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no process builder to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={processBuildersTableColumns}
+                        rows={processBuildersTableData} ></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="workflows" label="Workflows" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable

@@ -21,7 +21,8 @@ import { OrgCheckRecipeManager,
     RECIPE_APEXTRIGGERS_ALIAS,
     RECIPE_USERROLES_ALIAS,
     RECIPE_FLOWS_ALIAS,
-    RECIPE_PROCESSBUILDERS_ALIAS } from './core/orgcheck-api-recipemanager';
+    RECIPE_PROCESSBUILDERS_ALIAS,
+    RECIPE_WORKFLOWS_ALIAS } from './core/orgcheck-api-recipemanager';
 
 /**
  * Org Check API main class

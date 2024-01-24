@@ -602,13 +602,44 @@ export default class OrgCheckApp extends LightningElement {
 
     rolesTree;
 
+    flowsTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Version',       type: 'numeric',          data: { value: 'version' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Is Active',     type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'Type',          type: 'text',             data: { value: 'type' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
     flowsTableData;
     
+    processBuildersTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Version',       type: 'numeric',          data: { value: 'version' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Is Active',     type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'DML Creates',   type: 'numeric',          data: { value: 'dmlCreates' }},
+        { label: 'DML Deletes',   type: 'numeric',          data: { value: 'dmlDeletes' }},
+        { label: 'DML Updates',   type: 'numeric',          data: { value: 'dmlUpdates' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
+
     processBuildersTableData;
     
     workflowsTableColumns = [
-        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',              type: 'text',  data: { value: 'apiname' }}
+        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }}
     ];
     
     workflowsTableData;
