@@ -309,6 +309,79 @@ export class OrgCheckSalesforceManager {
         return Promise.all(promises);
     }
 
+    async readMetadataAtScale(type, ids, byPasses) {
+        return new Promise((resolve, reject) => {
+            const compositeRequestBodies = [];
+            let currentCompositeRequestBody;
+            const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
+            ids.forEach((id) => {
+                if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+                    currentCompositeRequestBody = {
+                        allOrNone: false,
+                        compositeRequest: []
+                    };
+                    compositeRequestBodies.push(currentCompositeRequestBody);
+                }
+                currentCompositeRequestBody.compositeRequest.push({ 
+                    url: '/services/data/v'+this.#connection.version+'/tooling/sobjects/' + type + '/' + id, 
+                    method: 'GET',
+                    referenceId: id
+                });
+            });
+            const promises = [];
+            compositeRequestBodies.forEach((requestBody) => {
+                promises.push(new Promise((r, e) => {
+                    this.#connection.request({
+                            url: '/services/data/v'+this.#connection.version+'/tooling/composite', 
+                            method: 'POST',
+                            body: JSON.stringify(requestBody),
+                            headers: { 'Content-Type': 'application/json' }
+                        }, (error, response) => { 
+                            if (error) {
+                                error.context = { 
+                                    when: 'While creating a promise to call the Tooling Composite API.',
+                                    what: {
+                                        type: metadataInformation.type,
+                                        ids: metadataInformation.ids,
+                                        body: requestBody
+                                    }
+                                };
+                                e(error); 
+                            } else r(response); 
+                        }
+                    );
+                }));
+            });
+            Promise.all(promises)
+                .then((results) => {
+                    const records = [];
+                    results.forEach((result) => {
+                        result.compositeResponse.forEach((response) => {
+                            if (response.httpStatusCode === 200) {
+                                records.push(response.body);
+                            } else {
+                                const errorCode = response.body[0].errorCode;
+                                if (byPasses && byPasses.includes(errorCode) === false) {
+                                    const error = new Error();
+                                    error.context = { 
+                                        when: 'After receiving a response with bad HTTP status code.',
+                                        what: {
+                                            type: type,
+                                            ids: ids,
+                                            body: response.body
+                                        }
+                                    };
+                                    reject(error);
+                                }
+                            }
+                        });
+                    });
+                    resolve(records);
+                })
+                .catch(reject);
+        });
+    }
+
     /**
      * Method to get the list of sobjects
      */
