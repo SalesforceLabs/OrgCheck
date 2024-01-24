@@ -13,16 +13,17 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         }]).then((results) => {
             
             // List of flow ids
-            localLogger.log(`Parsing ${results[0].records.length} Workflows...`);
+            localLogger.log(`Parsing ${results[0].records.length} Workflow Rules...`);
             const workflowRuleIds = results[0].records.map((record) => record.Id);
 
             // Init the map
             const workflows = new Map();
 
             // Get information about flows and process builders using metadata
+            localLogger.log(`Calling Composite Tooling API to get Metadata information about ${workflowRuleIds.length} workflow rules...`);
             sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
                 .then((records) => {
-                    localLogger.log(`Parsing ${records.length} Workflows...`);
+                    localLogger.log(`Parsing ${records.length} Workflows Rules...`);
                     records.forEach((record)=> {
                         
                         // Get the ID15 of this user
