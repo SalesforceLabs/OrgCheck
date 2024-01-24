@@ -70,7 +70,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                                 }
                             });
                         }
-                        workflow.hasAction = (workflow.actions.length === 0 && workflow.futureActions.length === 0);
+                        workflow.hasAction = (workflow.actions.length + workflow.futureActions.length > 0);
 
                         // Compute the score of this workflow, with the following rule:
                         //  - If the workflow is not active, then you get +1.
