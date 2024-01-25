@@ -29,7 +29,10 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                         isPublicGroup: record.Type === 'Regular',
                         isQueue: record.Type === 'Queue',
                         isRole: record.Type === 'Role',
-                        isRoleAndSubordinates: record.Type === 'RoleAndSubordinates'
+                        isRoleAndSubordinates: record.Type === 'RoleAndSubordinates',
+                        nbDirectMembers: 0,
+                        nbIndirectMembers: 0,
+                        isScoreNeeded: true
                     });
                     // Depending on the type we add some properties
                     switch (record.Type) {
@@ -68,15 +71,26 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                             const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
                             (groupMemberId.startsWith('005') ? group.directUserIds : group.directGroupIds).push(groupMemberId);
                         });
+                        group.nbDirectMembers = group.directUserIds.length + group.directGroupIds.length;
                     }
- 
+
                     // Add it to the map  
                     groups.set(group.id, group);
                 });
 
             // Handle the indirect group membership
             localLogger.log(`Computing the indirect group memberships for ${groups.size} groups ...`);
-            groups.forEach((group) => RECURSIVE_INDIRECT_USERS(groups, group.id, false));
+            groups.forEach((group) => {
+                RECURSIVE_INDIRECT_USERS(groups, group.id, false);
+                group.nbIndirectUsers = group.indirectUserIds?.length || 0;
+                group.nbUsers = group.nbIndirectUsers + (group.directUserIds?.length || 0);
+
+                // Compute the score of this group, with the following rule:
+                //  - If the group is has no direct member, then you get +1.
+                //  - If the group is has no direct users and no indirect users, then you get +1.
+                if (group.nbDirectMembers === 0) group.setBadField('nbDirectMembers');
+                if (group.nbUsers === 0) group.setBadField('nbUsers');
+            });
 
             // Return data
             resolve(groups);
@@ -86,20 +100,20 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
 const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
     if (groups.has(groupId) === false) {
-        console.error('id not found', groupId, groups);
         return [];
     }
     const group = groups.get(groupId);
     if (group.directGroupIds?.length > 0) {
-        group.indirectUserIds = [];
+        const indirectUserIds = new Set();
         group.directGroupIds.forEach((subGroupId) => {
-            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => group.indirectUserIds.push(u));
+            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
         });
+        group.indirectUserIds = Array.from(indirectUserIds);
     }
     if (returnSomething === true) {
-        const array = [];
-        group.directUserIds?.forEach((u) => array.push(u));
-        group.indirectUserIds?.forEach((u) => array.push(u));
-        return array;
+        const allUserIds = new Set();
+        group.directUserIds?.forEach((u) => allUserIds.add(u));
+        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
+        return Array.from(allUserIds);
     }
 }

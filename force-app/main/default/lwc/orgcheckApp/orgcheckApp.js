@@ -362,23 +362,29 @@ export default class OrgCheckApp extends LightningElement {
     profilesTableData;
 
     publicGroupsTableColumns = [
-        { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
-        { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
-        { label: 'Included users',   type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
-        { label: 'Implicit users',   type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
+        { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
+        { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
+        { label: '#Members (imp. & exp.)', type: 'numeric', data: { value: 'nbUsers' }},
+        { label: '#Explicit members',      type: 'numeric', data: { value: 'nbDirectMembers' }},
+        { label: 'Explicit groups',        type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
+        { label: 'Explicit users',         type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
+        { label: '#Implicit members',      type: 'numeric', data: { value: 'nbIndirectUsers' }},
+        { label: 'Implicit users',         type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
     ];
 
     publicGroupsTableData;
 
     queuesTableColumns = [
-        { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
-        { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
-        { label: 'Included users',   type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
-        { label: 'Implicit users',   type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
+        { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
+        { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
+        { label: '#Members (imp. & exp.)', type: 'numeric', data: { value: 'nbUsers' }},
+        { label: '#Explicit members',      type: 'numeric', data: { value: 'nbDirectMembers' }},
+        { label: 'Explicit groups',        type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
+        { label: 'Explicit users',         type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
+        { label: '#Implicit members',      type: 'numeric', data: { value: 'nbIndirectUsers' }},
+        { label: 'Implicit users',         type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
     ];
 
     queuesTableData;
