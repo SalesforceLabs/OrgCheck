@@ -60,13 +60,13 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                         }
                     }
 
-                    // Handle the group membership
+                    // Handle the direct group membership
                     if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records.length > 0) {
-                        group.directUsers = [];
-                        group.directGroups = [];
+                        group.directUserIds = [];
+                        group.directGroupIds = [];
                         record.GroupMembers.records.forEach((m) => {
                             const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
-                            (groupMemberId.startsWith('005') ? group.directUsers : group.directGroups).push({ id: groupMemberId, url: '/' });
+                            (groupMemberId.startsWith('005') ? group.directUserIds : group.directGroupIds).push(groupMemberId);
                         });
                     }
  
@@ -74,8 +74,32 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     groups.set(group.id, group);
                 });
 
+            // Handle the indirect group membership
+            localLogger.log(`Computing the indirect group memberships for ${groups.size} groups ...`);
+            groups.forEach((group) => RECURSIVE_INDIRECT_USERS(groups, group.id, false));
+
             // Return data
             resolve(groups);
         }).catch(reject);
     } 
+}
+
+const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
+    if (groups.has(groupId) === false) {
+        console.error('id not found', groupId, groups);
+        return [];
+    }
+    const group = groups.get(groupId);
+    if (group.directGroupIds?.length > 0) {
+        group.indirectUserIds = [];
+        group.directGroupIds.forEach((subGroupId) => {
+            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => group.indirectUserIds.push(u));
+        });
+    }
+    if (returnSomething === true) {
+        const array = [];
+        group.directUserIds?.forEach((u) => array.push(u));
+        group.indirectUserIds?.forEach((u) => array.push(u));
+        return array;
+    }
 }

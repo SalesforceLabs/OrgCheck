@@ -7,9 +7,12 @@ export class SFDC_Group extends OrgCheckData {
     developerName;
     includeBosses;
     relatedId;
-    directUsers;
-    directGroups;
-    indirectUsers;
+    directUserIds;
+    directUserRefs;
+    directGroupIds;
+    directGroupRefs;
+    indirectUserIds;
+    indirectUserRefs;
     isPublicGroup;
     isQueue;
     isRole;

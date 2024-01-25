@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_GROUPS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { DATASET_USERS_ALIAS,
+    DATASET_GROUPS_ALIAS } from '../core/orgcheck-api-datasetmanager';
 
 export class OrgCheckRecipeQueues extends OrgCheckRecipe {
 
@@ -9,7 +10,7 @@ export class OrgCheckRecipeQueues extends OrgCheckRecipe {
      * @returns {Array<string>}
      */
     extract() {
-        return [DATASET_GROUPS_ALIAS];
+        return [DATASET_USERS_ALIAS, DATASET_GROUPS_ALIAS];
     }
 
     /**
@@ -22,6 +23,15 @@ export class OrgCheckRecipeQueues extends OrgCheckRecipe {
     transform(data) {
         // Get data
         const groups = data.get(DATASET_GROUPS_ALIAS);
+        const users = data.get(DATASET_USERS_ALIAS);
+
+        // Augment data
+        groups.forEach((group) => {
+            group.directUserRefs = group.directUserIds?.filter((id) => users.has(id)).map((id) => users.get(id)) || [];
+            group.directGroupRefs = group.directGroupIds?.filter((id) => groups.has(id)).map((id) => groups.get(id)) || [];
+            group.indirectUserRefs = group.indirectUserIds?.filter((id) => users.has(id)).map((id) => users.get(id)) || [];
+        });
+
         // Filter data
         const array = [];
         for (const group of groups.values()) {

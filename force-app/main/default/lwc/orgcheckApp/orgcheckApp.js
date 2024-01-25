@@ -365,9 +365,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
         { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroups', value: 'id', url: 'url' }},
-        { label: 'Included users',   type: 'ids',     data: { ref: 'directUsers', value: 'id', url: 'url' }},
-        { label: 'All active users', type: 'ids',     data: { ref: 'indirectUsers', value: 'id', url: 'url' }},
+        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
+        { label: 'Included users',   type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
+        { label: 'Implicit users',   type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
     ];
 
     publicGroupsTableData;
@@ -376,9 +376,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',             type: 'id',      data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',   type: 'text',    data: { value: 'developerName' }},
         { label: 'With bosses?',     type: 'boolean', data: { value: 'includeBosses' }},
-        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroups', value: 'id' }},
-        { label: 'Included users',   type: 'ids',     data: { ref: 'directUsers', value: 'id' }},
-        { label: 'All active users', type: 'ids',     data: { ref: 'indirectUsers', value: 'id' }},
+        { label: 'Included groups',  type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
+        { label: 'Included users',   type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
+        { label: 'Implicit users',   type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
     ];
 
     queuesTableData;
