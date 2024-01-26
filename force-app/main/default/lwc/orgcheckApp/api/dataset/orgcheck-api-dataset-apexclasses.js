@@ -1,7 +1,8 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 
-const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+\\s*\\{", 'i');
+const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
+const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
 const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
 const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
 const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
@@ -69,8 +70,9 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     });
                     // Get information directly from the source code (if available)
                     if (record.Body) {
-                        apexClass.isInterface = record.Body.match(REGEX_ISINTERFACE) !== null;
-                        apexClass.isEnum = record.Body.match(REGEX_ISENUM) !== null;
+                        const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
+                        apexClass.isInterface = sourceCode.match(REGEX_ISINTERFACE) !== null;
+                        apexClass.isEnum = sourceCode.match(REGEX_ISENUM) !== null;
                         apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
                     }
                     // If the apex class compiled we will get information from compilation
