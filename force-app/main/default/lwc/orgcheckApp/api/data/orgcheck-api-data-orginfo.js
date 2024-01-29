@@ -4,6 +4,9 @@ export class SFDC_OrgInformation extends OrgCheckData {
     id;
     name;
     type;
+    isDeveloperEdition;
+    isSandbox;
+    isTrial;
     isProduction;
     localNamespace;
     

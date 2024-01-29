@@ -1,6 +1,11 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_OrgInformation } from '../data/orgcheck-api-data-orginfo';
 
+const ORGTYPE_PROD = 'Production';
+const ORGTYPE_DE = 'Developer Edition';
+const ORGTYPE_SANDBOX = 'Sandbox';
+const ORGTYPE_TRIAL = 'Trial';
+
 export class OrgCheckDatasetOrgInformation extends OrgCheckDataset {
 
     run(sfdcManager, localLogger, resolve, reject) {
@@ -17,15 +22,18 @@ export class OrgCheckDatasetOrgInformation extends OrgCheckDataset {
             // Set the map
             const organization = results[0].records[0];
             let type;
-            if (organization.OrganizationType === 'Developer Edition') type = 'Developer Edition';
-            else if (organization.IsSandbox === true) type = 'Sandbox';
-            else if (organization.IsSandbox === false && organization.TrialExpirationDate) type = 'TrialOrDemo';
-            else type = 'Production';
+            if (organization.OrganizationType === 'Developer Edition') type = ORGTYPE_DE;
+            else if (organization.IsSandbox === true) type = ORGTYPE_SANDBOX;
+            else if (organization.IsSandbox === false && organization.TrialExpirationDate) type = ORGTYPE_TRIAL;
+            else type = ORGTYPE_PROD;
             information.set(organization.Id, new SFDC_OrgInformation({
                 id: organization.Id,
                 name: organization.Name,
                 type: type,
-                isProduction: (type === 'Production'),
+                isDeveloperEdition: (type === ORGTYPE_DE),
+                isSandbox: (type === ORGTYPE_SANDBOX),
+                isTrial: (type === ORGTYPE_TRIAL),
+                isProduction: (type === ORGTYPE_PROD),
                 localNamespace: (organization.NamespacePrefix || '')
             }));
 

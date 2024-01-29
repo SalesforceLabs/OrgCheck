@@ -428,7 +428,7 @@ export class OrgCheckSalesforceManager {
      * 
      * @returns Ratio of the daily api usage.
      */
-    getOrgLimits() {
+    getOrgDailyApiLimitRate() {
         if (this.#connection.limitInfo && this.#connection.limitInfo.apiUsage) {
             const apiUsageUsed = this.#connection.limitInfo.apiUsage.used;
             const apiUsageMax = this.#connection.limitInfo.apiUsage.limit;

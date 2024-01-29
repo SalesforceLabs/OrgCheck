@@ -104,7 +104,7 @@ export class OrgCheckAPI {
      * @returns Ratio of the daily api usage.
      */
     getOrgDailyApiLimitRate() {
-        return this.#sfdcManager.getOrgLimits();
+        return this.#sfdcManager.getOrgDailyApiLimitRate();
     }
     
     async getOrganizationInformation() {

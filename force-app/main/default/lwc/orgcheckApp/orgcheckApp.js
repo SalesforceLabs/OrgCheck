@@ -152,6 +152,10 @@ export default class OrgCheckApp extends LightningElement {
             this.#api.getOrganizationInformation().then((orgInfo) => {
                 this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
                 this.orgType = orgInfo.type;
+                if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+                else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+                else this.themeForOrgType = 'slds-theme_success';
+                this._updateDailyAPIUsage();
             }).catch((error) => {
                 SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting information of the org from API', error);
             });
@@ -159,12 +163,30 @@ export default class OrgCheckApp extends LightningElement {
                 this.#filters.updateSObjectTypeOptions(data.types);
                 this.#filters.updatePackageOptions(data.packages);
                 this.#filters.updateSObjectApiNameOptions(data.objects);
+                this._updateDailyAPIUsage();
             }).catch((error) => {
                 SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting filters values from API', error);
             });
         }).catch((error) => {
             SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while loading API', error);
         });
+    }
+
+    _updateDailyAPIUsage() {
+        const dailyApiUsage = this.#api.getOrgDailyApiLimitRate();
+        // update the Daily API usage
+        this.orgLimit = `Daily API Request Limit: ${(dailyApiUsage*100).toFixed(3)}%`;
+        // update the color of the badge (if it approaches 70% or reached 100%)
+        if (dailyApiUsage > 0.9) {
+             // 90% of usage we should stop immediatly here!!!
+            this.themeForOrgLimit = 'slds-theme_error';
+        } else if (dailyApiUsage > 0.7) { 
+            // 70% of usage, we should just warn the user that we are getting close to the limit
+            this.themeForOrgLimit = 'slds-theme_warning';
+        } else {
+            // lower than 69%, ok!
+            this.themeForOrgLimit = 'slds-theme_success';
+        }
     }
 
     /**
@@ -202,6 +224,7 @@ export default class OrgCheckApp extends LightningElement {
         try {
             this.#spinner.open();
             this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
+            this._updateDailyAPIUsage();
             switch (this.#currentTab) {
                 case 'object-information': {
                     if (sobject !== '*') {
@@ -242,6 +265,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'cache-manager':                      this.cacheManagerData = await this.#api.getCacheInformation(); break;
                 default:
             }
+            this._updateDailyAPIUsage();
             this.#spinner.sectionEnded(section, 'Done');
             this.#spinner.close();
 
