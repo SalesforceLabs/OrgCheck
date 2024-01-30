@@ -257,7 +257,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'apex-triggers':                      this.apexTriggersTableData = await this.#api.getApexTriggers(namespace); break;
                 case 'dashboards':                         this.dashboardsTableData = await this.#api.getDashboards(); break;
                 case 'reports':                            this.reportsTableData = await this.#api.getReports(); break;
-                case 'cache-manager':                      this.cacheManagerData = await this.#api.getCacheInformation(); break;
+                case 'welcome':                            this.cacheManagerData = await this.#api.getCacheInformation(); break;
                 default:
             }
             this._updateDailyAPIUsage();
