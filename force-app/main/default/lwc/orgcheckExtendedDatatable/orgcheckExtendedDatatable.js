@@ -67,6 +67,22 @@ const HEADER_CSSCLASS = (column, isSticky) => {
     return (column.sorted ? `sorted sorted-${column.sorted}` : '') + ' ' + (isSticky === true? 'sticky' : '');
 }
 
+const STRING_MATCHER = (value, searchingValue) => {
+    return String(value).toUpperCase().indexOf(searchingValue) >= 0;
+}
+
+const ARRAY_MATCHER = (array, s) => {
+    return array.findIndex((item) => {
+        return Object.values(item.data).findIndex((property) => {
+            if (Array.isArray(property)) {
+                return ARRAY_MATCHER(property, s);
+            } else {
+                return STRING_MATCHER(property, s);
+            }
+        }) >= 0;
+    }) >= 0
+}
+
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
@@ -420,14 +436,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             const s = searchInput.toUpperCase();
             this.nbFilteredRows = 0;
             this.#allRows.forEach((row) => {
-                const rowIsVisible = (
-                    row.cells.findIndex((cell) => {
-                        return Object.values(cell.data).findIndex((value) => {
-                            return String(value).toUpperCase().indexOf(s) >= 0;
-                        }) >= 0;
-                    }) >= 0
-                );
-                if (rowIsVisible === true) {
+                if (ARRAY_MATCHER(row.cells, s) === true) {
                     delete row.isInvisible;
                     row.index = ++this.nbFilteredRows;
                 } else {
