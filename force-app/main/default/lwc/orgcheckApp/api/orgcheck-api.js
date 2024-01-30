@@ -99,86 +99,201 @@ export class OrgCheckAPI {
     }
 
     /**
-     * Get the lastest Daily API Usage from JSForce
+     * Get the lastest Daily API Usage from JSForce, and the level of confidence 
+     * we have in this ratio to continue using org check.
      * 
-     * @returns Ratio of the daily api usage.
+     * @returns {DailyApiRequestLimitInformation} Percentage of the daily api usage and a confidence precentage.
      */
-    getOrgDailyApiLimitRate() {
-        return this.#sfdcManager.getOrgDailyApiLimitRate();
+    getDailyApiRequestLimitInformation() {
+        return this.#sfdcManager.getDailyApiRequestLimitInformation();
     }
     
+    /**
+     * Get information about the organization
+     * 
+     * @returns {SFDC_OrgInformation} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getOrganizationInformation() {
         return this.#recipeManager.run(RECIPE_ORGINFO_ALIAS);
     }
 
+    /**
+     * Get information about the packages, the object types and objects (used for global filters)
+     * 
+     * @returns {Object} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getPackagesTypesAndObjects(namespace, sobjectType) {
         return this.#recipeManager.run(RECIPE_GLOBALFILTERS_ALIAS, namespace, sobjectType);
     }
 
+    /**
+     * Get information about a specific sobject
+     * 
+     * @returns {SFDC_Object} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getObject(sobject) {
         return this.#recipeManager.run(RECIPE_OBJECT_ALIAS, sobject);
     }
 
+    /**
+     * Get information about custom fields (filtered out by namespace/pakage, type and sobject)
+     * 
+     * @returns {SFDC_Field} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getCustomFields(namespace, sobjectType, sobject) {
         return this.#recipeManager.run(RECIPE_CUSTOMFIELDS_ALIAS, namespace, sobjectType, sobject);
     }
 
+    /**
+     * Get information about permission sets (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_Profile} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getPermissionSets(namespace) {
         return this.#recipeManager.run(RECIPE_PERMISSIONSETS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about profiles (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_Profile} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getProfiles(namespace) {
         return this.#recipeManager.run(RECIPE_PROFILES_ALIAS, namespace);
     }
 
+    /**
+     * Get information about active users
+     * 
+     * @returns {SFDC_User} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getActiveUsers() {
         return this.#recipeManager.run(RECIPE_ACTIVEUSERS_ALIAS);
     }
 
+    /**
+     * Get information about custom labels (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_CustomLabel} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getCustomLabels(namespace) {
         return this.#recipeManager.run(RECIPE_CUSTOMLABELS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about LWCs (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_LightningWebComponent} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getLightningWebComponents(namespace) {
         return this.#recipeManager.run(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about Aura Components (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_LightningAuraComponent} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getLightningAuraComponents(namespace) {
         return this.#recipeManager.run(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about flexipages (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_LightningPage} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getLightningPages(namespace) {
         return this.#recipeManager.run(RECIPE_LIGHTNINGPAGES_ALIAS, namespace);
     }
 
+    /**
+     * Get information about VFCs (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_VisualForceComponent} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getVisualForceComponents(namespace) {
         return this.#recipeManager.run(RECIPE_VISUALFORCECOMPONENTS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about VFPs (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_VisualForcePage} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getVisualForcePages(namespace) {
         return this.#recipeManager.run(RECIPE_VISUALFORCEPAGES_ALIAS, namespace);
     }
 
+    /**
+     * Get information about Public Groups
+     * 
+     * @returns {SFDC_Group} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getPublicGroups() {
         return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS);
     }
 
+    /**
+     * Get information about Queues
+     * 
+     * @returns {SFDC_Group} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getQueues() {
         return this.#recipeManager.run(RECIPE_QUEUES_ALIAS);
     }
     
+    /**
+     * Get information about Apex Classes (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_ApexClass} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getApexClasses(namespace) {
         return this.#recipeManager.run(RECIPE_APEXCLASSES_ALIAS, namespace);
     }
 
+    /**
+     * Get information about Apex triggers (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_ApexTrigger} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getApexTriggers(namespace) {
         return this.#recipeManager.run(RECIPE_APEXTRIGGERS_ALIAS, namespace);
     }
 
+    /**
+     * Get information about User roles in a tabular view
+     * 
+     * @returns {SFDC_UserRole} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getRoles() {
         return this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
     }
 
+    /**
+     * Get information about User Roles in a tree view
+     * 
+     * @returns {SFDC_UserRole} Tree
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getRolesTree() {
         // Get data
         const allRoles = await this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
@@ -215,14 +330,32 @@ export class OrgCheckAPI {
         return allNodes.get(ROOT_KEY);
     }
 
+    /**
+     * Get information about Workflows
+     * 
+     * @returns {SFDC_Workflow} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getWorkflows() {
         return this.#recipeManager.run(RECIPE_WORKFLOWS_ALIAS);
     }
 
+    /**
+     * Get information about Flows
+     * 
+     * @returns {SFDC_Flow} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getFlows() {
         return this.#recipeManager.run(RECIPE_FLOWS_ALIAS);
     }
 
+    /**
+     * Get information about Process Builders
+     * 
+     * @returns {SFDC_Flow} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
     async getProcessBuilders() {
         return this.#recipeManager.run(RECIPE_PROCESSBUILDERS_ALIAS);
     }

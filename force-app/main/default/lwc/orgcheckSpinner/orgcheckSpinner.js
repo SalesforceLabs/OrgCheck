@@ -31,6 +31,7 @@ export default class OrgCheckSpinner extends LightningElement {
     }
 
     @api sectionFailed(sectionName, error) {
+        if (this.isShown === false) this.isShown = true;
         if (error) {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);

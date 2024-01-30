@@ -11,6 +11,20 @@ export class SOQLQueryInformation {
     addDependenciesBasedOnField;
 }
 
+export class DailyApiRequestLimitInformation {
+    percentage;
+    isGreenZone;
+    isYellowZone;
+    isRedZone;
+    yellowThresholdPercentage;
+    redThresholdPercentage;
+}
+
+const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
+const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
+
+const DEFINITION_OLD_API_VERSION = 3; // in years
+
 export class OrgCheckSalesforceManager {
 
     /**
@@ -23,6 +37,19 @@ export class OrgCheckSalesforceManager {
      */
     #connection;
 
+
+    /**
+     * Timestamp of the last request we have made to Salesforce.
+     * Why we do this? to better appreciate the limitInfo we have from the last request.
+     * If the information is fresh then no need to ask again the API, if not we need to try calling.
+     */
+    #lastRequestToSalesforce;
+    
+    /**
+     * Last ratio the Salesforce API gave us about the Daily API Request. 
+     */
+    #lastApiUsage;
+
     /**
      * Construct the connection manager from a ConnectionFactory (like JSForce) and a VFP accesstoken
      * 
@@ -34,13 +61,14 @@ export class OrgCheckSalesforceManager {
         const THIS_MONTH = new Date().getMonth() + 1;
         const SF_API_VERSION = 3 * (THIS_YEAR - 2022) + 53 + (THIS_MONTH <= 2 ? 0 : (THIS_MONTH <= 6 ? 1 : (THIS_MONTH <= 10 ? 2 : 3 )));
 
+        this.#apiVersion = SF_API_VERSION;
         this.#connection = new jsConnectionFactory.Connection({
             accessToken: accessToken,
             version: SF_API_VERSION + '.0',
             maxRequest: '10000'
         });
-
-        this.#apiVersion = SF_API_VERSION;
+        this.#lastRequestToSalesforce = undefined;
+        this.#lastApiUsage = 0;
     }
 
     isEmpty(value) {
@@ -50,12 +78,16 @@ export class OrgCheckSalesforceManager {
         return false;
     }
 
+    ratioToPercentage(ratio, decimals) {
+        return (ratio*100).toFixed(decimals);
+    }
+
     /**
      * Is an API version is old or not?
      * @param version The given version number (should be an integer)
-     * @param definition_of_old in Years (by default 3 years)
+     * @param definition_of_old in Years (by default see DEFINITION_OLD_API_VERSION)
      */
-    isVersionOld(version, definition_of_old = 3) {
+    isVersionOld(version, definition_of_old = DEFINITION_OLD_API_VERSION) {
         // Compute age version in Years
         const age = (this.#apiVersion - version) / 3;
         if (age >= definition_of_old) return true;
@@ -203,18 +235,62 @@ export class OrgCheckSalesforceManager {
         return OBJECTTYPE_ID_STANDARD_SOBJECT;
     }
 
+    _watchDog__beforeRequest(errorCallback) {
+        if (this.#lastRequestToSalesforce && Date.now() - this.#lastRequestToSalesforce <= 60000 && this.#lastApiUsage > DAILY_API_REQUEST_FATAL_THRESHOLD) {
+            const error = new Error(
+                `WATCH DOG: Daily API Request limit is ${this.ratioToPercentage(this.#lastApiUsage)}%, `+
+                `and our internal threshold is ${this.ratioToPercentage(DAILY_API_REQUEST_FATAL_THRESHOLD)}%. `+
+                'We stop there to keep your org safe.'
+            );
+            if (errorCallback) {
+                errorCallback(error);
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    _watchDog__afterRequest(errorCallback) {
+        if (this.#connection.limitInfo && this.#connection.limitInfo.apiUsage) {
+            const apiUsageUsed = this.#connection.limitInfo.apiUsage.used;
+            const apiUsageMax = this.#connection.limitInfo.apiUsage.limit;
+            this.#lastApiUsage = ( apiUsageUsed / apiUsageMax );
+            this.#lastRequestToSalesforce = Date.now();
+            this._watchDog__beforeRequest(errorCallback);
+        }
+    }
+
+    /**
+     * Get the lastest Daily API Usage from JSForce, and the level of confidence 
+     * we have in this ratio to continue using org check.
+     * 
+     * @returns {DailyApiRequestLimitInformation} Percentage of the daily api usage and other flags to see if that percentage is good or bad.
+     */
+    getDailyApiRequestLimitInformation() {
+        const info = new DailyApiRequestLimitInformation();
+        info.percentage = this.ratioToPercentage(this.#lastApiUsage, 3);
+        if (this.#lastApiUsage > DAILY_API_REQUEST_FATAL_THRESHOLD) info.isRedZone = true;
+        else if (this.#lastApiUsage > DAILY_API_REQUEST_WARNING_THRESHOLD) info.isYellowZone = true;
+        else info.isGreenZone = true;
+        info.yellowThresholdPercentage = DAILY_API_REQUEST_WARNING_THRESHOLD;
+        info.redThresholdPercentage = DAILY_API_REQUEST_FATAL_THRESHOLD;
+        return info;
+    }
+
     /**
      * Method to call a list of SOQL queries (tooling or not)
      * 
      * @param {Array<SOQLQueryInformation>} queries 
      */
     async soqlQuery(queries) {
+        this._watchDog__beforeRequest();
         const promises = [];
         queries.forEach(q => {
             const queryPromise = new Promise((resolve, reject) => {
                 const conn = q.tooling === true ? this.#connection.tooling : this.#connection;
                 const records = [];
                 const recursive_query = (e, d) => {
+                    this._watchDog__afterRequest(reject);
                     if (e) { 
                         if (q.byPasses && q.byPasses.includes(e.errorCode)) {
                             resolve();
@@ -255,6 +331,7 @@ export class OrgCheckSalesforceManager {
                                     'FROM MetadataComponentDependency '+
                                     `WHERE (RefMetadataComponentId IN (${subids}) OR MetadataComponentId IN (${subids}))`,
                                     (e, d) => {
+                                        this._watchDog__afterRequest(reject);
                                         if (e) {
                                             e.context = { 
                                                 when: 'While getting the dependencies from DAPI',
@@ -310,6 +387,7 @@ export class OrgCheckSalesforceManager {
     }
 
     async readMetadataAtScale(type, ids, byPasses) {
+        this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
             const compositeRequestBodies = [];
             let currentCompositeRequestBody;
@@ -337,6 +415,7 @@ export class OrgCheckSalesforceManager {
                             body: JSON.stringify(requestBody),
                             headers: { 'Content-Type': 'application/json' }
                         }, (error, response) => { 
+                            this._watchDog__afterRequest(e);
                             if (error) {
                                 error.context = { 
                                     when: 'While creating a promise to call the Tooling Composite API.',
@@ -347,7 +426,9 @@ export class OrgCheckSalesforceManager {
                                     }
                                 };
                                 e(error); 
-                            } else r(response); 
+                            } else {
+                                r(response); 
+                            }
                         }
                     );
                 }));
@@ -386,8 +467,10 @@ export class OrgCheckSalesforceManager {
      * Method to get the list of sobjects
      */
     async describeGlobal() {
+        this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
             this.#connection.describeGlobal((e, d) => {
+                this._watchDog__afterRequest(reject);
                 if (e) reject(e); else resolve(d.sobjects);
             });
         });
@@ -399,9 +482,11 @@ export class OrgCheckSalesforceManager {
      * @param {string} sobjectDevName 
      */
     async describe(sobjectDevName) {
+        this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
             // describeSObject() method is not cached (compare to describe() method))
             this.#connection.describeSObject(sobjectDevName, (e, d) => {
+                this._watchDog__afterRequest(reject);
                 if (e) reject(e); else resolve(d);
             });
         });
@@ -413,27 +498,15 @@ export class OrgCheckSalesforceManager {
      * @param {string} sobjectDevName 
      */
     async recordCount(sobjectDevName) {
+        this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
             this.#connection.request({ 
                 url: '/services/data/v'+this.#connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
                 method: 'GET'
             }, (e, r) => {
+                this._watchDog__afterRequest(reject);
                 if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length == 1) ? r?.sObjects[0].count : 0);
             });
         });
-    }
-
-    /**
-     * Get the lastest Daily API Usage from JSForce
-     * 
-     * @returns Ratio of the daily api usage.
-     */
-    getOrgDailyApiLimitRate() {
-        if (this.#connection.limitInfo && this.#connection.limitInfo.apiUsage) {
-            const apiUsageUsed = this.#connection.limitInfo.apiUsage.used;
-            const apiUsageMax = this.#connection.limitInfo.apiUsage.limit;
-            return ( apiUsageUsed / apiUsageMax );
-        }
-        return 0;
     }
 }

@@ -149,23 +149,27 @@ export default class OrgCheckApp extends LightningElement {
             );
             this.accessToken = ''; // reset the accessToken so we do not store it anymore
             this.orgCheckVersion = this.#api.getVersion();
-            this.#api.getOrganizationInformation().then((orgInfo) => {
+            Promise.all([
+                this.#api.getOrganizationInformation(),
+                this.#api.getPackagesTypesAndObjects('*', '*')
+            ]).then((data) => {
+                // Information about the org
+                const orgInfo = data[0];
                 this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
                 this.orgType = orgInfo.type;
                 if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
                 else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
                 else this.themeForOrgType = 'slds-theme_success';
-                this._updateDailyAPIUsage();
+                // Data for the filters
+                const filtersData = data[1];
+                this.#filters.updateSObjectTypeOptions(filtersData.types);
+                this.#filters.updatePackageOptions(filtersData.packages);
+                this.#filters.updateSObjectApiNameOptions(filtersData.objects);
             }).catch((error) => {
                 SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting information of the org from API', error);
-            });
-            this.#api.getPackagesTypesAndObjects('*', '*').then((data) => {
-                this.#filters.updateSObjectTypeOptions(data.types);
-                this.#filters.updatePackageOptions(data.packages);
-                this.#filters.updateSObjectApiNameOptions(data.objects);
+            }).finally(() => {
+                // Show Daily API Usage in the app
                 this._updateDailyAPIUsage();
-            }).catch((error) => {
-                SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting filters values from API', error);
             });
         }).catch((error) => {
             SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while loading API', error);
@@ -173,20 +177,11 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     _updateDailyAPIUsage() {
-        const dailyApiUsage = this.#api.getOrgDailyApiLimitRate();
-        // update the Daily API usage
-        this.orgLimit = `Daily API Request Limit: ${(dailyApiUsage*100).toFixed(3)}%`;
-        // update the color of the badge (if it approaches 70% or reached 100%)
-        if (dailyApiUsage > 0.9) {
-             // 90% of usage we should stop immediatly here!!!
-            this.themeForOrgLimit = 'slds-theme_error';
-        } else if (dailyApiUsage > 0.7) { 
-            // 70% of usage, we should just warn the user that we are getting close to the limit
-            this.themeForOrgLimit = 'slds-theme_warning';
-        } else {
-            // lower than 69%, ok!
-            this.themeForOrgLimit = 'slds-theme_success';
-        }
+        const dailyApiInformation = this.#api.getDailyApiRequestLimitInformation();
+        if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
+        else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
+        else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
+        this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.percentage}%`;
     }
 
     /**
