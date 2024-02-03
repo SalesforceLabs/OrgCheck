@@ -90,6 +90,7 @@ mv build/tmp/js/${TYPE_UGLIFIED}-orgcheck.js build/tmp/js/orgcheck.js
 cp build/src/javascript/orgcheck/orgcheck-api.js build/tmp/js/orgcheck-api.js
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
+cp build/src/javascript/sheetjs/xlsx.js build/tmp/js/xlsx.js
 cp build/src/logos/Logo.svg build/tmp/img
 cp build/src/logos/Mascot.svg build/tmp/img
 cp build/src/logos/Mascot+Animated.svg build/tmp/img

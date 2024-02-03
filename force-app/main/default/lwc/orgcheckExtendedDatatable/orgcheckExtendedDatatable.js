@@ -186,6 +186,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api showRowNumberColumn = false;
 
+    @api showExportButton = false;
+    @api exportBasename = 'Data';
+    @api exportSheetName = 'Data';
+
     /**
      * Do you want the table to use all the horizontal space or not?
      * False by default.

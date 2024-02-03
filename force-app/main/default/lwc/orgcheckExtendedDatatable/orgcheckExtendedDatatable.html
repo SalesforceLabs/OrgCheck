@@ -45,7 +45,7 @@
                 </lightning-layout-item>
             </template>
             <lightning-layout-item>
-                <lightning-button label="Export" title="Export" variant="brand" class="slds-var-m-left_x-small" icon-name="utility:download"></lightning-button>
+                <c-orgcheck-export-button show-export-csv show-export-xls source-columns={columns} source-rows={visibleRows} basename={exportBasename} sheetname={exportSheetName}></c-orgcheck-export-button>
             </lightning-layout-item>
     </template>
     </lightning-layout>
@@ -93,7 +93,7 @@
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
                             <template lwc:elseif={cell.isId}>
                                 <template lwc:if={cell.data.url}>
-                                    <lightning-formatted-url value={cell.data.url} tooltip={cell.data.value} label={cell.data.value} target="_blank" ></lightning-formatted-url>
+                                    <lightning-formatted-url value={cell.data.url} tooltip={cell.data.value} label={cell.data.value} target="_blank" rel="external noopener noreferrer"></lightning-formatted-url>
                                 </template>
                                 <template lwc:else>
                                     {cell.data.value}
@@ -108,7 +108,7 @@
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         <template lwc:if={item.data.url}>
-                                            - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank" ></lightning-formatted-url>
+                                            - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank" rel="external noopener noreferrer"></lightning-formatted-url>
                                         </template>
                                         <template lwc:else>
                                             - {item.data.value}

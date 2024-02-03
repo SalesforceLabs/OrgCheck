@@ -127,7 +127,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={objectsOWDTableColumns}
-                        rows={objectsOWDTableData}></c-orgcheck-extended-datatable>
+                        rows={objectsOWDTableData}
+                        show-export-button
+                        export-basename="OrgWideDefault"
+                        export-sheet-name="Org Wide Default"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -145,7 +148,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={customFieldsTableColumns}
-                        rows={customFieldsTableData}></c-orgcheck-extended-datatable>
+                        rows={customFieldsTableData}
+                        show-export-button
+                        export-basename="CustomFields"
+                        export-sheet-name="Custom Fields"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -163,7 +169,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={usersTableColumns}
-                        rows={usersTableData}></c-orgcheck-extended-datatable>            
+                        rows={usersTableData}
+                        show-export-button
+                        export-basename="Users"
+                        export-sheet-name="Users"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -181,7 +190,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={profilesTableColumns}
-                        rows={profilesTableData}></c-orgcheck-extended-datatable>
+                        rows={profilesTableData}
+                        show-export-button
+                        export-basename="Profiles"
+                        export-sheet-name="Profiles"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="permission-sets" label="Permission Sets" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -195,7 +207,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={permissionSetsTableColumns}
-                        rows={permissionSetsTableData} ></c-orgcheck-extended-datatable>
+                        rows={permissionSetsTableData}
+                        show-export-button
+                        export-basename="PermissionSets"
+                        export-sheet-name="Permission Sets"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -220,7 +235,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={rolesTableColumns}
-                        rows={rolesTableData} ></c-orgcheck-extended-datatable>
+                        rows={rolesTableData}
+                        show-export-button
+                        export-basename="Roles"
+                        export-sheet-name="Roles"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -238,7 +256,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={publicGroupsTableColumns}
-                        rows={publicGroupsTableData} ></c-orgcheck-extended-datatable>
+                        rows={publicGroupsTableData}
+                        show-export-button
+                        export-basename="PublicGroups"
+                        export-sheet-name="Public Groups"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="queues" label="Queues" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -252,7 +273,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={queuesTableColumns}
-                        rows={queuesTableData} ></c-orgcheck-extended-datatable>            
+                        rows={queuesTableData}
+                        show-export-button
+                        export-basename="Queues"
+                        export-sheet-name="Queues"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -270,7 +294,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={flowsTableColumns}
-                        rows={flowsTableData} ></c-orgcheck-extended-datatable>
+                        rows={flowsTableData}
+                        show-export-button
+                        export-basename="Flows"
+                        export-sheet-name="Flows"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="process-builders" label="Process Builders" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -284,7 +311,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={processBuildersTableColumns}
-                        rows={processBuildersTableData} ></c-orgcheck-extended-datatable>
+                        rows={processBuildersTableData}
+                        show-export-button
+                        export-basename="ProcessBuilders"
+                        export-sheet-name="Process Builders"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="workflows" label="Workflows" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -298,7 +328,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={workflowsTableColumns}
-                        rows={workflowsTableData} ></c-orgcheck-extended-datatable>
+                        rows={workflowsTableData}
+                        show-export-button
+                        export-basename="Workflows"
+                        export-sheet-name="Workflows"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -316,7 +349,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={customLabelsTableColumns}
-                        rows={customLabelsTableData} ></c-orgcheck-extended-datatable>
+                        rows={customLabelsTableData}
+                        show-export-button
+                        export-basename="CustomLabels"
+                        export-sheet-name="Custom Labels"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -334,7 +370,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={visualForcePagesTableColumns}
-                        rows={visualForcePagesTableData} ></c-orgcheck-extended-datatable>
+                        rows={visualForcePagesTableData}
+                        show-export-button
+                        export-basename="VisualForcePages"
+                        export-sheet-name="Visual Force Pages"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="visual-force-components" label="Visual Force Components" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -348,7 +387,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={visualForceComponentsTableColumns}
-                        rows={visualForceComponentsTableData} ></c-orgcheck-extended-datatable>
+                        rows={visualForceComponentsTableData}
+                        show-export-button
+                        export-basename="VisualForceComponents"
+                        export-sheet-name="Visual Force Components"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="lightning-pages" label="Lightning Pages" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -362,7 +404,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={lightningPagesTableColumns}
-                        rows={lightningPagesTableData} ></c-orgcheck-extended-datatable>
+                        rows={lightningPagesTableData}
+                        show-export-button
+                        export-basename="LightningPages"
+                        export-sheet-name="Lightning Pages"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="lightning-aura-components" label="Lightning Aura Components" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -376,7 +421,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={auraComponentsTableColumns}
-                        rows={auraComponentsTableData} ></c-orgcheck-extended-datatable>            
+                        rows={auraComponentsTableData}
+                        show-export-button
+                        export-basename="LightningAuraComponents"
+                        export-sheet-name="Lightning Aura Components"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="lightning-web-components" label="Lightning Web Components" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -390,7 +438,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={lightningWebComponentsTableColumns}
-                        rows={lightningWebComponentsTableData} ></c-orgcheck-extended-datatable>            
+                        rows={lightningWebComponentsTableData}
+                        show-export-button
+                        export-basename="LightningWebComponents"
+                        export-sheet-name="Lightning Web Components"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -408,7 +459,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexClassesTableColumns}
-                        rows={apexClassesTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexClassesTableData}
+                        show-export-button
+                        export-basename="ApexClasses"
+                        export-sheet-name="Apex Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-recompilation-needed" label="Recompilation needed" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -422,7 +476,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexUncompiledTableColumns}
-                        rows={apexUncompiledTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexUncompiledTableData}
+                        show-export-button
+                        export-basename="ApexClassesNeedCompilation"
+                        export-sheet-name="Apex Classes Need Compilation"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-triggers" label="Triggers" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -436,7 +493,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexTriggersTableColumns}
-                        rows={apexTriggersTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexTriggersTableData}
+                        show-export-button
+                        export-basename="ApexTriggers"
+                        export-sheet-name="Apex Triggers"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-enums" label="Enum Classes" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -450,7 +510,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexEnumsTableColumns}
-                        rows={apexEnumssTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexEnumssTableData}
+                        show-export-button
+                        export-basename="ApexEnumClasses"
+                        export-sheet-name="Apex Enum Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-abstract" label="Abstract Classes" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -464,7 +527,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexAbstractTableColumns}
-                        rows={apexAbstractTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexAbstractTableData}
+                        show-export-button
+                        export-basename="ApexAbstractClasses"
+                        export-sheet-name="Apex Abstract Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-interfaces" label="Interfaces" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -478,7 +544,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexInterfacesTableColumns}
-                        rows={apexInterfacesTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexInterfacesTableData}
+                        show-export-button
+                        export-basename="ApexInterfaceClasses"
+                        export-sheet-name="Apex Interface Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
                 <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -492,7 +561,10 @@
                         infinite-scrolling-initial-nb-rows=200
                         infinite-scrolling-additional-nb-rows=100
                         columns={apexTestsTableColumns}
-                        rows={apexTestsTableData} ></c-orgcheck-extended-datatable>            
+                        rows={apexTestsTableData}
+                        show-export-button
+                        export-basename="ApexUnitTests"
+                        export-sheet-name="Apex Unit Tests"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
