@@ -1,7 +1,14 @@
 <template>
     <template if:true={isObjectDefined}>
 
-        <h1 class="slds-text-heading_large">{object.label} ({object.apiname})</h1>
+        <lightning-layout>
+            <lightning-layout-item>
+                <h1 class="slds-text-heading_large">{object.label} ({object.apiname})</h1>
+            </lightning-layout-item>
+            <lightning-layout-item alignment-bump="left">
+                <c-orgcheck-export-button source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
+            </lightning-layout-item>
+        </lightning-layout>
         <br /><br />
 
         <!-- GENERAL SECTION -->

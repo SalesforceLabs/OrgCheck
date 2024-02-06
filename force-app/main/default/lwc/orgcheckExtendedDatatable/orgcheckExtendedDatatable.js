@@ -188,7 +188,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     @api showExportButton = false;
     @api exportBasename = 'Data';
-    @api exportSheetName = 'Data';
 
     /**
      * Do you want the table to use all the horizontal space or not?
@@ -301,14 +300,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Array<any>} rows 
      */
     @api set rows(rows) {
-        if (!this.#columns) {
-            console.error('setRows() called but no columns yet...');
-            return;
-        }
-        if (!rows) {
-            console.error('setRows() called but given "rows" is undefined');
-            return;
-        }
+        if (!this.#columns) return;
+        if (!rows) return;
 
         this.nbAllRows = rows.length || 0;
         this.isDataEmpty = (this.nbAllRows === 0);
@@ -368,6 +361,22 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         return this.#allRows;
     }
     
+    get exportedRows() {
+        if (!this.#columns) return;
+        if (!this.#allRows) return;
+        return [
+            {
+                header: 'Data',
+                columns: this.#columns.map(c => c.label),
+                rows: this.#allRows.map(row => row.cells.map(cell => {
+                    if (cell.isIndex) return row.index;
+                    if (cell.data.values) return JSON.stringify(cell.data.values.map(v => v.data.decoratedValue ?? v.data.value));
+                    if (cell.data.value) return cell.data.decoratedValue ?? cell.data.value;
+                }))
+            }
+        ];
+    }
+
     /**
      * Handler when a user click on the "Load more rows..." button
      */

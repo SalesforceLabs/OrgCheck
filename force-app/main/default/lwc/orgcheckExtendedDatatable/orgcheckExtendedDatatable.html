@@ -45,7 +45,7 @@
                 </lightning-layout-item>
             </template>
             <lightning-layout-item>
-                <c-orgcheck-export-button show-export-csv show-export-xls source-columns={columns} source-rows={visibleRows} basename={exportBasename} sheetname={exportSheetName}></c-orgcheck-export-button>
+                <c-orgcheck-export-button source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
             </lightning-layout-item>
     </template>
     </lightning-layout>
