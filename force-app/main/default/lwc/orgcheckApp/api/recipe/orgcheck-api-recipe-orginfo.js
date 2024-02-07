@@ -22,10 +22,7 @@ export class OrgCheckRecipeOrgInformation extends OrgCheckRecipe {
     transform(data) {
         // Get data
         const orgInfoAsMap = data.get(DATASET_ORGINFO_ALIAS);
-        // Augment data
-        // Filter data
-        let orgInfo;
-        orgInfoAsMap.forEach((oi) => orgInfo = oi);
-        return orgInfo;
+        // Only returning the first record (we expect only one!!)
+        return orgInfoAsMap.values().next().value;
     }
 }
