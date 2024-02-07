@@ -255,8 +255,6 @@ export default class OrgCheckApp extends LightningElement {
                 case 'apex-unit-tests':                    this.apexTestsTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isTest === true); break;
                 case 'apex-recompilation-needed':          this.apexUncompiledTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.needsRecompilation === true); break;
                 case 'apex-triggers':                      this.apexTriggersTableData = await this.#api.getApexTriggers(namespace); break;
-                case 'dashboards':                         this.dashboardsTableData = await this.#api.getDashboards(); break;
-                case 'reports':                            this.reportsTableData = await this.#api.getReports(); break;
                 case 'welcome':                            this.cacheManagerData = await this.#api.getCacheInformation(); break;
                 default:
             }
