@@ -234,6 +234,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
                 case 'permission-sets':                    this.permissionSetsTableData = await this.#api.getPermissionSets(namespace); break;
+                case 'profile-restrictions':               this.profileRestrictionsTableData = await this.#api.getProfileRestrictions(namespace); break;
                 case 'roles-listing':                      this.rolesTableData = await this.#api.getRoles(); break;
                 case 'roles-explorer':                     this.rolesTree = await this.#api.getRolesTree(); break;
                 case 'public-groups':                      this.publicGroupsTableData = await this.#api.getPublicGroups(); break;
@@ -377,6 +378,17 @@ export default class OrgCheckApp extends LightningElement {
     ];
 
     profilesTableData;
+
+    profileRestrictionsTableData;
+
+    profileRestrictionsTableColumns = [
+        { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
+        { label: 'Custom',          type: 'boolean',  data: { ref: 'profileRef', value: 'isCustom' }},
+        { label: 'Package',         type: 'text',     data: { ref: 'profileRef', value: 'package' }},
+        { label: 'Ip Ranges',       type: 'objects',  data: { ref: 'ipRanges' }},
+        { label: 'Login Hours',     type: 'objects',  data: { ref: 'loginHours' }},
+        { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+    ];
 
     publicGroupsTableColumns = [
         { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
@@ -587,10 +599,6 @@ export default class OrgCheckApp extends LightningElement {
     ];
     
     apexTestsTableData;
-    
-    dashboardsTableData;
-    
-    reportsTableData;
 
     objectsOWDTableColumns = [
         { label: 'Label',            type: 'text',  data: { value: 'label' }, sorted: 'asc'},

@@ -10,6 +10,7 @@ import { OrgCheckRecipeManager,
     RECIPE_ORGINFO_ALIAS,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
+    RECIPE_PROFILERESTRICTIONS_ALIAS,
     RECIPE_VISUALFORCEPAGES_ALIAS,
     RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS,
     RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
@@ -166,6 +167,16 @@ export class OrgCheckAPI {
      */
     async getProfiles(namespace) {
         return this.#recipeManager.run(RECIPE_PROFILES_ALIAS, namespace);
+    }
+
+    /**
+     * Get information about profile restrictions (filtered out by namespace/pakage)
+     * 
+     * @returns {SFDC_ProfileRestiction} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
+    async getProfileRestrictions(namespace) {
+        return this.#recipeManager.run(RECIPE_PROFILERESTRICTIONS_ALIAS, namespace);
     }
 
     /**

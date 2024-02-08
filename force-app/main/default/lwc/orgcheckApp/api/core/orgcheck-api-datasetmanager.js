@@ -9,6 +9,7 @@ import { OrgCheckDatasetOrgInformation } from '../dataset/orgcheck-api-dataset-o
 import { OrgCheckDatasetPackages } from '../dataset/orgcheck-api-dataset-packages';
 import { OrgCheckDatasetPermissionSets } from '../dataset/orgcheck-api-dataset-permissionsets';
 import { OrgCheckDatasetProfiles } from '../dataset/orgcheck-api-dataset-profiles';
+import { OrgCheckDatasetProfileRestrictions } from '../dataset/orgcheck-api-dataset-profilerestrictions';
 import { OrgCheckDatasetUsers } from '../dataset/orgcheck-api-dataset-users';
 import { OrgCheckDatasetVisualForcePages } from '../dataset/orgcheck-api-dataset-visualforcepages';
 import { OrgCheckDatasetVisualForceComponents } from '../dataset/orgcheck-api-dataset-visualforcecomponents';
@@ -44,6 +45,7 @@ export const DATASET_ORGINFO_ALIAS = 'org-information';
 export const DATASET_PACKAGES_ALIAS = 'packages';
 export const DATASET_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const DATASET_PROFILES_ALIAS = 'profiles';
+export const DATASET_PROFILERESTRICTIONS_ALIAS = 'profile-restrictions';
 export const DATASET_USERS_ALIAS = 'users';
 export const DATASET_VISUALFORCEPAGES_ALIAS = 'visual-force-pages';
 export const DATASET_VISUALFORCEOMPONENTS_ALIAS = 'visual-force-components';
@@ -93,6 +95,7 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_PACKAGES_ALIAS, new OrgCheckDatasetPackages());
         this.#datasets.set(DATASET_PERMISSIONSETS_ALIAS, new OrgCheckDatasetPermissionSets());
         this.#datasets.set(DATASET_PROFILES_ALIAS, new OrgCheckDatasetProfiles());
+        this.#datasets.set(DATASET_PROFILERESTRICTIONS_ALIAS, new OrgCheckDatasetProfileRestrictions());
         this.#datasets.set(DATASET_USERS_ALIAS, new OrgCheckDatasetUsers());
         this.#datasets.set(DATASET_VISUALFORCEPAGES_ALIAS, new OrgCheckDatasetVisualForcePages());
         this.#datasets.set(DATASET_VISUALFORCEOMPONENTS_ALIAS, new OrgCheckDatasetVisualForceComponents());
