@@ -18,6 +18,7 @@ export class SFDC_Field extends OrgCheckData {
     isUnique;
     isEncrypted;
     isExternalId;
+    isIndexed;
     defaultValue;
     formula;
 

@@ -23,7 +23,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         promises.push(sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                        '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
+                        '(SELECT Id, DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
                         '(SELECT Id, Name FROM ApexTriggers), '+
                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -59,17 +59,21 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 const fieldsMapper = {};
                 if (entity.Fields) entity.Fields.records.forEach((f) => {
                     fieldsMapper[f.QualifiedApiName] = { 
-                        'id': f.DurableId.split('.')[1], 
-                        'description': f.Description 
+                        id: f.DurableId.split('.')[1], 
+                        description: f.Description,
+                        isIndexed: f.IsIndexed
                     };
                 });
                 const fields = (
                     sobjectDescribed.fields ?
                     sobjectDescribed.fields.map((t) => {
                         const mapper = fieldsMapper[t.name];
+                        console.error("t.name=",t.name);
                         if (mapper) {
+                            console.error("FOUND! ",mapper.isIndexed, mapper.description);
                             t.id = mapper.id;
                             t.description = mapper.description;
+                            t.isIndexed = mapper.isIndexed;
                         }
                         return new SFDC_Field({ 
                             id: sfdcManager.caseSafeId(t.id), 
@@ -83,6 +87,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                             isUnique: t.unique,
                             isEncrypted: t.encrypted,
                             isExternalId: t.externalId,
+                            isIndexed: t.isIndexed,
                             defaultValue: t.defaultValue,
                             formula: t.calculatedFormula,
                             url: sfdcManager.setupUrl('field', t.id, entity.DurableId, sobjectType)
