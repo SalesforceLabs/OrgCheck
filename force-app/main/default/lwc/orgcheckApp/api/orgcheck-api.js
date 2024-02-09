@@ -11,6 +11,7 @@ import { OrgCheckRecipeManager,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
     RECIPE_PROFILERESTRICTIONS_ALIAS,
+    RECIPE_PROFILEPWDPOLICIES_ALIAS,
     RECIPE_VISUALFORCEPAGES_ALIAS,
     RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS,
     RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
@@ -177,6 +178,16 @@ export class OrgCheckAPI {
      */
     async getProfileRestrictions(namespace) {
         return this.#recipeManager.run(RECIPE_PROFILERESTRICTIONS_ALIAS, namespace);
+    }
+
+    /**
+     * Get information about profile password policies
+     * 
+     * @returns {SFDC_ProfilePasswordPolicy} Data
+     * @throws Exception if rate >= THRESHOLD
+     */
+    async getProfilePasswordPolicies() {
+        return this.#recipeManager.run(RECIPE_PROFILEPWDPOLICIES_ALIAS);
     }
 
     /**

@@ -9,6 +9,7 @@ import { OrgCheckRecipeOrgInformation } from '../recipe/orgcheck-api-recipe-orgi
 import { OrgCheckRecipePermissionSets } from '../recipe/orgcheck-api-recipe-permissionsets';
 import { OrgCheckRecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
 import { OrgCheckRecipeProfileRestrictions } from '../recipe/orgcheck-api-recipe-profilerestrictions';
+import { OrgCheckRecipeProfilePasswordPolicies } from '../recipe/orgcheck-api-recipe-profilepasswordpolicies';
 import { OrgCheckRecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-visualforcepages';
 import { OrgCheckRecipeLightningWebComponents } from '../recipe/orgcheck-api-recipe-lightningwebcomponents';
 import { OrgCheckRecipeLightningAuraComponents } from '../recipe/orgcheck-api-recipe-lightningauracomponents';
@@ -32,6 +33,7 @@ export const RECIPE_ORGINFO_ALIAS = 'org-information';
 export const RECIPE_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const RECIPE_PROFILES_ALIAS = 'profiles';
 export const RECIPE_PROFILERESTRICTIONS_ALIAS = 'profile-restrictions';
+export const RECIPE_PROFILEPWDPOLICIES_ALIAS = 'profile-password-policies';
 export const RECIPE_VISUALFORCEPAGES_ALIAS = 'visual-force-pages';
 export const RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS = 'lightning-web-components';
 export const RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS = 'lightning-aura-components';
@@ -80,6 +82,7 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_PERMISSIONSETS_ALIAS, new OrgCheckRecipePermissionSets());
         this.#recipes.set(RECIPE_PROFILES_ALIAS, new OrgCheckRecipeProfiles());
         this.#recipes.set(RECIPE_PROFILERESTRICTIONS_ALIAS, new OrgCheckRecipeProfileRestrictions());
+        this.#recipes.set(RECIPE_PROFILEPWDPOLICIES_ALIAS, new OrgCheckRecipeProfilePasswordPolicies());
         this.#recipes.set(RECIPE_VISUALFORCEPAGES_ALIAS, new OrgCheckRecipeVisualForcePages());
         this.#recipes.set(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, new OrgCheckRecipeLightningWebComponents());
         this.#recipes.set(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, new OrgCheckRecipeLightningAuraComponents());

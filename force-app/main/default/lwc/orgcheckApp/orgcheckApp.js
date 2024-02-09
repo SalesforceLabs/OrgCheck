@@ -235,6 +235,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
                 case 'permission-sets':                    this.permissionSetsTableData = await this.#api.getPermissionSets(namespace); break;
                 case 'profile-restrictions':               this.profileRestrictionsTableData = await this.#api.getProfileRestrictions(namespace); break;
+                case 'profile-password-policies':          this.profilePasswordPoliciesTableData = await this.#api.getProfilePasswordPolicies(); break;
                 case 'roles-listing':                      this.rolesTableData = await this.#api.getRoles(); break;
                 case 'roles-explorer':                     this.rolesTree = await this.#api.getRolesTree(); break;
                 case 'public-groups':                      this.publicGroupsTableData = await this.#api.getPublicGroups(); break;
@@ -379,8 +380,6 @@ export default class OrgCheckApp extends LightningElement {
 
     profilesTableData;
 
-    profileRestrictionsTableData;
-
     profileRestrictionsTableColumns = [
         { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { ref: 'profileRef', value: 'isCustom' }},
@@ -389,6 +388,12 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Login Hours',     type: 'objects',  data: { ref: 'loginHours' }, modifier: { template: '{day} from {fromTime} to {toTime} (#minutes: {difference}) ' }},
         { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
+
+    profileRestrictionsTableData;
+
+    profilePasswordPoliciesTableColumns = [];
+    
+    profilePasswordPoliciesTableData;
 
     publicGroupsTableColumns = [
         { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
