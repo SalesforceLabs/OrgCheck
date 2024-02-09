@@ -385,8 +385,8 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { ref: 'profileRef', value: 'isCustom' }},
         { label: 'Package',         type: 'text',     data: { ref: 'profileRef', value: 'package' }},
-        { label: 'Ip Ranges',       type: 'objects',  data: { ref: 'ipRanges' }},
-        { label: 'Login Hours',     type: 'objects',  data: { ref: 'loginHours' }},
+        { label: 'Ip Ranges',       type: 'objects',  data: { ref: 'ipRanges' }, modifier: { template: 'from {startAddress} to {endAddress} (#addresses: {difference}) -- {description}' }},
+        { label: 'Login Hours',     type: 'objects',  data: { ref: 'loginHours' }, modifier: { template: '{day} from {fromTime} to {toTime} (#minutes: {difference}) ' }},
         { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
     ];
 

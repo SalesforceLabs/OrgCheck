@@ -3,6 +3,10 @@ import { SFDC_ProfileRestrictions,
             SFDC_ProfileIpRangeRestriction,
             SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
 
+const COMPUTE_NUMBER_FROM_IP = (ip) => {
+    return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { return prev + Number(currentItem) * Math.pow(255, array.length-1-currentIndex); }, 0);
+}
+
 export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
     run(sfdcManager, localLogger, resolve, reject) {
@@ -34,34 +38,50 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                         if (record.Metadata.loginHours) {
                             const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
                             days.forEach(d => {
-                                const c1 = record.Metadata.loginHours[d + 'Start'];
-                                const c2 = record.Metadata.loginHours[d + 'End'];
+                                const hourStart = record.Metadata.loginHours[d + 'Start'];
+                                const hourEnd = record.Metadata.loginHours[d + 'End'];
                                 loginHours.push(new SFDC_ProfileLoginHourRestriction({
                                     day: d,
-                                    fromTime: (('0' + Math.floor(c1 / 60)).slice(-2) + ':' + ('0' + (c1 % 60)).slice(-2)),
-                                    toTime:   (('0' + Math.floor(c2 / 60)).slice(-2) + ':' + ('0' + (c2 % 60)).slice(-2))
+                                    fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
+                                    toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
+                                    difference: hourEnd - hourStart
                                 }));
                             });
                         }
 
                         // Ip Ranges
                         const ipRanges = [];
-                        if (record.Metadata.loginIpRanges) {
+                        if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
                             record.Metadata.loginIpRanges.forEach(i => {
+                                const startNumber = COMPUTE_NUMBER_FROM_IP(i.startAddress);
+                                const endNumber = COMPUTE_NUMBER_FROM_IP(i.endAddress);
                                 ipRanges.push(new SFDC_ProfileIpRangeRestriction({
                                     startAddress: i.startAddress,
                                     endAddress: i.endAddress,
-                                    description: i.description
+                                    description: i.description,
+                                    difference: endNumber - startNumber
                                 }));
                             });
+                        }
+
+                        // Skip if no restriction at all
+                        if (loginHours.length === 0 && ipRanges.length === 0) {
+                            return;
                         }
 
                         // Create the instance
                         const profileRestriction = new SFDC_ProfileRestrictions({
                             profileId: profileId,
                             ipRanges: ipRanges,
-                            loginHours: loginHours
+                            loginHours: loginHours,
+                            isScoreNeeded: true
                         });
+
+                        // Compute the score of this profile restriction, with the following rule:
+                        //   - If ip range difference is bigger than 100k, then you get +1.
+                        //   - If login hour difference is bigger than 20 huurs long (per day), then you get +1.
+                        if (profileRestriction.ipRanges.filter(i => i.difference > 100000).length > 0) profileRestriction.setBadField('ipRanges');
+                        if (profileRestriction.loginHours.filter(i => i.difference > 1200).length > 0) profileRestriction.setBadField('loginHours');
 
                         // Add it to the map                        
                         profileRestrictions.set(profileRestriction.profileId, profileRestriction);                    

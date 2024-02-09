@@ -4,6 +4,7 @@ export class SFDC_ProfileIpRangeRestriction extends OrgCheckData {
     startAddress;
     endAddress;
     description;
+    difference;
 
     constructor(setup) {
         super();
@@ -15,6 +16,7 @@ export class SFDC_ProfileLoginHourRestriction extends OrgCheckData {
     fromTime;
     toTime;
     day;
+    difference;
 
     constructor(setup) {
         super();
