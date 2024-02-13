@@ -386,6 +386,70 @@ export class OrgCheckSalesforceManager {
         return Promise.all(promises);
     }
 
+    /*
+    https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/javascript/orgcheck/OrgCheck.Salesforce.js#L298
+    */
+    async readMetadata(metadatas) {
+        this._watchDog__beforeRequest();
+        return new Promise((resolve, reject) => {
+            // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
+            Promise.all(
+                metadatas
+                    .filter(m => m.members.includes('*'))
+                    .map(m => new Promise((resolve, reject) => { 
+                        this.#connection.metadata.list([{type: m.type}], this.#connection.version, (error, members) => {
+                            if (error) {
+                                reject(Object.assign(error, { context: { 
+                                    when: 'While calling a metadata api list.',
+                                    what: { type: m.type }
+                                }}));
+                            } else {
+                                // clear the members (remove the stars)
+                                m.members = m.members.filter(b => b !== '*'); // 'metadatas' will be altered!
+                                // add the fullNames 
+                                if (members) (Array.isArray(members) ? members : [ members ]).forEach(f => { m.members.push(f.fullName); });
+                                resolve();
+                            }
+                        });
+                    })))
+            .then(() => { 
+                // At this point, no more wildcard, only types and legitime member values in 'metadatas'.
+                // Second, we want to read the metatda for these types and members
+                const promises = [];
+                metadatas.forEach(m => {
+                    while (m.members.length > 0) {
+                        const membersMax10 = m.members.splice(0, 10); // get the first 10 items of the members, and members will no longer include them 
+                        promises.push(new Promise((resolve, reject) => { 
+                            this.#connection.metadata.read(m.type, membersMax10, (error, results) => {
+                                if (error) {
+                                    reject(Object.assign(error, { context: { 
+                                        when: 'While calling a metadata api read.',
+                                        what: { type: m.type, members: membersMax10 }
+                                    }}));   
+                                } else {
+                                    resolve({ type: m.type, members: Array.isArray(results) ? results : [ results ] });
+                                }
+                            });
+                        }));
+                    }
+                });
+                Promise.all(promises)
+                    .then((results) => {
+                        const response = {};
+                        results.forEach(r => {
+                            const m = response[r.type] || [];
+                            m.push(...r.members);
+                            response[r.type] = m;
+                        });
+                        return response;
+                    })
+                    .catch(reject)
+                    .then(resolve);
+                })
+                .catch(reject); // in case some of the list went wrong!!
+        });
+    }
+
     async readMetadataAtScale(type, ids, byPasses) {
         this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
