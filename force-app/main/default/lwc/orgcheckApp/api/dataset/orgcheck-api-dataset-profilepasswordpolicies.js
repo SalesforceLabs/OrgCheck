@@ -35,10 +35,10 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         minimumPasswordLength: parseInt(ppp.minimumPasswordLength),
                         minimumPasswordLifetime: (ppp.minimumPasswordLifetime === 'true'),
                         obscure: (ppp.obscure === 'true'),
-                        passwordComplexity: parseInt(ppp.ppasswordComplexity),
+                        passwordComplexity: parseInt(ppp.passwordComplexity),
                         passwordExpiration: parseInt(ppp.passwordExpiration),
                         passwordHistory: parseInt(ppp.passwordHistory),
-                        passwordQuestion: (ppp.passwordQuestion === 'true'),
+                        passwordQuestion: (ppp.passwordQuestion === '1'),
                         profileName: ppp.profile,
                         isScoreNeeded: true
                     });
@@ -48,7 +48,18 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
 
                     // Compute the score of this profile restriction, with the following rule:
                     //   - If question can include the password, then you get +1.
+                    //   - If password expires more than 90 days, then you get +1.
+                    //   - If password never expires (= 0 days), then you get +1.
+                    //   - If password history less than 3, then you get +1.
+                    //   - If max attempt is not defined, then you get +1.
+                    //   - If lockout inteval is not defined, then you get +1.
                     if (policy.passwordQuestion === true) policy.setBadField('passwordQuestion');
+                    if (policy.passwordExpiration > 90 || policy.passwordExpiration === 0) policy.setBadField('passwordExpiration');
+                    if (policy.passwordHistory < 3) policy.setBadField('passwordHistory');
+                    if (policy.minimumPasswordLength < 8) policy.setBadField('minimumPasswordLength');
+                    if (policy.passwordComplexity < 3) policy.setBadField('passwordComplexity');
+                    if (policy.maxLoginAttempts === undefined) policy.setBadField('maxLoginAttempts');
+                    if (policy.lockoutInterval === undefined) policy.setBadField('lockoutInterval');
                 });
             }
 

@@ -392,17 +392,16 @@ export default class OrgCheckApp extends LightningElement {
     profileRestrictionsTableData;
 
     profilePasswordPoliciesTableColumns = [
-        { label: 'Name',                      type: 'text',   data: { value: 'profileName' }},
-        { label: 'forgotPasswordRedirect',    type: 'text',   data: { value: 'forgotPasswordRedirect' }},
-        { label: 'lockoutInterval',           type: 'text',   data: { value: 'lockoutInterval' }},
-        { label: 'maxLoginAttempts',          type: 'text',   data: { value: 'maxLoginAttempts' }},
-        { label: 'minimumPasswordLength',     type: 'text',   data: { value: 'minimumPasswordLength' }},
-        { label: 'minimumPasswordLifetime',   type: 'text',   data: { value: 'minimumPasswordLifetime' }},
-        { label: 'obscure',                   type: 'text',   data: { value: 'obscure' }},
-        { label: 'passwordComplexity',        type: 'text',   data: { value: 'passwordComplexity' }},
-        { label: 'passwordExpiration',        type: 'text',   data: { value: 'passwordExpiration' }},
-        { label: 'passwordHistory',           type: 'text',   data: { value: 'passwordHistory' }},
-        { label: 'passwordQuestion',          type: 'text',   data: { value: 'passwordQuestion' }}
+        { label: 'Name',                                      type: 'text',    data: { value: 'profileName' }},
+        { label: 'User password expires in',                  type: 'numeric', data: { value: 'passwordExpiration' }},
+        { label: 'Enforce password history',                  type: 'numeric', data: { value: 'passwordHistory' }},
+        { label: 'Minimum password length',                   type: 'numeric', data: { value: 'minimumPasswordLength' }},
+        { label: 'Level of complexity (/5)',                  type: 'numeric', data: { value: 'passwordComplexity' }},
+        { label: 'Question can contain password',             type: 'boolean', data: { value: 'passwordQuestion' }},
+        { label: 'Maximum Login Attempts',                    type: 'numeric', data: { value: 'maxLoginAttempts' }},
+        { label: 'Lockout period',                            type: 'numeric', data: { value: 'lockoutInterval' }},
+        { label: 'Require minimum one day password lifetime', type: 'boolean', data: { value: 'minimumPasswordLifetime' }},
+        { label: 'Security Question Hidden',                  type: 'boolean', data: { value: 'obscure' }},
     ];
     
     profilePasswordPoliciesTableData;
