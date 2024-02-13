@@ -391,7 +391,19 @@ export default class OrgCheckApp extends LightningElement {
 
     profileRestrictionsTableData;
 
-    profilePasswordPoliciesTableColumns = [];
+    profilePasswordPoliciesTableColumns = [
+        { label: 'Name',                      type: 'text',   data: { value: 'profileName' }},
+        { label: 'forgotPasswordRedirect',    type: 'text',   data: { value: 'forgotPasswordRedirect' }},
+        { label: 'lockoutInterval',           type: 'text',   data: { value: 'lockoutInterval' }},
+        { label: 'maxLoginAttempts',          type: 'text',   data: { value: 'maxLoginAttempts' }},
+        { label: 'minimumPasswordLength',     type: 'text',   data: { value: 'minimumPasswordLength' }},
+        { label: 'minimumPasswordLifetime',   type: 'text',   data: { value: 'minimumPasswordLifetime' }},
+        { label: 'obscure',                   type: 'text',   data: { value: 'obscure' }},
+        { label: 'passwordComplexity',        type: 'text',   data: { value: 'passwordComplexity' }},
+        { label: 'passwordExpiration',        type: 'text',   data: { value: 'passwordExpiration' }},
+        { label: 'passwordHistory',           type: 'text',   data: { value: 'passwordHistory' }},
+        { label: 'passwordQuestion',          type: 'text',   data: { value: 'passwordQuestion' }}
+    ];
     
     profilePasswordPoliciesTableData;
 
