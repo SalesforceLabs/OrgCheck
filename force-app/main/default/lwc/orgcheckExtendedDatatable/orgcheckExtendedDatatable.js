@@ -6,9 +6,15 @@ const TYPE_SCORE = 'score';
 const SORT_ORDER_ASC = 'asc';
 const SORT_ORDER_DESC = 'desc';
 
+const NUMBER_FORMATTER = Intl.NumberFormat();
+
 const OBJECT_TO_STRING = (template, object) => {
-    return template.replace(/{([A-Za-z0-9]+)}/g, function (match, property) {
-        return typeof object[property] === 'undefined' ? match : object[property];
+    return template.replace(/{([A-Za-z0-9]+)(:[a-z-]+)?}/g, function (match, property, type) {
+        const value = typeof object[property] === 'undefined' ? match : object[property];
+        if (type) switch (type) {
+            case ':numeric': return NUMBER_FORMATTER.format(value);
+        }
+        return value;
     });
 }
 
