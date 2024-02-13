@@ -35,7 +35,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         minimumPasswordLength: parseInt(ppp.minimumPasswordLength),
                         minimumPasswordLifetime: (ppp.minimumPasswordLifetime === 'true'),
                         obscure: (ppp.obscure === 'true'),
-                        passwordComplexity: parseInt(rppppasswordComplexity),
+                        passwordComplexity: parseInt(ppp.ppasswordComplexity),
                         passwordExpiration: parseInt(ppp.passwordExpiration),
                         passwordHistory: parseInt(ppp.passwordHistory),
                         passwordQuestion: (ppp.passwordQuestion === 'true'),
