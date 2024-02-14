@@ -3,6 +3,7 @@ import { OrgCheckSalesforceManager } from './orgcheck-api-sfconnectionmanager';
 import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
 import { OrgCheckDatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
 import { OrgCheckDatasetObject } from '../dataset/orgcheck-api-dataset-object';
+import { OrgCheckDatasetObjectPermissions } from '../dataset/orgcheck-api-dataset-objectpermissions';
 import { OrgCheckDatasetObjects } from '../dataset/orgcheck-api-dataset-objects';
 import { OrgCheckDatasetObjectTypes } from '../dataset/orgcheck-api-dataset-objecttypes';
 import { OrgCheckDatasetOrgInformation } from '../dataset/orgcheck-api-dataset-orginfo';
@@ -40,6 +41,7 @@ export class DatasetRunInformation {
 export const DATASET_CUSTOMFIELDS_ALIAS = 'custom-fields';
 export const DATASET_CUSTOMLABELS_ALIAS = 'custom-labels';
 export const DATASET_OBJECT_ALIAS = 'object';
+export const DATASET_OBJECTPERMISSIONS_ALIAS = 'object-permissions';
 export const DATASET_OBJECTS_ALIAS = 'objects';
 export const DATASET_OBJECTTYPES_ALIAS = 'object-types';
 export const DATASET_ORGINFO_ALIAS = 'org-information';
@@ -77,10 +79,10 @@ export class OrgCheckDatasetManager {
     constructor(sfdcManager, logger) {
         
         if (sfdcManager instanceof OrgCheckSalesforceManager === false) {
-            throw new Error('The given logger is not an instance of OrgCheckSalesforceManager.');
+            throw new TypeError('The given logger is not an instance of OrgCheckSalesforceManager.');
         }
         if (logger instanceof OrgCheckLogger === false) {
-            throw new Error('The given logger is not an instance of OrgCheckLogger.');
+            throw new TypeError('The given logger is not an instance of OrgCheckLogger.');
         }
         
         this.#sfdcManager = sfdcManager;
@@ -91,6 +93,7 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
         this.#datasets.set(DATASET_OBJECT_ALIAS, new OrgCheckDatasetObject());
+        this.#datasets.set(DATASET_OBJECTPERMISSIONS_ALIAS, new OrgCheckDatasetObjectPermissions());
         this.#datasets.set(DATASET_OBJECTS_ALIAS, new OrgCheckDatasetObjects());
         this.#datasets.set(DATASET_OBJECTTYPES_ALIAS, new OrgCheckDatasetObjectTypes());
         this.#datasets.set(DATASET_ORGINFO_ALIAS, new OrgCheckDatasetOrgInformation());
@@ -121,7 +124,7 @@ export class OrgCheckDatasetManager {
      */
     async run(datasets) {
         if (datasets instanceof Array === false) {
-            throw new Error('The given datasets is not an instance of Array.');
+            throw new TypeError('The given datasets is not an instance of Array.');
         }
         const results = new Map();
         const promises = [];

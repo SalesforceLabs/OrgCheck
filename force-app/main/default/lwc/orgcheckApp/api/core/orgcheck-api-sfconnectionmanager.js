@@ -237,7 +237,7 @@ export class OrgCheckSalesforceManager {
 
     _watchDog__beforeRequest(errorCallback) {
         if (this.#lastRequestToSalesforce && Date.now() - this.#lastRequestToSalesforce <= 60000 && this.#lastApiUsage > DAILY_API_REQUEST_FATAL_THRESHOLD) {
-            const error = new Error(
+            const error = new TypeError(
                 `WATCH DOG: Daily API Request limit is ${this.ratioToPercentage(this.#lastApiUsage)}%, `+
                 `and our internal threshold is ${this.ratioToPercentage(DAILY_API_REQUEST_FATAL_THRESHOLD)}%. `+
                 'We stop there to keep your org safe.'
@@ -507,7 +507,7 @@ export class OrgCheckSalesforceManager {
                             } else {
                                 const errorCode = response.body[0].errorCode;
                                 if (byPasses && byPasses.includes(errorCode) === false) {
-                                    const error = new Error();
+                                    const error = new TypeError();
                                     error.context = { 
                                         when: 'After receiving a response with bad HTTP status code.',
                                         what: {

@@ -21,14 +21,14 @@ export class OrgCheckData {
         // If dependencies are needed...
         if (setup.isDependenciesNeeded === true) {
             if (!setup.allDependencies) {
-                throw new Error(`Missing 'allDependencies' information in setup as this data does need dependencies.`);
+                throw new TypeError(`Missing 'allDependencies' information in setup as this data does need dependencies.`);
             }
             if (!setup.dependenciesFor) {
-                throw new Error(`Missing 'dependenciesFor' information in setup as this data does need dependencies.`);
+                throw new TypeError(`Missing 'dependenciesFor' information in setup as this data does need dependencies.`);
             }
             const id = this[setup.dependenciesFor];
             if (!id) {
-                throw new Error(`The property "${setup.dependenciesFor}" is undefined for this data. Impossible to calculate dependencies.`);
+                throw new TypeError(`The property "${setup.dependenciesFor}" is undefined for this data. Impossible to calculate dependencies.`);
             }
             this.dependencies = new OrgCheckDataDependencies(setup.allDependencies, id);
         }
@@ -36,10 +36,10 @@ export class OrgCheckData {
 
     setBadField(field) {
         if (!this.badFields) {
-            throw new Error('Should not call setBadField() as this data does not need score.');
+            throw new TypeError('Should not call setBadField() as this data does not need score.');
         }
         if (!field) {
-            throw new Error('Field is a mandatory when calling setBadField()');
+            throw new TypeError('Field is a mandatory when calling setBadField()');
         }
         if (this.badFields.includes(field) === false) {
             this.badFields.push(field);
@@ -49,7 +49,7 @@ export class OrgCheckData {
 
     isItReferenced() {
         if (!this.dependencies) {
-            throw new Error('Should not call isItReferenced() as this data does not need dependencies.');
+            throw new TypeError('Should not call isItReferenced() as this data does not need dependencies.');
         }
         return this.dependencies.referenced.length > 0;
     }

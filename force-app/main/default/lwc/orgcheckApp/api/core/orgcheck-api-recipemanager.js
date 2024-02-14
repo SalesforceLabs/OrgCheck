@@ -5,6 +5,7 @@ import { OrgCheckRecipeCustomFields } from '../recipe/orgcheck-api-recipe-custom
 import { OrgCheckRecipeCustomLabels } from '../recipe/orgcheck-api-recipe-customlabels';
 import { OrgCheckRecipePackagesTypesAndObjects } from '../recipe/orgcheck-api-recipe-globalfilters';
 import { OrgCheckRecipeObject } from '../recipe/orgcheck-api-recipe-object';
+import { OrgCheckRecipeObjectPermissions } from '../recipe/orgcheck-api-recipe-objectpermissions';
 import { OrgCheckRecipeOrgInformation } from '../recipe/orgcheck-api-recipe-orginfo';
 import { OrgCheckRecipePermissionSets } from '../recipe/orgcheck-api-recipe-permissionsets';
 import { OrgCheckRecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
@@ -29,6 +30,7 @@ export const RECIPE_CUSTOMFIELDS_ALIAS = 'custom-fields';
 export const RECIPE_CUSTOMLABELS_ALIAS = 'custom-labels';
 export const RECIPE_GLOBALFILTERS_ALIAS = 'global-filters';
 export const RECIPE_OBJECT_ALIAS = 'object';
+export const RECIPE_OBJECTPERMISSIONS_ALIAS = 'object-permissions';
 export const RECIPE_ORGINFO_ALIAS = 'org-information';
 export const RECIPE_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const RECIPE_PROFILES_ALIAS = 'profiles';
@@ -63,10 +65,10 @@ export class OrgCheckRecipeManager {
     constructor(datasetManager, logger) {
 
         if (datasetManager instanceof OrgCheckDatasetManager === false) {
-            throw new Error('The given logger is not an instance of OrgCheckDatasetManager.');
+            throw new TypeError('The given logger is not an instance of OrgCheckDatasetManager.');
         }
         if (logger instanceof OrgCheckLogger === false) {
-            throw new Error('The given logger is not an instance of OrgCheckLogger.');
+            throw new TypeError('The given logger is not an instance of OrgCheckLogger.');
         }
 
         this.#datasetManager = datasetManager;
@@ -78,6 +80,7 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_CUSTOMLABELS_ALIAS, new OrgCheckRecipeCustomLabels());
         this.#recipes.set(RECIPE_GLOBALFILTERS_ALIAS, new OrgCheckRecipePackagesTypesAndObjects());
         this.#recipes.set(RECIPE_OBJECT_ALIAS, new OrgCheckRecipeObject());
+        this.#recipes.set(RECIPE_OBJECTPERMISSIONS_ALIAS, new OrgCheckRecipeObjectPermissions());
         this.#recipes.set(RECIPE_ORGINFO_ALIAS, new OrgCheckRecipeOrgInformation());
         this.#recipes.set(RECIPE_PERMISSIONSETS_ALIAS, new OrgCheckRecipePermissionSets());
         this.#recipes.set(RECIPE_PROFILES_ALIAS, new OrgCheckRecipeProfiles());
@@ -101,33 +104,56 @@ export class OrgCheckRecipeManager {
     async run(alias, ...parameters) {
         // Check if alias is registered
         if (this.#recipes.has(alias) === false) {
-            throw new Error(`The given alias (${alias}) does not correspond to a registered recipe.`);
+            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
         } 
         const section = `RECIPE ${alias}`;
         const recipe = this.#recipes.get(alias);
 
-        // Start the logger
-        this.#logger.begin();
         try {
+            // Start the logger
+            this.#logger.begin();
 
+            // -------------------
             // Extract
-            this.#logger.sectionStarts(section, 'Getting the information...');
-            const data = await this.#datasetManager.run(recipe.extract(...parameters));
+            // -------------------
+            this.#logger.sectionStarts(section, 'List the datasets that are needed...');
+            let datasets;
+            try {
+                datasets = recipe.extract(...parameters);   
+            } catch(error) {
+                this.#logger.sectionFailed(section, error);
+                throw error;
+            }
+            this.#logger.sectionContinues(section, 'Run all the datasets and extract their data...');
+            let data;
+            try {
+                data = await this.#datasetManager.run(datasets);
+            } catch(error) {
+                // the detail of the error should have been logged by dataset manager
+                // just mentionning that there was an error on the dataset layer
+                this.#logger.sectionFailed(section, 'Error in dataset!');
+                throw error;
+            }
             this.#logger.sectionContinues(section, 'Information succesfully retrieved!');
 
+            // -------------------
             // Transform
+            // -------------------
             this.#logger.sectionContinues(section, 'Transform the information...');
-            const finalData = recipe.transform(data, ...parameters);
+            let finalData;
+            try {
+                finalData = recipe.transform(data, ...parameters);
+            } catch(error) {
+                this.#logger.sectionFailed(section, error);
+                throw error;
+            }
             this.#logger.sectionEnded(section, 'Transformation done!');
 
             // Return value
             return finalData;
 
         } catch(error) {
-            // Error handling
-            this.#logger.sectionFailed(section, error);
             throw error;
-
         } finally {
             // End the logger
             this.#logger.end();

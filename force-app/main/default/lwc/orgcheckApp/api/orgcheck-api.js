@@ -7,6 +7,7 @@ import { OrgCheckRecipeManager,
     RECIPE_CUSTOMLABELS_ALIAS,
     RECIPE_GLOBALFILTERS_ALIAS,
     RECIPE_OBJECT_ALIAS,
+    RECIPE_OBJECTPERMISSIONS_ALIAS,
     RECIPE_ORGINFO_ALIAS,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
@@ -113,7 +114,7 @@ export class OrgCheckAPI {
     /**
      * Get information about the organization
      * 
-     * @returns {SFDC_OrgInformation} Data
+     * @returns {SFDC_OrgInformation} Org information to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getOrganizationInformation() {
@@ -123,7 +124,8 @@ export class OrgCheckAPI {
     /**
      * Get information about the packages, the object types and objects (used for global filters)
      * 
-     * @returns {Object} Data
+     * @returns {Any} Information about packages (list of SFDC_Package), types (list of SFDC_ObjectType) and objects (list of SFDC_Object)
+        }
      * @throws Exception if rate >= THRESHOLD
      */
     async getPackagesTypesAndObjects(namespace, sobjectType) {
@@ -133,7 +135,7 @@ export class OrgCheckAPI {
     /**
      * Get information about a specific sobject
      * 
-     * @returns {SFDC_Object} Data
+     * @returns {SFDC_Object[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getObject(sobject) {
@@ -141,9 +143,19 @@ export class OrgCheckAPI {
     }
 
     /**
+     * Get information about object permissions
+     * 
+     * @returns {SFDC_ObjectPermission[]} List of items to return
+     * @throws Exception if rate >= THRESHOLD
+     */
+    async getObjectPermissions(namespace) {
+        return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace);
+    }
+
+    /**
      * Get information about custom fields (filtered out by namespace/pakage, type and sobject)
      * 
-     * @returns {SFDC_Field} Data
+     * @returns {SFDC_Field[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getCustomFields(namespace, sobjectType, sobject) {
@@ -153,7 +165,7 @@ export class OrgCheckAPI {
     /**
      * Get information about permission sets (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_Profile} Data
+     * @returns {SFDC_Profile[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getPermissionSets(namespace) {
@@ -163,7 +175,7 @@ export class OrgCheckAPI {
     /**
      * Get information about profiles (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_Profile} Data
+     * @returns {SFDC_Profile[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getProfiles(namespace) {
@@ -173,7 +185,7 @@ export class OrgCheckAPI {
     /**
      * Get information about profile restrictions (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_ProfileRestiction} Data
+     * @returns {SFDC_ProfileRestiction[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getProfileRestrictions(namespace) {
@@ -183,7 +195,7 @@ export class OrgCheckAPI {
     /**
      * Get information about profile password policies
      * 
-     * @returns {SFDC_ProfilePasswordPolicy} Data
+     * @returns {SFDC_ProfilePasswordPolicy[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getProfilePasswordPolicies() {
@@ -193,7 +205,7 @@ export class OrgCheckAPI {
     /**
      * Get information about active users
      * 
-     * @returns {SFDC_User} Data
+     * @returns {SFDC_User[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getActiveUsers() {
@@ -203,7 +215,7 @@ export class OrgCheckAPI {
     /**
      * Get information about custom labels (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_CustomLabel} Data
+     * @returns {SFDC_CustomLabel[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getCustomLabels(namespace) {
@@ -213,7 +225,7 @@ export class OrgCheckAPI {
     /**
      * Get information about LWCs (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_LightningWebComponent} Data
+     * @returns {SFDC_LightningWebComponent[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getLightningWebComponents(namespace) {
@@ -223,7 +235,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Aura Components (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_LightningAuraComponent} Data
+     * @returns {SFDC_LightningAuraComponent[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getLightningAuraComponents(namespace) {
@@ -233,7 +245,7 @@ export class OrgCheckAPI {
     /**
      * Get information about flexipages (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_LightningPage} Data
+     * @returns {SFDC_LightningPage[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getLightningPages(namespace) {
@@ -243,7 +255,7 @@ export class OrgCheckAPI {
     /**
      * Get information about VFCs (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_VisualForceComponent} Data
+     * @returns {SFDC_VisualForceComponent[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getVisualForceComponents(namespace) {
@@ -253,7 +265,7 @@ export class OrgCheckAPI {
     /**
      * Get information about VFPs (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_VisualForcePage} Data
+     * @returns {SFDC_VisualForcePage[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getVisualForcePages(namespace) {
@@ -263,7 +275,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Public Groups
      * 
-     * @returns {SFDC_Group} Data
+     * @returns {SFDC_Group[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getPublicGroups() {
@@ -273,7 +285,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Queues
      * 
-     * @returns {SFDC_Group} Data
+     * @returns {SFDC_Group[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getQueues() {
@@ -283,7 +295,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Apex Classes (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_ApexClass} Data
+     * @returns {SFDC_ApexClass[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getApexClasses(namespace) {
@@ -293,7 +305,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Apex triggers (filtered out by namespace/pakage)
      * 
-     * @returns {SFDC_ApexTrigger} Data
+     * @returns {SFDC_ApexTrigger[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getApexTriggers(namespace) {
@@ -303,7 +315,7 @@ export class OrgCheckAPI {
     /**
      * Get information about User roles in a tabular view
      * 
-     * @returns {SFDC_UserRole} Data
+     * @returns {SFDC_UserRole[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getRoles() {
@@ -355,7 +367,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Workflows
      * 
-     * @returns {SFDC_Workflow} Data
+     * @returns {SFDC_Workflow[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getWorkflows() {
@@ -365,7 +377,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Flows
      * 
-     * @returns {SFDC_Flow} Data
+     * @returns {SFDC_Flow[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getFlows() {
@@ -375,7 +387,7 @@ export class OrgCheckAPI {
     /**
      * Get information about Process Builders
      * 
-     * @returns {SFDC_Flow} Data
+     * @returns {SFDC_Flow[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getProcessBuilders() {

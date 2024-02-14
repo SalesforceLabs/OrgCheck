@@ -230,6 +230,7 @@ export default class OrgCheckApp extends LightningElement {
                     break;
                 }
                 case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
+                case 'object-permissions':                 this.objectPermissionsTableData = await this.#api.getObjectPermissions(namespace); break;
                 case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
@@ -265,7 +266,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.close();
 
         } catch (error) {
-            SPINNER_LOGGER_LASTFAILURE(this.#spinner, section, error);
+            SPINNER_LOGGER_LASTFAILURE(this.#spinner, section, 'Error in recipe or dataset!');
         }
     }
 
@@ -617,14 +618,29 @@ export default class OrgCheckApp extends LightningElement {
     apexTestsTableData;
 
     objectsOWDTableColumns = [
-        { label: 'Label',            type: 'text',  data: { value: 'label' }, sorted: 'asc'},
-        { label: 'Name',             type: 'text',  data: { value: 'name' }},
-        { label: 'Package',          type: 'text',  data: { value: 'package' }},
-        { label: 'Internal',         type: 'text',  data: { value: 'internalSharingModel' }},
-        { label: 'External',         type: 'text',  data: { value: 'externalSharingModel' }}
+        { label: 'Label',     type: 'text',  data: { value: 'label' }, sorted: 'asc'},
+        { label: 'Name',      type: 'text',  data: { value: 'name' }},
+        { label: 'Package',   type: 'text',  data: { value: 'package' }},
+        { label: 'Internal',  type: 'text',  data: { value: 'internalSharingModel' }},
+        { label: 'External',  type: 'text',  data: { value: 'externalSharingModel' }}
     ];
 
     objectsOWDTableData;
+
+    objectPermissionsTableColumns = [
+        { label: 'Key',       type: 'text',    data: { value: 'key' }},
+        { label: 'Parent',    type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc'},
+        { label: 'IsProfile', type: 'boolean', data: { value: 'isParentProfile' }},
+        { label: 'Object',    type: 'text',    data: { value: 'objectType' }},
+        { label: 'R',         type: 'boolean', data: { value: 'isRead' }},
+        { label: 'C',         type: 'boolean', data: { value: 'isCreate' }},
+        { label: 'U',         type: 'boolean', data: { value: 'isEdit' }},
+        { label: 'D',         type: 'boolean', data: { value: 'isDelete' }},
+        { label: 'V',         type: 'boolean', data: { value: 'isViewAll' }},
+        { label: 'M',         type: 'boolean', data: { value: 'isModifyAll' }}
+    ];
+
+    objectPermissionsTableData;
 
     rolesTableColumns = [
         { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},

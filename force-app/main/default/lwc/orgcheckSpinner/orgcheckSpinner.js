@@ -36,7 +36,7 @@ export default class OrgCheckSpinner extends LightningElement {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
             } else {
-                this._setSection(sectionName, error.message, SECTION_STATUS_FAILED);
+                this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED);
                 this._setErrorDetail(error.stack);
             }
         } else {

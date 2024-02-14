@@ -247,6 +247,23 @@
                         export-basename="ProfilePasswordPolicies"
                         export-sheet-name="Profile Password Policies"></c-orgcheck-extended-datatable>
                 </lightning-tab>
+                <lightning-tab value="object-permissions" label="Object Permissions" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no object permission to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={objectPermissionsTableColumns}
+                        rows={objectPermissionsTableData}
+                        show-export-button
+                        export-basename="ObjectPermissions"
+                        export-sheet-name="Object Permissions"></c-orgcheck-extended-datatable>
+                </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
