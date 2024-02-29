@@ -1,4 +1,4 @@
-import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckDataset, OrgCheckDatasetParameters } from '../core/orgcheck-api-dataset';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
@@ -9,6 +9,10 @@ import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_ObjectRelationShip } from '../data/orgcheck-api-data-objectrelationship';
+
+export class OrgCheckDatasetObjectParameters extends OrgCheckDatasetParameters {
+    object;
+}
 
 export class OrgCheckDatasetObject extends OrgCheckDataset {
 

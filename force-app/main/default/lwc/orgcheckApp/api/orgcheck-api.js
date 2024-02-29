@@ -143,13 +143,13 @@ export class OrgCheckAPI {
     }
 
     /**
-     * Get information about object permissions
+     * Get information about object permissions per parent (kind of matrix view)
      * 
-     * @returns {SFDC_ObjectPermission[]} List of items to return
+     * @returns {Any} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
      * @throws Exception if rate >= THRESHOLD
      */
-    async getObjectPermissions(namespace) {
-        return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace);
+    async getObjectPermissionsPerParent(namespace) {
+        return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace, 'GroupByParent');
     }
 
     /**

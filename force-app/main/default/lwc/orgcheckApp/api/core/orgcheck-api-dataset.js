@@ -1,3 +1,5 @@
+export class OrgCheckDatasetParameters {}
+
 export class OrgCheckDataset {
 
     run(resolve, reject, parameters) {

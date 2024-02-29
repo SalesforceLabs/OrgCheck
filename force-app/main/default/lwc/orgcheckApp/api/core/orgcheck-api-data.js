@@ -32,6 +32,8 @@ export class OrgCheckData {
             }
             this.dependencies = new OrgCheckDataDependencies(setup.allDependencies, id);
         }
+
+        Object.seal(this);
     }
 
     setBadField(field) {

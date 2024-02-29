@@ -230,7 +230,22 @@ export default class OrgCheckApp extends LightningElement {
                     break;
                 }
                 case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
-                case 'object-permissions':                 this.objectPermissionsTableData = await this.#api.getObjectPermissions(namespace); break;
+                case 'object-permissions': {
+                    const data = await this.#api.getObjectPermissionsPerParent(namespace);
+                    const columns = [{ label: 'Parent', type: 'object', data: { ref: 'parentRef' }, modifier: { template: '{name} (custom={isCustom})' }}];
+                    data.objects.forEach(o => {
+                        columns.push({ label: o, type: 'object', data: { ref: `objectPermissions.${o}` }, modifier: { 
+                            template: (p) => { if (p) {
+                                return `${p.isCreate?'C':''}${p.isRead?'R':''}${p.isEdit?'U':''}${p.isDelete?'D':''}${p.isViewAll?'v':''}${p.isModifyAll?'m':''}`; 
+                            } else {
+                                return ''; 
+                            }}
+                        }});
+                    });
+                    this.objectPermissionsTableColumns = columns;
+                    this.objectPermissionsTableData = data.permissionsBy;
+                    break;
+                }
                 case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
@@ -266,7 +281,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.close();
 
         } catch (error) {
-            SPINNER_LOGGER_LASTFAILURE(this.#spinner, section, 'Error in recipe or dataset!');
+            SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error in recipe or dataset!', error);
         }
     }
 
@@ -626,19 +641,7 @@ export default class OrgCheckApp extends LightningElement {
     ];
 
     objectsOWDTableData;
-
-    objectPermissionsTableColumns = [
-        { label: 'Key',       type: 'text',    data: { value: 'key' }},
-        { label: 'Parent',    type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc'},
-        { label: 'IsProfile', type: 'boolean', data: { value: 'isParentProfile' }},
-        { label: 'Object',    type: 'text',    data: { value: 'objectType' }},
-        { label: 'R',         type: 'boolean', data: { value: 'isRead' }},
-        { label: 'C',         type: 'boolean', data: { value: 'isCreate' }},
-        { label: 'U',         type: 'boolean', data: { value: 'isEdit' }},
-        { label: 'D',         type: 'boolean', data: { value: 'isDelete' }},
-        { label: 'V',         type: 'boolean', data: { value: 'isViewAll' }},
-        { label: 'M',         type: 'boolean', data: { value: 'isModifyAll' }}
-    ];
+    objectPermissionsTableColumns;
 
     objectPermissionsTableData;
 
