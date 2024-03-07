@@ -16,6 +16,7 @@ export default class OrgCheckSpinner extends LightningElement {
         this.isClosable = false;
         this.sections = [];
         this.#keysIndex = {};
+        this.waitingTime = 0;
     }
     
     @api sectionStarts(sectionName, message='...') {
@@ -36,7 +37,7 @@ export default class OrgCheckSpinner extends LightningElement {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
             } else {
-                this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED);
+                this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED, error.stack);
                 this._setErrorDetail(error.stack);
             }
         } else {
@@ -51,17 +52,26 @@ export default class OrgCheckSpinner extends LightningElement {
             this.#openSince = new Date().getTime();
             this.isShown = true;
             this.isClosable = false;
+            this.waitingTime = 0;
+            const updateWaitingTime = () => { 
+                this.waitingTime = (new Date().getTime() - this.#openSince) / 1000; 
+            }
+            clearInterval(this.#intervalId);
+            this.#intervalId = setInterval(updateWaitingTime, 1000);
         }
     }
 
     @api canBeClosed() {
         this.isClosable = true;
+        clearInterval(this.#intervalId);
     }
 
     handleClose() {
         this.isShown = false;
         this.sections = [];
         this.#keysIndex = {};
+        this.#openSince = undefined;
+        clearInterval(this.#intervalId);
     }
 
     /**
@@ -75,7 +85,9 @@ export default class OrgCheckSpinner extends LightningElement {
         const realClose = () => {
             this.isShown = false;
             this.sections = [];
-            this.#keysIndex = {};    
+            this.#keysIndex = {};
+            this.#openSince = undefined;
+            clearInterval(this.#intervalId); 
         }
         if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
             // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -89,13 +101,15 @@ export default class OrgCheckSpinner extends LightningElement {
 
     isShown;
     isClosable;
+    waitingTime;
 
     #keysIndex;
     #openSince;
+    #intervalId;
 
     @track sections;
 
-    _setSection(sectionName, message, status) {
+    _setSection(sectionName, message, status, errorStack) {
         let item = { 
             id: sectionName,
             liClasses: 'slds-progress__item',
@@ -116,6 +130,7 @@ export default class OrgCheckSpinner extends LightningElement {
             case SECTION_STATUS_FAILED: 
                 item.liClasses += ' slds-has-error'; 
                 item.markerClasses += ' progress-marker-error';
+                item.stack = errorStack;
                 break;
         }
         if (Object.keys(this.#keysIndex).includes(item.id) === false) {

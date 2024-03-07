@@ -11,11 +11,6 @@ const SPINNER_LOGGER_END = (spinner, nbSuccesses, nbFailures) => {
     }
 }
 
-const SPINNER_LOGGER_LASTFAILURE = (spinner, section, error) => {
-    spinner.sectionFailed(section, error);
-    spinner.canBeClosed();
-}
-
 export default class OrgCheckApp extends LightningElement {
 
     /**
@@ -166,13 +161,13 @@ export default class OrgCheckApp extends LightningElement {
                 this.#filters.updatePackageOptions(filtersData.packages);
                 this.#filters.updateSObjectApiNameOptions(filtersData.objects);
             }).catch((error) => {
-                SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while getting information of the org from API', error);
+                console.error(error);
             }).finally(() => {
                 // Show Daily API Usage in the app
                 this._updateDailyAPIUsage();
             });
         }).catch((error) => {
-            SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error while loading API', error);
+            console.error(error);
         });
     }
 
@@ -289,7 +284,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.close();
 
         } catch (error) {
-            SPINNER_LOGGER_LASTFAILURE(this.#spinner, 'Error in recipe or dataset!', error);
+            console.error(error);
         }
     }
 
