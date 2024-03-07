@@ -622,6 +622,23 @@
                         export-basename="ApexInterfaceClasses"
                         export-sheet-name="Apex Interface Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
+                <lightning-tab value="apex-batches" label="Schedulables" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Schedulable to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexBatchesTableColumns}
+                        rows={apexBatchesTableData}
+                        show-export-button
+                        export-basename="ApexSchedulable"
+                        export-sheet-name="Apex Schedulable"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
                 <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no Apex Unit Test to show."

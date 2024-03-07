@@ -269,11 +269,12 @@ export default class OrgCheckApp extends LightningElement {
                 case 'lightning-aura-components':          this.auraComponentsTableData = await this.#api.getLightningAuraComponents(namespace); break;
                 case 'lightning-web-components':           this.lightningWebComponentsTableData = await this.#api.getLightningWebComponents(namespace); break;
                 case 'apex-classes':                       this.apexClassesTableData = (await this.#api.getApexClasses(namespace)).filter((r) => 
-                                                                r.isClass === true && r.isTest === false && r.isAbstract === false && r.needsRecompilation === false); break;
+                                                                r.isClass === true && r.isTest === false && r.isAbstract === false && r.needsRecompilation === false && r.isSchedulable === false); break;
                 case 'apex-abstract':                      this.apexAbstractTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isAbstract === true); break;
                 case 'apex-interfaces':                    this.apexInterfacesTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isInterface === true); break;
                 case 'apex-enums':                         this.apexEnumssTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isEnum === true); break;
                 case 'apex-unit-tests':                    this.apexTestsTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isTest === true); break;
+                case 'apex-batches':                       this.apexBatchesTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.isSchedulable === true); break;
                 case 'apex-recompilation-needed':          this.apexUncompiledTableData = (await this.#api.getApexClasses(namespace)).filter((r) => r.needsRecompilation === true); break;
                 case 'apex-triggers':                      this.apexTriggersTableData = await this.#api.getApexTriggers(namespace); break;
                 case 'welcome':                            this.cacheManagerData = await this.#api.getCacheInformation(); break;
@@ -634,6 +635,27 @@ export default class OrgCheckApp extends LightningElement {
     ];
     
     apexTestsTableData;
+
+    apexBatchesTableColumns = [
+        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Access',        type: 'text',             data: { value: 'specifiedAccess' }},
+        { label: 'Implements',    type: 'texts',            data: { ref: 'interfaces' }},
+        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Annotations',   type: 'texts',            data: { ref: 'annotations', value: 'name' }},
+        { label: 'Scheduled',     type: 'boolean',          data: { value: 'isScheduled' }},
+        { label: 'Sharing',       type: 'text',             data: { ref: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+        { label: 'Covering',      type: 'ids',              data: { ref: 'relatedClasses', value: 'name', url: 'url' }},
+        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+    ];
+
+    apexBatchesTableData;
 
     objectsOWDTableColumns = [
         { label: 'Label',     type: 'text',  data: { value: 'label' }, sorted: 'asc'},

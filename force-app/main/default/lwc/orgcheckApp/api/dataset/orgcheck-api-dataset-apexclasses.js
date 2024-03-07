@@ -55,6 +55,8 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         isClass: true,
                         isEnum: false,
                         isInterface: false,
+                        isSchedulable: false,
+                        isScheduled: false,
                         isSharingMissing: false,
                         length: record.LengthWithoutComments,
                         needsRecompilation: (!record.SymbolTable ? true : false),
@@ -79,6 +81,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     if (record.SymbolTable) {
                         apexClass.innerClassesCount = record.SymbolTable.innerClasses.length || 0;
                         apexClass.interfaces = record.SymbolTable.interfaces;
+                        apexClass.isSchedulable = record.SymbolTable.interfaces?.includes('System.Schedulable') ?? false;
                         apexClass.methodsCount = record.SymbolTable.methods.length || 0;
                         apexClass.extends = record.SymbolTable.parentClass;
                         if (record.SymbolTable.tableDeclaration) {
@@ -175,6 +178,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 if (sfdcManager.isVersionOld(apexClass.apiVersion)) apexClass.setBadField('apiVersion');
                 if (apexClass.isTest === true && apexClass.nbSystemAsserts === 0) apexClass.setBadField('nbSystemAsserts');
                 if (apexClass.isSharingMissing === true) apexClass.setBadField('specifiedSharing');
+                if (apexClass.isScheduled === false && apexClass.isSchedulable === true) apexClass.setBadField('isScheduled');
                 if (apexClass.needsRecompilation === true) apexClass.setBadField('name');
                 if (apexClass.coverage < 0.75) apexClass.setBadField('coverage');
                 if (apexClass.isItReferenced() === false) apexClass.setBadField('dependencies.referenced');
