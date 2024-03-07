@@ -6,6 +6,7 @@ import { OrgCheckRecipeCustomLabels } from '../recipe/orgcheck-api-recipe-custom
 import { OrgCheckRecipePackagesTypesAndObjects } from '../recipe/orgcheck-api-recipe-globalfilters';
 import { OrgCheckRecipeObject } from '../recipe/orgcheck-api-recipe-object';
 import { OrgCheckRecipeObjectPermissions } from '../recipe/orgcheck-api-recipe-objectpermissions';
+import { OrgCheckRecipeAppPermissions } from '../recipe/orgcheck-api-recipe-apppermissions';
 import { OrgCheckRecipeOrgInformation } from '../recipe/orgcheck-api-recipe-orginfo';
 import { OrgCheckRecipePermissionSets } from '../recipe/orgcheck-api-recipe-permissionsets';
 import { OrgCheckRecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
@@ -31,6 +32,7 @@ export const RECIPE_CUSTOMLABELS_ALIAS = 'custom-labels';
 export const RECIPE_GLOBALFILTERS_ALIAS = 'global-filters';
 export const RECIPE_OBJECT_ALIAS = 'object';
 export const RECIPE_OBJECTPERMISSIONS_ALIAS = 'object-permissions';
+export const RECIPE_APPPERMISSIONS_ALIAS = 'app-permissions';
 export const RECIPE_ORGINFO_ALIAS = 'org-information';
 export const RECIPE_PERMISSIONSETS_ALIAS = 'permission-sets';
 export const RECIPE_PROFILES_ALIAS = 'profiles';
@@ -81,6 +83,7 @@ export class OrgCheckRecipeManager {
         this.#recipes.set(RECIPE_GLOBALFILTERS_ALIAS, new OrgCheckRecipePackagesTypesAndObjects());
         this.#recipes.set(RECIPE_OBJECT_ALIAS, new OrgCheckRecipeObject());
         this.#recipes.set(RECIPE_OBJECTPERMISSIONS_ALIAS, new OrgCheckRecipeObjectPermissions());
+        this.#recipes.set(RECIPE_APPPERMISSIONS_ALIAS, new OrgCheckRecipeAppPermissions())
         this.#recipes.set(RECIPE_ORGINFO_ALIAS, new OrgCheckRecipeOrgInformation());
         this.#recipes.set(RECIPE_PERMISSIONSETS_ALIAS, new OrgCheckRecipePermissionSets());
         this.#recipes.set(RECIPE_PROFILES_ALIAS, new OrgCheckRecipeProfiles());

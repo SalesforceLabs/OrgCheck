@@ -19,6 +19,12 @@ th.sorted-desc {
     background-image: url(/img/arrowDown.gif);
 }
 
+th.vertical {
+    writing-mode: vertical-lr;
+    background-position-x: left;
+    transform: rotate(180deg);
+}
+
 tr.bad {
     background-color: #ffe099;
 }

@@ -1,8 +1,8 @@
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
-export class SFDC_ObjectPermissionsPerParent extends OrgCheckData {
+export class SFDC_AppPermissionsPerParent extends OrgCheckData {
     parentRef;
-    objectPermissions;
+    appPermissions;
 
     constructor(setup) {
         super();

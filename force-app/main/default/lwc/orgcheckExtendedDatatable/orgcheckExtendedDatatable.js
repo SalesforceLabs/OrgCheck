@@ -11,11 +11,14 @@ const NUMBER_FORMATTER = Intl.NumberFormat();
 const OBJECT_TO_STRING = (template, object) => {
     switch (typeof template) {
         case 'string':
-            return template.replace(/{([A-Za-z0-9]+)(:[a-z-]+)?}/g, function (match, property, type) {
-                const value = typeof object[property] === 'undefined' ? '' : object[property];
-                if (type) switch (type) {
-                    case ':numeric': return NUMBER_FORMATTER.format(value);
-                }
+            return template.replace(/{([A-Za-z0-9]+)(:(boolean|numeric)(:([^}]*))?)?}/g, function (_0, property, _1, type, _2, typeArg) {
+                const value = (object === undefined || typeof object[property] === 'undefined') ? '' : object[property];
+                if (type) {
+                    switch (type) {
+                        case 'numeric': return NUMBER_FORMATTER.format(value);
+                        case 'boolean': if (typeArg) { return typeArg.split(',', 2)[value === true ? 0 : 1]; } else return value;
+                    }
+                } 
                 return value;
             });
         case 'function':
@@ -75,7 +78,9 @@ const ROW_CSSCLASS = (row, showScore) => {
 }
 
 const HEADER_CSSCLASS = (column, isSticky) => {
-    return (column.sorted ? `sorted sorted-${column.sorted}` : '') + ' ' + (isSticky === true? 'sticky' : '');
+    return  (column.sorted ? `sorted sorted-${column.sorted} ` : ' ') +
+            (isSticky === true ? 'sticky ' : ' ') +
+            (column.orientation === 'vertical' ? 'vertical': '');
 }
 
 const STRING_MATCHER = (value, searchingValue) => {

@@ -8,6 +8,7 @@ import { OrgCheckRecipeManager,
     RECIPE_GLOBALFILTERS_ALIAS,
     RECIPE_OBJECT_ALIAS,
     RECIPE_OBJECTPERMISSIONS_ALIAS,
+    RECIPE_APPPERMISSIONS_ALIAS,
     RECIPE_ORGINFO_ALIAS,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
@@ -149,7 +150,17 @@ export class OrgCheckAPI {
      * @throws Exception if rate >= THRESHOLD
      */
     async getObjectPermissionsPerParent(namespace) {
-        return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace, 'GroupByParent');
+        return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace);
+    }
+
+     /**
+     * Get information about application permissions per parent (kind of matrix view)
+     * 
+     * @returns {Any} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
+     * @throws Exception if rate >= THRESHOLD
+     */
+    async getApplicationPermissionsPerParent(namespace) {
+        return this.#recipeManager.run(RECIPE_APPPERMISSIONS_ALIAS, namespace);
     }
 
     /**

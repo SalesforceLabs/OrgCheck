@@ -229,23 +229,31 @@ export default class OrgCheckApp extends LightningElement {
                     }
                     break;
                 }
-                case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
                 case 'object-permissions': {
                     const data = await this.#api.getObjectPermissionsPerParent(namespace);
-                    const columns = [{ label: 'Parent', type: 'object', data: { ref: 'parentRef' }, modifier: { template: '{name} (custom={isCustom})' }}];
-                    data.objects.forEach(o => {
-                        columns.push({ label: o, type: 'object', data: { ref: `objectPermissions.${o}` }, modifier: { 
-                            template: (p) => { if (p) {
-                                return `${p.isCreate?'C':''}${p.isRead?'R':''}${p.isEdit?'U':''}${p.isDelete?'D':''}${p.isViewAll?'v':''}${p.isModifyAll?'m':''}`; 
-                            } else {
-                                return ''; 
-                            }}
-                        }});
-                    });
+                    const columns = [
+                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
+                        { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
+                    ];
+                    data.objects.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'objectPermissions', value: o }, orientation: 'vertical' }));
                     this.objectPermissionsTableColumns = columns;
                     this.objectPermissionsTableData = data.permissionsBy;
                     break;
                 }
+                case 'app-permissions': {
+                    const data = await this.#api.getApplicationPermissionsPerParent(namespace);
+                    const columns = [
+                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
+                        { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
+                    ];
+                    data.apps.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'appPermissions', value: o }, orientation: 'vertical' }));
+                    this.appPermissionsTableColumns = columns;
+                    this.appPermissionsTableData = data.permissionsBy;
+                    break;
+                }
+                case 'objects-owd':                        this.objectsOWDTableData = (await this.#api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
                 case 'custom-fields':                      this.customFieldsTableData = await this.#api.getCustomFields(namespace, sobjectType, sobject); break;
                 case 'users':                              this.usersTableData = await this.#api.getActiveUsers(); break;
                 case 'profiles':                           this.profilesTableData = await this.#api.getProfiles(namespace); break;
@@ -641,9 +649,12 @@ export default class OrgCheckApp extends LightningElement {
     ];
 
     objectsOWDTableData;
-    objectPermissionsTableColumns;
 
+    objectPermissionsTableColumns;
     objectPermissionsTableData;
+
+    appPermissionsTableColumns;
+    appPermissionsTableData;
 
     rolesTableColumns = [
         { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},

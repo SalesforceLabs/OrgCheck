@@ -248,6 +248,9 @@
                         export-sheet-name="Profile Password Policies"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="object-permissions" label="Object Permissions" onactive={handleSubTabActivation}>
+                    <div style="text-align: right;">
+                        <b>Legend:</b> C means <i>Create</i>, R means <i>Read</i>, U means <i>Update/Modify</i>, D means <i>Delete</i>, v means <i>View All</i> and m means <i>Modify All</i>.
+                    </div>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no object permission to show."
                         show-search
@@ -262,6 +265,25 @@
                         show-export-button
                         export-basename="ObjectPermissions"
                         export-sheet-name="Object Permissions"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="app-permissions" label="Application Permissions" onactive={handleSubTabActivation}>
+                    <div style="text-align: right;">
+                        <b>Legend:</b> A means <i>Accessible</i> and V means <i>Visible</i>.
+                    </div>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no application permission to show."
+                        show-search
+                        show-statistics
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={appPermissionsTableColumns}
+                        rows={appPermissionsTableData}
+                        show-export-button
+                        export-basename="AppPermissions"
+                        export-sheet-name="Application Permissions"></c-orgcheck-extended-datatable>
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>

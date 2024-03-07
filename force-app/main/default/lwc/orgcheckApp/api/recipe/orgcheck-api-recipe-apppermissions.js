@@ -1,10 +1,10 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_OBJECTPERMISSIONS_ALIAS,
+import { DATASET_APPPERMISSIONS_ALIAS,
     DATASET_PROFILES_ALIAS,
     DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
-import { SFDC_ObjectPermissionsPerParent } from '../data/orgcheck-api-data-objectpermissionsperparent';
+import { SFDC_AppPermissionsPerParent } from '../data/orgcheck-api-data-apppermissionsperparent';
 
-export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
+export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
 
     /** 
      * Return the list of dataset you need 
@@ -13,7 +13,7 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
      */
     extract() {
         return [
-            DATASET_OBJECTPERMISSIONS_ALIAS,
+            DATASET_APPPERMISSIONS_ALIAS,
             DATASET_PROFILES_ALIAS,
             DATASET_PERMISSIONSETS_ALIAS
         ];
@@ -25,11 +25,11 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
      * @param {Map} data extracted
      * @param {string} namespace you want to list (optional), '*' for any
      * 
-     * @returns {Any} with objects property as Array<string> and permissions property as Array<SFDC_ObjectPermissionsPerParent>}
+     * @returns {Any} with objects property as Array<string> and permissions property as Array<SFDC_AppPermissionsPerParent>}
      */
     transform(data, namespace) {
         // Get data
-        const permissions = data.get(DATASET_OBJECTPERMISSIONS_ALIAS);
+        const permissions = data.get(DATASET_APPPERMISSIONS_ALIAS);
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
 
@@ -48,23 +48,19 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
         permissions.forEach((permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
                 if (permissionsBy.has(permission.parentId) === false) {
-                    permissionsBy.set(permission.parentId, new SFDC_ObjectPermissionsPerParent({
+                    permissionsBy.set(permission.parentId, new SFDC_AppPermissionsPerParent({
                         parentRef: permission.parentRef,
-                        objectPermissions: {}
+                        appPermissions: {}
                     }));
                 }
-                permissionsBy.get(permission.parentId).objectPermissions[permission.objectType] = 
-                    (permission.isCreate?'C':'') +
-                    (permission.isRead?'R':'') +
-                    (permission.isEdit?'U':'') + 
-                    (permission.isDelete?'D':'') + 
-                    (permission.isViewAll?'v':'') + 
-                    (permission.isModifyAll?'m':'');
-                properties.add(permission.objectType);
+                permissionsBy.get(permission.parentId).appPermissions[permission.appName] =
+                    (permission.isAccessible?'A':'') +
+                    (permission.isVisible?'V':'');
+                properties.add(permission.appName);
             }
         });
 
         // Return data
-        return { objects: Array.from(properties), permissionsBy: Array.from(permissionsBy.values())};
+        return { apps: Array.from(properties), permissionsBy: Array.from(permissionsBy.values())};
     }
 }

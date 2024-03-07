@@ -4,6 +4,7 @@ import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-cus
 import { OrgCheckDatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
 import { OrgCheckDatasetObject } from '../dataset/orgcheck-api-dataset-object';
 import { OrgCheckDatasetObjectPermissions } from '../dataset/orgcheck-api-dataset-objectpermissions';
+import { OrgCheckDatasetAppPermissions } from '../dataset/orgcheck-api-dataset-apppermissions';
 import { OrgCheckDatasetObjects } from '../dataset/orgcheck-api-dataset-objects';
 import { OrgCheckDatasetObjectTypes } from '../dataset/orgcheck-api-dataset-objecttypes';
 import { OrgCheckDatasetOrgInformation } from '../dataset/orgcheck-api-dataset-orginfo';
@@ -42,6 +43,7 @@ export const DATASET_CUSTOMFIELDS_ALIAS = 'custom-fields';
 export const DATASET_CUSTOMLABELS_ALIAS = 'custom-labels';
 export const DATASET_OBJECT_ALIAS = 'object';
 export const DATASET_OBJECTPERMISSIONS_ALIAS = 'object-permissions';
+export const DATASET_APPPERMISSIONS_ALIAS = 'app-permisions';
 export const DATASET_OBJECTS_ALIAS = 'objects';
 export const DATASET_OBJECTTYPES_ALIAS = 'object-types';
 export const DATASET_ORGINFO_ALIAS = 'org-information';
@@ -94,6 +96,7 @@ export class OrgCheckDatasetManager {
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
         this.#datasets.set(DATASET_OBJECT_ALIAS, new OrgCheckDatasetObject());
         this.#datasets.set(DATASET_OBJECTPERMISSIONS_ALIAS, new OrgCheckDatasetObjectPermissions());
+        this.#datasets.set(DATASET_APPPERMISSIONS_ALIAS, new OrgCheckDatasetAppPermissions());
         this.#datasets.set(DATASET_OBJECTS_ALIAS, new OrgCheckDatasetObjects());
         this.#datasets.set(DATASET_OBJECTTYPES_ALIAS, new OrgCheckDatasetObjectTypes());
         this.#datasets.set(DATASET_ORGINFO_ALIAS, new OrgCheckDatasetOrgInformation());
