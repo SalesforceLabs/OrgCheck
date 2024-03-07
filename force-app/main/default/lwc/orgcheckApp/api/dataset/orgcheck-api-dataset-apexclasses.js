@@ -180,7 +180,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 if (apexClass.isSharingMissing === true) apexClass.setBadField('specifiedSharing');
                 if (apexClass.isScheduled === false && apexClass.isSchedulable === true) apexClass.setBadField('isScheduled');
                 if (apexClass.needsRecompilation === true) apexClass.setBadField('name');
-                if (apexClass.coverage < 0.75) apexClass.setBadField('coverage');
+                if (isNaN(apexClass.coverage) || !apexClass.coverage || apexClass.coverage < 0.75) apexClass.setBadField('coverage');
                 if (apexClass.isItReferenced() === false) apexClass.setBadField('dependencies.referenced');
             });
 
