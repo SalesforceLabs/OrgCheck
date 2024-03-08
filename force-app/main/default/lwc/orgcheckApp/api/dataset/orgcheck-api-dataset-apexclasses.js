@@ -59,6 +59,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         isScheduled: false,
                         isSharingMissing: false,
                         length: record.LengthWithoutComments,
+                        sourceCode: record.Body,
                         needsRecompilation: (!record.SymbolTable ? true : false),
                         coverage: 0, // by default no coverage!
                         relatedTestClasses: [],

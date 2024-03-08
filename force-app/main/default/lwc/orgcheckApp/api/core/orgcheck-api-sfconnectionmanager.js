@@ -465,7 +465,7 @@ export class OrgCheckSalesforceManager {
                     compositeRequestBodies.push(currentCompositeRequestBody);
                 }
                 currentCompositeRequestBody.compositeRequest.push({ 
-                    url: '/services/data/v'+this.#connection.version+'/tooling/sobjects/' + type + '/' + id, 
+                    url: `/services/data/v${this.#connection.version}/tooling/sobjects/${type}/${id}`, 
                     method: 'GET',
                     referenceId: id
                 });
@@ -474,7 +474,7 @@ export class OrgCheckSalesforceManager {
             compositeRequestBodies.forEach((requestBody) => {
                 promises.push(new Promise((r, e) => {
                     this.#connection.request({
-                            url: '/services/data/v'+this.#connection.version+'/tooling/composite', 
+                            url: `/services/data/v${this.#connection.version}/tooling/composite`, 
                             method: 'POST',
                             body: JSON.stringify(requestBody),
                             headers: { 'Content-Type': 'application/json' }
@@ -565,7 +565,7 @@ export class OrgCheckSalesforceManager {
         this._watchDog__beforeRequest();
         return new Promise((resolve, reject) => {
             this.#connection.request({ 
-                url: '/services/data/v'+this.#connection.version+'/limits/recordCount?sObjects='+sobjectDevName,
+                url: `/services/data/v${this.#connection.version}/limits/recordCount?sObjects=${sobjectDevName}`,
                 method: 'GET'
             }, (e, r) => {
                 this._watchDog__afterRequest(reject);
@@ -577,7 +577,7 @@ export class OrgCheckSalesforceManager {
     async runAllTests() {
         return new Promise((resolve, reject) => {
             this.#connection.request({ 
-                url: '/services/data/v'+this.#connection.version+'/tooling/runTestsAsynchronous',
+                url: `/services/data/v${this.#connection.version}/tooling/runTestsAsynchronous`,
                 method: 'POST',
                 body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
                 headers: { 'Content-Type': 'application/json' }
@@ -586,5 +586,51 @@ export class OrgCheckSalesforceManager {
                 if (e) reject(e); else resolve(r);
             });
         });
+    }
+
+    async compileClasses(classes) {
+        const timestamp = Date.now();
+        const compositeRequestBodies = [];
+        let currentCompositeRequestBody;
+        let countBatches = 0;
+        const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
+        classes.forEach((c) => {
+            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+                countBatches++;
+                currentCompositeRequestBody = {
+                    allOrNone: false,
+                    compositeRequest: [
+                        {
+                            method: 'POST',
+                            url: `/services/data/v${this.#connection.version}/tooling/sobjects/MetadataContainer`,
+                            referenceId: 'container',
+                            body: { Name : `container-${timestamp}-${countBatches}` }
+                        },
+                        {
+                            method: 'POST',
+                            url: `/services/data/v${this.#connection.version}/tooling/sobjects/ContainerAsyncRequest`,
+                            referenceId: 'request',
+                            body: { MetadataContainerId: '@{container.id}', IsCheckOnly: true }
+                        }
+                    ]
+                };
+                compositeRequestBodies.push(currentCompositeRequestBody);
+            }
+            currentCompositeRequestBody.compositeRequest.push({ 
+                method: 'POST',
+                url: `/services/data/v${this.#connection.version}/tooling/sobjects/ApexClassMember`, 
+                referenceId: c.id,
+                body: { MetadataContainerId: '@{container.id}', ContentEntityId: c.id, Body: c.sourceCode }
+            });
+        });
+        const promises = compositeRequestBodies.map(request => {
+            return this.#connection.request({
+                url: `/services/data/v${this.#connection.version}/tooling/composite`,
+                method: 'POST',
+                body: JSON.stringify(request), 
+                headers: { 'Content-Type': 'application/json' }
+            });    
+        });
+        return Promise.all(promises);
     }
 }

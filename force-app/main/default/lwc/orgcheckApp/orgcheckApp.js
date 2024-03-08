@@ -130,6 +130,10 @@ export default class OrgCheckApp extends LightningElement {
         this.handleRemoveCache({ detail: { itemName: 'apex-classes' }});
     }
 
+    async handleClickRecompile() {
+        await this.#api.compileClasses(this.apexUncompiledTableData);
+    }
+
     /**
      * Internal method to load the Org Check API and its dependencies
      */ 

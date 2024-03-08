@@ -25,6 +25,7 @@ export class SFDC_ApexClass extends OrgCheckData {
     specifiedSharing;
     specifiedAccess;
     length;
+    sourceCode;
     needsRecompilation;
     coverage;
     relatedTestClasses;

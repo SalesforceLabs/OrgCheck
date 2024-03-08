@@ -122,6 +122,10 @@ export class OrgCheckAPI {
     async runAllTestsAsync() {
         return this.#sfdcManager.runAllTests();
     }
+
+    async compileClasses(classes) {
+        return this.#sfdcManager.compileClasses(classes);
+    }
     
     /**
      * Get information about the organization
