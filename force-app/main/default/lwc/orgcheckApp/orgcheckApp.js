@@ -3,14 +3,6 @@ import { OrgCheckAPI } from './api/orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { LightningElement, api } from 'lwc';
 
-const SPINNER_LOGGER_END = (spinner, nbSuccesses, nbFailures) => { 
-    if (nbFailures === 0) {
-        spinner.close(); 
-    } else {
-        spinner.canBeClosed();
-    }
-}
-
 export default class OrgCheckApp extends LightningElement {
 
     /**
@@ -52,12 +44,14 @@ export default class OrgCheckApp extends LightningElement {
 
     #hasRenderOnce = false;
     #spinner;
+    #modal;
     #filters;
 
     renderedCallback() {
         if (this.#hasRenderOnce === false && this.accessToken) {
             this.#hasRenderOnce = true;
             this.#spinner = this.template.querySelector('c-orgcheck-spinner');
+            this.#modal = this.template.querySelector('c-orgcheck-modal');
             this.#filters = this.template.querySelector('c-orgcheck-global-filters');
             this._loadAPI();
         }
@@ -152,7 +146,7 @@ export default class OrgCheckApp extends LightningElement {
                     sectionContinues: (s, m) => { this.#spinner.sectionContinues(s, m); },
                     sectionEnded: (s, m) => { this.#spinner.sectionEnded(s, m); },
                     sectionFailed: (s, e) => { this.#spinner.sectionFailed(s, e); },
-                    end: (s, f) => { SPINNER_LOGGER_END(this.#spinner, s, f); }
+                    end: (s, f) => { if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
                 }
             );
             this.accessToken = ''; // reset the accessToken so we do not store it anymore
@@ -709,22 +703,25 @@ export default class OrgCheckApp extends LightningElement {
 
     roleBoxOnClickDecorator = (depth, data) => {
         if (depth === 0) return;
-        console.error(`Role Name: ${data.record.name}`);
-        console.error(`Salesforce Id: ${data.record.id}`);
-        console.error(`Developer Name: ${data.record.apiname}`);
-        console.error(`Level in hierarchy: ${depth}`);
-        console.error(`This role has ${data.record.activeMembersCount} active user(s)`);
-        if (data.record.activeMemberRefs) {
-            data.record.activeMemberRefs.forEach(activeMember => console.error(` - ${activeMember.name}`));
-        }
-        console.error(`This role has ${data.record.inactiveMembersCount} inactive user(s)`);
+        let htmlContent = `Role Name: <b>${data.record.name}</b><br />`;
+        htmlContent += `Salesforce Id: <b>${data.record.id}</b><br />`;
+        htmlContent += `Developer Name: <b>${data.record.apiname}</b><br />`;
+        htmlContent += '<br />';
+        htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
+        htmlContent += '<br />';
+        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br />`;
+        data.record.activeMemberRefs?.forEach(activeMember => htmlContent += ` - ${activeMember.name}<br />`);
+        htmlContent += '<br />';
+        htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
+        htmlContent += '<br />';
         if (data.record.parentRef) {
-            console.error(`Parent Role Name: ${data.record.parentRef.name}`);
-            console.error(`Parent Salesforce Id: ${data.record.parentRef.id}`);
-            console.error(`Parent Developer Name: ${data.record.parentRef.apiname}`);
+            htmlContent += `Parent Role Name: <b>${data.record.parentRef.name}</b><br />`;
+            htmlContent += `Parent Salesforce Id: <b>${data.record.parentRef.id}</b><br />`;
+            htmlContent += `Parent Developer Name: <b>${data.record.parentRef.apiname}</b><br />`;
         } else {
-            console.error(`No parent.`);
+            htmlContent += 'No parent';
         }
+        this.#modal.open(`Details for role ${data.record.name}`, htmlContent);
     }
 
     rolesTree;

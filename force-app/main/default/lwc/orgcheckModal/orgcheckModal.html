@@ -1,0 +1,16 @@
+<template>
+    <template lwc:if={isShown}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{title}</h1>
+                </div>
+                <div class="slds-modal__content">
+                    <lightning-formatted-rich-text value={content}></lightning-formatted-rich-text>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>
