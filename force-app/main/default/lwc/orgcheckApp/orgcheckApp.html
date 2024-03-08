@@ -519,6 +519,14 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🔥 Apex" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Run All Tests" title="Run All Tests" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:apex" onclick={handleClickRunAllTests}></lightning-button>
+                </lightning-layout-item>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshApex}></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="apex-classes" label="Classes" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable

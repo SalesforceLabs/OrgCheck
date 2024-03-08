@@ -111,6 +111,17 @@ export class OrgCheckAPI {
     getDailyApiRequestLimitInformation() {
         return this.#sfdcManager.getDailyApiRequestLimitInformation();
     }
+
+    /**
+     * Send a request to run all tests in the org.
+     * When this method is finished, it does not mean all tests are run.
+     * 
+     * @returns The Salesforce Id of the AsyncApexJob
+     * @throws Exception if rate >= THRESHOLD
+     */
+    async runAllTestsAsync() {
+        return this.#sfdcManager.runAllTests();
+    }
     
     /**
      * Get information about the organization

@@ -573,4 +573,18 @@ export class OrgCheckSalesforceManager {
             });
         });
     }
+
+    async runAllTests() {
+        return new Promise((resolve, reject) => {
+            this.#connection.request({ 
+                url: '/services/data/v'+this.#connection.version+'/tooling/runTestsAsynchronous',
+                method: 'POST',
+                body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
+                headers: { 'Content-Type': 'application/json' }
+            }, (e, r) => {
+                this._watchDog__afterRequest(reject);
+                if (e) reject(e); else resolve(r);
+            });
+        });
+    }
 }

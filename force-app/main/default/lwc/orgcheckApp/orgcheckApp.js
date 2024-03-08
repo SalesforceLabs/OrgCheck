@@ -121,6 +121,15 @@ export default class OrgCheckApp extends LightningElement {
         this._updateCurrentTab();
     }
 
+    async handleClickRunAllTests() {
+        await this.#api.runAllTestsAsync();
+        window.open('/lightning/setup/ApexTestQueue/home', '_blank').focus();
+    }
+
+    async handleClickRefreshApex() {
+        this.handleRemoveCache({ detail: { itemName: 'apex-classes' }});
+    }
+
     /**
      * Internal method to load the Org Check API and its dependencies
      */ 
