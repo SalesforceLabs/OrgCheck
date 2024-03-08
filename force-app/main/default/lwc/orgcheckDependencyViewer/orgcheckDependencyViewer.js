@@ -26,14 +26,17 @@ export default class OrgcheckDependencyViewer extends LightningElement {
             case 3: return '#5fc9f8'; break;
         }
     };
-    dependencyBoxInnerHtmlDecorator = (depth, nbChildren, data) => {
+    dependencyBoxInnerHtmlDecorator = (depth, data) => {
         switch (depth) {
             case 0: return `<center><b>${ESCAPE_DATA(data.label)}</b></center>`;
             case 3: {
                 if (data.url) return `<a href="${data.url}" target="_blank"><b>${ESCAPE_DATA(data.label)}</b></a>`;
                 return `<b>${ESCAPE_DATA(data.label)}</b>`;
             }
-            default: return `<center>${ESCAPE_DATA(data.label)}<br /><code><small>${nbChildren} ${nbChildren > 1 ? "items": "item"}</small></code></center>`;
+            default: {
+                const nbChildren = data.children?.length ?? 0;
+                return `<center>${ESCAPE_DATA(data.label)}<br /><code><small>${nbChildren} ${nbChildren > 1 ? "items": "item"}</small></code></center>`;
+            }
         }
     };
     dependencyColumns = [

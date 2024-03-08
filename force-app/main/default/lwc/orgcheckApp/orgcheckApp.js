@@ -696,15 +696,35 @@ export default class OrgCheckApp extends LightningElement {
 
     rolesTableData;
 
-    roleBoxColorsDecorator = (depth, nbChildren, data) => {
+    roleBoxColorsDecorator = (depth, data) => {
         if (depth === 0) return '#2f89a8';
         if (data.record.hasActiveMembers === false) return '#fdc223';
         return '#5fc9f8';
     };
 
-    roleBoxInnerHtmlDecorator = (depth, nbChildren, data) => {
+    roleBoxInnerHtmlDecorator = (depth, data) => {
         if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
         return `<center><b>${data.record.name}</b><br />${data.record.apiname}</center>`;
+    }
+
+    roleBoxOnClickDecorator = (depth, data) => {
+        if (depth === 0) return;
+        console.error(`Role Name: ${data.record.name}`);
+        console.error(`Salesforce Id: ${data.record.id}`);
+        console.error(`Developer Name: ${data.record.apiname}`);
+        console.error(`Level in hierarchy: ${depth}`);
+        console.error(`This role has ${data.record.activeMembersCount} active user(s)`);
+        if (data.record.activeMemberRefs) {
+            data.record.activeMemberRefs.forEach(activeMember => console.error(` - ${activeMember.name}`));
+        }
+        console.error(`This role has ${data.record.inactiveMembersCount} inactive user(s)`);
+        if (data.record.parentRef) {
+            console.error(`Parent Role Name: ${data.record.parentRef.name}`);
+            console.error(`Parent Salesforce Id: ${data.record.parentRef.id}`);
+            console.error(`Parent Developer Name: ${data.record.parentRef.apiname}`);
+        } else {
+            console.error(`No parent.`);
+        }
     }
 
     rolesTree;

@@ -52,11 +52,13 @@ export default class OrgcheckGraphics extends LightningElement {
   @api boxTextPadding = 3;
   @api boxVerticalPadding = 5;
   @api boxHorizontalPadding = 50;
-  @api boxColorDecorator = (...args) => { console.debug(args); return 'red'; };
-  @api boxInnerHtmlDecorator = (...args) => { console.debug(args); return 'Todo!'; };
+  @api boxColorDecorator = (depth, data) => { console.debug(depth, data); return 'red'; };
+  @api boxInnerHtmlDecorator = (depth, data) => { console.debug(depth, data); return ''; };
+  @api boxOnClickDecorator = (depth, data) => { console.debug(depth, data); };
   @api edgeColor = '#2f89a8';
   @api fontFamily = 'Salesforce Sans,Arial,sans-serif';
   @api fontSize = 10;
+  @api showLevel = false;
 
   /**
    * Draw the dependency graph
@@ -110,17 +112,19 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('font-size', this.fontSize)
       .attr('transform', `translate(${root.dy / 2 - this.boxWidth},${root.dx - x0})`);
 
-    // Generate NODES
+    // Generate NODES with global click handler
     const nodes = graph.append('g')
       .attr('stroke-linejoin', 'round')
       .attr('stroke-width', 3)
       .selectAll('g')
       .data(root.descendants())
       .join('g')
-      .attr('transform', function(d) { return `translate(${d.y},${d.x})`; });
+      .attr('transform', (d) => `translate(${d.y},${d.x})`)
+      .on('click', (event) => { const d = event.currentTarget.__data__; this.boxOnClickDecorator(d.depth, d.data); });
 
+    // Add a colored square for each node
     nodes.append('rect')
-      .attr('fill', (d) => { return this.boxColorDecorator(d.depth, d.children?.length || 0, d.data); })
+      .attr('fill', (d) => this.boxColorDecorator(d.depth, d.data))
       .attr('rx', 6)
       .attr('ry', 6)
       .attr('x', 0)
@@ -128,14 +132,15 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('width', this.boxWidth)
       .attr('height', this.boxHeight);
 
+    // Add the content (in HTML) for each node
     nodes.append('foreignObject')
       .attr('class', 'slds-scrollable')
       .attr('x', this.boxTextPadding)
       .attr('y', - this.boxHeight / 2 + this.boxTextPadding)
       .attr('width', (d) => this.boxWidth - 2 * this.boxTextPadding)
       .attr('height', this.boxHeight - 2 * this.boxTextPadding)
-      .append('xhtml').html((d) => { return this.boxInnerHtmlDecorator(d.depth, d.children?.length || 0, d.data); });
-      
+      .append('xhtml').html((d) => this.boxInnerHtmlDecorator(d.depth, d.data));
+
     // Generate EDGES
     graph.append('g')
       .attr('fill', 'none')
@@ -145,11 +150,20 @@ export default class OrgcheckGraphics extends LightningElement {
       .selectAll('path')
       .data(root.links())
       .join('path')
-      .attr('d', (d) => { 
-        return `M${d.source.y + this.boxWidth},${d.source.x}` +
-                `C${d.source.y + 1.25*this.boxWidth},${d.source.x}` +
-                ` ${d.source.y + 1.0*this.boxWidth},${d.target.x}` +
-                ` ${d.target.y},${d.target.x}`
-      });
+      .attr('d', (d) => `M${d.source.y + this.boxWidth},${d.source.x}` +
+                        `C${d.source.y + 1.25*this.boxWidth},${d.source.x}` +
+                        ` ${d.source.y + 1.0*this.boxWidth},${d.target.x}` +
+                        ` ${d.target.y},${d.target.x}`);
+
+    if (this.showLevel === true) {
+      // Add the level of each node
+      nodes.filter((d) => d.depth > 0)
+        .append('foreignObject')
+        .attr('x', -this.boxHorizontalPadding)
+        .attr('y', -15)
+        .attr('width', this.boxHorizontalPadding - this.boxTextPadding)
+        .attr('height', 15)
+        .append('xhtml').html((d) => `<div style="text-align: right;">Level #${d.depth}</div>`);
+    } 
   }
 }
