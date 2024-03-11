@@ -125,7 +125,25 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     async handleClickRecompile() {
-        await this.#api.compileClasses(this.apexUncompiledTableData);
+        this.#spinner.open();
+        const classes = new Map();
+        this.#spinner.sectionStarts('request-to-recompile', 'Processing...');
+        this.apexUncompiledTableData.forEach(c => {
+            this.#spinner.sectionStarts(`request-to-recompile-${c.id}`, `Asking to recompile class: ${c.name}`);
+            classes.set(c.id, c);
+        });
+        const responses = await this.#api.compileClasses(this.apexUncompiledTableData);
+        this.#spinner.sectionContinues('request-to-recompile', 'Done');
+        responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
+            const c = classes.get(cr.referenceId);
+            if (cr.body.success === true) {
+                this.#spinner.sectionEnded(`request-to-recompile-${c.id}`, `Recompilation requested for class: ${c.name}`);
+            } else {
+                this.#spinner.sectionFailed(`request-to-recompile-${c.id}`, `Errors for class ${c.name}: ${cr.errors.map(e => JSON.stringify(e)).join(', ')}`);
+            }
+        }));
+        this.#spinner.sectionEnded('request-to-recompile', 'In case you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
+        this.#spinner.canBeClosed();
     }
 
     /**
