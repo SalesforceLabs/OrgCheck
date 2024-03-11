@@ -116,8 +116,12 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     async handleClickRunAllTests() {
-        await this.#api.runAllTestsAsync();
-        window.open('/lightning/setup/ApexTestQueue/home', '_blank').focus();
+        const asyncApexJobId = await this.#api.runAllTestsAsync();
+        let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
+        htmlContent += 'For more information about the success of these tests, you can:<br />';
+        htmlContent += ' - Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.<br />';
+        htmlContent += ` - Check with Tooling API the status of the following record: /services/data/v52.0/tooling/sobjects/AsyncApexJob/${asyncApexJobId}<br /><br />`;
+        this.#modal.open('Asynchronous Run All Test Asked', htmlContent);
     }
 
     async handleClickRefreshApex() {
