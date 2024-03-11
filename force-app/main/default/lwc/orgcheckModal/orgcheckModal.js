@@ -10,10 +10,11 @@ export default class OrgCheckModal extends LightningElement {
         this.isClosable = false;
     }
     
-    @api open(title, content) {
+    @api open(title, content, isClosable=true) {
         if (this.isShown === false) {
             this.isShown = true;
             this.title = title;
+            this.isClosable = isClosable;
             if (content) {
                 if (content instanceof Error) {
                     this.message = content.message;

@@ -13,6 +13,7 @@ export default class OrgCheckApp extends LightningElement {
     orgCheckVersion;
     orgName;
     orgType;
+    isOrgProduction;
     themeForOrgType;
     orgLimit;
     themeForOrgLimit;
@@ -183,9 +184,11 @@ export default class OrgCheckApp extends LightningElement {
                         const orgInfo = data[0];
                         this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
                         this.orgType = orgInfo.type;
+                        this.isOrgProduction = orgInfo.isProduction;
                         if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
                         else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
                         else this.themeForOrgType = 'slds-theme_success';
+                        this.#filters.updateIsCurrentOrgAProduction(this.isOrgProduction === true);
                         // Data for the filters
                         const filtersData = data[1];
                         this.#filters.updateSObjectTypeOptions(filtersData.types);
@@ -193,7 +196,7 @@ export default class OrgCheckApp extends LightningElement {
                         this.#filters.updateSObjectApiNameOptions(filtersData.objects);
                     }).catch((error) => {
                         // Issue with basic information gathering
-                        this.#modal.open('Basic Information Gathering Issue', error);
+                        this.#modal.open('Basic Information Gathering Issue', error, false);
                     }).finally(() => {
                         // Show Daily API Usage in the app
                         this._updateDailyAPIUsage();
@@ -201,7 +204,7 @@ export default class OrgCheckApp extends LightningElement {
                 })
                 .catch(error => {
                     // Issue with user permissions
-                    this.#modal.open('User Permissions Issue', error.message);
+                    this.#modal.open('User Permissions Issue', error.message, false);
                 })
             ;
         }).catch((error) => {
@@ -222,7 +225,7 @@ export default class OrgCheckApp extends LightningElement {
      * If the given input value is specified, this must be different from the current tab property, otherwise this method does nothing.
      * If the given input value is undefined, the method will use the current tab.
      * This can be because end user selected another tab
-     * This can be also becasue a filter was validated and needs to be propagated into the current tab
+     * This can be also because a filter was validated and needs to be propagated into the current tab
      * This can be also if the current tab is finally loaded
      * Usage: as this method is async, you should await when calling it!
      * 
@@ -243,7 +246,19 @@ export default class OrgCheckApp extends LightningElement {
         const namespace = this.#filters.isSelectedPackageAny === true ? '*' : (this.#filters.isSelectedPackageNo === true ? '' : this.#filters.selectedPackage);
         const sobjectType = this.#filters.isSelectedSObjectTypeAny === true ? '*' : this.#filters.selectedSObjectType;
         const sobject = this.#filters.isSelectedSObjectApiNameAny === true ? '*' : this.#filters.selectedSObjectApiName;
+        const shouldWeStop = this.isOrgProduction === true && this.#filters.isUseInProductionConfirmed === false;
 
+        if (shouldWeStop === true) {
+            this.#modal.open(
+                'Wait a minute!', 
+                'You are using the application in <b>Production</b>.<br /><br />'+
+                'Please accept to terms of conditions for direct usage in production by changing the filter "<code>Do you confirm running Org Check in production?</code>" to <code>YES</code>.<br /><br />'+
+                'Thank you and have a nice day!',
+                true
+            );
+            return;
+        }
+    
         // Call the API depending on the current tab
         // If not supported we stop there
         // Finally send the data to the content component.
