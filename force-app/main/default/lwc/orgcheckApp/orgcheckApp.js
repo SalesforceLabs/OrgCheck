@@ -173,28 +173,37 @@ export default class OrgCheckApp extends LightningElement {
             );
             this.accessToken = ''; // reset the accessToken so we do not store it anymore
             this.orgCheckVersion = this.#api.getVersion();
-            Promise.all([
-                this.#api.getOrganizationInformation(),
-                this.#api.getPackagesTypesAndObjects('*', '*')
-            ]).then((data) => {
-                // Information about the org
-                const orgInfo = data[0];
-                this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-                this.orgType = orgInfo.type;
-                if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-                else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-                else this.themeForOrgType = 'slds-theme_success';
-                // Data for the filters
-                const filtersData = data[1];
-                this.#filters.updateSObjectTypeOptions(filtersData.types);
-                this.#filters.updatePackageOptions(filtersData.packages);
-                this.#filters.updateSObjectApiNameOptions(filtersData.objects);
-            }).catch((error) => {
-                console.error(error);
-            }).finally(() => {
-                // Show Daily API Usage in the app
-                this._updateDailyAPIUsage();
-            });
+            this.#api.checkCurrentUserPermissions()
+                .then(() => {
+                    Promise.all([
+                        this.#api.getOrganizationInformation(),
+                        this.#api.getPackagesTypesAndObjects('*', '*')
+                    ]).then((data) => {
+                        // Information about the org
+                        const orgInfo = data[0];
+                        this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+                        this.orgType = orgInfo.type;
+                        if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+                        else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+                        else this.themeForOrgType = 'slds-theme_success';
+                        // Data for the filters
+                        const filtersData = data[1];
+                        this.#filters.updateSObjectTypeOptions(filtersData.types);
+                        this.#filters.updatePackageOptions(filtersData.packages);
+                        this.#filters.updateSObjectApiNameOptions(filtersData.objects);
+                    }).catch((error) => {
+                        // Issue with basic information gathering
+                        this.#modal.open('Basic Information Gathering Issue', error);
+                    }).finally(() => {
+                        // Show Daily API Usage in the app
+                        this._updateDailyAPIUsage();
+                    })
+                })
+                .catch(error => {
+                    // Issue with user permissions
+                    this.#modal.open('User Permissions Issue', error.message);
+                })
+            ;
         }).catch((error) => {
             console.error(error);
         });

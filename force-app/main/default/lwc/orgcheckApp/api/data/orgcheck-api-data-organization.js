@@ -1,6 +1,6 @@
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
-export class SFDC_OrgInformation extends OrgCheckData {
+export class SFDC_Organization extends OrgCheckData {
     id;
     name;
     type;

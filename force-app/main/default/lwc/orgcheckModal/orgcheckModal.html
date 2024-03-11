@@ -2,12 +2,17 @@
     <template lwc:if={isShown}>
         <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
             <div class="slds-modal__container">
-                <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+                <template lwc:if={isClosable}>
+                    <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+                </template>
                 <div class="slds-modal__header">
                     <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">{title}</h1>
                 </div>
                 <div class="slds-modal__content">
-                    <lightning-formatted-rich-text value={content}></lightning-formatted-rich-text>
+                    <lightning-formatted-rich-text value={message}></lightning-formatted-rich-text>
+                    <template lwc:if={stack}>
+                        <pre>{stack}</pre>
+                    </template>
                 </div>
             </div>
         </section>

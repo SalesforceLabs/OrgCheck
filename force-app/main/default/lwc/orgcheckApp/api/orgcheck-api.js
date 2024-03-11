@@ -9,7 +9,8 @@ import { OrgCheckRecipeManager,
     RECIPE_OBJECT_ALIAS,
     RECIPE_OBJECTPERMISSIONS_ALIAS,
     RECIPE_APPPERMISSIONS_ALIAS,
-    RECIPE_ORGINFO_ALIAS,
+    RECIPE_ORGANIZATION_ALIAS,
+    RECIPE_CURRENTUSERPERMISSIONS_ALIAS,
     RECIPE_PERMISSIONSETS_ALIAS,
     RECIPE_PROFILES_ALIAS,
     RECIPE_PROFILERESTRICTIONS_ALIAS,
@@ -130,11 +131,35 @@ export class OrgCheckAPI {
     /**
      * Get information about the organization
      * 
-     * @returns {SFDC_OrgInformation} Org information to return
+     * @returns {SFDC_Organization} Org information to return
      * @throws Exception if rate >= THRESHOLD
      */
     async getOrganizationInformation() {
-        return this.#recipeManager.run(RECIPE_ORGINFO_ALIAS);
+        return this.#recipeManager.run(RECIPE_ORGANIZATION_ALIAS);
+    }
+
+    /**
+     * Check if the current user can run the application
+     * 
+     * @returns true
+     * @throws Exception if not enough permissions to run the application
+     */
+    async checkCurrentUserPermissions() {
+        const perms = await this.#recipeManager.run(RECIPE_CURRENTUSERPERMISSIONS_ALIAS);
+        if (perms.get('PermissionsModifyAllData') === false || 
+            perms.get('PermissionsAuthorApex') === false ||
+            perms.get('PermissionsApiEnabled') === false ||
+            perms.get('PermissionsInstallPackaging') === false) {
+                const error = new TypeError(
+                    'Current User Permission Access is not enough to run the application <br /><br />'+
+                    `- <b>Modify All Data</b> (Create, edit, and delete all organization data, regardless of sharing settings) [PermissionsModifyAllData] is set to ${perms.get('PermissionsModifyAllData')} <br />`+
+                    `- <b>Author Apex</b> (Create Apex classes and triggers) [PermissionsAuthorApex] is set to ${perms.get('PermissionsAuthorApex')} <br />`+
+                    `- <b>API Enabled</b> (Access any Salesforce.com API) [PermissionsApiEnabled] is set to ${perms.get('PermissionsApiEnabled')} <br />`+
+                    `- <b>Download AppExchange Packages</b> (Install or uninstall AppExchange packages as system administrators) [PermissionsInstallPackaging] is set to ${perms.get('PermissionsInstallPackaging')} <br />`
+                );
+                throw (error);
+        }
+        return true;
     }
 
     /**

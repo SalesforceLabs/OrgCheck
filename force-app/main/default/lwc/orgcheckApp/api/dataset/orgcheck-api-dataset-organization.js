@@ -1,12 +1,12 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
-import { SFDC_OrgInformation } from '../data/orgcheck-api-data-orginfo';
+import { SFDC_Organization } from '../data/orgcheck-api-data-organization';
 
 const ORGTYPE_PROD = 'Production';
 const ORGTYPE_DE = 'Developer Edition';
 const ORGTYPE_SANDBOX = 'Sandbox';
 const ORGTYPE_TRIAL = 'Trial';
 
-export class OrgCheckDatasetOrgInformation extends OrgCheckDataset {
+export class OrgCheckDatasetOrganization extends OrgCheckDataset {
 
     run(sfdcManager, localLogger, resolve, reject) {
 
@@ -26,7 +26,7 @@ export class OrgCheckDatasetOrgInformation extends OrgCheckDataset {
             else if (organization.IsSandbox === true) type = ORGTYPE_SANDBOX;
             else if (organization.IsSandbox === false && organization.TrialExpirationDate) type = ORGTYPE_TRIAL;
             else type = ORGTYPE_PROD;
-            information.set(organization.Id, new SFDC_OrgInformation({
+            information.set(organization.Id, new SFDC_Organization({
                 id: organization.Id,
                 name: organization.Name,
                 type: type,

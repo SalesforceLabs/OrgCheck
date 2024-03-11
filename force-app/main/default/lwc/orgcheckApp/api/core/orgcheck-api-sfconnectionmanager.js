@@ -235,28 +235,24 @@ export class OrgCheckSalesforceManager {
         return OBJECTTYPE_ID_STANDARD_SOBJECT;
     }
 
-    _watchDog__beforeRequest(errorCallback) {
+    _watchDog__beforeRequest(callback) {
         if (this.#lastRequestToSalesforce && Date.now() - this.#lastRequestToSalesforce <= 60000 && this.#lastApiUsage > DAILY_API_REQUEST_FATAL_THRESHOLD) {
             const error = new TypeError(
                 `WATCH DOG: Daily API Request limit is ${this.ratioToPercentage(this.#lastApiUsage)}%, `+
                 `and our internal threshold is ${this.ratioToPercentage(DAILY_API_REQUEST_FATAL_THRESHOLD)}%. `+
                 'We stop there to keep your org safe.'
             );
-            if (errorCallback) {
-                errorCallback(error);
-            } else {
-                throw error;
-            }
+            if (callback) callback(error); else throw error;
         }
     }
 
-    _watchDog__afterRequest(errorCallback) {
+    _watchDog__afterRequest(callback) {
         if (this.#connection.limitInfo && this.#connection.limitInfo.apiUsage) {
             const apiUsageUsed = this.#connection.limitInfo.apiUsage.used;
             const apiUsageMax = this.#connection.limitInfo.apiUsage.limit;
             this.#lastApiUsage = ( apiUsageUsed / apiUsageMax );
             this.#lastRequestToSalesforce = Date.now();
-            this._watchDog__beforeRequest(errorCallback);
+            this._watchDog__beforeRequest(callback);
         }
     }
 

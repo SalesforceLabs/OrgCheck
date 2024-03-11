@@ -7,13 +7,27 @@ export default class OrgCheckModal extends LightningElement {
      */
     connectedCallback() {
         this.isShown = false;
+        this.isClosable = false;
     }
     
     @api open(title, content) {
         if (this.isShown === false) {
             this.isShown = true;
             this.title = title;
-            this.content = content;
+            if (content) {
+                if (content instanceof Error) {
+                    this.message = content.message;
+                    this.stack = content.stack;
+                } else if (typeof content === 'string') {
+                    this.message = content;
+                    this.stack = undefined;
+                } else {
+                    this.message = JSON.stringify(content);
+                    this.stack = undefined;
+                } 
+            } else {
+                this.message = 'Nothing to say...';
+            }
         }
     }
 
@@ -22,6 +36,8 @@ export default class OrgCheckModal extends LightningElement {
     }
 
     isShown;
+    isClosable;
     title;
-    content;
+    message;
+    stack;
 }
