@@ -67,6 +67,64 @@ export const DATASET_USERROLES_ALIAS = 'user-roles';
 export const DATASET_FLOWS_ALIAS = 'flows';
 export const DATASET_WORKFLOWS_ALIAS = 'workflows';
 
+const CACHE_PREFIX = 'OrgCheck.';
+
+class CacheManager {
+    _internal_key(key) {
+        return key.startsWith(CACHE_PREFIX) ? key : CACHE_PREFIX + key;
+    }
+    _internal_is_one_of_our_keys(key) {
+        return key && key.startsWith(CACHE_PREFIX);
+    }
+    has(key) {
+        return localStorage.getItem(this._internal_key(key)) !== null;
+    }
+    get(key) {
+        const entryFromStorage = localStorage.getItem(this._internal_key(key));
+        if (!entryFromStorage) return null
+        const entryAsJson = JSON.parse(entryFromStorage);
+        if (entryAsJson.type === 'map') return new Map(entryAsJson.data);
+        return entryAsJson.data;
+
+    }
+    set(key, value) {
+        try {
+            if (value === null) {
+                localStorage.remove(this._internal_key(key));
+            } else if (value instanceof Map) {
+                localStorage.setItem(
+                    this._internal_key(key), 
+                    JSON.stringify(
+                        { 
+                            type: 'map', 
+                            data: Array.from(value.entries().filter(([k, v]) => k.endsWith('Ref') === false)) 
+                        }
+                    )
+                );
+            } else {
+                localStorage.setItem(
+                    this._internal_key(key), 
+                    JSON.stringify({ data : value })
+                );
+            }
+        } catch(error) {
+            console.warn('Not able to store in local store that amount of data.')
+        }
+    }
+    forEach(callback) {
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (this._internal_is_one_of_our_keys(key)) callback(key, this.get(key));
+        }
+    }
+    remove(key) {
+        localStorage.removeItem(this._internal_key(key));
+    }
+    clear() {
+        localStorage.clear();
+    }
+}
+
 export class OrgCheckDatasetManager {
     
     #datasets;
@@ -79,8 +137,9 @@ export class OrgCheckDatasetManager {
      * 
      * @param {SFDCConnectionManager} sfdcManager 
      * @param {OrgCheckLogger} logger
+     * @param cacheSetup: constructor, has, get, set, forEach, remove, clear
      */
-    constructor(sfdcManager, logger) {
+    constructor(sfdcManager, logger, cacheSetup) {
         
         if (sfdcManager instanceof OrgCheckSalesforceManager === false) {
             throw new TypeError('The given logger is not an instance of OrgCheckSalesforceManager.');
@@ -92,7 +151,7 @@ export class OrgCheckDatasetManager {
         this.#sfdcManager = sfdcManager;
         this.#logger = logger;
         this.#datasets = new Map();
-        this.#cache = new Map();
+        this.#cache = new CacheManager();
 
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
@@ -162,7 +221,7 @@ export class OrgCheckDatasetManager {
                     // success
                     (data) => {
                         // Cache the data
-                        this.#cache.set(alias, data);
+                        this.#cache.set(cacheKey, data);
                         // Set the results
                         results.set(alias, data);
                         // Some logs
@@ -188,14 +247,14 @@ export class OrgCheckDatasetManager {
         const section = 'DATASET cache-info';
         this.#logger.sectionStarts(section, `Parsing all the dataset cache to answer your request...`);
         const cacheInformation = [];
-        for (const [datasetName, dataset] of this.#cache.entries()) {
+        this.#cache.forEach((datasetName, dataset) => {
             const info = new DatasetCacheInfo();
             info.name = datasetName;
             info.length = dataset?.size || 1;
             if (dataset?.createdDate) info.created = dataset?.createdDate();
             if (dataset?.lastModificationDate) info.modified = dataset?.lastModificationDate();
             cacheInformation.push(info);
-        };
+        });
         this.#logger.sectionEnded(section, `Done with ${cacheInformation.length} item(s) scanned.`);
         this.#logger.end();
         return cacheInformation;

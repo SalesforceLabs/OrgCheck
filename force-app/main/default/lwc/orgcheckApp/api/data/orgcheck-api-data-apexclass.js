@@ -28,8 +28,10 @@ export class SFDC_ApexClass extends OrgCheckData {
     sourceCode;
     needsRecompilation;
     coverage;
-    relatedTestClasses;
-    relatedClasses;
+    relatedTestClassIds;
+    relatedTestClassRefs;
+    relatedClassIds;
+    relatedClassRefs;
     createdDate;
     lastModifiedDate;
 

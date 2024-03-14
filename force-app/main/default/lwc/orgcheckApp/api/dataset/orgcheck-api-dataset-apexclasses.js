@@ -143,10 +143,10 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     relatedClassesByApexTest.get(testId).add(id);
                 });
             relatedTestsByApexClass.forEach((relatedTestsIds, apexClassId) => {
-                classesMap.get(apexClassId).relatedTestClasses = Array.from(relatedTestsIds).map((id) => classesMap.get(id));
+                classesMap.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
             });
             relatedClassesByApexTest.forEach((relatedClassesIds, apexTestId) => {
-                classesMap.get(apexTestId).relatedClasses = Array.from(relatedClassesIds).map((id) => classesMap.get(id));
+                classesMap.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
             });
 
             // Part 3- add the aggregate code coverage to apex classes

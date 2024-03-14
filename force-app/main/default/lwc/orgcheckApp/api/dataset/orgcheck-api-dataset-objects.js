@@ -48,9 +48,8 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                             const type = sfdcManager.getObjectType(object.name, object.customSetting)
                             if (!type) return;
                             const entity = entitiesByName[object.name];
-                            const id = sfdcManager.caseSafeId(object.name);
-                            objects.set(id, new SFDC_Object({
-                                id: id,
+                            objects.set(object.name, new SFDC_Object({
+                                id: object.name,
                                 label: object.label,
                                 name: entity.DeveloperName,
                                 apiname: object.name,

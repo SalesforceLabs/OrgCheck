@@ -72,9 +72,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     sobjectDescribed.fields ?
                     sobjectDescribed.fields.map((t) => {
                         const mapper = fieldsMapper[t.name];
-                        console.error("t.name=",t.name);
                         if (mapper) {
-                            console.error("FOUND! ",mapper.isIndexed, mapper.description);
                             t.id = mapper.id;
                             t.description = mapper.description;
                             t.isIndexed = mapper.isIndexed;

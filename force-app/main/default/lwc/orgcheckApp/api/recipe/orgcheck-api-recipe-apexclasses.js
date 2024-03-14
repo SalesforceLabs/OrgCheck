@@ -25,6 +25,11 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
     transform(data, namespace) {
         // Get data
         const apexClasses = data.get(DATASET_APEXCLASSES_ALIAS);
+        // Augment data
+        apexClasses.forEach((apexClass) => {
+            if (apexClass.relatedTestClassIds) apexClass.relatedTestClassRefs = apexClass.relatedTestClassIds.map(id => apexClasses.get(id));
+            if (apexClass.relatedClassIds) apexClass.relatedClassRefs = apexClass.relatedClassIds.map(id => apexClasses.get(id));
+        });
         // Filter data
         const array = [];
         for (const apexClass of apexClasses.values()) {
