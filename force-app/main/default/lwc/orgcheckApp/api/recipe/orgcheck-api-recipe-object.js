@@ -1,6 +1,8 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckDatasetObjectParameters } from '../dataset/params/orgcheck-api-datasetparams-object';
-import { DATASET_OBJECT_ALIAS, DatasetRunInformation } from '../core/orgcheck-api-datasetmanager';
+import { DATASET_OBJECT_ALIAS, 
+    DatasetRunInformation, 
+    DATASET_OBJECTTYPES_ALIAS } from '../core/orgcheck-api-datasetmanager';
 
 export class OrgCheckRecipeObject extends OrgCheckRecipe {
 
@@ -14,7 +16,8 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
         datasetRunInfo.alias = DATASET_OBJECT_ALIAS;
         datasetRunInfo.cacheKey = `${DATASET_OBJECT_ALIAS}_${object}`;
         datasetRunInfo.parameters = new OrgCheckDatasetObjectParameters({ object: object });
-        return [ datasetRunInfo ];
+        return [ datasetRunInfo, 
+            DATASET_OBJECTTYPES_ALIAS ];
     }
 
     /**
@@ -25,6 +28,11 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
      * @returns {SFDC_Object}
      */
     transform(data) {
-        return data.get(DATASET_OBJECT_ALIAS);
+        const types = data.get(DATASET_OBJECTTYPES_ALIAS);
+        const object = data.get(DATASET_OBJECT_ALIAS);
+        // Augment data
+        object.typeRef = types.get(object.typeId);
+        // Return data
+        return object;
     }
 }
