@@ -37,8 +37,8 @@
         </div>
     </div>  
     <script>
-    $Lightning.use('c:OrgCheck_App_Aura', function() {
-        $Lightning.createComponent('c:orgcheckApp',
+    $Lightning.use('orgcheck:OrgCheck_App_Aura', function() {
+        $Lightning.createComponent('orgcheck:orgcheckApp',
             { 
                 accessToken: '{! JSENCODE($Api.Session_Id) }', 
                 userId: '{! JSENCODE($User.Id) }' 
