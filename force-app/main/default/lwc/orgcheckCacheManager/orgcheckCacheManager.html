@@ -1,6 +1,6 @@
 <template>
     <lightning-card icon-name="standard:account" title="Metadata Cache">
-        <lightning-button label="Clear" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
+        <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
         <div class="slds-var-p-horizontal_small">
             List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
             <div class="slds-progress slds-progress_vertical">
@@ -10,11 +10,14 @@
                             <div class="slds-progress__marker"></div>
                             <div class="slds-progress__item_content">
                                 <b>{item.name}</b>: 
-                                {item.length} item(s) cached, 
-                                <template lwc:if={item.created}>Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time>, </template>
-                                <template lwc:if={item.modified}>Last modified on <lightning-formatted-date-time value={item.modified}></lightning-formatted-date-time>.</template>
+                                <template lwc:if={item.isEmpty}> (empty)</template>
+                                <template lwc:else>
+                                    <template lwc:if={item.isMap}> {item.length} in a map</template>
+                                    <template lwc:else> 1 in an object</template>
+                                </template>
+                                <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
                             </div>
-                            <lightning-button label="X" variant="destructive-text" onclick={handleRemoveOneCache} data-item-name={item.name}></lightning-button>
+                            <lightning-button label="Remove" variant="destructive-text" onclick={handleRemoveOneCache} data-item-name={item.name}></lightning-button>
                         </li>
                     </template>
                 </ol>
