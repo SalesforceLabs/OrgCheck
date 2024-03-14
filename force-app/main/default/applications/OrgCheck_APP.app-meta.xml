@@ -2,27 +2,18 @@
 <CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
     <brand>
         <headerColor>#0097A7</headerColor>
+        <logo>Badge1</logo>
+        <logoVersion>1</logoVersion>
         <shouldOverrideOrgTheme>true</shouldOverrideOrgTheme>
     </brand>
-    <description>Org Check - Application admins use to check the health of their org</description>
+    <description>Org Check - An easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.</description>
     <formFactors>Small</formFactors>
     <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>true</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>true</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <label>Org Check</label>
     <navType>Standard</navType>
-    <tabs>OrgCheck_Home_TAB</tabs>
-    <tabs>OrgCheck_ObjectsDoc_TAB</tabs>
-    <tabs>OrgCheck_CustomFields_TAB</tabs>
-    <tabs>OrgCheck_Users_TAB</tabs>
-    <tabs>OrgCheck_ProfilesPermSets_TAB</tabs>
-    <tabs>OrgCheck_Roles_TAB</tabs>
-    <tabs>OrgCheck_PublicGroups_TAB</tabs>
-    <tabs>OrgCheck_Automations_TAB</tabs>
-    <tabs>OrgCheck_CustomLabels_TAB</tabs>
-    <tabs>OrgCheck_VisualComponents_TAB</tabs>
-    <tabs>OrgCheck_ApexComponents_TAB</tabs>
-    <tabs>OrgCheck_Analytics_TAB</tabs>
-    <tabs>OrgCheck_Batches_TAB</tabs>
+    <tabs>OrgCheck_App_TAB</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

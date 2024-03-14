@@ -1,0 +1,54 @@
+th {
+    cursor: pointer;
+    border-width: 3px;
+}
+
+th.sorted {
+    background-color: #d4d4d4!important;
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: 11px;
+    padding-right: var(--lwc-squareIconMediumContent, 1rem)!important;
+}
+
+th.sorted-asc {
+    background-image: url(/img/arrowUp.gif);
+}
+
+th.sorted-desc {
+    background-image: url(/img/arrowDown.gif);
+}
+
+th.vertical {
+    writing-mode: vertical-lr;
+    background-position-x: left;
+    transform: rotate(180deg);
+}
+
+tr.bad {
+    background-color: #ffe099;
+}
+
+td.bad {
+    background-color: #ffd079;
+    background-image: url(/img/msg_icons/warning16.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    background-size: 11px;
+    padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
+}
+
+td.badscore {
+    background-image: url(/img/samples/rating1.gif);
+    cursor: pointer;
+}
+
+table.dontuseallspace {
+    width: unset;
+}
+
+th.sticky {
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+    z-index: 1000; /* when scrolling the header should stay on top */
+}

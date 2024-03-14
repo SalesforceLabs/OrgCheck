@@ -4,14 +4,14 @@
       "path": "force-app",
       "default": true,
       "package": "OrgCheck",
-      "versionName": "Lithium",
-      "versionNumber": "2.5.2.NEXT",
+      "versionName": "Beryllium",
+      "versionNumber": "4.0.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
   "namespace": "OrgCheck",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "55.0",
+  "sourceApiVersion": "59.0",
   "packageAliases": {
     "OrgCheck": "0Ho2X000000KyjaSAC",
     "OrgCheck@1.8.1-4": "04t7R000001u5tiQAA",
@@ -21,6 +21,7 @@
     "OrgCheck@2.5.0-1": "04t7R0000018kE3QAI",
     "OrgCheck@2.5.1-1": "04t7R0000018kEIQAY",
     "OrgCheck@2.5.1-2": "04t7R000001hrkwQAA",
-    "OrgCheck@2.5.2-1": "04t7R000001hrl1QAA"
+    "OrgCheck@2.5.2-1": "04t7R000001hrl1QAA",
+    "OrgCheck@4.0.0-1": "04t7R000000FE2PQAW"
   }
 }

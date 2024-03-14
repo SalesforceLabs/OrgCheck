@@ -1,0 +1,30 @@
+{
+  "name": "orgcheck",
+  "version": "2.5.2",
+  "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "lint": "npm run lint:lwc",
+    "lint:lwc": "eslint force-app/main/default/lwc",
+    "test:unit": "sfdx-lwc-jest",
+    "test:unit:debug": "sfdx-lwc-jest --debug",
+    "test:unit:watch": "sfdx-lwc-jest --watch",
+    "test:unit:coverage": "sfdx-lwc-jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalesforceLabs/OrgCheck.git"
+  },
+  "author": "Vincent FINET",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SalesforceLabs/OrgCheck/issues"
+  },
+  "homepage": "https://sfdc.co/OrgCheck",
+  "devDependencies": {
+    "@salesforce/sfdx-lwc-jest": "^3.0.1"
+  }
+}

@@ -1,0 +1,41 @@
+<template>
+    <template lwc:if={isShown}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <template lwc:if={isClosable}>
+                    <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+                </template>
+                <div class="slds-modal__header">
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Org Check is spinning around for <lightning-formatted-number value={waitingTime} maximum-fraction-digits="0"></lightning-formatted-number> seconds...</h1>
+                </div>
+                <div class="slds-modal__content">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col slds-size_1-of-3 slds-text-align_center">
+                            <object type="image/svg+xml" data={spinningURL} width="256" height="256">
+                                <img src={spinningURL} width="256" height="256" />
+                            </object>
+                        </div>
+                        <div class="slds-col slds-size_2-of-3">
+                            <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                                <ol class="slds-progress__list">
+                                    <template for:each={sections} for:item="msg">
+                                        <li key={msg.id} class={msg.liClasses}>
+                                            <div class={msg.markerClasses}></div>
+                                            <div class="slds-progress__item_content"><b>{msg.id}</b> {msg.label}</div>
+                                        </li>
+                                        <template lwc:if={msg.stack}>
+                                            <li key={msg.id}>
+                                                <pre>{msg.stack}</pre>
+                                            </li>
+                                        </template>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
+    </template>
+</template>

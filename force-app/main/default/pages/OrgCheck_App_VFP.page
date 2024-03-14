@@ -1,0 +1,53 @@
+<apex:page >
+    <apex:includeLightning />
+    <style>
+        #app {
+            height: 100vh;
+        }
+        #loading {
+            display:  flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+        #loading-logo {
+            display:  flex;
+            align-items: center;
+        }
+        #loading-text {
+        }
+        .slds-dropdown-trigger_click .slds-dropdown {
+            min-width: fit-content;
+        }
+    </style>
+    <div id="app">
+        <div id="loading">
+            <div id="loading-logo">
+                <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="200" height="200">
+                    <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="200" height="200" />
+                </object>
+                <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="250" height="250">
+                    <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="250" height="250" />
+                </object>
+            </div>
+            <div id="loading-text">
+                Please wait while <b>Org Check</b> is loading...
+            </div>
+        </div>
+    </div>  
+    <script>
+    $Lightning.use('orgcheck:OrgCheck_App_Aura', function() {
+        $Lightning.createComponent('orgcheck:orgcheckApp',
+            { 
+                accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                userId: '{! JSENCODE($User.Id) }' 
+            },
+            'app',
+            function(cmp) {
+                document.getElementById('loading').style.display = 'none';
+            }
+        );
+    });
+    </script>
+</apex:page>

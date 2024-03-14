@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Org Check Visual Components Tab</description>
-    <label>🥐 Visual Components</label>
-    <motif>Custom27: Laptop</motif>
-    <page>OrgCheck_VisualComponents_VFP</page>
-</CustomTab>

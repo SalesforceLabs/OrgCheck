@@ -45,7 +45,7 @@ OrgCheck.Datasets = {
          * @return true or false
          */
         this.hasDataset = (name) => {
-            return private_datasets_collection.hasOwnProperty(name);
+            return Object.prototype.hasOwnProperty.call(private_datasets_collection, name);
         };
 
         /**
@@ -83,9 +83,9 @@ OrgCheck.Datasets = {
         const METADATA_CACHE_HANDLER = handlers.MetadataCacheHandler;
     
         /**
-         * Preference Cache handler to use for perfomance
+         * Preference Cache handler to use for perfomance (unused)
          */
-        const PREFERENCE_CACHE_HANDLER = handlers.PreferenceCacheHandler;
+        //const PREFERENCE_CACHE_HANDLER = handlers.PreferenceCacheHandler;
 
          /**
          * Map handler for output data
@@ -147,7 +147,6 @@ OrgCheck.Datasets = {
          */
         this.runDatasets = (datasets, dependencies, decorators) => {
             const onLoadPromises = [];
-            const errors = [];
             datasets.forEach(ds => {
                 decorators.startDatasetDecorator(ds);
                 const dataset = private_datasets.getDataset(ds);
@@ -603,7 +602,7 @@ OrgCheck.Datasets = {
                             value.description = psgByName2[key].description;
                             value.isUndescribedCustom = value.isCustom && !value.description;
                             MAP_HANDLER.setValue(records, value.id, value);
-                        };
+                        }
                         resolve(records);
                     })
                     .on('error', (error) => reject(error))
@@ -744,7 +743,7 @@ OrgCheck.Datasets = {
                                 }
                                 MAP_HANDLER.setValue(records, item.name, item);
                             });
-                        };
+                        }
                         resolve(records);
                     })
                     .on('error', (err) => reject(err))
@@ -1294,7 +1293,7 @@ OrgCheck.Datasets = {
                                                     case 'testMethod':        item.isTest           = true;        break;
                                                 }
                                             });
-                                        };
+                                        }
                                     }
                                 }
                                 if (item.isEnum === true || item.isInterface === true) item.specifiedSharing = 'n/a';

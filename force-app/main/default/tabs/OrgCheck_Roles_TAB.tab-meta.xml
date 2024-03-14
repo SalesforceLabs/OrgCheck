@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description>Org Check Roles Tab</description>
-    <label>🐇 Roles</label>
-    <motif>Custom65: Cup</motif>
-    <page>OrgCheck_Roles_VFP</page>
-</CustomTab>

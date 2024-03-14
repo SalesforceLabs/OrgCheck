@@ -67,7 +67,7 @@
             * @param value to format (number if a timestamp, string otherwise)
             */
             this.dateFormat = (value) => {
-                return private_date_format(value, UserContext?.dateFormat,
+                return private_date_format(value, OrgCheck.externalLibs.salesforce.usercontext?.dateFormat,
                     configuration.defaultDateFormat
                 );
             };
@@ -77,7 +77,7 @@
             * @param value to format (number if a timestamp, string otherwise)
             */
             this.datetimeFormat = (value) => {
-                return private_date_format(value, UserContext?.dateTimeFormat,
+                return private_date_format(value, OrgCheck.externalLibs.salesforce.usercontext?.dateTimeFormat,
                     configuration.defaultDatetimeFormat
                 );
             };
@@ -91,7 +91,7 @@
             const private_date_format = (value, format, formatIfNull) => {
                 if (value) {
                     const timestamp = typeof value === "number" ? value : Date.parse(value);
-                    return DateUtil.formatDate(new Date(timestamp), format ? format : formatIfNull);
+                    return OrgCheck.externalLibs.salesforce.dateutil?.formatDate(new Date(timestamp), format ? format : formatIfNull);
                 }
                 return '';
             }
@@ -156,7 +156,7 @@
              */
              this.setValue = (map, key, value) => {
                 if (private_is_safe_key(key)) {
-                    if (map.hasOwnProperty(key) === false) map[configuration.keySize]++;;
+                    if (Object.prototype.hasOwnProperty.call(map, key) === false) map[configuration.keySize]++;
                     map[key] = value;
                 }
             };

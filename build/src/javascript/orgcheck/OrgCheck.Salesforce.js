@@ -12,9 +12,9 @@ OrgCheck.Salesforce = {
             'error': (error) => { console.error(error); }
         };
         const private_error_event = private_events.error;
-        this.has = (name) => private_events.hasOwnProperty(name);
+        this.has = (name) => Object.prototype.hasOwnProperty.call(private_events, name);
         this.fire = (name, ...args) => { 
-            if (private_events.hasOwnProperty(name)) {
+            if (Object.prototype.hasOwnProperty.call(private_events, name)) {
                 private_events[name](...args); 
             }
         };
@@ -133,7 +133,7 @@ OrgCheck.Salesforce = {
                 }));
                 promises.push(new Promise((resolve, reject) => {
                     const query = 'SELECT DurableId, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                                        '(SELECT Id, DurableId, QualifiedApiName, Description FROM Fields), '+
+                                        '(SELECT Id, DurableId, QualifiedApiName, Description, BusinessOwner.Name, BusinessStatus, ComplianceGroup, SecurityClassification FROM Fields), '+
                                         '(SELECT Id, Name FROM ApexTriggers), '+
                                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
@@ -266,14 +266,22 @@ OrgCheck.Salesforce = {
                             const fieldIds = [];
                             entityDef.Fields.records.forEach((r) => {
                                 const id = r.DurableId.split('.')[1];
-                                fieldsMapper[r.QualifiedApiName] = { 'id': id, 'description': r.Description };
+                                fieldsMapper[r.QualifiedApiName] = { 
+                                    'id': id, 
+                                    'description': r.Description,
+                                    'dataOwner': r.BusinessOwner?.Name, // Data Owner Name
+                                    'fieldUsage': r.BusinessStatus, // Field Usage
+                                    'complianceCategory': r.ComplianceGroup, // Compliance Categorization
+                                    'dataSensitivityLevel': r.SecurityClassification // Data Sensitivity Level
+                                };
                                 fieldIds.push(id);
                             });
                             object.fields.forEach((f) => {
                                 const mapper = fieldsMapper[f.name];
                                 if (mapper) {
-                                    f.id = mapper.id;
-                                    f.description = mapper.description;
+                                    for (const property in mapper) {
+                                        f[property] = mapper[property];
+                                    }
                                 }
                             });
                             dapi(fieldIds, (deps) => {
@@ -393,8 +401,9 @@ OrgCheck.Salesforce = {
                                     error.context = { 
                                         when: 'While creating a promise to call the Tooling Composite API.',
                                         what: {
-                                            type: metadataInformation.type,
-                                            ids: metadataInformation.ids,
+                                            type: type,
+                                            ids: ids,
+                                            byPasses: byPasses,
                                             body: requestBody
                                         }
                                     };
@@ -492,7 +501,7 @@ OrgCheck.Salesforce = {
         /**
          * Private connection to Salesforce using JsForce
          */
-        const CONNECTION = new jsforce.Connection({
+        const CONNECTION = new OrgCheck.externalLibs.jsforce.Connection({
             accessToken: configuration.accessToken,
             version: API_VERSION + ".0",
             maxRequest: "10000",

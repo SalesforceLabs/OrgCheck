@@ -1,0 +1,678 @@
+<template>
+    <div style="padding-bottom: 12px;">
+        <lightning-layout>
+            <lightning-layout-item padding="around-small">
+                <div class="slds-media" tabindex="0">
+                    <div class="slds-media__figure">
+                        <object data={logoURL} type="image/svg+xml" style="width: 4rem;"><img src={logoURL} width="4rem" /></object>
+                    </div>
+                    <div class="slds-media__body">
+                        <div class="slds-page-header__name">
+                            <div class="slds-page-header__name-title">
+                                <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
+                                Monitor your org seamlessly<br />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item padding="around-small" alignment-bump="left">
+                <!-- Separator -->
+                <lightning-icon icon-name="utility:threedots_vertical" alternative-text="separator" title="separator" class="slds-var-m-left_x-small"></lightning-icon>
+                <!-- Org information -->
+                <div class="slds-var-m-left_x-small" style="text-align: center; display: inline-table; vertical-align: middle;">
+                    <lightning-badge label={orgName}></lightning-badge>
+                    <br />
+                    <lightning-badge label={orgType} class={themeForOrgType}></lightning-badge>
+                    &nbsp;
+                    <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+        <c-orgcheck-global-filters onvalidatechange={handleFiltersValidated}></c-orgcheck-global-filters>
+        <c-orgcheck-spinner></c-orgcheck-spinner>
+        <c-orgcheck-modal></c-orgcheck-modal>
+    </div>
+    <lightning-tabset variant="scoped">
+        <lightning-tab label="Home" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="welcome" label="Welcome!" onactive={handleSubTabActivation}>
+                    <lightning-layout>
+                        <lightning-layout-item size="5">
+                            <lightning-card icon-name="standard:opportunity" title="General Information">
+                                <div class="slds-var-p-horizontal_small">
+                                    Introducing <b>Org Check</b>. An easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and 
+                                    its technical debt.<br /><br />
+                                    <b>Support and feedback</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><b>Issues or new ideas?</b> Track them at <a href="https://sfdc.co/OrgCheck-Backlog" 
+                                            target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Backlog</a></li>
+                                        <li><b>Want to chat with other users?</b> Join us on Slack at <a href="https://sfdc.co/OrgCheck-Community" 
+                                            target="_blank" rel="external noopener noreferrer">sfdc.co/OrgCheck-Community</a></li>
+                                        <li><b>Social Media</b> Like and share posts on <a href="https://www.linkedin.com/company/OrgChecksfdc" 
+                                            target="_blank" rel="external noopener noreferrer">LinkedIn</a> and on 
+                                            <a href="https://twitter.com/OrgCheckSFDF" target="_blank" rel="external noopener noreferrer">
+                                            Twitter</a>!</li>    
+                                    </ul>
+                                    <br />
+                                    <b>Org Check is free to use, but is not an official Salesforce product. </b> Org Check has not been officially tested or documented.
+                                    Salesforce support is not available for Org Check. Support requests for Org Check should be directed to GitHub. Source code for Org 
+                                    Check can be found on GitHub under separate and different license terms.<br /><br />
+                                    <b>Third party components</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><b>D3js</b>: distributed under the ISC license, more info at <a href="https://d3js.org" target="_blank" rel="external noopener noreferrer">d3js.org</a></li>
+                                        <li><b>JsForce</b>: distributed under the MIT license, more info at <a href="https://jsforce.github.io" target="_blank" rel="external noopener noreferrer">jsforce.github.io</a></li>
+                                        <li><b>SheetJS</b>: distributed under the Apache license v2.0, more info at <a href="https://sheetjs.com/" target="_blank" rel="external noopener noreferrer">sheetjs.com</a></li>
+                                    </ul>
+                                </div>
+                            </lightning-card>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="3">
+                            <lightning-card icon-name="standard:record_lookup" title="Complementary Tools">
+                                <div class="slds-var-p-horizontal_small">
+                                    <b>Tools from Salesforce</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://trailhead.salesforce.com/en/content/learn/modules/salesforce-optimizer" target="_blank" rel="external noopener noreferrer">Salesforce Optimizer</a></li>
+                                        <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;#38;type=5" target="_blank" rel="external noopener noreferrer">Salesforce LEX Readiness Report</a></li>
+                                        <li><a href="https://help.salesforce.com/s/articleView?id=sf.scale_center_overview.htm&type=5" target="_blank" rel="external noopener noreferrer">Scale Center (including Apex Guru!)</a></li>
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=%22Permission%20Helper%22&amp;#38;searchType=simpleSearch" target="_blank" rel="external noopener noreferrer">Permission Helper (AppExchange / Salesforce Lab)</a></li>
+                                    </ul>
+                                    <br />
+                                    <b>Code</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank" rel="external noopener noreferrer">Salesforce Guidelines for secure code</a></li>
+                                        <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank" rel="external noopener noreferrer">Apex PMD Rules</a></li>
+                                        <li><a href="https://security.secure.force.com/security/tools/forcecom/scanner" target="_blank" rel="external noopener noreferrer">Checkmarx</a></li>
+                                        <li><a href="https://www.getclayton.com/" target="_blank" rel="external noopener noreferrer">Clayton</a></li>
+                                        <li><a href="https://www.codescan.io/" target="_blank" rel="external noopener noreferrer">Codescan</a></li>
+                                    </ul>
+                                    <br />
+                                    <b>Debug Logs</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank" rel="external noopener noreferrer">Apex Replay Debugger</a></li>
+                                        <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank" rel="external noopener noreferrer">Online Debug Log Tree (on github)</a></li>
+                                    </ul>
+                                    <br />
+                                    <b>Dependencies</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://happysoup.io/" target="_blank" rel="external noopener noreferrer">Happy Soup</a></li>
+                                    </ul>
+                                    <br />
+                                    <b>Data Cleansing</b>
+                                    <ul class="slds-list_dotted">
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Field%20Trip%22" target="_blank" rel="external noopener noreferrer">RingLead Field Trip</a></li>
+                                        <li><a href="https://appexchange.salesforce.com/appxSearchKeywordResults?keywords=RingLead%20%22Dupe%20Dive%22" target="_blank" rel="external noopener noreferrer">RingLead Dupe Dive</a></li>
+                                    </ul>
+                                </div>
+                            </lightning-card>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="4">
+                            <c-orgcheck-cache-manager class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} onremovecache={handleRemoveCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="⚽ Objects" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="object-information" label="Object Documentation" onactive={handleSubTabActivation}>
+                    <c-orgcheck-object-information class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} object-information-data={objectInformationData}></c-orgcheck-object-information>
+                </lightning-tab>
+                <lightning-tab value="objects-owd" label="Org Wide Default" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no org wide default to show."
+                        show-search
+                        show-statistics
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={objectsOWDTableColumns}
+                        rows={objectsOWDTableData}
+                        show-export-button
+                        export-basename="OrgWideDefault"
+                        export-sheet-name="Org Wide Default"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🥕 Custom Fields" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="custom-fields" label="Custom Fields" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no custom field to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={customFieldsTableColumns}
+                        rows={customFieldsTableData}
+                        show-export-button
+                        export-basename="CustomFields"
+                        export-sheet-name="Custom Fields"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🧔 Users" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="users" label="Users" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no active user to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={usersTableColumns}
+                        rows={usersTableData}
+                        show-export-button
+                        export-basename="Users"
+                        export-sheet-name="Users"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="👮 Profiles and Permission Sets" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="profiles" label="Profiles" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no profile to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={profilesTableColumns}
+                        rows={profilesTableData}
+                        show-export-button
+                        export-basename="Profiles"
+                        export-sheet-name="Profiles"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="permission-sets" label="Permission Sets" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no permission to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={permissionSetsTableColumns}
+                        rows={permissionSetsTableData}
+                        show-export-button
+                        export-basename="PermissionSets"
+                        export-sheet-name="Permission Sets"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="profile-restrictions" label="Profile Restrictions" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no profile restriction to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={profileRestrictionsTableColumns}
+                        rows={profileRestrictionsTableData}
+                        show-export-button
+                        export-basename="ProfileRestrictions"
+                        export-sheet-name="Profile Restrictions"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="profile-password-policies" label="Profile Password Policies" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no profile password policy to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={profilePasswordPoliciesTableColumns}
+                        rows={profilePasswordPoliciesTableData}
+                        show-export-button
+                        export-basename="ProfilePasswordPolicies"
+                        export-sheet-name="Profile Password Policies"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="object-permissions" label="Object Permissions" onactive={handleSubTabActivation}>
+                    <div style="text-align: right;">
+                        <b>Legend:</b> C means <i>Create</i>, R means <i>Read</i>, U means <i>Update/Modify</i>, D means <i>Delete</i>, v means <i>View All</i> and m means <i>Modify All</i>.
+                    </div>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no object permission to show."
+                        show-search
+                        show-statistics
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={objectPermissionsTableColumns}
+                        rows={objectPermissionsTableData}
+                        show-export-button
+                        export-basename="ObjectPermissions"
+                        export-sheet-name="Object Permissions"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="app-permissions" label="Application Permissions" onactive={handleSubTabActivation}>
+                    <div style="text-align: right;">
+                        <b>Legend:</b> A means <i>Accessible</i> and V means <i>Visible</i>.
+                    </div>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no application permission to show."
+                        show-search
+                        show-statistics
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={appPermissionsTableColumns}
+                        rows={appPermissionsTableData}
+                        show-export-button
+                        export-basename="AppPermissions"
+                        export-sheet-name="Application Permissions"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="roles-explorer" label="Role Explorer" onactive={handleSubTabActivation}>
+                    <c-orgcheck-graphics 
+                        name="Role Hierarchy" 
+                        box-color-decorator={roleBoxColorsDecorator}
+                        box-inner-html-decorator={roleBoxInnerHtmlDecorator}
+                        box-on-click-decorator={roleBoxOnClickDecorator}
+                        show-level
+                        source={rolesTree}></c-orgcheck-graphics>
+                </lightning-tab>
+                <lightning-tab value="roles-listing" label="Role Listing" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no role to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={rolesTableColumns}
+                        rows={rolesTableData}
+                        show-export-button
+                        export-basename="Roles"
+                        export-sheet-name="Roles"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🌶️ Public Groups and Queues" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="public-groups" label="Public Groups" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no public group to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={publicGroupsTableColumns}
+                        rows={publicGroupsTableData}
+                        show-export-button
+                        export-basename="PublicGroups"
+                        export-sheet-name="Public Groups"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="queues" label="Queues" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no queue to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={queuesTableColumns}
+                        rows={queuesTableData}
+                        show-export-button
+                        export-basename="Queues"
+                        export-sheet-name="Queues"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🤖 Automations" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="flows" label="Flows" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no flow to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={flowsTableColumns}
+                        rows={flowsTableData}
+                        show-export-button
+                        export-basename="Flows"
+                        export-sheet-name="Flows"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="process-builders" label="Process Builders" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no process builder to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={processBuildersTableColumns}
+                        rows={processBuildersTableData}
+                        show-export-button
+                        export-basename="ProcessBuilders"
+                        export-sheet-name="Process Builders"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="workflows" label="Workflows" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no workflow to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={workflowsTableColumns}
+                        rows={workflowsTableData}
+                        show-export-button
+                        export-basename="Workflows"
+                        export-sheet-name="Workflows"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🎁 Custom Labels" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="custom-labels" label="Custom Labels" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no custom label to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={customLabelsTableColumns}
+                        rows={customLabelsTableData}
+                        show-export-button
+                        export-basename="CustomLabels"
+                        export-sheet-name="Custom Labels"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🥐 Visual Components" onactive={handleTabActivation}>
+            <lightning-tabset>
+                <lightning-tab value="visual-force-pages" label="Visual Force Pages" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no visual force page to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={visualForcePagesTableColumns}
+                        rows={visualForcePagesTableData}
+                        show-export-button
+                        export-basename="VisualForcePages"
+                        export-sheet-name="Visual Force Pages"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="visual-force-components" label="Visual Force Components" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no visual force component to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={visualForceComponentsTableColumns}
+                        rows={visualForceComponentsTableData}
+                        show-export-button
+                        export-basename="VisualForceComponents"
+                        export-sheet-name="Visual Force Components"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="lightning-pages" label="Lightning Pages" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Lightning Page to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={lightningPagesTableColumns}
+                        rows={lightningPagesTableData}
+                        show-export-button
+                        export-basename="LightningPages"
+                        export-sheet-name="Lightning Pages"></c-orgcheck-extended-datatable>
+                </lightning-tab>
+                <lightning-tab value="lightning-aura-components" label="Lightning Aura Components" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Lightning Aura Component to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={auraComponentsTableColumns}
+                        rows={auraComponentsTableData}
+                        show-export-button
+                        export-basename="LightningAuraComponents"
+                        export-sheet-name="Lightning Aura Components"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="lightning-web-components" label="Lightning Web Components" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Lightning Web Component to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={lightningWebComponentsTableColumns}
+                        rows={lightningWebComponentsTableData}
+                        show-export-button
+                        export-basename="LightningWebComponents"
+                        export-sheet-name="Lightning Web Components"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+        <lightning-tab label="🔥 Apex" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Run All Tests" title="Run All Tests" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:apex" onclick={handleClickRunAllTests}></lightning-button>
+                </lightning-layout-item>
+                <template if:true={apexUncompiledTableData}>
+                    <lightning-layout-item>
+                        <lightning-button label="Compile when needed" title="Compile when needed" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRecompile}></lightning-button>
+                    </lightning-layout-item>
+                </template>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshApex}></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
+            <lightning-tabset>
+                <lightning-tab value="apex-classes" label="Classes" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Class to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexClassesTableColumns}
+                        rows={apexClassesTableData}
+                        show-export-button
+                        export-basename="ApexClasses"
+                        export-sheet-name="Apex Classes"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-recompilation-needed" label="Recompilation needed" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Uncopmiled Class to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexUncompiledTableColumns}
+                        rows={apexUncompiledTableData}
+                        show-export-button
+                        export-basename="ApexClassesNeedCompilation"
+                        export-sheet-name="Apex Classes Need Compilation"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-triggers" label="Triggers" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Trigger to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexTriggersTableColumns}
+                        rows={apexTriggersTableData}
+                        show-export-button
+                        export-basename="ApexTriggers"
+                        export-sheet-name="Apex Triggers"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-enums" label="Enum Classes" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Enum to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexEnumsTableColumns}
+                        rows={apexEnumssTableData}
+                        show-export-button
+                        export-basename="ApexEnumClasses"
+                        export-sheet-name="Apex Enum Classes"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-abstract" label="Abstract Classes" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Abstract Class to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexAbstractTableColumns}
+                        rows={apexAbstractTableData}
+                        show-export-button
+                        export-basename="ApexAbstractClasses"
+                        export-sheet-name="Apex Abstract Classes"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-interfaces" label="Interfaces" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Interfaces to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexInterfacesTableColumns}
+                        rows={apexInterfacesTableData}
+                        show-export-button
+                        export-basename="ApexInterfaceClasses"
+                        export-sheet-name="Apex Interface Classes"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-batches" label="Schedulables" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Schedulable to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexBatchesTableColumns}
+                        rows={apexBatchesTableData}
+                        show-export-button
+                        export-basename="ApexSchedulable"
+                        export-sheet-name="Apex Schedulable"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+                <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
+                    <c-orgcheck-extended-datatable
+                        empty-message="There is no Apex Unit Test to show."
+                        show-search
+                        show-statistics
+                        show-score-column
+                        show-row-number-column
+                        is-sticky-headers
+                        is-infinite-scrolling
+                        infinite-scrolling-initial-nb-rows=200
+                        infinite-scrolling-additional-nb-rows=100
+                        columns={apexTestsTableColumns}
+                        rows={apexTestsTableData}
+                        show-export-button
+                        export-basename="ApexUnitTests"
+                        export-sheet-name="Apex Unit Tests"></c-orgcheck-extended-datatable>            
+                </lightning-tab>
+            </lightning-tabset>
+        </lightning-tab>
+    </lightning-tabset>
+</template>

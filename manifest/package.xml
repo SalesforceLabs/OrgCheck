@@ -3,54 +3,12 @@
     <fullName>Org Check</fullName>
     <description>Org Check</description>
     <types>
-        <members>OrgCheck_Home_VFP</members>
-        <members>OrgCheck_Objects_VFP</members>
-        <members>OrgCheck_PageTemplate_VFT</members>
-        <members>OrgCheck_ProfilesPermSets_VFP</members>
-        <members>OrgCheck_PublicGroups_VFP</members>
-        <members>OrgCheck_Roles_VFP</members>
-        <members>OrgCheck_CustomFields_VFP</members>
-        <members>OrgCheck_Users_VFP</members>
-        <members>OrgCheck_Batches_VFP</members>
-        <members>OrgCheck_CustomLabels_VFP</members>
-        <members>OrgCheck_Automations_VFP</members>
-        <members>OrgCheck_VisualComponents_VFP</members>
-        <members>OrgCheck_ApexComponents_VFP</members>
-        <members>OrgCheck_Analytics_VFP</members>
-        <name>ApexPage</name>
-    </types>
-    <types>
         <members>OrgCheck_APP</members>
         <name>CustomApplication</name>
     </types>
     <types>
-        <members>OrgCheck_Home_TAB</members>
-        <members>OrgCheck_ObjectsDoc_TAB</members>
-        <members>OrgCheck_ProfilesPermSets_TAB</members>
-        <members>OrgCheck_PublicGroups_TAB</members>
-        <members>OrgCheck_Roles_TAB</members>
-        <members>OrgCheck_CustomFields_TAB</members>
-        <members>OrgCheck_Users_TAB</members>
-        <members>OrgCheck_Batches_TAB</members>
-        <members>OrgCheck_CustomLabels_TAB</members>
-        <members>OrgCheck_Automations_TAB</members>
-        <members>OrgCheck_VisualComponents_TAB</members>
-        <members>OrgCheck_ApexComponents_TAB</members>
-        <members>OrgCheck_Analytics_TAB</members>
+        <members>OrgCheck_App_TAB</members>
         <name>CustomTab</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>CustomLabel</name>
-    </types>
-    <types>
-        <members>fr</members>
-        <members>ja</members>
-        <name>Translations</name>
-    </types>
-    <types>
-        <members>OrgCheck_SR</members>
-        <name>StaticResource</name>
     </types>
     <version>55.0</version>
 </Package>
