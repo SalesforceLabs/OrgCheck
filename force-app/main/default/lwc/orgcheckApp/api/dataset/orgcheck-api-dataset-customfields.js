@@ -38,7 +38,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                         description: record.Description,
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
-                        objectId: sfdcManager.caseSafeId(record.EntityDefinition.QualifiedApiName),
+                        objectId: record.EntityDefinition.QualifiedApiName, // id but no ids!
                         isScoreNeeded: true,
                         isDependenciesNeeded: true,
                         dependenciesFor: 'id',
