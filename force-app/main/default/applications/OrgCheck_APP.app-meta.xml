@@ -3,7 +3,6 @@
     <brand>
         <headerColor>#0097A7</headerColor>
         <logo>Badge1</logo>
-        <logoVersion>1</logoVersion>
         <shouldOverrideOrgTheme>true</shouldOverrideOrgTheme>
     </brand>
     <description>Org Check - An easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.</description>

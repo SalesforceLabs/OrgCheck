@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Prompt xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Org Check InApp Guidance</masterLabel>
+    <promptVersions>
+        <actionButtonLabel>Permission Sets (setup)</actionButtonLabel>
+        <actionButtonLink>/lightning/setup/PermSets/home</actionButtonLink>
+        <body>&lt;p&gt;We recently introduced the &lt;strong&gt;Org Check Users&lt;/strong&gt; &lt;strong&gt;permission set&lt;/strong&gt; in the app.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;We strongly recommend you to &lt;strong&gt;assign&lt;/strong&gt; this perm set to your user from the setup menu.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;It solves a potential issue with tab visibility.&lt;/p&gt;</body>
+        <customApplication>OrgCheck_APP</customApplication>
+        <delayDays>1</delayDays>
+        <dismissButtonLabel>Dismiss</dismissButtonLabel>
+        <displayPosition>MiddleCenter</displayPosition>
+        <displayType>FloatingPanel</displayType>
+        <experience>Lightning</experience>
+        <isPublished>true</isPublished>
+        <masterLabel>Org Check InApp Guidance</masterLabel>
+        <publishedDate>2024-03-16</publishedDate>
+        <shouldDisplayActionButton>true</shouldDisplayActionButton>
+        <shouldIgnoreGlobalDelay>true</shouldIgnoreGlobalDelay>
+        <startDate>2024-03-16</startDate>
+        <themeColor>Theme1</themeColor>
+        <themeSaturation>Dark</themeSaturation>
+        <timesToDisplay>1</timesToDisplay>
+        <title>Welcome in Org Check!</title>
+        <userAccess>Everyone</userAccess>
+        <userProfileAccess>Everyone</userProfileAccess>
+        <versionNumber>1</versionNumber>
+    </promptVersions>
+</Prompt>

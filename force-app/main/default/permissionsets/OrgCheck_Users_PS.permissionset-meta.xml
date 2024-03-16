@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <applicationVisibilities>
+        <application>OrgCheck_APP</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+    <description>Permission Set for Org Check&apos;s users. This includes the right to see the app and its main custom tab.</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Org Check Users</label>
+    <tabSettings>
+        <tab>OrgCheck_App_TAB</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+</PermissionSet>
