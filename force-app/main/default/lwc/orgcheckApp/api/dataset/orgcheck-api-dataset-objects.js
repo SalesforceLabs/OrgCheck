@@ -16,11 +16,12 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
             const promises = [];
 
             // Requesting information from the current salesforce org
-            promises.push(sfdcManager.describeGlobal());
+            promises.push(sfdcManager.describeGlobal()); // not using tooling api !!!
 
             // Some information are not in the global describe, we need to append them with EntityDefinition soql query
             promises.push(sfdcManager.soqlQuery([{ 
-                tooling: true,
+                queryMore: false, // entityDef does not support calling QueryMore
+                tooling: false, // so not using tooling either!!!
                 string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, '+
                             'ExternalSharingModel, InternalSharingModel '+
                         'FROM EntityDefinition ' +

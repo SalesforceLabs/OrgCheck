@@ -303,7 +303,7 @@ export class OrgCheckSalesforceManager {
                         }
                     } else {
                         records.push(... d.records);
-                        if (d.done === true) {
+                        if (d.done === true || (d.done === false && q.queryMore === false)) {
                             resolve({ records: records });
                         } else {
                             conn.queryMore(d.nextRecordsUrl, recursive_query);

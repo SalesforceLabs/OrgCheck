@@ -25,7 +25,8 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const promises = [];
         promises.push(sfdcManager.describe(fullObjectApiName));
         promises.push(sfdcManager.soqlQuery([{ 
-            tooling: true,
+            queryMore: false, // we should have only one record max so no need to have queryMore activated.
+            tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
             string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
                         '(SELECT Id, DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
                         '(SELECT Id, Name FROM ApexTriggers), '+
