@@ -2,4 +2,6 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>59.0</apiVersion>
     <isExposed>false</isExposed>
+    <masterLabel>Org Check Export Button Component</masterLabel>
+    <description>Org Check Export Button Component</description>
 </LightningComponentBundle>
