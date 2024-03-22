@@ -37,6 +37,15 @@
         </div>
     </div>  
     <script>
+    /* Reset the cache of previous versions */
+    try {
+        Object.keys(localStorage)
+            .filter(e => e.startsWith('OrgCheck.'))
+            .forEach(e => localStorage.removeItem(e));
+    } catch (e) {
+        console.error('Error while resetting the cache of previous Org Check versions (prior to Lithium).')
+    }
+    /* Insert LWC app */
     $Lightning.use('orgcheck:OrgCheck_App_Aura', function() {
         $Lightning.createComponent('orgcheck:orgcheckApp',
             { 
