@@ -30,7 +30,7 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
 
             // Set the map (2/2) - local package
             localLogger.log(`Parsing ${results[1].records.length} local packages...`);
-            results[1].records.forEach((record) => {
+            results[1].records.filter((record) => record.NamespacePrefix !== null).forEach((record) => {
                 packages.set('<local>', new SFDC_Package({
                     id: record.NamespacePrefix, 
                     name: record.NamespacePrefix, 
