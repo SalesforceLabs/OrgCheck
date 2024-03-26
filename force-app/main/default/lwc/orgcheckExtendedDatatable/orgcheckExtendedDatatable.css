@@ -4,7 +4,7 @@ th {
 }
 
 th.sorted {
-    background-color: #d4d4d4!important;
+    background-color: var(--lwc-colorBackground, #f3f3f3) !important;
     background-position: right;
     background-repeat: no-repeat;
     background-size: 11px;
@@ -35,12 +35,14 @@ td.bad {
     background-position: left;
     background-repeat: no-repeat;
     background-size: 11px;
+    font-weight: bolder;
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
 td.badscore {
     background-image: url(/img/samples/rating1.gif);
     cursor: pointer;
+    color: red;
 }
 
 table.dontuseallspace {

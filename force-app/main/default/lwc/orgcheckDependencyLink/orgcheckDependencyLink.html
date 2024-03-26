@@ -1,8 +1,8 @@
 <template>
     <template lwc:if={numberOfDependencies}>
-        <lightning-button variant="base" label="Dependencies..." onclick={handleClick}></lightning-button>
+        <lightning-button variant="base" label="Dependencies" onclick={handleClick} icon-name="utility:search" icon-position="right"></lightning-button>
     </template>
     <template lwc:else>
-        No dependency.
+        No dependency
     </template>
 </template>

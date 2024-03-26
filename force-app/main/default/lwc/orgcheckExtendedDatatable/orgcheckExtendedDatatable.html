@@ -135,8 +135,8 @@
                             <!-- TYPE BOOLEAN: boolean, decorated an icon for true and an icon for false -->
                             <template lwc:elseif={cell.isBoolean}>
                                 <div class="slds-text-align_center">
-                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="standard:task2" alternative-text="True" size="x-small"></lightning-icon></template>
-                                    <template lwc:else><lightning-icon icon-name="standard:first_non_empty" alternative-text="False" size="x-small"></lightning-icon></template>
+                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" size="x-small"></lightning-icon></template>
+                                    <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" size="x-small"></lightning-icon></template>
                                 </div>
                             </template>
 
