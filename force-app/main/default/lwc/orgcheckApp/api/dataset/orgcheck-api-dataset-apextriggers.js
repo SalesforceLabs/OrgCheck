@@ -2,7 +2,7 @@ import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 
 const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
-const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\w+|\\(|\\[)");
+const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
 
 export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 

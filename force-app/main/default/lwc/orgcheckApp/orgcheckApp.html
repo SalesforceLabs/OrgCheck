@@ -536,7 +536,7 @@
                 </lightning-layout-item>
             </lightning-layout>
             <lightning-tabset>
-                <lightning-tab value="apex-classes" label="Classes" onactive={handleSubTabActivation}>
+                <lightning-tab value="apex-classes" label="Apex Classes" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no Apex Class to show."
                         show-search
@@ -553,9 +553,9 @@
                         export-basename="ApexClasses"
                         export-sheet-name="Apex Classes"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
-                <lightning-tab value="apex-recompilation-needed" label="Recompilation needed" onactive={handleSubTabActivation}>
+                <lightning-tab value="apex-recompilation-needed" label="Apex Classes That Need Recompilation" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
-                        empty-message="There is no Apex Uncopmiled Class to show."
+                        empty-message="There is no Apex Uncompiled Class to show."
                         show-search
                         show-statistics
                         show-score-column
@@ -570,7 +570,7 @@
                         export-basename="ApexClassesNeedCompilation"
                         export-sheet-name="Apex Classes Need Compilation"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
-                <lightning-tab value="apex-triggers" label="Triggers" onactive={handleSubTabActivation}>
+                <lightning-tab value="apex-triggers" label="Apex Triggers" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no Apex Trigger to show."
                         show-search
@@ -587,75 +587,7 @@
                         export-basename="ApexTriggers"
                         export-sheet-name="Apex Triggers"></c-orgcheck-extended-datatable>            
                 </lightning-tab>
-                <lightning-tab value="apex-enums" label="Enum Classes" onactive={handleSubTabActivation}>
-                    <c-orgcheck-extended-datatable
-                        empty-message="There is no Apex Enum to show."
-                        show-search
-                        show-statistics
-                        show-score-column
-                        show-row-number-column
-                        is-sticky-headers
-                        is-infinite-scrolling
-                        infinite-scrolling-initial-nb-rows=200
-                        infinite-scrolling-additional-nb-rows=100
-                        columns={apexEnumsTableColumns}
-                        rows={apexEnumssTableData}
-                        show-export-button
-                        export-basename="ApexEnumClasses"
-                        export-sheet-name="Apex Enum Classes"></c-orgcheck-extended-datatable>            
-                </lightning-tab>
-                <lightning-tab value="apex-abstract" label="Abstract Classes" onactive={handleSubTabActivation}>
-                    <c-orgcheck-extended-datatable
-                        empty-message="There is no Apex Abstract Class to show."
-                        show-search
-                        show-statistics
-                        show-score-column
-                        show-row-number-column
-                        is-sticky-headers
-                        is-infinite-scrolling
-                        infinite-scrolling-initial-nb-rows=200
-                        infinite-scrolling-additional-nb-rows=100
-                        columns={apexAbstractTableColumns}
-                        rows={apexAbstractTableData}
-                        show-export-button
-                        export-basename="ApexAbstractClasses"
-                        export-sheet-name="Apex Abstract Classes"></c-orgcheck-extended-datatable>            
-                </lightning-tab>
-                <lightning-tab value="apex-interfaces" label="Interfaces" onactive={handleSubTabActivation}>
-                    <c-orgcheck-extended-datatable
-                        empty-message="There is no Apex Interfaces to show."
-                        show-search
-                        show-statistics
-                        show-score-column
-                        show-row-number-column
-                        is-sticky-headers
-                        is-infinite-scrolling
-                        infinite-scrolling-initial-nb-rows=200
-                        infinite-scrolling-additional-nb-rows=100
-                        columns={apexInterfacesTableColumns}
-                        rows={apexInterfacesTableData}
-                        show-export-button
-                        export-basename="ApexInterfaceClasses"
-                        export-sheet-name="Apex Interface Classes"></c-orgcheck-extended-datatable>            
-                </lightning-tab>
-                <lightning-tab value="apex-batches" label="Schedulables" onactive={handleSubTabActivation}>
-                    <c-orgcheck-extended-datatable
-                        empty-message="There is no Apex Schedulable to show."
-                        show-search
-                        show-statistics
-                        show-score-column
-                        show-row-number-column
-                        is-sticky-headers
-                        is-infinite-scrolling
-                        infinite-scrolling-initial-nb-rows=200
-                        infinite-scrolling-additional-nb-rows=100
-                        columns={apexBatchesTableColumns}
-                        rows={apexBatchesTableData}
-                        show-export-button
-                        export-basename="ApexSchedulable"
-                        export-sheet-name="Apex Schedulable"></c-orgcheck-extended-datatable>            
-                </lightning-tab>
-                <lightning-tab value="apex-unit-tests" label="Unit Tests" onactive={handleSubTabActivation}>
+                <lightning-tab value="apex-unit-tests" label="Apex Unit Tests" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
                         empty-message="There is no Apex Unit Test to show."
                         show-search

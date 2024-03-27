@@ -1,6 +1,6 @@
 {
   "name": "orgcheck",
-  "version": "2.5.2",
+  "version": "4.3.0",
   "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
   "main": "index.js",
   "directories": {

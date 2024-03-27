@@ -217,13 +217,6 @@ export class OrgCheckSalesforceManager {
         }
     }
     
-    splitIdsInBatches(ids, batchsize, callback) {
-        if (batchsize <= 0) return;
-        for (let i = 0; i < ids.length; i += batchsize) {
-            callback('\''+ids.slice(i, Math.min(i + batchsize, ids.length)).join('\',\'')+'\'');
-        }
-    }
-
     getObjectType(apiName, isCustomSetting) {
         if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
         if (apiName.endsWith('__c')) return OBJECTTYPE_ID_CUSTOM_SOBJECT;
@@ -317,59 +310,52 @@ export class OrgCheckSalesforceManager {
                     .then((results) => {
                         // Getting the Ids for DAPI call
                         const ids = results.records.map((record) => this.caseSafeId(record[q.addDependenciesBasedOnField]));
-                        // We are going to split the DAPI calls into batches for <n> ids at the same time
-                        const dapiPromises = [];
-                        this.splitIdsInBatches(ids, 50, (subids) => {
-                            dapiPromises.push(new Promise((resolve, reject) => {
-                                this.#connection.tooling.query(
-                                    'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
-                                        'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
-                                    'FROM MetadataComponentDependency '+
-                                    `WHERE (RefMetadataComponentId IN (${subids}) OR MetadataComponentId IN (${subids}))`,
-                                    (e, d) => {
-                                        this._watchDog__afterRequest(reject);
-                                        if (e) {
-                                            e.context = { 
-                                                when: 'While getting the dependencies from DAPI',
-                                                what: {
-                                                    allIds: ids,
-                                                    concernedIds: subids
-                                                }
-                                            };
-                                            reject(e);
-                                        } else {
-                                            resolve(d.records.map((e) => { return {
-                                                id: this.caseSafeId(e.MetadataComponentId),
-                                                name: e.MetadataComponentName, 
-                                                type: e.MetadataComponentType,
-                                                url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
-                                                refId: this.caseSafeId(e.RefMetadataComponentId), 
-                                                refName: e.RefMetadataComponentName,
-                                                refType: e.RefMetadataComponentType,
-                                                refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
-                                            }}));
-                                        }
+                        return this._callComposite(ids, true, '/query?q='+
+                            'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                                   'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                            'FROM MetadataComponentDependency '+
+                            'WHERE RefMetadataComponentId = \'(id)\' '+
+                            'OR MetadataComponentId = \'(id)\' ')
+                        .then(allDependenciesResults => {
+                            // We are going to append the dependencies in the results
+                            const allDependencies = [];
+                            // Using a set to filter duplicates
+                            const duplicateCheck = new Set(); 
+                            // We parse all the batches/results from the DAPI
+                            allDependenciesResults
+                                .filter(r => r.done === true && r.totalSize > 0)
+                                .forEach(r => allDependencies.push(... r.records.map((e) => {
+                                    const id = this.caseSafeId(e.MetadataComponentId);
+                                    const refId = this.caseSafeId(e.RefMetadataComponentId);
+                                    const key = `${id}-${refId}`;
+                                    if (duplicateCheck.has(key)) return null;
+                                    duplicateCheck.add(key);
+                                    return {
+                                        id: id,
+                                        name: e.MetadataComponentName, 
+                                        type: e.MetadataComponentType,
+                                        url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
+                                        refId: refId, 
+                                        refName: e.RefMetadataComponentName,
+                                        refType: e.RefMetadataComponentType,
+                                        refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
                                     }
-                                );
-                            }));
+                                })));
+                            // Remove duplicates
+                            results.allDependencies = allDependencies.filter(r => r !== null);
+                            // Return the altered results
+                            return results;
+                        })
+                        .catch(error => {
+                            error.context = { 
+                                when: 'While getting the dependencies from DAPI',
+                                what: {
+                                    allIds: ids,
+                                    concernedIds: subids
+                                }
+                            };
+                            return error;
                         });
-                        return Promise.all(dapiPromises)
-                            .then((allDependenciesResults) => { 
-                                // We are going to append the dependencies in the results
-                                results.allDependencies = [];
-                                // We parse all the batches/results from the DAPI
-                                allDependenciesResults.forEach((dependencies) => {
-                                    if (dependencies) {
-                                        // Merge them into one array
-                                        results.allDependencies.push(... dependencies);
-                                    }
-                                });
-                                // Return the altered results
-                                return results;
-                            })
-                            .catch((error) => {
-                                console.error('Issue while parsing results from DAPI', error);
-                            });
                     })
                     .catch((error) => {
                         console.error('Issue while accessing DAPI', error);
@@ -446,31 +432,30 @@ export class OrgCheckSalesforceManager {
         });
     }
 
-    async readMetadataAtScale(type, ids, byPasses) {
+    async _callComposite(ids, tooling, uriPattern, byPasses) {
         this._watchDog__beforeRequest();
-        return new Promise((resolve, reject) => {
-            const compositeRequestBodies = [];
-            let currentCompositeRequestBody;
-            const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
-            ids.forEach((id) => {
-                if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
-                    currentCompositeRequestBody = {
-                        allOrNone: false,
-                        compositeRequest: []
-                    };
-                    compositeRequestBodies.push(currentCompositeRequestBody);
-                }
-                currentCompositeRequestBody.compositeRequest.push({ 
-                    url: `/services/data/v${this.#connection.version}/tooling/sobjects/${type}/${id}`, 
-                    method: 'GET',
-                    referenceId: id
-                });
+        const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
+        const compositeRequestBodies = [];
+        let currentCompositeRequestBody;
+        ids.forEach((id) => {
+            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+                currentCompositeRequestBody = {
+                    allOrNone: false,
+                    compositeRequest: []
+                };
+                compositeRequestBodies.push(currentCompositeRequestBody);
+            }
+            currentCompositeRequestBody.compositeRequest.push({ 
+                url: `/services/data/v${this.#connection.version}${tooling === true ? '/tooling' : ''}${uriPattern.replaceAll('(id)', id)}`, 
+                method: 'GET',
+                referenceId: id
             });
-            const promises = [];
-            compositeRequestBodies.forEach((requestBody) => {
-                promises.push(new Promise((r, e) => {
+        });
+        return new Promise((resolve, reject) => {
+            Promise.all(
+                compositeRequestBodies.map((requestBody) => new Promise((r, e) => {
                     this.#connection.request({
-                            url: `/services/data/v${this.#connection.version}/tooling/composite`, 
+                            url: `/services/data/v${this.#connection.version}${tooling === true ? '/tooling' : ''}/composite`, 
                             method: 'POST',
                             body: JSON.stringify(requestBody),
                             headers: { 'Content-Type': 'application/json' }
@@ -478,10 +463,11 @@ export class OrgCheckSalesforceManager {
                             this._watchDog__afterRequest(e);
                             if (error) {
                                 error.context = { 
-                                    when: 'While creating a promise to call the Tooling Composite API.',
+                                    when: `While creating a promise to call the ${tooling === true ? 'Tooling Composite API' : 'Composite API'}.`,
                                     what: {
-                                        type: metadataInformation.type,
-                                        ids: metadataInformation.ids,
+                                        tooling: tooling,
+                                        pattern: uriPattern,
+                                        ids: ids,
                                         body: requestBody
                                     }
                                 };
@@ -491,9 +477,7 @@ export class OrgCheckSalesforceManager {
                             }
                         }
                     );
-                }));
-            });
-            Promise.all(promises)
+                })))
                 .then((results) => {
                     const records = [];
                     results.forEach((result) => {
@@ -507,7 +491,8 @@ export class OrgCheckSalesforceManager {
                                     error.context = { 
                                         when: 'After receiving a response with bad HTTP status code.',
                                         what: {
-                                            type: type,
+                                            tooling: tooling,
+                                            pattern: uriPattern,
                                             ids: ids,
                                             body: response.body
                                         }
@@ -521,6 +506,10 @@ export class OrgCheckSalesforceManager {
                 })
                 .catch(reject);
         });
+    }
+
+    async readMetadataAtScale(type, ids, byPasses) {
+        return this._callComposite(ids, true, `/sobjects/${type}/(id)`, byPasses);
     }
 
     /**
