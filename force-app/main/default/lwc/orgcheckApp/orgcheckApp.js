@@ -36,7 +36,7 @@ export default class OrgCheckApp extends LightningElement {
      * {String} #currentTab The name of the currently selected tab
      *                      This property is private
      */
-    #currentTab;
+    #currentTab = 'welcome';
 
     /**
      * {OrgCheckAPI} #api The OrgCheck api
@@ -195,6 +195,8 @@ export default class OrgCheckApp extends LightningElement {
                         this.#filters.updateSObjectTypeOptions(filtersData.types);
                         this.#filters.updatePackageOptions(filtersData.packages);
                         this.#filters.updateSObjectApiNameOptions(filtersData.objects);
+                        // Update the current tab
+                        this._updateCurrentTab();
                     }).catch((error) => {
                         // Issue with basic information gathering
                         this.#modal.open('Basic Information Gathering Issue', error, false);
