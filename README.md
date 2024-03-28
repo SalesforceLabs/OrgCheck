@@ -43,6 +43,8 @@ Org Check is available under the [MIT license](LICENSE.md)
 - Social:
   - LinkedIn: https://www.linkedin.com/company/orgchecksfdc/
   - Twitter: https://www.twitter.com/OrgCheckSFDC
+- 2024: 
+  - Salesforce's Ben blog article (the second one!): https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis
 - 2023:
   - Presentation for Salesforce France Professional Services in a **whole new way** with Jani Souryavongsa https://www.linkedin.com/in/janisouryavongsa)
   - Pablo Gonzalez blog: 10 Salesforce Open-source Projects for DevOps Engineers https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck
