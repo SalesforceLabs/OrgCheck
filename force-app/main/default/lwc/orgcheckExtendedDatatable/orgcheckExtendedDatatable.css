@@ -1,6 +1,7 @@
 th {
     cursor: pointer;
     border-width: 3px;
+    border-bottom: var(--lwc-borderWidthThin, 1px) solid var(--lwc-colorBorder, #c9c9c9);
 }
 
 th.sorted {
@@ -23,6 +24,8 @@ th.vertical {
     writing-mode: vertical-lr;
     background-position-x: left;
     transform: rotate(180deg);
+    border-bottom: unset;
+    border-top: var(--lwc-borderWidthThin, 1px) solid var(--lwc-colorBorder, #c9c9c9);
 }
 
 tr.bad {
@@ -53,4 +56,5 @@ th.sticky {
     position: sticky;
     top: 0; /* Don't forget this, required for the stickiness */
     z-index: 1000; /* when scrolling the header should stay on top */
+    vertical-align: bottom;
 }
