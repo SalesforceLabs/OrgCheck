@@ -14,9 +14,11 @@ export class SFDC_Profile extends OrgCheckData {
     lastModifiedDate;
     nbFieldPermissions;
     nbObjectPermissions;
+    type;
 
     constructor(setup) {
         super();
+        setup.type = 'Profile';
         super.initData(setup);
     }
 }

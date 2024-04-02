@@ -285,6 +285,7 @@ export default class OrgCheckApp extends LightningElement {
                     const columns = [
                         { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
                         { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
                         { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
                     ];
                     data.objects.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'objectPermissions', value: o }, orientation: 'vertical' }));
@@ -297,6 +298,7 @@ export default class OrgCheckApp extends LightningElement {
                     const columns = [
                         { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
                         { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
                         { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
                     ];
                     data.apps.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'appPermissions', value: o }, orientation: 'vertical' }));
