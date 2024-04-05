@@ -15,9 +15,4 @@ export class SFDC_User extends OrgCheckData {
     importantPermissions;
     permissionSetIds;
     permissionSetRefs;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

@@ -2,7 +2,7 @@ import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 
 export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL queries on UserPermissionAccess
         sfdcManager.soqlQuery([{ 

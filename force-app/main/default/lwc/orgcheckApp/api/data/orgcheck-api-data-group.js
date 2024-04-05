@@ -21,9 +21,4 @@ export class SFDC_Group extends OrgCheckData {
     isRole;
     isRoleAndSubordinates;
     isTechnical;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

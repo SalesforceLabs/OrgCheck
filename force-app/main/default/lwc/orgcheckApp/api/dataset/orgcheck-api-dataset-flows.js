@@ -3,7 +3,7 @@ import { SFDC_Flow } from '../data/orgcheck-api-data-flow';
 
 export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // List all ids for Flows and Process Builders
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -20,6 +20,9 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
             // Init the map
             const flows = new Map();
 
+            // Init the factory
+            const flowDataFactory = dataFactory.getInstance(SFDC_Flow);
+
             // Get information about flows and process builders using metadata
             localLogger.log(`Calling Composite Tooling API to get Metadata information about ${flowIds.length} flows...`);
             sfdcManager.readMetadataAtScale('Flow', flowIds, [ 'UNKNOWN_EXCEPTION' ])
@@ -31,7 +34,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                         const id = sfdcManager.caseSafeId(record.Id);
 
                         // Create the instance
-                        const flow = new SFDC_Flow({
+                        const flow = flowDataFactory.create({
                             id: id,
                             name: record.FullName,
                             url: sfdcManager.setupUrl('flow', id),
@@ -47,8 +50,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             type: record.ProcessType,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                            isScoreNeeded: true,
-                            isDependenciesNeeded: true,
+                                isDependenciesNeeded: true,
                             dependenciesFor: 'id',
                             allDependencies: results[0].allDependencies
                         });
@@ -57,13 +59,13 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             if (m.name === 'TriggerType') flow.triggerType = m.value.stringValue;
                         });
 
-                        // Compute the score of this flow, with the following rule:
-                        //  - If the flow is not active, then you get +1.
-                        //  - If no description, then you get +1.
-                        //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                        // Compute the score of this item
+                        flowDataFactory.computeScore(flow);
+                        /*
                         if (flow.isActive === false) flow.setBadField('isActive');
                         if (sfdcManager.isEmpty(flow.description)) flow.setBadField('description');
                         if (flow.isItReferenced() === false) flow.setBadField('dependencies.referenced');
+                        */
 
                         // Add it to the map  
                         flows.set(flow.id, flow);

@@ -16,9 +16,4 @@ export class SFDC_UserRole extends OrgCheckData {
     inactiveMembersCount;
     hasInactiveMembers;
     isExternal;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

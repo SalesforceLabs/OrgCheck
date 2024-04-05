@@ -8,7 +8,7 @@ const ORGTYPE_TRIAL = 'Trial';
 
 export class OrgCheckDatasetOrganization extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL queries on InstalledSubscriberPackage and Organization
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,9 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
             // Init the map
             const information = new Map();
 
+            // Init the factory
+            const organizationDataFactory = dataFactory.getInstance(SFDC_Organization);
+
             // Set the map
             const organization = results[0].records[0];
             let type;
@@ -26,7 +29,7 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
             else if (organization.IsSandbox === true) type = ORGTYPE_SANDBOX;
             else if (organization.IsSandbox === false && organization.TrialExpirationDate) type = ORGTYPE_TRIAL;
             else type = ORGTYPE_PROD;
-            information.set(organization.Id, new SFDC_Organization({
+            information.set(organization.Id, organizationDataFactory.create({
                 id: organization.Id,
                 name: organization.Name,
                 type: type,

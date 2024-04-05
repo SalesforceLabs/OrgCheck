@@ -200,6 +200,7 @@ export default class OrgCheckApp extends LightningElement {
                     }).catch((error) => {
                         // Issue with basic information gathering
                         this.#modal.open('Basic Information Gathering Issue', error, false);
+                        console.error(error);
                     }).finally(() => {
                         // Show Daily API Usage in the app
                         this._updateDailyAPIUsage();
@@ -208,6 +209,7 @@ export default class OrgCheckApp extends LightningElement {
                 .catch(error => {
                     // Issue with user permissions
                     this.#modal.open('User Permissions Issue', error.message, false);
+                    console.error(error);
                 })
             ;
         }).catch((error) => {

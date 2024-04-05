@@ -3,7 +3,7 @@ import { SFDC_ProfilePasswordPolicy } from '../data/orgcheck-api-data-profilepas
 
 export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         localLogger.log('Calling Metadata API about ProfilePasswordPolicy...');
         sfdcManager.readMetadata([{ 
@@ -17,6 +17,9 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
             // Init the map
             const policies = new Map();
 
+            // Init the factory
+            const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
+
             // Parse the records
             if (profilePasswordPolicies) {
                 localLogger.log(`Parsing ${profilePasswordPolicies.length} policies...`);
@@ -28,7 +31,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         return
                     };
                     // Create the instance
-                    const policy = new SFDC_ProfilePasswordPolicy({
+                    const policy = policyDataFactory.create({
                         forgotPasswordRedirect: (ppp.forgotPasswordRedirect === 'true'),
                         lockoutInterval: parseInt(ppp.lockoutInterval),
                         maxLoginAttempts: parseInt(ppp.maxLoginAttempts),
@@ -46,13 +49,9 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                     // Add it to the map                        
                     policies.set(policy.profileName, policy);                  
 
-                    // Compute the score of this profile restriction, with the following rule:
-                    //   - If question can include the password, then you get +1.
-                    //   - If password expires more than 90 days, then you get +1.
-                    //   - If password never expires (= 0 days), then you get +1.
-                    //   - If password history less than 3, then you get +1.
-                    //   - If max attempt is not defined, then you get +1.
-                    //   - If lockout inteval is not defined, then you get +1.
+                    // Compute the score of this item
+                    policyDataFactory.computeScore(policy);
+                    /*
                     if (policy.passwordQuestion === true) policy.setBadField('passwordQuestion');
                     if (policy.passwordExpiration > 90 || policy.passwordExpiration === 0) policy.setBadField('passwordExpiration');
                     if (policy.passwordHistory < 3) policy.setBadField('passwordHistory');
@@ -60,6 +59,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                     if (policy.passwordComplexity < 3) policy.setBadField('passwordComplexity');
                     if (policy.maxLoginAttempts === undefined) policy.setBadField('maxLoginAttempts');
                     if (policy.lockoutInterval === undefined) policy.setBadField('lockoutInterval');
+                    */
                 });
             }
 

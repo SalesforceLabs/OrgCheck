@@ -3,7 +3,7 @@ import { SFDC_AppPermission } from '../data/orgcheck-api-data-apppermission';
 
 export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on AppMenuItem and SetupEntityAccess
         // Thanks to SimplySFDC: https://www.simplysfdc.com/2018/04/salesforce-app-visibility-and-query.html
@@ -20,6 +20,9 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
             // Init the maps
             const permissions = new Map();
             const applications = new Map();
+
+            // Init the factory
+            const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
 
             // Set the application map (as reference)
             localLogger.log(`Parsing ${results[0].records.length} Application Menu Items...`);
@@ -46,7 +49,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
                     if (applications.has(appId)) {
                         const app = applications.get(appId);
                         // Create the instance
-                        const permission = new SFDC_AppPermission({
+                        const permission = appPermissionDataFactory.create({
                             parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
                             isParentProfile: record.Parent.IsOwnedByProfile === true,
                             appId: appId,

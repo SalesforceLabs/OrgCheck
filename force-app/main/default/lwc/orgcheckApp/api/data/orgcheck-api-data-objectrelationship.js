@@ -7,8 +7,4 @@ export class SFDC_ObjectRelationShip extends OrgCheckData {
     isCascadeDelete;
     isRestrictedDelete;
     
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

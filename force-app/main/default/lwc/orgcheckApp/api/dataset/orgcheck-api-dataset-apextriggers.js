@@ -6,7 +6,7 @@ const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)
 
 export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on Apex Classes, Apex Coverage and Apex Jobs
         sfdcManager.soqlQuery([{
@@ -28,13 +28,16 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
             // Init the map
             const triggersMap = new Map();
 
+            // Init the factory
+            const apexTriggerDataFactory = dataFactory.getInstance(SFDC_ApexTrigger);
+
             // Set the map
 
             // Part 1- define the apex classes
             localLogger.log(`Parsing ${results[0].records.length} Apex Triggers...`);
             results[0].records
                 .forEach((record) => {
-                    const apexTrigger = new SFDC_ApexTrigger({
+                    const apexTrigger = apexTriggerDataFactory.create({
                         id: sfdcManager.caseSafeId(record.Id),
                         url: sfdcManager.setupUrl('apex-trigger', record.Id),
                         name: record.Name,
@@ -54,9 +57,6 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         hasDML: false,
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
@@ -66,13 +66,15 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         apexTrigger.hasDML = record.Body.match(REGEX_HASDML) !== null; 
                     }
 
-                    // Compute the score of this class, with the following rule:
-                    //  - If the trigger uses a very old API version, then you get +1.
+                    // Compute the score of this item
+                    apexTriggerDataFactory.computeScore(apexTrigger);
+                    /*
                     if (sfdcManager.isVersionOld(apexTrigger.apiVersion)) apexTrigger.setBadField('apiVersion');
                     if (apexTrigger.hasSOQL === true) apexTrigger.setBadField('hasSOQL');
                     if (apexTrigger.hasDML === true) apexTrigger.setBadField('hasDML');
                     if (apexTrigger.length > 5000) apexTrigger.setBadField('length');
                     if (apexTrigger.isItReferenced() === false) apexTrigger.setBadField('dependencies.referenced');
+                    */
 
                     // Add it to the map  
                     triggersMap.set(apexTrigger.id, apexTrigger);

@@ -15,10 +15,4 @@ export class SFDC_Profile extends OrgCheckData {
     nbFieldPermissions;
     nbObjectPermissions;
     type;
-
-    constructor(setup) {
-        super();
-        setup.type = 'Profile';
-        super.initData(setup);
-    }
 }

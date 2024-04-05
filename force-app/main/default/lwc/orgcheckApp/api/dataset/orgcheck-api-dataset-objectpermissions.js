@@ -3,7 +3,7 @@ import { SFDC_ObjectPermission } from '../data/orgcheck-api-data-objectpermissio
 
 export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on ObjectPermissions
         sfdcManager.soqlQuery([{ 
@@ -17,12 +17,15 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
             // Init the maps and sets
             const permissions = new Map();
 
+            // Init the factory
+            const permissionDataFactory = dataFactory.getInstance(SFDC_ObjectPermission);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} ObjectPermissions...`);
             results[0].records
                 .forEach((record) => {
                     // Create the instance
-                    const permission = new SFDC_ObjectPermission({
+                    const permission = permissionDataFactory.create({
                         parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
                         isParentProfile: record.Parent.IsOwnedByProfile === true,
                         objectType: record.SobjectType,

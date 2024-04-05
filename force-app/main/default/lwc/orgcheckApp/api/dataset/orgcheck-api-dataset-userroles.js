@@ -3,7 +3,7 @@ import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 
 export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL queries on ExternalString
         sfdcManager.soqlQuery([{ 
@@ -15,6 +15,9 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
             // Init the map
             const userRoles = new Map();
 
+            // Init the factory
+            const userRoleDataFactory = dataFactory.getInstance(SFDC_UserRole);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} User Roles...`);
             results[0].records
@@ -24,7 +27,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const userRole = new SFDC_UserRole({
+                    const userRole = userRoleDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('user-role', record.Id),
                         name: record.Name,
@@ -52,9 +55,12 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                     userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
                     userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;
 
-                    // Compute the score of this user role, with the following rule:
-                    //  - If the role has no active user in it, then you get +1.
+                    // Compute the score of this item
+                    userRoleDataFactory.computeScore(userRole);
+                    /*
                     if (userRole.activeMembersCount === 0) userRole.setBadField('activeMembersCount');
+                    */
+                   
                     // Add it to the map  
                     userRoles.set(userRole.id, userRole);
                 });

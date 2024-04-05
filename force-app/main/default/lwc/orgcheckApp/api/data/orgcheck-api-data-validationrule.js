@@ -8,9 +8,4 @@ export class SFDC_ValidationRule extends OrgCheckData {
     errorDisplayField;
     errorMessage;
     url;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

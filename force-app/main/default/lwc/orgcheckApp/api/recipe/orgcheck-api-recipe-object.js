@@ -1,5 +1,4 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { OrgCheckDatasetObjectParameters } from '../dataset/params/orgcheck-api-datasetparams-object';
 import { DATASET_OBJECT_ALIAS, 
     DatasetRunInformation, 
     DATASET_OBJECTTYPES_ALIAS } from '../core/orgcheck-api-datasetmanager';
@@ -12,10 +11,8 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
      * @returns {Array<DatasetRunInformation>}
      */
     extract(object) {
-        const datasetRunInfo = new DatasetRunInformation();
-        datasetRunInfo.alias = DATASET_OBJECT_ALIAS;
-        datasetRunInfo.cacheKey = `${DATASET_OBJECT_ALIAS}_${object}`;
-        datasetRunInfo.parameters = new OrgCheckDatasetObjectParameters({ object: object });
+        const datasetRunInfo = new DatasetRunInformation(DATASET_OBJECT_ALIAS, `${DATASET_OBJECT_ALIAS}_${object}`);
+        datasetRunInfo.parameters.set('object', object);
         return [ datasetRunInfo, 
             DATASET_OBJECTTYPES_ALIAS ];
     }

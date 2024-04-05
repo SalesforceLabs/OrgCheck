@@ -28,9 +28,4 @@ export class SFDC_Object extends OrgCheckData {
     recordTypes;
     relationships;
     recordCount;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

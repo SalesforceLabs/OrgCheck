@@ -332,6 +332,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 index: i+1,
                 cssClass: ROW_CSSCLASS(r, this.showScoreColumn),
                 score: r.badScore,
+                explainations: r.badExplainations,
                 cells: []
             };
             if (row.score > 0) {
@@ -453,6 +454,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     handleViewDependency(event) {
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
         viewer.open(event.target.whatid, event.target.whatname, event.target.dependencies);
+    }
+
+    handleViewScore(event) {
+        console.error('SCORE=', event.target.getAttribute('data-score'));
+        console.error('EXPLAINATIONS=', event.target.getAttribute('data-explainations'));
     }
 
     /**

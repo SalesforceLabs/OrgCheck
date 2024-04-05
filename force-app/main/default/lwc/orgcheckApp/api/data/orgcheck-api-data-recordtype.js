@@ -9,9 +9,4 @@ export class SFDC_RecordType extends OrgCheckData {
     isAvailable;
     isDefaultRecordTypeMapping;
     isMaster;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

@@ -80,7 +80,9 @@
                             <template lwc:if={cell.isIndex}>{row.index}</template>
                             
                             <!-- TYPE SCORE: numeric, auto valued, represent the badness score of each row in the table -->
-                            <template lwc:elseif={cell.isScore}>{row.score}</template>
+                            <template lwc:elseif={cell.isScore}>
+                                <lightning-button variant="base" label={row.score} onclick={handleViewScore} data-score={row.score} data-explainations={row.explainations}></lightning-button>
+                            </template>
 
                             <!-- TYPE EMPTY: string, if the value is empty then it can be decorated by the 'decoratedValue' -->
                             <template lwc:elseif={cell.isEmpty}>{cell.data.decoratedValue}</template>

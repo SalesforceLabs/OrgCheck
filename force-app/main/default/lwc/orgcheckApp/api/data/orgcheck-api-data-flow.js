@@ -18,9 +18,4 @@ export class SFDC_Flow extends OrgCheckData {
     lastModifiedDate;
     sobject;
     triggerType;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

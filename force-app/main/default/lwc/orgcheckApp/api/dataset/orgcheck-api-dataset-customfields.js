@@ -3,7 +3,7 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -18,6 +18,9 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
             // Init the map
             const customFields = new Map();
 
+            // Init the factory
+            const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Custom Fields...`);
             results[0].records
@@ -28,7 +31,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const customField = new SFDC_Field({
+                    const customField = fieldDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('field', record.Id, record.EntityDefinition.QualifiedApiName, 
                                     sfdcManager.getObjectType(record.EntityDefinition.QualifiedApiName, record.EntityDefinition.IsCustomSetting)),
@@ -39,17 +42,15 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         objectId: record.EntityDefinition.QualifiedApiName, // id but no ids!
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field has no description, then you get +1.
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                    // Compute the score of this item
+                    fieldDataFactory.computeScore(customField);
+                    /*
                     if (sfdcManager.isEmpty(customField.description)) customField.setBadField('description');
                     if (customField.isItReferenced() === false) customField.setBadField('dependencies.referenced');
+                    */
 
                     // Add it to the map  
                     customFields.set(customField.id, customField);

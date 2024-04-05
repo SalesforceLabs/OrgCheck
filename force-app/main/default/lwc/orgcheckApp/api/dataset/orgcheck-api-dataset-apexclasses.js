@@ -9,7 +9,7 @@ const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 
 
 export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on Apex Classes, Apex Coverage and Apex Jobs
         sfdcManager.soqlQuery([{
@@ -38,13 +38,16 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             // Init the map
             const classesMap = new Map();
 
+            // Init the factory
+            const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
+
             // Set the map
 
             // Part 1- define the apex classes
             localLogger.log(`Parsing ${results[0].records.length} Apex Classes...`);
             results[0].records
                 .forEach((record) => {
-                    const apexClass = new SFDC_ApexClass({
+                    const apexClass = apexClassDataFactory.create({
                         id: sfdcManager.caseSafeId(record.Id),
                         url: sfdcManager.setupUrl('apex-class', record.Id),
                         name: record.Name,
@@ -66,9 +69,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         relatedClasses: [],
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
                     // Get information directly from the source code (if available)
@@ -173,9 +173,10 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     classesMap.get(id).isScheduled = true;
                 });
 
-            // Compute the score of this class, with the following rule:
-            //  - If the class uses a very old API version, then you get +1.
+            // Compute the score of all items
             classesMap.forEach((apexClass) => {
+                apexClassDataFactory.computeScore(apexClass);
+                /*
                 if (sfdcManager.isVersionOld(apexClass.apiVersion)) apexClass.setBadField('apiVersion');
                 if (apexClass.isTest === true && apexClass.nbSystemAsserts === 0) apexClass.setBadField('nbSystemAsserts');
                 if (apexClass.isSharingMissing === true) apexClass.setBadField('specifiedSharing');
@@ -183,6 +184,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 if (apexClass.needsRecompilation === true) apexClass.setBadField('name');
                 if (isNaN(apexClass.coverage) || !apexClass.coverage || apexClass.coverage < 0.75) apexClass.setBadField('coverage');
                 if (apexClass.isItReferenced() === false) apexClass.setBadField('dependencies.referenced');
+                */
             });
 
             // Return data

@@ -3,7 +3,7 @@ import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -15,6 +15,9 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             // Init the map
             const groups = new Map();
 
+            // Init the factory
+            const groupDataFactory = dataFactory.getInstance(SFDC_Group);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Groups...`);
             results[0].records
@@ -24,7 +27,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance (common one)
-                    let group = new SFDC_Group({
+                    let group = groupDataFactory.create({
                         id: id,
                         isPublicGroup: record.Type === 'Regular',
                         isQueue: record.Type === 'Queue',
@@ -85,11 +88,12 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                 group.nbIndirectUsers = group.indirectUserIds?.length || 0;
                 group.nbUsers = group.nbIndirectUsers + (group.directUserIds?.length || 0);
 
-                // Compute the score of this group, with the following rule:
-                //  - If the group is has no direct member, then you get +1.
-                //  - If the group is has no direct users and no indirect users, then you get +1.
+                // Compute the score of this item
+                groupDataFactory.computeScore(group);
+                /*
                 if (group.nbDirectMembers === 0) group.setBadField('nbDirectMembers');
                 if (group.nbUsers === 0) group.setBadField('nbUsers');
+                */
             });
 
             // Return data

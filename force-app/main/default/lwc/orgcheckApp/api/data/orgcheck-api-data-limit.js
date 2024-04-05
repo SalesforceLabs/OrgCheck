@@ -7,9 +7,4 @@ export class SFDC_Limit extends OrgCheckData {
     max;
     used;
     type;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

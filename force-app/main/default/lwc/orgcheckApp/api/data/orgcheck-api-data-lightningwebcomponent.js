@@ -9,9 +9,4 @@ export class SFDC_LightningWebComponent extends OrgCheckData {
     lastModifiedDate;
     description;
     url;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

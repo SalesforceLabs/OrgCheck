@@ -3,7 +3,7 @@ import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforce
 
 export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
     
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -18,6 +18,9 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
             // Init the map
             const components = new Map();
 
+            // Init the factory
+            const componentDataFactory = dataFactory.getInstance(SFDC_VisualForceComponent);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Apex Components...`);
             results[0].records
@@ -27,7 +30,7 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const component = new SFDC_VisualForceComponent({
+                    const component = componentDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('visual-force-component', record.Id),
                         name: record.Name,
@@ -36,17 +39,15 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field has no description, then you get +1.
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
+                    // Compute the score of this item
+                    componentDataFactory.computeScore(component);
+                    /*
                     if (sfdcManager.isEmpty(component.description)) component.setBadField('description');
                     if (component.isItReferenced() === false) component.setBadField('dependencies.referenced');
+                    */
 
                     // Add it to the map  
                     components.set(component.id, component);

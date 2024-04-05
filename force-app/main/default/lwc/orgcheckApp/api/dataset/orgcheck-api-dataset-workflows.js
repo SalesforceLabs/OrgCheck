@@ -3,7 +3,7 @@ import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // List all ids for Workflow Rules
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -19,6 +19,9 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
             // Init the map
             const workflows = new Map();
 
+            // Init the factory
+            const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
+
             // Get information about flows and process builders using metadata
             localLogger.log(`Calling Composite Tooling API to get Metadata information about ${workflowRuleIds.length} workflow rules...`);
             sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ])
@@ -30,7 +33,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                         const id = sfdcManager.caseSafeId(record.Id);
 
                         // Create the instance
-                        const workflow = new SFDC_Workflow({
+                        const workflow = workflowDataFactory.create({
                             id: id,
                             name: record.FullName,
                             url: sfdcManager.setupUrl('workflow', id),
@@ -75,15 +78,14 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                         }
                         workflow.hasAction = (workflow.actions.length + workflow.futureActions.length > 0);
 
-                        // Compute the score of this workflow, with the following rule:
-                        //  - If the workflow is not active, then you get +1.
-                        //  - If the workflow ihas no action (either direct or future), then you get +1.
-                        //  - If the workflow has timetrigger with no action, then you get +1.
-                        //  - If the field has no description, then you get +1.
+                        // Compute the score of this item
+                        workflowDataFactory.computeScore(workflow);
+                        /*
                         if (workflow.isActive === false) workflow.setBadField('isActive');
                         if (workflow.hasAction === false) workflow.setBadField('hasAction');
                         if (workflow.emptyTimeTriggers.length > 0) workflow.setBadField('emptyTimeTriggers');
                         if (sfdcManager.isEmpty(workflow.description)) workflow.setBadField('description');
+                        */
 
                         // Add it to the map  
                         workflows.set(workflow.id, workflow);

@@ -18,14 +18,4 @@ export class SFDC_PermissionSet extends OrgCheckData {
     profileIds;
     profileRefs;
     type;
-
-    constructor(setup) {
-        super();
-        if (setup.isGroup === true) {
-            setup.type = 'Permission Set Group';
-        } else {
-            setup.type = 'Permission Set';
-        }
-        super.initData(setup);
-    }
 }

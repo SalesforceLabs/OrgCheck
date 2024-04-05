@@ -11,9 +11,4 @@ export class SFDC_ObjectPermission extends OrgCheckData {
     isDelete;
     isViewAll;
     isModifyAll;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

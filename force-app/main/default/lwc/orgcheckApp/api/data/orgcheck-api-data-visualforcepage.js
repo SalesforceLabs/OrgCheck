@@ -10,9 +10,4 @@ export class SFDC_VisualForcePage extends OrgCheckData {
     lastModifiedDate;
     description;
     url;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

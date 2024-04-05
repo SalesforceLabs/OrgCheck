@@ -5,9 +5,4 @@ export class SFDC_FieldSet extends OrgCheckData {
     label;
     description;
     url;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

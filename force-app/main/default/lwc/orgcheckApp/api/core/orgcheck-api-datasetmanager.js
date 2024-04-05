@@ -1,6 +1,7 @@
 import { OrgCheckLogger } from './orgcheck-api-logger';
 import { OrgCheckDataCacheManager } from './orgcheck-api-datacache';
 import { OrgCheckSalesforceManager } from './orgcheck-api-sfconnectionmanager';
+import { OrgCheckDataFactory } from './orgcheck-api-datafactory';
 import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
 import { OrgCheckDatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
 import { OrgCheckDatasetObject } from '../dataset/orgcheck-api-dataset-object';
@@ -30,8 +31,14 @@ import { OrgCheckDatasetWorkflows } from '../dataset/orgcheck-api-dataset-workfl
 
 export class DatasetRunInformation {
     alias;
-    parameters;
     cacheKey;
+    parameters;
+    
+    constructor(alias, cacheKey) {
+        this.alias = alias;
+        this.cacheKey = cacheKey;
+        this.parameters = new Map();
+    }
 }
 
 export const DATASET_CUSTOMFIELDS_ALIAS = 'custom-fields';
@@ -63,10 +70,30 @@ export const DATASET_WORKFLOWS_ALIAS = 'workflows';
 
 export class OrgCheckDatasetManager {
     
+    /**
+     * @property {Map<string, OrgCheckDataset>} datasets
+     */
     #datasets;
+
+    /**
+     * @property {OrgCheckDataCacheManager} cache
+     */
     #cache;
-    #logger;
+
+    /**
+     * @property {OrgCheckSalesforceManager} sfdcManager
+     */
     #sfdcManager;
+
+    /**
+     * @property {OrgCheckLogger} logger
+     */
+    #logger;
+
+    /**
+     * @property {OrgCheckDataFactory} dataFactory
+     */
+    #dataFactory;
 
     /**
      * Dataset Manager constructor
@@ -87,6 +114,7 @@ export class OrgCheckDatasetManager {
         this.#logger = logger;
         this.#datasets = new Map();
         this.#cache = new OrgCheckDataCacheManager();
+        this.#dataFactory = new OrgCheckDataFactory(sfdcManager);
 
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
@@ -151,6 +179,8 @@ export class OrgCheckDatasetManager {
                 this.#datasets.get(alias).run(
                     // sfdc manager
                     this.#sfdcManager,
+                    // data factory
+                    this.#dataFactory,
                     // local logger
                     { log: (msg) => { this.#logger.sectionContinues(section, msg); }},
                     // success

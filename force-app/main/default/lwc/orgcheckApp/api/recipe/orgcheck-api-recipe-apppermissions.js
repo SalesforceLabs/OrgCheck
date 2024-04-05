@@ -2,7 +2,6 @@ import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_APPPERMISSIONS_ALIAS,
     DATASET_PROFILES_ALIAS,
     DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
-import { SFDC_AppPermissionsPerParent } from '../data/orgcheck-api-data-apppermissionsperparent';
 
 export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
 
@@ -48,10 +47,10 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         permissions.forEach((permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
                 if (permissionsBy.has(permission.parentId) === false) {
-                    permissionsBy.set(permission.parentId, new SFDC_AppPermissionsPerParent({
+                    permissionsBy.set(permission.parentId, {
                         parentRef: permission.parentRef,
                         appPermissions: {}
-                    }));
+                    });
                 }
                 permissionsBy.get(permission.parentId).appPermissions[permission.appName] =
                     (permission.isAccessible?'A':'') +
