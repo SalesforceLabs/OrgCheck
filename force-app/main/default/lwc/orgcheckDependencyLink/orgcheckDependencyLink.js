@@ -2,8 +2,8 @@ import { LightningElement, api } from 'lwc';
 
 export default class OrgcheckDependencyLink extends LightningElement {
 
-    @api whatid;
-    @api whatname;
+    @api whatId;
+    @api whatName;
     @api dependencies;
     numberOfDependencies;
 
@@ -12,6 +12,6 @@ export default class OrgcheckDependencyLink extends LightningElement {
     }
 
     handleClick() {
-        this.dispatchEvent(new CustomEvent('view', { detail: { whatid: this.whatid, whatname: this.whatname, dependencies: this.dependencies } }));
+        this.dispatchEvent(new CustomEvent('view', { detail: { whatId: this.whatId, whatName: this.whatName, dependencies: this.dependencies } }));
     }
 }

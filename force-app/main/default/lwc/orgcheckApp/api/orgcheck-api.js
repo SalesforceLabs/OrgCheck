@@ -104,6 +104,10 @@ export class OrgCheckAPI {
         return this.#datasetManager.getCacheInformation();
     }
 
+    getValidationRule(id) {
+        return this.#datasetManager.getValidationRule(id);
+    }
+
     /**
      * Get the lastest Daily API Usage from JSForce, and the level of confidence 
      * we have in this ratio to continue using org check.

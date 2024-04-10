@@ -4,13 +4,13 @@
             <div class="slds-modal__container">
                 <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
                 <div class="slds-modal__header">
-                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatname} ({whatid})</h1>
+                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Dependency viewer: {whatName} ({whatId})</h1>
                 </div>
                 <div class="slds-modal__content slds-scrollable">
                     <lightning-tabset variant="scoped">
                         <lightning-tab label="Graphical View">
                             <c-orgcheck-graphics 
-                                name={whatname}
+                                name={whatName}
                                 box-color-decorator={dependencyBoxColorsDecorator}
                                 box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
                                 source={dependencyTreeByType}></c-orgcheck-graphics>

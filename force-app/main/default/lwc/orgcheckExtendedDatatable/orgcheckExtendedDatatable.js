@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 
 const TYPE_INDEX = 'index';
 const TYPE_SCORE = 'score';
+const TYPE_DEPENDENCIES = 'dependencyViewer';
 
 const SORT_ORDER_ASC = 'asc';
 const SORT_ORDER_DESC = 'desc';
@@ -67,14 +68,12 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
 }
 
 const CELL_CSSCLASS = (row, cell) => {
-    if (cell.type === TYPE_SCORE && row.badScore > 0) {
-        return 'bad badscore';
-    }
+    if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
     return (row.badFields && row.badFields.includes(cell.data?.ref || cell.data?.value) === true) ? 'bad' : '';
 }
 
 const ROW_CSSCLASS = (row, showScore) => {
-    return ((showScore === true && row.badScore > 0)? 'bad': '');
+    return ((showScore === true && row.badFields?.length > 0)? 'bad': '');
 }
 
 const HEADER_CSSCLASS = (column, isSticky) => {
@@ -188,12 +187,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api showSearch = false;
 
-    /**
-     * Do you want to show the SCORE column in the table?
-     * No need to add it to the columns, flag this property to true
-     * False by default.
-     */
-    @api showScoreColumn = false;
+    #showScoreColumn = false;
 
     /**
      * Do you want to show the ROW NUMBER column in the table?
@@ -274,20 +268,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api set columns(columns) {
         if (columns) {
             this.usesDependencyViewer = false;
+            this.#showScoreColumn = false;
             const _columns = [];
             if (this.showRowNumberColumn === true) {
                 _columns.push({ label: '#', type: TYPE_INDEX });
             }
-            if (this.showScoreColumn === true) {
-                _columns.push({ label: 'Score', type: TYPE_SCORE, data: { value: 'badScore' }, sorted: SORT_ORDER_DESC });
-            }
             _columns.push(...columns);
             this.#columns = _columns.map((c, i) => { 
+                if (c.type === TYPE_SCORE) {
+                    this.#showScoreColumn = true;
+                }
                 if (c.sorted) {
                     this.#sortingColumnIndex = i;
                     this.#sortingOrder = c.sorted;
                 }
-                if (this.usesDependencyViewer === false && c.type === 'dependencyViewer') {
+                if (this.usesDependencyViewer === false && c.type === TYPE_DEPENDENCIES) {
                     this.usesDependencyViewer = true;
                 }
                 return Object.assign({
@@ -330,9 +325,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             const row = { 
                 key: i, 
                 index: i+1,
-                cssClass: ROW_CSSCLASS(r, this.showScoreColumn),
-                score: r.badScore,
-                explainations: r.badExplainations,
+                cssClass: ROW_CSSCLASS(r, this.#showScoreColumn),
+                score: r.badFields?.length || 0,
+                badFields: r.badFields,
+                badReasonIds: r.badReasonIds,
                 cells: []
             };
             if (row.score > 0) {
@@ -353,9 +349,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     data: {}
                 };
                 cell[c.typeProperty] = true;
-                if (c.isIndex === true || c.isScore === true) {
+                /*if (c.type === TYPE_INDEX) {
                     cell.data.value = '';
-                } else if (c.isIterative === true) {
+                } else if (c.type === TYPE_SCORE) {
+                    cell.data.value = row.score;
+                } else */ if (c.isIterative === true) {
                     cell.data.values = ref?.map((r) => CELL_PREPARE(r, c)) || [];
                 } else {
                     CELL_PREPARE(ref, c, cell);
@@ -453,12 +451,17 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     handleViewDependency(event) {
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
-        viewer.open(event.target.whatid, event.target.whatname, event.target.dependencies);
+        viewer.open(event.target.whatId, event.target.whatName, event.target.dependencies);
     }
 
     handleViewScore(event) {
-        console.error('SCORE=', event.target.getAttribute('data-score'));
-        console.error('EXPLAINATIONS=', event.target.getAttribute('data-explainations'));
+        this.dispatchEvent(new CustomEvent('viewscore', { detail: { 
+            whatId: event.target.whatId,
+            whatName: event.target.whatName,
+            score: event.target.score,
+            reasonIds: event.target.reasonIds, 
+            fields: event.target.fields 
+        }}));
     }
 
     /**

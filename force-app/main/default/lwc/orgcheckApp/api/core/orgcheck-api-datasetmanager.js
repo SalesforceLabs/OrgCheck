@@ -219,4 +219,8 @@ export class OrgCheckDatasetManager {
     removeAllCache() {
         this.#cache.clear();
     }
-}
+
+    getValidationRule(id) {
+        return this.#dataFactory.getValidationRule(id);
+    }
+ }

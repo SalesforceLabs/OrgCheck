@@ -1,6 +1,6 @@
 export class OrgCheckData {
-    badScore;
+    score;
     badFields;
-    badExplainations;
+    badReasonIds;
     dependencies;
 }

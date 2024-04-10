@@ -43,9 +43,9 @@ export class OrgCheckDataFactory {
 
         this.#allValidations = [
             { 
-                description: 'Component not used',
-                formula: (d) => d.dependencies.referenced.length > 0 === true, 
-                errorMessage: 'This component is not used anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
+                description: 'Not referenced anywhere',
+                formula: (d) => d.dependencies.referenced.length === 0, 
+                errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced',
                 applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
@@ -67,15 +67,21 @@ export class OrgCheckDataFactory {
                 badField: 'description',
                 applicable: [ SFDC_Field, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow ]
             }
-        ];
+        ].map((v, i) => { v.id = i; return v; });
+        Object.freeze(this.#allValidations); 
 
         this.#needDepencencies = [
             SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, 
             SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent,
             SFDC_VisualForceComponent, SFDC_VisualForcePage
         ];
+        Object.freeze(this.#needDepencencies); 
 
         this.#instances = new Map();
+    }
+
+    getValidationRule(id) {
+        return this.#allValidations[id];
     }
 
     getInstance(dataClass) {
@@ -94,9 +100,9 @@ export class OrgCheckDataFactory {
                     Object.seal(row);
                     // For this type if we have at least one validation rule, then score is needed
                     if (validations.length > 0) {
-                        row.badScore = 0;
+                        row.score = 0;
                         row.badFields = [];
-                        row.badExplainations = [];
+                        row.badReasonIds = [];
                     }
                     // If dependencies are needed...
                     if (isDependenciesNeeded === true && setup.allDependencies) {
@@ -105,20 +111,14 @@ export class OrgCheckDataFactory {
                     // Return the row finally
                     return row;
                 },
-                computeScore: (r) => { 
-                    let badScore = 0;
-                    const badFields = new Set();
-                    const badExplainations = new Set();
+                computeScore: (row) => { 
                     validations
-                        .filter(v => v.formula(r))
+                        .filter(v => v.formula(row))
                         .forEach(v => {
-                            badScore++;
-                            badFields.add(v.badField);
-                            badExplainations.add(v.errorMessage);
+                            row.score++;
+                            row.badFields.push(v.badField);
+                            row.badReasonIds.push(v.id);
                         });
-                    r.badScore = badScore;
-                    r.badFields = Array.from(badFields);
-                    r.badExplainations = Array.from(badExplainations);
                 }
             };
             this.#instances.set(dataClass, instance);

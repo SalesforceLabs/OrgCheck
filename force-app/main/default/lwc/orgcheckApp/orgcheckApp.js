@@ -117,12 +117,27 @@ export default class OrgCheckApp extends LightningElement {
         this._updateCurrentTab();
     }
 
+    async handleViewScore(event) {
+        const whatid = event.detail.whatId;
+        const whatname = event.detail.whatName;
+        const score = event.detail.score;
+        const reasonIds = event.detail.reasonIds;
+
+        let htmlContent = `The component <code><b>${whatname}</b></code> (<code>${whatid}</code>) has a score of <b><code>${score}</code></b> because of the following reasons:<br /><ul>`;
+        reasonIds.forEach((id) => {
+            const reason = this.#api.getValidationRule(id);
+            htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
+        });
+        htmlContent += '</ul>';
+        this.#modal.open(`Understand the Score of "${whatname}" (${whatid})`, htmlContent);
+    }
+
     async handleClickRunAllTests() {
         const asyncApexJobId = await this.#api.runAllTestsAsync();
         let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
-        htmlContent += 'For more information about the success of these tests, you can:<br />';
-        htmlContent += ' - Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.<br />';
-        htmlContent += ` - Check with Tooling API the status of the following record: /services/data/v52.0/tooling/sobjects/AsyncApexJob/${asyncApexJobId}<br /><br />`;
+        htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
+        htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
+        htmlContent += `<li>Check with Tooling API the status of the following record: /tooling/sobjects/AsyncApexJob/${asyncApexJobId}</li><ul>`;
         this.#modal.open('Asynchronous Run All Test Asked', htmlContent);
     }
 
@@ -285,7 +300,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'object-permissions': {
                     const data = await this.#api.getObjectPermissionsPerParent(namespace);
                     const columns = [
-                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
+                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
                         { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
                         { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
                         { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
@@ -298,7 +313,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'app-permissions': {
                     const data = await this.#api.getApplicationPermissionsPerParent(namespace);
                     const columns = [
-                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }},
+                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
                         { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
                         { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
                         { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
@@ -345,9 +360,10 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     customFieldsTableColumns = [
-        { label: 'Object',              type: 'id',               data: { ref: 'objectRef', value: 'label', url: 'url' }},
-        { label: 'Object Type',         type: 'text',             data: { ref: 'objectRef.typeRef', value: 'label' }},
+        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'In this object',      type: 'id',               data: { ref: 'objectRef', value: 'label', url: 'url' }},
+        { label: 'Object Type',         type: 'text',             data: { ref: 'objectRef.typeRef', value: 'label' }},
         { label: 'Package',             type: 'text',             data: { value: 'package' }},
         { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
@@ -363,6 +379,7 @@ export default class OrgCheckApp extends LightningElement {
     customFieldsTableData;
 
     customLabelsTableColumns = [
+        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Package',             type: 'text',             data: { value: 'package' }},
         { label: 'Label',               type: 'text',             data: { value: 'label' }},
@@ -383,6 +400,7 @@ export default class OrgCheckApp extends LightningElement {
     customLabelsTableData;
 
     auraComponentsTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -397,6 +415,7 @@ export default class OrgCheckApp extends LightningElement {
     auraComponentsTableData;
 
     lightningPagesTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
@@ -410,6 +429,7 @@ export default class OrgCheckApp extends LightningElement {
     lightningPagesTableData;
 
     lightningWebComponentsTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -424,6 +444,7 @@ export default class OrgCheckApp extends LightningElement {
     lightningWebComponentsTableData;
 
     permissionSetsTableColumns = [
+        { label: 'Score',            type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
         { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
@@ -441,6 +462,7 @@ export default class OrgCheckApp extends LightningElement {
     permissionSetsTableData;
 
     profilesTableColumns = [
+        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
         { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
@@ -456,6 +478,7 @@ export default class OrgCheckApp extends LightningElement {
     profilesTableData;
 
     profileRestrictionsTableColumns = [
+        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { ref: 'profileRef', value: 'isCustom' }},
         { label: 'Package',         type: 'text',     data: { ref: 'profileRef', value: 'package' }},
@@ -467,6 +490,7 @@ export default class OrgCheckApp extends LightningElement {
     profileRestrictionsTableData;
 
     profilePasswordPoliciesTableColumns = [
+        { label: 'Score',                                     type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                                      type: 'text',    data: { value: 'profileName' }},
         { label: 'User password expires in',                  type: 'numeric', data: { value: 'passwordExpiration' }},
         { label: 'Enforce password history',                  type: 'numeric', data: { value: 'passwordHistory' }},
@@ -482,6 +506,7 @@ export default class OrgCheckApp extends LightningElement {
     profilePasswordPoliciesTableData;
 
     publicGroupsTableColumns = [
+        { label: 'Score',                  type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
         { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
@@ -496,6 +521,7 @@ export default class OrgCheckApp extends LightningElement {
     publicGroupsTableData;
 
     queuesTableColumns = [
+        { label: 'Score',                  type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
         { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
@@ -510,6 +536,7 @@ export default class OrgCheckApp extends LightningElement {
     queuesTableData;
 
     usersTableColumns = [
+        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
         { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
@@ -523,6 +550,7 @@ export default class OrgCheckApp extends LightningElement {
     usersTableData;
 
     visualForceComponentsTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -537,6 +565,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForceComponentsTableData;
 
     visualForcePagesTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Mobile',        type: 'boolean',          data: { value: 'isMobileReady' }},
@@ -552,6 +581,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForcePagesTableData;
 
     apexClassesTableColumns = [
+        { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
@@ -581,6 +611,7 @@ export default class OrgCheckApp extends LightningElement {
     apexClassesTableData;
     
     apexUncompiledTableColumns = [
+        { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
@@ -597,6 +628,7 @@ export default class OrgCheckApp extends LightningElement {
     apexUncompiledTableData;
 
     apexTriggersTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -622,6 +654,7 @@ export default class OrgCheckApp extends LightningElement {
     apexTriggersTableData;
 
     apexTestsTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -656,11 +689,12 @@ export default class OrgCheckApp extends LightningElement {
     appPermissionsTableData;
 
     rolesTableColumns = [
-        { label: 'Name',                        type: 'id',  data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',              type: 'text',  data: { value: 'apiname' }},
+        { label: 'Score',                       type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                        type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',              type: 'text',     data: { value: 'apiname' }},
         { label: 'Number of active members',    type: 'numeric',  data: { value: 'activeMembersCount' }},
         { label: 'Number of inactive members',  type: 'numeric',  data: { value: 'inactiveMembersCount' }},
-        { label: 'Parent',                      type: 'id',  data: { ref: 'parentRef', value: 'name', url: 'url' }}
+        { label: 'Parent',                      type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }}
     ];
 
     rolesTableData;
@@ -684,9 +718,9 @@ export default class OrgCheckApp extends LightningElement {
         htmlContent += '<br />';
         htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
         htmlContent += '<br />';
-        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br />`;
-        data.record.activeMemberRefs?.forEach(activeMember => htmlContent += ` - ${activeMember.name}<br />`);
-        htmlContent += '<br />';
+        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
+        data.record.activeMemberRefs?.forEach(activeMember => htmlContent += `<li>${activeMember.name}</li>`);
+        htmlContent += '</ul><br />';
         htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
         htmlContent += '<br />';
         if (data.record.parentRef) {
@@ -702,6 +736,7 @@ export default class OrgCheckApp extends LightningElement {
     rolesTree;
 
     flowsTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Version',       type: 'numeric',          data: { value: 'version' }},
@@ -719,6 +754,7 @@ export default class OrgCheckApp extends LightningElement {
     flowsTableData;
     
     processBuildersTableColumns = [
+        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
         { label: 'Version',       type: 'numeric',          data: { value: 'version' }},
@@ -738,6 +774,7 @@ export default class OrgCheckApp extends LightningElement {
     processBuildersTableData;
     
     workflowsTableColumns = [
+        { label: 'Score',             type: 'score',       data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',              type: 'id',          data: { value: 'name', url: 'url' }},
         { label: 'Is Active',         type: 'boolean',     data: { value: 'isActive' }},
         { label: 'Has Actions',       type: 'boolean',     data: { value: 'hasAction' }},

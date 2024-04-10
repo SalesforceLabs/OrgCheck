@@ -81,7 +81,7 @@
                             
                             <!-- TYPE SCORE: numeric, auto valued, represent the badness score of each row in the table -->
                             <template lwc:elseif={cell.isScore}>
-                                <lightning-button variant="base" label={row.score} onclick={handleViewScore} data-score={row.score} data-explainations={row.explainations}></lightning-button>
+                                <c-orgcheck-score-link onview={handleViewScore} what-id={cell.data.id} what-name={cell.data.name} score={row.score} fields={row.badFields} reason-ids={row.badReasonIds}></c-orgcheck-score-link>
                             </template>
 
                             <!-- TYPE EMPTY: string, if the value is empty then it can be decorated by the 'decoratedValue' -->
@@ -89,7 +89,7 @@
 
                             <!-- TYPE DEPENDENCY: link, opens the depdency modal with dependencies information about the current row -->
                             <template lwc:elseif={cell.isDependencyViewer}>
-                                <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.data.value} whatid={cell.data.id} whatname={cell.data.name}></c-orgcheck-dependency-link>
+                                <c-orgcheck-dependency-link onview={handleViewDependency} what-id={cell.data.id} what-name={cell.data.name} dependencies={cell.data.value}></c-orgcheck-dependency-link>
                             </template>
 
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->

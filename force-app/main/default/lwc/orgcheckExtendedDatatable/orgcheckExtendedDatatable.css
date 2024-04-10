@@ -42,12 +42,6 @@ td.bad {
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
-td.badscore {
-    background-image: url(/img/samples/rating1.gif);
-    cursor: pointer;
-    color: red;
-}
-
 table.dontuseallspace {
     width: unset;
 }

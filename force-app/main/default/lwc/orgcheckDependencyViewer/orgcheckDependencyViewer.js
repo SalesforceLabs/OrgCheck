@@ -14,8 +14,8 @@ const ESCAPE_DATA = (unsafe) => {
 export default class OrgcheckDependencyViewer extends LightningElement {
 
     isShown;
-    whatid;
-    whatname;
+    whatId;
+    whatName;
     dependencyData;
     dependencyTreeByType;
     dependencyBoxColorsDecorator = (depth) => {
@@ -44,15 +44,15 @@ export default class OrgcheckDependencyViewer extends LightningElement {
         { label: 'Type',  type: 'text', data: { value: 'type' }}
     ];
 
-    @api open(whatid, whatname, dependencies) {
+    @api open(whatId, whatName, dependencies) {
         this.isShown = false;
-        this.whatid = whatid;
-        this.whatname = whatname;
+        this.whatId = whatId;
+        this.whatName = whatName;
         this.dependencyData = dependencies;
 
         // Hierarchical view of the data
         this.dependencyTreeByType = { 
-            label: whatname,
+            label: whatName,
             children: [ 
                 { id: 'referenced', label: 'Where is it referenced?', children: [] }, 
                 { id: 'using', label: 'What is it using?', children: [] } 
