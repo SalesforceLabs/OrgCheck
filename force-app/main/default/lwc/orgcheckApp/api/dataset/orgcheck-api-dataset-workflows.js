@@ -44,8 +44,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                             hasAction: true,
                             futureActions: [],
                             emptyTimeTriggers: [],
-                            description: record.description,
-                            isScoreNeeded: true
+                            description: record.description
                         });
                         const directActions = record.Metadata.actions;
                         if (directActions) {
@@ -80,12 +79,6 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
                         // Compute the score of this item
                         workflowDataFactory.computeScore(workflow);
-                        /*
-                        if (workflow.isActive === false) workflow.setBadField('isActive');
-                        if (workflow.hasAction === false) workflow.setBadField('hasAction');
-                        if (workflow.emptyTimeTriggers.length > 0) workflow.setBadField('emptyTimeTriggers');
-                        if (sfdcManager.isEmpty(workflow.description)) workflow.setBadField('description');
-                        */
 
                         // Add it to the map  
                         workflows.set(workflow.id, workflow);

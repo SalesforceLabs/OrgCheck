@@ -36,7 +36,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
                         name: record.Name,
                         apiVersion: record.ApiVersion,
                         isMobileReady: record.IsAvailableInTouch,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
@@ -45,10 +45,6 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
                     // Compute the score of this item
                     pageDataFactory.computeScore(visualForcePage);
-                    /*
-                    if (sfdcManager.isEmpty(visualForcePage.description)) visualForcePage.setBadField('description');
-                    if (visualForcePage.isItReferenced() === false) visualForcePage.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     visualForcePages.set(visualForcePage.id, visualForcePage);

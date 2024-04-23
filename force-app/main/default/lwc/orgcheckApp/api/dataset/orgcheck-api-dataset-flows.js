@@ -50,7 +50,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             type: record.ProcessType,
                             createdDate: record.CreatedDate,
                             lastModifiedDate: record.LastModifiedDate,
-                                isDependenciesNeeded: true,
+                            isDependenciesNeeded: true,
                             dependenciesFor: 'id',
                             allDependencies: results[0].allDependencies
                         });
@@ -61,11 +61,6 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
                         // Compute the score of this item
                         flowDataFactory.computeScore(flow);
-                        /*
-                        if (flow.isActive === false) flow.setBadField('isActive');
-                        if (sfdcManager.isEmpty(flow.description)) flow.setBadField('description');
-                        if (flow.isItReferenced() === false) flow.setBadField('dependencies.referenced');
-                        */
 
                         // Add it to the map  
                         flows.set(flow.id, flow);

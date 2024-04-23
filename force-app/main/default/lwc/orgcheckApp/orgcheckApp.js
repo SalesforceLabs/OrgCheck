@@ -362,19 +362,25 @@ export default class OrgCheckApp extends LightningElement {
     customFieldsTableColumns = [
         { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'In this object',      type: 'id',               data: { ref: 'objectRef', value: 'label', url: 'url' }},
-        { label: 'Object Type',         type: 'text',             data: { ref: 'objectRef.typeRef', value: 'label' }},
-        { label: 'Package',             type: 'text',             data: { value: 'package' }},
-        { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
-        { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
-        { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'In this object',      type: 'id',               filter: 'obj', data: {ref: 'objectRef', value: 'label', url: 'url' }},
+        { label: 'Object Type',         type: 'text',             filter: 'obj', data: {ref: 'objectRef.typeRef', value: 'label' }},
+        { label: 'Package',             type: 'text',             data: {value: 'package' }},
+        { label: 'Using',               type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Layout' }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Class' }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', filter: 'dep', data: {value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         data: {value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         data: {value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: {value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
+    customFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c =>
+        c.filter === undefined || c.filter !== 'obj'
+    );
+    standardFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c => 
+        c.filter === undefined || c.filter !== 'obj' && c.filter !== 'dep'
+    );
 
     customFieldsTableData;
 
@@ -394,7 +400,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Value',               type: 'text',             data: { value: 'value'}, modifier: { maximumLength: 30 }}
+        { label: 'Value',               type: 'text',             data: { value: 'value'}, modifier: { maximumLength: 45 }}
     ];
 
     customLabelsTableData;
@@ -409,7 +415,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     auraComponentsTableData;
@@ -423,7 +429,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     lightningPagesTableData;
@@ -438,7 +444,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ]
 
     lightningWebComponentsTableData;
@@ -456,7 +462,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Users\' profiles', type: 'ids',      data: { ref: 'profileRefs', value: 'name', url: 'url' }},
         { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
-        { label: 'Description',      type: 'text',     data: { value: 'description'}, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',      type: 'text',     data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     permissionSetsTableData;
@@ -472,7 +478,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts' }, modifier: { max: 50, valueAfterMax: '50+', min: 1, valueBeforeMin: 'No active user on this profile!' }},
         { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
-        { label: 'Description',     type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',     type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     profilesTableData;
@@ -484,7 +490,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Package',         type: 'text',     data: { ref: 'profileRef', value: 'package' }},
         { label: 'Ip Ranges',       type: 'objects',  data: { ref: 'ipRanges' }, modifier: { template: '{description}: from {startAddress} to {endAddress} --> {difference:numeric} address(es)' }},
         { label: 'Login Hours',     type: 'objects',  data: { ref: 'loginHours' }, modifier: { template: '{day} from {fromTime} to {toTime} --> {difference:numeric} minute(s)' }},
-        { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     profileRestrictionsTableData;
@@ -559,7 +565,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description'}, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     visualForceComponentsTableData;
@@ -575,7 +581,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     visualForcePagesTableData;
@@ -748,7 +754,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     flowsTableData;
@@ -768,7 +774,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     processBuildersTableData;
@@ -783,7 +789,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Future Actions',    type: 'objects',     data: { ref: 'futureActions' }, modifier: { template: '{field} after {delay}: {name} ({type})' }},
         { label: 'Created date',      type: 'dateTime',    data: { value: 'createdDate' }},
         { label: 'Modified date',     type: 'dateTime',    data: { value: 'lastModifiedDate' }},
-        { label: 'Description',       type: 'text',        data: { value: 'description' }, modifier: { maximumLength: 30, valueIfEmpty: 'No description.' }}
+        { label: 'Description',       type: 'text',        data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
     
     workflowsTableData;

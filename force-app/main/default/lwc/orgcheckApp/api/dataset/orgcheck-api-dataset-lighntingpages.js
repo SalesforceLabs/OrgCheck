@@ -36,7 +36,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                         url: sfdcManager.setupUrl('lightning-page', record.Id),
                         name: record.MasterLabel,
                         apiVersion: record.ApiVersion,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
@@ -45,10 +45,6 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
 
                     // Compute the score of this item
                     pageDataFactory.computeScore(page);
-                    /*
-                    if (sfdcManager.isEmpty(page.description)) page.setBadField('description');
-                    if (page.isItReferenced() === false) page.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     pages.set(page.id, page);

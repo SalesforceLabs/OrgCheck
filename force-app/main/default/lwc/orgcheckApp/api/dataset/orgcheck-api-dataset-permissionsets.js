@@ -56,16 +56,11 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                         lastModifiedDate: record.LastModifiedDate,
                         nbFieldPermissions: record.FieldPerms?.records.length || 0,
                         nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                        profileIds: {},
-                        isScoreNeeded: true
+                        profileIds: {}
                     });
 
                     // Compute the score of this item
                     permissionSetDataFactory.computeScore(permissionSet);
-                    /*
-                    if (permissionSet.isCustom === true && permissionSet.memberCounts === 0) permissionSet.setBadField('memberCounts');
-                    if (permissionSet.isCustom === true && sfdcManager.isEmpty(permissionSet.description)) permissionSet.setBadField('description');
-                    */
                     
                     // Add it to the map
                     permissionSets.set(id, permissionSet);

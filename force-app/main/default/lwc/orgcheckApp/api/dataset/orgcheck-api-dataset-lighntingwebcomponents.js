@@ -35,7 +35,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
                         url: sfdcManager.setupUrl('lightning-web-component', record.Id),
                         name: record.MasterLabel,
                         apiVersion: record.ApiVersion,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
@@ -44,10 +44,6 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
 
                     // Compute the score of this item
                     componentDataFactory.computeScore(component);
-                    /*
-                    if (sfdcManager.isEmpty(component.description)) component.setBadField('description');
-                    if (component.isItReferenced() === false) component.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     components.set(component.id, component);

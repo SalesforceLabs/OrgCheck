@@ -52,7 +52,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         url: sfdcManager.setupUrl('apex-class', record.Id),
                         name: record.Name,
                         apiVersion: record.ApiVersion,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         isTest: false,
                         isAbstract: false,
                         isClass: true,
@@ -176,15 +176,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             // Compute the score of all items
             classesMap.forEach((apexClass) => {
                 apexClassDataFactory.computeScore(apexClass);
-                /*
-                if (sfdcManager.isVersionOld(apexClass.apiVersion)) apexClass.setBadField('apiVersion');
-                if (apexClass.isTest === true && apexClass.nbSystemAsserts === 0) apexClass.setBadField('nbSystemAsserts');
-                if (apexClass.isSharingMissing === true) apexClass.setBadField('specifiedSharing');
-                if (apexClass.isScheduled === false && apexClass.isSchedulable === true) apexClass.setBadField('isScheduled');
-                if (apexClass.needsRecompilation === true) apexClass.setBadField('name');
-                if (isNaN(apexClass.coverage) || !apexClass.coverage || apexClass.coverage < 0.75) apexClass.setBadField('coverage');
-                if (apexClass.isItReferenced() === false) apexClass.setBadField('dependencies.referenced');
-                */
             });
 
             // Return data

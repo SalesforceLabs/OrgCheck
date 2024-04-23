@@ -6,7 +6,6 @@ export class SFDC_User extends OrgCheckData {
     photoUrl;
     name;
     lastLogin;
-    neverLogged;
     numberFailedLogins;
     onLightningExperience;
     lastPasswordChange;

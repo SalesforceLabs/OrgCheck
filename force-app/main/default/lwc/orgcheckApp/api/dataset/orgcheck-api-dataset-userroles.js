@@ -39,8 +39,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                         hasActiveMembers: false,
                         inactiveMembersCount: 0,
                         hasInactiveMembers: false,
-                        isExternal: (record.PortalType !== 'None') ? true : false,
-                        isScoreNeeded: true
+                        isExternal: (record.PortalType !== 'None') ? true : false
                     });                
                     if (record.Users && record.Users.records) {
                         record.Users.records.forEach((user) => {
@@ -57,9 +56,6 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
 
                     // Compute the score of this item
                     userRoleDataFactory.computeScore(userRole);
-                    /*
-                    if (userRole.activeMembersCount === 0) userRole.setBadField('activeMembersCount');
-                    */
                    
                     // Add it to the map  
                     userRoles.set(userRole.id, userRole);

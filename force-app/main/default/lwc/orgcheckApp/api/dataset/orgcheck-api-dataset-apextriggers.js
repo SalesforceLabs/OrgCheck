@@ -42,7 +42,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         url: sfdcManager.setupUrl('apex-trigger', record.Id),
                         name: record.Name,
                         apiVersion: record.ApiVersion,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         length: record.LengthWithoutComments,
                         isActive: (record.Status === 'Active' ? true : false),
                         beforeInsert: record.UsageBeforeInsert,
@@ -68,13 +68,6 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
                     // Compute the score of this item
                     apexTriggerDataFactory.computeScore(apexTrigger);
-                    /*
-                    if (sfdcManager.isVersionOld(apexTrigger.apiVersion)) apexTrigger.setBadField('apiVersion');
-                    if (apexTrigger.hasSOQL === true) apexTrigger.setBadField('hasSOQL');
-                    if (apexTrigger.hasDML === true) apexTrigger.setBadField('hasDML');
-                    if (apexTrigger.length > 5000) apexTrigger.setBadField('length');
-                    if (apexTrigger.isItReferenced() === false) apexTrigger.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     triggersMap.set(apexTrigger.id, apexTrigger);

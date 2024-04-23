@@ -340,7 +340,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 // Unless the 'ref' property in column.data is specified 
                 let ref = r;
                 if (c.data?.ref) {
-                    c.data?.ref.split('.').forEach((p) => { ref = ref[p]; });
+                    c.data?.ref.split('.').forEach((p) => { if (ref) ref = ref[p]; });
                 }
                 // Prepare the cell information
                 const cell = { 

@@ -34,8 +34,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                         isRole: record.Type === 'Role',
                         isRoleAndSubordinates: record.Type === 'RoleAndSubordinates',
                         nbDirectMembers: 0,
-                        nbIndirectMembers: 0,
-                        isScoreNeeded: true
+                        nbIndirectMembers: 0
                     });
                     // Depending on the type we add some properties
                     switch (record.Type) {
@@ -90,10 +89,6 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
                 // Compute the score of this item
                 groupDataFactory.computeScore(group);
-                /*
-                if (group.nbDirectMembers === 0) group.setBadField('nbDirectMembers');
-                if (group.nbUsers === 0) group.setBadField('nbUsers');
-                */
             });
 
             // Return data

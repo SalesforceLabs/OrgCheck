@@ -1,6 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
-import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
@@ -15,7 +14,6 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
     run(sfdcManager, dataFactory, localLogger, resolve, reject, parameters) {
 
         // Init the factories
-        const apexTriggerDataFactory = dataFactory.getInstance(SFDC_ApexTrigger);
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
         const fieldSetDataFactory = dataFactory.getInstance(SFDC_FieldSet);
         const layoutDataFactory = dataFactory.getInstance(SFDC_PageLayout);
@@ -36,8 +34,8 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
             queryMore: false, // we should have only one record max so no need to have queryMore activated.
             tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
             string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                        '(SELECT Id, DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
-                        '(SELECT Id, Name FROM ApexTriggers), '+
+                        '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
+                        '(SELECT Id FROM ApexTriggers), '+
                         '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
                         '(SELECT Id, Name, LayoutType FROM Layouts), '+
                         '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
@@ -69,57 +67,51 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 // the third promise is the number of records!!
                 const recordCount = r[2]; 
 
-                const fieldsMapper = {};
+                const customFieldIds = []; 
+                const standardFieldsMapper = new Map();
                 if (entity.Fields) entity.Fields.records.forEach((f) => {
-                    fieldsMapper[f.QualifiedApiName] = { 
-                        id: f.DurableId.split('.')[1], 
-                        description: f.Description,
-                        isIndexed: f.IsIndexed
-                    };
-                });
-                const fields = (
-                    sobjectDescribed.fields ?
-                    sobjectDescribed.fields.map((t) => {
-                        const mapper = fieldsMapper[t.name];
-                        if (mapper) {
-                            t.id = mapper.id;
-                            t.description = mapper.description;
-                            t.isIndexed = mapper.isIndexed;
-                        }
-                        return fieldDataFactory.create({ 
-                            id: sfdcManager.caseSafeId(t.id), 
-                            name: t.label, 
-                            label: t.label, 
-                            description: t.description,
-                            isCustom: t.custom,
-                            tooltip: t.inlineHelpText,
-                            type: t.type,
-                            length: t.length,
-                            isUnique: t.unique,
-                            isEncrypted: t.encrypted,
-                            isExternalId: t.externalId,
-                            isIndexed: t.isIndexed,
-                            defaultValue: t.defaultValue,
-                            formula: t.calculatedFormula,
-                            url: sfdcManager.setupUrl('field', t.id, entity.DurableId, sobjectType)
+                    const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
+                    if (f.DurableId.includes('.00N')) {
+                        customFieldIds.push(id);
+                    } else {
+                        standardFieldsMapper.set(f.QualifiedApiName, { 
+                            id: id,
+                            description: f.Description,
+                            isIndexed: f.IsIndexed
                         });
-                    }) :
+                    }
+                });
+                const standardFields = (
+                    sobjectDescribed.fields ? 
+                    sobjectDescribed.fields
+                        .filter(f => standardFieldsMapper.has(f.name))
+                        .map((f) => {
+                            const fieldMapper = standardFieldsMapper.get(f.name);
+                            return fieldDataFactory.createWithScore({
+                                id: fieldMapper.id,
+                                name: f.label, 
+                                label: f.label, 
+                                description: fieldMapper.description,
+                                tooltip: f.inlineHelpText,
+                                type: f.type,
+                                length: f.length,
+                                isUnique: f.unique,
+                                isEncrypted: f.encrypted,
+                                isExternalId: f.externalId,
+                                isIndexed: fieldMapper.isIndexed,
+                                defaultValue: f.defaultValue,
+                                formula: f.calculatedFormula,
+                                url: sfdcManager.setupUrl('field', fieldMapper.id, entity.DurableId, sobjectType)
+                            });
+                        }) : 
                     []
                 );
 
-                const apexTriggers = (
-                    entity.ApexTriggers ? 
-                    entity.ApexTriggers.records.map((t) => apexTriggerDataFactory.create({ 
-                        id: sfdcManager.caseSafeId(t.Id), 
-                        name: t.Name, 
-                        url: sfdcManager.setupUrl('apex-trigger', t.Id) 
-                    })) : 
-                    []
-                );
+                const apexTriggerIds = entity.ApexTriggers ? entity.ApexTriggers.records.map((t) => sfdcManager.caseSafeId(t.Id)) : [];
 
                 const fieldSets = (
                     entity.FieldSets ? 
-                    entity.FieldSets.records.map((t) => fieldSetDataFactory.create({ 
+                    entity.FieldSets.records.map((t) => fieldSetDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.Id), 
                         label: t.MasterLabel, 
                         description: t.Description,
@@ -130,7 +122,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
 
                 const layouts = (
                     entity.Layouts ? 
-                    entity.Layouts.records.map((t) => layoutDataFactory.create({ 
+                    entity.Layouts.records.map((t) => layoutDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.Id), 
                         name: t.Name, 
                         url: sfdcManager.setupUrl('layout', t.Id, entity.DurableId), 
@@ -140,7 +132,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 );
                 
                 const limits = (
-                    entity.Limits ? entity.Limits.records.map((t) => limitDataFactory.create({ 
+                    entity.Limits ? entity.Limits.records.map((t) => limitDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.DurableId), 
                         label: t.Label, 
                         max: t.Max, 
@@ -153,7 +145,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 
                 const validationRules = (
                     entity.ValidationRules ? 
-                    entity.ValidationRules.records.map((t) => validationRuleDataFactory.create({ 
+                    entity.ValidationRules.records.map((t) => validationRuleDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.Id), 
                         name: t.ValidationName, 
                         isActive: t.Active,
@@ -167,7 +159,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 
                 const webLinks = (
                     entity.WebLinks ? 
-                    entity.WebLinks.records.map((t) => webLinkDataFactory.create({ 
+                    entity.WebLinks.records.map((t) => webLinkDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.Id), 
                         name: t.Name, 
                         url: sfdcManager.setupUrl('web-link', t.Id, entity.DurableId) 
@@ -177,7 +169,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 
                 const recordTypes = (
                     sobjectDescribed.recordTypeInfos ? 
-                    sobjectDescribed.recordTypeInfos.map((t) => recordTypeDataFactory.create({ 
+                    sobjectDescribed.recordTypeInfos.map((t) => recordTypeDataFactory.createWithScore({ 
                         id: sfdcManager.caseSafeId(t.recordTypeId), 
                         name: t.name, 
                         developerName: t.developerName, 
@@ -192,7 +184,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 
                 const relationships = (
                     sobjectDescribed.childRelationships ? 
-                    sobjectDescribed.childRelationships.filter((t) => !sfdcManager.isEmpty(t.relationshipName)).map((t) => relationshipDataFactory.create({ 
+                    sobjectDescribed.childRelationships.filter((t) => !sfdcManager.isEmpty(t.relationshipName)).map((t) => relationshipDataFactory.createWithScore({ 
                         name: t.relationshipName,
                         childObject: t.childSObject,
                         fieldName: t.field,
@@ -202,7 +194,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     []
                 );
 
-                resolve(objectDataFactory.create({
+                resolve(objectDataFactory.createWithScore({
                     id: entity.DurableId,
                     label: sobjectDescribed.label,
                     labelPlural: sobjectDescribed.labelPlural,
@@ -219,13 +211,14 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     description: entity.Description,
                     externalSharingModel: entity.ExternalSharingModel,
                     internalSharingModel: entity.InternalSharingModel,
-                    apexTriggers: apexTriggers,
+                    apexTriggerIds: apexTriggerIds,
                     fieldSets: fieldSets,
                     limits: limits,
                     layouts: layouts,
                     validationRules: validationRules,
                     webLinks: webLinks,
-                    fields: fields,
+                    standardFields: standardFields,
+                    customFieldIds: customFieldIds,
                     recordTypes: recordTypes,
                     relationships: relationships,
                     recordCount: recordCount

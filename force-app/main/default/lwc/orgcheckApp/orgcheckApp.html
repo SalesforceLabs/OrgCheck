@@ -107,7 +107,7 @@
                             </lightning-card>
                         </lightning-layout-item>
                         <lightning-layout-item size="4">
-                            <c-orgcheck-cache-manager class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} onremovecache={handleRemoveCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
+                            <c-orgcheck-cache-manager onload={handleSubTabContentLoaded} onremovecache={handleRemoveCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
                         </lightning-layout-item>
                     </lightning-layout>
                 </lightning-tab>
@@ -115,8 +115,165 @@
         </lightning-tab>
         <lightning-tab label="⚽ Objects" onactive={handleTabActivation}>
             <lightning-tabset>
-                <lightning-tab value="object-information" label="Object Documentation" onactive={handleSubTabActivation}>
-                    <c-orgcheck-object-information class="orgcheck-subTabContent" onload={handleSubTabContentLoaded} object-information-data={objectInformationData}></c-orgcheck-object-information>
+                <lightning-tab value="object-information" label="Object Documentation" onactive={handleSubTabActivation}>                    
+                    <template if:false={objectInformationData}>
+                        There is no specific object set in the global filter above. <br />
+                        <br />
+                        Please set the <b>SObject</b> value in the global filter and hit <b>'Apply'</b> button to see something here.<br />
+                        <br />
+                        Thank you!
+                    </template>
+                    <template if:true={objectInformationData}>
+                        <lightning-layout>
+                            <lightning-layout-item>
+                                <h1 class="slds-text-heading_large">{objectInformationData.label} ({objectInformationData.apiname})</h1>
+                            </lightning-layout-item>
+                            <lightning-layout-item alignment-bump="left">
+                                <c-orgcheck-export-button source={exportSource} basename={exportBasename}></c-orgcheck-export-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                        <br /><br />
+                
+                        <!-- GENERAL SECTION -->
+                        <h1 class="slds-text-heading_medium">General information</h1>
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col">
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="API Name" value={objectInformationData.apiname} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Object Type" value={objectInformationData.typeRef.label} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Package" value={objectInformationData.package} read-only></lightning-input></div>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Singular Label" value={objectInformationData.label} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Plural Label" value={objectInformationData.labelPlural} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Description" value={objectInformationData.description} read-only></lightning-input></div>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Key Prefix" value={objectInformationData.keyPrefix} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="number" label="Record Count (including deleted ones)" value={objectInformationData.recordCount} read-only></lightning-input></div>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-has-divider--bottom"><lightning-input type="toggle" label="Is Custom?" value={objectInformationData.isCustom} disabled></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="toggle" label="Feed Enable?" value={objectInformationData.isFeedEnabled} disabled></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="toggle" label="Most Recent Enabled?" value={objectInformationData.isMostRecentEnabled} disabled></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="toggle" label="Global Search Enabled?" value={objectInformationData.isSearchable} disabled></lightning-input></div>
+                            </div>
+                            <div class="slds-col">
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="Internal Sharing" value={objectInformationData.internalSharingModel} read-only></lightning-input></div>
+                                <div class="slds-has-divider--bottom"><lightning-input type="text" label="External Sharing" value={objectInformationData.externalSharingModel} read-only></lightning-input></div>
+                            </div>
+                        </div>
+                        <br /><br />
+                
+                        <!-- APEX TRIGGER SECTION -->
+                        <template lwc:if={objectInformationData.apexTriggerRefs.length}>
+                            <h1 class="slds-text-heading_medium">Apex Triggers</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={apexTriggersTableColumns}
+                                rows={objectInformationData.apexTriggerRefs}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>
+                        
+                        <!-- FIELD SETS SECTION -->
+                        <!--<template lwc:if={objectInformationData.fieldSets.length}>
+                            <h1 class="slds-text-heading_medium">Field Sets</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={fieldSetsColumns}
+                                rows={objectInformationData.fieldSets}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                
+                        <!-- LAYOUTS SECTION -->
+                        <!--<template lwc:if={objectInformationData.layouts.length}>
+                            <h1 class="slds-text-heading_medium">Page Layouts</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={layoutsColumns}
+                                rows={objectInformationData.layouts}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                
+                        <!-- LIMITS SECTION -->
+                        <!--<template lwc:if={objectInformationData.limits.length}>
+                            <h1 class="slds-text-heading_medium">Limits</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={limitsColumns}
+                                rows={objectInformationData.limits}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                        
+                        <!-- VALIDATION RULES SECTION -->
+                        <!--<template lwc:if={objectInformationData.validationRules.length}>
+                            <h1 class="slds-text-heading_medium">Validation Rules</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={validationRulesColumns}
+                                rows={objectInformationData.validationRules}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                        
+                        <!-- WEB LINKS SECTION -->
+                        <!--<template lwc:if={objectInformationData.webLinks.length}>
+                            <h1 class="slds-text-heading_medium">Web Links</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={webLinksColumns}
+                                rows={objectInformationData.webLinks}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                        
+                        <!-- STANDARD FIELDS SECTION -->
+                        <template lwc:if={objectInformationData.standardFields.length}>
+                            <h1 class="slds-text-heading_medium">Standard Fields</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={standardFieldsInObjectTableColumns}
+                                rows={objectInformationData.standardFields}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>
+
+                        <!-- CUSTOM FIELDS SECTION -->
+                        <template lwc:if={objectInformationData.customFieldRefs.length}>
+                            <h1 class="slds-text-heading_medium">Custom Fields</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={customFieldsInObjectTableColumns}
+                                rows={objectInformationData.customFieldRefs}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>
+                        
+                        <!-- RECORD TYPES SECTION -->
+                        <!--<template lwc:if={objectInformationData.recordTypes.length}>
+                            <h1 class="slds-text-heading_medium">Record Types</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={recordTypesColumns}
+                                rows={objectInformationData.recordTypes}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                        
+                        <!-- RELEATIONSHIPS SECTION -->
+                        <!--<template lwc:if={objectInformationData.relationships.length}>
+                            <h1 class="slds-text-heading_medium">Relationships</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                columns={relationshipsColumns}
+                                rows={objectInformationData.relationships}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>-->
+                    </template>
                 </lightning-tab>
                 <lightning-tab value="objects-owd" label="Org Wide Default" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable

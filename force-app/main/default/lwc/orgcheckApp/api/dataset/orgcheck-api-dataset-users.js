@@ -67,16 +67,11 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                         lastPasswordChange: record.LastPasswordChangeDate,
                         profileId: sfdcManager.caseSafeId(record.ProfileId),
                         importantPermissions: Object.keys(importantPermissions).sort(),
-                        permissionSetIds: permissionSetRefs,
-                        isScoreNeeded: true
+                        permissionSetIds: permissionSetRefs
                     });
 
                     // Compute the score of this item
                     userDataFactory.computeScore(user);
-                    /*
-                    if (user.onLightningExperience === false) user.setBadField('onLightningExperience');
-                    if (!user.lastLogin) user.setBadField('lastLogin');
-                    */
 
                     // Add it to the map  
                     users.set(user.id, user);

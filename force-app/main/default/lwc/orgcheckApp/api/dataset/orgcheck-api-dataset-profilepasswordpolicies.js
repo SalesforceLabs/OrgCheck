@@ -42,8 +42,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         passwordExpiration: parseInt(ppp.passwordExpiration),
                         passwordHistory: parseInt(ppp.passwordHistory),
                         passwordQuestion: (ppp.passwordQuestion === '1'),
-                        profileName: ppp.profile,
-                        isScoreNeeded: true
+                        profileName: ppp.profile
                     });
 
                     // Add it to the map                        
@@ -51,15 +50,6 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
 
                     // Compute the score of this item
                     policyDataFactory.computeScore(policy);
-                    /*
-                    if (policy.passwordQuestion === true) policy.setBadField('passwordQuestion');
-                    if (policy.passwordExpiration > 90 || policy.passwordExpiration === 0) policy.setBadField('passwordExpiration');
-                    if (policy.passwordHistory < 3) policy.setBadField('passwordHistory');
-                    if (policy.minimumPasswordLength < 8) policy.setBadField('minimumPasswordLength');
-                    if (policy.passwordComplexity < 3) policy.setBadField('passwordComplexity');
-                    if (policy.maxLoginAttempts === undefined) policy.setBadField('maxLoginAttempts');
-                    if (policy.lockoutInterval === undefined) policy.setBadField('lockoutInterval');
-                    */
                 });
             }
 

@@ -47,11 +47,6 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
                     // Compute the score of this item
                     labelDataFactory.computeScore(customLabel);
-                    /*
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                    if (customLabel.isItReferenced() === false) customLabel.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     customLabels.set(customLabel.id, customLabel);

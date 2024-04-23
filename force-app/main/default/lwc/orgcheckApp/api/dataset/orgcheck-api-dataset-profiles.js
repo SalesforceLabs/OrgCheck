@@ -45,16 +45,11 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                         lastModifiedDate: record.LastModifiedDate,
                         nbFieldPermissions: record.FieldPerms?.records.length || 0,
                         nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                        tyoe: 'Profile',
-                        isScoreNeeded: true
+                        tyoe: 'Profile'
                     });
 
                     // Compute the score of this item
                     profileDataFactory.computeScore(profile);
-                    /*
-                    if (profile.isCustom === true && profile.memberCounts === 0) profile.setBadField('memberCounts');
-                    if (profile.isCustom === true && sfdcManager.isEmpty(profile.description)) profile.setBadField('description');
-                    */
 
                     // Add it to the map                        
                     profiles.set(profile.id, profile);                    

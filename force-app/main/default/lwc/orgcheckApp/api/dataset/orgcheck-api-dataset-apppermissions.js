@@ -34,7 +34,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
                     applications.set(id, {
                         name: record.Name, 
                         label: record.Label, 
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         isAccessible: record.IsAccessible,
                         isVisible: record.IsVisible
                     });

@@ -137,8 +137,8 @@
                             <!-- TYPE BOOLEAN: boolean, decorated an icon for true and an icon for false -->
                             <template lwc:elseif={cell.isBoolean}>
                                 <div class="slds-text-align_center">
-                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" size="x-small"></lightning-icon></template>
-                                    <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" size="x-small"></lightning-icon></template>
+                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" title="True" size="x-small"></lightning-icon></template>
+                                    <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" title="False" size="x-small"></lightning-icon></template>
                                 </div>
                             </template>
 
@@ -150,7 +150,7 @@
                             <!-- TYPE TEXT: string, potentially decorated with a another text if the length of the text is exceeding a certain amount of characters (optional) -->
                             <template lwc:elseif={cell.isText}>
                                 <template lwc:if={cell.isValueTruncated}>
-                                    {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon>
+                                    {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon>
                                 </template>
                                 <template lwc:else>{cell.data.value}</template>
                             </template>
@@ -163,7 +163,7 @@
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         <template lwc:if={item.isValueTruncated}>
-                                            - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon><br key={cell.key} />
+                                            - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon><br key={cell.key} />
                                         </template>
                                         <template lwc:else>
                                             - {item.data.value}<br key={cell.key} />

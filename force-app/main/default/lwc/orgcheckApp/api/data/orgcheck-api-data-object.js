@@ -18,13 +18,16 @@ export class SFDC_Object extends OrgCheckData {
     description;
     externalSharingModel;
     internalSharingModel;
-    apexTriggers;
+    apexTriggerIds;
+    apexTriggerRefs;
     fieldSets;
     layouts;
     limits;
     validationRules;
     webLinks;
-    fields;
+    standardFields;
+    customFieldIds;
+    customFieldRefs;
     recordTypes;
     relationships;
     recordCount;

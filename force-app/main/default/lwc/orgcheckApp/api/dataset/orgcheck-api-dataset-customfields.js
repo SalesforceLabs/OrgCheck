@@ -39,6 +39,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                         label: record.DeveloperName,
                         package: (record.NamespacePrefix || ''),
                         description: record.Description,
+                        isCustom: true,
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         objectId: record.EntityDefinition.QualifiedApiName, // id but no ids!
@@ -47,10 +48,6 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
                     // Compute the score of this item
                     fieldDataFactory.computeScore(customField);
-                    /*
-                    if (sfdcManager.isEmpty(customField.description)) customField.setBadField('description');
-                    if (customField.isItReferenced() === false) customField.setBadField('dependencies.referenced');
-                    */
 
                     // Add it to the map  
                     customFields.set(customField.id, customField);

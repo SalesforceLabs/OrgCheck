@@ -78,16 +78,11 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                         const profileRestriction = restrictionsFactory.create({
                             profileId: profileId,
                             ipRanges: ipRanges,
-                            loginHours: loginHours,
-                            isScoreNeeded: true
+                            loginHours: loginHours
                         });
 
                         // Compute the score of this item
                         restrictionsFactory.computeScore(profileRestriction);
-                        /*
-                        if (profileRestriction.ipRanges.filter(i => i.difference > 100000).length > 0) profileRestriction.setBadField('ipRanges');
-                        if (profileRestriction.loginHours.filter(i => i.difference > 1200).length > 0) profileRestriction.setBadField('loginHours');
-                        */
 
                         // Add it to the map                        
                         profileRestrictions.set(profileRestriction.profileId, profileRestriction);                    
