@@ -6,5 +6,6 @@ export class SFDC_Limit extends OrgCheckData {
     remaining;
     max;
     used;
+    usedPercentage;
     type;
 }

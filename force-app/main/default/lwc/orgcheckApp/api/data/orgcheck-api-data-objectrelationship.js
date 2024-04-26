@@ -6,5 +6,4 @@ export class SFDC_ObjectRelationShip extends OrgCheckData {
     fieldName;
     isCascadeDelete;
     isRestrictedDelete;
-    
 }

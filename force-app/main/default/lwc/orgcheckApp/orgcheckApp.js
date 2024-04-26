@@ -359,27 +359,89 @@ export default class OrgCheckApp extends LightningElement {
         }
     }
 
-    customFieldsTableColumns = [
+    fieldSetsColumns = [
+        { label: 'Label',               type: 'id',               data: { value: 'label', url: 'url' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+    ];
+
+    layoutsColumns = [
+        { label: 'Label',               type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Type',                type: 'text',             data: { value: 'type' }},
+    ];
+
+    limitsColumns = [
+        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'label' }, sorted: 'desc' },
+        { label: 'Label',               type: 'id',               data: { value: 'label', url: 'url' }},
+        { label: 'Type',                type: 'text',             data: { value: 'type' }},
+        { label: 'Max',                 type: 'numeric',          data: { value: 'max' }},
+        { label: 'Used',                type: 'numeric',          data: { value: 'used' }},
+        { label: 'Used (%)',            type: 'percentage',       data: { value: 'usedPercentage' }},
+        { label: 'Remaining',           type: 'numeric',          data: { value: 'remaining' }}
+    ];
+
+    validationRulesColumns = [
+        { label: 'Score',             type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',              type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Is Active',         type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'Display On Field',  type: 'text',             data: { value: 'errorDisplayField' }},
+        { label: 'Error Message',     type: 'text',             data: { value: 'errorMessage' }},
+        { label: 'Description',       type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+    ];
+
+    webLinksColumns = [
+        { label: 'Name',           type: 'id',               data: { value: 'name', url: 'url' }},
+    ];
+
+    recordTypesColumns = [
         { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',      type: 'text',             data: { value: 'developerName' }},
+        { label: 'Is Active',           type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'Is Available',        type: 'boolean',          data: { value: 'isAvailable' }},
+        { label: 'Is Default',          type: 'boolean',          data: { value: 'isDefaultRecordTypeMapping' }},
+        { label: 'Is Master',           type: 'boolean',          data: { value: 'isMaster' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+    ];
+
+    relationshipsColumns = [
+        { label: 'Name',                 type: 'text',             data: { value: 'name' }},
+        { label: 'Field Name',           type: 'text',             data: { value: 'fieldName' }},
+        { label: 'Child Object',         type: 'text',             data: { value: 'childObject' }},
+        { label: 'Is Cascade Delete',    type: 'boolean',          data: { value: 'isCascadeDelete' }},
+        { label: 'Is Restricive Delete', type: 'boolean',          data: { value: 'isRestrictedDelete' }}
+    ];
+    
+    customFieldsTableColumns = [
+        { label: 'Score',               type: 'score',            filter: 'sco', data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'In this object',      type: 'id',               filter: 'obj', data: {ref: 'objectRef', value: 'label', url: 'url' }},
-        { label: 'Object Type',         type: 'text',             filter: 'obj', data: {ref: 'objectRef.typeRef', value: 'label' }},
-        { label: 'Package',             type: 'text',             data: {value: 'package' }},
-        { label: 'Using',               type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Ref. in Layout?',     type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Layout' }},
-        { label: 'Ref. in Apex Class?', type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Class' }},
-        { label: 'Ref. in Flow?',       type: 'numeric',          filter: 'dep', data: {ref: 'dependencies.referencedByTypes', value: 'Flow' }},
-        { label: 'Dependencies',        type: 'dependencyViewer', filter: 'dep', data: {value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',        type: 'dateTime',         data: {value: 'createdDate' }},
-        { label: 'Modified date',       type: 'dateTime',         data: {value: 'lastModifiedDate' }},
-        { label: 'Description',         type: 'text',             data: {value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Label',               type: 'text',             data: { value: 'label' }},
+        { label: 'In this object',      type: 'id',               filter: 'obj', data: { ref: 'objectRef', value: 'label', url: 'url' }},
+        { label: 'Object Type',         type: 'text',             filter: 'obj', data: { ref: 'objectRef.typeRef', value: 'label' }},
+        { label: 'Package',             type: 'text',             filter: 'cus', data: { value: 'package' }},
+        { label: 'Type',                type: 'text',             data: { value: 'type' }},
+        { label: 'Length',              type: 'text',             data: { value: 'length' }},
+        { label: 'Unique?',             type: 'boolean',          data: { value: 'isUnique' }},
+        { label: 'Encrypted?',          type: 'boolean',          data: { value: 'isEncrypted' }},
+        { label: 'External?',           type: 'boolean',          data: { value: 'isExternalId' }},
+        { label: 'Indexed?',            type: 'boolean',          data: { value: 'isIndexed' }},
+        { label: 'Tooltip',             type: 'text',             data: { value: 'tooltip' }},
+        { label: 'Formula',             type: 'text',             data: { value: 'formula' }},
+        { label: 'Default Value',       type: 'text',             data: { value: 'defaultValue' }},
+        { label: 'Using',               type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Dependencies',        type: 'dependencyViewer', filter: 'dep', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',        type: 'dateTime',         filter: 'noc', data: { value: 'createdDate' }},
+        { label: 'Modified date',       type: 'dateTime',         filter: 'noc', data: { value: 'lastModifiedDate' }},
+        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
     customFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c =>
         c.filter === undefined || c.filter !== 'obj'
     );
     standardFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c => 
-        c.filter === undefined || c.filter !== 'obj' && c.filter !== 'dep'
+        c.filter === undefined
     );
 
     customFieldsTableData;

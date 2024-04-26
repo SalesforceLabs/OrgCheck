@@ -98,6 +98,15 @@ export class OrgCheckSalesforceManager {
         if (id && id.length === 18) return id.substr(0, 15);
         return id;
     }
+
+    arraySafeIds(ids) {
+        if (ids) {
+            if (Array.isArray(ids)) {
+                return `'${ids.map(a => a.replaceAll(`'`, '')).join(`','`)}'`
+            }
+        }
+        return `''`;
+    }
     
     setupUrl(type, durableId, objectDurableId, objectType) {
         

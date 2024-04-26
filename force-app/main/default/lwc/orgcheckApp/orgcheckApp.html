@@ -170,65 +170,83 @@
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={apexTriggersTableColumns}
                                 rows={objectInformationData.apexTriggerRefs}></c-orgcheck-extended-datatable>
                             <br /><br />
                         </template>
                         
                         <!-- FIELD SETS SECTION -->
-                        <!--<template lwc:if={objectInformationData.fieldSets.length}>
+                        <template lwc:if={objectInformationData.fieldSets.length}>
                             <h1 class="slds-text-heading_medium">Field Sets</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={fieldSetsColumns}
                                 rows={objectInformationData.fieldSets}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                 
                         <!-- LAYOUTS SECTION -->
-                        <!--<template lwc:if={objectInformationData.layouts.length}>
+                        <template lwc:if={objectInformationData.layouts.length}>
                             <h1 class="slds-text-heading_medium">Page Layouts</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={layoutsColumns}
                                 rows={objectInformationData.layouts}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                 
                         <!-- LIMITS SECTION -->
-                        <!--<template lwc:if={objectInformationData.limits.length}>
+                        <template lwc:if={objectInformationData.limits.length}>
                             <h1 class="slds-text-heading_medium">Limits</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={limitsColumns}
                                 rows={objectInformationData.limits}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                         
                         <!-- VALIDATION RULES SECTION -->
-                        <!--<template lwc:if={objectInformationData.validationRules.length}>
+                        <template lwc:if={objectInformationData.validationRules.length}>
                             <h1 class="slds-text-heading_medium">Validation Rules</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={validationRulesColumns}
                                 rows={objectInformationData.validationRules}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                         
                         <!-- WEB LINKS SECTION -->
-                        <!--<template lwc:if={objectInformationData.webLinks.length}>
+                        <template lwc:if={objectInformationData.webLinks.length}>
                             <h1 class="slds-text-heading_medium">Web Links</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={webLinksColumns}
                                 rows={objectInformationData.webLinks}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
+                        
+                        <!-- CUSTOM FIELDS SECTION -->
+                        <template lwc:if={objectInformationData.customFieldRefs.length}>
+                            <h1 class="slds-text-heading_medium">Custom Fields</h1>
+                            <c-orgcheck-extended-datatable
+                                show-row-number-column
+                                dont-use-all-space
+                                onviewscore={handleViewScore}
+                                columns={customFieldsInObjectTableColumns}
+                                rows={objectInformationData.customFieldRefs}></c-orgcheck-extended-datatable>
+                            <br /><br />
+                        </template>
                         
                         <!-- STANDARD FIELDS SECTION -->
                         <template lwc:if={objectInformationData.standardFields.length}>
@@ -236,43 +254,35 @@
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={standardFieldsInObjectTableColumns}
                                 rows={objectInformationData.standardFields}></c-orgcheck-extended-datatable>
                             <br /><br />
                         </template>
 
-                        <!-- CUSTOM FIELDS SECTION -->
-                        <template lwc:if={objectInformationData.customFieldRefs.length}>
-                            <h1 class="slds-text-heading_medium">Custom Fields</h1>
-                            <c-orgcheck-extended-datatable
-                                show-row-number-column
-                                dont-use-all-space
-                                columns={customFieldsInObjectTableColumns}
-                                rows={objectInformationData.customFieldRefs}></c-orgcheck-extended-datatable>
-                            <br /><br />
-                        </template>
-                        
                         <!-- RECORD TYPES SECTION -->
-                        <!--<template lwc:if={objectInformationData.recordTypes.length}>
+                        <template lwc:if={objectInformationData.recordTypes.length}>
                             <h1 class="slds-text-heading_medium">Record Types</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={recordTypesColumns}
                                 rows={objectInformationData.recordTypes}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                         
                         <!-- RELEATIONSHIPS SECTION -->
-                        <!--<template lwc:if={objectInformationData.relationships.length}>
+                        <template lwc:if={objectInformationData.relationships.length}>
                             <h1 class="slds-text-heading_medium">Relationships</h1>
                             <c-orgcheck-extended-datatable
                                 show-row-number-column
                                 dont-use-all-space
+                                onviewscore={handleViewScore}
                                 columns={relationshipsColumns}
                                 rows={objectInformationData.relationships}></c-orgcheck-extended-datatable>
                             <br /><br />
-                        </template>-->
+                        </template>
                     </template>
                 </lightning-tab>
                 <lightning-tab value="objects-owd" label="Org Wide Default" onactive={handleSubTabActivation}>

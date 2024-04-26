@@ -137,7 +137,8 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                         label: t.Label, 
                         max: t.Max, 
                         remaining: t.Remaining, 
-                        used:(t.Max-t.Remaining), 
+                        used: (t.Max-t.Remaining), 
+                        usedPercentage: ((t.Max-t.Remaining)/t.Max),
                         type: t.Type 
                     })) : 
                     []

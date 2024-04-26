@@ -17,6 +17,9 @@ import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
+import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
+import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
+import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
 
 export class OrgCheckDataFactory2 {
 
@@ -54,7 +57,12 @@ export class OrgCheckDataFactory2 {
 
     computeScore(row) { 
         this.#validations
-            .filter(v => { try { return v.formula(row); } catch (error) { console.error('COMPUTE SCORE', error); }})
+            .filter(v => { 
+                try { 
+                    return v.formula(row); } 
+                catch (error) { 
+                    console.error('COMPUTE SCORE', error, row); 
+                }})
             .forEach(v => {
                 row.score++;
                 row.badFields.push(v.badField);
@@ -79,7 +87,7 @@ export class OrgCheckDataFactory {
         this.#allValidations = [
             { 
                 description: 'Not referenced anywhere',
-                formula: (d) => d.dependencies.referenced.length === 0, 
+                formula: (d) => d.dependencies?.referenced?.length === 0, 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced',
                 applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
@@ -263,6 +271,18 @@ export class OrgCheckDataFactory {
                 errorMessage: 'This profile includes a login hour that is to wide (more than 20 hours a day!). If you set a login hour it should reflect the reality. Please review this setting.',
                 badField: 'loginHours',
                 applicable: [ SFDC_ProfileRestrictions ]
+            }, {
+                description: 'Inactive component',
+                formula: (d) => d.isActive === false,
+                errorMessage: 'This component is inactive, so why do not you just remove it from your org?',
+                badField: 'isActive',
+                applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger ]
+            }, {
+                description: 'Near the limit',
+                formula: (d) => d.usedPercentage >= 0.80,
+                errorMessage: 'This limit is almost reached (>80%). Please review this.',
+                badField: 'usedPercentage',
+                applicable: [ SFDC_Limit ]
             }
         ].map((v, i) => { v.id = i; return v; });
         Object.freeze(this.#allValidations); 
