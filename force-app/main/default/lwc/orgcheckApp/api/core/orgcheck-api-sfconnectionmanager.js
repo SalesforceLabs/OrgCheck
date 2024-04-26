@@ -20,9 +20,9 @@ export class DailyApiRequestLimitInformation {
     redThresholdPercentage;
 }
 
+const MAX_COMPOSITE_REQUEST_SIZE = 25;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
-
 const DEFINITION_OLD_API_VERSION = 3; // in years
 
 export class OrgCheckSalesforceManager {
@@ -324,7 +324,7 @@ export class OrgCheckSalesforceManager {
                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                             'FROM MetadataComponentDependency '+
                             'WHERE RefMetadataComponentId = \'(id)\' '+
-                            'OR MetadataComponentId = \'(id)\' ')
+                            'OR MetadataComponentId = \'(id)\' ', [], 5) // for some reason there is a limit of 5 here!!maxRequestSize
                         .then(allDependenciesResults => {
                             // We are going to append the dependencies in the results
                             const allDependencies = [];
@@ -441,13 +441,13 @@ export class OrgCheckSalesforceManager {
         });
     }
 
-    async _callComposite(ids, tooling, uriPattern, byPasses) {
+    async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE) {
         this._watchDog__beforeRequest();
-        const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
+        if (maxRequestSize > MAX_COMPOSITE_REQUEST_SIZE) maxRequestSize = MAX_COMPOSITE_REQUEST_SIZE;
         const compositeRequestBodies = [];
         let currentCompositeRequestBody;
         ids.forEach((id) => {
-            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === maxRequestSize) {
                 currentCompositeRequestBody = {
                     allOrNone: false,
                     compositeRequest: []
