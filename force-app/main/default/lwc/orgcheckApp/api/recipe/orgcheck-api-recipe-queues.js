@@ -34,11 +34,11 @@ export class OrgCheckRecipeQueues extends OrgCheckRecipe {
 
         // Filter data
         const array = [];
-        for (const group of groups.values()) {
+        groups.forEach((group) => {
             if (group.isQueue === true) {
                 array.push(group);
             }
-        }
+        });
         // Return data
         return array;
     }

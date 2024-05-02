@@ -25,11 +25,11 @@ export class OrgCheckRecipeProfiles extends OrgCheckRecipe {
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         // Filter data
         const array = [];
-        for (const profile of profiles.values()) {
+        profiles.forEach((profile) => {
             if (namespace === '*' || profile.package === namespace) {
                 array.push(profile);
             }
-        }
+        });
         // Return data
         return array;
     }

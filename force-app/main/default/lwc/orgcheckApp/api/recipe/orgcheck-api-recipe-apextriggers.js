@@ -34,11 +34,11 @@ export class OrgCheckRecipeApexTriggers extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const apexTrigger of apexTriggers.values()) {
+        apexTriggers.forEach((apexTrigger) => {
             if (namespace === '*' || apexTrigger.package === namespace) {
                 array.push(apexTrigger);
             }
-        }
+        });
         // Return data
         return array;
     }

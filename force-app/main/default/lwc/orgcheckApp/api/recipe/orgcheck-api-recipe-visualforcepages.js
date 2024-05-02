@@ -25,11 +25,11 @@ export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
         const pages = data.get(DATASET_VISUALFORCEPAGES_ALIAS);
         // Filter data
         const array = [];
-        for (const page of pages.values()) {
+        pages.forEach((page) => {
             if (namespace === '*' || page.package === namespace) {
                 array.push(page);
             }
-        }
+        });
         // Return data
         return array;
     }

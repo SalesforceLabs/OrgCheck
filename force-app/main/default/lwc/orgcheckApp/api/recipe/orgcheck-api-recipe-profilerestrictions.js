@@ -34,11 +34,11 @@ export class OrgCheckRecipeProfileRestrictions extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const restriction of profileRestrictions.values()) {
+        profileRestrictions.forEach((restriction) => {
             if (namespace === '*' || restriction.profileRef?.package === namespace) {
                 array.push(restriction);
             }
-        }
+        });
         // Return data
         return array;
     }

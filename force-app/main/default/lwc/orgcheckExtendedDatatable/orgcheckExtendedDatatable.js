@@ -69,7 +69,7 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
 
 const CELL_CSSCLASS = (row, cell) => {
     if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
-    return (row.badFields && row.badFields.includes(cell.data?.ref || cell.data?.value) === true) ? 'bad' : '';
+    return (row.badFields && row.badFields.some((field) => field === cell.data?.ref || field === cell.data?.value || field === `${cell.data?.ref}.${cell.data?.value}`)) ? 'bad' : '';
 }
 
 const ROW_CSSCLASS = (row, showScore) => {

@@ -34,11 +34,11 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const permissionSet of permissionSets.values()) {
+        permissionSets.forEach((permissionSet) => {
             if (namespace === '*' || permissionSet.package === namespace) {
                 array.push(permissionSet);
             }
-        }
+        });
         // Return data
         return array;
     }

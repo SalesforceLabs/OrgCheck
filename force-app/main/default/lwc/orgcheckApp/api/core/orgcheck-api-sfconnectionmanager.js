@@ -201,6 +201,9 @@ export class OrgCheckSalesforceManager {
             case 'Flow': { // From DAPI 
                 return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
             }
+            case 'flowDefinition': { // Org Check specific
+                return `/${durableId}`
+            }
             case 'visual-force-page': // Org Check specific
             case 'ApexPage': { // From DAPI 
                 return `/lightning/setup/ApexPages/page?address=%2F${durableId}`;
@@ -318,7 +321,12 @@ export class OrgCheckSalesforceManager {
                 promises.push(queryPromise
                     .then((results) => {
                         // Getting the Ids for DAPI call
-                        const ids = results.records.map((record) => this.caseSafeId(record[q.addDependenciesBasedOnField]));
+                        const allIds = []; // All ids (potentially with duplicates)
+                        const fields = Array.isArray(q.addDependenciesBasedOnField) ? q.addDependenciesBasedOnField : [ q.addDependenciesBasedOnField ];
+                        fields.forEach((field) => {
+                            allIds.push(... results.records.filter((record) => record[field]).map((record) => this.caseSafeId(record[field])));
+                        });
+                        const ids = Array.from(new Set(allIds)); // Deduplication of ids
                         return this._callComposite(ids, true, '/query?q='+
                             'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
@@ -359,8 +367,7 @@ export class OrgCheckSalesforceManager {
                             error.context = { 
                                 when: 'While getting the dependencies from DAPI',
                                 what: {
-                                    allIds: ids,
-                                    concernedIds: subids
+                                    allIds: ids
                                 }
                             };
                             return error;

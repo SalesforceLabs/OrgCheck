@@ -1,3 +1,4 @@
+import { OrgCheckData, OrgCheckInnerData } from './orgcheck-api-data';
 import { OrgCheckDataDependencies } from './orgcheck-api-data-dependencies';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
@@ -20,6 +21,8 @@ import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
+
+const IS_CLASS_EXTENDS = (clazz, parentClazz) => { return clazz.prototype instanceof parentClazz }
 
 export class OrgCheckDataFactory2 {
 
@@ -49,7 +52,7 @@ export class OrgCheckDataFactory2 {
         }
         // If dependencies are needed...
         if (this.#isDependenciesNeeded === true && setup.allDependencies) {
-            row.dependencies = new OrgCheckDataDependencies(setup.allDependencies, row.id);
+            row.dependencies = new OrgCheckDataDependencies(setup.allDependencies, row[setup.dependenciesFor || 'id']);
         }
         // Return the row finally
         return row;
@@ -276,7 +279,37 @@ export class OrgCheckDataFactory {
                 formula: (d) => d.isActive === false,
                 errorMessage: 'This component is inactive, so why do not you just remove it from your org?',
                 badField: 'isActive',
-                applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger ]
+                applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger, SFDC_Workflow ]
+            }, {
+                description: 'No active version for this flow',
+                formula: (d) => d.isVersionActive === false,
+                errorMessage: 'This flow does not have an active version, did you forgot to activate its latest version? or you do not need that flow anymore?',
+                badField: 'isVersionActive',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'Too much versions under for this flow',
+                formula: (d) => d.versionsCount > 7,
+                errorMessage: 'This flow has more than seven versions. Maybe it is time to do some cleaning in this flow!',
+                badField: 'versionsCount',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'Migrate this process builder',
+                formula: (d) => d.currentVersionRef?.type === 'Workflow',
+                errorMessage: 'Time to migrate this process builder to flow!',
+                badField: 'name',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'API Version too old for the current version of a flow',
+                formula: (d) => sfdcManager.isVersionOld(d.currentVersionRef?.apiVersion) === true,
+                errorMessage: `The API version of this flow's current version is too old. Please update it to a newest version.`,
+                badField: 'currentVersionRef.apiVersion',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'No description for the current version of a flow',
+                formula: (d) => sfdcManager.isEmpty(d.currentVersionRef?.description) === true,
+                errorMessage: `This flow's current version does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
+                badField: 'currentVersionRef.description',
+                applicable: [ SFDC_Flow ]
             }, {
                 description: 'Near the limit',
                 formula: (d) => d.usedPercentage >= 0.80,
@@ -284,14 +317,39 @@ export class OrgCheckDataFactory {
                 badField: 'usedPercentage',
                 applicable: [ SFDC_Limit ]
             }
-        ].map((v, i) => { v.id = i; return v; });
+        ].map((v, i) => { 
+            // check description
+            if (v.description === undefined || typeof v.description !== 'string') {
+                throw new TypeError(`The ${i}th Validation Rule should have a 'description' property of type 'string'.`);
+            }
+            // check formula
+            if (v.formula === undefined || typeof v.formula !== 'function' || v.formula.length !== 1) {
+                throw new TypeError(`The Validation Rule called '${v.description}' should have a 'formula' property of type 'function' with only one argument.`);
+            }
+            // check errorMessage
+            if (v.errorMessage === undefined || typeof v.errorMessage !== 'string') {
+                throw new TypeError(`The Validation Rule called '${v.description}' should have an 'errorMessage' property of type 'string'.`);
+            }
+            // check if 'applicable' array contains only OrgCheckData instances
+            if (v.applicable === undefined || Array.isArray(v.applicable) === false || v.applicable.every((dc) => IS_CLASS_EXTENDS(dc, OrgCheckData) === false)) {
+                throw new TypeError(`The Validation Rule called '${v.description}' should have an 'applicable' property of type 'array' with only OrgCheckData items.`);
+            }
+            // automatic id assignment
+            v.id = i; 
+            // return the item
+            return v; 
+        });
         Object.freeze(this.#allValidations); 
 
         this.#needDepencencies = [
-            SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, 
+            SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow,
             SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent,
             SFDC_VisualForceComponent, SFDC_VisualForcePage
         ];
+        // check if '#needDepencencies' array contains only OrgCheckData instances
+        if (this.#needDepencencies === undefined || Array.isArray(this.#needDepencencies) === false || this.#needDepencencies.every((dc) => IS_CLASS_EXTENDS(dc, OrgCheckData) === false)) {
+            throw new TypeError(`The list of classes that needs Dependencies must be of type 'array' with only OrgCheckData items.`);
+        }
         Object.freeze(this.#needDepencencies); 
 
         this.#instances = new Map();
@@ -302,12 +360,19 @@ export class OrgCheckDataFactory {
     }
 
     getInstance(dataClass) {
+        const isDataClassExtendsData = IS_CLASS_EXTENDS(dataClass, OrgCheckData);
+        const isDataClassExtendsInnerData = IS_CLASS_EXTENDS(dataClass, OrgCheckInnerData);
+        // Checking dataClass
+        if (isDataClassExtendsData === false && isDataClassExtendsInnerData === false) {
+            throw new TypeError('Given dataClass is not an instance of OrgCheckData nor OrgCheckInnerData');
+        }
         // If this dataClass was never asked before, create it and store it in the cache
         if (this.#instances.has(dataClass) === false) {
-            const validations = this.#allValidations.filter(v => v.applicable.includes(dataClass));
-            const isDependenciesNeeded = this.#needDepencencies.includes(dataClass);
-            const instance = new OrgCheckDataFactory2(dataClass, validations, isDependenciesNeeded);
-            this.#instances.set(dataClass, instance);
+            this.#instances.set(dataClass, new OrgCheckDataFactory2(
+                dataClass, 
+                isDataClassExtendsData ? this.#allValidations.filter(v => v.applicable.includes(dataClass)) : [], 
+                isDataClassExtendsData ? this.#needDepencencies.includes(dataClass) : []
+            ));
         }
         // Return the instance
         return this.#instances.get(dataClass);

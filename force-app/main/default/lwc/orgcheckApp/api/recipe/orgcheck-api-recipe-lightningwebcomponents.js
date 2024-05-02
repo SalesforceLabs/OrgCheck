@@ -25,11 +25,11 @@ export class OrgCheckRecipeLightningWebComponents extends OrgCheckRecipe {
         const components = data.get(DATASET_LIGHTNINGWEBCOMPONENTS_ALIAS);
         // Filter data
         const array = [];
-        for (const component of components.values()) {
+        components.forEach((component) => {
             if (namespace === '*' || component.package === namespace) {
                 array.push(component);
             }
-        }
+        });
         // Return data
         return array;
     }
