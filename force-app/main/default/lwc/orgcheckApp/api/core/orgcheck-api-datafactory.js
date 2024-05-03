@@ -311,6 +311,24 @@ export class OrgCheckDataFactory {
                 badField: 'currentVersionRef.description',
                 applicable: [ SFDC_Flow ]
             }, {
+                description: 'API Version too old for the current version of a flow',
+                formula: (d) => sfdcManager.isVersionOld(d.currentVersionRef?.apiVersion) === true,
+                errorMessage: `The API version of this flow's current version is too old. Please update it to a newest version.`,
+                badField: 'currentVersionRef.apiVersion',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'This flow is running without sharing',
+                formula: (d) => d.currentVersionRef?.runningMode === 'SystemModeWithoutSharing',
+                errorMessage: `The running mode of this version without sharing. With great power comes great responsabilities. Please check if this is REALLY needed.`,
+                badField: 'currentVersionRef.runningMode',
+                applicable: [ SFDC_Flow ]
+            }, {
+                description: 'Too many nodes in this version',
+                formula: (d) => d.currentVersionRef?.totalNodeCount > 100,
+                errorMessage: `There are more than one hundred of nodes in this flow. Please consider using Apex? or cut it into multiple sub flows?`,
+                badField: 'currentVersionRef.totalNodeCount',
+                applicable: [ SFDC_Flow ]
+            }, {
                 description: 'Near the limit',
                 formula: (d) => d.usedPercentage >= 0.80,
                 errorMessage: 'This limit is almost reached (>80%). Please review this.',

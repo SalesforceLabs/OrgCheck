@@ -29,6 +29,7 @@ export class SFDC_FlowVersion extends OrgCheckInnerData {
     url;
     version;
     apiVersion;
+    totalNodeCount;
     dmlCreateNodeCount;
     dmlDeleteNodeCount;
     dmlUpdateNodeCount;

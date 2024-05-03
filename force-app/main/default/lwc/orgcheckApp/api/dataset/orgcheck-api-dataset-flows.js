@@ -94,6 +94,12 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             url: sfdcManager.setupUrl('flow', id),
                             version: record.VersionNumber,
                             apiVersion: record.ApiVersion,
+                            totalNodeCount: ['actionCalls', 'apexPluginCalls', 'assignments',
+                                             'collectionProcessors', 'decisions', 'loops',
+                                             'orchestratedStages', 'recordCreates', 'recordDeletes',
+                                             'recordLookups', 'recordRollbacks', 'recordUpdates',
+                                             'screens', 'steps', 'waits'
+                                            ].reduce((count, property) => count + record.Metadata[property]?.length || 0, 0),
                             dmlCreateNodeCount: record.Metadata.recordCreates?.length || 0,
                             dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
                             dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
