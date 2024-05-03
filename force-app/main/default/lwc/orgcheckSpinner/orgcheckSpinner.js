@@ -15,6 +15,7 @@ export default class OrgCheckSpinner extends LightningElement {
         this.isShown = false;
         this.isClosable = false;
         this.sections = [];
+        this.hadError = false;
         this.#keysIndex = {};
         this.waitingTime = 0;
     }
@@ -33,6 +34,7 @@ export default class OrgCheckSpinner extends LightningElement {
 
     @api sectionFailed(sectionName, error) {
         if (this.isShown === false) this.isShown = true;
+        this.hadError = true;
         if (error) {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
@@ -102,6 +104,7 @@ export default class OrgCheckSpinner extends LightningElement {
     isShown;
     isClosable;
     waitingTime;
+    hadError;
 
     #keysIndex;
     #openSince;
