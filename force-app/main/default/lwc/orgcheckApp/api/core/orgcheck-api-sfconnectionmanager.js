@@ -389,7 +389,7 @@ export class OrgCheckSalesforceManager {
     */
     async readMetadata(metadatas) {
         this._watchDog__beforeRequest();
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve1, reject1) => {
             // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
             Promise.all(
                 metadatas
@@ -441,10 +441,10 @@ export class OrgCheckSalesforceManager {
                         });
                         return response;
                     })
-                    .catch(reject)
-                    .then(resolve);
+                    .catch(reject1)
+                    .then(resolve1);
                 })
-                .catch(reject); // in case some of the list went wrong!!
+                .catch(reject1); // in case some of the list went wrong!!
         });
     }
 
@@ -570,7 +570,7 @@ export class OrgCheckSalesforceManager {
                 method: 'GET'
             }, (e, r) => {
                 this._watchDog__afterRequest(reject);
-                if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length == 1) ? r?.sObjects[0].count : 0);
+                if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length === 1) ? r?.sObjects[0].count : 0);
             });
         });
     }

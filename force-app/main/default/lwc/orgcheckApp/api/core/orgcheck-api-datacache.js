@@ -43,7 +43,7 @@ export class OrgCheckDataCacheManager {
                         { 
                             type: 'map', 
                             length: value.size,
-                            data: Array.from(value.entries().filter(([k, v]) => k.endsWith('Ref') === false)),
+                            data: Array.from(value.entries().filter(([k]) => k.endsWith('Ref') === false)),
                             created: Date.now()
                         }
                     )

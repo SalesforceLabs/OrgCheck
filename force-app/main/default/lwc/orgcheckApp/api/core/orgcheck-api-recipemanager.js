@@ -158,8 +158,6 @@ export class OrgCheckRecipeManager {
             // Return value
             return finalData;
 
-        } catch(error) {
-            throw error;
         } finally {
             // End the logger
             this.#logger.end();

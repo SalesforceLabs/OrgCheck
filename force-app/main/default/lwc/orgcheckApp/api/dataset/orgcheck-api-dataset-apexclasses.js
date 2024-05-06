@@ -97,6 +97,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                                         case 'global':            apexClass.specifiedAccess  = 'global';    break;
                                         case 'abstract':          apexClass.isAbstract       = true;        break;
                                         case 'testMethod':        apexClass.isTest           = true;        break;
+                                        default:                  console.error(`Unsupported modifier in SymbolTable.tableDeclaration: ${m} (ApexClassId=${apexClass.id})`);
                                     }
                                 });
                             }

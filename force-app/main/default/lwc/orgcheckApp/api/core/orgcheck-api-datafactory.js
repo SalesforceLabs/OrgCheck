@@ -34,7 +34,7 @@ export class OrgCheckDataFactory2 {
         this.#dataClass = dataClass;
         this.#validations = validations;
         this.#isDependenciesNeeded = isDependenciesNeeded;
-    };
+    }
 
     create(setup) {
         // Create a row from the protofype
@@ -65,6 +65,7 @@ export class OrgCheckDataFactory2 {
                     return v.formula(row); } 
                 catch (error) { 
                     console.error('COMPUTE SCORE', error, row); 
+                    return false;
                 }})
             .forEach(v => {
                 row.score++;

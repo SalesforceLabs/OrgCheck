@@ -188,7 +188,6 @@ export default class OrgCheckApp extends LightningElement {
                     end: (s, f) => { if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
                 }
             );
-            this.accessToken = ''; // reset the accessToken so we do not store it anymore
             this.orgCheckVersion = this.#api.getVersion();
             this.#api.checkCurrentUserPermissions()
                 .then(() => {
@@ -787,7 +786,7 @@ export default class OrgCheckApp extends LightningElement {
         htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
         htmlContent += '<br />';
         htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
-        data.record.activeMemberRefs?.forEach(activeMember => htmlContent += `<li>${activeMember.name}</li>`);
+        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${activeMember.name}</li>`; });
         htmlContent += '</ul><br />';
         htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
         htmlContent += '<br />';

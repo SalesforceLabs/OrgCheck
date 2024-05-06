@@ -43,8 +43,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                             lastModifiedDate: record.LastModifiedDate,
                             hasAction: true,
                             futureActions: [],
-                            emptyTimeTriggers: [],
-                            description: record.description
+                            emptyTimeTriggers: []
                         });
                         const directActions = record.Metadata.actions;
                         if (directActions) {

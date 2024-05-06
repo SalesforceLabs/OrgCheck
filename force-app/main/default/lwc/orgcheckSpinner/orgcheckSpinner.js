@@ -59,6 +59,7 @@ export default class OrgCheckSpinner extends LightningElement {
                 this.waitingTime = (new Date().getTime() - this.#openSince) / 1000; 
             }
             clearInterval(this.#intervalId);
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
             this.#intervalId = setInterval(updateWaitingTime, 1000);
         }
     }

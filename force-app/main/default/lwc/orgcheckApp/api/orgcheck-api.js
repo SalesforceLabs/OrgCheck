@@ -28,7 +28,6 @@ import { OrgCheckRecipeManager,
     RECIPE_FLOWS_ALIAS,
     RECIPE_PROCESSBUILDERS_ALIAS,
     RECIPE_WORKFLOWS_ALIAS } from './core/orgcheck-api-recipemanager';
-import { OrgCheckScoreProcessorFactory } from './core/orgcheck-api-datafactory';
 
 /**
  * Org Check API main class

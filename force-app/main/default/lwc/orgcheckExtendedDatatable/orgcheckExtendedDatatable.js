@@ -17,13 +17,21 @@ const OBJECT_TO_STRING = (template, object) => {
                 if (type) {
                     switch (type) {
                         case 'numeric': return NUMBER_FORMATTER.format(value);
-                        case 'boolean': if (typeArg) { return typeArg.split(',', 2)[value === true ? 0 : 1]; } else return value;
+                        case 'boolean': {
+                            if (typeArg) {
+                                return typeArg.split(',', 2)[value === true ? 0 : 1];
+                            }
+                            return value;
+                        }
+                        default: return value;
                     }
                 } 
                 return value;
             });
         case 'function':
             return template(object);
+        default:
+            return object;
     }
 }
 
@@ -58,6 +66,7 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
                 break;
             case 'isObject':
             case 'isObjects':
+            default:
                 if (column.modifier?.template) {
                     cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
                 }
@@ -91,9 +100,8 @@ const ARRAY_MATCHER = (array, s) => {
         return Object.values(item.data).findIndex((property) => {
             if (Array.isArray(property)) {
                 return ARRAY_MATCHER(property, s);
-            } else {
-                return STRING_MATCHER(property, s);
             }
+            return STRING_MATCHER(property, s);
         }) >= 0;
     }) >= 0
 }
@@ -354,7 +362,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 } else if (c.type === TYPE_SCORE) {
                     cell.data.value = row.score;
                 } else */ if (c.isIterative === true) {
-                    cell.data.values = ref?.map((r) => CELL_PREPARE(r, c)) || [];
+                    cell.data.values = ref?.map((rr) => CELL_PREPARE(rr, c)) || [];
                 } else {
                     CELL_PREPARE(ref, c, cell);
                 }
@@ -377,8 +385,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
     
     get exportedRows() {
-        if (!this.#columns) return;
-        if (!this.#allRows) return;
+        if (!this.#columns || !this.#allRows) return [];
         return [
             {
                 header: 'Data',
@@ -387,6 +394,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     if (cell.isIndex) return row.index;
                     if (cell.data.values) return JSON.stringify(cell.data.values.map(v => v.data.decoratedValue ?? v.data.value));
                     if (cell.data.value) return cell.data.decoratedValue ?? cell.data.value;
+                    return '';
                 }))
             }
         ];
@@ -396,7 +404,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * Handler when a user click on the "Load more rows..." button
      */
     handleLoadMoreData() {
-        const nextNbRows = Number.parseInt(this.infiniteScrollingCurrentNbRows) + Number.parseInt(this.infiniteScrollingAdditionalNbRows);
+        const nextNbRows = Number.parseInt(this.infiniteScrollingCurrentNbRows, 10) + Number.parseInt(this.infiniteScrollingAdditionalNbRows, 10);
         this.infiniteScrollingCurrentNbRows = nextNbRows < this.nbAllRows ? nextNbRows : this.nbAllRows;
         this._setVisibleRows();
     }

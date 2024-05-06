@@ -57,7 +57,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      */
     sobjectApiNameData;
 
-    isCurrentOrgAProduction = false;;
+    isCurrentOrgAProduction = false;
 
     /** 
      * Yes/No options
@@ -189,12 +189,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     @api get isShowExternalRolesSelected() { return this.showExternalRoles === TRUE_AS_STRING; }
 
     @api get isUseInProductionConfirmed() { return this.useInProductionConfirmation === TRUE_AS_STRING; }
-
-    /** 
-     * Production by-pass option selected in the filter
-     * False by default;
-     */
-    useInProductionConfirmation = FALSE_AS_STRING;
 
     /**
      * This array indicates which filters has changed since last validation

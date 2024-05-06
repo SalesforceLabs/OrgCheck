@@ -1,6 +1,27 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
+const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
+    if (groups.has(groupId) === false) {
+        return [];
+    }
+    const group = groups.get(groupId);
+    if (group.directGroupIds?.length > 0) {
+        const indirectUserIds = new Set();
+        group.directGroupIds.forEach((subGroupId) => {
+            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
+        });
+        group.indirectUserIds = Array.from(indirectUserIds);
+    }
+    if (returnSomething === true) {
+        const allUserIds = new Set();
+        group.directUserIds?.forEach((u) => allUserIds.add(u));
+        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
+        return Array.from(allUserIds);
+    }
+    return [];
+}
+
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
     run(sfdcManager, dataFactory, localLogger, resolve, reject) {
@@ -95,24 +116,4 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             resolve(groups);
         }).catch(reject);
     } 
-}
-
-const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
-    if (groups.has(groupId) === false) {
-        return [];
-    }
-    const group = groups.get(groupId);
-    if (group.directGroupIds?.length > 0) {
-        const indirectUserIds = new Set();
-        group.directGroupIds.forEach((subGroupId) => {
-            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
-        });
-        group.indirectUserIds = Array.from(indirectUserIds);
-    }
-    if (returnSomething === true) {
-        const allUserIds = new Set();
-        group.directUserIds?.forEach((u) => allUserIds.add(u));
-        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
-        return Array.from(allUserIds);
-    }
 }

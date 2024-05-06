@@ -20,10 +20,11 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     dependencyTreeByType;
     dependencyBoxColorsDecorator = (depth) => {
         switch (depth) {
-            case 0: return '#2f89a8'; break;
-            case 1: return '#3fb9b8'; break;
-            case 2: return '#4fb9c8'; break;
-            case 3: return '#5fc9f8'; break;
+            case 0:  return '#2f89a8'; 
+            case 1:  return '#3fb9b8'; 
+            case 2:  return '#4fb9c8'; 
+            case 3: 
+            default: return '#5fc9f8'; 
         }
     };
     dependencyBoxInnerHtmlDecorator = (depth, data) => {

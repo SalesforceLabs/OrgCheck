@@ -12,7 +12,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
         }]).then((results) => {
             
             // List of policies
-            const profilePasswordPolicies = results['ProfilePasswordPolicy'];
+            const profilePasswordPolicies = results?.ProfilePasswordPolicy;
 
             // Init the map
             const policies = new Map();
@@ -29,18 +29,18 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         // In this case, r.profile will be equal to { $: {xsi:nil: 'true'} }
                         // And we expect r.profile to be the name of the profile so....
                         return
-                    };
+                    }
                     // Create the instance
                     const policy = policyDataFactory.create({
                         forgotPasswordRedirect: (ppp.forgotPasswordRedirect === 'true'),
-                        lockoutInterval: parseInt(ppp.lockoutInterval),
-                        maxLoginAttempts: parseInt(ppp.maxLoginAttempts),
-                        minimumPasswordLength: parseInt(ppp.minimumPasswordLength),
+                        lockoutInterval: parseInt(ppp.lockoutInterval, 10),
+                        maxLoginAttempts: parseInt(ppp.maxLoginAttempts, 10),
+                        minimumPasswordLength: parseInt(ppp.minimumPasswordLength, 10),
                         minimumPasswordLifetime: (ppp.minimumPasswordLifetime === 'true'),
                         obscure: (ppp.obscure === 'true'),
-                        passwordComplexity: parseInt(ppp.passwordComplexity),
-                        passwordExpiration: parseInt(ppp.passwordExpiration),
-                        passwordHistory: parseInt(ppp.passwordHistory),
+                        passwordComplexity: parseInt(ppp.passwordComplexity, 10),
+                        passwordExpiration: parseInt(ppp.passwordExpiration, 10),
+                        passwordHistory: parseInt(ppp.passwordHistory, 10),
                         passwordQuestion: (ppp.passwordQuestion === '1'),
                         profileName: ppp.profile
                     });
