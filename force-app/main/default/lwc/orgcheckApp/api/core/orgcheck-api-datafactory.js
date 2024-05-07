@@ -95,7 +95,7 @@ export class OrgCheckDataFactory {
                 formula: (d) => d.dependencies?.referenced?.length === 0, 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
-                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
+                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 description: 'API Version too old',
                 formula: (d) => sfdcManager.isVersionOld(d.apiVersion) === true,
