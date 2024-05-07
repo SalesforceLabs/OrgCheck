@@ -146,7 +146,13 @@ export default class OrgCheckApp extends LightningElement {
         if (dataTabs) {
             dataTabs.split(',').forEach((tab) => {
                 switch (tab) {
-                    case 'object-information':         this.#api.removeAllObjectsCache(); break;
+                    case 'object-information': {
+                        const sobject = this.#filters.isSelectedSObjectApiNameAny === true ? '*' : this.#filters.selectedSObjectApiName;
+                        if (sobject !== '*') {
+                            this.#api.removeAllObjectsCache(sobject); 
+                        }
+                        break;
+                    }
                     case 'object-permissions':         this.#api.removeAllObjectPermissionsCache(); break;
                     case 'app-permissions':            this.#api.removeAllAppPermissionsCache(); break;
                     case 'custom-fields':              this.#api.removeAllCustomFieldsCache(); break;
