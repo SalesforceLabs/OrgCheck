@@ -187,6 +187,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_OBJECT_ALIAS, sobject);
     }
 
+    removeAllObjectsCache(sobject) {
+        this.#recipeManager.clean(RECIPE_OBJECT_ALIAS, sobject);
+    }
+
     /**
      * Get information about object permissions per parent (kind of matrix view)
      * 
@@ -197,7 +201,11 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace);
     }
 
-     /**
+    removeAllObjectPermissionsCache() {
+        this.#recipeManager.clean(RECIPE_OBJECTPERMISSIONS_ALIAS);
+    }
+
+    /**
      * Get information about application permissions per parent (kind of matrix view)
      * 
      * @returns {Any} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
@@ -205,6 +213,10 @@ export class OrgCheckAPI {
      */
     async getApplicationPermissionsPerParent(namespace) {
         return this.#recipeManager.run(RECIPE_APPPERMISSIONS_ALIAS, namespace);
+    }
+
+    removeAllAppPermissionsCache() {
+        this.#recipeManager.clean(RECIPE_APPPERMISSIONS_ALIAS);
     }
 
     /**
@@ -217,6 +229,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_CUSTOMFIELDS_ALIAS, namespace, sobjectType, sobject);
     }
 
+    removeAllCustomFieldsCache() {
+        this.#recipeManager.clean(RECIPE_CUSTOMFIELDS_ALIAS);
+    }
+
     /**
      * Get information about permission sets (filtered out by namespace/pakage)
      * 
@@ -225,6 +241,10 @@ export class OrgCheckAPI {
      */
     async getPermissionSets(namespace) {
         return this.#recipeManager.run(RECIPE_PERMISSIONSETS_ALIAS, namespace);
+    }
+    
+    removeAllPermSetsCache() {
+        this.#recipeManager.clean(RECIPE_PERMISSIONSETS_ALIAS);
     }
 
     /**
@@ -237,6 +257,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_PROFILES_ALIAS, namespace);
     }
 
+    removeAllProfilesCache() {
+        this.#recipeManager.clean(RECIPE_PROFILES_ALIAS);
+    }
+
     /**
      * Get information about profile restrictions (filtered out by namespace/pakage)
      * 
@@ -245,6 +269,10 @@ export class OrgCheckAPI {
      */
     async getProfileRestrictions(namespace) {
         return this.#recipeManager.run(RECIPE_PROFILERESTRICTIONS_ALIAS, namespace);
+    }
+
+    removeAllProfileRestrictionsCache() {
+        this.#recipeManager.clean(RECIPE_PROFILERESTRICTIONS_ALIAS);
     }
 
     /**
@@ -257,6 +285,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_PROFILEPWDPOLICIES_ALIAS);
     }
 
+    removeAllProfilePasswordPoliciesCache() {
+        this.#recipeManager.clean(RECIPE_PROFILEPWDPOLICIES_ALIAS);
+    }
+
     /**
      * Get information about active users
      * 
@@ -265,6 +297,10 @@ export class OrgCheckAPI {
      */
     async getActiveUsers() {
         return this.#recipeManager.run(RECIPE_ACTIVEUSERS_ALIAS);
+    }
+
+    removeAllActiveUsersCache() {
+        this.#recipeManager.clean(RECIPE_ACTIVEUSERS_ALIAS);
     }
 
     /**
@@ -277,6 +313,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_CUSTOMLABELS_ALIAS, namespace);
     }
 
+    removeAllCustomLabelsCache() {
+        this.#recipeManager.clean(RECIPE_CUSTOMLABELS_ALIAS);
+    }
+
     /**
      * Get information about LWCs (filtered out by namespace/pakage)
      * 
@@ -285,6 +325,10 @@ export class OrgCheckAPI {
      */
     async getLightningWebComponents(namespace) {
         return this.#recipeManager.run(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, namespace);
+    }
+    
+    removeAllLightningWebComponentsCache() {
+        this.#recipeManager.clean(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS);
     }
 
     /**
@@ -297,6 +341,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, namespace);
     }
 
+    removeAllLightningAuraComponentsCache() {
+        this.#recipeManager.clean(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS);
+    }
+
     /**
      * Get information about flexipages (filtered out by namespace/pakage)
      * 
@@ -307,6 +355,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_LIGHTNINGPAGES_ALIAS, namespace);
     }
 
+    removeAllLightningPagesCache() {
+        this.#recipeManager.clean(RECIPE_LIGHTNINGPAGES_ALIAS);
+    }
+    
     /**
      * Get information about VFCs (filtered out by namespace/pakage)
      * 
@@ -315,6 +367,10 @@ export class OrgCheckAPI {
      */
     async getVisualForceComponents(namespace) {
         return this.#recipeManager.run(RECIPE_VISUALFORCECOMPONENTS_ALIAS, namespace);
+    }
+    
+    removeAllVisualForceComponentsCache() {
+        this.#recipeManager.clean(RECIPE_VISUALFORCECOMPONENTS_ALIAS);
     }
 
     /**
@@ -327,6 +383,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_VISUALFORCEPAGES_ALIAS, namespace);
     }
 
+    removeAllVisualForcePagesCache() {
+        this.#recipeManager.clean(RECIPE_VISUALFORCEPAGES_ALIAS);
+    }
+    
     /**
      * Get information about Public Groups
      * 
@@ -335,6 +395,10 @@ export class OrgCheckAPI {
      */
     async getPublicGroups() {
         return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS);
+    }
+
+    removeAllPublicGroupsCache() {
+        this.#recipeManager.clean(RECIPE_PUBLICGROUPS_ALIAS);
     }
 
     /**
@@ -347,6 +411,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_QUEUES_ALIAS);
     }
     
+    removeAllQueuesCache() {
+        this.#recipeManager.clean(RECIPE_QUEUES_ALIAS);
+    }
+    
     /**
      * Get information about Apex Classes (filtered out by namespace/pakage)
      * 
@@ -357,6 +425,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_APEXCLASSES_ALIAS, namespace);
     }
 
+    removeAllApexClassesCache() {
+        this.#recipeManager.clean(RECIPE_APEXCLASSES_ALIAS);
+    }
+    
     /**
      * Get information about Apex triggers (filtered out by namespace/pakage)
      * 
@@ -367,6 +439,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_APEXTRIGGERS_ALIAS, namespace);
     }
 
+    removeAllApexTriggersCache() {
+        this.#recipeManager.clean(RECIPE_APEXTRIGGERS_ALIAS);
+    }
+
     /**
      * Get information about User roles in a tabular view
      * 
@@ -375,6 +451,10 @@ export class OrgCheckAPI {
      */
     async getRoles() {
         return this.#recipeManager.run(RECIPE_USERROLES_ALIAS);
+    }
+
+    removeAllRolesCache() {
+        this.#recipeManager.clean(RECIPE_USERROLES_ALIAS);
     }
 
     /**
@@ -429,6 +509,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_WORKFLOWS_ALIAS);
     }
 
+    removeAllWorkflowsCache() {
+        this.#recipeManager.clean(RECIPE_WORKFLOWS_ALIAS);
+    }
+
     /**
      * Get information about Flows
      * 
@@ -439,6 +523,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_FLOWS_ALIAS);
     }
 
+    removeAllFlowsCache() {
+        this.#recipeManager.clean(RECIPE_FLOWS_ALIAS);
+    }
+    
     /**
      * Get information about Process Builders
      * 
@@ -448,4 +536,8 @@ export class OrgCheckAPI {
     async getProcessBuilders() {
         return this.#recipeManager.run(RECIPE_PROCESSBUILDERS_ALIAS);
     }
+
+    removeAllProcessBuildersCache() {
+        this.#recipeManager.clean(RECIPE_PROCESSBUILDERS_ALIAS);
+    }    
 }

@@ -141,8 +141,42 @@ export default class OrgCheckApp extends LightningElement {
         this.#modal.open('Asynchronous Run All Test Asked', htmlContent);
     }
 
-    async handleClickRefreshApex() {
-        this.handleRemoveCache({ detail: { itemName: 'apex-classes' }});
+    async handleClickRefresh(event) {
+        const dataTabs = event?.target?.getAttribute('data-tabs');
+        if (dataTabs) {
+            dataTabs.split(',').forEach((tab) => {
+                switch (tab) {
+                    case 'object-information':         this.#api.removeAllObjectsCache(); break;
+                    case 'object-permissions':         this.#api.removeAllObjectPermissionsCache(); break;
+                    case 'app-permissions':            this.#api.removeAllAppPermissionsCache(); break;
+                    case 'custom-fields':              this.#api.removeAllCustomFieldsCache(); break;
+                    case 'users':                      this.#api.removeAllActiveUsersCache(); break;
+                    case 'profiles':                   this.#api.removeAllProfilesCache(); break;
+                    case 'permission-sets':            this.#api.removeAllPermSetsCache(); break;
+                    case 'profile-restrictions':       this.#api.removeAllProfileRestrictionsCache(); break;
+                    case 'profile-password-policies':  this.#api.removeAllProfilePasswordPoliciesCache(); break;
+                    case 'roles-listing':
+                    case 'roles-explorer':             this.#api.removeAllRolesCache(); break;
+                    case 'public-groups':              this.#api.removeAllPublicGroupsCache(); break;
+                    case 'queues':                     this.#api.removeAllQueuesCache(); break;
+                    case 'flows':                      this.#api.removeAllFlowsCache(); break;
+                    case 'process-builders':           this.#api.removeAllProcessBuildersCache(); break;
+                    case 'workflows':                  this.#api.removeAllWorkflowsCache(); break;
+                    case 'custom-labels':              this.#api.removeAllCustomLabelsCache(); break;
+                    case 'visual-force-pages':         this.#api.removeAllVisualForcePagesCache(); break;
+                    case 'visual-force-components':    this.#api.removeAllVisualForceComponentsCache(); break;
+                    case 'lightning-pages':            this.#api.removeAllLightningPagesCache(); break;
+                    case 'lightning-aura-components':  this.#api.removeAllLightningAuraComponentsCache(); break;
+                    case 'lightning-web-components':   this.#api.removeAllLightningWebComponentsCache(); break;
+                    case 'apex-classes':
+                    case 'apex-unit-tests':
+                    case 'apex-recompilation-needed':  this.#api.removeAllApexClassesCache(); break; 
+                    case 'apex-triggers':              this.#api.removeAllApexTriggersCache(); break;
+                    default:
+                }
+            });
+            this._updateCurrentTab();
+        }
     }
 
     async handleClickRecompile() {

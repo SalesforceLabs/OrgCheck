@@ -114,6 +114,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="⚽ Objects" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="object-information,objects-owd"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="object-information" label="Object Documentation" onactive={handleSubTabActivation}>                    
                     <template if:false={objectInformationData}>
@@ -304,6 +309,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🥕 Custom Fields" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="custom-fields"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="custom-fields" label="Custom Fields" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -325,6 +335,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🧔 Users" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="users"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="users" label="Users" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -346,6 +361,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="👮 Profiles and Permission Sets" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="profiles,permission-sets,profile-restrictions,profile-password-policies,object-permissions,app-permissions"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="profiles" label="Profiles" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -456,6 +476,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🐇 Roles" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="roles-explorer,roles-listing"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="roles-explorer" label="Role Explorer" onactive={handleSubTabActivation}>
                     <c-orgcheck-graphics 
@@ -486,6 +511,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🌶️ Public Groups and Queues" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="public-groups,queues"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="public-groups" label="Public Groups" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -524,6 +554,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🤖 Automations" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="flows,process-builders,workflows"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="flows" label="Flows" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -579,6 +614,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🎁 Custom Labels" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="custom-labels"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="custom-labels" label="Custom Labels" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -600,6 +640,11 @@
             </lightning-tabset>
         </lightning-tab>
         <lightning-tab label="🥐 Visual Components" onactive={handleTabActivation}>
+            <lightning-layout>
+                <lightning-layout-item>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
+                </lightning-layout-item>
+            </lightning-layout>
             <lightning-tabset>
                 <lightning-tab value="visual-force-pages" label="Visual Force Pages" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
@@ -699,7 +744,7 @@
                     </lightning-layout-item>
                 </template>
                 <lightning-layout-item>
-                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshApex}></lightning-button>
+                    <lightning-button label="Refresh" title="Refresh" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefresh} data-tabs="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>
                 </lightning-layout-item>
             </lightning-layout>
             <lightning-tabset>

@@ -208,6 +208,16 @@ export class OrgCheckDatasetManager {
         return Promise.all(promises).then(() => results);
     }
 
+    clean(datasets) {
+        if (datasets instanceof Array === false) {
+            throw new TypeError('The given datasets is not an instance of Array.');
+        }
+        datasets.forEach((dataset) => {
+            const cacheKey = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
+            this.#cache.remove(cacheKey);
+        });
+    }
+
     getCacheInformation() {
         return this.#cache.details();
     }
