@@ -94,6 +94,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                                         case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
                                         case 'inherited sharing': apexClass.specifiedSharing = 'inherited'; break;
                                         case 'public':            apexClass.specifiedAccess  = 'public';    break;
+                                        case 'private':           apexClass.specifiedAccess  = 'private';   break;
                                         case 'global':            apexClass.specifiedAccess  = 'global';    break;
                                         case 'abstract':          apexClass.isAbstract       = true;        break;
                                         case 'testMethod':        apexClass.isTest           = true;        break;
