@@ -78,7 +78,14 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
 
 const CELL_CSSCLASS = (row, cell) => {
     if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
-    return (row.badFields && row.badFields.some((field) => field === cell.data?.ref || field === cell.data?.value || field === `${cell.data?.ref}.${cell.data?.value}`)) ? 'bad' : '';
+    return (row.badFields && row.badFields.some((field) => {
+        // if the name of field is the ref + property
+        if (field === `${cell.data?.ref}.${cell.data?.value}`) return true;
+        // if the field is the property of the current row
+        if (cell.data?.ref === undefined && field === cell.data?.value) return true;
+        // otherwise
+        return false;
+    })) ? 'bad' : '';
 }
 
 const ROW_CSSCLASS = (row, showScore) => {

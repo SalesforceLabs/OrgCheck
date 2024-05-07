@@ -93,7 +93,7 @@ export class OrgCheckDataFactory {
                 description: 'Not referenced anywhere',
                 formula: (d) => d.dependencies?.referenced?.length === 0, 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
-                badField: 'dependencies.referenced',
+                badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 description: 'API Version too old',
@@ -288,7 +288,7 @@ export class OrgCheckDataFactory {
                 badField: 'isVersionActive',
                 applicable: [ SFDC_Flow ]
             }, {
-                description: 'Too much versions under for this flow',
+                description: 'Too much versions under this flow',
                 formula: (d) => d.versionsCount > 7,
                 errorMessage: 'This flow has more than seven versions. Maybe it is time to do some cleaning in this flow!',
                 badField: 'versionsCount',
