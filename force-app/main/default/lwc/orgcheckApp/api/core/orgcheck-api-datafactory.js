@@ -21,6 +21,7 @@ import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
+import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 
 const IS_CLASS_EXTENDS = (clazz, parentClazz) => { return clazz.prototype instanceof parentClazz }
 
@@ -100,7 +101,7 @@ export class OrgCheckDataFactory {
                 formula: (d) => sfdcManager.isVersionOld(d.apiVersion) === true,
                 errorMessage: 'The API version of this component is too old. Please update it to a newest version.',
                 badField: 'apiVersion',
-                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger ]
+                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent ]
             }, {
                 description: 'No assert in this Apex Test',
                 formula: (d) => d.isTest === true && d.nbSystemAsserts === 0,
@@ -112,7 +113,7 @@ export class OrgCheckDataFactory {
                 formula: (d) => sfdcManager.isEmpty(d.description) === true,
                 errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
                 badField: 'description',
-                applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow ]
+                applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_FieldSet, SFDC_ValidationRule ]
             }, {
                 description: 'No description for custom component',
                 formula: (d) => d.isCustom === true && sfdcManager.isEmpty(d.description) === true,
@@ -298,12 +299,6 @@ export class OrgCheckDataFactory {
                 formula: (d) => d.currentVersionRef?.type === 'Workflow',
                 errorMessage: 'Time to migrate this process builder to flow!',
                 badField: 'name',
-                applicable: [ SFDC_Flow ]
-            }, {
-                description: 'API Version too old for the current version of a flow',
-                formula: (d) => sfdcManager.isVersionOld(d.currentVersionRef?.apiVersion) === true,
-                errorMessage: `The API version of this flow's current version is too old. Please update it to a newest version.`,
-                badField: 'currentVersionRef.apiVersion',
                 applicable: [ SFDC_Flow ]
             }, {
                 description: 'No description for the current version of a flow',
