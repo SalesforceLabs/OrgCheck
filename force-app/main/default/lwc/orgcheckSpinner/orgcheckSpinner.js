@@ -55,6 +55,7 @@ export default class OrgCheckSpinner extends LightningElement {
             this.isShown = true;
             this.isClosable = false;
             this.waitingTime = 0;
+            this.hadError = false;
             const updateWaitingTime = () => { 
                 this.waitingTime = (new Date().getTime() - this.#openSince) / 1000; 
             }
@@ -74,6 +75,8 @@ export default class OrgCheckSpinner extends LightningElement {
         this.sections = [];
         this.#keysIndex = {};
         this.#openSince = undefined;
+        this.waitingTime = 0;
+        this.hadError = false;
         clearInterval(this.#intervalId);
     }
 
