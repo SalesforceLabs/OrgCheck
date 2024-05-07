@@ -63,8 +63,8 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                                 ipRanges.push(ipRangeDataFactory.create({
                                     startAddress: i.startAddress,
                                     endAddress: i.endAddress,
-                                    description: i.description,
-                                    difference: endNumber - startNumber
+                                    description: i.description || '(empty)',
+                                    difference: endNumber - startNumber + 1
                                 }));
                             });
                         }
