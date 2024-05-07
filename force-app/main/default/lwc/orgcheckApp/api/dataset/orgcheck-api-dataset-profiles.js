@@ -45,7 +45,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                         lastModifiedDate: record.LastModifiedDate,
                         nbFieldPermissions: record.FieldPerms?.records.length || 0,
                         nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                        tyoe: 'Profile'
+                        type: 'Profile'
                     });
 
                     // Compute the score of this item
