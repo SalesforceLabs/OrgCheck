@@ -96,6 +96,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                                         case 'public':            apexClass.specifiedAccess  = 'public';    break;
                                         case 'private':           apexClass.specifiedAccess  = 'private';   break;
                                         case 'global':            apexClass.specifiedAccess  = 'global';    break;
+                                        case 'virtual':           apexClass.specifiedAccess  = 'virtual';   break;
                                         case 'abstract':          apexClass.isAbstract       = true;        break;
                                         case 'testMethod':        apexClass.isTest           = true;        break;
                                         default:                  console.error(`Unsupported modifier in SymbolTable.tableDeclaration: ${m} (ApexClassId=${apexClass.id})`);
