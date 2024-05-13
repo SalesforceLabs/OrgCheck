@@ -36,8 +36,28 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
         const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
         // Augment data
         object.typeRef = types.get(object.typeId);
-        object.apexTriggerRefs = object.apexTriggerIds.map((id) => { const t = apexTriggers.get(id); t.objectRef = object; return t; });
-        object.customFieldRefs = object.customFieldIds.map((id) => { const f = customFields.get(id); f.objectRef = object; return f; });
+        object.apexTriggerRefs = object.apexTriggerIds
+            .filter((id) => {
+                if (apexTriggers.has(id)) return true;
+                console.error('Unknown Apex Trigger id', id, ' for Object ', object, ' in Apex Triggers list ', apexTriggers);
+                return false;
+            })
+            .map((id) => { 
+                const t = apexTriggers.get(id); // can't be null 
+                t.objectRef = object; 
+                return t; 
+            });
+        object.customFieldRefs = object.customFieldIds
+            .filter((id) => {
+                if (customFields.has(id)) return true;
+                console.error('Unknown Custom Field id', id, ' for Object ', object, ' in Custom Field list ', customFields);
+                return false;
+            })
+            .map((id) => { 
+                const f = customFields.get(id); // can't be null
+                f.objectRef = object; 
+                return f; 
+            });
         // Return data
         return object;
     }
