@@ -133,7 +133,11 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     async handleClickRunAllTests() {
+        this.#spinner.open();
+        this.#spinner.sectionStarts('run-all-tests', 'Launching...');
         const asyncApexJobId = await this.#api.runAllTestsAsync();
+        this.#spinner.sectionEnded('run-all-tests', 'Done!');
+        this.#spinner.close();
         let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
         htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
         htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
