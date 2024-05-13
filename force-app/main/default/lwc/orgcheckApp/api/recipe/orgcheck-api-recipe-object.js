@@ -10,7 +10,7 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
     /** 
      * Return the list of dataset you need 
      * 
-     * @returns {Array<DatasetRunInformation>}
+     * @returns {Array<string|DatasetRunInformation>}
      */
     extract(object) {
         const datasetRunInfo = new DatasetRunInformation(DATASET_OBJECT_ALIAS, `${DATASET_OBJECT_ALIAS}_${object}`);

@@ -149,11 +149,11 @@ export class OrgCheckAPI {
      * @throws Exception if not enough permissions to run the application
      */
     async checkCurrentUserPermissions() {
-        const perms = await this.#recipeManager.run(RECIPE_CURRENTUSERPERMISSIONS_ALIAS);
-        if (perms.get('PermissionsModifyAllData') === false || 
-            perms.get('PermissionsAuthorApex') === false ||
-            perms.get('PermissionsApiEnabled') === false ||
-            perms.get('PermissionsInstallPackaging') === false) {
+        const perms = await this.#recipeManager.run(RECIPE_CURRENTUSERPERMISSIONS_ALIAS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]);
+        if (perms.get('ModifyAllData') === false || 
+            perms.get('AuthorApex') === false ||
+            perms.get('ApiEnabled') === false ||
+            perms.get('InstallPackaging') === false) {
                 const error = new TypeError(
                     'Current User Permission Access is not enough to run the application <br /><br />'+
                     `- <b>Modify All Data</b> (Create, edit, and delete all organization data, regardless of sharing settings) [PermissionsModifyAllData] is set to ${perms.get('PermissionsModifyAllData')} <br />`+
