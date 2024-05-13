@@ -23,6 +23,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} ObjectPermissions...`);
             results[0].records
+                .filter((record) => record.Parent !== null) // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!)
                 .forEach((record) => {
                     // Create the instance
                     const permission = permissionDataFactory.create({
