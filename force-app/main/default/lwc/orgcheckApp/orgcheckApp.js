@@ -468,7 +468,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'External?',           type: 'boolean',          data: { value: 'isExternalId' }},
         { label: 'Indexed?',            type: 'boolean',          data: { value: 'isIndexed' }},
         { label: 'Tooltip',             type: 'text',             data: { value: 'tooltip' }},
-        { label: 'Formula',             type: 'text',             data: { value: 'formula' }},
+        { label: 'Formula',             type: 'text',             data: { value: 'formula' }, modifier: { preformatted: true }},
         { label: 'Default Value',       type: 'text',             data: { value: 'defaultValue' }},
         { label: 'Using',               type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},

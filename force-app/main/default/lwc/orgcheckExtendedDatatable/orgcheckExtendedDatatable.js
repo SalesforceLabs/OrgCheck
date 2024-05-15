@@ -43,6 +43,9 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
     } else {
         cell.data.value = reference || '';
     }
+    if (column.modifier?.preformatted === true) {
+        cell.isPreformatted = true;
+    }
     if (column.modifier?.valueIfEmpty && !cell.data.value) {
         cell.data.decoratedValue = column.modifier.valueIfEmpty;
         cell.isEmpty = true;

@@ -154,7 +154,14 @@
                                 <template lwc:if={cell.isValueTruncated}>
                                     {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon>
                                 </template>
-                                <template lwc:else>{cell.data.value}</template>
+                                <template lwc:else>
+                                    <template lwc:if={cell.isPreformatted}>
+                                        <pre>{cell.data.value}</pre>
+                                    </template>
+                                    <template lwc:else>
+                                        {cell.data.value}
+                                    </template>
+                                </template>
                             </template>
 
                             <!-- TYPE TEXTS: array of string (see TEXT for each element) -->
@@ -168,7 +175,12 @@
                                             - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon><br key={cell.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data.value}<br key={cell.key} />
+                                            <template lwc:if={item.isPreformatted}>
+                                                - <pre key={cell.key}>{cell.data.value}</pre>
+                                            </template>
+                                            <template lwc:else>
+                                                - {item.data.value}<br key={cell.key} />
+                                            </template>
                                         </template>
                                     </template>
                                 </template>
