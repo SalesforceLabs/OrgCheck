@@ -44,7 +44,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                         '(SELECT Id, Name FROM WebLinks) '+
                     'FROM EntityDefinition '+
                     `WHERE QualifiedApiName = '${fullObjectApiName}' `+
-                    (sfdcManager.isEmpty(packageName) ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
+                    (!packageName ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
         }]));
         promises.push(sfdcManager.recordCount(fullObjectApiName));
         Promise.all(promises)
@@ -185,7 +185,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 
                 const relationships = (
                     sobjectDescribed.childRelationships ? 
-                    sobjectDescribed.childRelationships.filter((t) => !sfdcManager.isEmpty(t.relationshipName)).map((t) => relationshipDataFactory.createWithScore({ 
+                    sobjectDescribed.childRelationships.filter((t) => !t.relationshipName).map((t) => relationshipDataFactory.createWithScore({ 
                         name: t.relationshipName,
                         childObject: t.childSObject,
                         fieldName: t.field,

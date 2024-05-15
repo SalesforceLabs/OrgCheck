@@ -513,7 +513,7 @@ export default class OrgCheckApp extends LightningElement {
     auraComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
@@ -542,7 +542,7 @@ export default class OrgCheckApp extends LightningElement {
     lightningWebComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
@@ -663,7 +663,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForceComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
@@ -678,7 +678,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForcePagesTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Mobile',        type: 'boolean',          data: { value: 'isMobileReady' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
@@ -694,7 +694,7 @@ export default class OrgCheckApp extends LightningElement {
     apexClassesTableColumns = [
         { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
         { label: 'Class',           type: 'boolean',          data: { value: 'isClass' }},
         { label: 'Abst.',           type: 'boolean',          data: { value: 'isAbstract' }},
@@ -724,7 +724,7 @@ export default class OrgCheckApp extends LightningElement {
     apexUncompiledTableColumns = [
         { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
         { label: 'Size',            type: 'numeric',          data: { value: 'length' }},
         { label: 'Coverage (>75%)', type: 'percentage',       data: { ref: 'coverage' }, modifier: { valueIfEmpty: 'No coverage!' }},
@@ -741,7 +741,7 @@ export default class OrgCheckApp extends LightningElement {
     apexTriggersTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
         { label: 'Object',        type: 'id',               data: { ref: 'objectRef', value: 'name', url: 'url' }},
@@ -767,7 +767,7 @@ export default class OrgCheckApp extends LightningElement {
     apexTestsTableColumns = [
         { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
         { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
@@ -849,14 +849,14 @@ export default class OrgCheckApp extends LightningElement {
     flowsTableColumns = [
         { label: 'Score',                    type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                     type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',              type: 'numeric',          data: { value: 'apiVersion' }},
+        { label: 'API Version',              type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Type',                     type: 'text',             data: { value: 'type' }},
         { label: 'Number of versions',       type: 'numeric',          data: { value: 'versionsCount' }},
         { label: 'Current Version',          type: 'id',               data: { ref: 'currentVersionRef', value: 'version', url: 'url' }},
         { label: 'Is it Active?',            type: 'boolean',          data: { value: 'isVersionActive' }},
         { label: 'Is it the Latest?',        type: 'boolean',          data: { value: 'isLatestCurrentVersion' }},
         { label: 'Its Running Mode',         type: 'text',             data: { ref: 'currentVersionRef', value: 'runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-        { label: 'Its API Version',          type: 'numeric',          data: { ref: 'currentVersionRef', value: 'apiVersion' }},
+        { label: 'Its API Version',          type: 'numeric',          data: { ref: 'currentVersionRef', value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: '# Nodes',                  type: 'numeric',          data: { ref: 'currentVersionRef', value: 'totalNodeCount' }},
         { label: '# DML Create Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlCreateNodeCount' }},
         { label: '# DML Delete Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlDeleteNodeCount' }},

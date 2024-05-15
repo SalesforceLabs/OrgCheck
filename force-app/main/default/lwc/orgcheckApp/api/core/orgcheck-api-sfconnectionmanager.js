@@ -23,7 +23,6 @@ export class DailyApiRequestLimitInformation {
 const MAX_COMPOSITE_REQUEST_SIZE = 25;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
-const DEFINITION_OLD_API_VERSION = 3; // in years
 
 export class OrgCheckSalesforceManager {
 
@@ -71,27 +70,12 @@ export class OrgCheckSalesforceManager {
         this.#lastApiUsage = 0;
     }
 
-    isEmpty(value) {
-        if (!value) return true;
-        if (value.length === 0) return true;
-        if (value.trim && value.trim().length === 0) return true;
-        return false;
+    getApiVersion() {
+        return this.#apiVersion;
     }
 
     ratioToPercentage(ratio, decimals) {
         return (ratio*100).toFixed(decimals);
-    }
-
-    /**
-     * Is an API version is old or not?
-     * @param version The given version number (should be an integer)
-     * @param definition_of_old in Years (by default see DEFINITION_OLD_API_VERSION)
-     */
-    isVersionOld(version, definition_of_old = DEFINITION_OLD_API_VERSION) {
-        // Compute age version in Years
-        const age = (this.#apiVersion - version) / 3;
-        if (age >= definition_of_old) return true;
-        return false;
     }
 
     caseSafeId(id) {

@@ -23,7 +23,21 @@ import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 
-const IS_CLASS_EXTENDS = (clazz, parentClazz) => { return clazz.prototype instanceof parentClazz }
+const IS_CLASS_EXTENDS = (clazz, parentClazz) => { 
+    return clazz.prototype instanceof parentClazz 
+}
+
+const IS_OLD_APIVERSION = (currentVersion, version, definition_of_old = 3) => { 
+    if (version && currentVersion && definition_of_old) return ((currentVersion - version) / 3) >= definition_of_old; 
+    return false;
+}
+
+const IS_EMPTY = (value) => {
+    if (!value) return true;
+    if (value.length === 0) return true;
+    if (value.trim && value.trim().length === 0) return true;
+    return false;
+}
 
 export class OrgCheckDataFactory2 {
 
@@ -89,16 +103,18 @@ export class OrgCheckDataFactory {
 
     constructor(sfdcManager) {
 
+        const currentApiVersion = sfdcManager.getApiVersion();
+
         this.#allValidations = [
             { 
                 description: 'Not referenced anywhere',
-                formula: (d) => d.dependencies?.referenced?.length === 0, 
+                formula: (d) => IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 description: 'API Version too old',
-                formula: (d) => sfdcManager.isVersionOld(d.apiVersion) === true,
+                formula: (d) => IS_OLD_APIVERSION(currentApiVersion, d.apiVersion),
                 errorMessage: 'The API version of this component is too old. Please update it to a newest version.',
                 badField: 'apiVersion',
                 applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent ]
@@ -110,13 +126,13 @@ export class OrgCheckDataFactory {
                 applicable: [ SFDC_ApexClass ]
             }, {
                 description: 'No description',
-                formula: (d) => sfdcManager.isEmpty(d.description) === true,
+                formula: (d) => IS_EMPTY(d.description),
                 errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
                 badField: 'description',
                 applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_FieldSet, SFDC_ValidationRule ]
             }, {
                 description: 'No description for custom component',
-                formula: (d) => d.isCustom === true && sfdcManager.isEmpty(d.description) === true,
+                formula: (d) => d.isCustom === true && IS_EMPTY(d.description),
                 errorMessage: 'This custom component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
                 badField: 'description',
                 applicable: [ SFDC_Field, SFDC_PermissionSet, SFDC_Profile ]
@@ -302,13 +318,13 @@ export class OrgCheckDataFactory {
                 applicable: [ SFDC_Flow ]
             }, {
                 description: 'No description for the current version of a flow',
-                formula: (d) => sfdcManager.isEmpty(d.currentVersionRef?.description) === true,
+                formula: (d) => IS_EMPTY(d.currentVersionRef?.description),
                 errorMessage: `This flow's current version does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
                 badField: 'currentVersionRef.description',
                 applicable: [ SFDC_Flow ]
             }, {
                 description: 'API Version too old for the current version of a flow',
-                formula: (d) => sfdcManager.isVersionOld(d.currentVersionRef?.apiVersion) === true,
+                formula: (d) => IS_OLD_APIVERSION(currentApiVersion, d.currentVersionRef?.apiVersion),
                 errorMessage: `The API version of this flow's current version is too old. Please update it to a newest version.`,
                 badField: 'currentVersionRef.apiVersion',
                 applicable: [ SFDC_Flow ]
