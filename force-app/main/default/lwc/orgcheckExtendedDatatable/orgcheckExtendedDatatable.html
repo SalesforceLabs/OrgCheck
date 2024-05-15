@@ -44,10 +44,12 @@
                     <lightning-button label="All rows" title="All rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
                 </lightning-layout-item>
             </template>
+        </template>
+        <template if:true={showExportButton}>
             <lightning-layout-item>
                 <c-orgcheck-export-button source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
             </lightning-layout-item>
-    </template>
+        </template>
     </lightning-layout>
     <template if:true={showSearch}>
         <div>
