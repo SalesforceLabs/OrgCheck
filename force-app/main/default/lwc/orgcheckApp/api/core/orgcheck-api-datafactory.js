@@ -111,7 +111,7 @@ export class OrgCheckDataFactory {
                 formula: (d) => IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
-                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
+                applicable: [ SFDC_ApexClass, SFDC_Field, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 description: 'API Version too old',
                 formula: (d) => IS_OLD_APIVERSION(currentApiVersion, d.apiVersion),
@@ -181,7 +181,7 @@ export class OrgCheckDataFactory {
             }, {
                 description: 'Apex Trigger should not contain logic',
                 formula: (d) => d.length > 5000,
-                errorMessage: 'Due to the massive number of source code in this Apex Trigger, we suspect that it contains logic. Best practices force you to move any logic in dedicated Apex Classes that you would call from the trigger. Please update the code accordingly.',
+                errorMessage: 'Due to the massive number of source code (more than 5000 characters) in this Apex Trigger, we suspect that it contains logic. Best practices force you to move any logic in dedicated Apex Classes that you would call from the trigger. Please update the code accordingly.',
                 badField: 'length',
                 applicable: [ SFDC_ApexTrigger ]
             }, {
