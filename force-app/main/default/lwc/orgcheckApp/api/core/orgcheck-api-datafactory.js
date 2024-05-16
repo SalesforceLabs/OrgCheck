@@ -168,7 +168,7 @@ export class OrgCheckDataFactory {
                 applicable: [ SFDC_ApexClass ]
             }, {
                 description: 'Coverage not enough',
-                formula: (d) => d.coverage < 0.75,
+                formula: (d) => d.coverage > 0 && d.coverage < 0.75,
                 errorMessage: 'This Apex Class does not have enough code coverage (less than 75% of lines are covered by successful unit tests). Maybe you ran not all the unit tests to cover this class entirely? If you did, then consider augmenting that coverage with new test methods.',
                 badField: 'coverage',
                 applicable: [ SFDC_ApexClass ]
