@@ -1,43 +1,11 @@
 ============================================================
-Push source in a scratch org
-============================================================
-sfdx force:org:create --definitionfile config/project-scratch-def.json --setalias MyScratchOrg --targetdevhubusername vfinet.devhub@salesforce.com --wait 10
-sfdx force:source:push --targetusername MyScratchOrg --forceoverwrite   
-profileName=$(sfdx force:data:soql:query --targetusername MyScratchOrg --query "SELECT Name FROM Profile WHERE UserLicense.MasterLabel = 'Salesforce' AND Name LIKE '%Admin%' AND PermissionsViewAllData = true LIMIT 1" --resultformat=csv | tail -1)      
-sfdx force:user:create --setalias uatuser --definitionfile config/user-uat-def.json "profileName=${profileName}" permsets=OrgCheck_Users --targetusername MyScratchOrg
-
-uatUserId=$(sfdx force:data:soql:query --query "SELECT Id FROM User WHERE Profile.Name = '${profileName}' AND IsActive = true" --resultformat=csv --targetusername MyScratchOrg | tail -1)
-
-## Set French Local/Language
-sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=fr LanguageLocaleKey=fr" --targetusername MyScratchOrg
-
-## Set English Local/Language
-sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=en_US LanguageLocaleKey=en_US" --targetusername MyScratchOrg
-
-## Set Japanese Local/Language
-sfdx force:data:record:update --sobjectid "${uatUserId}" --sobjecttype User --values "LocaleSidKey=ja LanguageLocaleKey=ja" --targetusername MyScratchOrg
-
-## In case of persistente language, please close all browsers before launching the next command.
-sfdx force:org:open --targetusername uatuser 
-
-
-sfdx force:user:list --targetusername MyScratchOrg 
-sfdx force:org:open --targetusername MyScratchOrg 
-
-sfdx force:org:delete --targetusername MyScratchOrg 
-
-
-============================================================
 List of usefull commands for packaging
 ============================================================
-##sfdx force:package:version:list --targetdevhubusername vfinet.devhub@salesforce.com 
-##sfdx force:package:version:create --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck --definitionfile config/project-scratch-def.json --installationkeybypass --codecoverage --wait 10
-##sfdx force:package:version:promote --targetdevhubusername vfinet.devhub@salesforce.com --package OrgCheck@2.4.1-0
 
-sfdx package version list --target-hub-org vfinet.devhub@salesforce.com 
-sfdx package version create --target-hub-org vfinet.devhub@salesforce.com --package OrgCheck --definition-file config/project-scratch-def.json --installation-key-bypass --code-coverage --wait 10
-sfdx package version promote --target-hub-org vfinet.devhub@salesforce.com --package OrgCheck@2.5.0-0
-
+sf package version list --target-dev-hub vfinet.devhub@salesforce.com 
+sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck --definition-file config/project-scratch-def.json --installation-key-bypass --code-coverage --wait 10
+sf package version promote --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck@2.5.0-0
+sf package version delete --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck@2.5.0-0
 
 
 ============================================================
