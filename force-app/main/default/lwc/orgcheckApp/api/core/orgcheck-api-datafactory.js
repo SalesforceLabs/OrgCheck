@@ -111,13 +111,19 @@ export class OrgCheckDataFactory {
                 formula: (d) => IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
-                applicable: [ SFDC_ApexClass, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
+                applicable: [ SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 description: 'No reference anywhere for custom field',
                 formula: (d) => d.isCustom === true && IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_Field ]
+            }, {
+                description: 'No reference anywhere for apex class',
+                formula: (d) => d.isTest === false && IS_EMPTY(d.dependencies?.referenced), 
+                errorMessage: 'This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
+                badField: 'dependencies.referenced.length',
+                applicable: [ SFDC_ApexClass ]
             }, {
                 description: 'API Version too old',
                 formula: (d) => IS_OLD_APIVERSION(currentApiVersion, d.apiVersion),

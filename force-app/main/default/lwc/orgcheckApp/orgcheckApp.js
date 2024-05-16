@@ -775,7 +775,6 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Sharing',       type: 'text',             data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
         { label: 'Covering',      type: 'ids',              data: { ref: 'relatedClassRefs', value: 'name', url: 'url' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
