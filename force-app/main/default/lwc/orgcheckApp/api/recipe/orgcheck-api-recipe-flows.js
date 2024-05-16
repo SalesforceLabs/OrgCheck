@@ -24,11 +24,11 @@ export class OrgCheckRecipeFlows extends OrgCheckRecipe {
         const flows = data.get(DATASET_FLOWS_ALIAS);
         // Filter data
         const array = [];
-        for (const flow of flows.values()) {
+        flows.forEach((flow) => {
             if (flow.type !== 'Workflow') {
                 array.push(flow);
             }
-        }
+        });
         // Return data
         return array;
     }

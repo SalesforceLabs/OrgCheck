@@ -21,9 +21,4 @@ export class SFDC_Field extends OrgCheckData {
     isIndexed;
     defaultValue;
     formula;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

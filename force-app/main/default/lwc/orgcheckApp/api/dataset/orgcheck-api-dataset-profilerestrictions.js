@@ -9,7 +9,7 @@ const COMPUTE_NUMBER_FROM_IP = (ip) => {
 
 export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // List all ids for Profiles
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -23,6 +23,11 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
             // Init the map
             const profileRestrictions = new Map();
+
+            // Init the factories
+            const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
+            const ipRangeDataFactory = dataFactory.getInstance(SFDC_ProfileIpRangeRestriction);
+            const loginHourDataFactory = dataFactory.getInstance(SFDC_ProfileLoginHourRestriction);
 
             // Get information about profiles using metadata
             localLogger.log(`Calling Composite Tooling API to get Metadata information about ${profileIds.length} profiles and their restrictions...`);
@@ -40,7 +45,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                             days.forEach(d => {
                                 const hourStart = record.Metadata.loginHours[d + 'Start'];
                                 const hourEnd = record.Metadata.loginHours[d + 'End'];
-                                loginHours.push(new SFDC_ProfileLoginHourRestriction({
+                                loginHours.push(loginHourDataFactory.create({
                                     day: d,
                                     fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
                                     toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
@@ -55,11 +60,11 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                             record.Metadata.loginIpRanges.forEach(i => {
                                 const startNumber = COMPUTE_NUMBER_FROM_IP(i.startAddress);
                                 const endNumber = COMPUTE_NUMBER_FROM_IP(i.endAddress);
-                                ipRanges.push(new SFDC_ProfileIpRangeRestriction({
+                                ipRanges.push(ipRangeDataFactory.create({
                                     startAddress: i.startAddress,
                                     endAddress: i.endAddress,
-                                    description: i.description,
-                                    difference: endNumber - startNumber
+                                    description: i.description || '(empty)',
+                                    difference: endNumber - startNumber + 1
                                 }));
                             });
                         }
@@ -70,18 +75,14 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
                         }
 
                         // Create the instance
-                        const profileRestriction = new SFDC_ProfileRestrictions({
+                        const profileRestriction = restrictionsFactory.create({
                             profileId: profileId,
                             ipRanges: ipRanges,
-                            loginHours: loginHours,
-                            isScoreNeeded: true
+                            loginHours: loginHours
                         });
 
-                        // Compute the score of this profile restriction, with the following rule:
-                        //   - If ip range difference is bigger than 100k, then you get +1.
-                        //   - If login hour difference is bigger than 20 huurs long (per day), then you get +1.
-                        if (profileRestriction.ipRanges.filter(i => i.difference > 100000).length > 0) profileRestriction.setBadField('ipRanges');
-                        if (profileRestriction.loginHours.filter(i => i.difference > 1200).length > 0) profileRestriction.setBadField('loginHours');
+                        // Compute the score of this item
+                        restrictionsFactory.computeScore(profileRestriction);
 
                         // Add it to the map                        
                         profileRestrictions.set(profileRestriction.profileId, profileRestriction);                    

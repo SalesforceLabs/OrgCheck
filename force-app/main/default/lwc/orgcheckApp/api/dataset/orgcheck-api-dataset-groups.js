@@ -1,9 +1,30 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
+const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
+    if (groups.has(groupId) === false) {
+        return [];
+    }
+    const group = groups.get(groupId);
+    if (group.directGroupIds?.length > 0) {
+        const indirectUserIds = new Set();
+        group.directGroupIds.forEach((subGroupId) => {
+            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
+        });
+        group.indirectUserIds = Array.from(indirectUserIds);
+    }
+    if (returnSomething === true) {
+        const allUserIds = new Set();
+        group.directUserIds?.forEach((u) => allUserIds.add(u));
+        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
+        return Array.from(allUserIds);
+    }
+    return [];
+}
+
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -15,6 +36,9 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             // Init the map
             const groups = new Map();
 
+            // Init the factory
+            const groupDataFactory = dataFactory.getInstance(SFDC_Group);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Groups...`);
             results[0].records
@@ -24,15 +48,14 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance (common one)
-                    let group = new SFDC_Group({
+                    let group = groupDataFactory.create({
                         id: id,
                         isPublicGroup: record.Type === 'Regular',
                         isQueue: record.Type === 'Queue',
                         isRole: record.Type === 'Role',
                         isRoleAndSubordinates: record.Type === 'RoleAndSubordinates',
                         nbDirectMembers: 0,
-                        nbIndirectMembers: 0,
-                        isScoreNeeded: true
+                        nbIndirectMembers: 0
                     });
                     // Depending on the type we add some properties
                     switch (record.Type) {
@@ -85,35 +108,12 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                 group.nbIndirectUsers = group.indirectUserIds?.length || 0;
                 group.nbUsers = group.nbIndirectUsers + (group.directUserIds?.length || 0);
 
-                // Compute the score of this group, with the following rule:
-                //  - If the group is has no direct member, then you get +1.
-                //  - If the group is has no direct users and no indirect users, then you get +1.
-                if (group.nbDirectMembers === 0) group.setBadField('nbDirectMembers');
-                if (group.nbUsers === 0) group.setBadField('nbUsers');
+                // Compute the score of this item
+                groupDataFactory.computeScore(group);
             });
 
             // Return data
             resolve(groups);
         }).catch(reject);
     } 
-}
-
-const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
-    if (groups.has(groupId) === false) {
-        return [];
-    }
-    const group = groups.get(groupId);
-    if (group.directGroupIds?.length > 0) {
-        const indirectUserIds = new Set();
-        group.directGroupIds.forEach((subGroupId) => {
-            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
-        });
-        group.indirectUserIds = Array.from(indirectUserIds);
-    }
-    if (returnSomething === true) {
-        const allUserIds = new Set();
-        group.directUserIds?.forEach((u) => allUserIds.add(u));
-        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
-        return Array.from(allUserIds);
-    }
 }

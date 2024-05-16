@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_CURRENTUSERPERMISSIONS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { DatasetRunInformation,
+    DATASET_CURRENTUSERPERMISSIONS_ALIAS } from '../core/orgcheck-api-datasetmanager';
 
 export class OrgCheckRecipeCurrentUserPermissions extends OrgCheckRecipe {
 
@@ -8,8 +9,10 @@ export class OrgCheckRecipeCurrentUserPermissions extends OrgCheckRecipe {
      * 
      * @returns {Array<string>}
      */
-    extract() {
-        return [DATASET_CURRENTUSERPERMISSIONS_ALIAS];
+    extract(permissions) {
+        const datasetRunInfo = new DatasetRunInformation(DATASET_CURRENTUSERPERMISSIONS_ALIAS, DATASET_CURRENTUSERPERMISSIONS_ALIAS);
+        datasetRunInfo.parameters.set('permissions', permissions);
+        return [datasetRunInfo];
     }
 
     /**

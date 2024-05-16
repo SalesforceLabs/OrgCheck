@@ -2,11 +2,13 @@ import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 
 export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject, parameters) {
+
+        const permissionFields = parameters.get('permissions');
 
         // SOQL queries on UserPermissionAccess
         sfdcManager.soqlQuery([{ 
-            string: 'SELECT FIELDS(STANDARD) FROM UserPermissionAccess LIMIT 1'
+            string: `SELECT ${permissionFields.map(p => `Permissions${p}`).join(`, `)} FROM UserPermissionAccess LIMIT 1`
         }]).then((results) => {
 
             // Init the map

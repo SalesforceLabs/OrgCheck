@@ -42,14 +42,14 @@ export class OrgCheckRecipeUserRoles extends OrgCheckRecipe {
         const array = [];
         if (includesExternalRoles === true) {
             // in this case do not filter!
-            for (const userRole of userRoles.values()) {
+            userRoles.forEach((userRole) => {
                 array.push(userRole);
-            }
+            });
         } else {
             // in this case please filter
-            for (const userRole of userRoles.values()) {
+            userRoles.forEach((userRole) => {
                 if (userRole.isExternal === false) array.push(userRole);
-            }
+            });
         }
         // Return data
         return array;

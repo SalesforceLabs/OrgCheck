@@ -17,9 +17,5 @@ export class SFDC_PermissionSet extends OrgCheckData {
     nbObjectPermissions;
     profileIds;
     profileRefs;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
+    type;
 }

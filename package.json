@@ -25,6 +25,10 @@
   },
   "homepage": "https://sfdc.co/OrgCheck",
   "devDependencies": {
-    "@salesforce/sfdx-lwc-jest": "^3.0.1"
+    "@salesforce/sfdx-lwc-jest": "^3.1.2"
+  },
+  "dependencies": {
+    "@salesforce/eslint-config-lwc": "github:salesforce/eslint-config-lwc",
+    "eslint": "^8.57.0"
   }
 }

@@ -10,9 +10,4 @@ export class SFDC_AppPermission extends OrgCheckData {
     appPackage;
     isAccessible;
     isVisible;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

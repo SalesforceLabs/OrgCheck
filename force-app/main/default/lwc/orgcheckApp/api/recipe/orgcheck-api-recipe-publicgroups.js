@@ -34,11 +34,11 @@ export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
 
         // Filter data
         const array = [];
-        for (const group of groups.values()) {
+        groups.forEach((group) => {
             if (group.isPublicGroup === true) {
                 array.push(group);
             }
-        }
+        });
         // Return data
         return array;
     }

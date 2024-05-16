@@ -32,11 +32,11 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const apexClass of apexClasses.values()) {
+        apexClasses.forEach((apexClass) => {
             if (namespace === '*' || apexClass.package === namespace) {
                 array.push(apexClass);
             }
-        }
+        });
         // Return data
         return array;
     }

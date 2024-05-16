@@ -5,9 +5,4 @@ export class SFDC_PageLayout extends OrgCheckData {
     name;
     type;
     url;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

@@ -15,6 +15,7 @@ export default class OrgCheckSpinner extends LightningElement {
         this.isShown = false;
         this.isClosable = false;
         this.sections = [];
+        this.hadError = false;
         this.#keysIndex = {};
         this.waitingTime = 0;
     }
@@ -33,6 +34,7 @@ export default class OrgCheckSpinner extends LightningElement {
 
     @api sectionFailed(sectionName, error) {
         if (this.isShown === false) this.isShown = true;
+        this.hadError = true;
         if (error) {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
@@ -53,10 +55,12 @@ export default class OrgCheckSpinner extends LightningElement {
             this.isShown = true;
             this.isClosable = false;
             this.waitingTime = 0;
+            this.hadError = false;
             const updateWaitingTime = () => { 
                 this.waitingTime = (new Date().getTime() - this.#openSince) / 1000; 
             }
             clearInterval(this.#intervalId);
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
             this.#intervalId = setInterval(updateWaitingTime, 1000);
         }
     }
@@ -71,6 +75,8 @@ export default class OrgCheckSpinner extends LightningElement {
         this.sections = [];
         this.#keysIndex = {};
         this.#openSince = undefined;
+        this.waitingTime = 0;
+        this.hadError = false;
         clearInterval(this.#intervalId);
     }
 
@@ -102,6 +108,7 @@ export default class OrgCheckSpinner extends LightningElement {
     isShown;
     isClosable;
     waitingTime;
+    hadError;
 
     #keysIndex;
     #openSince;

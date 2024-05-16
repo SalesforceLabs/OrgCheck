@@ -158,8 +158,49 @@ export class OrgCheckRecipeManager {
             // Return value
             return finalData;
 
-        } catch(error) {
-            throw error;
+        } finally {
+            // End the logger
+            this.#logger.end();
+        }
+    }
+
+    clean(alias, ...parameters) {
+        // Check if alias is registered
+        if (this.#recipes.has(alias) === false) {
+            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
+        } 
+        const section = `RECIPE ${alias}`;
+        const recipe = this.#recipes.get(alias);
+
+        try {
+            // Start the logger
+            this.#logger.begin();
+
+            // -------------------
+            // Extract
+            // -------------------
+            this.#logger.sectionStarts(section, 'List the datasets that were needed...');
+            let datasets;
+            try {
+                datasets = recipe.extract(...parameters);   
+            } catch(error) {
+                this.#logger.sectionFailed(section, error);
+                throw error;
+            }
+            this.#logger.sectionContinues(section, 'Information succesfully retrieved!');
+
+            // -------------------
+            // Clean
+            // -------------------
+            this.#logger.sectionContinues(section, 'Clean all datasets...');
+            try {
+                this.#datasetManager.clean(datasets);
+            } catch(error) {
+                this.#logger.sectionFailed(section, error);
+                throw error;
+            }
+            this.#logger.sectionEnded(section, 'Datasets succesfully cleaned!');
+
         } finally {
             // End the logger
             this.#logger.end();

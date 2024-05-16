@@ -20,10 +20,9 @@ export class DailyApiRequestLimitInformation {
     redThresholdPercentage;
 }
 
+const MAX_COMPOSITE_REQUEST_SIZE = 25;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
-
-const DEFINITION_OLD_API_VERSION = 3; // in years
 
 export class OrgCheckSalesforceManager {
 
@@ -71,32 +70,26 @@ export class OrgCheckSalesforceManager {
         this.#lastApiUsage = 0;
     }
 
-    isEmpty(value) {
-        if (!value) return true;
-        if (value.length === 0) return true;
-        if (value.trim && value.trim().length === 0) return true;
-        return false;
+    getApiVersion() {
+        return this.#apiVersion;
     }
 
     ratioToPercentage(ratio, decimals) {
         return (ratio*100).toFixed(decimals);
     }
 
-    /**
-     * Is an API version is old or not?
-     * @param version The given version number (should be an integer)
-     * @param definition_of_old in Years (by default see DEFINITION_OLD_API_VERSION)
-     */
-    isVersionOld(version, definition_of_old = DEFINITION_OLD_API_VERSION) {
-        // Compute age version in Years
-        const age = (this.#apiVersion - version) / 3;
-        if (age >= definition_of_old) return true;
-        return false;
-    }
-
     caseSafeId(id) {
         if (id && id.length === 18) return id.substr(0, 15);
         return id;
+    }
+
+    arraySafeIds(ids) {
+        if (ids) {
+            if (Array.isArray(ids)) {
+                return `'${ids.map(a => a.replaceAll(`'`, '')).join(`','`)}'`
+            }
+        }
+        return `''`;
     }
     
     setupUrl(type, durableId, objectDurableId, objectType) {
@@ -191,6 +184,9 @@ export class OrgCheckSalesforceManager {
             case 'flow': // Org Check specific
             case 'Flow': { // From DAPI 
                 return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
+            }
+            case 'flowDefinition': { // Org Check specific
+                return `/${durableId}`
             }
             case 'visual-force-page': // Org Check specific
             case 'ApexPage': { // From DAPI 
@@ -309,13 +305,18 @@ export class OrgCheckSalesforceManager {
                 promises.push(queryPromise
                     .then((results) => {
                         // Getting the Ids for DAPI call
-                        const ids = results.records.map((record) => this.caseSafeId(record[q.addDependenciesBasedOnField]));
+                        const allIds = []; // All ids (potentially with duplicates)
+                        const fields = Array.isArray(q.addDependenciesBasedOnField) ? q.addDependenciesBasedOnField : [ q.addDependenciesBasedOnField ];
+                        fields.forEach((field) => {
+                            allIds.push(... results.records.filter((record) => record[field]).map((record) => this.caseSafeId(record[field])));
+                        });
+                        const ids = Array.from(new Set(allIds)); // Deduplication of ids
                         return this._callComposite(ids, true, '/query?q='+
                             'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                                    'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                             'FROM MetadataComponentDependency '+
                             'WHERE RefMetadataComponentId = \'(id)\' '+
-                            'OR MetadataComponentId = \'(id)\' ')
+                            'OR MetadataComponentId = \'(id)\' ', [], 5) // for some reason there is a limit of 5 here!!maxRequestSize
                         .then(allDependenciesResults => {
                             // We are going to append the dependencies in the results
                             const allDependencies = [];
@@ -350,8 +351,7 @@ export class OrgCheckSalesforceManager {
                             error.context = { 
                                 when: 'While getting the dependencies from DAPI',
                                 what: {
-                                    allIds: ids,
-                                    concernedIds: subids
+                                    allIds: ids
                                 }
                             };
                             return error;
@@ -373,7 +373,7 @@ export class OrgCheckSalesforceManager {
     */
     async readMetadata(metadatas) {
         this._watchDog__beforeRequest();
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve1, reject1) => {
             // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
             Promise.all(
                 metadatas
@@ -425,20 +425,20 @@ export class OrgCheckSalesforceManager {
                         });
                         return response;
                     })
-                    .catch(reject)
-                    .then(resolve);
+                    .catch(reject1)
+                    .then(resolve1);
                 })
-                .catch(reject); // in case some of the list went wrong!!
+                .catch(reject1); // in case some of the list went wrong!!
         });
     }
 
-    async _callComposite(ids, tooling, uriPattern, byPasses) {
+    async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE) {
         this._watchDog__beforeRequest();
-        const BATCH_MAX_SIZE = 25; // Composite can't handle more than 25 records per request
+        if (maxRequestSize > MAX_COMPOSITE_REQUEST_SIZE) maxRequestSize = MAX_COMPOSITE_REQUEST_SIZE;
         const compositeRequestBodies = [];
         let currentCompositeRequestBody;
         ids.forEach((id) => {
-            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === BATCH_MAX_SIZE) {
+            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === maxRequestSize) {
                 currentCompositeRequestBody = {
                     allOrNone: false,
                     compositeRequest: []
@@ -554,7 +554,7 @@ export class OrgCheckSalesforceManager {
                 method: 'GET'
             }, (e, r) => {
                 this._watchDog__afterRequest(reject);
-                if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length == 1) ? r?.sObjects[0].count : 0);
+                if (e) reject(e); else resolve((Array.isArray(r?.sObjects) && r?.sObjects.length === 1) ? r?.sObjects[0].count : 0);
             });
         });
     }

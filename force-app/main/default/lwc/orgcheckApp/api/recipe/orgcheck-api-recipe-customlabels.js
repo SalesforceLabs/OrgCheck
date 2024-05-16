@@ -25,11 +25,11 @@ export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
         const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);
         // Filter data
         const array = [];
-        for (const customLabel of customLabels.values()) {
+        customLabels.forEach((customLabel) => {
             if (namespace === '*' || customLabel.package === namespace) {
                 array.push(customLabel);
             }
-        }
+        });
         // Return data
         return array;
     }

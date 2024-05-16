@@ -44,10 +44,12 @@
                     <lightning-button label="All rows" title="All rows" variant="brand-outline" class="slds-var-m-left_x-small" onclick={handleLoadAllData} icon-name="utility:jump_to_bottom"></lightning-button>
                 </lightning-layout-item>
             </template>
+        </template>
+        <template if:true={showExportButton}>
             <lightning-layout-item>
                 <c-orgcheck-export-button source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
             </lightning-layout-item>
-    </template>
+        </template>
     </lightning-layout>
     <template if:true={showSearch}>
         <div>
@@ -80,14 +82,16 @@
                             <template lwc:if={cell.isIndex}>{row.index}</template>
                             
                             <!-- TYPE SCORE: numeric, auto valued, represent the badness score of each row in the table -->
-                            <template lwc:elseif={cell.isScore}>{row.score}</template>
+                            <template lwc:elseif={cell.isScore}>
+                                <c-orgcheck-score-link onview={handleViewScore} what-id={cell.data.id} what-name={cell.data.name} score={row.score} fields={row.badFields} reason-ids={row.badReasonIds}></c-orgcheck-score-link>
+                            </template>
 
                             <!-- TYPE EMPTY: string, if the value is empty then it can be decorated by the 'decoratedValue' -->
                             <template lwc:elseif={cell.isEmpty}>{cell.data.decoratedValue}</template>
 
                             <!-- TYPE DEPENDENCY: link, opens the depdency modal with dependencies information about the current row -->
                             <template lwc:elseif={cell.isDependencyViewer}>
-                                <c-orgcheck-dependency-link onview={handleViewDependency} dependencies={cell.data.value} whatid={cell.data.id} whatname={cell.data.name}></c-orgcheck-dependency-link>
+                                <c-orgcheck-dependency-link onview={handleViewDependency} what-id={cell.data.id} what-name={cell.data.name} dependencies={cell.data.value}></c-orgcheck-dependency-link>
                             </template>
 
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
@@ -135,8 +139,8 @@
                             <!-- TYPE BOOLEAN: boolean, decorated an icon for true and an icon for false -->
                             <template lwc:elseif={cell.isBoolean}>
                                 <div class="slds-text-align_center">
-                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" size="x-small"></lightning-icon></template>
-                                    <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" size="x-small"></lightning-icon></template>
+                                    <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" title="True" size="x-small"></lightning-icon></template>
+                                    <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" title="False" size="x-small"></lightning-icon></template>
                                 </div>
                             </template>
 
@@ -148,9 +152,16 @@
                             <!-- TYPE TEXT: string, potentially decorated with a another text if the length of the text is exceeding a certain amount of characters (optional) -->
                             <template lwc:elseif={cell.isText}>
                                 <template lwc:if={cell.isValueTruncated}>
-                                    {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon>
+                                    {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon>
                                 </template>
-                                <template lwc:else>{cell.data.value}</template>
+                                <template lwc:else>
+                                    <template lwc:if={cell.isPreformatted}>
+                                        <pre>{cell.data.value}</pre>
+                                    </template>
+                                    <template lwc:else>
+                                        {cell.data.value}
+                                    </template>
+                                </template>
                             </template>
 
                             <!-- TYPE TEXTS: array of string (see TEXT for each element) -->
@@ -161,10 +172,15 @@
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         <template lwc:if={item.isValueTruncated}>
-                                            - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." size="x-small"></lightning-icon><br key={cell.key} />
+                                            - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon><br key={cell.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data.value}<br key={cell.key} />
+                                            <template lwc:if={item.isPreformatted}>
+                                                - <pre key={cell.key}>{cell.data.value}</pre>
+                                            </template>
+                                            <template lwc:else>
+                                                - {item.data.value}<br key={cell.key} />
+                                            </template>
                                         </template>
                                     </template>
                                 </template>

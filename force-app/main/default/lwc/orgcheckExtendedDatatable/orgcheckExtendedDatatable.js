@@ -2,6 +2,7 @@ import { LightningElement, api, track } from 'lwc';
 
 const TYPE_INDEX = 'index';
 const TYPE_SCORE = 'score';
+const TYPE_DEPENDENCIES = 'dependencyViewer';
 
 const SORT_ORDER_ASC = 'asc';
 const SORT_ORDER_DESC = 'desc';
@@ -16,13 +17,21 @@ const OBJECT_TO_STRING = (template, object) => {
                 if (type) {
                     switch (type) {
                         case 'numeric': return NUMBER_FORMATTER.format(value);
-                        case 'boolean': if (typeArg) { return typeArg.split(',', 2)[value === true ? 0 : 1]; } else return value;
+                        case 'boolean': {
+                            if (typeArg) {
+                                return typeArg.split(',', 2)[value === true ? 0 : 1];
+                            }
+                            return value;
+                        }
+                        default: return value;
                     }
                 } 
                 return value;
             });
         case 'function':
             return template(object);
+        default:
+            return object;
     }
 }
 
@@ -33,6 +42,9 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
         });
     } else {
         cell.data.value = reference || '';
+    }
+    if (column.modifier?.preformatted === true) {
+        cell.isPreformatted = true;
     }
     if (column.modifier?.valueIfEmpty && !cell.data.value) {
         cell.data.decoratedValue = column.modifier.valueIfEmpty;
@@ -57,6 +69,7 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
                 break;
             case 'isObject':
             case 'isObjects':
+            default:
                 if (column.modifier?.template) {
                     cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
                 }
@@ -67,14 +80,19 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
 }
 
 const CELL_CSSCLASS = (row, cell) => {
-    if (cell.type === TYPE_SCORE && row.badScore > 0) {
-        return 'bad badscore';
-    }
-    return (row.badFields && row.badFields.includes(cell.data?.ref || cell.data?.value) === true) ? 'bad' : '';
+    if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
+    return (row.badFields && row.badFields.some((field) => {
+        // if the name of field is the ref + property
+        if (field === `${cell.data?.ref}.${cell.data?.value}`) return true;
+        // if the field is the property of the current row
+        if (cell.data?.ref === undefined && field === cell.data?.value) return true;
+        // otherwise
+        return false;
+    })) ? 'bad' : '';
 }
 
 const ROW_CSSCLASS = (row, showScore) => {
-    return ((showScore === true && row.badScore > 0)? 'bad': '');
+    return ((showScore === true && row.badFields?.length > 0)? 'bad': '');
 }
 
 const HEADER_CSSCLASS = (column, isSticky) => {
@@ -92,9 +110,8 @@ const ARRAY_MATCHER = (array, s) => {
         return Object.values(item.data).findIndex((property) => {
             if (Array.isArray(property)) {
                 return ARRAY_MATCHER(property, s);
-            } else {
-                return STRING_MATCHER(property, s);
             }
+            return STRING_MATCHER(property, s);
         }) >= 0;
     }) >= 0
 }
@@ -188,12 +205,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api showSearch = false;
 
-    /**
-     * Do you want to show the SCORE column in the table?
-     * No need to add it to the columns, flag this property to true
-     * False by default.
-     */
-    @api showScoreColumn = false;
+    #showScoreColumn = false;
 
     /**
      * Do you want to show the ROW NUMBER column in the table?
@@ -274,20 +286,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     @api set columns(columns) {
         if (columns) {
             this.usesDependencyViewer = false;
+            this.#showScoreColumn = false;
             const _columns = [];
             if (this.showRowNumberColumn === true) {
                 _columns.push({ label: '#', type: TYPE_INDEX });
             }
-            if (this.showScoreColumn === true) {
-                _columns.push({ label: 'Score', type: TYPE_SCORE, data: { value: 'badScore' }, sorted: SORT_ORDER_DESC });
-            }
             _columns.push(...columns);
             this.#columns = _columns.map((c, i) => { 
+                if (c.type === TYPE_SCORE) {
+                    this.#showScoreColumn = true;
+                }
                 if (c.sorted) {
                     this.#sortingColumnIndex = i;
                     this.#sortingOrder = c.sorted;
                 }
-                if (this.usesDependencyViewer === false && c.type === 'dependencyViewer') {
+                if (this.usesDependencyViewer === false && c.type === TYPE_DEPENDENCIES) {
                     this.usesDependencyViewer = true;
                 }
                 return Object.assign({
@@ -330,8 +343,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             const row = { 
                 key: i, 
                 index: i+1,
-                cssClass: ROW_CSSCLASS(r, this.showScoreColumn),
-                score: r.badScore,
+                cssClass: ROW_CSSCLASS(r, this.#showScoreColumn),
+                score: r.badFields?.length || 0,
+                badFields: r.badFields,
+                badReasonIds: r.badReasonIds,
                 cells: []
             };
             if (row.score > 0) {
@@ -343,7 +358,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 // Unless the 'ref' property in column.data is specified 
                 let ref = r;
                 if (c.data?.ref) {
-                    c.data?.ref.split('.').forEach((p) => { ref = ref[p]; });
+                    c.data?.ref.split('.').forEach((p) => { if (ref) ref = ref[p]; });
                 }
                 // Prepare the cell information
                 const cell = { 
@@ -352,10 +367,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     data: {}
                 };
                 cell[c.typeProperty] = true;
-                if (c.isIndex === true || c.isScore === true) {
+                /*if (c.type === TYPE_INDEX) {
                     cell.data.value = '';
-                } else if (c.isIterative === true) {
-                    cell.data.values = ref?.map((r) => CELL_PREPARE(r, c)) || [];
+                } else if (c.type === TYPE_SCORE) {
+                    cell.data.value = row.score;
+                } else */ if (c.isIterative === true) {
+                    cell.data.values = ref?.map((rr) => CELL_PREPARE(rr, c)) || [];
                 } else {
                     CELL_PREPARE(ref, c, cell);
                 }
@@ -378,8 +395,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
     
     get exportedRows() {
-        if (!this.#columns) return;
-        if (!this.#allRows) return;
+        if (!this.#columns || !this.#allRows) return [];
         return [
             {
                 header: 'Data',
@@ -388,6 +404,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     if (cell.isIndex) return row.index;
                     if (cell.data.values) return JSON.stringify(cell.data.values.map(v => v.data.decoratedValue ?? v.data.value));
                     if (cell.data.value) return cell.data.decoratedValue ?? cell.data.value;
+                    return '';
                 }))
             }
         ];
@@ -397,7 +414,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * Handler when a user click on the "Load more rows..." button
      */
     handleLoadMoreData() {
-        const nextNbRows = Number.parseInt(this.infiniteScrollingCurrentNbRows) + Number.parseInt(this.infiniteScrollingAdditionalNbRows);
+        const nextNbRows = Number.parseInt(this.infiniteScrollingCurrentNbRows, 10) + Number.parseInt(this.infiniteScrollingAdditionalNbRows, 10);
         this.infiniteScrollingCurrentNbRows = nextNbRows < this.nbAllRows ? nextNbRows : this.nbAllRows;
         this._setVisibleRows();
     }
@@ -452,7 +469,17 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     handleViewDependency(event) {
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
-        viewer.open(event.target.whatid, event.target.whatname, event.target.dependencies);
+        viewer.open(event.target.whatId, event.target.whatName, event.target.dependencies);
+    }
+
+    handleViewScore(event) {
+        this.dispatchEvent(new CustomEvent('viewscore', { detail: { 
+            whatId: event.target.whatId,
+            whatName: event.target.whatName,
+            score: event.target.score,
+            reasonIds: event.target.reasonIds, 
+            fields: event.target.fields 
+        }}));
     }
 
     /**

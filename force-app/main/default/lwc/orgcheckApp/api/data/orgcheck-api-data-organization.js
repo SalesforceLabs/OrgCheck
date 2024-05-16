@@ -10,8 +10,4 @@ export class SFDC_Organization extends OrgCheckData {
     isProduction;
     localNamespace;
     
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

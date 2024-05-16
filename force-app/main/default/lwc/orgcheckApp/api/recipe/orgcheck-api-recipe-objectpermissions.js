@@ -2,7 +2,6 @@ import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_OBJECTPERMISSIONS_ALIAS,
     DATASET_PROFILES_ALIAS,
     DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
-import { SFDC_ObjectPermissionsPerParent } from '../data/orgcheck-api-data-objectpermissionsperparent';
 
 export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
 
@@ -48,10 +47,10 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
         permissions.forEach((permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
                 if (permissionsBy.has(permission.parentId) === false) {
-                    permissionsBy.set(permission.parentId, new SFDC_ObjectPermissionsPerParent({
+                    permissionsBy.set(permission.parentId, {
                         parentRef: permission.parentRef,
                         objectPermissions: {}
-                    }));
+                    });
                 }
                 permissionsBy.get(permission.parentId).objectPermissions[permission.objectType] = 
                     (permission.isCreate?'C':'') +

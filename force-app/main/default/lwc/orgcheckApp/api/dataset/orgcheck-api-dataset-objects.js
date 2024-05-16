@@ -3,7 +3,10 @@ import { SFDC_Object } from '../data/orgcheck-api-data-object';
 
 export class OrgCheckDatasetObjects extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+
+        // Init the factory
+        const objectDataFactory = dataFactory.getInstance(SFDC_Object);
 
         sfdcManager.soqlQuery([{ 
             string: 'SELECT NamespacePrefix FROM Organization'
@@ -49,7 +52,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                             const type = sfdcManager.getObjectType(object.name, object.customSetting)
                             if (!type) return;
                             const entity = entitiesByName[object.name];
-                            objects.set(object.name, new SFDC_Object({
+                            objects.set(object.name, objectDataFactory.create({
                                 id: object.name,
                                 label: object.label,
                                 name: entity.DeveloperName,

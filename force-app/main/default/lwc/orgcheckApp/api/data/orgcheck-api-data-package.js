@@ -5,9 +5,4 @@ export class SFDC_Package extends OrgCheckData {
     name;
     namespace;
     type;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

@@ -6,7 +6,6 @@ export class SFDC_User extends OrgCheckData {
     photoUrl;
     name;
     lastLogin;
-    neverLogged;
     numberFailedLogins;
     onLightningExperience;
     lastPasswordChange;
@@ -15,9 +14,4 @@ export class SFDC_User extends OrgCheckData {
     importantPermissions;
     permissionSetIds;
     permissionSetRefs;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

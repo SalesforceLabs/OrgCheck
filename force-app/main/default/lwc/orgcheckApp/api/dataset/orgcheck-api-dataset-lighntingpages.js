@@ -3,7 +3,7 @@ import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 
 export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,9 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
             // Init the map
             const pages = new Map();
 
+            // Init the factory
+            const pageDataFactory = dataFactory.getInstance(SFDC_LightningPage);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Flexi Pages...`);
             results[0].records
@@ -28,26 +31,20 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const page = new SFDC_LightningPage({
+                    const page = pageDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('lightning-page', record.Id),
                         name: record.MasterLabel,
                         apiVersion: record.ApiVersion,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field has no description, then you get +1.
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                    if (sfdcManager.isEmpty(page.description)) page.setBadField('description');
-                    if (page.isItReferenced() === false) page.setBadField('dependencies.referenced');
+                    // Compute the score of this item
+                    pageDataFactory.computeScore(page);
 
                     // Add it to the map  
                     pages.set(page.id, page);

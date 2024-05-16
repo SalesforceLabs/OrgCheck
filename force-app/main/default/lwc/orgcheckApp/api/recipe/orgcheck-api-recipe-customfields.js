@@ -42,13 +42,13 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const customField of customFields.values()) {
+        customFields.forEach((customField) => {
             if ((namespace === '*' || customField.package === namespace) &&
                 (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || customField.objectRef?.apiname === object)) {
                 array.push(customField);
             }
-        }
+        });
         // Return data
         return array;
     }

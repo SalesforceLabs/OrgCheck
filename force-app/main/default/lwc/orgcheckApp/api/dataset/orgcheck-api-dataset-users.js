@@ -3,7 +3,7 @@ import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         const IMPORTANT_PERMISSIONS = [ 'ApiEnabled', 'ViewSetup', 'ModifyAllData', 'ViewAllData' ];
 
@@ -26,6 +26,9 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
 
             // Init the map
             const users = new Map();
+
+            // Init the factory
+            const userDataFactory = dataFactory.getInstance(SFDC_User);
 
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Users...`);
@@ -53,7 +56,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                     }
 
                     // Create the instance
-                    const user = new SFDC_User({
+                    const user = userDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('user', id),
                         photoUrl: record.SmallPhotoUrl,
@@ -64,15 +67,11 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                         lastPasswordChange: record.LastPasswordChangeDate,
                         profileId: sfdcManager.caseSafeId(record.ProfileId),
                         importantPermissions: Object.keys(importantPermissions).sort(),
-                        permissionSetIds: permissionSetRefs,
-                        isScoreNeeded: true
+                        permissionSetIds: permissionSetRefs
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //   - If the user is not using Lightning Experience, then you get +1.
-                    //   - If the user never logged, then you get +1.
-                    if (user.onLightningExperience === false) user.setBadField('onLightningExperience');
-                    if (!user.lastLogin) user.setBadField('lastLogin');
+                    // Compute the score of this item
+                    userDataFactory.computeScore(user);
 
                     // Add it to the map  
                     users.set(user.id, user);

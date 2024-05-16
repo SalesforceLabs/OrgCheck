@@ -3,3 +3,7 @@ pre {
     color: #e39893;
     padding: 10px;
 }
+
+div.modal-content {
+    padding: 10px;
+}

@@ -44,7 +44,7 @@ export default class OrgcheckGraphics extends LightningElement {
    * Get the data used in the graphic
    */
   get source() {
-    this.#data;
+    return this.#data;
   }
 
   @api boxHeight = 40;
@@ -137,7 +137,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('class', 'slds-scrollable')
       .attr('x', this.boxTextPadding)
       .attr('y', - this.boxHeight / 2 + this.boxTextPadding)
-      .attr('width', (d) => this.boxWidth - 2 * this.boxTextPadding)
+      .attr('width', () => this.boxWidth - 2 * this.boxTextPadding)
       .attr('height', this.boxHeight - 2 * this.boxTextPadding)
       .append('xhtml').html((d) => this.boxInnerHtmlDecorator(d.depth, d.data));
 

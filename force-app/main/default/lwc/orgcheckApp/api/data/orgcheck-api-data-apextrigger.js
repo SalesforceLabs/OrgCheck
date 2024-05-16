@@ -21,9 +21,4 @@ export class SFDC_ApexTrigger extends OrgCheckData {
     hasDML;
     createdDate;
     lastModifiedDate;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

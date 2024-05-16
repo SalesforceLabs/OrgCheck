@@ -34,9 +34,4 @@ export class SFDC_ApexClass extends OrgCheckData {
     relatedClassRefs;
     createdDate;
     lastModifiedDate;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

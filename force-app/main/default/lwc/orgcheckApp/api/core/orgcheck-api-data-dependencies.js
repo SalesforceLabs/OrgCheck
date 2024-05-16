@@ -4,9 +4,9 @@ export class OrgCheckDataDependencies {
     referenced;
     referencedByTypes;
 
-    constructor(data, whatid) {
+    constructor(data, whatId) {
 
-        this.using = data.filter(e => e.id === whatid).map(n => { 
+        this.using = data.filter(e => e.id === whatId).map(n => { 
             return { 
                 id: n.refId, 
                 name: n.refName, 
@@ -15,7 +15,7 @@ export class OrgCheckDataDependencies {
             }; 
         });
         this.referencedByTypes = {};
-        this.referenced = data.filter(e => e.refId === whatid).map(n => {
+        this.referenced = data.filter(e => e.refId === whatId).map(n => {
             if (this.referencedByTypes[n.type] === undefined) {
                 this.referencedByTypes[n.type] = 1;
             } else {

@@ -1,37 +1,23 @@
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_ProfileIpRangeRestriction extends OrgCheckData {
-    startAddress;
-    endAddress;
-    description;
-    difference;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
-}
-
-export class SFDC_ProfileLoginHourRestriction extends OrgCheckData {
-    fromTime;
-    toTime;
-    day;
-    difference;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
-}
+import { OrgCheckData, OrgCheckInnerData } from '../core/orgcheck-api-data';
 
 export class SFDC_ProfileRestrictions extends OrgCheckData {
     profileId;
     profileRef;
     ipRanges;
     loginHours;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }
+
+export class SFDC_ProfileIpRangeRestriction extends OrgCheckInnerData {
+    startAddress;
+    endAddress;
+    description;
+    difference;
+}
+
+export class SFDC_ProfileLoginHourRestriction extends OrgCheckInnerData {
+    fromTime;
+    toTime;
+    day;
+    difference;
+}
+

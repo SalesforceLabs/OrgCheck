@@ -37,12 +37,12 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
         });
         // Filter data
         const array = [];
-        for (const object of objects.values()) {
+        objects.forEach((object) => {
             if ((namespace === '*' || object.package === namespace) &&
                 (type === '*' || object.typeRef?.id === type)) {
                 array.push(object);
             }
-        }
+        });
         // Return data
         return { 
             packages: [... packages.values()],

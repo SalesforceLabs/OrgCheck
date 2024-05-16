@@ -3,7 +3,7 @@ import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on PermissionSet
         sfdcManager.soqlQuery([{ 
@@ -30,6 +30,9 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             // Init the map
             const permissionSets = new Map();
 
+            // Init the factory
+            const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Permission Sets...`);
             results[0].records
@@ -37,7 +40,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
 
                     // Get the ID15 of this permission set
                     const id = sfdcManager.caseSafeId(record.Id);
-                    const permissionSet = new SFDC_PermissionSet({
+                    const permissionSet = permissionSetDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('permission-set', id),
                         name: record.Name,
@@ -47,20 +50,17 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                         isCustom: record.IsCustom,
                         package: (record.NamespacePrefix || ''),
                         memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
-                        isGroup: (record.Type === 'Group'),  // other values can be 'Regular', 'Standard', 'Session
+                        isGroup: (record.Type === 'Group'),  // other values can be 'Regular', 'Standard', 'Session'
+                        type: (record.Type === 'Group' ? 'Permission Set Group' : 'Permission Set'),
                         createdDate: record.CreatedDate, 
                         lastModifiedDate: record.LastModifiedDate,
                         nbFieldPermissions: record.FieldPerms?.records.length || 0,
                         nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                        profileIds: {},
-                        isScoreNeeded: true
+                        profileIds: {}
                     });
 
-                    // Compute the score of this permission set, with the following rule:
-                    //   - If it is custom and is not used by any active users, then you get +1.
-                    //   - If it is custom and has no description, then you get +1.
-                    if (permissionSet.isCustom === true && permissionSet.memberCounts === 0) permissionSet.setBadField('memberCounts');
-                    if (permissionSet.isCustom === true && sfdcManager.isEmpty(permissionSet.description)) permissionSet.setBadField('description');
+                    // Compute the score of this item
+                    permissionSetDataFactory.computeScore(permissionSet);
                     
                     // Add it to the map
                     permissionSets.set(id, permissionSet);

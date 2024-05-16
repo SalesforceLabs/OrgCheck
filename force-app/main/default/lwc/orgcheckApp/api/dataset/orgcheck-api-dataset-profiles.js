@@ -3,7 +3,7 @@ import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 
 export class OrgCheckDatasetProfiles extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on PermissionSet with isOwnedByProfile = TRUE
         sfdcManager.soqlQuery([{ 
@@ -19,6 +19,9 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
             // Init the map
             const profiles = new Map();
 
+            // Init the factory
+            const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
+            
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Profiles...`);
             results[0].records
@@ -28,7 +31,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                     const profileId = sfdcManager.caseSafeId(record.ProfileId);
 
                     // Create the instance
-                    const profile = new SFDC_Profile({
+                    const profile = profileDataFactory.create({
                         id: profileId,
                         url: sfdcManager.setupUrl('profile', profileId),
                         name: record.Profile.Name,
@@ -42,14 +45,11 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                         lastModifiedDate: record.LastModifiedDate,
                         nbFieldPermissions: record.FieldPerms?.records.length || 0,
                         nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                        isScoreNeeded: true
+                        type: 'Profile'
                     });
 
-                    // Compute the score of this profile, with the following rule:
-                    //   - If it is custom and is not used by any active users, then you get +1.
-                    //   - If it is custom and has no description, then you get +1.
-                    if (profile.isCustom === true && profile.memberCounts === 0) profile.setBadField('memberCounts');
-                    if (profile.isCustom === true && sfdcManager.isEmpty(profile.description)) profile.setBadField('description');
+                    // Compute the score of this item
+                    profileDataFactory.computeScore(profile);
 
                     // Add it to the map                        
                     profiles.set(profile.id, profile);                    

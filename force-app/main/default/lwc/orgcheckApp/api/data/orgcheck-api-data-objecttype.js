@@ -3,11 +3,6 @@ import { OrgCheckData } from '../core/orgcheck-api-data';
 export class SFDC_ObjectType extends OrgCheckData {
     id;
     label;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }
 
 export const OBJECTTYPE_ID_STANDARD_SOBJECT = 'StandardObject';

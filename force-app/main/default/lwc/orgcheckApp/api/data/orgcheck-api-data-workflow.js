@@ -12,9 +12,4 @@ export class SFDC_Workflow extends OrgCheckData {
     createdDate;
     lastModifiedDate;
     hasAction;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

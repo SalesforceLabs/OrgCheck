@@ -3,7 +3,7 @@ import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL queries on ExternalString
         sfdcManager.soqlQuery([{ 
@@ -18,6 +18,9 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
             // Init the map
             const customLabels = new Map();
 
+            // Init the factory
+            const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Custom Labels...`);
             results[0].records
@@ -27,7 +30,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const customLabel = new SFDC_CustomLabel({
+                    const customLabel = labelDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('custom-label', record.Id),
                         name: record.Name,
@@ -39,15 +42,12 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                         value: record.Value,
                         createdDate: record.CreatedDate, 
                         lastModifiedDate: record.LastModifiedDate,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                    if (customLabel.isItReferenced() === false) customLabel.setBadField('dependencies.referenced');
+                    // Compute the score of this item
+                    labelDataFactory.computeScore(customLabel);
+
                     // Add it to the map  
                     customLabels.set(customLabel.id, customLabel);
                 });

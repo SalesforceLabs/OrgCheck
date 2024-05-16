@@ -12,9 +12,4 @@ export class SFDC_ProfilePasswordPolicy extends OrgCheckData {
     passwordHistory;
     passwordQuestion;
     profileName;
-
-    constructor(setup) {
-        super();
-        super.initData(setup);
-    }
 }

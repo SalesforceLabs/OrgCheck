@@ -3,7 +3,7 @@ import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage'
 
 export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         // SOQL query on CustomField
         sfdcManager.soqlQuery([{ 
@@ -18,6 +18,9 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
             // Init the map
             const visualForcePages = new Map();
 
+            // Init the factory
+            const pageDataFactory = dataFactory.getInstance(SFDC_VisualForcePage);
+
             // Set the map
             localLogger.log(`Parsing ${results[0].records.length} Apex Pages...`);
             results[0].records
@@ -27,27 +30,21 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
                     const id = sfdcManager.caseSafeId(record.Id);
 
                     // Create the instance
-                    const visualForcePage = new SFDC_VisualForcePage({
+                    const visualForcePage = pageDataFactory.create({
                         id: id,
                         url: sfdcManager.setupUrl('visual-force-page', record.Id),
                         name: record.Name,
                         apiVersion: record.ApiVersion,
                         isMobileReady: record.IsAvailableInTouch,
-                        package: record.NamespacePrefix,
+                        package: (record.NamespacePrefix || ''),
                         createdDate: record.CreatedDate,
                         lastModifiedDate: record.LastModifiedDate,
                         description: record.Description,
-                        isScoreNeeded: true,
-                        isDependenciesNeeded: true,
-                        dependenciesFor: 'id',
                         allDependencies: results[0].allDependencies
                     });
 
-                    // Compute the score of this user, with the following rule:
-                    //  - If the field has no description, then you get +1.
-                    //  - If the field is not used by any other entity (based on the Dependency API), then you get +1.
-                    if (sfdcManager.isEmpty(visualForcePage.description)) visualForcePage.setBadField('description');
-                    if (visualForcePage.isItReferenced() === false) visualForcePage.setBadField('dependencies.referenced');
+                    // Compute the score of this item
+                    pageDataFactory.computeScore(visualForcePage);
 
                     // Add it to the map  
                     visualForcePages.set(visualForcePage.id, visualForcePage);

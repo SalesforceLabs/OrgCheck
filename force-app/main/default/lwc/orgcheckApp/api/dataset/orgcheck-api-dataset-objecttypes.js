@@ -11,12 +11,15 @@ import { SFDC_ObjectType,
 
 export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
 
-    run(sfdcManager, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
 
         try {
 
             // Init the map
             const types = new Map();
+
+            // Init the factory
+            const objecTypeDataFactory = dataFactory.getInstance(SFDC_ObjectType);
 
             // Set the map
             [
@@ -29,7 +32,7 @@ export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
                 { id: OBJECTTYPE_ID_KNOWLEDGE_ARTICLE,       label: 'Knowledge Article' },
                 { id: OBJECTTYPE_ID_CUSTOM_BIG_OBJECT,       label: 'Big Object' }
             ].forEach((e) => { 
-                types.set(e.id, new SFDC_ObjectType({id: e.id, label: e.label})); 
+                types.set(e.id, objecTypeDataFactory.create({id: e.id, label: e.label})); 
             });
 
             // Return data
