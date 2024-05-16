@@ -3,7 +3,9 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    run(sfdcManager, dataFactory, localLogger, resolve, reject, parameters) {
+
+        const fullObjectApiName = parameters?.get('object');
 
         // List all ids for Flows and Process Builders
         // (only ids because metadata can't be read via SOQL in bulk!
@@ -11,7 +13,8 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
             tooling: true,
             string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting '+
                     'FROM CustomField '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')',
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '+
+                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : ''),
             addDependenciesBasedOnField: 'Id'
         }]).then((results) => {
             

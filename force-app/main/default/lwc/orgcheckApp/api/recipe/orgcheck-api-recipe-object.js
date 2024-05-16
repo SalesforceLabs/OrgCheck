@@ -13,12 +13,14 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
      * @returns {Array<string|DatasetRunInformation>}
      */
     extract(object) {
-        const datasetRunInfo = new DatasetRunInformation(DATASET_OBJECT_ALIAS, `${DATASET_OBJECT_ALIAS}_${object}`);
-        datasetRunInfo.parameters.set('object', object);
-        return [ datasetRunInfo, 
+        const datasetRunInfoObject = new DatasetRunInformation(DATASET_OBJECT_ALIAS, `${DATASET_OBJECT_ALIAS}_${object}`);
+        const datasetRunInfoCustomField = new DatasetRunInformation(DATASET_CUSTOMFIELDS_ALIAS, `${DATASET_CUSTOMFIELDS_ALIAS}_${object}`);
+        datasetRunInfoObject.parameters.set('object', object);
+        datasetRunInfoCustomField.parameters.set('object', object);
+        return [ datasetRunInfoObject, 
             DATASET_OBJECTTYPES_ALIAS,
             DATASET_APEXTRIGGERS_ALIAS,
-            DATASET_CUSTOMFIELDS_ALIAS
+            datasetRunInfoCustomField
         ];
     }
 

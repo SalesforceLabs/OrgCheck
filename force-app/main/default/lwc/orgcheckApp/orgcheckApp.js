@@ -398,6 +398,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner.close();
 
         } catch (error) {
+            this.#spinner.sectionFailed(section, error);
             console.error(error);
         }
     }
