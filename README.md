@@ -37,6 +37,9 @@ You can log any issues and new ideas in our tracker: https://github.com/Salesfor
 
 Org Check is available under the [MIT license](LICENSE.md)
 
+## Development Setup
+
+To set up a development environment and deploy OrgCheck as your own unlocked package, follow the steps outlined in the [Development Setup Guide](docs/development.md).
 
 ## Some references
 - Org Check on the AppExchange: https://sfdc.co/OrgCheck-InstallToday-AppExchange
