@@ -1,100 +1,134 @@
-<h1>Development Setup Guide</h1>
+# Development Setup Guide
 
-<p>This guide will walk you through setting up a developer environment for OrgCheck, allowing you to deploy OrgCheck as your own unlocked package.</p>
+This guide will walk you through setting up a developer environment allowing you to deploy Org Check as your own unlocked package.
 
-<h2>Prerequisites</h2>
-<p>Before you begin, ensure you have the following:</p>
-<ul>
-    <li>A development setup with two connected Salesforce orgs</li>
-    <li>Salesforce CLI installed</li>
-</ul>
+## Prerequisites
 
-<h2>Step 1: Clone the OrgCheck Project</h2>
-<p>First, clone the OrgCheck project repository from GitHub:</p>
-<pre><code>git clone https://github.com/SalesforceLabs/OrgCheck.git
-cd OrgCheck</code></pre>
+Before you begin, ensure you have the following:
 
-<h2>Step 2: Connect Developer Orgs</h2>
-<p>You need two developer orgs:</p>
-<ol>
-    <li><strong>Dev Hub Org</strong>: Enable Unlocked Packages and Second-Generation Managed Packages settings.</li>
-    <li><strong>Namespace Org</strong>: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.</li>
-</ol>
+- A development setup with two connected Salesforce orgs
+- Salesforce CLI installed
 
-<h3>Connect Dev Hub Org</h3>
-<p>Log in to your Dev Hub org and enable the necessary settings.</p>
+## Step 1: Clone the Org Check Project
 
-<h3>Link Namespace in Dev Hub Org</h3>
-<ol>
-    <li>Go to <strong>App Launcher</strong>.</li>
-    <li>Search for <strong>Namespace Registries</strong>.</li>
-    <li>Click <strong>Link</strong> and sign in to your Namespace Org.</li>
-</ol>
+First, clone the Org Check project repository from GitHub:
 
-<h2>Step 3: Update Project Definition</h2>
-<p>Edit the <code>sfdx-project.json</code> file to specify the namespace:</p>
-<pre><code>{
+```bash
+git clone https://github.com/SalesforceLabs/OrgCheck.git
+```
+```bash
+cd OrgCheck
+```
+
+
+## Step 2: Connect Developer Orgs
+
+You need two developer orgs:
+
+1. **Dev Hub Org**: Enable Unlocked Packages and Second-Generation Managed Packages settings.
+2. **Namespace Org**: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.
+
+### Connect Dev Hub Org
+
+Log in to your Dev Hub org and enable the necessary settings.
+
+### Link Namespace in Dev Hub Org
+
+1. Go to **App Launcher**.
+2. Search for **Namespace Registries**.
+3. Click **Link** and sign in to your Namespace Org.
+
+## Step 3: Update Project Definition
+
+Edit the `sfdx-project.json` file to specify the namespace:
+
+```json
+{
   "packageDirectories": [
     {
-      "path": "&lt;namespace&gt;",
+      "path": "<namespace>",
       "default": true,
-      "package": "&lt;namespace&gt;",
+      "package": "<namespace>",
       "versionName": "Beryllium",
       "versionNumber": "4.3.2.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
-  "namespace": "&lt;namespace&gt;",
+  "namespace": "<namespace>",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "60.0"
-}</code></pre>
-<p>Replace <code>&lt;namespace&gt;</code> with your actual namespace.</p>
+}
+```
+Replace `<namespace>` with your actual namespace.
 
-<h2>Step 4: Rename the Force-App Folder</h2>
-<p>Rename the <code>force-app</code> folder to match your namespace name.</p>
+## Step 4: Rename the Force-App Folder
 
-<h2>Step 5: Adjust VisualForce Page</h2>
-<p>Update the <code>OrgCheck_App_VFP.page</code> to point to your namespace:</p>
-<pre><code>&lt;apex:page&gt;
-    &lt;script&gt;
-        Lightning.use('&lt;namespace&gt;:OrgCheck_App_Aura', function() {
-            $Lightning.createComponent('&lt;namespace&gt;:orgcheckApp', {});
+Rename the `force-app` folder to match your namespace name.
+
+## Step 5: Adjust VisualForce Page
+
+Update the `OrgCheck_App_VFP.page` to point to your namespace as well:
+
+```html
+<apex:page
+    <script>
+        Lightning.use('<namespace>:OrgCheck_App_Aura', function() {
+            $Lightning.createComponent('<namespace>:orgcheckApp', {});
         });
-    &lt;/script&gt;
-&lt;/apex:page&gt;</code></pre>
-<p>Replace <code>&lt;namespace&gt;</code> with your actual namespace.</p>
+    </script>
+</apex:page>
+```
+Replace `<namespace>` with your actual namespace.
 
-<h2>Step 6: Create the Package</h2>
-<p>Create the package using the Salesforce CLI:</p>
-<pre><code>sfdx force:package:create --name &lt;namespace&gt; --packagetype Unlocked --path &lt;namespace&gt; -v &lt;devhubalias&gt;</code></pre>
-<p>Note the generated <strong>Package Id</strong>.</p>
+## Step 6: Create the Package
 
-<h2>Step 7: Create a Package Version</h2>
-<p>Create a package version with the generated <strong>Package Id</strong>:</p>
-<pre><code>sfdx force:package:version:create -p 0HoDn0000010wBuKAI -x -w 10 -v &lt;devhubalias&gt;</code></pre>
-<p>Note the <strong>Subscriber Package Version Id</strong> from the output.</p>
+Create the package using the Salesforce CLI:
 
-<h2>Step 8: Optional - Create a Scratch Org</h2>
-<p>If you want to use a scratch org, create it using:</p>
-<pre><code>sf force:org:create --definitionfile orgs/dev.json --setalias &lt;scratchorgalias&gt; --targetdevhubusername &lt;devhubalias&gt; --wait 10</code></pre>
+```bash
+sfdx force:package:create --name <namespace> --packagetype Unlocked --path <namespace> -v <devhubalias>
+```
 
-<h2>Step 9: Deploy the Package</h2>
-<p>Deploy the package to your org using the <strong>Subscriber Package Version Id</strong>:</p>
-<pre><code>sfdx force:package:install -p 04tDn0000011NpHIAU -u &lt;scratchorgalias&gt; -w 10</code></pre>
+Note the generated **Package Id**.
 
-<h2>Debugging</h2>
-<p>To debug, go to <strong>Setup</strong> in Salesforce:</p>
-<ol>
-    <li>Navigate to <strong>Visualforce Pages</strong>.</li>
-    <li>Look for <code>OrgCheck_App_VFP</code>.</li>
-    <li>Click <strong>Preview</strong> to view the page.</li>
-</ol>
+## Step 7: Create a Package Version
 
-<p>If you encounter any issues, check the following:</p>
-<ul>
-    <li>Verify the Visualforce page is correctly pointing to your namespace.</li>
-    <li>Ensure the namespace is correctly set in <code>sfdx-project.json</code>.</li>
-</ul>
+Create a package version with the generated **Package Id**:
 
-<h2>Conclusion</h2>
-<p>You should now have a fully working unlocked package for OrgCheck, using your own namespace. For further assistance, refer to the official documentation or reach out to the OrgCheck community. Happy coding!</p>
+```bash
+sfdx force:package:version:create -p 0HoDn0000010wBuKAI -x -w 10 -v <devhubalias>
+```
+
+Note the **Subscriber Package Version Id** from the output.
+
+## Step 8: Optional - Create a Scratch Org
+
+If you want to use a scratch org, create it using:
+
+```bash
+sf force:org:create --definitionfile orgs/dev.json --setalias <scratchorgalias> --targetdevhubusername <devhubalias> --wait 10
+```
+
+## Step 9: Deploy the Package
+
+Deploy the package to your org using the **Subscriber Package Version Id**:
+
+```bash
+sfdx force:package:install -p 04tDn0000011NpHIAU -u <scratchorgalias> -w 10
+```
+
+## Debugging
+
+To debug, go to **Setup** in Salesforce:
+
+1. Navigate to **Visualforce Pages**.
+2. Look for `OrgCheck_App_VFP`.
+3. Click **Preview** to view the page.
+
+If you encounter any issues, check the following:
+
+- Verify the Visualforce page is correctly pointing to your namespace.
+- Ensure the namespace is correctly set in `sfdx-project.json`.
+
+## Conclusion
+
+You should now have a fully working unlocked package of Org Check, using your own namespace. For further assistance, refer to the official documentation or reach out to the community. Happy coding!
