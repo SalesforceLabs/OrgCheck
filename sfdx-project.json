@@ -6,7 +6,14 @@
       "package": "OrgCheck",
       "versionName": "Beryllium",
       "versionNumber": "4.3.2.NEXT",
-      "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
+      "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
+      "dependencies": [
+        {
+            "package": "lfs_component@0.1.0",
+            "subscriberPackageVersionId": "04tDn0000011NpgIAE",
+            "subscriberPackageNamespace": "lfs_component"
+        }
+    ]
     }
   ],
   "namespace": "OrgCheck",

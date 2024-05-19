@@ -86,6 +86,10 @@
                                 <c-orgcheck-score-link onview={handleViewScore} what-id={cell.data.id} what-name={cell.data.name} score={row.score} fields={row.badFields} reason-ids={row.badReasonIds}></c-orgcheck-score-link>
                             </template>
 
+                            <template lwc:elseif={cell.isAnalysis}>
+                                <c-orgcheck-flow-scanner onview={handleViewAnalysis} what-id={cell.data.id} what-name={cell.data.name}></orgcheck-flow-scanner>
+                            </template>
+
                             <!-- TYPE EMPTY: string, if the value is empty then it can be decorated by the 'decoratedValue' -->
                             <template lwc:elseif={cell.isEmpty}>{cell.data.decoratedValue}</template>
 

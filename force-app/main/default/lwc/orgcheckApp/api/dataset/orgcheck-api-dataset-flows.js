@@ -83,7 +83,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                     localLogger.log(`Parsing ${records.length} flow versions...`);
                     records.forEach((record)=> {
 
-                        // Get the ID15s of this flow version and parent flow definition
+                                                  // Get the ID15s of this flow version and parent flow definition
                         const id = sfdcManager.caseSafeId(record.Id);
                         const parentId = sfdcManager.caseSafeId(record.DefinitionId);
 
@@ -94,16 +94,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                             url: sfdcManager.setupUrl('flow', id),
                             version: record.VersionNumber,
                             apiVersion: record.ApiVersion,
-                            totalNodeCount: ['actionCalls', 'apexPluginCalls', 'assignments',
-                                             'collectionProcessors', 'decisions', 'loops',
-                                             'orchestratedStages', 'recordCreates', 'recordDeletes',
-                                             'recordLookups', 'recordRollbacks', 'recordUpdates',
-                                             'screens', 'steps', 'waits'
-                                            ].reduce((count, property) => count + record.Metadata[property]?.length || 0, 0),
-                            dmlCreateNodeCount: record.Metadata.recordCreates?.length || 0,
-                            dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
-                            dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
-                            screenNodeCount: record.Metadata.screens?.length || 0,
+                            analysis: true, 
                             isActive: record.Status === 'Active',
                             description: record.Description,
                             type: record.ProcessType,

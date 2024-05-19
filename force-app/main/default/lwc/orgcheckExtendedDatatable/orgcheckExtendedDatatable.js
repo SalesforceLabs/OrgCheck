@@ -482,6 +482,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         }}));
     }
 
+    handleViewAnalysis(event) {
+        this.dispatchEvent(new CustomEvent('viewanalysis', { detail: { 
+            whatId: event.target.whatId,
+            whatName: event.target.whatName
+        }}));
+    }
+
     /**
      * Internal filter method which takes into account the <code>#filteringSearchInput</code> property
      */

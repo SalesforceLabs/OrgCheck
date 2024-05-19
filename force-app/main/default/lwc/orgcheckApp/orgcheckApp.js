@@ -216,7 +216,7 @@ export default class OrgCheckApp extends LightningElement {
      */ 
     _loadAPI() {
         Promise.all([
-            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js')
+            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
         ]).then(() => {
             this.#api = new OrgCheckAPI(
                 // eslint-disable-next-line no-undef
@@ -848,28 +848,14 @@ export default class OrgCheckApp extends LightningElement {
     flowsTableColumns = [
         { label: 'Score',                    type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                     type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',              type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Type',                     type: 'text',             data: { value: 'type' }},
-        { label: 'Number of versions',       type: 'numeric',          data: { value: 'versionsCount' }},
-        { label: 'Current Version',          type: 'id',               data: { ref: 'currentVersionRef', value: 'version', url: 'url' }},
+        { label: 'API Version',              type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Is it Active?',            type: 'boolean',          data: { value: 'isVersionActive' }},
-        { label: 'Is it the Latest?',        type: 'boolean',          data: { value: 'isLatestCurrentVersion' }},
-        { label: 'Its Running Mode',         type: 'text',             data: { ref: 'currentVersionRef', value: 'runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-        { label: 'Its API Version',          type: 'numeric',          data: { ref: 'currentVersionRef', value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-        { label: '# Nodes',                  type: 'numeric',          data: { ref: 'currentVersionRef', value: 'totalNodeCount' }},
-        { label: '# DML Create Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlCreateNodeCount' }},
-        { label: '# DML Delete Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlDeleteNodeCount' }},
-        { label: '# DML Update Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlUpdateNodeCount' }},
-        { label: '# Screen Nodes',           type: 'numeric',          data: { ref: 'currentVersionRef', value: 'screenNodeCount' }},
-        { label: 'Its Created date',         type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'createdDate' }},
         { label: 'Its Modified date',        type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'lastModifiedDate' }},
-        { label: 'Its Description',          type: 'text',             data: { ref: 'currentVersionRef', value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         { label: 'Using',                    type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',            type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',             type: 'dependencyViewer', data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }},
-        { label: 'Created date',             type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',            type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',              type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Description',              type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        { label: 'Analysis',                 type: 'analysis',         data: { value: 'analysis', id: 'id', name: 'name' } },
     ];
 
     flowsTableData;
