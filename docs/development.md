@@ -1,6 +1,18 @@
+---
+layout: default
+title: How to setup your own environment to modify the application and propose a PR to the project?
+permalink: /development/
+---
+
+
+
+
 # Development Setup Guide
 
 This guide will walk you through setting up a developer environment allowing you to deploy Org Check as your own unlocked package.
+
+This page is also a good start if you want to participate in the project and propose your own PR o the team!
+
 
 ## Prerequisites
 
@@ -9,14 +21,13 @@ Before you begin, ensure you have the following:
 - A development setup with two connected Salesforce orgs
 - Salesforce CLI installed
 
+
 ## Step 1: Clone the Org Check Project
 
 First, clone the Org Check project repository from GitHub:
 
 ```bash
 git clone https://github.com/SalesforceLabs/OrgCheck.git
-```
-```bash
 cd OrgCheck
 ```
 
@@ -85,7 +96,7 @@ Replace `<namespace>` with your actual namespace.
 Create the package using the Salesforce CLI:
 
 ```bash
-sfdx force:package:create --name <namespace> --packagetype Unlocked --path <namespace> -v <devhubalias>
+sf package create --name <namespace> --package-type Unlocked --path <namespace> --target-dev-hub <devhubalias>
 ```
 
 Note the generated **Package Id**.
@@ -95,7 +106,7 @@ Note the generated **Package Id**.
 Create a package version with the generated **Package Id**:
 
 ```bash
-sfdx force:package:version:create -p 0HoDn0000010wBuKAI -x -w 10 -v <devhubalias>
+sf package version create --package <namespace> --installation-key-bypass --wait 10 --target-dev-hub <devhubalias>
 ```
 
 Note the **Subscriber Package Version Id** from the output.
@@ -105,15 +116,21 @@ Note the **Subscriber Package Version Id** from the output.
 If you want to use a scratch org, create it using:
 
 ```bash
-sf force:org:create --definitionfile orgs/dev.json --setalias <scratchorgalias> --targetdevhubusername <devhubalias> --wait 10
+sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
 ## Step 9: Deploy the Package
 
-Deploy the package to your org using the **Subscriber Package Version Id**:
+Deploy the package to your org using the **Subscriber Package Version Id**.
 
 ```bash
-sfdx force:package:install -p 04tDn0000011NpHIAU -u <scratchorgalias> -w 10
+sf package install --package 04tDn0000011NpHIAU -u <scratchorgalias> -w 10
+```
+
+Alternatively, you can use the corresponding **alias** of the version id, which has been generated for you (on step 7) in the sfdx-project.json under the section **packageAliases**.
+
+```bash
+sf package install --package <namespace>@1.2.3.4 -u <scratchorgalias> -w 10
 ```
 
 ## Debugging
