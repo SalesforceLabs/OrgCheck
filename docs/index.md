@@ -52,9 +52,9 @@ Any issues installing the application? Please, [go to this dedicated page](insta
 
 
 ## How to get help and support?
-- Source code is available to anyone at: https://www.sfdc.co/OrgCheck-Repository
-- Issues or ideas are welcome and can be logged by anyone at: https://www.sfdc.co/OrgCheck-Backlog
-- Join our public Slack workspace at: https://sfdc.co/OrgCheck-Community
+- Source code is available to anyone at: [sfdc.co/OrgCheck-Repository](https://www.sfdc.co/OrgCheck-Repository)
+- Issues or ideas are welcome and can be logged by anyone at: [sfdc.co/OrgCheck-Backlog](https://www.sfdc.co/OrgCheck-Backlog)
+- Join our public Slack workspace at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
 
 
 ## Useful references
