@@ -11,6 +11,7 @@ their Salesforce org to monitor and help **continuously reduce their technical d
 
 ![Home Page tab screenshot](./images/screenshots/OrgCheck-Screenshot-Home.png)
 
+
 ## Why would you need this application in your org?
 
 Make sure your Salesforce organisation is under control in terms of **technical debt reduction**.
@@ -25,6 +26,7 @@ You will need org Check to verify some things in your organisation like:
 - Better Automations
 - etc.
 
+
 ## My Vision of the application
 
 This application is **easy to install and easy to use**.
@@ -37,6 +39,7 @@ Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleague
 
 Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/SalesforceLabs/OrgCheck/issues.
 
+
 ## How do I install this application?
 
 You install this application directly in the org you want to analyse from the AppExchange.
@@ -47,11 +50,33 @@ Then, you navigate through the tabs in the app to discover some bad practices in
 
 Any issues installing the application? Please, [go to this dedicated page](installation) about installation, including some frequently asked questions.
 
-## How to get help and support?
 
+## How to get help and support?
 - Source code is available to anyone at: https://www.sfdc.co/OrgCheck-Repository
 - Issues or ideas are welcome and can be logged by anyone at: https://www.sfdc.co/OrgCheck-Backlog
 - Join our public Slack workspace at: https://sfdc.co/OrgCheck-Community
+
+
+## Useful references
+- [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
+- [Article on Pablo Gonzalez blog: "10 Salesforce Open-source Projects for DevOps Engineers"](https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck)
+- [Youtube Video: "Reduce Technical Debt with Org Check"](https://www.youtube.com/watch?v=gjv6q-AR1m0)
+- [Article on Medium: "How to contin uously monitor, balance, challenge, and reduce Technical Debt in a Salesforce org?"](https://medium.com/@vfinet/how-to-continuously-monitor-balance-challenge-and-reduce-technical-debt-in-a-salesforce-org-8809cef4ce4a)
+- [Article on Medium:  "Five concrete actions to reduce technical debt related to Apex Classes"](https://medium.com/@vfinet/five-concret-actions-to-reduce-technical-debt-related-to-apex-classes-reduce-technical-debt-f71a31e4b30c)
+- [Youtube Video: "Org Check Review by Ike Wagh"](https://www.youtube.com/watch?v=IG4zzqVsO_8)
+- [Salesforce Labs Live! "How to Reduce Technical Debt from your Salesforce Environment (Ep.1)"](https://www.youtube.com/watch?v=ZCJ_NH-29I0)
+- [Albanian Dreamin21: "Org Check presentation" by Sara Sali and Vincent Finet](https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/)
+- [Article on Unofficial SF: "Analyze your org with Org Check"](https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/)
+- [Article on Salesforce's Ben: "Free ways to monitor your Salesforce org"](https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/)
+
+
+## I am a developer, how do I contribute?
+
+To set up a development environment and deploy Org Check as your own unlocked package, follow the steps outlined in the [Development Setup Guide](development).
+
+Once done when you want to send a Pull Request just do so from Github and we will review it.
+Please note that you will need to sign the Salesforce CLA to do this.
+
 
 
 

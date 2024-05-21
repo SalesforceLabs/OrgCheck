@@ -30,13 +30,20 @@
 - [AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 - [Installation Guide](https://SalesforceLabs.github.io/OrgCheck/installation/)
 
+
 ## Have valuable feedback?
 
 You can log any issues and new ideas in our [tracker](https://github.com/SalesforceLabs/OrgCheck/issues).
 
+
 ## Development Setup
 
-To set up a development environment and deploy Org Check as your own unlocked package, follow the steps outlined in the [Development Setup Guide](docs/development.md).
+To set up a development environment and deploy Org Check as your own unlocked package, follow 
+the steps outlined in the [Development Setup Guide](docs/development.md).
+
+Once done when you want to send a Pull Request just do so from Github and we will review it.
+Please note that you will need to sign the Salesforce CLA to do this.
+
 
 ## Useful references
 - [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)

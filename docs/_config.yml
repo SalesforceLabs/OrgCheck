@@ -25,8 +25,5 @@ page_preview_url: /preview
 page_installation_label: Install
 page_installation_url: /installation
 
-page_vision_label: Vision
-page_vision_url: /vision
-
-page_legal_label: Legal Terms
-page_legal_url: /legal
+page_dev_label: Development
+page_dev_url: /development
