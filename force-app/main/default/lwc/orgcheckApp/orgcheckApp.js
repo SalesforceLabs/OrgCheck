@@ -336,7 +336,7 @@ export default class OrgCheckApp extends LightningElement {
                     if (sobject !== '*') {
                         this.objectInformationData = await this.#api.getObject(sobject); 
                     } else {
-                        this.objectInformationData = null; 
+                        this.objectInformationData = undefined; 
                     }
                     break;
                 }
@@ -896,4 +896,186 @@ export default class OrgCheckApp extends LightningElement {
     cacheManagerData;
 
     objectInformationData;
+
+
+    get objectInformationExportBasename() {
+        return this.objectInformationData.apiname;
+    }
+    
+    get objectInformationExportSource() {
+        return [
+            {
+                header: 'General information',
+                columns: [
+                    { label: 'Label', field: 'label' },  
+                    { label: 'Value', field: 'value' }
+                ], 
+                rows: [
+                    { label: 'API Name', value: this.objectInformationData.apiname },
+                    { label: 'Package', value: this.objectInformationData.package },
+                    { label: 'Singular Label', value: this.objectInformationData.label },
+                    { label: 'Plural Label', value: this.objectInformationData.labelPlural },
+                    { label: 'Description', value: this.objectInformationData.description },
+                    { label: 'Key Prefix', value: this.objectInformationData.keyPrefix },
+                    { label: 'Record Count (including deleted ones)', value: this.objectInformationData.recordCount },
+                    { label: 'Is Custom?', value: this.objectInformationData.isCustom },
+                    { label: 'Feed Enable?', value: this.objectInformationData.isFeedEnabled },
+                    { label: 'Most Recent Enabled?', value: this.objectInformationData.isMostRecentEnabled },
+                    { label: 'Global Search Enabled?', value: this.objectInformationData.isSearchable },
+                    { label: 'Internal Sharing', value: this.objectInformationData.internalSharingModel },
+                    { label: 'External Sharing', value: this.objectInformationData.externalSharingModel }
+                ]
+            },
+            {
+                header: 'Standard Fields',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' },
+                    { label: 'Package', field: 'package' },
+                    { label: 'Type', field: 'type' },
+                    { label: 'Length', field: 'length' },
+                    { label: 'Unique?', field: 'isUnique' },
+                    { label: 'Encrypted?', field: 'isEncrypted' },
+                    { label: 'External?', field: 'isExternalId' },
+                    { label: 'Indexed?', field: 'isIndexed' },
+                    { label: 'Tooltip', field: 'tooltip' },
+                    { label: 'Formula', field: 'formula' },
+                    { label: 'Default Value', field: 'defaultValue' },
+                    { label: 'Created date', field: 'createdDate' },
+                    { label: 'Modified date', field: 'lastModifiedDate' },
+                    { label: 'Description', field: 'description'}
+                ], 
+                rows: this.objectInformationData.standardFields
+            },
+            {
+                header: 'Custom Fields',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Package', field: 'package' },
+                    { label: 'Type', field: 'type' },
+                    { label: 'Length', field: 'length' },
+                    { label: 'Unique?', field: 'isUnique' },
+                    { label: 'Encrypted?', field: 'isEncrypted' },
+                    { label: 'External?', field: 'isExternalId' },
+                    { label: 'Indexed?', field: 'isIndexed' },
+                    { label: 'Tooltip', field: 'tooltip' },
+                    { label: 'Formula', field: 'formula' },
+                    { label: 'Default Value', field: 'defaultValue' },
+                    { label: 'Created date', field: 'createdDate' },
+                    { label: 'Modified date', field: 'lastModifiedDate' },
+                    { label: 'Description', field: 'description'}
+                ], 
+                rows: this.objectInformationData.customFieldRefs
+            },
+            {
+                header: 'Apex Triggers',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' }
+                ], 
+                rows: this.objectInformationData.apexTriggers
+            },
+            {
+                header: 'Field Sets',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'label' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Description', field: 'description' }
+                ], 
+                rows: this.objectInformationData.fieldSets
+            },
+            {
+                header: 'Page Layouts',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Type', field: 'type' }
+                ], 
+                rows: this.objectInformationData.layouts
+            },           
+            {
+                header: 'Limits',
+                columns: [
+                    { label: 'Name', field: 'label' },  
+                    { label: 'Maximum', field: 'max' },  
+                    { label: 'Used', field: 'used' },  
+                    { label: 'Remaining', field: 'remaining' },  
+                    { label: 'Type', field: 'type' }
+                ], 
+                rows: this.objectInformationData.limits
+            },
+            {
+                header: 'Validation Rules',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'label' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Is Active?', field: 'isActive' },  
+                    { label: 'Error Display Field', field: 'errorDisplayField' },  
+                    { label: 'Error Message', field: 'errorMessage' },  
+                    { label: 'Description', field: 'description' }
+                ], 
+                rows: this.objectInformationData.validationRules
+            },
+            {
+                header: 'Web Links',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' }
+                ], 
+                rows: this.objectInformationData.webLinks
+            },
+            {
+                header: 'Fields',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Custom', field: 'isCustom' },  
+                    { label: 'Tooltip', field: 'tooltip' },  
+                    { label: 'Type', field: 'type' },  
+                    { label: 'Length', field: 'length' },  
+                    { label: 'Unique', field: 'isUnique' },  
+                    { label: 'Encrypted', field: 'isEncrypted' },  
+                    { label: 'External Id', field: 'isExternalId' },  
+                    { label: 'Default', field: 'defaultValue' },  
+                    { label: 'Formula', field: 'formula' },  
+                    { label: 'Description', field: 'description' }
+                ], 
+                rows: this.objectInformationData.fields
+            },
+            {
+                header: 'Record Types',
+                columns: [
+                    { label: 'Id', field: 'id' },  
+                    { label: 'Name', field: 'name' },  
+                    { label: 'URL', field: 'url' },  
+                    { label: 'Developer Name', field: 'ladeveloperNamebel' },  
+                    { label: 'Master', field: 'isMaster' },  
+                    { label: 'Is Active?', field: 'isActive' },  
+                    { label: 'Is Available?', field: 'isAvailable' },  
+                    { label: 'Default Mapping', field: 'isDefaultRecordTypeMapping' }
+                ], 
+                rows: this.objectInformationData.recordTypes
+            },
+            {
+                header: 'Relationships',
+                columns: [
+                    { label: 'Name', field: 'name' },  
+                    { label: 'Child Object', field: 'childObject' },  
+                    { label: 'Field', field: 'fieldName' },  
+                    { label: 'Cascade Delete?', field: 'isCascadeDelete' },  
+                    { label: 'Restricted Delete?', field: 'isRestrictedDelete' }
+                ], 
+                rows: this.objectInformationData.relationships
+            }
+        ];
+    }
 }
