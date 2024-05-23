@@ -55,7 +55,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                             url: sfdcManager.setupUrl('field', id, entityInfo.qualifiedApiName, 
                                         sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting)),
                             name: record.DeveloperName,
-                            label: record.Metadata.Label,
+                            label: record.Metadata.label,
                             package: (record.NamespacePrefix || ''),
                             description: record.Description,
                             isCustom: true,
@@ -73,7 +73,6 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                             formula: record.Metadata.formula,
                             allDependencies: allDependencies
                         });
-
                         // Add it to the map  
                         customFields.set(customField.id, customField);
                     });
