@@ -55,6 +55,7 @@ mkdir build/tmp/js
 mkdir build/tmp/img
 
 cp build/src/javascript/d3/d3.js build/tmp/js/d3.js
+cp build/src/javascript/fflate/fflate.js build/tmp/js/fflate.js
 cp build/src/javascript/jsforce/jsforce.js build/tmp/js/jsforce.js
 cp build/src/javascript/sheetjs/xlsx.js build/tmp/js/xlsx.js
 cp build/src/logos/Logo.svg build/tmp/img
