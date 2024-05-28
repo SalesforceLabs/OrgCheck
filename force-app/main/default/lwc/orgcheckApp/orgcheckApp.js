@@ -216,11 +216,14 @@ export default class OrgCheckApp extends LightningElement {
      */ 
     _loadAPI() {
         Promise.all([
-            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js')
+            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
+            loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
         ]).then(() => {
             this.#api = new OrgCheckAPI(
                 // eslint-disable-next-line no-undef
                 jsforce,
+                // eslint-disable-next-line no-undef
+                fflate,
                 this.accessToken,
                 this.userId,
                 {

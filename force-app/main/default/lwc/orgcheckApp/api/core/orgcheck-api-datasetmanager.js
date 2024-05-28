@@ -99,9 +99,10 @@ export class OrgCheckDatasetManager {
      * Dataset Manager constructor
      * 
      * @param {SFDCConnectionManager} sfdcManager 
+     * @param {FFlate} jsCompression
      * @param {OrgCheckLogger} logger
      */
-    constructor(sfdcManager, logger) {
+    constructor(sfdcManager, jsCompression, logger) {
         
         if (sfdcManager instanceof OrgCheckSalesforceManager === false) {
             throw new TypeError('The given logger is not an instance of OrgCheckSalesforceManager.');
@@ -113,7 +114,7 @@ export class OrgCheckDatasetManager {
         this.#sfdcManager = sfdcManager;
         this.#logger = logger;
         this.#datasets = new Map();
-        this.#cache = new OrgCheckDataCacheManager();
+        this.#cache = new OrgCheckDataCacheManager(jsCompression);
         this.#dataFactory = new OrgCheckDataFactory(sfdcManager);
 
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
@@ -154,27 +155,23 @@ export class OrgCheckDatasetManager {
         if (datasets instanceof Array === false) {
             throw new TypeError('The given datasets is not an instance of Array.');
         }
-        const results = new Map();
-        const promises = [];
-        datasets.forEach((dataset) => {
+        return new Map((await Promise.all(datasets.map((dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             const section = `DATASET ${alias}`;
-
-            promises.push(new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 this.#logger.sectionContinues(section, `Checking the cache for key=${cacheKey}...`);
                 // Check cache if any
                 if (this.#cache.has(cacheKey) === true) {
                     // Set the results from cache
                     this.#logger.sectionEnded(section, 'There was data in cache, we use it!');
-                    results.set(alias, this.#cache.get(cacheKey));
-                    // Resolve
-                    resolve();
+                    // Return the key/alias and value from the cache
+                    resolve([ alias, this.#cache.get(cacheKey) ]);
+                    // Stop there
                     return;
                 }
                 this.#logger.sectionContinues(section, 'There was no data in cache. Let\'s retrieve data.');
-
                 // Calling the retriever
                 this.#datasets.get(alias).run(
                     // sfdc manager
@@ -183,29 +180,22 @@ export class OrgCheckDatasetManager {
                     this.#dataFactory,
                     // local logger
                     { log: (msg) => { this.#logger.sectionContinues(section, msg); }},
-                    // success
-                    (data) => {
-                        // Cache the data
-                        this.#cache.set(cacheKey, data);
-                        // Set the results
-                        results.set(alias, data);
-                        // Some logs
-                        this.#logger.sectionEnded(section, `Data retrieved and saved in cache with key=${cacheKey}`);
-                        // Resolve
-                        resolve();
-                    },
-                    // error
-                    (error) => {
-                        // Reject with this error
-                        this.#logger.sectionFailed(section, error);
-                        reject(error);
-                    },
                     // Send any parameters if needed
                     parameters
-                );
-            }));
-        });
-        return Promise.all(promises).then(() => results);
+                ).then((data) => {
+                    // Cache the data (if possible and not too big)
+                    this.#cache.set(cacheKey, data); 
+                    // Some logs
+                    this.#logger.sectionEnded(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                    // Return the key/alias and value from the cache
+                    resolve([ alias, data ]);
+                }).catch((error) => {
+                    // Reject with this error
+                    this.#logger.sectionFailed(section, error);
+                    reject(error);
+                });
+            });
+        }))));
     }
 
     clean(datasets) {

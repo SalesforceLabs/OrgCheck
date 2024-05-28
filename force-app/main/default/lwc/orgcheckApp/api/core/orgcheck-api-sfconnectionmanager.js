@@ -54,8 +54,9 @@ export class OrgCheckSalesforceManager {
      * 
      * @param {JsForce} jsConnectionFactory 
      * @param {string} accessToken 
+     * @param {string} userId
      */
-    constructor(jsConnectionFactory, accessToken) {
+    constructor(jsConnectionFactory, accessToken, userId) {
         const THIS_YEAR = new Date().getFullYear();
         const THIS_MONTH = new Date().getMonth() + 1;
         const SF_API_VERSION = 3 * (THIS_YEAR - 2022) + 53 + (THIS_MONTH <= 2 ? 0 : (THIS_MONTH <= 6 ? 1 : (THIS_MONTH <= 10 ? 2 : 3 )));
@@ -266,10 +267,13 @@ export class OrgCheckSalesforceManager {
      * Method to call a list of SOQL queries (tooling or not)
      * 
      * @param {Array<SOQLQueryInformation>} queries 
+     * @param localLogger
      */
-    async soqlQuery(queries) {
+    async soqlQuery(queries, localLogger) {
         this._watchDog__beforeRequest();
         const promises = [];
+        localLogger?.log(`Preparing ${queries.length} SOQL queries...`);
+        let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0;
         queries.forEach(q => {
             const queryPromise = new Promise((resolve, reject) => {
                 const conn = q.tooling === true ? this.#connection.tooling : this.#connection;
@@ -278,6 +282,7 @@ export class OrgCheckSalesforceManager {
                     this._watchDog__afterRequest(reject);
                     if (e) { 
                         if (q.byPasses && q.byPasses.includes(e.errorCode)) {
+                            nbQueriesByPassed++;
                             resolve();
                         } else {
                             e.context = { 
@@ -288,22 +293,27 @@ export class OrgCheckSalesforceManager {
                                     queryUseTooling: q.tooling
                                 }
                             };
+                            nbQueriesError++;
                             reject(e);
                         }
                     } else {
                         records.push(... d.records);
                         if (d.done === true || (d.done === false && q.queryMore === false)) {
+                            nbQueriesDone++;
                             resolve({ records: records });
                         } else {
                             conn.queryMore(d.nextRecordsUrl, recursive_query);
                         }
                     }
+                    localLogger?.log(`Performing ${queries.length} queries: ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
                 conn.query(q.string, recursive_query);
             });
             if (q.addDependenciesBasedOnField) {
                 promises.push(queryPromise
                     .then((results) => {
+                        localLogger?.log(`Preparing to call the Dependency API for these ${results.records.length} records...`);
+
                         // Getting the Ids for DAPI call
                         const allIds = []; // All ids (potentially with duplicates)
                         const fields = Array.isArray(q.addDependenciesBasedOnField) ? q.addDependenciesBasedOnField : [ q.addDependenciesBasedOnField ];
@@ -318,6 +328,9 @@ export class OrgCheckSalesforceManager {
                             'WHERE RefMetadataComponentId = \'(id)\' '+
                             'OR MetadataComponentId = \'(id)\' ', [], 5) // for some reason there is a limit of 5 here!!maxRequestSize
                         .then(allDependenciesResults => {
+
+                            localLogger?.log(`Dependencies successfuly retrieved...`);
+
                             // We are going to append the dependencies in the results
                             const allDependencies = [];
                             // Using a set to filter duplicates
