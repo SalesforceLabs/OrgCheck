@@ -3,47 +3,54 @@ import { SFDC_Package } from '../data/orgcheck-api-data-package';
 
 export class OrgCheckDatasetPackages extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // SOQL queries on InstalledSubscriberPackage and Organization
-        sfdcManager.soqlQuery([{ 
+        // First SOQL queries
+        localLogger.log(`Querying Tooling API about InstalledSubscriberPackage and REST API about Organization in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name '+
                     'FROM InstalledSubscriberPackage ' 
         }, { 
-            string: 'SELECT NamespacePrefix FROM Organization '
-        }]).then((results) => {
+            string: 'SELECT NamespacePrefix FROM Organization LIMIT 1 '
+        }], localLogger);
 
-            // Init the map
-            const packages = new Map();
+        // Init the factory
+        const packageDataFactory = dataFactory.getInstance(SFDC_Package);
 
-            // Init the factory
-            const packageDataFactory = dataFactory.getInstance(SFDC_Package);
+        // Create the map
+        localLogger.log(`Parsing ${results[0].records.length} installed packages...`);
+        const packages = new Map(results[0].records.map((record) => {
 
-            // Set the map (1/2) - installed package
-            localLogger.log(`Parsing ${results[0].records.length} Installed Subscriber Packages...`);
-            results[0].records.forEach((record) => {
-                packages.set(record.Id, packageDataFactory.create({
-                    id: record.Id,
-                    name: record.SubscriberPackage.Name,
-                    namespace: record.SubscriberPackage.NamespacePrefix,
-                    type: 'Installed'
-                }));
+            // Get the ID15 of this custom field
+            const id = sfdcManager.caseSafeId(record.Id);
+
+            // Create the instance
+            const installedPackage = packageDataFactory.create({
+                id: id,
+                name: record.SubscriberPackage.Name,
+                namespace: record.SubscriberPackage.NamespacePrefix,
+                type: 'Installed'
             });
 
-            // Set the map (2/2) - local package
-            localLogger.log(`Parsing ${results[1].records.length} local packages...`);
-            results[1].records.filter((record) => record.NamespacePrefix !== null).forEach((record) => {
-                packages.set('<local>', packageDataFactory.create({
-                    id: record.NamespacePrefix, 
-                    name: record.NamespacePrefix, 
-                    namespace: record.NamespacePrefix, 
-                    type: 'Local'
-                }));
-            });
+            // Add it to the map  
+            return [ installedPackage.id, installedPackage ];
+        }));
 
-            // Return data
-            resolve(packages);
-        }).catch(reject);        
+        // Add potential package of the organization if it is set up
+        const localPackage = results[1].records[0].NamespacePrefix;
+        if (localPackage) {
+            localLogger.log(`Adding your local package ${localPackage}...`);
+            packages.set(localPackage, packageDataFactory.create({
+                id: localPackage, 
+                name: localPackage, 
+                namespace: localPackage, 
+                type: 'Local'
+            }));
+        }
+
+        // Return data as map
+        localLogger.log(`Done`);
+        return packages;
     } 
 }

@@ -3,57 +3,51 @@ import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // SOQL queries on ExternalString
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying Tooling API about ExternalString in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM ExternalString '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
             addDependenciesBasedOnField: 'Id'
-        }]).then((results) => {
+        }], localLogger);
 
-            // Init the map
-            const customLabels = new Map();
+        // Init the factory
+        const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
 
-            // Init the factory
-            const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
+        // Create the map
+        localLogger.log(`Parsing ${results[0].records.length} custom labels...`);
+        const customLabels = new Map(results[0].records.map((record) => {
 
-            // Set the map
-            localLogger.log(`Parsing ${results[0].records.length} Custom Labels...`);
-            results[0].records
-                .forEach((record) => {
+            // Get the ID15 of this custom label
+            const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Get the ID15 of this custom label
-                    const id = sfdcManager.caseSafeId(record.Id);
+            // Create the instance
+            const customLabel = labelDataFactory.createWithScore({
+                id: id,
+                url: sfdcManager.setupUrl('custom-label', record.Id),
+                name: record.Name,
+                package: (record.NamespacePrefix || ''),
+                category: record.Category,
+                isProtected: record.IsProtected === true,
+                language: record.Language,
+                label: record.MasterLabel,
+                value: record.Value,
+                createdDate: record.CreatedDate, 
+                lastModifiedDate: record.LastModifiedDate,
+                allDependencies: results[0].allDependencies
+            });
 
-                    // Create the instance
-                    const customLabel = labelDataFactory.create({
-                        id: id,
-                        url: sfdcManager.setupUrl('custom-label', record.Id),
-                        name: record.Name,
-                        package: (record.NamespacePrefix || ''),
-                        category: record.Category,
-                        isProtected: record.IsProtected === true,
-                        language: record.Language,
-                        label: record.MasterLabel,
-                        value: record.Value,
-                        createdDate: record.CreatedDate, 
-                        lastModifiedDate: record.LastModifiedDate,
-                        allDependencies: results[0].allDependencies
-                    });
+            // Add it to the map  
+            return [ customLabel.id, customLabel ];
+        }));
 
-                    // Compute the score of this item
-                    labelDataFactory.computeScore(customLabel);
-
-                    // Add it to the map  
-                    customLabels.set(customLabel.id, customLabel);
-                });
-
-            // Return data
-            resolve(customLabels);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return customLabels;
     } 
 }

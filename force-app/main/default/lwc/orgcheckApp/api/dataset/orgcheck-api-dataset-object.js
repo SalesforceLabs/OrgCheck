@@ -11,7 +11,7 @@ import { SFDC_ObjectRelationShip } from '../data/orgcheck-api-data-objectrelatio
 
 export class OrgCheckDatasetObject extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject, parameters) {
+    async run(sfdcManager, dataFactory, localLogger, parameters) {
 
         // Init the factories
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);

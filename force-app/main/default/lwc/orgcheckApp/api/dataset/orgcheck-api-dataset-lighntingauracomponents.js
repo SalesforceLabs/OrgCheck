@@ -3,54 +3,48 @@ import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightning
 
 export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // SOQL query on CustomField
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying Tooling API about AuraDefinitionBundle in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM AuraDefinitionBundle '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
             addDependenciesBasedOnField: 'Id'
-        }]).then((results) => {
+        }], localLogger);
 
-            // Init the map
-            const components = new Map();
+        // Init the factory
+        const componentDataFactory = dataFactory.getInstance(SFDC_LightningAuraComponent);
 
-            // Init the factory
-            const componentDataFactory = dataFactory.getInstance(SFDC_LightningAuraComponent);
+        // Create the map
+        localLogger.log(`Parsing ${results[0].records.length} lightning aura components...`);
+        const components = new Map(results[0].records.map((record) => {
 
-            // Set the map
-            localLogger.log(`Parsing ${results[0].records.length} Aura Definition Bundles...`);
-            results[0].records
-                .forEach((record) => {
+            // Get the ID15 of this custom field
+            const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Get the ID15 of this custom field
-                    const id = sfdcManager.caseSafeId(record.Id);
+            // Create the instance
+            const component = componentDataFactory.createWithScore({
+                id: id,
+                url: sfdcManager.setupUrl('lightning-aura-component', record.Id),
+                name: record.MasterLabel,
+                apiVersion: record.ApiVersion,
+                package: (record.NamespacePrefix || ''),
+                createdDate: record.CreatedDate,
+                lastModifiedDate: record.LastModifiedDate,
+                description: record.Description,
+                allDependencies: results[0].allDependencies
+            });
 
-                    // Create the instance
-                    const component = componentDataFactory.create({
-                        id: id,
-                        url: sfdcManager.setupUrl('lightning-aura-component', record.Id),
-                        name: record.MasterLabel,
-                        apiVersion: record.ApiVersion,
-                        package: (record.NamespacePrefix || ''),
-                        createdDate: record.CreatedDate,
-                        lastModifiedDate: record.LastModifiedDate,
-                        description: record.Description,
-                        allDependencies: results[0].allDependencies
-                    });
+            // Add it to the map  
+            return [ component.id, component ];
+        }));
 
-                    // Compute the score of this item
-                    componentDataFactory.computeScore(component);
-
-                    // Add it to the map  
-                    components.set(component.id, component);
-                });
-
-            // Return data
-            resolve(components);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return components;
     } 
 }

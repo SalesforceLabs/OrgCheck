@@ -7,91 +7,86 @@ const COMPUTE_NUMBER_FROM_IP = (ip) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { return prev + Number(currentItem) * Math.pow(255, array.length-1-currentIndex); }, 0);
 }
 
+const WEEKDAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+
 export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // List all ids for Profiles
+        // First SOQL query
         // (only ids because metadata can't be read via SOQL in bulk!
-        sfdcManager.soqlQuery([{ 
+        localLogger.log(`Querying REST API about Profile in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             string: 'SELECT Id FROM Profile'
-        }]).then((results) => {
+        }], localLogger);
             
-            // List of profile ids
-            localLogger.log(`Parsing ${results[0].records.length} Profiles...`);
-            const profileIds = results[0].records.map((record) => record.Id);
+        // List of profile ids
+        localLogger.log(`Parsing ${results[0].records.length} Profiles...`);
+        const profileIds = results[0].records.map((record) => record.Id);
 
-            // Init the map
-            const profileRestrictions = new Map();
+        // Init the factories
+        const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
+        const ipRangeDataFactory = dataFactory.getInstance(SFDC_ProfileIpRangeRestriction);
+        const loginHourDataFactory = dataFactory.getInstance(SFDC_ProfileLoginHourRestriction);
 
-            // Init the factories
-            const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
-            const ipRangeDataFactory = dataFactory.getInstance(SFDC_ProfileIpRangeRestriction);
-            const loginHourDataFactory = dataFactory.getInstance(SFDC_ProfileLoginHourRestriction);
+        // Get information about profiles using metadata
+        localLogger.log(`Calling Tooling API Composite to get more information about these ${profileIds.length} profiles...`);
+        const records = await sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ]);
 
-            // Get information about profiles using metadata
-            localLogger.log(`Calling Composite Tooling API to get Metadata information about ${profileIds.length} profiles and their restrictions...`);
-            sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ])
-                .then((records) => {
-                    localLogger.log(`Parsing ${records.length} Profile...`);
-                    records.forEach((record)=> {
-                        // Get the ID15 of this profile
-                        const profileId = sfdcManager.caseSafeId(record.Id);
+        // Create the map
+        localLogger.log(`Parsing ${records.length} profile restrictions...`);
+        const profileRestrictions = new Map(records.map((record) => {
 
-                        // Login Hours
-                        const loginHours = [];
-                        if (record.Metadata.loginHours) {
-                            const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-                            days.forEach(d => {
-                                const hourStart = record.Metadata.loginHours[d + 'Start'];
-                                const hourEnd = record.Metadata.loginHours[d + 'End'];
-                                loginHours.push(loginHourDataFactory.create({
-                                    day: d,
-                                    fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
-                                    toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
-                                    difference: hourEnd - hourStart
-                                }));
-                            });
-                        }
+            // Get the ID15 of this profile
+            const profileId = sfdcManager.caseSafeId(record.Id);
 
-                        // Ip Ranges
-                        const ipRanges = [];
-                        if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
-                            record.Metadata.loginIpRanges.forEach(i => {
-                                const startNumber = COMPUTE_NUMBER_FROM_IP(i.startAddress);
-                                const endNumber = COMPUTE_NUMBER_FROM_IP(i.endAddress);
-                                ipRanges.push(ipRangeDataFactory.create({
-                                    startAddress: i.startAddress,
-                                    endAddress: i.endAddress,
-                                    description: i.description || '(empty)',
-                                    difference: endNumber - startNumber + 1
-                                }));
-                            });
-                        }
-
-                        // Skip if no restriction at all
-                        if (loginHours.length === 0 && ipRanges.length === 0) {
-                            return;
-                        }
-
-                        // Create the instance
-                        const profileRestriction = restrictionsFactory.create({
-                            profileId: profileId,
-                            ipRanges: ipRanges,
-                            loginHours: loginHours
-                        });
-
-                        // Compute the score of this item
-                        restrictionsFactory.computeScore(profileRestriction);
-
-                        // Add it to the map                        
-                        profileRestrictions.set(profileRestriction.profileId, profileRestriction);                    
+            // Login Hours
+            let loginHours;
+            if (record.Metadata.loginHours) {
+                loginHours = WEEKDAYS.map(d => {
+                    const hourStart = record.Metadata.loginHours[d + 'Start'];
+                    const hourEnd = record.Metadata.loginHours[d + 'End'];
+                    return loginHourDataFactory.create({
+                        day: d,
+                        fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
+                        toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
+                        difference: hourEnd - hourStart
                     });
+                });
+            } else {
+                loginHours = [];
+            }
 
-                    // Return data
-                    resolve(profileRestrictions);
+            // Ip Ranges
+            let ipRanges;
+            if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
+                ipRanges = record.Metadata.loginIpRanges.map(i => {
+                    const startNumber = COMPUTE_NUMBER_FROM_IP(i.startAddress);
+                    const endNumber = COMPUTE_NUMBER_FROM_IP(i.endAddress);
+                    return ipRangeDataFactory.create({
+                        startAddress: i.startAddress,
+                        endAddress: i.endAddress,
+                        description: i.description || '(empty)',
+                        difference: endNumber - startNumber + 1
+                    });
+                });
+            } else {
+                ipRanges = [];
+            }
 
-                }).catch(reject);
-        }).catch(reject);
+            // Create the instance
+            const profileRestriction = restrictionsFactory.createWithScore({
+                profileId: profileId,
+                ipRanges: ipRanges,
+                loginHours: loginHours
+            });
+
+            // Add it to the map  
+            return [ profileRestriction.profileId, profileRestriction ];
+        }));
+
+        // Return data as map
+        localLogger.log(`Done`);
+        return profileRestrictions;
     } 
 }

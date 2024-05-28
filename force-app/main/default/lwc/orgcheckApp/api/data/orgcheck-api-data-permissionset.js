@@ -15,7 +15,7 @@ export class SFDC_PermissionSet extends OrgCheckData {
     lastModifiedDate;
     nbFieldPermissions;
     nbObjectPermissions;
-    profileIds;
-    profileRefs;
+    assigneeProfileIds;
+    assigneeProfileRefs;
     type;
 }
