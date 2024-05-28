@@ -30,7 +30,7 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         // Augment data
         permissionSets.forEach((permissionSet) => {
-            permissionSet.profileRefs = permissionSet.profileIds.filter((id) => profiles.has(id)).map((id) => profiles.get(id));
+            permissionSet.assigneeProfileRefs = permissionSet.assigneeProfileIds.filter((id) => profiles.has(id)).map((id) => profiles.get(id));
         });
         // Filter data
         const array = [];
