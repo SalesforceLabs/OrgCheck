@@ -42,21 +42,29 @@ export class OrgCheckDataCacheManager {
     }
 
     _getItemFromLocalStorage = (key) => {
-        const hexValue = localStorage.getItem(key);
-        if (hexValue) {
-            const bufferValue = fromHexToBuffer(hexValue);
-            const uncompressedValue = this.#jsCompression.unzlibSync(bufferValue);
-            const decodedValue = this.#textDecoder.decode(uncompressedValue);
-            return decodedValue;
+        try {
+            const hexValue = localStorage.getItem(key);
+            if (hexValue) {
+                const bufferValue = fromHexToBuffer(hexValue);
+                const uncompressedValue = this.#jsCompression.unzlibSync(bufferValue);
+                const decodedValue = this.#textDecoder.decode(uncompressedValue);
+                return decodedValue;
+            }
+        } catch (error) {
+            console.error(`Error occured when trying to get the value for key ${key}`, error);
         }
         return null;
     }
     
     _setItemFromLocalStorage = (key, stringValue) => {
-        const encodedValue = this.#textEncoder.encode(stringValue);
-        const compressedValue = this.#jsCompression.zlibSync(encodedValue, { level: 9 });
-        const hexValue = fromBufferToHex(compressedValue);
-        localStorage.setItem(key, hexValue);
+        try {
+            const encodedValue = this.#textEncoder.encode(stringValue);
+            const compressedValue = this.#jsCompression.zlibSync(encodedValue, { level: 9 });
+            const hexValue = fromBufferToHex(compressedValue);
+            localStorage.setItem(key, hexValue);
+        } catch (error) {
+            console.error(`Error occured when trying to save the value for key ${key}`, error);
+        }
     }
 
     _getEntryFromCache = (key) => {
