@@ -77,5 +77,5 @@ echo ""
 ### If everything is OK push the resulting built items into dev org
 ### --------------------------------------------------------------------------------------------
 echo "Deploying to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))"
-sfdx project deploy start --metadata StaticResource  1>/dev/null
+sf project deploy start --metadata StaticResource --ignore-conflicts  1>/dev/null
 
