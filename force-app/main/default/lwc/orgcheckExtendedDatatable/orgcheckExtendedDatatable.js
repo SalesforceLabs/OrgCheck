@@ -62,7 +62,7 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
                 break;
             case 'isText':
             case 'isTexts':
-                if (column.modifier?.maximumLength && cell.data.value.length > column.modifier.maximumLength) {
+                if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
                     cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
                     cell.isValueTruncated = true;
                 }

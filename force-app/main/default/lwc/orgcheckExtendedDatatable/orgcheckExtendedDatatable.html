@@ -66,14 +66,14 @@
         <thead>
             <tr>
                 <template for:each={columns} for:item="column">
-                    <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex={column.index} class={column.cssClass}>
+                    <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex="0" class={column.cssClass}>
                         {column.label}
                     </th>
                 </template>
             </tr>
         </thead>
         <tbody>
-            <template for:each={visibleRows} for:item="row">
+            <template if:true={visibleRows}><template for:each={visibleRows} for:item="row">
                 <tr key={row.key} class={row.cssClass}>
                     <template for:each={row.cells} for:item="cell">
                         <td key={cell.key} data-value={cell.data.value} class={cell.cssClass}>
@@ -97,7 +97,7 @@
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
                             <template lwc:elseif={cell.isId}>
                                 <template lwc:if={cell.data.url}>
-                                    <lightning-formatted-url value={cell.data.url} tooltip={cell.data.value} label={cell.data.value} target="_blank" rel="external noopener noreferrer"></lightning-formatted-url>
+                                    <lightning-formatted-url value={cell.data.url} tooltip={cell.data.value} label={cell.data.value} target="_blank"></lightning-formatted-url>
                                 </template>
                                 <template lwc:else>
                                     {cell.data.value}
@@ -112,7 +112,7 @@
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         <template lwc:if={item.data.url}>
-                                            - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank" rel="external noopener noreferrer"></lightning-formatted-url>
+                                            - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank"></lightning-formatted-url>
                                         </template>
                                         <template lwc:else>
                                             - {item.data.value}
@@ -210,7 +210,7 @@
                         </td>
                     </template>
                 </tr>
-            </template>
+            </template></template>
         </tbody>
     </table>
     <span>
