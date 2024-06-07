@@ -178,6 +178,10 @@ export class OrgCheckAPI {
         return this.#recipeManager.run(RECIPE_GLOBALFILTERS_ALIAS, namespace, sobjectType);
     }
 
+    removeAllPackagesTypesAndObjects() {
+        return this.#recipeManager.clean(RECIPE_GLOBALFILTERS_ALIAS);
+    }
+
     /**
      * Get information about a specific sobject
      * 

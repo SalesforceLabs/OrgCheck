@@ -158,6 +158,7 @@ export default class OrgCheckApp extends LightningElement {
                         break;
                     }
                     case 'object-permissions':         this.#api.removeAllObjectPermissionsCache(); break;
+                    case 'objects-owd':                this.#api.removeAllPackagesTypesAndObjects(); break;
                     case 'app-permissions':            this.#api.removeAllAppPermissionsCache(); break;
                     case 'custom-fields':              this.#api.removeAllCustomFieldsCache(); break;
                     case 'users':                      this.#api.removeAllActiveUsersCache(); break;
@@ -471,8 +472,8 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Encrypted?',          type: 'boolean',          data: { value: 'isEncrypted' }},
         { label: 'External?',           type: 'boolean',          data: { value: 'isExternalId' }},
         { label: 'Indexed?',            type: 'boolean',          data: { value: 'isIndexed' }},
-        { label: 'Tooltip',             type: 'text',             data: { value: 'tooltip' }},
-        { label: 'Formula',             type: 'text',             data: { value: 'formula' }, modifier: { preformatted: true }},
+        { label: 'Tooltip',             type: 'text',             data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
+        { label: 'Formula',             type: 'text',             data: { value: 'formula' }, modifier: { maximumLength: 100, preformatted: true }},
         { label: 'Default Value',       type: 'text',             data: { value: 'defaultValue' }},
         { label: 'Using',               type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
