@@ -13,16 +13,20 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                         'Type, NamespacePrefix, Description, ' +
                         'CreatedDate, LastModifiedDate '+
                     'FROM FlexiPage '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            addDependenciesBasedOnField: 'Id'
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const pageDataFactory = dataFactory.getInstance(SFDC_LightningPage);
+        const pageRecords = results[0].records;
+
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);
+        const dependencies = await sfdcManager.dependenciesQuery(pageRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} lightning pages...`);
-        const pages = new Map(results[0].records.map((record) => {
+        localLogger.log(`Parsing ${pageRecords.length} lightning pages...`);
+        const pages = new Map(pageRecords.map((record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -37,7 +41,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate,
                 description: record.Description,
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
 
             // Add it to the map  

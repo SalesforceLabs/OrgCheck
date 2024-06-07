@@ -1,6 +1,7 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 
+const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
 const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
 const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
 
@@ -18,20 +19,24 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         'UsageBeforeDelete, UsageAfterDelete, '+
                         'UsageAfterUndelete, UsageIsBulk, '+
                         'LengthWithoutComments, '+
-                        'EntityDefinition.QualifiedApiName, '+
+                        'EntityDefinition.QualifiedApiName, EntityDefinition.DurableId, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexTrigger '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            tooling: true,
-            addDependenciesBasedOnField: 'Id'
+            tooling: true
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const apexTriggerDataFactory = dataFactory.getInstance(SFDC_ApexTrigger);
+        const apexTriggerRecords = results[0].records;
+
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${apexTriggerRecords.length} apex triggers...`);
+        const dependencies = await sfdcManager.dependenciesQuery(apexTriggerRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} apex triggers...`);
-        const apexTriggers = new Map(results[0].records.map((record) => {
+        localLogger.log(`Parsing ${apexTriggerRecords.length} apex triggers...`);
+        const apexTriggers = new Map(apexTriggerRecords.map((record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -39,7 +44,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
             // Create the instance
             const apexTrigger = apexTriggerDataFactory.create({
                 id: id,
-                url: sfdcManager.setupUrl('apex-trigger', id),
+                url: sfdcManager.setupUrl('apex-trigger', id, record.EntityDefinition.DurableId),
                 name: record.Name,
                 apiVersion: record.ApiVersion,
                 package: (record.NamespacePrefix || ''),
@@ -57,13 +62,14 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                 hasDML: false,
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate,
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
             
             // Get information directly from the source code (if available)
             if (record.Body) {
-                apexTrigger.hasSOQL = record.Body.match(REGEX_HASSOQL) !== null; 
-                apexTrigger.hasDML = record.Body.match(REGEX_HASDML) !== null; 
+                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
+                apexTrigger.hasSOQL = sourceCode.match(REGEX_HASSOQL) !== null; 
+                apexTrigger.hasDML = sourceCode.match(REGEX_HASDML) !== null; 
             }
 
             // Compute the score of this item

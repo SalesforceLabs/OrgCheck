@@ -13,7 +13,7 @@ export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
 
     async run(sfdcManager, dataFactory, localLogger) {
     
-        // Init the factory
+        // Init the factory and records
         const objecTypeDataFactory = dataFactory.getInstance(SFDC_ObjectType);
 
         // Return data

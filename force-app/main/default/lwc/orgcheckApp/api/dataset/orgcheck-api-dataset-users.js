@@ -25,7 +25,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
             'AND IsActive = true ', // we only want active users
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const userDataFactory = dataFactory.getInstance(SFDC_User);
 
         // Create the map

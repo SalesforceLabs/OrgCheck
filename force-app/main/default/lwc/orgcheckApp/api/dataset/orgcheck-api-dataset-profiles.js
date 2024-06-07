@@ -17,7 +17,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                     'WHERE isOwnedByProfile = TRUE'
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
 
         // Create the map

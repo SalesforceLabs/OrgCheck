@@ -5,7 +5,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
 
     async run(sfdcManager, dataFactory, localLogger) {
 
-        // Init the factory
+        // Init the factory and records
         const objectDataFactory = dataFactory.getInstance(SFDC_Object);
 
         // First SOQL query

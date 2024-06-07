@@ -17,7 +17,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         localLogger.log(`Parsing ${results[0].records.length} Workflow Rules...`);
         const workflowRuleIds = results[0].records.map((record) => record.Id);
 
-        // Init the factory
+        // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
 
         // Get information about flows and process builders using metadata

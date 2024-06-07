@@ -14,12 +14,16 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
             string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting '+
                     'FROM CustomField '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '+
-                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : ''),
-            addDependenciesBasedOnField: 'Id'
+                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
         }], localLogger);
-        localLogger.log(`Parsing ${results[0].records.length} custom fields...`);            
+
+        // Init the factory and records
+        const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
+        const customFieldRecords = results[0].records;
+
+        localLogger.log(`Parsing ${customFieldRecords.length} custom fields...`);            
         const entityInfoByCustomFieldId = new Map(
-            results[0].records
+            customFieldRecords
                 .filter((record) => (record.EntityDefinition ? true : false))
                 .map((record) => [ 
                     sfdcManager.caseSafeId(record.Id), 
@@ -29,10 +33,10 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                     }
                 ])
         );
-        const allDependencies = results[0].allDependencies;
 
-        // Init the factory
-        const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
+        const dependencies = await sfdcManager.dependenciesQuery(customFieldRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
 
         // Get information about custom fields using metadata
         localLogger.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
@@ -70,7 +74,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                 isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
                 defaultValue: record.Metadata.defaultValue,
                 formula: record.Metadata.formula,
-                allDependencies: allDependencies
+                allDependencies: dependencies
             });
 
             // Add it to the map  

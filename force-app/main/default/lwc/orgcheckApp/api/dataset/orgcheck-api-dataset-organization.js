@@ -19,7 +19,7 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
         const record = results[0].records[0];
         localLogger.log(`Parsing the result...`);
 
-        // Init the factory
+        // Init the factory and records
         const organizationDataFactory = dataFactory.getInstance(SFDC_Organization);
 
         // Set the type

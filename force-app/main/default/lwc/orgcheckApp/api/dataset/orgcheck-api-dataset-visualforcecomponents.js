@@ -12,16 +12,20 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexComponent '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            addDependenciesBasedOnField: 'Id'
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const componentDataFactory = dataFactory.getInstance(SFDC_VisualForceComponent);
+        const componentRecords = results[0].records;
+
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
+        const dependencies = await sfdcManager.dependenciesQuery(componentRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} visualforce components...`);
-        const components = new Map(results[0].records.map((record) => {
+        localLogger.log(`Parsing ${componentRecords.length} visualforce components...`);
+        const components = new Map(componentRecords.map((record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -36,7 +40,7 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate,
                 description: record.Description,
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
 
             // Add it to the map  

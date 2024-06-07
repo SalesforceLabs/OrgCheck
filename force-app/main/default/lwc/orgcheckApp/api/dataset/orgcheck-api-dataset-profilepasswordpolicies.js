@@ -16,7 +16,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
         const profilePasswordPolicies = results?.ProfilePasswordPolicy;
         if (!profilePasswordPolicies) return new Map();
 
-        // Init the factory
+        // Init the factory and records
         const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
 
         // Create the map

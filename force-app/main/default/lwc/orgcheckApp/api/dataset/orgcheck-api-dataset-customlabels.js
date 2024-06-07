@@ -13,15 +13,19 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate '+
                     'FROM ExternalString '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            addDependenciesBasedOnField: 'Id'
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
+        const customLabelRecords = results[0].records;
 
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
+        const dependencies = await sfdcManager.dependenciesQuery(customLabelRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} custom labels...`);
-        const customLabels = new Map(results[0].records.map((record) => {
+        localLogger.log(`Parsing ${customLabelRecords.length} custom labels...`);
+        const customLabels = new Map(customLabelRecords.map((record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
@@ -39,7 +43,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                 value: record.Value,
                 createdDate: record.CreatedDate, 
                 lastModifiedDate: record.LastModifiedDate,
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
 
             // Add it to the map  

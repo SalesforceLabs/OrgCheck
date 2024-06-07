@@ -15,7 +15,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
                     'FROM ObjectPermissions'
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const permissionDataFactory = dataFactory.getInstance(SFDC_ObjectPermission);
 
         // Create the map

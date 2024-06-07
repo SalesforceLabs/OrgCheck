@@ -18,7 +18,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
                     'WHERE SetupEntityType = \'TabSet\' '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
 
         // Set the application map (as reference)

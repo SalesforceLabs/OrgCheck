@@ -15,7 +15,7 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
             string: 'SELECT NamespacePrefix FROM Organization LIMIT 1 '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const packageDataFactory = dataFactory.getInstance(SFDC_Package);
 
         // Create the map

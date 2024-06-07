@@ -13,7 +13,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                     ' FROM UserRole '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const userRoleDataFactory = dataFactory.getInstance(SFDC_UserRole);
 
         // Create the map

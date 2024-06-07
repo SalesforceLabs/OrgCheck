@@ -8,7 +8,6 @@ export class SOQLQueryInformation {
     tooling;
     byPasses;
     queryMore;
-    addDependenciesBasedOnField;
 }
 
 export class DailyApiRequestLimitInformation {
@@ -56,7 +55,7 @@ export class OrgCheckSalesforceManager {
      * @param {string} accessToken 
      * @param {string} userId
      */
-    constructor(jsConnectionFactory, accessToken, userId) {
+    constructor(jsConnectionFactory, accessToken) {
         const THIS_YEAR = new Date().getFullYear();
         const THIS_MONTH = new Date().getMonth() + 1;
         const SF_API_VERSION = 3 * (THIS_YEAR - 2022) + 53 + (THIS_MONTH <= 2 ? 0 : (THIS_MONTH <= 6 ? 1 : (THIS_MONTH <= 10 ? 2 : 3 )));
@@ -161,10 +160,10 @@ export class OrgCheckSalesforceManager {
                 return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
             }
             case 'apex-trigger': { // Org Check specific
-                return '/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view';
+                return `/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view`;
             }            
             case 'field-set': { // Org Check specific
-                return '/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view';
+                return `/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view`;
             }
             case 'user': { // Org Check specific
                 return `/lightning/setup/ManageUsers/page?address=%2F${durableId}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
@@ -271,114 +270,75 @@ export class OrgCheckSalesforceManager {
      */
     async soqlQuery(queries, localLogger) {
         this._watchDog__beforeRequest();
-        const promises = [];
-        localLogger?.log(`Preparing ${queries.length} SOQL queries...`);
+        localLogger?.log(`Preparing ${queries.length} SOQL ${queries.length>1?'queries':'query'}...`);
         let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0;
-        queries.forEach(q => {
-            const queryPromise = new Promise((resolve, reject) => {
-                const conn = q.tooling === true ? this.#connection.tooling : this.#connection;
+        return Promise.all(queries.map((query) => {
+            const conn = query.tooling === true ? this.#connection.tooling : this.#connection;
+            return new Promise((resolve, reject) => {
                 const records = [];
                 const recursive_query = (e, d) => {
                     this._watchDog__afterRequest(reject);
                     if (e) { 
-                        if (q.byPasses && q.byPasses.includes(e.errorCode)) {
+                        if (query.byPasses && query.byPasses.includes(e.errorCode)) {
                             nbQueriesByPassed++;
                             resolve();
                         } else {
-                            e.context = { 
-                                when: 'While creating a promise to call a SOQL query.',
-                                what: {
-                                    queryMore: q.queryMore,
-                                    queryString: q.string,
-                                    queryUseTooling: q.tooling
-                                }
-                            };
+                            e.context = { when: 'While creating a promise to call a SOQL query.', what: query };
                             nbQueriesError++;
                             reject(e);
                         }
                     } else {
                         records.push(... d.records);
-                        if (d.done === true || (d.done === false && q.queryMore === false)) {
+                        if (d.done === true || (d.done === false && query.queryMore === false)) {
                             nbQueriesDone++;
                             resolve({ records: records });
                         } else {
                             conn.queryMore(d.nextRecordsUrl, recursive_query);
                         }
                     }
-                    localLogger?.log(`Performing ${queries.length} queries: ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
+                    localLogger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
-                conn.query(q.string, recursive_query);
+                conn.query(query.string, recursive_query);
             });
-            if (q.addDependenciesBasedOnField) {
-                promises.push(queryPromise
-                    .then((results) => {
-                        localLogger?.log(`Preparing to call the Dependency API for these ${results.records.length} records...`);
+        }));
+    }
 
-                        // Getting the Ids for DAPI call
-                        const allIds = []; // All ids (potentially with duplicates)
-                        const fields = Array.isArray(q.addDependenciesBasedOnField) ? q.addDependenciesBasedOnField : [ q.addDependenciesBasedOnField ];
-                        fields.forEach((field) => {
-                            allIds.push(... results.records.filter((record) => record[field]).map((record) => this.caseSafeId(record[field])));
-                        });
-                        const ids = Array.from(new Set(allIds)); // Deduplication of ids
-                        return this._callComposite(ids, true, '/query?q='+
-                            'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
-                                   'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
-                            'FROM MetadataComponentDependency '+
-                            'WHERE RefMetadataComponentId = \'(id)\' '+
-                            'OR MetadataComponentId = \'(id)\' ', [], 5) // for some reason there is a limit of 5 here!!maxRequestSize
-                        .then(allDependenciesResults => {
-
-                            localLogger?.log(`Dependencies successfuly retrieved...`);
-
-                            // We are going to append the dependencies in the results
-                            const allDependencies = [];
-                            // Using a set to filter duplicates
-                            const duplicateCheck = new Set(); 
-                            // We parse all the batches/results from the DAPI
-                            allDependenciesResults
-                                .filter(r => r.done === true && r.totalSize > 0)
-                                .forEach(r => allDependencies.push(... r.records.map((e) => {
-                                    const id = this.caseSafeId(e.MetadataComponentId);
-                                    const refId = this.caseSafeId(e.RefMetadataComponentId);
-                                    const key = `${id}-${refId}`;
-                                    if (duplicateCheck.has(key)) return null;
-                                    duplicateCheck.add(key);
-                                    return {
-                                        id: id,
-                                        name: e.MetadataComponentName, 
-                                        type: e.MetadataComponentType,
-                                        url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
-                                        refId: refId, 
-                                        refName: e.RefMetadataComponentName,
-                                        refType: e.RefMetadataComponentType,
-                                        refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
-                                    }
-                                })));
-                            // Remove duplicates
-                            results.allDependencies = allDependencies.filter(r => r !== null);
-                            // Return the altered results
-                            return results;
-                        })
-                        .catch(error => {
-                            error.context = { 
-                                when: 'While getting the dependencies from DAPI',
-                                what: {
-                                    allIds: ids
-                                }
-                            };
-                            return error;
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('Issue while accessing DAPI', error);
-                    })
-                );
-            } else {
-                promises.push(queryPromise);
-            }
+    async dependenciesQuery(ids, localLogger) {
+        this._watchDog__beforeRequest();
+        localLogger?.log(`Preparing to call the Dependency API for these ${ids.length} ids...`);
+        const results = await new Promise((resolve, reject) => {
+            this._callComposite(ids, true, '/query?q='+
+                    'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
+                        'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
+                    'FROM MetadataComponentDependency '+
+                    'WHERE RefMetadataComponentId = \'(id)\' '+
+                    'OR MetadataComponentId = \'(id)\' ', [], 5)
+                .then(resolve)
+                .catch((e) => { if (e.errorCode === 'INVALID_TYPE') resolve(); else reject(e); })
+                .finally(() => this._watchDog__afterRequest(reject));
         });
-        return Promise.all(promises);
+        localLogger?.log(`Dependencies successfuly retrieved!`);
+        const duplicateCheck = new Set(); // Using a set to filter duplicates
+        return results.map(r => r.records).flat() // flatten all results
+            .filter(r => r !== undefined) // Remove by passed dependencies
+            .map(e => { // map the dependency
+                const id = this.caseSafeId(e.MetadataComponentId);
+                const refId = this.caseSafeId(e.RefMetadataComponentId);
+                const key = `${id}-${refId}`;
+                if (duplicateCheck.has(key)) return null;
+                duplicateCheck.add(key);
+                return {
+                    id: id,
+                    name: e.MetadataComponentName, 
+                    type: e.MetadataComponentType,
+                    url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
+                    refId: refId, 
+                    refName: e.RefMetadataComponentName,
+                    refType: e.RefMetadataComponentType,
+                    refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
+                }
+            })
+            .filter(r => r !== null); // Remove duplicates
     }
 
     /*
@@ -443,6 +403,52 @@ export class OrgCheckSalesforceManager {
                 })
                 .catch(reject1); // in case some of the list went wrong!!
         });
+    }
+
+    async _bulk2Query(query, pollInterval, pollTimeout) {
+        const uri = `/services/data/v${this.#connection.version}${query.tooling === true ? '/tooling' : ''}/jobs/query`;
+        const queryJob = await this.#connection.request({
+            url: uri, 
+            method: 'POST',
+            body: `{ "operation": "query", "query": "${query.string}" } `,
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const isJobComplete = async () => {
+            const job = await this.#connection.request({
+                url: `${uri}/${queryJob.id}`,
+                method: 'GET'
+            });
+            if (job.state === 'JobComplete') return true;
+            return false;
+        };
+        const sleep = ms => new Promise(resolve => {
+            // eslint-disable-next-line @lwc/lwc/no-async-operation
+            setTimeout(resolve, ms) 
+        });
+        
+        let jobComplete = false;
+        const start = Date.now();
+        while (jobComplete === false && Date.now() - start < pollTimeout) {
+            // eslint-disable-next-line no-await-in-loop
+            if (await isJobComplete()) {
+                jobComplete = true;
+            } else {
+                // eslint-disable-next-line no-await-in-loop
+                await sleep(pollInterval);
+            }
+        }
+
+        if (jobComplete === false) {
+            throw new Error(`Job #${queryJob.id} has not been finished BEFORE timeout!`);
+        }
+
+        const results = await this.#connection.request({
+            url: `${uri}/${queryJob.id}/results`,
+            method: 'GET',
+            headers: { 'Accept': 'text/csv' }
+        });
+        return results;
     }
 
     async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE) {

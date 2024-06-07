@@ -19,8 +19,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexClass '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            tooling: true,
-            addDependenciesBasedOnField: 'Id'
+            tooling: true
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
                     'FROM ApexCodeCoverage',
@@ -36,12 +35,20 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     'WHERE JobType = \'ScheduledApex\' '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records and records
         const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
+        const apexClassRecords = results[0].records;
+        const apexCodeCoverageRecords = results[1].records;
+        const apexCodeCoverageAggRecords = results[2].records;
+        const asyncApexJobRecords = results[3].records;
 
-        // Part 1- apex classes
-        localLogger.log(`Parsing ${results[0].records.length} apex classes...`);
-        const apexClasses = new Map(results[0].records.map((record) => {
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
+        const dependencies = await sfdcManager.dependenciesQuery(apexClassRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+
+        // Part 1b- apex classes
+        localLogger.log(`Parsing ${apexClassRecords.length} apex classes...`);
+        const apexClasses = new Map(apexClassRecords.map((record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -69,7 +76,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 relatedClasses: [],
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate,
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
 
             // Get information directly from the source code (if available)
@@ -136,10 +143,10 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         }));
 
         // Part 2- add the related tests to apex classes
-        localLogger.log(`Parsing ${results[1].records.length} apex code coverages...`);
+        localLogger.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
         const relatedTestsByApexClass = new Map();
         const relatedClassesByApexTest = new Map();
-        results[1].records
+        apexCodeCoverageRecords
             .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId)))
             .forEach((record) => {
                 // Get the ID15 of the class that is tested and the test class
@@ -158,8 +165,8 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         });
 
         // Part 3- add the aggregate code coverage to apex classes
-        localLogger.log(`Parsing ${results[2].records.length} apex code coverage aggregates...`);
-        results[2].records
+        localLogger.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
+        apexCodeCoverageAggRecords
             .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId)))
             .forEach((record) => {
                 // Get the ID15 of the class that is tested
@@ -168,8 +175,8 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             });
 
         // Part 4- add if class is scheduled
-        localLogger.log(`Parsing ${results[3].records.length} schedule apex classes...`);
-        results[3].records
+        localLogger.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
+        asyncApexJobRecords
             .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassId)))
             .forEach((record) => {
                 // Get the ID15 of the class that is scheduled

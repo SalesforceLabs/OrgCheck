@@ -5,10 +5,6 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
     async run(sfdcManager, dataFactory, localLogger) {
 
-        // Init the factories
-        const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
-        const flowVersionDataFactory = dataFactory.getInstance(SFDC_FlowVersion);
-        
         // First SOQL query
         localLogger.log(`Querying Tooling API about FlowDefinition in the org...`);            
         const results = await sfdcManager.soqlQuery([{
@@ -16,7 +12,6 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
             string: 'SELECT Id, MasterLabel, DeveloperName, ApiVersion, Description, ActiveVersionId, '+
                         'LatestVersionId, CreatedDate, LastModifiedDate '+
                     'FROM FlowDefinition',
-            addDependenciesBasedOnField: ['ActiveVersionId', 'LatestVersionId'],
             tooling: true
         }, {
             // List all Flow (attached to a FlowDefintion)
@@ -24,12 +19,22 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
             tooling: true
         }], localLogger);
             
+        // Init the factories
+        const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
+        const flowVersionDataFactory = dataFactory.getInstance(SFDC_FlowVersion);
+        const flowDefRecords = results[0].records;
+        const flowRecords = results[1].records;
+        
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
+        const dependencies = await sfdcManager.dependenciesQuery(flowDefRecords.map(r => sfdcManager.caseSafeId(r.ActiveVersionId ?? r.LatestVersionId)), localLogger);
+        
         // List of active flows that we need to get information later (with Metadata API)
         const activeFlowIds = [];
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} flow definitions...`);
-        const flowDefinitions = new Map(results[0].records.map((record) => {
+        localLogger.log(`Parsing ${flowDefRecords.length} flow definitions...`);
+        const flowDefinitions = new Map(flowDefRecords.map((record) => {
         
             // Get the ID15 of this flow definition and others
             const id = sfdcManager.caseSafeId(record.Id);
@@ -50,7 +55,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate,
                 dependenciesFor: 'currentVersionId',
-                allDependencies: results[0].allDependencies
+                allDependencies: dependencies
             });
                 
             // Add only the active flow (the ones we want to analyze)
@@ -61,8 +66,8 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         }));
 
         // Add count of Flow verions (whatever they are active or not)
-        localLogger.log(`Parsing ${results[1].records.length} flow versions...`);
-        results[1].records.forEach((record) => {
+        localLogger.log(`Parsing ${flowRecords.length} flow versions...`);
+        flowRecords.forEach((record) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);

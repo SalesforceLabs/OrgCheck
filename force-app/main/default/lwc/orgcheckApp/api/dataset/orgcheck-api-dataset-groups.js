@@ -34,7 +34,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                     'FROM Group '
         }], localLogger);
 
-        // Init the factory
+        // Init the factory and records
         const groupDataFactory = dataFactory.getInstance(SFDC_Group);
 
         // Create the map
