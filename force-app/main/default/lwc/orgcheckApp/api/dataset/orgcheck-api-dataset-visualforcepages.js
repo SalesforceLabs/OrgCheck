@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 
 export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
@@ -21,11 +22,14 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${pageRecords.length} visualforce pages...`);
-        const dependencies = await sfdcManager.dependenciesQuery(pageRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
         // Create the map
         localLogger.log(`Parsing ${pageRecords.length} visualforce pages...`);
-        const pages = new Map(pageRecords.map((record) => {
+        const pages = new Map(await OrgCheckProcessor.carte(pageRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);

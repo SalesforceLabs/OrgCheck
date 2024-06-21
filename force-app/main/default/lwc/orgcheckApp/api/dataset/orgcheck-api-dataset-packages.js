@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Package } from '../data/orgcheck-api-data-package';
 
 export class OrgCheckDatasetPackages extends OrgCheckDataset {
@@ -19,8 +20,9 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         const packageDataFactory = dataFactory.getInstance(SFDC_Package);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} installed packages...`);
-        const packages = new Map(results[0].records.map((record) => {
+        const packageRecords = results[0].records;
+        localLogger.log(`Parsing ${packageRecords.length} installed packages...`);
+        const packages = new Map(await OrgCheckProcessor.carte(packageRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);

@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 
 export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
@@ -17,8 +18,9 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
         const userRoleDataFactory = dataFactory.getInstance(SFDC_UserRole);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} user roles...`);
-        const roles = new Map(results[0].records.map((record) => {
+        const userRoleRecords = results[0].records;
+        localLogger.log(`Parsing ${userRoleRecords.length} user roles...`);
+        const roles = new Map(await OrgCheckProcessor.carte(userRoleRecords, async (record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
@@ -38,15 +40,16 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                 hasInactiveMembers: false,
                 isExternal: (record.PortalType !== 'None') ? true : false
             });         
-            if (record.Users && record.Users.records) {
-                record.Users.records.forEach((user) => {
+            await OrgCheckProcessor.chaque(
+                record?.Users?.records, 
+                (user) => {
                     if (user.IsActive === true) {
                         userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
                     } else {
                         userRole.inactiveMembersCount++;
                     }
-                });
-            }
+                }
+            );
             userRole.activeMembersCount = userRole.activeMemberIds.length;
             userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
             userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;

@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
@@ -44,11 +45,14 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
-        const dependencies = await sfdcManager.dependenciesQuery(apexClassRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(apexClassRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
         // Part 1b- apex classes
         localLogger.log(`Parsing ${apexClassRecords.length} apex classes...`);
-        const apexClasses = new Map(apexClassRecords.map((record) => {
+        const apexClasses = new Map(await OrgCheckProcessor.carte(apexClassRecords, async (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -96,22 +100,20 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
                     apexClass.annotations = record.SymbolTable.tableDeclaration.annotations;
-                    if (record.SymbolTable.tableDeclaration.modifiers) {
-                        record.SymbolTable.tableDeclaration.modifiers.forEach(m => {
-                            switch (m) {
-                                case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
-                                case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
-                                case 'inherited sharing': apexClass.specifiedSharing = 'inherited'; break;
-                                case 'public':            apexClass.specifiedAccess  = 'public';    break;
-                                case 'private':           apexClass.specifiedAccess  = 'private';   break;
-                                case 'global':            apexClass.specifiedAccess  = 'global';    break;
-                                case 'virtual':           apexClass.specifiedAccess  = 'virtual';   break;
-                                case 'abstract':          apexClass.isAbstract       = true;        break;
-                                case 'testMethod':        apexClass.isTest           = true;        break;
-                                default:                  console.error(`Unsupported modifier in SymbolTable.tableDeclaration: ${m} (ApexClassId=${apexClass.id})`);
-                            }
-                        });
-                    }
+                    await OrgCheckProcessor.chaque(record.SymbolTable.tableDeclaration.modifiers, m => {
+                        switch (m) {
+                            case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
+                            case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
+                            case 'inherited sharing': apexClass.specifiedSharing = 'inherited'; break;
+                            case 'public':            apexClass.specifiedAccess  = 'public';    break;
+                            case 'private':           apexClass.specifiedAccess  = 'private';   break;
+                            case 'global':            apexClass.specifiedAccess  = 'global';    break;
+                            case 'virtual':           apexClass.specifiedAccess  = 'virtual';   break;
+                            case 'abstract':          apexClass.isAbstract       = true;        break;
+                            case 'testMethod':        apexClass.isTest           = true;        break;
+                            default:                  console.error(`Unsupported modifier in SymbolTable.tableDeclaration: ${m} (ApexClassId=${apexClass.id})`);
+                        }
+                    });
                 }
             }
 
@@ -146,9 +148,9 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         localLogger.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
         const relatedTestsByApexClass = new Map();
         const relatedClassesByApexTest = new Map();
-        apexCodeCoverageRecords
-            .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId)))
-            .forEach((record) => {
+        await OrgCheckProcessor.chaque(
+            await OrgCheckProcessor.filtre(apexCodeCoverageRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId))), 
+            (record) => {
                 // Get the ID15 of the class that is tested and the test class
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
@@ -156,36 +158,39 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 if (relatedClassesByApexTest.has(testId) === false) relatedClassesByApexTest.set(testId, new Set());
                 relatedTestsByApexClass.get(id).add(testId);
                 relatedClassesByApexTest.get(testId).add(id);
-            });
-        relatedTestsByApexClass.forEach((relatedTestsIds, apexClassId) => {
+            }
+        );
+        await OrgCheckProcessor.chaque(relatedTestsByApexClass, (relatedTestsIds, apexClassId) => {
             apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
         });
-        relatedClassesByApexTest.forEach((relatedClassesIds, apexTestId) => {
+        await OrgCheckProcessor.chaque(relatedClassesByApexTest, (relatedClassesIds, apexTestId) => {
             apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
         });
 
         // Part 3- add the aggregate code coverage to apex classes
         localLogger.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
-        apexCodeCoverageAggRecords
-            .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId)))
-            .forEach((record) => {
+        await OrgCheckProcessor.chaque(
+            await OrgCheckProcessor.filtre(apexCodeCoverageAggRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId))),
+            (record) => {
                 // Get the ID15 of the class that is tested
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 apexClasses.get(id).coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
-            });
+            }
+        );
 
         // Part 4- add if class is scheduled
         localLogger.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
-        asyncApexJobRecords
-            .filter((record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassId)))
-            .forEach((record) => {
+        await OrgCheckProcessor.chaque(
+            await OrgCheckProcessor.filtre(asyncApexJobRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassId))),
+            (record) => {
                 // Get the ID15 of the class that is scheduled
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
                 apexClasses.get(id).isScheduled = true;
-            });
+            }
+        );
 
         // Compute the score of all items
-        apexClasses.forEach((apexClass) => {
+        await OrgCheckProcessor.chaque(apexClasses, (apexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
 

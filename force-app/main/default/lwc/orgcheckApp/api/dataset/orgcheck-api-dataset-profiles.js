@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 
 export class OrgCheckDatasetProfiles extends OrgCheckDataset {
@@ -21,8 +22,9 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
         const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} profiles...`);
-        const profiles = new Map(results[0].records.map((record) => {
+        const profileRecords = results[0].records;
+        localLogger.log(`Parsing ${profileRecords.length} profiles...`);
+        const profiles = new Map(await OrgCheckProcessor.carte(profileRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.ProfileId);

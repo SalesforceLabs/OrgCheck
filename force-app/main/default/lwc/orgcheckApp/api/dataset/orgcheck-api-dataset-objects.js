@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 
 export class OrgCheckDatasetObjects extends OrgCheckDataset {
@@ -18,41 +19,48 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
         const localNamespace = results[0].records[0].NamespacePrefix;
 
         // Two actions to perform in parallel, global describe and an additional entity definition soql query
-        const promises = [];
-
-        // Requesting information from the current salesforce org
-        promises.push(sfdcManager.describeGlobal()); // not using tooling api !!!
-
-        // Some information are not in the global describe, we need to append them with EntityDefinition soql query
-        promises.push(sfdcManager.soqlQuery([{ 
-            queryMore: false, // entityDef does not support calling QueryMore
-            tooling: false, // so not using tooling either!!!
-            string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, '+
-                        'ExternalSharingModel, InternalSharingModel '+
-                    'FROM EntityDefinition ' +
-                    `WHERE PublisherId IN ('System', '<local>', '${localNamespace}') ` +
-                    'AND keyPrefix <> null '+
-                    'AND DeveloperName <> null '
-        }]));
-
         localLogger.log(`Performing a global describe and in parallel a SOQL query to EntityDefinition...`);            
-        const resultss = await Promise.all(promises)
+        const resultss = await Promise.all([
+            
+            // Requesting information from the current salesforce org
+            sfdcManager.describeGlobal(), // not using tooling api !!!
+
+            // Some information are not in the global describe, we need to append them with EntityDefinition soql query
+            sfdcManager.soqlQuery([{ 
+                queryMore: false, // entityDef does not support calling QueryMore
+                tooling: false, // so not using tooling either!!!
+                string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, '+
+                            'ExternalSharingModel, InternalSharingModel '+
+                        'FROM EntityDefinition ' +
+                        `WHERE PublisherId IN ('System', '<local>', '${localNamespace}') ` +
+                        'AND keyPrefix <> null '+
+                        'AND DeveloperName <> null '
+            }])
+        ])
 
         const objectsDescription = resultss[0]; 
         const entities = resultss[1][0].records;
         const entitiesByName = {};
-        const qualifiedApiNames = entities.map((record) => { 
-            entitiesByName[record.QualifiedApiName] = record; 
-            return record.QualifiedApiName;
-        });
+        const qualifiedApiNames = await OrgCheckProcessor.carte(
+            entities, 
+            (record) => { 
+                entitiesByName[record.QualifiedApiName] = record; 
+                return record.QualifiedApiName;
+            }
+        );
 
         // Create the map
         localLogger.log(`Parsing ${objectsDescription.length} custom labels...`);
-        const objects = new Map(objectsDescription
-            .filter((object) =>
-                 qualifiedApiNames.includes(object.name) &&
-                 sfdcManager.getObjectType(object.name, object.customSetting))
-            .map((object) => {
+
+        const objects = new Map(await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(
+                objectsDescription, 
+                (object) => {
+                    return qualifiedApiNames.includes(object.name) && 
+                           sfdcManager.getObjectType(object.name, object.customSetting) ? true : false;
+                }
+            ),
+            (object) => {
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
 
@@ -71,8 +79,8 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
 
                 // Add it to the map  
                 return [ obj.id, obj ];
-            })
-        );
+            }
+        ));
 
         // Return data as map
         localLogger.log(`Done`);

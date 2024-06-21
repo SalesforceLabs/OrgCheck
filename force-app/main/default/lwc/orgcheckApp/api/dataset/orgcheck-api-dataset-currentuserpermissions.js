@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
 
@@ -15,6 +16,9 @@ export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
         localLogger.log(`Parsing the results...`);            
 
         // Return data as map
-        return new Map(Object.keys(permissions).filter(n => n.startsWith('Permissions')).map(p => [ p, permissions[p] ]));
+        return new Map(await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(Object.keys(permissions), (field)=> field.startsWith('Permissions')),
+            (field) => [ field, permissions[field] ]
+        ));
     } 
 }

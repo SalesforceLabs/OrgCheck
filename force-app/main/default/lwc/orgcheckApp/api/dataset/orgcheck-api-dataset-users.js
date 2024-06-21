@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
@@ -29,8 +30,9 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
         const userDataFactory = dataFactory.getInstance(SFDC_User);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} users...`);
-        const users = new Map(results[0].records.map((record) => {
+        const userRecords = results[0].records;
+        localLogger.log(`Parsing ${userRecords.length} users...`);
+        const users = new Map(await OrgCheckProcessor.carte(userRecords, async (record) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
@@ -39,18 +41,22 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
             // At the same time, set the reference if of its permission sets
             const importantPermissions = {};
             const permissionSetRefs = [];
-            if (record.PermissionSetAssignments && record.PermissionSetAssignments.records) {
-                record.PermissionSetAssignments.records.forEach((assignment) => {
-                    IMPORTANT_PERMISSIONS.forEach((permission) => {
-                        if (assignment.PermissionSet[`Permissions${permission}`] === true) {
-                            importantPermissions[permission] = true;
+            await OrgCheckProcessor.chaque(
+                record?.PermissionSetAssignments?.records, 
+                async (assignment) => {
+                    await OrgCheckProcessor.chaque(
+                        IMPORTANT_PERMISSIONS,
+                        (permission) => {
+                            if (assignment.PermissionSet[`Permissions${permission}`] === true) {
+                                importantPermissions[permission] = true;
+                            }
                         }
-                    });
+                    );
                     if (assignment.PermissionSet.IsOwnedByProfile === false) {
                         permissionSetRefs.push(sfdcManager.caseSafeId(assignment.PermissionSetId));
                     }
-                });
-            }
+                }
+            );
 
             // Create the instance
             const user = userDataFactory.createWithScore({

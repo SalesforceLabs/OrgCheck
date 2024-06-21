@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Organization } from '../data/orgcheck-api-data-organization';
 
 const ORGTYPE_PROD = 'Production';

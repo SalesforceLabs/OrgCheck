@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
@@ -21,11 +22,14 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
-        const dependencies = await sfdcManager.dependenciesQuery(customLabelRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
         
         // Create the map
         localLogger.log(`Parsing ${customLabelRecords.length} custom labels...`);
-        const customLabels = new Map(customLabelRecords.map((record) => {
+        const customLabels = new Map(await OrgCheckProcessor.carte(customLabelRecords, (record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);

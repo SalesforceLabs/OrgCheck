@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforcecomponent';
 
 export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
@@ -21,11 +22,14 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
-        const dependencies = await sfdcManager.dependenciesQuery(componentRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
         // Create the map
         localLogger.log(`Parsing ${componentRecords.length} visualforce components...`);
-        const components = new Map(componentRecords.map((record) => {
+        const components = new Map(await OrgCheckProcessor.carte(componentRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);

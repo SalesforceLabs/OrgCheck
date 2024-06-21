@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
@@ -21,22 +22,25 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
         const customFieldRecords = results[0].records;
 
-        localLogger.log(`Parsing ${customFieldRecords.length} custom fields...`);            
-        const entityInfoByCustomFieldId = new Map(
-            customFieldRecords
-                .filter((record) => (record.EntityDefinition ? true : false))
-                .map((record) => [ 
-                    sfdcManager.caseSafeId(record.Id), 
-                    { 
-                        qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
-                        isCustomSetting: record.EntityDefinition.IsCustomSetting 
-                    }
-                ])
-        );
+        localLogger.log(`Parsing ${customFieldRecords.length} custom fields...`);        
+        
+        const entityInfoByCustomFieldId = new Map(await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(customFieldRecords, (record)=> (record.EntityDefinition ? true : false)),
+            (record) => [ 
+                sfdcManager.caseSafeId(record.Id), 
+                { 
+                    qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
+                    isCustomSetting: record.EntityDefinition.IsCustomSetting 
+                }
+            ]
+        ));
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
-        const dependencies = await sfdcManager.dependenciesQuery(customFieldRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
         // Get information about custom fields using metadata
         localLogger.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
@@ -44,7 +48,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} custom fields...`);
-        const customFields = new Map(records.map((record) => {
+        const customFields = new Map(await OrgCheckProcessor.carte(records, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);

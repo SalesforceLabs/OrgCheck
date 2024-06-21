@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 
 export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
@@ -21,11 +22,14 @@ export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
-        const dependencies = await sfdcManager.dependenciesQuery(componentRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
         
         // Create the map
         localLogger.log(`Parsing ${componentRecords.length} lightning aura components...`);
-        const components = new Map(componentRecords.map((record) => {
+        const components = new Map(await OrgCheckProcessor.carte(componentRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);

@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_AppPermission } from '../data/orgcheck-api-data-apppermission';
 
 export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
@@ -22,8 +23,9 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
         const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
 
         // Set the application map (as reference)
-        localLogger.log(`Parsing ${results[0].records.length} Application Menu Items...`);
-        const applications = new Map(results[0].records.map((record) => {
+        const applicationRecords = results[0].records;
+        localLogger.log(`Parsing ${applicationRecords.length} Application Menu Items...`);
+        const applications = new Map(await OrgCheckProcessor.carte(applicationRecords, (record) => {
 
             // Get the ID15 of this application
             const id = sfdcManager.caseSafeId(record.ApplicationId);
@@ -43,10 +45,11 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
         }));
 
         // Create the map
-        localLogger.log(`Parsing ${results[1].records.length} setup entity accesses...`);
-        const permissions = new Map(results[1].records            
-            .filter((record) => applications.has(sfdcManager.caseSafeId(record.SetupEntityId))) // Application must be one that we know about...
-            .map((record) => {
+        const permissionRecords = results[1].records;
+        localLogger.log(`Parsing ${permissionRecords.length} setup entity accesses...`);
+        const permissions = await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(permissionRecords, (record)=> applications.has(sfdcManager.caseSafeId(record.SetupEntityId))), // Application must be one that we know about... 
+            (record) => {
                 const appId = sfdcManager.caseSafeId(record.SetupEntityId);
                 const app = applications.get(appId);
                 
@@ -64,7 +67,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
 
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.appId}`, permission ];
-            })
+            }
         );
 
         // Return data as map

@@ -1,22 +1,26 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
-const RECURSIVE_INDIRECT_USERS = (groups, groupId, returnSomething) => {
+const RECURSIVE_INDIRECT_USERS = async (groups, groupId, returnSomething) => {
     if (groups.has(groupId) === false) {
         return [];
     }
     const group = groups.get(groupId);
     if (group.directGroupIds?.length > 0) {
         const indirectUserIds = new Set();
-        group.directGroupIds.forEach((subGroupId) => {
-            RECURSIVE_INDIRECT_USERS(groups, subGroupId, true).forEach((u) => indirectUserIds.add(u));
+        await OrgCheckProcessor.chaque(group.directGroupIds, async (subGroupId) => {
+            await OrgCheckProcessor.chaque(
+                RECURSIVE_INDIRECT_USERS(groups, subGroupId, true),
+                (u) => indirectUserIds.add(u)
+            );
         });
         group.indirectUserIds = Array.from(indirectUserIds);
     }
     if (returnSomething === true) {
         const allUserIds = new Set();
-        group.directUserIds?.forEach((u) => allUserIds.add(u));
-        group.indirectUserIds?.forEach((u) => allUserIds.add(u));
+        await OrgCheckProcessor.chaque(group.directUserIds, (u) => allUserIds.add(u));
+        await OrgCheckProcessor.chaque(group.indirectUserIds, (u) => allUserIds.add(u));
         return Array.from(allUserIds);
     }
     return [];
@@ -38,8 +42,9 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
         const groupDataFactory = dataFactory.getInstance(SFDC_Group);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} groups...`);
-        const groups = new Map(results[0].records.map((record) => {
+        const groupRecords = results[0].records;
+        localLogger.log(`Parsing ${groupRecords.length} groups...`);
+        const groups = new Map(await OrgCheckProcessor.carte(groupRecords, async (record) => {
         
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -88,10 +93,13 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records.length > 0) {
                 group.directUserIds = [];
                 group.directGroupIds = [];
-                record.GroupMembers.records.forEach((m) => {
-                    const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
-                    (groupMemberId.startsWith('005') ? group.directUserIds : group.directGroupIds).push(groupMemberId);
-                });
+                await OrgCheckProcessor.chaque(
+                    record.GroupMembers.records, 
+                    (m) => {
+                        const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
+                        (groupMemberId.startsWith('005') ? group.directUserIds : group.directGroupIds).push(groupMemberId);
+                    }
+                );
                 group.nbDirectMembers = group.directUserIds.length + group.directGroupIds.length;
             }
 
@@ -101,7 +109,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
         // Handle the indirect group membership
         localLogger.log(`Computing the indirect group memberships for ${groups.size} groups ...`);
-        groups.forEach((group) => {
+        await OrgCheckProcessor.chaque(groups, (group) => {
             RECURSIVE_INDIRECT_USERS(groups, group.id, false);
             group.nbIndirectUsers = group.indirectUserIds?.length || 0;
             group.nbUsers = group.nbIndirectUsers + (group.directUserIds?.length || 0);

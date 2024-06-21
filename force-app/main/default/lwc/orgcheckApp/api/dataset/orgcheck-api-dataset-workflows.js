@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
@@ -14,8 +15,9 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         }], localLogger);
         
         // List of flow ids
-        localLogger.log(`Parsing ${results[0].records.length} Workflow Rules...`);
-        const workflowRuleIds = results[0].records.map((record) => record.Id);
+        const workflowRuleRecords = results[0].records;
+        localLogger.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
+        const workflowRuleIds = await OrgCheckProcessor.carte(workflowRuleRecords, (record) => record.Id);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
@@ -26,7 +28,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} workflows...`);
-        const workflows = new Map(records.map((record) => {
+        const workflows = new Map(await OrgCheckProcessor.carte(records, async (record) => {
 
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
@@ -47,18 +49,16 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
             // Add information about direction actions
             const directActions = record.Metadata.actions;
-            if (directActions) {
-                workflow.actions = directActions.map((action) => { 
-                    return { name: action.name, type: action.type }; 
-                });
-            } else {
-                workflow.actions = [];
-            }
+            workflow.actions = await OrgCheckProcessor.carte(
+                directActions,
+                (action) => { return { name: action.name, type: action.type } }
+            );
 
             // Add information about time triggered actions
             const timeTriggers = record.Metadata.workflowTimeTriggers;
-            if (timeTriggers) {
-                timeTriggers.forEach((tt) => {
+            await OrgCheckProcessor.chaque(
+                timeTriggers, 
+                async (tt) => {
                     const field = tt.offsetFromField || 'TriggerDate';
                     if (tt.actions.length === 0) {
                         workflow.emptyTimeTriggers.push({
@@ -66,17 +66,20 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                             delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
                         });
                     } else {
-                        tt.actions.forEach((action) => {
-                            workflow.futureActions.push({ 
-                                name: action.name, 
-                                type: action.type, 
-                                field: field,
-                                delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}` 
-                            });
-                        })
+                        await OrgCheckProcessor.chaque(
+                            tt.actions,
+                            (action) => {
+                                workflow.futureActions.push({ 
+                                    name: action.name, 
+                                    type: action.type, 
+                                    field: field,
+                                    delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}` 
+                                });
+                            }
+                        )
                     }
-                });
-            }
+                }
+            );
 
             // Add number of actions (direct or future)
             workflow.hasAction = (workflow.actions.length + workflow.futureActions.length > 0);

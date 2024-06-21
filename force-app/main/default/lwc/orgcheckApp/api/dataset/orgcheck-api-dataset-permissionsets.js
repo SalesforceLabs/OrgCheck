@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
@@ -32,8 +33,9 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
 
         // Create the map
-        localLogger.log(`Parsing ${results[0].records.length} permission sets...`);
-        const permissionSets = new Map(results[0].records.map((record) => {
+        const permissionSetRecords = results[0].records;
+        localLogger.log(`Parsing ${permissionSetRecords.length} permission sets...`);
+        const permissionSets = new Map(await OrgCheckProcessor.carte(permissionSetRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -61,9 +63,10 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             return [ permissionSet.id, permissionSet ];
         }));
 
-        localLogger.log(`Parsing ${results[1].records.length} Permission Set Assignments...`);
+        const permissionSetAssignmentRecords = results[1].records;
+        localLogger.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
         const assigneeProfileIdsByPermSetId = new Map();
-        results[1].records.forEach((record) => {
+        await OrgCheckProcessor.chaque(permissionSetAssignmentRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const assigneeProfileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
             if (permissionSets.has(permissionSetId)) {
@@ -73,12 +76,13 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 assigneeProfileIdsByPermSetId.get(permissionSetId).add(assigneeProfileId);
             }
         });
-        assigneeProfileIdsByPermSetId.forEach((assigneeProfileIds, permissionSetId) => {
+        await OrgCheckProcessor.chaque(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
             permissionSets.get(permissionSetId).assigneeProfileIds = Array.from(assigneeProfileIds);
         });
 
-        localLogger.log(`Parsing ${results[2].records.length} Permission Set Groups...`);
-        results[2].records.forEach((record) => {
+        const permissionSetGroupRecords = results[2].records;
+        localLogger.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
+        await OrgCheckProcessor.chaque(permissionSetGroupRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
             if (permissionSets.has(permissionSetId)) {

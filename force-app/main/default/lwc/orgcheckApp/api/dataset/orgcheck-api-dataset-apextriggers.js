@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
@@ -32,11 +33,14 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${apexTriggerRecords.length} apex triggers...`);
-        const dependencies = await sfdcManager.dependenciesQuery(apexTriggerRecords.map(r => sfdcManager.caseSafeId(r.Id)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(apexTriggerRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
         // Create the map
         localLogger.log(`Parsing ${apexTriggerRecords.length} apex triggers...`);
-        const apexTriggers = new Map(apexTriggerRecords.map((record) => {
+        const apexTriggers = new Map(await OrgCheckProcessor.carte(apexTriggerRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);

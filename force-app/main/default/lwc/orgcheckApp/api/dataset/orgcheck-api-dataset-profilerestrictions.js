@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_ProfileRestrictions, 
             SFDC_ProfileIpRangeRestriction,
             SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
@@ -21,8 +22,9 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         }], localLogger);
             
         // List of profile ids
-        localLogger.log(`Parsing ${results[0].records.length} Profiles...`);
-        const profileIds = results[0].records.map((record) => record.Id);
+        const profileIdRecords = results[0].records;
+        localLogger.log(`Parsing ${profileIdRecords.length} Profiles...`);
+        const profileIds = await OrgCheckProcessor.carte(profileIdRecords, (record) => record.Id);
 
         // Init the factories
         const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
@@ -35,7 +37,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} profile restrictions...`);
-        const profileRestrictions = new Map(records.map((record) => {
+        const profileRestrictions = new Map(await OrgCheckProcessor.carte(records, async (record) => {
 
             // Get the ID15 of this profile
             const profileId = sfdcManager.caseSafeId(record.Id);
@@ -43,14 +45,16 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
             // Login Hours
             let loginHours;
             if (record.Metadata.loginHours) {
-                loginHours = WEEKDAYS.map(d => {
-                    const hourStart = record.Metadata.loginHours[d + 'Start'];
-                    const hourEnd = record.Metadata.loginHours[d + 'End'];
-                    return loginHourDataFactory.create({
-                        day: d,
-                        fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
-                        toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
-                        difference: hourEnd - hourStart
+                loginHours = await OrgCheckProcessor.carte(
+                    WEEKDAYS,
+                    (day) => {
+                        const hourStart = record.Metadata.loginHours[day + 'Start'];
+                        const hourEnd = record.Metadata.loginHours[day + 'End'];
+                        return loginHourDataFactory.create({
+                            day: day,
+                            fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
+                            toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
+                            difference: hourEnd - hourStart
                     });
                 });
             } else {
@@ -60,14 +64,16 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
             // Ip Ranges
             let ipRanges;
             if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
-                ipRanges = record.Metadata.loginIpRanges.map(i => {
-                    const startNumber = COMPUTE_NUMBER_FROM_IP(i.startAddress);
-                    const endNumber = COMPUTE_NUMBER_FROM_IP(i.endAddress);
-                    return ipRangeDataFactory.create({
-                        startAddress: i.startAddress,
-                        endAddress: i.endAddress,
-                        description: i.description || '(empty)',
-                        difference: endNumber - startNumber + 1
+                ipRanges = await OrgCheckProcessor.carte(
+                    record.Metadata.loginIpRanges,
+                    range => {
+                        const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
+                        const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
+                        return ipRangeDataFactory.create({
+                            startAddress: range.startAddress,
+                            endAddress: range.endAddress,
+                            description: range.description || '(empty)',
+                            difference: endNumber - startNumber + 1
                     });
                 });
             } else {

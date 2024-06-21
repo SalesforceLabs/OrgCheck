@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
@@ -28,27 +29,26 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const splittedApiName = fullObjectApiName.split('__');
         const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
         
-        const promises = [];
-        promises.push(sfdcManager.describe(fullObjectApiName));
-        promises.push(sfdcManager.soqlQuery([{ 
-            queryMore: false, // we should have only one record max so no need to have queryMore activated.
-            tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
-            string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                        '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
-                        '(SELECT Id FROM ApexTriggers), '+
-                        '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
-                        '(SELECT Id, Name, LayoutType FROM Layouts), '+
-                        '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
-                        '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
-                            'ValidationName FROM ValidationRules), '+
-                        '(SELECT Id, Name FROM WebLinks) '+
-                    'FROM EntityDefinition '+
-                    `WHERE QualifiedApiName = '${fullObjectApiName}' `+
-                    (!packageName ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
-        }]));
-        promises.push(sfdcManager.recordCount(fullObjectApiName));
-        
-        const results = await Promise.all(promises);
+        const results = await Promise.all([
+            sfdcManager.describe(fullObjectApiName),
+            sfdcManager.soqlQuery([{ 
+                queryMore: false, // we should have only one record max so no need to have queryMore activated.
+                tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
+                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
+                            '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
+                            '(SELECT Id FROM ApexTriggers), '+
+                            '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
+                            '(SELECT Id, Name, LayoutType FROM Layouts), '+
+                            '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                                'ValidationName FROM ValidationRules), '+
+                            '(SELECT Id, Name FROM WebLinks) '+
+                        'FROM EntityDefinition '+
+                        `WHERE QualifiedApiName = '${fullObjectApiName}' `+
+                        (!packageName ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
+            }]),
+            sfdcManager.recordCount(fullObjectApiName)
+        ]);
 
         // the first promise was describe
         // so we initialize the object with the first result
@@ -68,7 +68,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         // fields (standard and custom)
         const customFieldIds = []; 
         const standardFieldsMapper = new Map();
-        if (entity.Fields) entity.Fields.records.forEach((f) => {
+        await OrgCheckProcessor.chaque(entity.Fields?.records, (f) => {
             const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
             if (f.DurableId.includes('.00N')) {
                 customFieldIds.push(id);
@@ -80,62 +80,61 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 });
             }
         });
-        const standardFields = (
-            sobjectDescribed.fields ? 
-            sobjectDescribed.fields
-                .filter(f => standardFieldsMapper.has(f.name))
-                .map((f) => {
-                    const fieldMapper = standardFieldsMapper.get(f.name);
-                    return fieldDataFactory.createWithScore({
-                        id: fieldMapper.id,
-                        name: f.label, 
-                        label: f.label, 
-                        description: fieldMapper.description,
-                        tooltip: f.inlineHelpText,
-                        type: f.type,
-                        length: f.length,
-                        isUnique: f.unique,
-                        isEncrypted: f.encrypted,
-                        isExternalId: f.externalId,
-                        isIndexed: fieldMapper.isIndexed,
-                        defaultValue: f.defaultValue,
-                        formula: f.calculatedFormula,
-                        url: sfdcManager.setupUrl('field', fieldMapper.id, entity.DurableId, sobjectType)
-                    });
-                }) : 
-            []
+        const standardFields = await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(sobjectDescribed.fields, (field) => standardFieldsMapper.has(field.name)),
+            (field) => {
+                const fieldMapper = standardFieldsMapper.get(field.name);
+                return fieldDataFactory.createWithScore({
+                    id: fieldMapper.id,
+                    name: field.label, 
+                    label: field.label, 
+                    description: fieldMapper.description,
+                    tooltip: field.inlineHelpText,
+                    type: field.type,
+                    length: field.length,
+                    isUnique: field.unique,
+                    isEncrypted: field.encrypted,
+                    isExternalId: field.externalId,
+                    isIndexed: fieldMapper.isIndexed,
+                    defaultValue: field.defaultValue,
+                    formula: field.calculatedFormula,
+                    url: sfdcManager.setupUrl('field', fieldMapper.id, entity.DurableId, sobjectType)
+                });
+            }
         );
 
         // apex triggers
-        const apexTriggerIds = entity.ApexTriggers ? entity.ApexTriggers.records.map((t) => sfdcManager.caseSafeId(t.Id)) : [];
+        const apexTriggerIds = await OrgCheckProcessor.carte(
+            entity.ApexTriggers?.records, 
+            (t) => sfdcManager.caseSafeId(t.Id)
+        );
 
         // field sets
-        const fieldSets = (
-            entity.FieldSets ? 
-            entity.FieldSets.records.map((t) => fieldSetDataFactory.createWithScore({ 
+        const fieldSets = await OrgCheckProcessor.carte(
+            entity.FieldSets?.records,
+            (t) => fieldSetDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.Id), 
                 label: t.MasterLabel, 
                 description: t.Description,
                 url: sfdcManager.setupUrl('field-set', t.Id, entity.DurableId) 
-            })) : 
-            []
+            })
         );
 
         // page layouts
-        const layouts = (
-            entity.Layouts ? 
-            entity.Layouts.records.map((t) => layoutDataFactory.createWithScore({ 
+        const layouts = await OrgCheckProcessor.carte(
+            entity.Layouts?.records,
+            (t) => layoutDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.Id), 
                 name: t.Name, 
                 url: sfdcManager.setupUrl('layout', t.Id, entity.DurableId), 
                 type: t.LayoutType 
-            })) : 
-            []
+            })
         );
         
         // limits
-        const limits = (
-            entity.Limits ? entity.Limits.records.map((t) => limitDataFactory.createWithScore({ 
+        const limits = await OrgCheckProcessor.carte(
+            entity.Limits?.records,
+            (t) => limitDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.DurableId), 
                 label: t.Label, 
                 max: t.Max, 
@@ -143,14 +142,13 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 used: (t.Max-t.Remaining), 
                 usedPercentage: ((t.Max-t.Remaining)/t.Max),
                 type: t.Type 
-            })) : 
-            []
+            })
         );
         
         // validation rules
-        const validationRules = (
-            entity.ValidationRules ? 
-            entity.ValidationRules.records.map((t) => validationRuleDataFactory.createWithScore({ 
+        const validationRules = await OrgCheckProcessor.carte(
+            entity.ValidationRules?.records,
+            (t) => validationRuleDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.Id), 
                 name: t.ValidationName, 
                 isActive: t.Active,
@@ -158,25 +156,23 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 errorDisplayField: t.ErrorDisplayField,
                 errorMessage: t.ErrorMessage,
                 url: sfdcManager.setupUrl('validation-rule', t.Id), 
-            })) : 
-            []
+            })
         );
         
         // weblinks and actions
-        const webLinks = (
-            entity.WebLinks ? 
-            entity.WebLinks.records.map((t) => webLinkDataFactory.createWithScore({ 
+        const webLinks = await OrgCheckProcessor.carte(
+            entity.WebLinks?.records,
+            (t) => webLinkDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.Id), 
                 name: t.Name, 
                 url: sfdcManager.setupUrl('web-link', t.Id, entity.DurableId) 
-            })) : 
-            []
+            })
         );
         
         // record types
-        const recordTypes = (
-            sobjectDescribed.recordTypeInfos ? 
-            sobjectDescribed.recordTypeInfos.map((t) => recordTypeDataFactory.createWithScore({ 
+        const recordTypes = await OrgCheckProcessor.carte(
+            sobjectDescribed.recordTypeInfos,
+            (t) => recordTypeDataFactory.createWithScore({ 
                 id: sfdcManager.caseSafeId(t.recordTypeId), 
                 name: t.name, 
                 developerName: t.developerName, 
@@ -185,21 +181,19 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 isAvailable: t.available,
                 isDefaultRecordTypeMapping: t.defaultRecordTypeMapping,
                 isMaster: t.master 
-            })) : 
-            []
+            })
         );
         
         // relationships
-        const relationships = (
-            sobjectDescribed.childRelationships ? 
-            sobjectDescribed.childRelationships.filter((t) => !t.relationshipName).map((t) => relationshipDataFactory.createWithScore({ 
-                name: t.relationshipName,
-                childObject: t.childSObject,
-                fieldName: t.field,
-                isCascadeDelete: t.cascadeDelete,
-                isRestrictedDelete: t.restrictedDelete
-            })) : 
-            []
+        const relationships = await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(sobjectDescribed.childRelationships, (relationship) => !relationship.relationshipName),
+            (relationship) => relationshipDataFactory.createWithScore({ 
+                name: relationship.relationshipName,
+                childObject: relationship.childSObject,
+                fieldName: relationship.field,
+                isCascadeDelete: relationship.cascadeDelete,
+                isRestrictedDelete: relationship.restrictedDelete
+            })
         );
 
         const object = objectDataFactory.createWithScore({

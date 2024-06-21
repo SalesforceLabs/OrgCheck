@@ -1,4 +1,5 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
 
 export class OrgCheckDatasetFlows extends OrgCheckDataset {
@@ -27,14 +28,17 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
-        const dependencies = await sfdcManager.dependenciesQuery(flowDefRecords.map(r => sfdcManager.caseSafeId(r.ActiveVersionId ?? r.LatestVersionId)), localLogger);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
+            localLogger
+        );
         
         // List of active flows that we need to get information later (with Metadata API)
         const activeFlowIds = [];
 
         // Create the map
         localLogger.log(`Parsing ${flowDefRecords.length} flow definitions...`);
-        const flowDefinitions = new Map(flowDefRecords.map((record) => {
+        const flowDefinitions = new Map(await OrgCheckProcessor.carte(flowDefRecords, (record) => {
         
             // Get the ID15 of this flow definition and others
             const id = sfdcManager.caseSafeId(record.Id);
@@ -67,7 +71,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
         // Add count of Flow verions (whatever they are active or not)
         localLogger.log(`Parsing ${flowRecords.length} flow versions...`);
-        flowRecords.forEach((record) => {
+        await OrgCheckProcessor.chaque(flowRecords, (record) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
@@ -86,7 +90,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ]); // There are GACKs throwing that errors for some flows!
 
         localLogger.log(`Parsing ${records.length} flow versions...`);
-        records.forEach((record)=> {
+        await OrgCheckProcessor.chaque(records, async (record)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
@@ -116,10 +120,13 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                 createdDate: record.CreatedDate,
                 lastModifiedDate: record.LastModifiedDate
             });
-            record.Metadata.processMetadataValues?.filter(m => m.name === 'ObjectType' || m.name === 'TriggerType').forEach(m => {
-                if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
-                if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
-            });
+            await OrgCheckProcessor.chaque(
+                await OrgCheckProcessor.filtre(record.Metadata.processMetadataValues, (m) => m.name === 'ObjectType' || m.name === 'TriggerType'),
+                (m) => {
+                    if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
+                    if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
+                }
+            );
 
             // Get the parent Flow definition
             const flowDefinition = flowDefinitions.get(parentId);
@@ -129,7 +136,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         });
 
         // Compute the score of all definitions
-        flowDefinitions.forEach(flowDefinition => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await OrgCheckProcessor.chaque(flowDefinitions, (flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
         localLogger.log(`Done`);
