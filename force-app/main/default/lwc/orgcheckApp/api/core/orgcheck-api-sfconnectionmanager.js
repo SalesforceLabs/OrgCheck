@@ -271,7 +271,7 @@ export class OrgCheckSalesforceManager {
     async soqlQuery(queries, localLogger) {
         this._watchDog__beforeRequest();
         localLogger?.log(`Preparing ${queries.length} SOQL ${queries.length>1?'queries':'query'}...`);
-        let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0;
+        let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0, nbQueryMore = 0, nbQueriesPending = queries.length;
         return Promise.all(queries.map((query) => {
             const conn = query.tooling === true ? this.#connection.tooling : this.#connection;
             return new Promise((resolve, reject) => {
@@ -287,16 +287,19 @@ export class OrgCheckSalesforceManager {
                             nbQueriesError++;
                             reject(e);
                         }
+                        nbQueriesPending--;
                     } else {
                         records.push(... d.records);
                         if (d.done === true || (d.done === false && query.queryMore === false)) {
                             nbQueriesDone++;
+                            nbQueriesPending--;
                             resolve({ records: records });
                         } else {
+                            nbQueryMore++;
                             conn.queryMore(d.nextRecordsUrl, recursive_query);
                         }
                     }
-                    localLogger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
+                    localLogger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
                 conn.query(query.string, recursive_query);
             });
@@ -307,15 +310,29 @@ export class OrgCheckSalesforceManager {
         this._watchDog__beforeRequest();
         localLogger?.log(`Preparing to call the Dependency API for these ${ids.length} ids...`);
         const results = await new Promise((resolve, reject) => {
-            this._callComposite(ids, true, '/query?q='+
+            this._callComposite(
+                ids, 
+                true, 
+                '/query?q='+
                     'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                         'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                     'FROM MetadataComponentDependency '+
                     'WHERE RefMetadataComponentId = \'(id)\' '+
-                    'OR MetadataComponentId = \'(id)\' ', [], 5)
-                .then(resolve)
-                .catch((e) => { if (e.errorCode === 'INVALID_TYPE') resolve(); else reject(e); })
-                .finally(() => this._watchDog__afterRequest(reject));
+                    'OR MetadataComponentId = \'(id)\' ', 
+                [], 
+                5, 
+                { 
+                    onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
+                        localLogger?.log(`Statistics of ${ids.length} Dependency API ${ids.length>1?'elements':'element'}: ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesError} in error...`);
+                    },
+                    onFetched: (nbRecords, nbQueriesByPassed) => {
+                        localLogger?.log(`Statistics of ${ids.length} Dependency API ${ids.length>1?'elements':'element'}: ${nbRecords} records fetched, ${nbQueriesByPassed} by-passed...`);
+                    }
+                }
+            )
+            .then(resolve)
+            .catch((e) => { if (e.errorCode === 'INVALID_TYPE') resolve(); else reject(e); })
+            .finally(() => this._watchDog__afterRequest(reject));
         });
         localLogger?.log(`Dependencies successfuly retrieved!`);
         const duplicateCheck = new Set(); // Using a set to filter duplicates
@@ -451,7 +468,7 @@ export class OrgCheckSalesforceManager {
         return results;
     }
 
-    async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE) {
+    async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE, logger) {
         this._watchDog__beforeRequest();
         if (maxRequestSize > MAX_COMPOSITE_REQUEST_SIZE) maxRequestSize = MAX_COMPOSITE_REQUEST_SIZE;
         const compositeRequestBodies = [];
@@ -470,6 +487,7 @@ export class OrgCheckSalesforceManager {
                 referenceId: id
             });
         });
+        let nbQueriesDone = 0, nbQueriesError = 0, nbQueriesPending = compositeRequestBodies.length;
         return new Promise((resolve, reject) => {
             Promise.all(
                 compositeRequestBodies.map((requestBody) => new Promise((r, e) => {
@@ -481,6 +499,7 @@ export class OrgCheckSalesforceManager {
                         }, (error, response) => { 
                             this._watchDog__afterRequest(e);
                             if (error) {
+                                nbQueriesError++;
                                 error.context = { 
                                     when: `While creating a promise to call the ${tooling === true ? 'Tooling Composite API' : 'Composite API'}.`,
                                     what: {
@@ -492,34 +511,43 @@ export class OrgCheckSalesforceManager {
                                 };
                                 e(error); 
                             } else {
+                                nbQueriesDone++;
                                 r(response); 
                             }
+                            nbQueriesPending--;
+                            logger?.onRequest(nbQueriesDone, nbQueriesError, nbQueriesPending);
                         }
                     );
                 })))
                 .then((results) => {
                     const records = [];
+                    let nbQueriesByPassed = 0;
                     results.forEach((result) => {
                         result.compositeResponse.forEach((response) => {
                             if (response.httpStatusCode === 200) {
                                 records.push(response.body);
                             } else {
                                 const errorCode = response.body[0].errorCode;
-                                if (byPasses && byPasses.includes(errorCode) === false) {
-                                    const error = new TypeError();
-                                    error.context = { 
-                                        when: 'After receiving a response with bad HTTP status code.',
-                                        what: {
-                                            tooling: tooling,
-                                            pattern: uriPattern,
-                                            ids: ids,
-                                            body: response.body
-                                        }
-                                    };
-                                    reject(error);
+                                if (byPasses) {
+                                    if (byPasses.includes(errorCode) === false) {
+                                        const error = new TypeError();
+                                        error.context = { 
+                                            when: 'After receiving a response with bad HTTP status code.',
+                                            what: {
+                                                tooling: tooling,
+                                                pattern: uriPattern,
+                                                ids: ids,
+                                                body: response.body
+                                            }
+                                        };
+                                        reject(error);
+                                    } else {
+                                        nbQueriesByPassed++;
+                                    }
                                 }
                             }
                         });
+                        logger?.onFetched(records.length, nbQueriesByPassed);
                     });
                     resolve(records);
                 })
