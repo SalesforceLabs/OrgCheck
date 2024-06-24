@@ -23,8 +23,8 @@ import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 
-const IS_CLASS_EXTENDS = (clazz, parentClazz) => { 
-    return clazz.prototype instanceof parentClazz 
+const IS_CLASS_EXTENDS = (instanceClass, masterClass) => { 
+    return Object.prototype.isPrototypeOf.call(masterClass, instanceClass);
 }
 
 const IS_OLD_APIVERSION = (currentVersion, version, definition_of_old = 3) => { 

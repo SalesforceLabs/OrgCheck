@@ -34,6 +34,12 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
         users.forEach((user) => {
             user.profileRef = profiles.get(user.profileId);
             user.permissionSetRefs = user.permissionSetIds.filter((id) => permissionSets.has(id)).map((id) => permissionSets.get(id));
+            user.aggregateImportantPermissions = user.profileRef?.importantPermissions || {};
+            user.permissionSetRefs.forEach((permissionSet) => {
+                Object.keys(permissionSet.importantPermissions)
+                    .filter(permName => permissionSet.importantPermissions[permName] === true)
+                    .forEach(permName => { user.aggregateImportantPermissions[permName] = true; });
+            });
         });
         // Return all data
         return [... users.values()];
