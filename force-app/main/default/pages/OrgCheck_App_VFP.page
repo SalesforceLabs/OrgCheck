@@ -45,15 +45,22 @@
     } catch (e) {
         console.error('Error while resetting the cache of previous Org Check versions (prior to Lithium).')
     }
+    /* Determine the namespace where the app is running (if local/standalone the package is 'c') */ 
+    const firstSubDomain = document.location.host.split('.')[0];
+    const subDomainParts = firstSubDomain.split('--');
+    const namespace = subDomainParts.pop(); // last part is the package name
     /* Insert LWC app */
-    $Lightning.use('orgcheck:OrgCheck_App_Aura', function() {
-        $Lightning.createComponent('orgcheck:orgcheckApp',
+    const app = `${namespace}:OrgCheck_App_Aura`;
+    const component = `${namespace}:orgcheckApp`;
+    $Lightning.use(app, () => {
+        $Lightning.createComponent(
+            component, 
             { 
                 accessToken: '{! JSENCODE($Api.Session_Id) }', 
                 userId: '{! JSENCODE($User.Id) }' 
             },
             'app',
-            function(cmp) {
+            () => {
                 document.getElementById('loading').style.display = 'none';
             }
         );

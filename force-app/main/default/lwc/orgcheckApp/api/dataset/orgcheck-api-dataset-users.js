@@ -1,14 +1,16 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
         const IMPORTANT_PERMISSIONS = [ 'ApiEnabled', 'ViewSetup', 'ModifyAllData', 'ViewAllData' ];
 
-        // SOQL query on User
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying REST API about User in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, '+
             'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
             'UserPreferencesLightningExperiencePreferred, '+
@@ -22,63 +24,61 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
             'FROM User '+
             'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
             'AND IsActive = true ', // we only want active users
-        }]).then((results) => {
+        }], localLogger);
 
-            // Init the map
-            const users = new Map();
+        // Init the factory and records
+        const userDataFactory = dataFactory.getInstance(SFDC_User);
 
-            // Init the factory
-            const userDataFactory = dataFactory.getInstance(SFDC_User);
+        // Create the map
+        const userRecords = results[0].records;
+        localLogger.log(`Parsing ${userRecords.length} users...`);
+        const users = new Map(await OrgCheckProcessor.carte(userRecords, async (record) => {
+        
+            // Get the ID15 of this user
+            const id = sfdcManager.caseSafeId(record.Id);
 
-            // Set the map
-            localLogger.log(`Parsing ${results[0].records.length} Users...`);
-            results[0].records
-                .forEach((record) => {
-
-                    // Get the ID15 of this user
-                    const id = sfdcManager.caseSafeId(record.Id);
-
-                    // Check if this user has a set of important permissions in Profile and Permission Sets
-                    // At the same time, set the reference if of its permission sets
-                    const importantPermissions = {};
-                    const permissionSetRefs = [];
-                    if (record.PermissionSetAssignments && record.PermissionSetAssignments.records) {
-                        record.PermissionSetAssignments.records.forEach((assignment) => {
-                            IMPORTANT_PERMISSIONS.forEach((permission) => {
-                                if (assignment.PermissionSet[`Permissions${permission}`] === true) {
-                                    importantPermissions[permission] = true;
-                                }
-                            });
-                            if (assignment.PermissionSet.IsOwnedByProfile === false) {
-                                permissionSetRefs.push(sfdcManager.caseSafeId(assignment.PermissionSetId));
+            // Check if this user has a set of important permissions in Profile and Permission Sets
+            // At the same time, set the reference if of its permission sets
+            const importantPermissions = {};
+            const permissionSetRefs = [];
+            await OrgCheckProcessor.chaque(
+                record?.PermissionSetAssignments?.records, 
+                async (assignment) => {
+                    await OrgCheckProcessor.chaque(
+                        IMPORTANT_PERMISSIONS,
+                        (permission) => {
+                            if (assignment.PermissionSet[`Permissions${permission}`] === true) {
+                                importantPermissions[permission] = true;
                             }
-                        });
+                        }
+                    );
+                    if (assignment.PermissionSet.IsOwnedByProfile === false) {
+                        permissionSetRefs.push(sfdcManager.caseSafeId(assignment.PermissionSetId));
                     }
+                }
+            );
 
-                    // Create the instance
-                    const user = userDataFactory.create({
-                        id: id,
-                        url: sfdcManager.setupUrl('user', id),
-                        photoUrl: record.SmallPhotoUrl,
-                        name: record.Name,
-                        lastLogin: record.LastLoginDate,
-                        numberFailedLogins: record.NumberOfFailedLogins,
-                        onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
-                        lastPasswordChange: record.LastPasswordChangeDate,
-                        profileId: sfdcManager.caseSafeId(record.ProfileId),
-                        importantPermissions: Object.keys(importantPermissions).sort(),
-                        permissionSetIds: permissionSetRefs
-                    });
+            // Create the instance
+            const user = userDataFactory.createWithScore({
+                id: id,
+                url: sfdcManager.setupUrl('user', id),
+                photoUrl: record.SmallPhotoUrl,
+                name: record.Name,
+                lastLogin: record.LastLoginDate,
+                numberFailedLogins: record.NumberOfFailedLogins,
+                onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
+                lastPasswordChange: record.LastPasswordChangeDate,
+                profileId: sfdcManager.caseSafeId(record.ProfileId),
+                importantPermissions: Object.keys(importantPermissions).sort(),
+                permissionSetIds: permissionSetRefs
+            });
 
-                    // Compute the score of this item
-                    userDataFactory.computeScore(user);
+            // Add it to the map  
+            return [ user.id, user ];
+        }));
 
-                    // Add it to the map  
-                    users.set(user.id, user);
-                });
-
-            // Return data
-            resolve(users);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return users;
     } 
 }

@@ -1,0 +1,4 @@
+Name: fflate
+Website: https://github.com/101arrowz/fflate
+Version: v0.8.2 minimized
+Source: https://unpkg.com/fflate@0.8.2/umd/index.js

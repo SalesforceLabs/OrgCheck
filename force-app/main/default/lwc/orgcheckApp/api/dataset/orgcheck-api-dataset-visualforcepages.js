@@ -1,57 +1,59 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 
 export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // SOQL query on CustomField
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying Tooling API about ApexPage in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexPage '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')',
-            addDependenciesBasedOnField: 'Id'
-        }]).then((results) => {
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')'
+        }], localLogger);
 
-            // Init the map
-            const visualForcePages = new Map();
+        // Init the factory and records
+        const pageDataFactory = dataFactory.getInstance(SFDC_VisualForcePage);
+        const pageRecords = results[0].records;
 
-            // Init the factory
-            const pageDataFactory = dataFactory.getInstance(SFDC_VisualForcePage);
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${pageRecords.length} visualforce pages...`);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
-            // Set the map
-            localLogger.log(`Parsing ${results[0].records.length} Apex Pages...`);
-            results[0].records
-                .forEach((record) => {
+        // Create the map
+        localLogger.log(`Parsing ${pageRecords.length} visualforce pages...`);
+        const pages = new Map(await OrgCheckProcessor.carte(pageRecords, (record) => {
 
-                    // Get the ID15 of this custom field
-                    const id = sfdcManager.caseSafeId(record.Id);
+            // Get the ID15
+            const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the instance
-                    const visualForcePage = pageDataFactory.create({
-                        id: id,
-                        url: sfdcManager.setupUrl('visual-force-page', record.Id),
-                        name: record.Name,
-                        apiVersion: record.ApiVersion,
-                        isMobileReady: record.IsAvailableInTouch,
-                        package: (record.NamespacePrefix || ''),
-                        createdDate: record.CreatedDate,
-                        lastModifiedDate: record.LastModifiedDate,
-                        description: record.Description,
-                        allDependencies: results[0].allDependencies
-                    });
+            // Create the instance
+            const page = pageDataFactory.createWithScore({
+                id: id,
+                url: sfdcManager.setupUrl('visual-force-page', record.Id),
+                name: record.Name,
+                apiVersion: record.ApiVersion,
+                isMobileReady: record.IsAvailableInTouch,
+                package: (record.NamespacePrefix || ''),
+                createdDate: record.CreatedDate,
+                lastModifiedDate: record.LastModifiedDate,
+                description: record.Description,
+                allDependencies: dependencies
+            });
 
-                    // Compute the score of this item
-                    pageDataFactory.computeScore(visualForcePage);
+            // Add it to the map  
+            return [ page.id, page ];
+        }));
 
-                    // Add it to the map  
-                    visualForcePages.set(visualForcePage.id, visualForcePage);
-                });
-
-            // Return data
-            resolve(visualForcePages);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return pages;
     } 
 }
