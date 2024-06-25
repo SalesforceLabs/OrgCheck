@@ -20,7 +20,7 @@ export class OrgCheckRecipeWorkflows extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_Workflow>}
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const workflows = data.get(DATASET_WORKFLOWS_ALIAS);
         // Return data

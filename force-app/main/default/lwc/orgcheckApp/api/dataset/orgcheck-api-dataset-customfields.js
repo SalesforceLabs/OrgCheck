@@ -44,7 +44,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
         // Get information about custom fields using metadata
         localLogger.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
-        const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()));
+        const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()), localLogger);
 
         // Create the map
         localLogger.log(`Parsing ${records.length} custom fields...`);

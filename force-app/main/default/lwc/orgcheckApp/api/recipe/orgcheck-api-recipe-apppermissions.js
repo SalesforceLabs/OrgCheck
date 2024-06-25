@@ -2,6 +2,7 @@ import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_APPPERMISSIONS_ALIAS,
     DATASET_PROFILES_ALIAS,
     DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
 
@@ -26,14 +27,14 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
      * 
      * @returns {Any} with objects property as Array<string> and permissions property as Array<SFDC_AppPermissionsPerParent>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const permissions = data.get(DATASET_APPPERMISSIONS_ALIAS);
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
 
         // Augment data
-        permissions.forEach((permission) => {
+        await OrgCheckProcessor.chaque(permissions, (permission) => {
             if (permission.isParentProfile === true) {
                 permission.parentRef = profiles.get(permission.parentId);
             } else {
@@ -44,7 +45,7 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         // Filter data
         const permissionsBy = new Map();
         const properties = new Set();
-        permissions.forEach((permission) => {
+        await OrgCheckProcessor.chaque(permissions, (permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
                 if (permissionsBy.has(permission.parentId) === false) {
                     permissionsBy.set(permission.parentId, {

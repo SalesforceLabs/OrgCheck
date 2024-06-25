@@ -15,4 +15,5 @@ export class SFDC_Profile extends OrgCheckData {
     nbFieldPermissions;
     nbObjectPermissions;
     type;
+    importantPermissions;
 }

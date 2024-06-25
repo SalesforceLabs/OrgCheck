@@ -87,7 +87,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
         // Get information about the previous identified active flows using metadata api
         localLogger.log(`Calling Tooling API Composite to get more information about these ${activeFlowIds.length} flow versions...`);
-        const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ]); // There are GACKs throwing that errors for some flows!
+        const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], localLogger); // There are GACKs throwing that errors for some flows!
 
         localLogger.log(`Parsing ${records.length} flow versions...`);
         await OrgCheckProcessor.chaque(records, async (record)=> {

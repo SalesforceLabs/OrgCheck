@@ -533,8 +533,8 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
             }
             if (value1 && value1.toUpperCase) value1 = value1.toUpperCase();
             if (value2 && value2.toUpperCase) value2 = value2.toUpperCase();
-            if (!value1 && value1 !== 0) return 1;
-            if (!value2 && value2 !== 0) return -1;
+            if (!value1 && value1 !== 0) return iOrder;
+            if (!value2 && value2 !== 0) return -iOrder;
             return (value1 < value2 ? -iOrder : iOrder);
         }).forEach((row) => { 
             if (!row.isInvisible) {

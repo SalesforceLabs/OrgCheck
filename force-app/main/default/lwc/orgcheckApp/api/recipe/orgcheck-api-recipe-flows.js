@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_FLOWS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeFlows extends OrgCheckRecipe {
 
@@ -19,12 +20,12 @@ export class OrgCheckRecipeFlows extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_Flow>}
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const flows = data.get(DATASET_FLOWS_ALIAS);
         // Filter data
         const array = [];
-        flows.forEach((flow) => {
+        await OrgCheckProcessor.chaque(flows, (flow) => {
             if (flow.type !== 'Workflow') {
                 array.push(flow);
             }

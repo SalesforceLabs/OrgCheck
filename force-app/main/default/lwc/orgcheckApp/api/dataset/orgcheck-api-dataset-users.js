@@ -6,24 +6,17 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
 
     async run(sfdcManager, dataFactory, localLogger) {
 
-        const IMPORTANT_PERMISSIONS = [ 'ApiEnabled', 'ViewSetup', 'ModifyAllData', 'ViewAllData' ];
-
         // First SOQL query
-        localLogger.log(`Querying REST API about User in the org...`);            
+        localLogger.log(`Querying REST API about internal active User in the org...`);            
         const results = await sfdcManager.soqlQuery([{ 
             string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, '+
             'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, '+
             'UserPreferencesLightningExperiencePreferred, '+
-            '(SELECT PermissionSetId, '+
-                'PermissionSet.PermissionsApiEnabled, '+
-                'PermissionSet.PermissionsViewSetup, '+
-                'PermissionSet.PermissionsModifyAllData, '+
-                'PermissionSet.PermissionsViewAllData, '+
-                'PermissionSet.IsOwnedByProfile '+
-                'FROM PermissionSetAssignments) '+
+            '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) '+
             'FROM User '+
-            'WHERE Profile.Id != NULL ' + // we do not want the Automated Process users!
-            'AND IsActive = true ', // we only want active users
+            'WHERE IsActive = true ' + // we only want active users
+            'AND ContactId = NULL ' + // only internal users
+            'AND Profile.Id != NULL ' // we do not want the Automated Process users!
         }], localLogger);
 
         // Init the factory and records
@@ -37,25 +30,10 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
-            // Check if this user has a set of important permissions in Profile and Permission Sets
-            // At the same time, set the reference if of its permission sets
-            const importantPermissions = {};
-            const permissionSetRefs = [];
-            await OrgCheckProcessor.chaque(
+            // Get the ID15 of Permission Sets assigned to this user
+            const permissionSetIdsAssigned = await OrgCheckProcessor.carte(
                 record?.PermissionSetAssignments?.records, 
-                async (assignment) => {
-                    await OrgCheckProcessor.chaque(
-                        IMPORTANT_PERMISSIONS,
-                        (permission) => {
-                            if (assignment.PermissionSet[`Permissions${permission}`] === true) {
-                                importantPermissions[permission] = true;
-                            }
-                        }
-                    );
-                    if (assignment.PermissionSet.IsOwnedByProfile === false) {
-                        permissionSetRefs.push(sfdcManager.caseSafeId(assignment.PermissionSetId));
-                    }
-                }
+                (assignment) => sfdcManager.caseSafeId(assignment.PermissionSetId)
             );
 
             // Create the instance
@@ -69,8 +47,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                 onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
                 lastPasswordChange: record.LastPasswordChangeDate,
                 profileId: sfdcManager.caseSafeId(record.ProfileId),
-                importantPermissions: Object.keys(importantPermissions).sort(),
-                permissionSetIds: permissionSetRefs
+                permissionSetIds: permissionSetIdsAssigned
             });
 
             // Add it to the map  

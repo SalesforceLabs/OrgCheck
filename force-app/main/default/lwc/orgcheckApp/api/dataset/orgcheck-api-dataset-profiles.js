@@ -10,8 +10,8 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
         localLogger.log(`Querying REST API about PermissionSet with IsOwnedByProfile=true in the org...`);            
         const results = await sfdcManager.soqlQuery([{ 
             string: 'SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, '+
+                        'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, '+
                         'CreatedDate, LastModifiedDate, '+
-                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51), '+
                         '(SELECT Id FROM FieldPerms LIMIT 51), '+
                         '(SELECT Id FROM ObjectPerms LIMIT 51)'+
                     'FROM PermissionSet '+ // oh yes we are not mistaken!
@@ -30,7 +30,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
             const id = sfdcManager.caseSafeId(record.ProfileId);
 
             // Create the instance
-            const profile = profileDataFactory.createWithScore({
+            const profile = profileDataFactory.create({
                 id: id,
                 url: sfdcManager.setupUrl('profile', id),
                 name: record.Profile.Name,
@@ -39,17 +39,29 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                 license: (record.License ? record.License.Name : ''),
                 isCustom: record.IsCustom,
                 package: (record.NamespacePrefix || ''),
-                memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
+                memberCounts: 0, // default value, may be changed in second SOQL
                 createdDate: record.CreatedDate, 
                 lastModifiedDate: record.LastModifiedDate,
                 nbFieldPermissions: record.FieldPerms?.records.length || 0,
                 nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                type: 'Profile'
+                type: 'Profile',
+                importantPermissions: {
+                    apiEnabled: record.PermissionsApiEnabled,
+                    viewSetup: record.PermissionsViewSetup, 
+                    modifyAllData: record.PermissionsModifyAllData, 
+                    viewAllData: record.PermissionsViewAllData
+                }
             });
 
             // Add it to the map  
             return [ profile.id, profile ];
         }));
+
+        // Compute scores for all permission sets
+        localLogger.log(`Computing the score for ${profiles.size} profiles...`);
+        await OrgCheckProcessor.chaque(profiles, (profile) => {
+            profileDataFactory.computeScore(profile);
+        });
 
         // Return data as map
         localLogger.log(`Done`);

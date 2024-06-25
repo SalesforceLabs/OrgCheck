@@ -148,7 +148,7 @@ export class OrgCheckRecipeManager {
             this.#logger.sectionContinues(section, 'Transform the information...');
             let finalData;
             try {
-                finalData = recipe.transform(data, ...parameters);
+                finalData = await recipe.transform(data, ...parameters);
             } catch(error) {
                 this.#logger.sectionFailed(section, error);
                 throw error;

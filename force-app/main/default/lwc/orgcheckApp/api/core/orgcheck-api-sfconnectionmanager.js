@@ -64,7 +64,7 @@ export class OrgCheckSalesforceManager {
         this.#connection = new jsConnectionFactory.Connection({
             accessToken: accessToken,
             version: SF_API_VERSION + '.0',
-            maxRequest: '10000'
+            maxRequest: '20' // default is 10, we set it to 20
         });
         this.#lastRequestToSalesforce = undefined;
         this.#lastApiUsage = 0;
@@ -555,8 +555,22 @@ export class OrgCheckSalesforceManager {
         });
     }
 
-    async readMetadataAtScale(type, ids, byPasses) {
-        return this._callComposite(ids, true, `/sobjects/${type}/(id)`, byPasses);
+    async readMetadataAtScale(type, ids, byPasses, localLogger) {
+        return this._callComposite(
+            ids, 
+            true, 
+            `/sobjects/${type}/(id)`, 
+            byPasses, 
+            MAX_COMPOSITE_REQUEST_SIZE,
+            { 
+                onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
+                    localLogger?.log(`Statistics of ${ids.length} Metadata ${type}${ids.length>1?'s':''}: ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesError} in error...`);
+                },
+                onFetched: (nbRecords, nbQueriesByPassed) => {
+                    localLogger?.log(`Statistics of ${ids.length} Metadata ${type}${ids.length>1?'s':''}: ${nbRecords} records fetched, ${nbQueriesByPassed} by-passed...`);
+                }
+            }
+        );
     }
 
     /**

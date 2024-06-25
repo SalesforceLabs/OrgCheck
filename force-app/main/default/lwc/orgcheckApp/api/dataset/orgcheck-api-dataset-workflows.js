@@ -24,7 +24,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
         // Get information about flows and process builders using metadata
         localLogger.log(`Calling Tooling API Composite to get more information about these ${workflowRuleIds.length} workflow rules...`);
-        const records = await sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ]);
+        const records = await sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ], localLogger);
 
         // Create the map
         localLogger.log(`Parsing ${records.length} workflows...`);

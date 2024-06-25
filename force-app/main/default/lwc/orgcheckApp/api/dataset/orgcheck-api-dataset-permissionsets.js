@@ -10,8 +10,8 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         localLogger.log(`Querying REST API about PermissionSet, PermissionSetAssignment and PermissionSet (with a PermissionSetGroupId populated) in the org...`);            
         const results = await sfdcManager.soqlQuery([{ 
             string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
+                        'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, '+
                         'CreatedDate, LastModifiedDate, '+
-                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51), '+
                         '(SELECT Id FROM FieldPerms LIMIT 51), '+
                         '(SELECT Id FROM ObjectPerms LIMIT 51)'+
                     'FROM PermissionSet '+
@@ -50,13 +50,19 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 license: (record.License ? record.License.Name : ''),
                 isCustom: record.IsCustom,
                 package: (record.NamespacePrefix || ''),
-                memberCounts: (record.Assignments && record.Assignments.records) ? record.Assignments.records.length : 0,
+                memberCounts: 0, // default value, may be changed in second SOQL
                 isGroup: (record.Type === 'Group'),  // other values can be 'Regular', 'Standard', 'Session'
                 type: (record.Type === 'Group' ? 'Permission Set Group' : 'Permission Set'),
                 createdDate: record.CreatedDate, 
                 lastModifiedDate: record.LastModifiedDate,
                 nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                nbObjectPermissions: record.ObjectPerms?.records.length || 0
+                nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                importantPermissions: {
+                    apiEnabled: record.PermissionsApiEnabled,
+                    viewSetup: record.PermissionsViewSetup, 
+                    modifyAllData: record.PermissionsModifyAllData, 
+                    viewAllData: record.PermissionsViewAllData
+                }
             });
 
             // Add it to the map  
@@ -70,10 +76,13 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const assigneeProfileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
             if (permissionSets.has(permissionSetId)) {
+                // This permission set is assigned to users with this profile
                 if (assigneeProfileIdsByPermSetId.has(permissionSetId) === false) {
                     assigneeProfileIdsByPermSetId.set(permissionSetId, new Set());
                 }
                 assigneeProfileIdsByPermSetId.get(permissionSetId).add(assigneeProfileId);
+                // Add to the count of member for this permission set
+                permissionSets.get(permissionSetId).memberCounts++;
             }
         });
         await OrgCheckProcessor.chaque(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
@@ -92,6 +101,12 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             }
         });
 
+        // Compute scores for all permission sets
+        localLogger.log(`Computing the score for ${permissionSets.size} permission sets...`);
+        await OrgCheckProcessor.chaque(permissionSets, (permissionSet) => {
+            permissionSetDataFactory.computeScore(permissionSet);
+        });
+        
         // Return data as map
         localLogger.log(`Done`);
         return permissionSets;

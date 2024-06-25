@@ -19,7 +19,7 @@ export class OrgCheckRecipeOrganization extends OrgCheckRecipe {
      * 
      * @returns {SFDC_Organization}
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const organization = data.get(DATASET_ORGANIZATION_ALIAS);
         

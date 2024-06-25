@@ -390,9 +390,9 @@
                 </lightning-layout-item>
             </lightning-layout>
             <lightning-tabset>
-                <lightning-tab value="users" label="Users" onactive={handleSubTabActivation}>
+                <lightning-tab value="users" label="Active Internal Users" onactive={handleSubTabActivation}>
                     <c-orgcheck-extended-datatable
-                        empty-message="There is no active user to show."
+                        empty-message="There is no active internal user to show."
                         show-search
                         show-statistics
                         onviewscore={handleViewScore}

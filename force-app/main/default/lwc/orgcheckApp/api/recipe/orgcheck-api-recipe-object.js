@@ -4,6 +4,7 @@ import { DATASET_OBJECT_ALIAS,
     DATASET_OBJECTTYPES_ALIAS, 
     DATASET_APEXTRIGGERS_ALIAS,
     DATASET_CUSTOMFIELDS_ALIAS} from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeObject extends OrgCheckRecipe {
 
@@ -31,35 +32,29 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
      * 
      * @returns {SFDC_Object}
      */
-    transform(data) {
+    async transform(data) {
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);
         const object = data.get(DATASET_OBJECT_ALIAS);
         const apexTriggers = data.get(DATASET_APEXTRIGGERS_ALIAS);
         const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
         // Augment data
         object.typeRef = types.get(object.typeId);
-        object.apexTriggerRefs = object.apexTriggerIds
-            .filter((id) => {
-                if (apexTriggers.has(id)) return true;
-                console.error('Unknown Apex Trigger id', id, ' for Object ', object, ' in Apex Triggers list ', apexTriggers);
-                return false;
-            })
-            .map((id) => { 
-                const t = apexTriggers.get(id); // can't be null 
-                t.objectRef = object; 
-                return t; 
-            });
-        object.customFieldRefs = object.customFieldIds
-            .filter((id) => {
-                if (customFields.has(id)) return true;
-                console.error('Unknown Custom Field id', id, ' for Object ', object, ' in Custom Field list ', customFields);
-                return false;
-            })
-            .map((id) => { 
-                const f = customFields.get(id); // can't be null
-                f.objectRef = object; 
-                return f; 
-            });
+        object.apexTriggerRefs = await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(object.apexTriggerIds, (id) => apexTriggers.has(id)),
+            (id) => { 
+                const apexTrigger = apexTriggers.get(id);
+                apexTrigger.objectRef = object;
+                return apexTrigger;
+            }
+        );
+        object.customFieldRefs = await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(object.customFieldIds, (id) => customFields.has(id)),
+            (id) => { 
+                const customField = customFields.get(id);
+                customField.objectRef = object;
+                return customField;
+            }
+        );
         // Return data
         return object;
     }

@@ -33,7 +33,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
         // Get information about profiles using metadata
         localLogger.log(`Calling Tooling API Composite to get more information about these ${profileIds.length} profiles...`);
-        const records = await sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ]);
+        const records = await sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ], localLogger);
 
         // Create the map
         localLogger.log(`Parsing ${records.length} profile restrictions...`);

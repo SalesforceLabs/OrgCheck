@@ -2,6 +2,7 @@ import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_PACKAGES_ALIAS, 
     DATASET_OBJECTTYPES_ALIAS, 
     DATASET_OBJECTS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
 
@@ -26,18 +27,18 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
      * 
      * @returns {Any}
      */
-    transform(data, namespace, type) {
+    async transform(data, namespace, type) {
         // Get data
         const packages = data.get(DATASET_PACKAGES_ALIAS);
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);
         const objects = data.get(DATASET_OBJECTS_ALIAS);
         // Augment data
-        objects.forEach((object) => {
+        await OrgCheckProcessor.chaque(objects, (object) => {
             object.typeRef = types.get(object.typeId);
         });
         // Filter data
         const array = [];
-        objects.forEach((object) => {
+        await OrgCheckProcessor.chaque(objects, (object) => {
             if ((namespace === '*' || object.package === namespace) &&
                 (type === '*' || object.typeRef?.id === type)) {
                 array.push(object);
