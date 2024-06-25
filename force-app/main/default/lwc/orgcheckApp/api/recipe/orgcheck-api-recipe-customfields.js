@@ -2,6 +2,7 @@ import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_CUSTOMFIELDS_ALIAS, 
     DATASET_OBJECTTYPES_ALIAS, 
     DATASET_OBJECTS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
 
@@ -28,21 +29,21 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_Field>}
      */
-    transform(data, namespace, objecttype, object) {
+    async transform(data, namespace, objecttype, object) {
         // Get data
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);
         const objects = data.get(DATASET_OBJECTS_ALIAS);
         const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
         // Augment data
-        objects.forEach((obj) => {
+        await OrgCheckProcessor.chaque(objects, (obj) => {
             obj.typeRef = types.get(obj.typeId);
         });
-        customFields.forEach((customField) => {
+        await OrgCheckProcessor.chaque(customFields, (customField) => {
             customField.objectRef = objects.get(customField.objectId);
         });
         // Filter data
         const array = [];
-        customFields.forEach((customField) => {
+        await OrgCheckProcessor.chaque(customFields, (customField) => {
             if ((namespace === '*' || customField.package === namespace) &&
                 (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || customField.objectRef?.apiname === object)) {

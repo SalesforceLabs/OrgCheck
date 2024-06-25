@@ -1,6 +1,7 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_PROFILES_ALIAS,
             DATASET_PROFILERESTRICTIONS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeProfileRestrictions extends OrgCheckRecipe {
 
@@ -24,17 +25,17 @@ export class OrgCheckRecipeProfileRestrictions extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_ProfileRestriction>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const profileRestrictions = data.get(DATASET_PROFILERESTRICTIONS_ALIAS);
         // Augment data
-        profileRestrictions.forEach((restriction) => {
+        await OrgCheckProcessor.chaque(profileRestrictions, (restriction) => {
             restriction.profileRef = profiles.get(restriction.profileId);
         });
         // Filter data
         const array = [];
-        profileRestrictions.forEach((restriction) => {
+        await OrgCheckProcessor.chaque(profileRestrictions, (restriction) => {
             if (namespace === '*' || restriction.profileRef?.package === namespace) {
                 array.push(restriction);
             }
