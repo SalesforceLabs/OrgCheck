@@ -11,7 +11,7 @@ export class SFDC_User extends OrgCheckData {
     lastPasswordChange;
     profileId;
     profileRef;
-    importantPermissions;
+    aggregateImportantPermissions;
     permissionSetIds;
     permissionSetRefs;
 }

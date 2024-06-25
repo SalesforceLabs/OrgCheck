@@ -1,56 +1,58 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
 
 export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        // SOQL query on CustomField
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying Tooling API about LightningComponentBundle in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             tooling: true,
             string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
                         'CreatedDate, LastModifiedDate '+
                     'FROM LightningComponentBundle '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            addDependenciesBasedOnField: 'Id'
-        }]).then((results) => {
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
+        }], localLogger);
 
-            // Init the map
-            const components = new Map();
+        // Init the factory and records
+        const componentDataFactory = dataFactory.getInstance(SFDC_LightningWebComponent);
+        const componentRecords = results[0].records;
 
-            // Init the factory
-            const componentDataFactory = dataFactory.getInstance(SFDC_LightningWebComponent);
+        // Then retreive dependencies
+        localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
+        const dependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.carte(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            localLogger
+        );
 
-            // Set the map
-            localLogger.log(`Parsing ${results[0].records.length} Lightning Component Bundles...`);
-            results[0].records
-                .forEach((record) => {
+        // Create the map
+        localLogger.log(`Parsing ${componentRecords.length} lightning web components...`);
+        const components = new Map(await OrgCheckProcessor.carte(componentRecords, (record) => {
 
-                    // Get the ID15 of this custom field
-                    const id = sfdcManager.caseSafeId(record.Id);
+            // Get the ID15 of this custom field
+            const id = sfdcManager.caseSafeId(record.Id);
 
-                    // Create the instance
-                    const component = componentDataFactory.create({
-                        id: id,
-                        url: sfdcManager.setupUrl('lightning-web-component', record.Id),
-                        name: record.MasterLabel,
-                        apiVersion: record.ApiVersion,
-                        package: (record.NamespacePrefix || ''),
-                        createdDate: record.CreatedDate,
-                        lastModifiedDate: record.LastModifiedDate,
-                        description: record.Description,
-                        allDependencies: results[0].allDependencies
-                    });
+            // Create the instance
+            const component = componentDataFactory.createWithScore({
+                id: id,
+                url: sfdcManager.setupUrl('lightning-web-component', record.Id),
+                name: record.MasterLabel,
+                apiVersion: record.ApiVersion,
+                package: (record.NamespacePrefix || ''),
+                createdDate: record.CreatedDate,
+                lastModifiedDate: record.LastModifiedDate,
+                description: record.Description,
+                allDependencies: dependencies
+            });
 
-                    // Compute the score of this item
-                    componentDataFactory.computeScore(component);
+            // Add it to the map  
+            return [ component.id, component ];
+        }));
 
-                    // Add it to the map  
-                    components.set(component.id, component);
-                });
-
-            // Return data
-            resolve(components);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return components;
     } 
 }

@@ -1,25 +1,24 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject, parameters) {
+    async run(sfdcManager, dataFactory, localLogger, parameters) {
 
         const permissionFields = parameters.get('permissions');
 
-        // SOQL queries on UserPermissionAccess
-        sfdcManager.soqlQuery([{ 
+        // First SOQL query
+        localLogger.log(`Querying REST API about UserPermissionAccess in the org...`);            
+        const results = await sfdcManager.soqlQuery([{ 
             string: `SELECT ${permissionFields.map(p => `Permissions${p}`).join(`, `)} FROM UserPermissionAccess LIMIT 1`
-        }]).then((results) => {
+        }], localLogger);
+        const permissions = results[0].records[0];
+        localLogger.log(`Parsing the results...`);            
 
-            // Init the map
-            const information = new Map();
-
-            // Set the map
-            const permissions = results[0].records[0];
-            Object.keys(permissions).filter(n => n.startsWith('Permissions')).forEach(p => information.set(p, permissions[p]));
-
-            // Return data
-            resolve(information);
-        }).catch(reject);
+        // Return data as map
+        return new Map(await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(Object.keys(permissions), (field)=> field.startsWith('Permissions')),
+            (field) => [ field, permissions[field] ]
+        ));
     } 
 }

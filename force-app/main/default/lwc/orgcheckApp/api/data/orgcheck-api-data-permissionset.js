@@ -1,21 +1,7 @@
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { SFDC_Profile } from './orgcheck-api-data-profile';
 
-export class SFDC_PermissionSet extends OrgCheckData {
-    id;
-    url;
-    name;
-    apiName;
-    description;
-    license;
-    isCustom;
-    package;
-    memberCounts;
+export class SFDC_PermissionSet extends SFDC_Profile {
     isGroup;
-    createdDate;
-    lastModifiedDate;
-    nbFieldPermissions;
-    nbObjectPermissions;
-    profileIds;
-    profileRefs;
-    type;
+    assigneeProfileIds;
+    assigneeProfileRefs;
 }

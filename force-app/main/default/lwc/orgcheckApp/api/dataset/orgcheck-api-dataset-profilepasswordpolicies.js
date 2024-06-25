@@ -1,37 +1,36 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { SFDC_ProfilePasswordPolicy } from '../data/orgcheck-api-data-profilepasswordpolicy';
 
 export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
 
-    run(sfdcManager, dataFactory, localLogger, resolve, reject) {
+    async run(sfdcManager, dataFactory, localLogger) {
 
-        localLogger.log('Calling Metadata API about ProfilePasswordPolicy...');
-        sfdcManager.readMetadata([{ 
+        // First Metadata API query
+        localLogger.log(`Querying Metadata API about ProfilePasswordPolicy...`);
+        const results = await sfdcManager.readMetadata([{ 
             type: 'ProfilePasswordPolicy',
             members: [ '*' ]
-        }]).then((results) => {
+        }], localLogger);
             
-            // List of policies
-            const profilePasswordPolicies = results?.ProfilePasswordPolicy;
+        // List of policies
+        const profilePasswordPolicies = results?.ProfilePasswordPolicy;
+        if (!profilePasswordPolicies) return new Map();
 
-            // Init the map
-            const policies = new Map();
+        // Init the factory and records
+        const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
 
-            // Init the factory
-            const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
-
-            // Parse the records
-            if (profilePasswordPolicies) {
-                localLogger.log(`Parsing ${profilePasswordPolicies.length} policies...`);
-                profilePasswordPolicies.forEach(ppp => {
-                    if (typeof ppp.profile !== 'string') {
-                        // Metadata could return profile pwd policy for deleted profile
-                        // In this case, r.profile will be equal to { $: {xsi:nil: 'true'} }
-                        // And we expect r.profile to be the name of the profile so....
-                        return
-                    }
+        // Create the map
+        localLogger.log(`Parsing ${profilePasswordPolicies.length} profile password policies...`);        
+        const policies = new Map(
+            await OrgCheckProcessor.carte(
+                // Metadata could return profile pwd policy for deleted profile
+                // In this case, r.profile will be equal to { $: {xsi:nil: 'true'} }
+                // And we expect r.profile to be the name of the profile so....
+                await OrgCheckProcessor.filtre(profilePasswordPolicies, (ppp) => typeof ppp.profile === 'string'), // if string this is the profile's name, so the profile exists.
+                (ppp) => {
                     // Create the instance
-                    const policy = policyDataFactory.create({
+                    const policy = policyDataFactory.createWithScore({
                         forgotPasswordRedirect: (ppp.forgotPasswordRedirect === 'true'),
                         lockoutInterval: parseInt(ppp.lockoutInterval, 10),
                         maxLoginAttempts: parseInt(ppp.maxLoginAttempts, 10),
@@ -44,17 +43,14 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
                         passwordQuestion: (ppp.passwordQuestion === '1'),
                         profileName: ppp.profile
                     });
+                    // Add it to the map  
+                    return [ policy.profileName, policy ];
+                }
+            )
+        );
 
-                    // Add it to the map                        
-                    policies.set(policy.profileName, policy);                  
-
-                    // Compute the score of this item
-                    policyDataFactory.computeScore(policy);
-                });
-            }
-
-            // Return data
-            resolve(policies);
-        }).catch(reject);
+        // Return data as map
+        localLogger.log(`Done`);
+        return policies;
     } 
 }

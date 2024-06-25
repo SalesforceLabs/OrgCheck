@@ -1,6 +1,7 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_USERS_ALIAS, 
     DATASET_GROUPS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
 
@@ -20,21 +21,30 @@ export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_Group>}
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const groups = data.get(DATASET_GROUPS_ALIAS);
         const users = data.get(DATASET_USERS_ALIAS);
 
         // Augment data
-        groups.forEach((group) => {
-            group.directUserRefs = group.directUserIds?.filter((id) => users.has(id)).map((id) => users.get(id)) || [];
-            group.directGroupRefs = group.directGroupIds?.filter((id) => groups.has(id)).map((id) => groups.get(id)) || [];
-            group.indirectUserRefs = group.indirectUserIds?.filter((id) => users.has(id)).map((id) => users.get(id)) || [];
+        await OrgCheckProcessor.chaque(groups, async (group) => {
+            group.directUserRefs = await OrgCheckProcessor.carte(
+                await OrgCheckProcessor.filtre(group.directUserIds, (id) => users.has(id)),
+                (id) => users.get(id)
+            );
+            group.directGroupRefs = await OrgCheckProcessor.carte(
+                await OrgCheckProcessor.filtre(group.directGroupIds, (id) => groups.has(id)),
+                (id) => groups.get(id)
+            );
+            group.indirectUserRefs = await OrgCheckProcessor.carte(
+                await OrgCheckProcessor.filtre(group.indirectUserIds, (id) => users.has(id)),
+                (id) => users.get(id)
+            );
         });
 
         // Filter data
         const array = [];
-        groups.forEach((group) => {
+        await OrgCheckProcessor.chaque(groups, (group) => {
             if (group.isPublicGroup === true) {
                 array.push(group);
             }

@@ -67,14 +67,15 @@ export class OrgCheckAPI {
      * Org Check constructor
      * 
      * @param {JsForce} jsConnectionFactory
+     * @param {FFlate} jsCompression
      * @param {String} accessToken
      * @param {String} userId
      * @param {JSon} loggerSetup
      */
-    constructor(jsConnectionFactory, accessToken, userId, loggerSetup) {
-        this.#sfdcManager = new OrgCheckSalesforceManager(jsConnectionFactory, accessToken, userId);
+    constructor(jsConnectionFactory, jsCompression, accessToken, userId, loggerSetup) {
         this.#logger = new OrgCheckLogger(loggerSetup);
-        this.#datasetManager = new OrgCheckDatasetManager(this.#sfdcManager, this.#logger);
+        this.#sfdcManager = new OrgCheckSalesforceManager(jsConnectionFactory, accessToken, userId, this.#logger);
+        this.#datasetManager = new OrgCheckDatasetManager(this.#sfdcManager, jsCompression, this.#logger);
         this.#recipeManager = new OrgCheckRecipeManager(this.#datasetManager, this.#logger);
     }
     
@@ -175,6 +176,10 @@ export class OrgCheckAPI {
      */
     async getPackagesTypesAndObjects(namespace, sobjectType) {
         return this.#recipeManager.run(RECIPE_GLOBALFILTERS_ALIAS, namespace, sobjectType);
+    }
+
+    removeAllPackagesTypesAndObjects() {
+        return this.#recipeManager.clean(RECIPE_GLOBALFILTERS_ALIAS);
     }
 
     /**

@@ -5,7 +5,7 @@ export class OrgCheckRecipe {
         throw new TypeError('You need to implement the method "extract(parameters)"');
     }
 
-    transform(data) {
+    async transform(data) {
         console.error('data:', data);
         throw new TypeError('You need to implement the method "transform(data)"');
     }

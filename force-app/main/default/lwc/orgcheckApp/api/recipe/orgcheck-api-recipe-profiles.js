@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_PROFILES_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeProfiles extends OrgCheckRecipe {
 
@@ -20,12 +21,12 @@ export class OrgCheckRecipeProfiles extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_Profile>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         // Filter data
         const array = [];
-        profiles.forEach((profile) => {
+        await OrgCheckProcessor.chaque(profiles, (profile) => {
             if (namespace === '*' || profile.package === namespace) {
                 array.push(profile);
             }

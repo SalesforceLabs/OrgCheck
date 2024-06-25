@@ -67,7 +67,7 @@ export default class OrgcheckExportButton extends LightningElement {
             // create workbook
             const workbook = this.#api.utils.book_new();
             this.source.forEach(item => {
-                if (item.rows.length === 0) return;
+                if (!item.rows || item.rows.length === 0) return; // skip if no rows or empty rows
                 const isTypeSimple = typeof item.columns[0] === 'string';
                 const datasheet_columns = isTypeSimple ? item.columns : (item.columns.map(c => c?.label));
                 const datasheet_rows = isTypeSimple ? item.rows : item.rows.map(r => item.columns.map(c => r[c.field]));

@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_CUSTOMLABELS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
 
@@ -20,12 +21,12 @@ export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_CustomLabel>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);
         // Filter data
         const array = [];
-        customLabels.forEach((customLabel) => {
+        await OrgCheckProcessor.chaque(customLabels, (customLabel) => {
             if (namespace === '*' || customLabel.package === namespace) {
                 array.push(customLabel);
             }

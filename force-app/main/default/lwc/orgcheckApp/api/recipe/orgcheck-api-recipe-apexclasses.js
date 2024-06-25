@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_APEXCLASSES_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
 
@@ -22,17 +23,17 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_ApexClass>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const apexClasses = data.get(DATASET_APEXCLASSES_ALIAS);
         // Augment data
-        apexClasses.forEach((apexClass) => {
-            if (apexClass.relatedTestClassIds) apexClass.relatedTestClassRefs = apexClass.relatedTestClassIds.map(id => apexClasses.get(id));
-            if (apexClass.relatedClassIds) apexClass.relatedClassRefs = apexClass.relatedClassIds.map(id => apexClasses.get(id));
+        await OrgCheckProcessor.chaque(apexClasses, async (apexClass) => {
+            apexClass.relatedTestClassRefs = await OrgCheckProcessor.carte(apexClass.relatedTestClassIds, id => apexClasses.get(id));
+            apexClass.relatedClassRefs = await OrgCheckProcessor.carte(apexClass.relatedClassIds, id => apexClasses.get(id));
         });
         // Filter data
         const array = [];
-        apexClasses.forEach((apexClass) => {
+        await OrgCheckProcessor.chaque(apexClasses, (apexClass) => {
             if (namespace === '*' || apexClass.package === namespace) {
                 array.push(apexClass);
             }

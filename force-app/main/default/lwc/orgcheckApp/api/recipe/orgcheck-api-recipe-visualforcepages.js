@@ -1,5 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { DATASET_VISUALFORCEPAGES_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
 export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
 
@@ -20,12 +21,12 @@ export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_VisualForcePage>}
      */
-    transform(data, namespace) {
+    async transform(data, namespace) {
         // Get data
         const pages = data.get(DATASET_VISUALFORCEPAGES_ALIAS);
         // Filter data
         const array = [];
-        pages.forEach((page) => {
+        await OrgCheckProcessor.chaque(pages, (page) => {
             if (namespace === '*' || page.package === namespace) {
                 array.push(page);
             }

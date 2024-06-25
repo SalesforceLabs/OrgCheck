@@ -22,7 +22,7 @@ export class OrgCheckRecipeCurrentUserPermissions extends OrgCheckRecipe {
      * 
      * @returns {Map} List of booleans identified by the name of the permission
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const currentUserPermissions = data.get(DATASET_CURRENTUSERPERMISSIONS_ALIAS);
         

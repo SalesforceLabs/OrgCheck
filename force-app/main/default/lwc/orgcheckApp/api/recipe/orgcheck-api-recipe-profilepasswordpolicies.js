@@ -19,7 +19,7 @@ export class OrgCheckRecipeProfilePasswordPolicies extends OrgCheckRecipe {
      * 
      * @returns {Array<SFDC_ProfilePasswordPolicy>}
      */
-    transform(data) {
+    async transform(data) {
         // Get data
         const policies = data.get(DATASET_PROFILEPWDPOLICY_ALIAS);
         // Return all data
