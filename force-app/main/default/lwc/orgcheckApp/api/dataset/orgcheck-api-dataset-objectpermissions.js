@@ -22,7 +22,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
         // Create the map
         const permissionRecords = results[0].records;
         localLogger.log(`Parsing ${permissionRecords.length} object permissions...`);
-        const permissions = await OrgCheckProcessor.carte(
+        const permissions = new Map(await OrgCheckProcessor.carte(
             await OrgCheckProcessor.filtre(permissionRecords, (record) => record.Parent !== null), // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
             (record) => {
                 // Create the instance
@@ -43,7 +43,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.objectType}`, permission ];
             }
-        );
+        ));
 
         // Return data as map
         localLogger.log(`Done`);

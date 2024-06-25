@@ -47,7 +47,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
         // Create the map
         const permissionRecords = results[1].records;
         localLogger.log(`Parsing ${permissionRecords.length} setup entity accesses...`);
-        const permissions = await OrgCheckProcessor.carte(
+        const permissions = new Map(await OrgCheckProcessor.carte(
             await OrgCheckProcessor.filtre(permissionRecords, (record)=> applications.has(sfdcManager.caseSafeId(record.SetupEntityId))), // Application must be one that we know about... 
             (record) => {
                 const appId = sfdcManager.caseSafeId(record.SetupEntityId);
@@ -68,7 +68,7 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.appId}`, permission ];
             }
-        );
+        ));
 
         // Return data as map
         localLogger.log(`Done`);
