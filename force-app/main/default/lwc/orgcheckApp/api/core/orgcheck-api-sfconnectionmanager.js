@@ -102,9 +102,10 @@ export class OrgCheckSalesforceManager {
                 Let's give it a try by returning just '/' and the id...
             */
             case 'CustomField': // From DAPI 
-            case 'Layout': // From DAPI 
                 return `/${durableId}`;
-            
+            case 'Layout': // From DAPI 
+                return ''; // The /{Id} does not work for pagelayout so better returning nothing (outcome will be no link!).
+
             /*
               In the following section we have enought information go return the full URL
             */
