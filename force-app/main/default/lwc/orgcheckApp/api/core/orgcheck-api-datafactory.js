@@ -168,7 +168,7 @@ export class OrgCheckDataFactory {
                 applicable: [ SFDC_ApexClass ]
             }, {
                 description: 'No coverage for this class',
-                formula: (d) => isNaN(d.coverage) || !d.coverage,
+                formula: (d) => d.isTest === false && (isNaN(d.coverage) || !d.coverage),
                 errorMessage: 'This Apex Class does not have any code coverage. Consider launching the corresponding tests that will bring some coverage. If you do not know which test to launch just run them all!',
                 badField: 'coverage',
                 applicable: [ SFDC_ApexClass ]
