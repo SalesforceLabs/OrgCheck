@@ -34,7 +34,9 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                         'FROM EntityDefinition ' +
                         `WHERE PublisherId IN ('System', '<local>', '${localNamespace}') ` +
                         'AND keyPrefix <> null '+
-                        'AND DeveloperName <> null '
+                        'AND DeveloperName <> null '+
+                        `AND (NOT(keyPrefix IN ('00a', '017', '0D5', '02c', '01j', '0jE','0Jf','0Ob','00I','0aA'))) `+ // filtering the feed, share, history, ...
+                        'LIMIT 2000 ' // Just to make sure we are not throwing EXCEEDED_ID_LIMIT and still got the first 2000 rows
             }])
         ])
 
