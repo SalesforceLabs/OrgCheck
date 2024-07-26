@@ -4,21 +4,12 @@
   <p>
     <b>Org Check</b> is an easy-to-install and easy-to-use <b>Salesforce application</b> in order to quickly analyze your org and its <b>technical debt</b>.
   </p>
-  <a href="https://github.com/SalesforceLabs/OrgCheck/network/members">
-    <img alt="forks on github" src="https://img.shields.io/github/forks/SalesforceLabs/OrgCheck?style=flat-square&logoColor=blue">
-  </a>
-  <a href="https://github.com/SalesforceLabs/OrgCheck/stargazers">
-    <img alt="stars on github" src="https://img.shields.io/github/stars/SalesforceLabs/OrgCheck?style=flat-square">
-  </a>
-  <a href="https://github.com/SalesforceLabs/OrgCheck/watchers">
-    <img alt="watchers" src="https://img.shields.io/github/watchers/SalesforceLabs/OrgCheck?style=flat-square">
-  </a>
-  <a href="https://github.com/SalesforceLabs/OrgCheck/issues">
-    <img alt="issues" src="https://img.shields.io/github/issues-raw/SalesforceLabs/OrgCheck?style=flat-square">
-  </a>
-  <a href="LICENSE.md">
-    <img alt="licenses" src="https://img.shields.io/badge/License-MIT-yellow.svg">
-  </a>
+  <img alt="GitHub Created At" src="https://img.shields.io/github/created-at/SalesforceLabs/OrgCheck?style=plastic" />&nbsp;
+  <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/SalesforceLabs/OrgCheck?style=plastic" />&nbsp;
+  <a href="https://github.com/SalesforceLabs/OrgCheck/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/SalesforceLabs/OrgCheck?style=plastic" /></a>&nbsp;
+  <a href="https://github.com/SalesforceLabs/OrgCheck/network/members"><img alt="GitHub forks" src="https://img.shields.io/github/forks/SalesforceLabs/OrgCheck?style=plastic" /></a>&nbsp;
+  <a href="https://github.com/SalesforceLabs/OrgCheck/issues"><img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/SalesforceLabs/OrgCheck?style=plastic" /></a>&nbsp;
+  <a href="LICENSE.md"><img alt="GitHub License" src="https://img.shields.io/github/license/SalesforceLabs/OrgCheck?style=plastic" /></a>&nbsp;
 </div>
 
 ---
