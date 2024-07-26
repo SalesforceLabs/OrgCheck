@@ -69,15 +69,17 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const customFieldIds = []; 
         const standardFieldsMapper = new Map();
         await OrgCheckProcessor.chaque(entity.Fields?.records, (f) => {
-            const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
-            if (f.DurableId.includes('.00N')) {
-                customFieldIds.push(id);
-            } else {
-                standardFieldsMapper.set(f.QualifiedApiName, { 
-                    id: id,
-                    description: f.Description,
-                    isIndexed: f.IsIndexed
-                });
+            if (f.DurableId && f.DurableId.split && f.DurableId.includes) {
+                const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
+                if (f.DurableId.includes('.00N')) {
+                    customFieldIds.push(id);
+                } else {
+                    standardFieldsMapper.set(f.QualifiedApiName, { 
+                        id: id,
+                        description: f.Description,
+                        isIndexed: f.IsIndexed
+                    });
+                }
             }
         });
         const standardFields = await OrgCheckProcessor.carte(
