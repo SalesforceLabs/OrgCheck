@@ -302,7 +302,7 @@ export class OrgCheckSalesforceManager {
                     }
                     localLogger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
-                conn.query(query.string, recursive_query);
+                conn.query(query.string, { autoFetch: query.queryMore === true ? true : false }, recursive_query);
             });
         }));
     }
