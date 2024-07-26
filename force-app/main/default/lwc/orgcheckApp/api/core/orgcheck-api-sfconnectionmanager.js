@@ -280,7 +280,7 @@ export class OrgCheckSalesforceManager {
                 const recursive_query = (e, d) => {
                     this._watchDog__afterRequest(reject);
                     if (e) { 
-                        if (query.byPasses && query.byPasses.includes(e.errorCode)) {
+                        if (query.byPasses && query.byPasses.includes && query.byPasses.includes(e.errorCode)) {
                             nbQueriesByPassed++;
                             resolve();
                         } else {
@@ -529,22 +529,20 @@ export class OrgCheckSalesforceManager {
                                 records.push(response.body);
                             } else {
                                 const errorCode = response.body[0].errorCode;
-                                if (byPasses) {
-                                    if (byPasses.includes(errorCode) === false) {
-                                        const error = new TypeError();
-                                        error.context = { 
-                                            when: 'After receiving a response with bad HTTP status code.',
-                                            what: {
-                                                tooling: tooling,
-                                                pattern: uriPattern,
-                                                ids: ids,
-                                                body: response.body
-                                            }
-                                        };
-                                        reject(error);
-                                    } else {
-                                        nbQueriesByPassed++;
-                                    }
+                                if (byPasses && byPasses.includes && byPasses.includes(errorCode) === false) {
+                                    const error = new TypeError();
+                                    error.context = { 
+                                        when: 'After receiving a response with bad HTTP status code.',
+                                        what: {
+                                            tooling: tooling,
+                                            pattern: uriPattern,
+                                            ids: ids,
+                                            body: response.body
+                                        }
+                                    };
+                                    reject(error);
+                                } else {
+                                    nbQueriesByPassed++;
                                 }
                             }
                         });
