@@ -64,7 +64,7 @@ export class OrgCheckSalesforceManager {
         this.#connection = new jsConnectionFactory.Connection({
             accessToken: accessToken,
             version: SF_API_VERSION + '.0',
-            maxRequest: '20' // default is 10, we set it to 20
+            maxRequest: 15 // making sure we set it to a reasonable value = 15
         });
         this.#lastRequestToSalesforce = undefined;
         this.#lastApiUsage = 0;
@@ -275,6 +275,13 @@ export class OrgCheckSalesforceManager {
         let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0, nbQueryMore = 0, nbQueriesPending = queries.length;
         return Promise.all(queries.map((query) => {
             const conn = query.tooling === true ? this.#connection.tooling : this.#connection;
+            const sequential_query = (callback) => {
+                if (query.queryMore === false) {
+                    conn.query(`${query.string} LIMIT 2000 OFFSET ${nbQueryMore * 2000}`, { autoFetch: false }, callback);
+                } else {
+                    conn.query(query.string, { autoFetch: true }, callback);
+                }
+            }
             return new Promise((resolve, reject) => {
                 const records = [];
                 const recursive_query = (e, d) => {
@@ -291,18 +298,31 @@ export class OrgCheckSalesforceManager {
                         nbQueriesPending--;
                     } else {
                         records.push(... d.records);
-                        if (d.done === true || (d.done === false && query.queryMore === false)) {
-                            nbQueriesDone++;
-                            nbQueriesPending--;
-                            resolve({ records: records });
+                        if (query.queryMore === false) {
+                            // Here we can't call queryMore (the sobject in the FROM statment does not support it, like EntityDefinition)
+                            if (d.records.length < 2000) {
+                                nbQueriesDone++;
+                                nbQueriesPending--;
+                                resolve({ records: records });
+                            } else {
+                                nbQueryMore++;
+                                sequential_query(recursive_query);
+                            }
                         } else {
-                            nbQueryMore++;
-                            conn.queryMore(d.nextRecordsUrl, recursive_query);
+                            // Here we can call queryMore if fetching is not done...
+                            if (d.done === true) {
+                                nbQueriesDone++;
+                                nbQueriesPending--;
+                                resolve({ records: records });
+                            } else {
+                                nbQueryMore++;
+                                conn.queryMore(d.nextRecordsUrl, recursive_query);
+                            }
                         }
                     }
                     localLogger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
-                conn.query(query.string, { autoFetch: query.queryMore === true ? true : false }, recursive_query);
+                sequential_query(recursive_query);
             });
         }));
     }

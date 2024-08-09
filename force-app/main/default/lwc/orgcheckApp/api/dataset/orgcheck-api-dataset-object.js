@@ -32,7 +32,6 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const results = await Promise.all([
             sfdcManager.describe(fullObjectApiName),
             sfdcManager.soqlQuery([{ 
-                queryMore: false, // we should have only one record max so no need to have queryMore activated.
                 tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
                 string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
                             '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
@@ -45,7 +44,8 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                             '(SELECT Id, Name FROM WebLinks) '+
                         'FROM EntityDefinition '+
                         `WHERE QualifiedApiName = '${fullObjectApiName}' `+
-                        (!packageName ? `AND PublisherId IN ('System', '<local>')` : `AND NamespacePrefix = '${packageName}' `)
+                        (packageName ? `AND NamespacePrefix = '${packageName}' `: '') +
+                        'LIMIT 1' // We should get zero or one record, not more!
             }]),
             sfdcManager.recordCount(fullObjectApiName)
         ]);
