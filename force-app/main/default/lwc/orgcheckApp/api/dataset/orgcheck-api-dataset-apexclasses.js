@@ -161,10 +161,14 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             }
         );
         await OrgCheckProcessor.chaque(relatedTestsByApexClass, (relatedTestsIds, apexClassId) => {
-            apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
+            if (apexClasses.has(apexClassId)) { // Just to be safe!
+                apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
+            }
         });
         await OrgCheckProcessor.chaque(relatedClassesByApexTest, (relatedClassesIds, apexTestId) => {
-            apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
+            if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
+                apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
+            }
         });
 
         // Part 3- add the aggregate code coverage to apex classes
