@@ -6,7 +6,7 @@ const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*
 const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
 const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
 const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
-const REGEX_TESTNBASSERTS = new RegExp("System.assert(?:Equals|NotEquals|)\\(", 'ig');
+const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\(|Assert\\.[a-zA-Z]*\\()", 'ig');
 
 export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
@@ -83,15 +83,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 allDependencies: dependencies
             });
 
-            // Get information directly from the source code (if available)
-            if (record.Body) {
-                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
-                apexClass.isInterface = sourceCode.match(REGEX_ISINTERFACE) !== null;
-                apexClass.isEnum = sourceCode.match(REGEX_ISENUM) !== null;
-                apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
-            }
-
-            // If the apex class compiled we will get information from compilation
+            // Get information from the compilation output information by the Apex compiler on salesforce side (if available)
             if (record.SymbolTable) {
                 apexClass.innerClassesCount = record.SymbolTable.innerClasses.length || 0;
                 apexClass.interfaces = record.SymbolTable.interfaces;
@@ -116,8 +108,22 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     });
                 }
             }
+            
+            // Get information directly from the source code (if available)
+            if (record.Body) {
+                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
+                apexClass.isInterface = sourceCode.match(REGEX_ISINTERFACE) !== null;
+                apexClass.isEnum = sourceCode.match(REGEX_ISENUM) !== null;
+                apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
+                
+                // Specific scanning for Test Classes
+                if (apexClass.isTest === true) { // this is defined only from the SymbolTable!
+                    apexClass.isTestSeeAllData = sourceCode.match(REGEX_ISTESTSEEALLDATA) !== null;
+                    apexClass.nbSystemAsserts = sourceCode.match(REGEX_TESTNBASSERTS)?.length || 0;
+                }
+            }
 
-            // Defin type
+            // Define type
             if (apexClass.isTest === true) {
                 apexClass.type = 'test';
             } else if (apexClass.isInterface === true) {
@@ -132,12 +138,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
             if (apexClass.isEnum === true || apexClass.isInterface === true) apexClass.specifiedSharing = 'Not applicable';
             if (apexClass.isTest === false && apexClass.isClass === true && !apexClass.specifiedSharing) {
                 apexClass.isSharingMissing = true;
-            }
-
-            // Specific scanning for Test Classes
-            if (apexClass.isTest === true) {
-                apexClass.isTestSeeAllData = record.Body.match(REGEX_ISTESTSEEALLDATA) !== null;
-                apexClass.nbSystemAsserts = record.Body.match(REGEX_TESTNBASSERTS)?.length || 0;
             }
 
             // Add it to the map  

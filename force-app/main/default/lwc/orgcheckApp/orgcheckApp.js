@@ -785,6 +785,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
+        { label: 'Nb Asserts',    type: 'numeric',          data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
         { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
         { label: 'Inner Classes', type: 'numeric',          data: { value: 'innerClassesCount' }},
         { label: 'Sharing',       type: 'text',             data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
