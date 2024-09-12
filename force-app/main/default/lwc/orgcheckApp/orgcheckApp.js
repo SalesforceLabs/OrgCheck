@@ -660,20 +660,23 @@ export default class OrgCheckApp extends LightningElement {
     queuesTableData;
 
     usersTableColumns = [
-        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'User Name',       type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Under LEX?',      type: 'boolean',  data: { value: 'onLightningExperience' }},
-        { label: 'Last login',      type: 'dateTime', data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
-        { label: 'Failed logins',   type: 'numeric',  data: { value: 'numberFailedLogins' }},
-        { label: 'Password change', type: 'dateTime', data: { value: 'lastPasswordChange' }},
-        { label: 'Api Enabled',     type: 'boolean',  data: { ref: 'aggregateImportantPermissions', value: 'apiEnabled' }},
-        { label: 'View Setup',      type: 'boolean',  data: { ref: 'aggregateImportantPermissions', value: 'viewSetup' }},
-        { label: 'Modify All Data', type: 'boolean',  data: { ref: 'aggregateImportantPermissions', value: 'modifyAllData' }},
-        { label: 'View All Data',   type: 'boolean',  data: { ref: 'aggregateImportantPermissions', value: 'viewAllData' }},
-        { label: 'Profile',         type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
-        { label: 'Permission Sets', type: 'ids',      data: { ref: 'permissionSetRefs', url: 'url', value: 'name' }}
+        { label: 'Score',                        type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'User Name',                    type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Under LEX?',                   type: 'boolean',  data: { value: 'onLightningExperience' }},
+        { label: 'Last login',                   type: 'dateTime', data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
+        { label: 'Failed logins',                type: 'numeric',  data: { value: 'numberFailedLogins' }},
+        { label: 'Password change',              type: 'dateTime', data: { value: 'lastPasswordChange' }},
+        { label: 'Api Enabled',                  type: 'boolean',  data: { ref: 'aggregateImportantPermissions.apiEnabled', value: 'length' }},
+        { label: 'Api Enabled granted from',     type: 'ids',      data: { ref: 'aggregateImportantPermissions.apiEnabled', url: 'url', value: 'name' }},
+        { label: 'View Setup',                   type: 'boolean',  data: { ref: 'aggregateImportantPermissions.viewSetup', value: 'length' }},
+        { label: 'View Setup granted from',      type: 'ids',      data: { ref: 'aggregateImportantPermissions.viewSetup', url: 'url', value: 'name' }},
+        { label: 'Modify All Data',              type: 'boolean',  data: { ref: 'aggregateImportantPermissions.modifyAllData', value: 'length' }},
+        { label: 'Modify All Data granted from', type: 'ids',      data: { ref: 'aggregateImportantPermissions.modifyAllData', url: 'url', value: 'name' }},
+        { label: 'View All Data',                type: 'boolean',  data: { ref: 'aggregateImportantPermissions.viewAllData', value: 'length' }},
+        { label: 'View All Data granted from',   type: 'ids',      data: { ref: 'aggregateImportantPermissions.viewAllData', url: 'url', value: 'name' }},
+        { label: 'Profile',                      type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
+        { label: 'Permission Sets',              type: 'ids',      data: { ref: 'permissionSetRefs', url: 'url', value: 'name' }}
     ];
-
     usersTableData;
 
     visualForceComponentsTableColumns = [
