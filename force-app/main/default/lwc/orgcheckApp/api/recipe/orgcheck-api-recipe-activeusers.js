@@ -38,11 +38,19 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
                 await OrgCheckProcessor.filtre(user.permissionSetIds, (id) => permissionSets.has(id)),
                 (id) => permissionSets.get(id)
             );
-            user.aggregateImportantPermissions = user.profileRef?.importantPermissions || {};
+            user.aggregateImportantPermissions = {};
+            if (user.profileRef?.importantPermissions) {
+                Object.keys(user.profileRef.importantPermissions)
+                    .filter(permName => user.profileRef.importantPermissions[permName] === true)
+                    .forEach(permName => { user.aggregateImportantPermissions[permName] = [ user.profileRef ]; });
+            }
             await OrgCheckProcessor.chaque(user.permissionSetRefs, (permissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter(permName => permissionSet.importantPermissions[permName] === true)
-                    .forEach(permName => { user.aggregateImportantPermissions[permName] = true; });
+                    .forEach(permName => { 
+                        if (!user.aggregateImportantPermissions[permName]) user.aggregateImportantPermissions[permName] = []; 
+                        user.aggregateImportantPermissions[permName].push(permissionSet);
+                    });
             });
         });
         // Return all data
