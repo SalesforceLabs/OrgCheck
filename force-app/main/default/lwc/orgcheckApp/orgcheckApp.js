@@ -572,7 +572,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'View All Data',    type: 'boolean',  data: { ref: 'importantPermissions', value: 'viewAllData' }},
         { label: 'License',          type: 'text',     data: { value: 'license' }},
         { label: 'Package',          type: 'text',     data: { value: 'package' }},
-        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No internal active user!' }},
+        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No active user!' }},
         { label: 'Users\' profiles', type: 'ids',      data: { ref: 'assigneeProfileRefs', value: 'name', url: 'url' }},
         { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
@@ -593,7 +593,7 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'View All Data',   type: 'boolean',  data: { ref: 'importantPermissions', value: 'viewAllData' }},
         { label: 'License',         type: 'text',     data: { value: 'license' }},
         { label: 'Package',         type: 'text',     data: { value: 'package' }},
-        { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No internal active user!' }},
+        { label: '#Active users',   type: 'numeric',  data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No active user!', max: 50, valueAfterMax: '50+' }},
         { label: 'Created date',    type: 'dateTime', data: { value: 'createdDate' }},
         { label: 'Modified date',   type: 'dateTime', data: { value: 'lastModifiedDate' }},
         { label: 'Description',     type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}

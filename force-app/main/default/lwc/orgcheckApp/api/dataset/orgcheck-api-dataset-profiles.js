@@ -13,7 +13,8 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                         'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, '+
                         'CreatedDate, LastModifiedDate, '+
                         '(SELECT Id FROM FieldPerms LIMIT 51), '+
-                        '(SELECT Id FROM ObjectPerms LIMIT 51)'+
+                        '(SELECT Id FROM ObjectPerms LIMIT 51), '+
+                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) '+
                     'FROM PermissionSet '+ // oh yes we are not mistaken!
                     'WHERE isOwnedByProfile = TRUE'
         }], localLogger);
@@ -39,7 +40,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                 license: (record.License ? record.License.Name : ''),
                 isCustom: record.IsCustom,
                 package: (record.NamespacePrefix || ''),
-                memberCounts: 0, // default value, may be changed in second SOQL
+                memberCounts: record.Assignments?.records.length || 0,
                 createdDate: record.CreatedDate, 
                 lastModifiedDate: record.LastModifiedDate,
                 nbFieldPermissions: record.FieldPerms?.records.length || 0,
