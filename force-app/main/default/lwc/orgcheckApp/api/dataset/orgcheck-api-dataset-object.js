@@ -188,7 +188,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         
         // relationships
         const relationships = await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(sobjectDescribed.childRelationships, (relationship) => !relationship.relationshipName),
+            await OrgCheckProcessor.filtre(sobjectDescribed.childRelationships, (relationship) => relationship.relationshipName !== null),
             (relationship) => relationshipDataFactory.createWithScore({ 
                 name: relationship.relationshipName,
                 childObject: relationship.childSObject,
