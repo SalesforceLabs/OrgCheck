@@ -20,7 +20,8 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexClass '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-            tooling: true
+            tooling: true,
+            queryMore: false
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
                     'FROM ApexCodeCoverage',

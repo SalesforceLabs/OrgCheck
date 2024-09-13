@@ -20,6 +20,7 @@ export class DailyApiRequestLimitInformation {
 }
 
 const MAX_COMPOSITE_REQUEST_SIZE = 25;
+const MAX_NOQUERYMORE_BATCH_SIZE = 200;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
 
@@ -277,7 +278,7 @@ export class OrgCheckSalesforceManager {
             const conn = query.tooling === true ? this.#connection.tooling : this.#connection;
             const sequential_query = (callback) => {
                 if (query.queryMore === false) {
-                    conn.query(`${query.string} LIMIT 2000 OFFSET ${nbQueryMore * 2000}`, { autoFetch: false }, callback);
+                    conn.query(`${query.string} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE} OFFSET ${nbQueryMore * MAX_NOQUERYMORE_BATCH_SIZE}`, { autoFetch: false }, callback);
                 } else {
                     conn.query(query.string, { autoFetch: true }, callback);
                 }
@@ -300,7 +301,7 @@ export class OrgCheckSalesforceManager {
                         records.push(... d.records);
                         if (query.queryMore === false) {
                             // Here we can't call queryMore (the sobject in the FROM statment does not support it, like EntityDefinition)
-                            if (d.records.length < 2000) {
+                            if (d.records.length < MAX_NOQUERYMORE_BATCH_SIZE) {
                                 nbQueriesDone++;
                                 nbQueriesPending--;
                                 resolve({ records: records });

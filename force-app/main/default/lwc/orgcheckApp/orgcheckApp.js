@@ -205,10 +205,16 @@ export default class OrgCheckApp extends LightningElement {
             if (cr.body.success === true) {
                 this.#spinner.sectionEnded(`request-to-recompile-${c.id}`, `Recompilation requested for class: ${c.name}`);
             } else {
-                this.#spinner.sectionFailed(`request-to-recompile-${c.id}`, `Errors for class ${c.name}: ${cr.errors.map(e => JSON.stringify(e)).join(', ')}`);
+                let reasons = [];
+                if (cr.body && Array.isArray(cr.body)) {
+                    reasons = cr.body;
+                } else if (cr.errors && Array.isArray(cr.errors)) {
+                    reasons = cr.errors;
+                }
+                this.#spinner.sectionFailed(`request-to-recompile-${c.id}`, `Errors for class ${c.name}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
             }
         }));
-        this.#spinner.sectionEnded('request-to-recompile', 'In case you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
+        this.#spinner.sectionEnded('request-to-recompile', 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
         this.#spinner.canBeClosed();
     }
 
