@@ -21,7 +21,8 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     'FROM ApexClass '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
             tooling: true,
-            queryMore: false
+            queryMore: false,
+            uniqueFieldName: 'Id', // unique field name (to be used by the custom QueryMore)
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
                     'FROM ApexCodeCoverage',

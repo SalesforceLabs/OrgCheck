@@ -98,14 +98,14 @@ export class OrgCheckDataFactory2 {
 export class OrgCheckDataFactory {
 
     #allValidations;
-    #needDepencencies;
+    #needDependencies;
     #instances;
 
     constructor(sfdcManager) {
 
         const currentApiVersion = sfdcManager.getApiVersion();
 
-        this.#allValidations = [
+        this.#allValidations = [ // START:ALL_VALIDATIONS
             { 
                 description: 'Not referenced anywhere',
                 formula: (d) => IS_EMPTY(d.dependencies?.referenced), 
@@ -359,7 +359,8 @@ export class OrgCheckDataFactory {
                 badField: 'usedPercentage',
                 applicable: [ SFDC_Limit ]
             }
-        ].map((v, i) => { 
+        ] // END:ALL_VALIDATIONS
+        .map((v, i) => { 
             // check description
             if (v.description === undefined || typeof v.description !== 'string') {
                 throw new TypeError(`The ${i}th Validation Rule should have a 'description' property of type 'string'.`);
@@ -383,16 +384,16 @@ export class OrgCheckDataFactory {
         });
         Object.freeze(this.#allValidations); 
 
-        this.#needDepencencies = [
+        this.#needDependencies = [ // START:ALL_NEED_DEPENDENCIES
             SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_CustomLabel, SFDC_Flow,
             SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent,
             SFDC_VisualForceComponent, SFDC_VisualForcePage
-        ];
+        ]; // END:ALL_NEED_DEPENDENCIES
         // check if '#needDepencencies' array contains only OrgCheckData instances
-        if (this.#needDepencencies === undefined || Array.isArray(this.#needDepencencies) === false || this.#needDepencencies.every((dc) => IS_CLASS_EXTENDS(dc, OrgCheckData) === false)) {
+        if (this.#needDependencies === undefined || Array.isArray(this.#needDependencies) === false || this.#needDependencies.every((dc) => IS_CLASS_EXTENDS(dc, OrgCheckData) === false)) {
             throw new TypeError(`The list of classes that needs Dependencies must be of type 'array' with only OrgCheckData items.`);
         }
-        Object.freeze(this.#needDepencencies); 
+        Object.freeze(this.#needDependencies); 
 
         this.#instances = new Map();
     }
@@ -413,7 +414,7 @@ export class OrgCheckDataFactory {
             this.#instances.set(dataClass, new OrgCheckDataFactory2(
                 dataClass, 
                 isDataClassExtendsData ? this.#allValidations.filter(v => v.applicable.includes(dataClass)) : [], 
-                isDataClassExtendsData ? this.#needDepencencies.includes(dataClass) : []
+                isDataClassExtendsData ? this.#needDependencies.includes(dataClass) : []
             ));
         }
         // Return the instance

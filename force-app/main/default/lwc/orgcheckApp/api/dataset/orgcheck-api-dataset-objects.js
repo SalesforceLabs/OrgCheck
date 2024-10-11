@@ -18,7 +18,8 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
 
             // Some information are not in the global describe, we need to append them with EntityDefinition soql query
             sfdcManager.soqlQuery([{ 
-                queryMore: false, // entityDef does not support calling QueryMore, we will get records with LIMIT/OFFSET
+                queryMore: false, // entityDef does not support calling QueryMore
+                uniqueFieldName: 'DurableId', // unique field name (to be used by the custom QueryMore)
                 string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, '+
                             'ExternalSharingModel, InternalSharingModel '+
                         'FROM EntityDefinition '+

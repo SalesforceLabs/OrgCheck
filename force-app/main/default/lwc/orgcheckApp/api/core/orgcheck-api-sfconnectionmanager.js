@@ -276,9 +276,11 @@ export class OrgCheckSalesforceManager {
         let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0, nbQueryMore = 0, nbQueriesPending = queries.length;
         return Promise.all(queries.map((query) => {
             const conn = query.tooling === true ? this.#connection.tooling : this.#connection;
+            let queryMoreStartingId = '000000000000000000';
+            const uniqueFieldName = query.uniqueFieldName || 'Id';
             const sequential_query = (callback) => {
                 if (query.queryMore === false) {
-                    conn.query(`${query.string} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE} OFFSET ${nbQueryMore * MAX_NOQUERYMORE_BATCH_SIZE}`, { autoFetch: false }, callback);
+                    conn.query(`${query.string} AND ${uniqueFieldName} > '${queryMoreStartingId}' ORDER BY ${uniqueFieldName} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`, { autoFetch: false }, callback);
                 } else {
                     conn.query(query.string, { autoFetch: true }, callback);
                 }
@@ -306,6 +308,7 @@ export class OrgCheckSalesforceManager {
                                 nbQueriesPending--;
                                 resolve({ records: records });
                             } else {
+                                queryMoreStartingId = records[records.length-1][uniqueFieldName];
                                 nbQueryMore++;
                                 sequential_query(recursive_query);
                             }
