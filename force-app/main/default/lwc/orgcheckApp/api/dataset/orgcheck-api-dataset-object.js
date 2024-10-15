@@ -69,7 +69,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const customFieldIds = []; 
         const standardFieldsMapper = new Map();
         await OrgCheckProcessor.chaque(entity.Fields?.records, (f) => {
-            if (f.DurableId && f.DurableId.split && f.DurableId.includes) {
+            if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
                 if (f.DurableId.includes('.00N')) {
                     customFieldIds.push(id);
