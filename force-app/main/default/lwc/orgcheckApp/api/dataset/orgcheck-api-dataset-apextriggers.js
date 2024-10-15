@@ -40,48 +40,51 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${apexTriggerRecords.length} apex triggers...`);
-        const apexTriggers = new Map(await OrgCheckProcessor.carte(apexTriggerRecords, (record) => {
+        const apexTriggers = new Map(await OrgCheckProcessor.carte(
+            await OrgCheckProcessor.filtre(apexTriggerRecords, (record)=> (record.EntityDefinition ? true : false)),
+            (record) => {
 
-            // Get the ID15
-            const id = sfdcManager.caseSafeId(record.Id);
+                // Get the ID15
+                const id = sfdcManager.caseSafeId(record.Id);
 
-            // Create the instance
-            const apexTrigger = apexTriggerDataFactory.create({
-                id: id,
-                url: sfdcManager.setupUrl('apex-trigger', id, record.EntityDefinition.DurableId),
-                name: record.Name,
-                apiVersion: record.ApiVersion,
-                package: (record.NamespacePrefix || ''),
-                length: record.LengthWithoutComments,
-                isActive: (record.Status === 'Active' ? true : false),
-                beforeInsert: record.UsageBeforeInsert,
-                afterInsert: record.UsageAfterInsert,
-                beforeUpdate: record.UsageBeforeUpdate,
-                afterUpdate: record.UsageAfterUpdate,
-                beforeDelete: record.UsageBeforeDelete,
-                afterDelete: record.UsageAfterDelete,
-                afterUndelete: record.UsageAfterUndelete,
-                objectId: sfdcManager.caseSafeId(record.EntityDefinition.QualifiedApiName),
-                hasSOQL: false,
-                hasDML: false,
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                allDependencies: dependencies
-            });
-            
-            // Get information directly from the source code (if available)
-            if (record.Body) {
-                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
-                apexTrigger.hasSOQL = sourceCode.match(REGEX_HASSOQL) !== null; 
-                apexTrigger.hasDML = sourceCode.match(REGEX_HASDML) !== null; 
+                // Create the instance
+                const apexTrigger = apexTriggerDataFactory.create({
+                    id: id,
+                    url: sfdcManager.setupUrl('apex-trigger', id, record.EntityDefinition?.DurableId),
+                    name: record.Name,
+                    apiVersion: record.ApiVersion,
+                    package: (record.NamespacePrefix || ''),
+                    length: record.LengthWithoutComments,
+                    isActive: (record.Status === 'Active' ? true : false),
+                    beforeInsert: record.UsageBeforeInsert,
+                    afterInsert: record.UsageAfterInsert,
+                    beforeUpdate: record.UsageBeforeUpdate,
+                    afterUpdate: record.UsageAfterUpdate,
+                    beforeDelete: record.UsageBeforeDelete,
+                    afterDelete: record.UsageAfterDelete,
+                    afterUndelete: record.UsageAfterUndelete,
+                    objectId: sfdcManager.caseSafeId(record.EntityDefinition?.QualifiedApiName),
+                    hasSOQL: false,
+                    hasDML: false,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    allDependencies: dependencies
+                });
+                
+                // Get information directly from the source code (if available)
+                if (record.Body) {
+                    const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
+                    apexTrigger.hasSOQL = sourceCode.match(REGEX_HASSOQL) !== null; 
+                    apexTrigger.hasDML = sourceCode.match(REGEX_HASDML) !== null; 
+                }
+
+                // Compute the score of this item
+                apexTriggerDataFactory.computeScore(apexTrigger);
+
+                // Add it to the map  
+                return [ apexTrigger.id, apexTrigger ];
             }
-
-            // Compute the score of this item
-            apexTriggerDataFactory.computeScore(apexTrigger);
-
-            // Add it to the map  
-            return [ apexTrigger.id, apexTrigger ];
-        }));
+        ));
 
         // Return data as map
         localLogger.log(`Done`);
