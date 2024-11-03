@@ -21,6 +21,7 @@ export class DailyApiRequestLimitInformation {
 
 const MAX_COMPOSITE_REQUEST_SIZE = 25;
 const MAX_COMPOSITE_QUERY_REQUEST_SIZE = 5;
+const MAX_IDS_IN_DAPI_REQUEST_SIZE = 100;
 const MAX_NOQUERYMORE_BATCH_SIZE = 200;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
@@ -349,7 +350,7 @@ export class OrgCheckSalesforceManager {
                     'OR MetadataComponentId IN (\'(ids)\') ', 
                 [], 
                 MAX_COMPOSITE_QUERY_REQUEST_SIZE,
-                100,
+                MAX_IDS_IN_DAPI_REQUEST_SIZE,
                 (hundredOfIds) => { return hundredOfIds.join("','")},
                 { 
                     onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
@@ -590,8 +591,8 @@ export class OrgCheckSalesforceManager {
             `/sobjects/${type}/(ids)`, 
             byPasses, 
             MAX_COMPOSITE_REQUEST_SIZE,
-            1,
-            (id) => { return id; },
+            1, // replace (ids) in the pattern below by only one id at a time
+            (id) => { return id; }, // as previous arg is 1, this callback will be called with an array of one item only.
             { 
                 onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
                     localLogger?.log(`Statistics of ${ids.length} Metadata ${type}${ids.length>1?'s':''}: ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesError} in error...`);
