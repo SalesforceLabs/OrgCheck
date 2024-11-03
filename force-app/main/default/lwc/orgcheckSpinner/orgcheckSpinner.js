@@ -39,8 +39,8 @@ export default class OrgCheckSpinner extends LightningElement {
             if (typeof error === 'string') {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
             } else {
-                this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED, error.stack);
-                this._setErrorDetail(error.stack);
+                this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED, error);
+                console.error(sectionName, error);
             }
         } else {
             this._setSection(sectionName, 'The error was undefined...', SECTION_STATUS_FAILED);
@@ -116,7 +116,7 @@ export default class OrgCheckSpinner extends LightningElement {
 
     @track sections;
 
-    _setSection(sectionName, message, status, errorStack) {
+    _setSection(sectionName, message, status, error) {
         let item = { 
             id: sectionName,
             liClasses: 'slds-progress__item',
@@ -137,7 +137,8 @@ export default class OrgCheckSpinner extends LightningElement {
             case SECTION_STATUS_FAILED: 
                 item.liClasses += ' slds-has-error'; 
                 item.markerClasses += ' progress-marker-error';
-                item.stack = errorStack;
+                item.stack = error?.stack;
+                item.context = JSON.stringify(error?.context);
                 break;
         }
         if (Object.keys(this.#keysIndex).includes(item.id) === false) {
@@ -147,9 +148,5 @@ export default class OrgCheckSpinner extends LightningElement {
             const index = this.#keysIndex[item.id];
             this.sections[index] = item;
         }
-    }
-
-    _setErrorDetail(stack) {
-        console.error(stack);
     }
 }

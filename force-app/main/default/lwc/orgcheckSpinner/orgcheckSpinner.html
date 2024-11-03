@@ -37,6 +37,12 @@
                                                 <pre>{msg.stack}</pre>
                                             </li>
                                         </template>
+                                        <template lwc:if={msg.context}>
+                                            <li key={msg.id}>
+                                                WHEN: <pre>{msg.context.when}</pre>
+                                                WHAT: <pre>{msg.context.what}</pre>
+                                            </li>
+                                        </template>
                                     </template>
                                 </ol>
                             </div>
