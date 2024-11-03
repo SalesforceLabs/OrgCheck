@@ -20,6 +20,8 @@ export class DailyApiRequestLimitInformation {
 }
 
 const MAX_COMPOSITE_REQUEST_SIZE = 25;
+const MAX_COMPOSITE_QUERY_REQUEST_SIZE = 5;
+const MAX_IDS_IN_DAPI_REQUEST_SIZE = 100;
 const MAX_NOQUERYMORE_BATCH_SIZE = 200;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
@@ -294,9 +296,11 @@ export class OrgCheckSalesforceManager {
                             nbQueriesByPassed++;
                             resolve();
                         } else {
-                            e.context = { when: 'While creating a promise to call a SOQL query.', what: query };
                             nbQueriesError++;
-                            reject(e);
+                            reject(Object.assign(e, { context: { 
+                                when: 'While creating a promise to call a SOQL query.', 
+                                what: query 
+                            }}));  
                         }
                         nbQueriesPending--;
                     } else {
@@ -342,10 +346,12 @@ export class OrgCheckSalesforceManager {
                     'SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, '+
                         'RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType '+
                     'FROM MetadataComponentDependency '+
-                    'WHERE RefMetadataComponentId = \'(id)\' '+
-                    'OR MetadataComponentId = \'(id)\' ', 
+                    'WHERE RefMetadataComponentId IN (\'(ids)\') '+
+                    'OR MetadataComponentId IN (\'(ids)\') ', 
                 [], 
-                5, 
+                MAX_COMPOSITE_QUERY_REQUEST_SIZE,
+                MAX_IDS_IN_DAPI_REQUEST_SIZE,
+                (hundredOfIds) => { return hundredOfIds.join("','")},
                 { 
                     onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
                         localLogger?.log(`Statistics of ${ids.length} Dependency API ${ids.length>1?'elements':'element'}: ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesError} in error...`);
@@ -493,13 +499,15 @@ export class OrgCheckSalesforceManager {
         return results;
     }
 
-    async _callComposite(ids, tooling, uriPattern, byPasses, maxRequestSize=MAX_COMPOSITE_REQUEST_SIZE, logger) {
+    async _callComposite(ids, tooling, uriPattern, byPasses, numberCompositeRequests=MAX_COMPOSITE_REQUEST_SIZE, maxIdsInEachCompositeRequest=1, idsAsStringCallback, logger) {
         this._watchDog__beforeRequest();
-        if (maxRequestSize > MAX_COMPOSITE_REQUEST_SIZE) maxRequestSize = MAX_COMPOSITE_REQUEST_SIZE;
+        if (!numberCompositeRequests || numberCompositeRequests > MAX_COMPOSITE_REQUEST_SIZE || numberCompositeRequests <= 0) numberCompositeRequests = MAX_COMPOSITE_REQUEST_SIZE;
+        if (!maxIdsInEachCompositeRequest || maxIdsInEachCompositeRequest <= 0) maxIdsInEachCompositeRequest = 1;
         const compositeRequestBodies = [];
         let currentCompositeRequestBody;
-        ids.forEach((id) => {
-            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === maxRequestSize) {
+        for (let i = 0; i < ids.length; i += maxIdsInEachCompositeRequest) {
+            const idsInCurrentCompositeRequest = ids.slice(i, i + maxIdsInEachCompositeRequest);
+            if (!currentCompositeRequestBody || currentCompositeRequestBody.compositeRequest.length === numberCompositeRequests) {
                 currentCompositeRequestBody = {
                     allOrNone: false,
                     compositeRequest: []
@@ -507,11 +515,11 @@ export class OrgCheckSalesforceManager {
                 compositeRequestBodies.push(currentCompositeRequestBody);
             }
             currentCompositeRequestBody.compositeRequest.push({ 
-                url: `/services/data/v${this.#connection.version}${tooling === true ? '/tooling' : ''}${uriPattern.replaceAll('(id)', id)}`, 
+                url: `/services/data/v${this.#connection.version}${tooling === true ? '/tooling' : ''}${uriPattern.replaceAll('(ids)', idsAsStringCallback(idsInCurrentCompositeRequest))}`, 
                 method: 'GET',
-                referenceId: id
+                referenceId: `chunk${i}`
             });
-        });
+        }
         let nbQueriesDone = 0, nbQueriesError = 0, nbQueriesPending = compositeRequestBodies.length;
         return new Promise((resolve, reject) => {
             Promise.all(
@@ -525,7 +533,7 @@ export class OrgCheckSalesforceManager {
                             this._watchDog__afterRequest(e);
                             if (error) {
                                 nbQueriesError++;
-                                error.context = { 
+                                e(Object.assign(error, { context: { 
                                     when: `While creating a promise to call the ${tooling === true ? 'Tooling Composite API' : 'Composite API'}.`,
                                     what: {
                                         tooling: tooling,
@@ -533,8 +541,7 @@ export class OrgCheckSalesforceManager {
                                         ids: ids,
                                         body: requestBody
                                     }
-                                };
-                                e(error); 
+                                }}));   
                             } else {
                                 nbQueriesDone++;
                                 r(response); 
@@ -554,8 +561,8 @@ export class OrgCheckSalesforceManager {
                             } else {
                                 const errorCode = response.body[0].errorCode;
                                 if (byPasses && byPasses.includes && byPasses.includes(errorCode) === false) {
-                                    const error = new TypeError();
-                                    error.context = { 
+                                    const error = new TypeError(`errorCode: ${errorCode}`);
+                                    reject(Object.assign(error, { context: { 
                                         when: 'After receiving a response with bad HTTP status code.',
                                         what: {
                                             tooling: tooling,
@@ -563,8 +570,7 @@ export class OrgCheckSalesforceManager {
                                             ids: ids,
                                             body: response.body
                                         }
-                                    };
-                                    reject(error);
+                                    }}));
                                 } else {
                                     nbQueriesByPassed++;
                                 }
@@ -582,9 +588,11 @@ export class OrgCheckSalesforceManager {
         return this._callComposite(
             ids, 
             true, 
-            `/sobjects/${type}/(id)`, 
+            `/sobjects/${type}/(ids)`, 
             byPasses, 
             MAX_COMPOSITE_REQUEST_SIZE,
+            1, // replace (ids) in the pattern below by only one id at a time
+            (id) => { return id; }, // as previous arg is 1, this callback will be called with an array of one item only.
             { 
                 onRequest: (nbQueriesDone, nbQueriesError, nbQueriesPending) => {
                     localLogger?.log(`Statistics of ${ids.length} Metadata ${type}${ids.length>1?'s':''}: ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesError} in error...`);
