@@ -32,11 +32,12 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(users, async (user) => {
+        await OrgCheckProcessor.forEach(users, async (user) => {
             user.profileRef = profiles.get(user.profileId);
-            user.permissionSetRefs = await OrgCheckProcessor.carte(
-                await OrgCheckProcessor.filtre(user.permissionSetIds, (id) => permissionSets.has(id)),
-                (id) => permissionSets.get(id)
+            user.permissionSetRefs = await OrgCheckProcessor.map(
+                user.permissionSetIds,
+                (id) => permissionSets.get(id),
+                (id) => permissionSets.has(id)
             );
             user.aggregateImportantPermissions = {};
             if (user.profileRef?.importantPermissions) {
@@ -44,7 +45,7 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
                     .filter(permName => user.profileRef.importantPermissions[permName] === true)
                     .forEach(permName => { user.aggregateImportantPermissions[permName] = [ user.profileRef ]; });
             }
-            await OrgCheckProcessor.chaque(user.permissionSetRefs, (permissionSet) => {
+            await OrgCheckProcessor.forEach(user.permissionSetRefs, (permissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter(permName => permissionSet.importantPermissions[permName] === true)
                     .forEach(permName => { 

@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_APEX_TRIGGER } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
@@ -20,7 +21,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         'UsageBeforeDelete, UsageAfterDelete, '+
                         'UsageAfterUndelete, UsageIsBulk, '+
                         'LengthWithoutComments, '+
-                        'EntityDefinition.QualifiedApiName, EntityDefinition.DurableId, '+
+                        'EntityDefinition.QualifiedApiName, '+
                         'CreatedDate, LastModifiedDate '+
                     'FROM ApexTrigger '+
                     'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
@@ -33,15 +34,15 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${apexTriggerRecords.length} apex triggers...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(apexTriggerRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const apexTriggersDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(apexTriggerRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
 
         // Create the map
         localLogger.log(`Parsing ${apexTriggerRecords.length} apex triggers...`);
-        const apexTriggers = new Map(await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(apexTriggerRecords, (record)=> (record.EntityDefinition ? true : false)),
+        const apexTriggers = new Map(await OrgCheckProcessor.map(
+            apexTriggerRecords,
             (record) => {
 
                 // Get the ID15
@@ -49,26 +50,30 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
                 // Create the instance
                 const apexTrigger = apexTriggerDataFactory.create({
-                    id: id,
-                    url: sfdcManager.setupUrl('apex-trigger', id, record.EntityDefinition?.DurableId),
-                    name: record.Name,
-                    apiVersion: record.ApiVersion,
-                    package: (record.NamespacePrefix || ''),
-                    length: record.LengthWithoutComments,
-                    isActive: (record.Status === 'Active' ? true : false),
-                    beforeInsert: record.UsageBeforeInsert,
-                    afterInsert: record.UsageAfterInsert,
-                    beforeUpdate: record.UsageBeforeUpdate,
-                    afterUpdate: record.UsageAfterUpdate,
-                    beforeDelete: record.UsageBeforeDelete,
-                    afterDelete: record.UsageAfterDelete,
-                    afterUndelete: record.UsageAfterUndelete,
-                    objectId: sfdcManager.caseSafeId(record.EntityDefinition?.QualifiedApiName),
-                    hasSOQL: false,
-                    hasDML: false,
-                    createdDate: record.CreatedDate,
-                    lastModifiedDate: record.LastModifiedDate,
-                    allDependencies: dependencies
+                    properties: {
+                        id: id,
+                        name: record.Name,
+                        apiVersion: record.ApiVersion,
+                        package: (record.NamespacePrefix || ''),
+                        length: record.LengthWithoutComments,
+                        isActive: (record.Status === 'Active' ? true : false),
+                        beforeInsert: record.UsageBeforeInsert,
+                        afterInsert: record.UsageAfterInsert,
+                        beforeUpdate: record.UsageBeforeUpdate,
+                        afterUpdate: record.UsageAfterUpdate,
+                        beforeDelete: record.UsageBeforeDelete,
+                        afterDelete: record.UsageAfterDelete,
+                        afterUndelete: record.UsageAfterUndelete,
+                        objectId: sfdcManager.caseSafeId(record.EntityDefinition?.QualifiedApiName),
+                        hasSOQL: false,
+                        hasDML: false,
+                        createdDate: record.CreatedDate,
+                        lastModifiedDate: record.LastModifiedDate,
+                        url: sfdcManager.setupUrl(id, TYPE_APEX_TRIGGER, record.EntityDefinition?.QualifiedApiName)
+                    }, 
+                    dependencies: {
+                        data: apexTriggersDependencies
+                    }
                 });
                 
                 // Get information directly from the source code (if available)
@@ -83,7 +88,8 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
                 // Add it to the map  
                 return [ apexTrigger.id, apexTrigger ];
-            }
+            },
+            (record)=> (record.EntityDefinition ? true : false)
         ));
 
         // Return data as map

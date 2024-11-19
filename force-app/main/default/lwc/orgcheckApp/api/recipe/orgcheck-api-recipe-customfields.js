@@ -35,15 +35,15 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
         const objects = data.get(DATASET_OBJECTS_ALIAS);
         const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(objects, (obj) => {
+        await OrgCheckProcessor.forEach(objects, (obj) => {
             obj.typeRef = types.get(obj.typeId);
         });
-        await OrgCheckProcessor.chaque(customFields, (customField) => {
+        await OrgCheckProcessor.forEach(customFields, (customField) => {
             customField.objectRef = objects.get(customField.objectId);
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(customFields, (customField) => {
+        await OrgCheckProcessor.forEach(customFields, (customField) => {
             if ((namespace === '*' || customField.package === namespace) &&
                 (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || customField.objectRef?.apiname === object)) {

@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_ROLE } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 
 export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
@@ -20,27 +21,29 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
         // Create the map
         const userRoleRecords = results[0].records;
         localLogger.log(`Parsing ${userRoleRecords.length} user roles...`);
-        const roles = new Map(await OrgCheckProcessor.carte(userRoleRecords, async (record) => {
+        const roles = new Map(await OrgCheckProcessor.map(userRoleRecords, async (record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const userRole = userRoleDataFactory.create({
-                id: id,
-                url: sfdcManager.setupUrl('user-role', record.Id),
-                name: record.Name,
-                apiname: record.DeveloperName,
-                parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId) : undefined,
-                hasParent: record.ParentRoleId ? true : false,
-                activeMembersCount: 0,
-                activeMemberIds: [],
-                hasActiveMembers: false,
-                inactiveMembersCount: 0,
-                hasInactiveMembers: false,
-                isExternal: (record.PortalType !== 'None') ? true : false
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    apiname: record.DeveloperName,
+                    parentId: record.ParentRoleId ? sfdcManager.caseSafeId(record.ParentRoleId) : undefined,
+                    hasParent: record.ParentRoleId ? true : false,
+                    activeMembersCount: 0,
+                    activeMemberIds: [],
+                    hasActiveMembers: false,
+                    inactiveMembersCount: 0,
+                    hasInactiveMembers: false,
+                    isExternal: (record.PortalType !== 'None') ? true : false,
+                    url: sfdcManager.setupUrl(id, TYPE_ROLE)
+                }
             });         
-            await OrgCheckProcessor.chaque(
+            await OrgCheckProcessor.forEach(
                 record?.Users?.records, 
                 (user) => {
                     if (user.IsActive === true) {

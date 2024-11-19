@@ -35,45 +35,39 @@ const OBJECT_TO_STRING = (template, object) => {
     }
 }
 
-const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
+const CELL_PREPARE = (rowScore, reference, column, cell = { data: {}}) => {
     if (reference && column.dataProperties.length > 0) {
         column.dataProperties.forEach((p) => {
-            cell.data[p] = reference[column.data[p]];
+            const refProperty = column.data[p];
+            cell.data[p] = ((typeof refProperty === 'function') ? (refProperty(reference)) : (reference[refProperty]));
         });
     } else {
         cell.data.value = reference || '';
     }
-    if (column.modifier?.preformatted === true) {
-        cell.isPreformatted = true;
+    if (column.type === TYPE_SCORE) {
+        cell.data.value = rowScore;
     }
-    if (column.modifier?.valueIfEmpty && !cell.data.value) {
-        cell.data.decoratedValue = column.modifier.valueIfEmpty;
-        cell.isEmpty = true;
-    } else {
-        switch (column.typeProperty) {
-            case 'isNumeric':
-                if (column.modifier?.max && cell.data.value > column.modifier.max) {
-                    cell.data.decoratedValue = column.modifier.valueAfterMax;
-                    cell.isMaxReached = true;
-                } else if (column.modifier?.min && cell.data.value < column.modifier.min) {
-                    cell.data.decoratedValue = column.modifier.valueBeforeMin;
-                    cell.isMinReached = true;
-                }
-                break;
-            case 'isText':
-            case 'isTexts':
-                if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
-                    cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
-                    cell.isValueTruncated = true;
-                }
-                break;
-            case 'isObject':
-            case 'isObjects':
-            default:
-                if (column.modifier?.template) {
-                    cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
-                }
-                break;
+    if (column.modifier) {
+        if (column.modifier?.preformatted === true) {
+            cell.isPreformatted = true;
+        }
+        if (column.modifier?.valueIfEmpty && !cell.data.value) {
+            cell.data.decoratedValue = column.modifier.valueIfEmpty;
+            cell.isEmpty = true;
+        }
+        if (column.modifier?.max && cell.data.value > column.modifier.max) {
+            cell.data.decoratedValue = column.modifier.valueAfterMax;
+            cell.isMaxReached = true;
+        } else if (column.modifier?.min && cell.data.value < column.modifier.min) {
+            cell.data.decoratedValue = column.modifier.valueBeforeMin;
+            cell.isMinReached = true;
+        }
+        if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
+            cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
+            cell.isValueTruncated = true;
+        }
+        if (column.modifier?.template) {
+            cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
         }
     }
     return cell;
@@ -82,6 +76,8 @@ const CELL_PREPARE = (reference, column, cell = { data: {}}) => {
 const CELL_CSSCLASS = (row, cell) => {
     if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
     return (row.badFields && row.badFields.some((field) => {
+        // if the field is iterative then only consider the ref as the field name
+        if (cell.isIterative === true && field === cell.data?.ref) return true;
         // if the name of field is the ref + property
         if (field === `${cell.data?.ref}.${cell.data?.value}`) return true;
         // if the field is the property of the current row
@@ -367,14 +363,10 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     data: {}
                 };
                 cell[c.typeProperty] = true;
-                /*if (c.type === TYPE_INDEX) {
-                    cell.data.value = '';
-                } else if (c.type === TYPE_SCORE) {
-                    cell.data.value = row.score;
-                } else */ if (c.isIterative === true) {
-                    cell.data.values = ref?.map((rr) => CELL_PREPARE(rr, c)) || [];
+                if (c.isIterative === true) {
+                    cell.data.values = ref?.map((rr) => CELL_PREPARE(row.score, rr, c)) || [];
                 } else {
-                    CELL_PREPARE(ref, c, cell);
+                    CELL_PREPARE(row.score, ref, c, cell);
                 }
                 row.cells.push(cell);
             });

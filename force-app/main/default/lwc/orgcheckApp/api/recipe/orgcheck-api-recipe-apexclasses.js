@@ -27,13 +27,13 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
         // Get data
         const apexClasses = data.get(DATASET_APEXCLASSES_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(apexClasses, async (apexClass) => {
-            apexClass.relatedTestClassRefs = await OrgCheckProcessor.carte(apexClass.relatedTestClassIds, id => apexClasses.get(id));
-            apexClass.relatedClassRefs = await OrgCheckProcessor.carte(apexClass.relatedClassIds, id => apexClasses.get(id));
+        await OrgCheckProcessor.forEach(apexClasses, async (apexClass) => {
+            apexClass.relatedTestClassRefs = await OrgCheckProcessor.map(apexClass.relatedTestClassIds, id => apexClasses.get(id));
+            apexClass.relatedClassRefs = await OrgCheckProcessor.map(apexClass.relatedClassIds, id => apexClasses.get(id));
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(apexClasses, (apexClass) => {
+        await OrgCheckProcessor.forEach(apexClasses, (apexClass) => {
             if (namespace === '*' || apexClass.package === namespace) {
                 array.push(apexClass);
             }

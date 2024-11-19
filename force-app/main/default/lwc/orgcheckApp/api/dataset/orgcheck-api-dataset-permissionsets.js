@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_PERMISSION_SET, TYPE_PERMISSION_SET_GROUP } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
@@ -35,33 +36,38 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         // Create the map
         const permissionSetRecords = results[0].records;
         localLogger.log(`Parsing ${permissionSetRecords.length} permission sets...`);
-        const permissionSets = new Map(await OrgCheckProcessor.carte(permissionSetRecords, (record) => {
+        const permissionSets = new Map(await OrgCheckProcessor.map(permissionSetRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
         
+            // Is it a permission set or a permission set group?
+            const isPermissionSetGroup = (record.Type === 'Group'); // other values can be 'Regular', 'Standard', 'Session'
+
             // Create the instance
             const permissionSet = permissionSetDataFactory.create({
-                id: id,
-                url: sfdcManager.setupUrl('permission-set', id),
-                name: record.Name,
-                apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Name,
-                description: record.Description,
-                license: (record.License ? record.License.Name : ''),
-                isCustom: record.IsCustom,
-                package: (record.NamespacePrefix || ''),
-                memberCounts: 0, // default value, may be changed in second SOQL
-                isGroup: (record.Type === 'Group'),  // other values can be 'Regular', 'Standard', 'Session'
-                type: (record.Type === 'Group' ? 'Permission Set Group' : 'Permission Set'),
-                createdDate: record.CreatedDate, 
-                lastModifiedDate: record.LastModifiedDate,
-                nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                importantPermissions: {
-                    apiEnabled: record.PermissionsApiEnabled,
-                    viewSetup: record.PermissionsViewSetup, 
-                    modifyAllData: record.PermissionsModifyAllData, 
-                    viewAllData: record.PermissionsViewAllData
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Name,
+                    description: record.Description,
+                    license: (record.License ? record.License.Name : ''),
+                    isCustom: record.IsCustom,
+                    package: (record.NamespacePrefix || ''),
+                    memberCounts: 0, // default value, may be changed in second SOQL
+                    isGroup: isPermissionSetGroup,  
+                    type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
+                    createdDate: record.CreatedDate, 
+                    lastModifiedDate: record.LastModifiedDate,
+                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
+                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    importantPermissions: {
+                        apiEnabled: record.PermissionsApiEnabled,
+                        viewSetup: record.PermissionsViewSetup, 
+                        modifyAllData: record.PermissionsModifyAllData, 
+                        viewAllData: record.PermissionsViewAllData
+                    },
+                    url: (isPermissionSetGroup === false ? sfdcManager.setupUrl(id, TYPE_PERMISSION_SET) : '')
                 }
             });
 
@@ -72,7 +78,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         const permissionSetAssignmentRecords = results[1].records;
         localLogger.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
         const assigneeProfileIdsByPermSetId = new Map();
-        await OrgCheckProcessor.chaque(permissionSetAssignmentRecords, (record) => {
+        await OrgCheckProcessor.forEach(permissionSetAssignmentRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const assigneeProfileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
             if (permissionSets.has(permissionSetId)) {
@@ -85,25 +91,27 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 permissionSets.get(permissionSetId).memberCounts++;
             }
         });
-        await OrgCheckProcessor.chaque(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
+        await OrgCheckProcessor.forEach(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
             permissionSets.get(permissionSetId).assigneeProfileIds = Array.from(assigneeProfileIds);
         });
 
         const permissionSetGroupRecords = results[2].records;
         localLogger.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
-        await OrgCheckProcessor.chaque(permissionSetGroupRecords, (record) => {
+        await OrgCheckProcessor.forEach(permissionSetGroupRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
             if (permissionSets.has(permissionSetId)) {
                 const permissionSet = permissionSets.get(permissionSetId);
-                permissionSet.url = sfdcManager.setupUrl('permission-set-group', permissionSetGroupId);
                 permissionSet.isGroup = true;
+                permissionSet.groupId = permissionSetGroupId;
+                permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, TYPE_PERMISSION_SET_GROUP);
+
             }
         });
 
         // Compute scores for all permission sets
         localLogger.log(`Computing the score for ${permissionSets.size} permission sets...`);
-        await OrgCheckProcessor.chaque(permissionSets, (permissionSet) => {
+        await OrgCheckProcessor.forEach(permissionSets, (permissionSet) => {
             permissionSetDataFactory.computeScore(permissionSet);
         });
         

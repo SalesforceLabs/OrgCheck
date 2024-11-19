@@ -26,7 +26,7 @@ export class OrgCheckRecipeProfiles extends OrgCheckRecipe {
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(profiles, (profile) => {
+        await OrgCheckProcessor.forEach(profiles, (profile) => {
             if (namespace === '*' || profile.package === namespace) {
                 array.push(profile);
             }

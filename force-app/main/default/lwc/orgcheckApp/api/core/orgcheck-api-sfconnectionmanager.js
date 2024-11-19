@@ -26,6 +26,45 @@ const MAX_NOQUERYMORE_BATCH_SIZE = 200;
 const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90;   // =90%
 
+export const TYPE_ANY_FIELD = 'Field';
+export const TYPE_APEX_CLASS = 'ApexClass';
+export const TYPE_APEX_TRIGGER = 'ApexTrigger';
+export const TYPE_AURA_WEB_COMPONENT = 'AuraDefinitionBundle';
+export const TYPE_CUSTOM_BIG_OBJECT = 'CustomBigObject';
+export const TYPE_CUSTOM_EVENT = 'CustomEvent';
+export const TYPE_CUSTOM_FIELD = 'CustomField';
+export const TYPE_CUSTOM_LABEL = 'CustomLabel';
+export const TYPE_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
+export const TYPE_CUSTOM_OBJECT = 'CustomObject';
+export const TYPE_CUSTOM_SETTING = 'CustomSetting';
+export const TYPE_CUSTOM_SITE = 'CustomSite';
+export const TYPE_CUSTOM_TAB = 'CustomTab';
+export const TYPE_EXTERNAL_OBJECT = 'ExternalObject';
+export const TYPE_FIELD_SET = 'FieldSet';
+export const TYPE_FLOW_DEFINITION = 'FlowDefinition';
+export const TYPE_FLOW_VERSION = 'Flow';
+export const TYPE_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
+export const TYPE_LIGHTNING_PAGE = 'FlexiPage';
+export const TYPE_LIGHTNING_WEB_COMPONENT = 'LightningComponentBundle';
+export const TYPE_PAGE_LAYOUT = 'Layout';
+export const TYPE_PERMISSION_SET = 'PermissionSet';
+export const TYPE_PERMISSION_SET_GROUP = 'PermissionSetGroup';
+export const TYPE_PROFILE = 'Profile';
+export const TYPE_PUBLIC_GROUP = 'PublicGroup';
+export const TYPE_QUEUE = 'Queue';
+export const TYPE_RECORD_TYPE = 'RecordType';
+export const TYPE_ROLE = 'UserRole';
+export const TYPE_TECHNICAL_GROUP = 'TechnicalGroup';
+export const TYPE_STANDARD_FIELD = 'StandardField';
+export const TYPE_STANDARD_OBJECT = 'StandardEntity';
+export const TYPE_STATIC_RESOURCE = 'StaticResource';
+export const TYPE_USER = 'User';
+export const TYPE_VALIDATION_RULE = 'ValidationRule';
+export const TYPE_VISUAL_FORCE_COMPONENT = 'ApexComponent';
+export const TYPE_VISUAL_FORCE_PAGE = 'ApexPage';
+export const TYPE_WEB_LINK = 'WebLink';
+export const TYPE_WORKFLOW_RULE = 'WorkflowRule';
+
 export class OrgCheckSalesforceManager {
 
     /**
@@ -95,125 +134,84 @@ export class OrgCheckSalesforceManager {
         return `''`;
     }
     
-    setupUrl(type, durableId, objectDurableId, objectType) {
-        
+    /**
+     * @param {String} id Identification of the data to be used in the Setup URL. 
+     * @param {String} type Type of the data to be used to choose the correct URL template
+     * @param {String} parentId In case the template URL has a reference to the parent, this optional property
+     *                          will contain the parent identification.
+     * @param {String} parentType In case the template URL has a reference to the parent, this optional property
+     *                            will contain the parent type.
+     * @returns A url in string representation
+     */
+    setupUrl(id, type, parentId, parentType) {
+        // If the salesforce identifier is not set, just return a blank url!
+        if (!id) {
+            return '';
+        }
         switch (type) {
-
-            /*
-              In case the type is from the DAPI, we only have the id and the type from the DAPI (not the 
-                object information). so in this case we cannot point to the direct URL in Lightning Setup. 
-                Let's give it a try by returning just '/' and the id...
-            */
-            case 'CustomField': // From DAPI 
-                return `/${durableId}`;
-            case 'Layout': // From DAPI 
-                return ''; // The /{Id} does not work for pagelayout so better returning nothing (outcome will be no link!).
-
-            /*
-              In the following section we have enought information go return the full URL
-            */
-            case 'field': { // Org Check specific
-                switch (objectType) {
-                    case OBJECTTYPE_ID_STANDARD_SOBJECT:
-                    case OBJECTTYPE_ID_CUSTOM_SOBJECT:
-                        return `/lightning/setup/ObjectManager/${objectDurableId}/FieldsAndRelationships/${durableId}/view`;
-                    case OBJECTTYPE_ID_CUSTOM_BIG_OBJECT:
-                        return `/lightning/setup/BigObjects/page?address=%2F${durableId}%3Fsetupid%3DBigObjects`;
-                    case OBJECTTYPE_ID_CUSTOM_EVENT:
-                        return `/lightning/setup/EventObjects/page?address=%2F${durableId}%3Fsetupid%3DEventObjects`;
-                    case OBJECTTYPE_ID_CUSTOM_SETTING:
-                        return `/lightning/setup/CustomSettings/page?address=%2F${durableId}%3Fsetupid%3DCustomSettings`;
-                    case OBJECTTYPE_ID_CUSTOM_METADATA_TYPE:
-                        return `/lightning/setup/CustomMetadata/page?address=%2F${durableId}%3Fsetupid%3DCustomMetadata`;
-                    case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
-                        return `/lightning/setup/ExternalObjects/page?address=%2F${durableId}%3Fsetupid%3DExternalObjects`;
-                    default:
-                        return `/${durableId}`;
+            // FIELD
+            case TYPE_STANDARD_FIELD:
+            case TYPE_CUSTOM_FIELD:
+            case TYPE_ANY_FIELD: {
+                switch (parentType) {
+                    case TYPE_STANDARD_OBJECT:
+                    case TYPE_CUSTOM_OBJECT:
+                    case TYPE_KNOWLEDGE_ARTICLE:    return `/lightning/setup/ObjectManager/${parentId}/FieldsAndRelationships/${id}/view`;
+                    case TYPE_CUSTOM_BIG_OBJECT:    return `/lightning/setup/BigObjects/page?address=%2F${id}%3Fsetupid%3DBigObjects`;
+                    case TYPE_CUSTOM_EVENT:         return `/lightning/setup/EventObjects/page?address=%2F${id}%3Fsetupid%3DEventObjects`;
+                    case TYPE_CUSTOM_SETTING:       return `/lightning/setup/CustomSettings/page?address=%2F${id}%3Fsetupid%3DCustomSettings`;
+                    case TYPE_CUSTOM_METADATA_TYPE: return `/lightning/setup/CustomMetadata/page?address=%2F${id}%3Fsetupid%3DCustomMetadata`;
+                    case TYPE_EXTERNAL_OBJECT:      return `/lightning/setup/ExternalObjects/page?address=%2F${id}%3Fsetupid%3DExternalObjects`;
+                    default:                        return `/${id}`;
                 }
             }
-            case 'layout': { // Org Check specific
-                return `/lightning/setup/ObjectManager/${objectDurableId}/PageLayouts/${durableId}/view`;
+            // SOBJECT
+            case TYPE_STANDARD_OBJECT:
+            case TYPE_CUSTOM_OBJECT:
+            case TYPE_KNOWLEDGE_ARTICLE:       return `/lightning/setup/ObjectManager/${id}/Details/view`;
+            case TYPE_CUSTOM_BIG_OBJECT:       return `/lightning/setup/BigObjects/page?address=%2F${id}%3Fsetupid%3DBigObjects`;
+            case TYPE_CUSTOM_EVENT:            return `/lightning/setup/EventObjects/page?address=%2F${id}%3Fsetupid%3DEventObjects`;
+            case TYPE_CUSTOM_SETTING:          return `/lightning/setup/CustomSettings/page?address=%2F${id}%3Fsetupid%3DCustomSettings`;
+            case TYPE_CUSTOM_METADATA_TYPE:    return `/lightning/setup/CustomMetadata/page?address=%2F${id}%3Fsetupid%3DCustomMetadata`;
+            case TYPE_EXTERNAL_OBJECT:         return `/lightning/setup/ExternalObjects/page?address=%2F${id}%3Fsetupid%3DExternalObjects`;
+            // SOBJECT COMPONENTS
+            case TYPE_PAGE_LAYOUT:             return `/lightning/setup/ObjectManager/${parentId}/PageLayouts/${id}/view`;
+            case TYPE_VALIDATION_RULE:         return `/lightning/setup/ObjectManager/page?address=%2F${id}`;
+            case TYPE_WEB_LINK:                return `/lightning/setup/ObjectManager/${parentId}/ButtonsLinksActions/${id}/view`;
+            case TYPE_RECORD_TYPE:             return `/lightning/setup/ObjectManager/${parentId}/RecordTypes/${id}/view`;
+            case TYPE_APEX_TRIGGER:            return `/lightning/setup/ObjectManager/${parentId}/ApexTriggers/${id}/view`;
+            case TYPE_FIELD_SET:               return `/lightning/setup/ObjectManager/${parentId}/FieldSets/${id}/view`;
+            // SECURITY AND ACCESS
+            case TYPE_USER:                    return `/lightning/setup/ManageUsers/page?address=%2F${id}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
+            case TYPE_PROFILE:                 return `/lightning/setup/EnhancedProfiles/page?address=%2F${id}`;
+            case TYPE_PERMISSION_SET:          return `/lightning/setup/PermSets/page?address=%2F${id}`;
+            case TYPE_PERMISSION_SET_GROUP:    return `/lightning/setup/PermSetGroups/page?address=%2F${id}`;
+            case TYPE_ROLE:                    return `/lightning/setup/Roles/page?address=%2F${id}`;
+            case TYPE_PUBLIC_GROUP:            return `/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D${id}`;
+            case TYPE_QUEUE:                   return `/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D${id}`;
+            case TYPE_TECHNICAL_GROUP:         return '';
+            // SETTING
+            case TYPE_CUSTOM_LABEL:            return `/lightning/setup/ExternalStrings/page?address=%2F${id}`;
+            case TYPE_STATIC_RESOURCE:         return `/lightning/setup/StaticResources/page?address=%2F${id}`;
+            case TYPE_CUSTOM_SITE:             return `/servlet/networks/switch?networkId=${id}&startURL=%2FcommunitySetup%2FcwApp.app%23%2Fc%2Fhome&`;
+            case TYPE_CUSTOM_TAB:              return `/lightning/setup/CustomTabs/page?address=%2F${id}`;
+            // AUTOMATION
+            case TYPE_FLOW_VERSION:            return `/builder_platform_interaction/flowBuilder.app?flowId=${id}`;
+            case TYPE_FLOW_DEFINITION:         return `/${id}`;
+            case TYPE_WORKFLOW_RULE:           return `/lightning/setup/WorkflowRules/page?address=%2F${id}&nodeId=WorkflowRules`;
+            // VISUAL COMPONENTS
+            case TYPE_VISUAL_FORCE_PAGE:       return `/lightning/setup/ApexPages/page?address=%2F${id}`;
+            case TYPE_VISUAL_FORCE_COMPONENT:  return `/lightning/setup/ApexComponent/page?address=%2F${id}`;
+            case TYPE_AURA_WEB_COMPONENT:
+            case TYPE_LIGHTNING_WEB_COMPONENT: return `/lightning/setup/LightningComponentBundles/page?address=%2F${id}`;
+            case TYPE_LIGHTNING_PAGE:          return `/lightning/setup/ObjectManager/Account/LightningPages/${id}/view`;
+            // APEX PROGAMMATION
+            case TYPE_APEX_CLASS:              return `/lightning/setup/ApexClasses/page?address=%2F${id}`;
+            // Other types or even undefined type
+            default: {
+                console.error(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
+                return `/${id}`;
             }
-            case 'object': { // Org Check specific
-                switch (objectType) {
-                    case OBJECTTYPE_ID_STANDARD_SOBJECT:
-                    case OBJECTTYPE_ID_CUSTOM_SOBJECT:
-                        return `/lightning/setup/ObjectManager/${objectDurableId}/Details/view`;
-                    case OBJECTTYPE_ID_CUSTOM_BIG_OBJECT:
-                        return `/lightning/setup/BigObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DBigObjects`;
-                    case OBJECTTYPE_ID_CUSTOM_EVENT:
-                        return `/lightning/setup/EventObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DEventObjects`;
-                    case OBJECTTYPE_ID_CUSTOM_SETTING:
-                        return `/lightning/setup/CustomSettings/page?address=%2F${objectDurableId}%3Fsetupid%3DCustomSettings`;
-                    case OBJECTTYPE_ID_CUSTOM_METADATA_TYPE:
-                        return `/lightning/setup/CustomMetadata/page?address=%2F${objectDurableId}%3Fsetupid%3DCustomMetadata`;
-                    case OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT:
-                        return `/lightning/setup/ExternalObjects/page?address=%2F${objectDurableId}%3Fsetupid%3DExternalObjects`;
-                    default:
-                        return `/${objectDurableId}`;
-                }
-            }
-            case 'validation-rule': // Org Check specific
-            case 'ValidationRule': { // From DAPI 
-                return `/lightning/setup/ObjectManager/page?address=%2F${durableId}`;
-            }
-            case 'web-link': { // Org Check specific
-                return `/lightning/setup/ObjectManager/${objectDurableId}/ButtonsLinksActions/${durableId}/view`;
-            } 
-            case 'record-type': { // Org Check specific
-                return `/lightning/setup/ObjectManager/${objectDurableId}/RecordTypes/${durableId}/view`;
-            }
-            case 'apex-trigger': { // Org Check specific
-                return `/lightning/setup/ObjectManager/${objectDurableId}/ApexTriggers/${durableId}/view`;
-            }            
-            case 'field-set': { // Org Check specific
-                return `/lightning/setup/ObjectManager/${objectDurableId}/FieldSets/${durableId}/view`;
-            }
-            case 'user': { // Org Check specific
-                return `/lightning/setup/ManageUsers/page?address=%2F${durableId}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
-            }
-            case 'profile': { // Org Check specific
-                return `/lightning/setup/EnhancedProfiles/page?address=%2F${durableId}`;
-            }
-            case 'permission-set': { // Org Check specific
-                return `/lightning/setup/PermSets/page?address=%2F${durableId}`;
-            }
-            case 'permission-set-group': { // Org Check specific
-                return `/lightning/setup/PermSetGroups/page?address=%2F${durableId}`;
-            }
-            case 'custom-label': // Org Check specific            
-            case 'CustomLabel': { // From DAPI 
-                return `/lightning/setup/ExternalStrings/page?address=%2F${durableId}`;
-            }
-            case 'flow': // Org Check specific
-            case 'Flow': { // From DAPI 
-                return `/builder_platform_interaction/flowBuilder.app?flowId=${durableId}`;
-            }
-            case 'flowDefinition': { // Org Check specific
-                return `/${durableId}`
-            }
-            case 'visual-force-page': // Org Check specific
-            case 'ApexPage': { // From DAPI 
-                return `/lightning/setup/ApexPages/page?address=%2F${durableId}`;
-            }
-            case 'visual-force-component': // Org Check specific
-            case 'ApexComponent': { // From DAPI 
-                return `/lightning/setup/ApexComponent/page?address=%2F${durableId}`;
-            }
-            case 'static-resource': // Org Check specific
-            case 'StaticResource': { // From DAPI 
-                return `/lightning/setup/StaticResources/page?address=%2F${durableId}`;
-            }
-            //CustomSite
-            //CustomTab
-            case 'apex-class': // Org Check specific
-            case 'ApexClass': { // From DAPI 
-                return `/lightning/setup/ApexClasses/page?address=%2F${durableId}`;
-            }
-            // User
-            //AuraDefinitionBundle
-            default:
-                return `/${durableId}`;
         }
     }
     
@@ -379,11 +377,11 @@ export class OrgCheckSalesforceManager {
                     id: id,
                     name: e.MetadataComponentName, 
                     type: e.MetadataComponentType,
-                    url: this.setupUrl(e.MetadataComponentType, e.MetadataComponentId),
+                    url: this.setupUrl(id, e.MetadataComponentType),
                     refId: refId, 
                     refName: e.RefMetadataComponentName,
                     refType: e.RefMetadataComponentType,
-                    refUrl: this.setupUrl(e.RefMetadataComponentType, e.RefMetadataComponentId),
+                    refUrl: this.setupUrl(refId, e.RefMetadataComponentType)
                 }
             })
             .filter(r => r !== null); // Remove duplicates

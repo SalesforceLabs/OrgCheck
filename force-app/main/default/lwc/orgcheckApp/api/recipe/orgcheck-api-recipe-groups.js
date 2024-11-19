@@ -3,7 +3,7 @@ import { DATASET_USERS_ALIAS,
     DATASET_GROUPS_ALIAS } from '../core/orgcheck-api-datasetmanager';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 
-export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
+export class OrgCheckRecipeGroups extends OrgCheckRecipe {
 
     /** 
      * Return the list of dataset you need 
@@ -15,7 +15,7 @@ export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
     }
 
     /**
-     * Get a list of public groups (async method)
+     * Get a list of public groups and queues (async method)
      * 
      * @param {Map} data extracted
      * 
@@ -27,28 +27,27 @@ export class OrgCheckRecipePublicGroups extends OrgCheckRecipe {
         const users = data.get(DATASET_USERS_ALIAS);
 
         // Augment data
-        await OrgCheckProcessor.chaque(groups, async (group) => {
-            group.directUserRefs = await OrgCheckProcessor.carte(
-                await OrgCheckProcessor.filtre(group.directUserIds, (id) => users.has(id)),
-                (id) => users.get(id)
+        await OrgCheckProcessor.forEach(groups, async (group) => {
+            group.directUserRefs = await OrgCheckProcessor.map(
+                group.directUserIds,
+                (id) => users.get(id),
+                (id) => users.has(id)
             );
-            group.directGroupRefs = await OrgCheckProcessor.carte(
-                await OrgCheckProcessor.filtre(group.directGroupIds, (id) => groups.has(id)),
-                (id) => groups.get(id)
-            );
-            group.indirectUserRefs = await OrgCheckProcessor.carte(
-                await OrgCheckProcessor.filtre(group.indirectUserIds, (id) => users.has(id)),
-                (id) => users.get(id)
+            group.directGroupRefs = await OrgCheckProcessor.map(
+                group.directGroupIds,
+                (id) => groups.get(id),
+                (id) => groups.has(id)
             );
         });
 
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(groups, (group) => {
-            if (group.isPublicGroup === true) {
+        await OrgCheckProcessor.forEach(groups, async (group) => {
+            if (group.isPublicGroup === true || group.isQueue === true) {
                 array.push(group);
             }
         });
+
         // Return data
         return array;
     }

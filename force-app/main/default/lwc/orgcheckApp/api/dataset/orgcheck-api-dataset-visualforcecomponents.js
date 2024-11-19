@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_VISUAL_FORCE_COMPONENT } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforcecomponent';
 
 export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
@@ -22,29 +23,33 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const componentsDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
 
         // Create the map
         localLogger.log(`Parsing ${componentRecords.length} visualforce components...`);
-        const components = new Map(await OrgCheckProcessor.carte(componentRecords, (record) => {
+        const components = new Map(await OrgCheckProcessor.map(componentRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const component = componentDataFactory.createWithScore({
-                id: id,
-                url: sfdcManager.setupUrl('visual-force-component', record.Id),
-                name: record.Name,
-                apiVersion: record.ApiVersion,
-                package: (record.NamespacePrefix || ''),
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                description: record.Description,
-                allDependencies: dependencies
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    apiVersion: record.ApiVersion,
+                    package: (record.NamespacePrefix || ''),
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    description: record.Description,
+                    url: sfdcManager.setupUrl(id, TYPE_VISUAL_FORCE_COMPONENT)
+                }, 
+                dependencies:{
+                    data: componentsDependencies
+                }
             });
 
             // Add it to the map  

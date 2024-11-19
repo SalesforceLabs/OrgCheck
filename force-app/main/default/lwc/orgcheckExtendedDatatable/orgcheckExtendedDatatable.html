@@ -97,7 +97,7 @@
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
                             <template lwc:elseif={cell.isId}>
                                 <template lwc:if={cell.data.url}>
-                                    <lightning-formatted-url value={cell.data.url} tooltip={cell.data.value} label={cell.data.value} target="_blank"></lightning-formatted-url>
+                                    <lightning-formatted-url label={cell.data.value} value={cell.data.url} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon>
                                 </template>
                                 <template lwc:else>
                                     {cell.data.value}
@@ -112,12 +112,11 @@
                                 <template for:each={cell.data.values} for:item="item">
                                     <template lwc:if={item}>
                                         <template lwc:if={item.data.url}>
-                                            - <lightning-formatted-url key={cell.key} value={item.data.url} tooltip={item.data.value} label={item.data.value} target="_blank"></lightning-formatted-url>
+                                            - <lightning-formatted-url key={item.key} label={item.data.value} value={item.data.url} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data.value}
+                                            - {item.data.value}<br key={item.key} />
                                         </template>
-                                        <br key={cell.key} />
                                     </template>
                                 </template>
                             </template>

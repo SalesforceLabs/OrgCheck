@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_WORKFLOW_RULE } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
@@ -17,7 +18,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         // List of flow ids
         const workflowRuleRecords = results[0].records;
         localLogger.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
-        const workflowRuleIds = await OrgCheckProcessor.carte(workflowRuleRecords, (record) => record.Id);
+        const workflowRuleIds = await OrgCheckProcessor.map(workflowRuleRecords, (record) => record.Id);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
@@ -28,35 +29,37 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} workflows...`);
-        const workflows = new Map(await OrgCheckProcessor.carte(records, async (record) => {
+        const workflows = new Map(await OrgCheckProcessor.map(records, async (record) => {
 
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const workflow = workflowDataFactory.create({
-                id: id,
-                name: record.FullName,
-                url: sfdcManager.setupUrl('workflow', id),
-                description: record.Metadata.description,
-                isActive: record.Metadata.active,
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                hasAction: true,
-                futureActions: [],
-                emptyTimeTriggers: []
+                properties: {
+                    id: id,
+                    name: record.FullName,
+                    description: record.Metadata.description,
+                    isActive: record.Metadata.active,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    hasAction: true,
+                    futureActions: [],
+                    emptyTimeTriggers: [],
+                    url: sfdcManager.setupUrl(id, TYPE_WORKFLOW_RULE)
+                }
             });
 
             // Add information about direction actions
             const directActions = record.Metadata.actions;
-            workflow.actions = await OrgCheckProcessor.carte(
+            workflow.actions = await OrgCheckProcessor.map(
                 directActions,
                 (action) => { return { name: action.name, type: action.type } }
             );
 
             // Add information about time triggered actions
             const timeTriggers = record.Metadata.workflowTimeTriggers;
-            await OrgCheckProcessor.chaque(
+            await OrgCheckProcessor.forEach(
                 timeTriggers, 
                 async (tt) => {
                     const field = tt.offsetFromField || 'TriggerDate';
@@ -66,7 +69,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                             delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
                         });
                     } else {
-                        await OrgCheckProcessor.chaque(
+                        await OrgCheckProcessor.forEach(
                             tt.actions,
                             (action) => {
                                 workflow.futureActions.push({ 

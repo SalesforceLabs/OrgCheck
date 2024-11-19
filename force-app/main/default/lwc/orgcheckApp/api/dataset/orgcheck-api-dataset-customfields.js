@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_CUSTOM_FIELD } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
@@ -24,21 +25,22 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
         localLogger.log(`Parsing ${customFieldRecords.length} custom fields...`);        
         
-        const entityInfoByCustomFieldId = new Map(await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(customFieldRecords, (record)=> (record.EntityDefinition ? true : false)),
+        const entityInfoByCustomFieldId = new Map(await OrgCheckProcessor.map(
+            customFieldRecords, 
             (record) => [ 
                 sfdcManager.caseSafeId(record.Id), 
                 { 
                     qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
                     isCustomSetting: record.EntityDefinition.IsCustomSetting 
                 }
-            ]
+            ],
+            (record) => (record.EntityDefinition ? true : false)
         ));
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const customFieldsDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
 
@@ -48,7 +50,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} custom fields...`);
-        const customFields = new Map(await OrgCheckProcessor.carte(records, (record) => {
+        const customFields = new Map(await OrgCheckProcessor.map(records, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -58,27 +60,30 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
             // Create the instance (with score)
             const customField = fieldDataFactory.createWithScore({
-                id: id,
-                url: sfdcManager.setupUrl('field', id, entityInfo.qualifiedApiName, 
-                            sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting)),
-                name: record.DeveloperName,
-                label: record.Metadata.label,
-                package: (record.NamespacePrefix || ''),
-                description: record.Description,
-                isCustom: true,
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                objectId: entityInfo.qualifiedApiName,
-                tooltip: record.InlineHelpText,
-                type: record.Metadata.type,
-                length: record.Metadata.length,
-                isUnique: record.Metadata.unique === true,
-                isEncrypted: record.Metadata.encryptionScheme !== null && record.Metadata.encryptionScheme !== 'None',
-                isExternalId: record.Metadata.externalId === true,
-                isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
-                defaultValue: record.Metadata.defaultValue,
-                formula: record.Metadata.formula,
-                allDependencies: dependencies
+                properties: {
+                    id: id,
+                    name: record.DeveloperName,
+                    label: record.Metadata.label,
+                    package: (record.NamespacePrefix || ''),
+                    description: record.Description,
+                    isCustom: true,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    objectId: entityInfo.qualifiedApiName,
+                    tooltip: record.InlineHelpText,
+                    type: record.Metadata.type,
+                    length: record.Metadata.length,
+                    isUnique: record.Metadata.unique === true,
+                    isEncrypted: record.Metadata.encryptionScheme !== null && record.Metadata.encryptionScheme !== 'None',
+                    isExternalId: record.Metadata.externalId === true,
+                    isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
+                    defaultValue: record.Metadata.defaultValue,
+                    formula: record.Metadata.formula,
+                    url: sfdcManager.setupUrl(id, TYPE_CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
+                }, 
+                dependencies: {
+                    data: customFieldsDependencies
+                }
             });
 
             // Add it to the map  

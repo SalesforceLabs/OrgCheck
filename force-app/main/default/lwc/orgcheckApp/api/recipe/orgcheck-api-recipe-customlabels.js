@@ -26,7 +26,7 @@ export class OrgCheckRecipeCustomLabels extends OrgCheckRecipe {
         const customLabels = data.get(DATASET_CUSTOMLABELS_ALIAS);
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(customLabels, (customLabel) => {
+        await OrgCheckProcessor.forEach(customLabels, (customLabel) => {
             if (namespace === '*' || customLabel.package === namespace) {
                 array.push(customLabel);
             }

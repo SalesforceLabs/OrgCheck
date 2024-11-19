@@ -25,7 +25,7 @@ export class OrgCheckRecipeFlows extends OrgCheckRecipe {
         const flows = data.get(DATASET_FLOWS_ALIAS);
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(flows, (flow) => {
+        await OrgCheckProcessor.forEach(flows, (flow) => {
             if (flow.type !== 'Workflow') {
                 array.push(flow);
             }

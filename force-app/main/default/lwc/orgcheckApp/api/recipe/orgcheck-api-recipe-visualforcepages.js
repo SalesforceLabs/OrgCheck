@@ -26,7 +26,7 @@ export class OrgCheckRecipeVisualForcePages extends OrgCheckRecipe {
         const pages = data.get(DATASET_VISUALFORCEPAGES_ALIAS);
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(pages, (page) => {
+        await OrgCheckProcessor.forEach(pages, (page) => {
             if (namespace === '*' || page.package === namespace) {
                 array.push(page);
             }

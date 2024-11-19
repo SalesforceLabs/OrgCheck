@@ -39,21 +39,23 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
         const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
         // Augment data
         object.typeRef = types.get(object.typeId);
-        object.apexTriggerRefs = await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(object.apexTriggerIds, (id) => apexTriggers.has(id)),
+        object.apexTriggerRefs = await OrgCheckProcessor.map(
+            object.apexTriggerIds,
             (id) => { 
                 const apexTrigger = apexTriggers.get(id);
                 apexTrigger.objectRef = object;
                 return apexTrigger;
-            }
+            },
+            (id) => apexTriggers.has(id)
         );
-        object.customFieldRefs = await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(object.customFieldIds, (id) => customFields.has(id)),
+        object.customFieldRefs = await OrgCheckProcessor.map(
+            object.customFieldIds,
             (id) => { 
                 const customField = customFields.get(id);
                 customField.objectRef = object;
                 return customField;
-            }
+            },
+            (id) => customFields.has(id)
         );
         // Return data
         return object;

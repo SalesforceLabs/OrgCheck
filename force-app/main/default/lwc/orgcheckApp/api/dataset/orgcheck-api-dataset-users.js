@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_USER } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 
 export class OrgCheckDatasetUsers extends OrgCheckDataset {
@@ -25,29 +26,31 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
         // Create the map
         const userRecords = results[0].records;
         localLogger.log(`Parsing ${userRecords.length} users...`);
-        const users = new Map(await OrgCheckProcessor.carte(userRecords, async (record) => {
+        const users = new Map(await OrgCheckProcessor.map(userRecords, async (record) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Get the ID15 of Permission Sets assigned to this user
-            const permissionSetIdsAssigned = await OrgCheckProcessor.carte(
+            const permissionSetIdsAssigned = await OrgCheckProcessor.map(
                 record?.PermissionSetAssignments?.records, 
                 (assignment) => sfdcManager.caseSafeId(assignment.PermissionSetId)
             );
 
             // Create the instance
             const user = userDataFactory.createWithScore({
-                id: id,
-                url: sfdcManager.setupUrl('user', id),
-                photoUrl: record.SmallPhotoUrl,
-                name: record.Name,
-                lastLogin: record.LastLoginDate,
-                numberFailedLogins: record.NumberOfFailedLogins,
-                onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
-                lastPasswordChange: record.LastPasswordChangeDate,
-                profileId: sfdcManager.caseSafeId(record.ProfileId),
-                permissionSetIds: permissionSetIdsAssigned
+                properties: {
+                    id: id,
+                    photoUrl: record.SmallPhotoUrl,
+                    name: record.Name,
+                    lastLogin: record.LastLoginDate,
+                    numberFailedLogins: record.NumberOfFailedLogins,
+                    onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
+                    lastPasswordChange: record.LastPasswordChangeDate,
+                    profileId: sfdcManager.caseSafeId(record.ProfileId),
+                    permissionSetIds: permissionSetIdsAssigned,
+                    url: sfdcManager.setupUrl(id, TYPE_USER)
+                }
             });
 
             // Add it to the map  

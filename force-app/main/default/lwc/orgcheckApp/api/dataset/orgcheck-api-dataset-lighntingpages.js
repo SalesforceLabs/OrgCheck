@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_LIGHTNING_PAGE } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 
 export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
@@ -23,29 +24,33 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const pagesDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
 
         // Create the map
         localLogger.log(`Parsing ${pageRecords.length} lightning pages...`);
-        const pages = new Map(await OrgCheckProcessor.carte(pageRecords, (record) => {
+        const pages = new Map(await OrgCheckProcessor.map(pageRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const page = pageDataFactory.createWithScore({
-                id: id,
-                url: sfdcManager.setupUrl('lightning-page', record.Id),
-                name: record.MasterLabel,
-                apiVersion: record.ApiVersion,
-                package: (record.NamespacePrefix || ''),
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                description: record.Description,
-                allDependencies: dependencies
+                properties: {
+                    id: id,
+                    name: record.MasterLabel,
+                    apiVersion: record.ApiVersion,
+                    package: (record.NamespacePrefix || ''),
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    description: record.Description,
+                    url: sfdcManager.setupUrl(id, TYPE_LIGHTNING_PAGE)
+                }, 
+                dependencies: {
+                    data: pagesDependencies
+                }
             });
 
             // Add it to the map  

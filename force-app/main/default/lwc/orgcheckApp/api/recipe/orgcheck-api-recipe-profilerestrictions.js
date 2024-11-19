@@ -30,12 +30,12 @@ export class OrgCheckRecipeProfileRestrictions extends OrgCheckRecipe {
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         const profileRestrictions = data.get(DATASET_PROFILERESTRICTIONS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(profileRestrictions, (restriction) => {
+        await OrgCheckProcessor.forEach(profileRestrictions, (restriction) => {
             restriction.profileRef = profiles.get(restriction.profileId);
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(profileRestrictions, (restriction) => {
+        await OrgCheckProcessor.forEach(profileRestrictions, (restriction) => {
             if (namespace === '*' || restriction.profileRef?.package === namespace) {
                 array.push(restriction);
             }

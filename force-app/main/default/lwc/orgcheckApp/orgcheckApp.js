@@ -44,17 +44,18 @@ export default class OrgCheckApp extends LightningElement {
     #api;
 
     #hasRenderOnce = false;
+    #keepSpinnerOpen = true;
     #spinner;
     #modal;
     #filters;
 
-    renderedCallback() {
+    async renderedCallback() {
         if (this.#hasRenderOnce === false && this.accessToken) {
             this.#hasRenderOnce = true;
             this.#spinner = this.template.querySelector('c-orgcheck-spinner');
             this.#modal = this.template.querySelector('c-orgcheck-modal');
             this.#filters = this.template.querySelector('c-orgcheck-global-filters');
-            this._loadAPI();
+            await this._loadAPI();
         }
     }
 
@@ -221,11 +222,20 @@ export default class OrgCheckApp extends LightningElement {
     /**
      * Internal method to load the Org Check API and its dependencies
      */ 
-    _loadAPI() {
-        Promise.all([
-            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
-            loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
-        ]).then(() => {
+    async _loadAPI() {
+
+        const LOG_SECTION = 'INIT';
+        this.#spinner.open();
+        this.#spinner.sectionStarts(LOG_SECTION, "C'est parti !");
+
+        try {
+            this.#spinner.sectionContinues(LOG_SECTION, 'Loading JsForce and FFLate libraries...')
+            await Promise.all([
+                loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
+                loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
+            ]);
+
+            this.#spinner.sectionContinues(LOG_SECTION, 'Loading Org Check library...')
             this.#api = new OrgCheckAPI(
                 // eslint-disable-next-line no-undef
                 jsforce,
@@ -239,50 +249,48 @@ export default class OrgCheckApp extends LightningElement {
                     sectionContinues: (s, m) => { this.#spinner.sectionContinues(s, m); },
                     sectionEnded: (s, m) => { this.#spinner.sectionEnded(s, m); },
                     sectionFailed: (s, e) => { this.#spinner.sectionFailed(s, e); },
-                    end: (s, f) => { if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
+                    end: (s, f) => { if (this.#keepSpinnerOpen === true) return; if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
                 }
             );
+
             this.orgCheckVersion = this.#api.getVersion();
-            this.#api.checkCurrentUserPermissions()
-                .then(() => {
-                    Promise.all([
-                        this.#api.getOrganizationInformation(),
-                        this.#api.getPackagesTypesAndObjects('*', '*')
-                    ]).then((data) => {
-                        // Information about the org
-                        const orgInfo = data[0];
-                        this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-                        this.orgType = orgInfo.type;
-                        this.isOrgProduction = orgInfo.isProduction;
-                        if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-                        else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-                        else this.themeForOrgType = 'slds-theme_success';
-                        this.#filters.updateIsCurrentOrgAProduction(this.isOrgProduction === true);
-                        // Data for the filters
-                        const filtersData = data[1];
-                        this.#filters.updateSObjectTypeOptions(filtersData.types);
-                        this.#filters.updatePackageOptions(filtersData.packages);
-                        this.#filters.updateSObjectApiNameOptions(filtersData.objects);
-                        // Update the current tab
-                        this._updateCurrentTab();
-                    }).catch((error) => {
-                        // Issue with basic information gathering
-                        this.#modal.open('Basic Information Gathering Issue', error, false);
-                        console.error(error);
-                    }).finally(() => {
-                        // Show Daily API Usage in the app
-                        this._updateDailyAPIUsage();
-                    })
-                })
-                .catch(error => {
-                    // Issue with user permissions
-                    this.#modal.open('User Permissions Issue', error.message, false);
-                    console.error(error);
-                })
-            ;
-        }).catch((error) => {
-            console.error(error);
-        });
+
+            this.#spinner.sectionContinues(LOG_SECTION, 'Checking if current user has enough permission...')
+            await this.#api.checkCurrentUserPermissions();
+
+            this.#spinner.sectionContinues(LOG_SECTION, 'Gathering information from the org and fetching info for the global filter...');
+            const infoData = await Promise.all([
+                this.#api.getOrganizationInformation(),
+                this.#api.getPackagesTypesAndObjects('*', '*')
+            ]);
+
+            // Information about the org
+            this.#spinner.sectionContinues(LOG_SECTION, 'Information about the org...');
+            const orgInfo = infoData[0];
+            this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+            this.orgType = orgInfo.type;
+            this.isOrgProduction = orgInfo.isProduction;
+            if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+            else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+            else this.themeForOrgType = 'slds-theme_success';
+            this.#filters.updateIsCurrentOrgAProduction(this.isOrgProduction === true);
+
+            // Data for the filters
+            this.#spinner.sectionContinues(LOG_SECTION, 'Data for the filters...');
+            const filtersData = infoData[1];
+            this.#filters.updateSObjectTypeOptions(filtersData.types);
+            this.#filters.updatePackageOptions(filtersData.packages);
+            this.#filters.updateSObjectApiNameOptions(filtersData.objects);
+
+            // FINALLY!
+            this.#spinner.sectionEnded(LOG_SECTION, 'All set!');
+            this._updateCurrentTab();
+            this._updateDailyAPIUsage();
+            this.#keepSpinnerOpen = false;
+    
+        } catch(error) {
+            this.#spinner.sectionFailed(LOG_SECTION, error);
+        }
     }
 
     _updateDailyAPIUsage() {
@@ -339,6 +347,7 @@ export default class OrgCheckApp extends LightningElement {
         const section = `TAB ${this.#currentTab}`;
         try {
             this.#spinner.open();
+            this.#keepSpinnerOpen = true;
             this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             this._updateDailyAPIUsage();
             switch (this.#currentTab) {
@@ -353,10 +362,10 @@ export default class OrgCheckApp extends LightningElement {
                 case 'object-permissions': {
                     const data = await this.#api.getObjectPermissionsPerParent(namespace);
                     const columns = [
-                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
-                        { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
-                        { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
+                        { label: 'Parent',  type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
+                        { label: 'Package', type: 'text',     data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Type',    type: 'text',     data: { ref: 'parentRef', value: 'type' }},
+                        { label: 'Custom',  type: 'boolean',  data: { ref: 'parentRef', value: 'isCustom' }}
                     ];
                     data.objects.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'objectPermissions', value: o }, orientation: 'vertical' }));
                     this.objectPermissionsTableColumns = columns;
@@ -366,10 +375,10 @@ export default class OrgCheckApp extends LightningElement {
                 case 'app-permissions': {
                     const data = await this.#api.getApplicationPermissionsPerParent(namespace);
                     const columns = [
-                        { label: 'Parent',  type: 'id',      data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',    data: { ref: 'parentRef', value: 'package' }},
-                        { label: 'Type',    type: 'text',    data: { ref: 'parentRef', value: 'type' }},
-                        { label: 'Custom',  type: 'boolean', data: { ref: 'parentRef', value: 'isCustom' }}
+                        { label: 'Parent',  type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
+                        { label: 'Package', type: 'text',     data: { ref: 'parentRef', value: 'package' }},
+                        { label: 'Type',    type: 'text',     data: { ref: 'parentRef', value: 'type' }},
+                        { label: 'Custom',  type: 'boolean',  data: { ref: 'parentRef', value: 'isCustom' }}
                     ];
                     data.apps.forEach(o => columns.push({ label: o, type: 'text', data: { ref: 'appPermissions', value: o }, orientation: 'vertical' }));
                     this.appPermissionsTableColumns = columns;
@@ -385,8 +394,8 @@ export default class OrgCheckApp extends LightningElement {
                 case 'profile-password-policies':          this.profilePasswordPoliciesTableData = await this.#api.getProfilePasswordPolicies(); break;
                 case 'roles-listing':                      this.rolesTableData = await this.#api.getRoles(); break;
                 case 'roles-explorer':                     this.rolesTree = await this.#api.getRolesTree(); break;
-                case 'public-groups':                      this.publicGroupsTableData = await this.#api.getPublicGroups(); break;
-                case 'queues':                             this.queuesTableData = await this.#api.getQueues(); break;
+                case 'public-groups':                      this.publicGroupsTableData = (await this.#api.getGroups()).filter((r) => r.isPublicGroup === true); break;
+                case 'queues':                             this.queuesTableData = (await this.#api.getGroups()).filter((r) => r.isQueue === true); break;
                 case 'flows':                              this.flowsTableData = await this.#api.getFlows(); break;
                 case 'process-builders':                   this.processBuildersTableData = await this.#api.getProcessBuilders(); break;
                 case 'workflows':                          this.workflowsTableData = await this.#api.getWorkflows(); break;
@@ -406,6 +415,7 @@ export default class OrgCheckApp extends LightningElement {
             this._updateDailyAPIUsage();
             this.#spinner.sectionEnded(section, 'Done');
             this.#spinner.close();
+            this.#keepSpinnerOpen = false;
 
         } catch (error) {
             this.#spinner.sectionFailed(section, error);
@@ -414,62 +424,62 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     fieldSetsColumns = [
-        { label: 'Label',               type: 'id',               data: { value: 'label', url: 'url' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Label',       type: 'id',       data: { value: 'label', url: 'url' }},
+        { label: 'Description', type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     layoutsColumns = [
-        { label: 'Label',               type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'Type',                type: 'text',             data: { value: 'type' }},
+        { label: 'Label', type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Type',  type: 'text',     data: { value: 'type' }},
     ];
 
     limitsColumns = [
-        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'label' }, sorted: 'desc' },
-        { label: 'Label',               type: 'id',               data: { value: 'label', url: 'url' }},
-        { label: 'Type',                type: 'text',             data: { value: 'type' }},
-        { label: 'Max',                 type: 'numeric',          data: { value: 'max' }},
-        { label: 'Used',                type: 'numeric',          data: { value: 'used' }},
-        { label: 'Used (%)',            type: 'percentage',       data: { value: 'usedPercentage' }},
-        { label: 'Remaining',           type: 'numeric',          data: { value: 'remaining' }}
+        { label: 'Score',     type: 'score',      data: { id: 'id', name: 'label' }, sorted: 'desc' },
+        { label: 'Label',     type: 'text',       data: { value: 'label' }},
+        { label: 'Type',      type: 'text',       data: { value: 'type' }},
+        { label: 'Max',       type: 'numeric',    data: { value: 'max' }},
+        { label: 'Used',      type: 'numeric',    data: { value: 'used' }},
+        { label: 'Used (%)',  type: 'percentage', data: { value: 'usedPercentage' }},
+        { label: 'Remaining', type: 'numeric',    data: { value: 'remaining' }}
     ];
 
     validationRulesColumns = [
-        { label: 'Score',             type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',              type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'Is Active',         type: 'boolean',          data: { value: 'isActive' }},
-        { label: 'Display On Field',  type: 'text',             data: { value: 'errorDisplayField' }},
-        { label: 'Error Message',     type: 'text',             data: { value: 'errorMessage' }},
-        { label: 'Description',       type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Score',            type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',             type: 'id',        data: { value: 'name', url: 'url' }},
+        { label: 'Is Active',        type: 'boolean',   data: { value: 'isActive' }},
+        { label: 'Display On Field', type: 'text',      data: { value: 'errorDisplayField' }},
+        { label: 'Error Message',    type: 'text',      data: { value: 'errorMessage' }},
+        { label: 'Description',      type: 'text',      data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     webLinksColumns = [
-        { label: 'Name',           type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Name', type: 'id',       data: { value: 'name' }},
     ];
 
     recordTypesColumns = [
-        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',      type: 'text',             data: { value: 'developerName' }},
-        { label: 'Is Active',           type: 'boolean',          data: { value: 'isActive' }},
-        { label: 'Is Available',        type: 'boolean',          data: { value: 'isAvailable' }},
-        { label: 'Is Default',          type: 'boolean',          data: { value: 'isDefaultRecordTypeMapping' }},
-        { label: 'Is Master',           type: 'boolean',          data: { value: 'isMaster' }},
-        { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Score',          type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',           type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name', type: 'text',     data: { value: 'developerName' }},
+        { label: 'Is Active',      type: 'boolean',  data: { value: 'isActive' }},
+        { label: 'Is Available',   type: 'boolean',  data: { value: 'isAvailable' }},
+        { label: 'Is Default',     type: 'boolean',  data: { value: 'isDefaultRecordTypeMapping' }},
+        { label: 'Is Master',      type: 'boolean',  data: { value: 'isMaster' }},
+        { label: 'Description',    type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     relationshipsColumns = [
-        { label: 'Name',                 type: 'text',             data: { value: 'name' }},
-        { label: 'Field Name',           type: 'text',             data: { value: 'fieldName' }},
-        { label: 'Child Object',         type: 'text',             data: { value: 'childObject' }},
-        { label: 'Is Cascade Delete',    type: 'boolean',          data: { value: 'isCascadeDelete' }},
-        { label: 'Is Restricive Delete', type: 'boolean',          data: { value: 'isRestrictedDelete' }}
+        { label: 'Name',                 type: 'text',    data: { value: 'name' }},
+        { label: 'Field Name',           type: 'text',    data: { value: 'fieldName' }},
+        { label: 'Child Object',         type: 'text',    data: { value: 'childObject' }},
+        { label: 'Is Cascade Delete',    type: 'boolean', data: { value: 'isCascadeDelete' }},
+        { label: 'Is Restricive Delete', type: 'boolean', data: { value: 'isRestrictedDelete' }}
     ];
     
     customFieldsTableColumns = [
-        { label: 'Score',               type: 'score',            filter: 'sco', data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',               type: 'score',            filter: 'sco', data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Label',               type: 'text',             data: { value: 'label' }},
-        { label: 'In this object',      type: 'id',               filter: 'obj', data: { ref: 'objectRef', value: 'label', url: 'url' }},
+        { label: 'In this object',      type: 'id',               filter: 'obj', data: { ref: 'objectRef', value: 'name', url: 'url' }},
         { label: 'Object Type',         type: 'text',             filter: 'obj', data: { ref: 'objectRef.typeRef', value: 'label' }},
         { label: 'Package',             type: 'text',             filter: 'cus', data: { value: 'package' }},
         { label: 'Type',                type: 'text',             data: { value: 'type' }},
@@ -501,7 +511,7 @@ export default class OrgCheckApp extends LightningElement {
     customFieldsTableData;
 
     customLabelsTableColumns = [
-        { label: 'Score',               type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',               type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Package',             type: 'text',             data: { value: 'package' }},
         { label: 'Label',               type: 'text',             data: { value: 'label' }},
@@ -522,7 +532,7 @@ export default class OrgCheckApp extends LightningElement {
     customLabelsTableData;
 
     auraComponentsTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -537,7 +547,7 @@ export default class OrgCheckApp extends LightningElement {
     auraComponentsTableData;
 
     lightningPagesTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
@@ -551,7 +561,7 @@ export default class OrgCheckApp extends LightningElement {
     lightningPagesTableData;
 
     lightningWebComponentsTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -566,29 +576,29 @@ export default class OrgCheckApp extends LightningElement {
     lightningWebComponentsTableData;
 
     permissionSetsTableColumns = [
-        { label: 'Score',            type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',             type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Is Group?',        type: 'boolean',  data: { value: 'isGroup' }},
-        { label: 'Custom',           type: 'boolean',  data: { value: 'isCustom' }},
-        { label: '#FLSs',            type: 'numeric',  data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
-        { label: '#Object CRUDs',    type: 'numeric',  data: { value: 'nbObjectPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},            
-        { label: 'Api Enabled',      type: 'boolean',  data: { ref: 'importantPermissions', value: 'apiEnabled' }},
-        { label: 'View Setup',       type: 'boolean',  data: { ref: 'importantPermissions', value: 'viewSetup' }},
-        { label: 'Modify All Data',  type: 'boolean',  data: { ref: 'importantPermissions', value: 'modifyAllData' }},
-        { label: 'View All Data',    type: 'boolean',  data: { ref: 'importantPermissions', value: 'viewAllData' }},
-        { label: 'License',          type: 'text',     data: { value: 'license' }},
-        { label: 'Package',          type: 'text',     data: { value: 'package' }},
-        { label: '#Active users',    type: 'numeric',  data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No active user!' }},
-        { label: 'Users\' profiles', type: 'ids',      data: { ref: 'assigneeProfileRefs', value: 'name', url: 'url' }},
-        { label: 'Created date',     type: 'dateTime', data: { value: 'createdDate' }},
-        { label: 'Modified date',    type: 'dateTime', data: { value: 'lastModifiedDate' }},
-        { label: 'Description',      type: 'text',     data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Score',            type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',             type: 'id',        data: { value: 'name', url: 'url' }},
+        { label: 'Is Group?',        type: 'boolean',   data: { value: 'isGroup' }},
+        { label: 'Custom',           type: 'boolean',   data: { value: 'isCustom' }},
+        { label: '#FLSs',            type: 'numeric',   data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
+        { label: '#Object CRUDs',    type: 'numeric',   data: { value: 'nbObjectPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},            
+        { label: 'Api Enabled',      type: 'boolean',   data: { ref: 'importantPermissions', value: 'apiEnabled' }},
+        { label: 'View Setup',       type: 'boolean',   data: { ref: 'importantPermissions', value: 'viewSetup' }},
+        { label: 'Modify All Data',  type: 'boolean',   data: { ref: 'importantPermissions', value: 'modifyAllData' }},
+        { label: 'View All Data',    type: 'boolean',   data: { ref: 'importantPermissions', value: 'viewAllData' }},
+        { label: 'License',          type: 'text',      data: { value: 'license' }},
+        { label: 'Package',          type: 'text',      data: { value: 'package' }},
+        { label: '#Active users',    type: 'numeric',   data: { value: 'memberCounts' }, modifier: { min: 1, valueBeforeMin: 'No active user!' }},
+        { label: 'Users\' profiles', type: 'ids',       data: { ref: 'assigneeProfileRefs', value: 'name', url: 'url' }},
+        { label: 'Created date',     type: 'dateTime',  data: { value: 'createdDate' }},
+        { label: 'Modified date',    type: 'dateTime',  data: { value: 'lastModifiedDate' }},
+        { label: 'Description',      type: 'text',      data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     permissionSetsTableData;
 
     profilesTableColumns = [
-        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',           type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { value: 'isCustom' }},
         { label: '#FLSs',           type: 'numeric',  data: { value: 'nbFieldPermissions' }, modifier: { max: 50, valueAfterMax: '50+' }},
@@ -608,7 +618,7 @@ export default class OrgCheckApp extends LightningElement {
     profilesTableData;
 
     profileRestrictionsTableColumns = [
-        { label: 'Score',           type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',           type: 'score',    data: { ref: 'profileRef', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
         { label: 'Custom',          type: 'boolean',  data: { ref: 'profileRef', value: 'isCustom' }},
         { label: 'Package',         type: 'text',     data: { ref: 'profileRef', value: 'package' }},
@@ -620,7 +630,7 @@ export default class OrgCheckApp extends LightningElement {
     profileRestrictionsTableData;
 
     profilePasswordPoliciesTableColumns = [
-        { label: 'Score',                                     type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',                                     type: 'score',   data: { id: 'profileName', name: 'profileName' }, sorted: 'desc' },
         { label: 'Name',                                      type: 'text',    data: { value: 'profileName' }},
         { label: 'User password expires in',                  type: 'numeric', data: { value: 'passwordExpiration' }},
         { label: 'Enforce password history',                  type: 'numeric', data: { value: 'passwordHistory' }},
@@ -636,57 +646,51 @@ export default class OrgCheckApp extends LightningElement {
     profilePasswordPoliciesTableData;
 
     publicGroupsTableColumns = [
-        { label: 'Score',                  type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
-        { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
-        { label: '#Members (imp. & exp.)', type: 'numeric', data: { value: 'nbUsers' }},
-        { label: '#Explicit members',      type: 'numeric', data: { value: 'nbDirectMembers' }},
-        { label: 'Explicit groups',        type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
-        { label: 'Explicit users',         type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
-        { label: '#Implicit members',      type: 'numeric', data: { value: 'nbIndirectUsers' }},
-        { label: 'Implicit users',         type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
+        { label: 'Score',                  type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                   type: 'id',        data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',         type: 'text',      data: { value: 'developerName' }},
+        { label: 'With bosses?',           type: 'boolean',   data: { value: 'includeBosses' }},
+        { label: '#Explicit members',      type: 'numeric',   data: { value: 'nbDirectMembers' }},
+        { label: 'Explicit groups',        type: 'ids',       data: { ref: 'directGroupRefs', value: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses ':''}${g.includeSubordinates?' with subordinates':''})`, url: 'url' }},
+        { label: 'Explicit users',         type: 'ids',       data: { ref: 'directUserRefs', value: 'name', url: 'url' }}
     ];
 
     publicGroupsTableData;
 
     queuesTableColumns = [
-        { label: 'Score',                  type: 'score',   data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',                   type: 'id',      data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',         type: 'text',    data: { value: 'developerName' }},
-        { label: 'With bosses?',           type: 'boolean', data: { value: 'includeBosses' }},
-        { label: '#Members (imp. & exp.)', type: 'numeric', data: { value: 'nbUsers' }},
-        { label: '#Explicit members',      type: 'numeric', data: { value: 'nbDirectMembers' }},
-        { label: 'Explicit groups',        type: 'ids',     data: { ref: 'directGroupRefs', value: 'name', url: 'url' }},
-        { label: 'Explicit users',         type: 'ids',     data: { ref: 'directUserRefs', value: 'name', url: 'url' }},
-        { label: '#Implicit members',      type: 'numeric', data: { value: 'nbIndirectUsers' }},
-        { label: 'Implicit users',         type: 'ids',     data: { ref: 'indirectUserRefs', value: 'name', url: 'url' }},
+        { label: 'Score',                  type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                   type: 'id',        data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',         type: 'text',      data: { value: 'developerName' }},
+        { label: 'With bosses?',           type: 'boolean',   data: { value: 'includeBosses' }},
+        { label: '#Explicit members',      type: 'numeric',   data: { value: 'nbDirectMembers' }},
+        { label: 'Explicit groups',        type: 'ids',       data: { ref: 'directGroupRefs', value: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses ':''}${g.includeSubordinates?' with subordinates':''})`, url: 'url' }},
+        { label: 'Explicit users',         type: 'ids',       data: { ref: 'directUserRefs', value: 'name', url: 'url' }}
     ];
 
     queuesTableData;
 
     usersTableColumns = [
-        { label: 'Score',                        type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'User Name',                    type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Under LEX?',                   type: 'boolean',  data: { value: 'onLightningExperience' }},
-        { label: 'Last login',                   type: 'dateTime', data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
-        { label: 'Failed logins',                type: 'numeric',  data: { value: 'numberFailedLogins' }},
-        { label: 'Password change',              type: 'dateTime', data: { value: 'lastPasswordChange' }},
-        { label: 'Api Enabled',                  type: 'boolean',  data: { ref: 'aggregateImportantPermissions.apiEnabled', value: 'length' }},
-        { label: 'Api Enabled granted from',     type: 'ids',      data: { ref: 'aggregateImportantPermissions.apiEnabled', url: 'url', value: 'name' }},
-        { label: 'View Setup',                   type: 'boolean',  data: { ref: 'aggregateImportantPermissions.viewSetup', value: 'length' }},
-        { label: 'View Setup granted from',      type: 'ids',      data: { ref: 'aggregateImportantPermissions.viewSetup', url: 'url', value: 'name' }},
-        { label: 'Modify All Data',              type: 'boolean',  data: { ref: 'aggregateImportantPermissions.modifyAllData', value: 'length' }},
-        { label: 'Modify All Data granted from', type: 'ids',      data: { ref: 'aggregateImportantPermissions.modifyAllData', url: 'url', value: 'name' }},
-        { label: 'View All Data',                type: 'boolean',  data: { ref: 'aggregateImportantPermissions.viewAllData', value: 'length' }},
-        { label: 'View All Data granted from',   type: 'ids',      data: { ref: 'aggregateImportantPermissions.viewAllData', url: 'url', value: 'name' }},
-        { label: 'Profile',                      type: 'id',       data: { ref: 'profileRef', url: 'url', value: 'name' }},
-        { label: 'Permission Sets',              type: 'ids',      data: { ref: 'permissionSetRefs', url: 'url', value: 'name' }}
+        { label: 'Score',                        type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'User Name',                    type: 'id',        data: { value: 'name', url: 'url' }},
+        { label: 'Under LEX?',                   type: 'boolean',   data: { value: 'onLightningExperience' }},
+        { label: 'Last login',                   type: 'dateTime',  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
+        { label: 'Failed logins',                type: 'numeric',   data: { value: 'numberFailedLogins' }},
+        { label: 'Password change',              type: 'dateTime',  data: { value: 'lastPasswordChange' }},
+        { label: 'Api Enabled',                  type: 'boolean',   data: { ref: 'aggregateImportantPermissions.apiEnabled', value: 'length' }},
+        { label: 'Api Enabled granted from',     type: 'ids',       data: { ref: 'aggregateImportantPermissions.apiEnabled', value: 'name', url: 'url' }},
+        { label: 'View Setup',                   type: 'boolean',   data: { ref: 'aggregateImportantPermissions.viewSetup', value: 'length' }},
+        { label: 'View Setup granted from',      type: 'ids',       data: { ref: 'aggregateImportantPermissions.viewSetup', value: 'name', url: 'url' }},
+        { label: 'Modify All Data',              type: 'boolean',   data: { ref: 'aggregateImportantPermissions.modifyAllData', value: 'length', url: 'url' }},
+        { label: 'Modify All Data granted from', type: 'ids',       data: { ref: 'aggregateImportantPermissions.modifyAllData', value: 'name', url: 'url' }},
+        { label: 'View All Data',                type: 'boolean',   data: { ref: 'aggregateImportantPermissions.viewAllData', value: 'length', url: 'url' }},
+        { label: 'View All Data granted from',   type: 'ids',       data: { ref: 'aggregateImportantPermissions.viewAllData', value: 'name', url: 'url' }},
+        { label: 'Profile',                      type: 'id',        data: { ref: 'profileRef', value: 'name', url: 'url' }},
+        { label: 'Permission Sets',              type: 'ids',       data: { ref: 'permissionSetRefs', value: 'name', url: 'url' }}
     ];
     usersTableData;
 
     visualForceComponentsTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -701,7 +705,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForceComponentsTableData;
 
     visualForcePagesTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Mobile',        type: 'boolean',          data: { value: 'isMobileReady' }},
@@ -717,7 +721,7 @@ export default class OrgCheckApp extends LightningElement {
     visualForcePagesTableData;
 
     apexClassesTableColumns = [
-        { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
@@ -747,7 +751,7 @@ export default class OrgCheckApp extends LightningElement {
     apexClassesTableData;
     
     apexUncompiledTableColumns = [
-        { label: 'Score',           type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',         type: 'text',             data: { value: 'package' }},
@@ -764,12 +768,12 @@ export default class OrgCheckApp extends LightningElement {
     apexUncompiledTableData;
 
     apexTriggersTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
         { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
-        { label: 'Object',        type: 'id',               data: { ref: 'objectRef', value: 'name', url: 'url' }},
+        { label: 'Object',        type: 'id',               filter: 'nob', data: { ref: 'objectRef', value: 'name', url: 'url' }},
         { label: 'Active?',       type: 'boolean',          data: { value: 'isActive' }},
         { label: 'Has SOQL?',     type: 'boolean',          data: { value: 'hasSOQL' }},
         { label: 'Has DML?',      type: 'boolean',          data: { value: 'hasDML' }},
@@ -786,10 +790,14 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
 
+    apexTriggersInObjectTableColumns = this.apexTriggersTableColumns.filter(c =>
+        c.filter !== 'nob'
+    );
+
     apexTriggersTableData;
 
     apexTestsTableColumns = [
-        { label: 'Score',         type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
         { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
@@ -824,7 +832,7 @@ export default class OrgCheckApp extends LightningElement {
     appPermissionsTableData;
 
     rolesTableColumns = [
-        { label: 'Score',                       type: 'score',    data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Score',                       type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                        type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Developer Name',              type: 'text',     data: { value: 'apiname' }},
         { label: 'Number of active members',    type: 'numeric',  data: { value: 'activeMembersCount' }},
@@ -871,30 +879,30 @@ export default class OrgCheckApp extends LightningElement {
     rolesTree;
 
     flowsTableColumns = [
-        { label: 'Score',                    type: 'score',            data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',                     type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',              type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-        { label: 'Type',                     type: 'text',             data: { value: 'type' }},
-        { label: 'Number of versions',       type: 'numeric',          data: { value: 'versionsCount' }},
-        { label: 'Current Version',          type: 'id',               data: { ref: 'currentVersionRef', value: 'version', url: 'url' }},
-        { label: 'Is it Active?',            type: 'boolean',          data: { value: 'isVersionActive' }},
-        { label: 'Is it the Latest?',        type: 'boolean',          data: { value: 'isLatestCurrentVersion' }},
-        { label: 'Its Running Mode',         type: 'text',             data: { ref: 'currentVersionRef', value: 'runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-        { label: 'Its API Version',          type: 'numeric',          data: { ref: 'currentVersionRef', value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-        { label: '# Nodes',                  type: 'numeric',          data: { ref: 'currentVersionRef', value: 'totalNodeCount' }},
-        { label: '# DML Create Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlCreateNodeCount' }},
-        { label: '# DML Delete Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlDeleteNodeCount' }},
-        { label: '# DML Update Nodes',       type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlUpdateNodeCount' }},
-        { label: '# Screen Nodes',           type: 'numeric',          data: { ref: 'currentVersionRef', value: 'screenNodeCount' }},
-        { label: 'Its Created date',         type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'createdDate' }},
-        { label: 'Its Modified date',        type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'lastModifiedDate' }},
-        { label: 'Its Description',          type: 'text',             data: { ref: 'currentVersionRef', value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-        { label: 'Using',                    type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Referenced in',            type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Dependencies',             type: 'dependencyViewer', data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }},
-        { label: 'Created date',             type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date',            type: 'dateTime',         data: { value: 'lastModifiedDate' }},
-        { label: 'Description',              type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Score',              type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',               type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',        type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+        { label: 'Type',               type: 'text',             data: { value: 'type' }},
+        { label: 'Number of versions', type: 'numeric',          data: { value: 'versionsCount' }},
+        { label: 'Current Version',    type: 'id',               data: { ref: 'currentVersionRef', value: 'name', url: 'url' }},
+        { label: 'Is it Active?',      type: 'boolean',          data: { value: 'isVersionActive' }},
+        { label: 'Is it the Latest?',  type: 'boolean',          data: { value: 'isLatestCurrentVersion' }},
+        { label: 'Its Running Mode',   type: 'text',             data: { ref: 'currentVersionRef', value: 'runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
+        { label: 'Its API Version',    type: 'numeric',          data: { ref: 'currentVersionRef', value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+        { label: '# Nodes',            type: 'numeric',          data: { ref: 'currentVersionRef', value: 'totalNodeCount' }},
+        { label: '# DML Create Nodes', type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlCreateNodeCount' }},
+        { label: '# DML Delete Nodes', type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlDeleteNodeCount' }},
+        { label: '# DML Update Nodes', type: 'numeric',          data: { ref: 'currentVersionRef', value: 'dmlUpdateNodeCount' }},
+        { label: '# Screen Nodes',     type: 'numeric',          data: { ref: 'currentVersionRef', value: 'screenNodeCount' }},
+        { label: 'Its Created date',   type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'createdDate' }},
+        { label: 'Its Modified date',  type: 'dateTime',         data: { ref: 'currentVersionRef', value: 'lastModifiedDate' }},
+        { label: 'Its Description',    type: 'text',             data: { ref: 'currentVersionRef', value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        { label: 'Using',              type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Referenced in',      type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
+        { label: 'Dependencies',       type: 'dependencyViewer', data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }},
+        { label: 'Created date',       type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',      type: 'dateTime',         data: { value: 'lastModifiedDate' }},
+        { label: 'Description',        type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
     flowsTableData;
@@ -904,16 +912,16 @@ export default class OrgCheckApp extends LightningElement {
     processBuildersTableData;
     
     workflowsTableColumns = [
-        { label: 'Score',             type: 'score',       data: { value: 'score', id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',              type: 'id',          data: { value: 'name', url: 'url' }},
-        { label: 'Is Active',         type: 'boolean',     data: { value: 'isActive' }},
-        { label: 'Has Actions',       type: 'boolean',     data: { value: 'hasAction' }},
-        { label: 'Direct Actions',    type: 'objects',     data: { ref: 'actions' }, modifier: { template: '{name} ({type})' }},
-        { label: 'Empty Timetrigger', type: 'objects',     data: { ref: 'emptyTimeTriggers' }, modifier: { template: '{field} after {delay}' }},
-        { label: 'Future Actions',    type: 'objects',     data: { ref: 'futureActions' }, modifier: { template: '{field} after {delay}: {name} ({type})' }},
-        { label: 'Created date',      type: 'dateTime',    data: { value: 'createdDate' }},
-        { label: 'Modified date',     type: 'dateTime',    data: { value: 'lastModifiedDate' }},
-        { label: 'Description',       type: 'text',        data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        { label: 'Score',             type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',              type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Is Active',         type: 'boolean',  data: { value: 'isActive' }},
+        { label: 'Has Actions',       type: 'boolean',  data: { value: 'hasAction' }},
+        { label: 'Direct Actions',    type: 'objects',  data: { ref: 'actions' }, modifier: { template: '{name} ({type})' }},
+        { label: 'Empty Timetrigger', type: 'objects',  data: { ref: 'emptyTimeTriggers' }, modifier: { template: '{field} after {delay}' }},
+        { label: 'Future Actions',    type: 'objects',  data: { ref: 'futureActions' }, modifier: { template: '{field} after {delay}: {name} ({type})' }},
+        { label: 'Created date',      type: 'dateTime', data: { value: 'createdDate' }},
+        { label: 'Modified date',     type: 'dateTime', data: { value: 'lastModifiedDate' }},
+        { label: 'Description',       type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
     
     workflowsTableData;
@@ -956,7 +964,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' },
                     { label: 'Package', field: 'package' },
                     { label: 'Type', field: 'type' },
                     { label: 'Length', field: 'length' },
@@ -978,7 +985,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Package', field: 'package' },
                     { label: 'Type', field: 'type' },
                     { label: 'Length', field: 'length' },
@@ -1000,7 +1006,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' }
                 ], 
                 rows: this.objectInformationData.apexTriggers
             },
@@ -1009,7 +1014,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'label' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Description', field: 'description' }
                 ], 
                 rows: this.objectInformationData.fieldSets
@@ -1019,7 +1023,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Type', field: 'type' }
                 ], 
                 rows: this.objectInformationData.layouts
@@ -1040,7 +1043,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'label' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Is Active?', field: 'isActive' },  
                     { label: 'Error Display Field', field: 'errorDisplayField' },  
                     { label: 'Error Message', field: 'errorMessage' },  
@@ -1062,7 +1064,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Custom', field: 'isCustom' },  
                     { label: 'Tooltip', field: 'tooltip' },  
                     { label: 'Type', field: 'type' },  
@@ -1081,7 +1082,6 @@ export default class OrgCheckApp extends LightningElement {
                 columns: [
                     { label: 'Id', field: 'id' },  
                     { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' },  
                     { label: 'Developer Name', field: 'ladeveloperNamebel' },  
                     { label: 'Master', field: 'isMaster' },  
                     { label: 'Is Active?', field: 'isActive' },  

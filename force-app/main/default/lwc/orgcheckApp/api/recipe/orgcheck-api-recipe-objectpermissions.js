@@ -34,7 +34,7 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
 
         // Augment data
-        await OrgCheckProcessor.chaque(permissions, (permission) => {
+        await OrgCheckProcessor.forEach(permissions, (permission) => {
             if (permission.isParentProfile === true) {
                 permission.parentRef = profiles.get(permission.parentId);
             } else {
@@ -45,7 +45,7 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
         // Filter data
         const permissionsBy = new Map();
         const properties = new Set();
-        await OrgCheckProcessor.chaque(permissions, (permission) => {
+        await OrgCheckProcessor.forEach(permissions, (permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
                 if (permissionsBy.has(permission.parentId) === false) {
                     permissionsBy.set(permission.parentId, {
