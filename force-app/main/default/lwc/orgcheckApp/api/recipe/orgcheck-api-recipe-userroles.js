@@ -30,9 +30,9 @@ export class OrgCheckRecipeUserRoles extends OrgCheckRecipe {
         const userRoles = data.get(DATASET_USERROLES_ALIAS);
         const users = data.get(DATASET_USERS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(userRoles, async (userRole) => {
+        await OrgCheckProcessor.forEach(userRoles, async (userRole) => {
             if (userRole.hasActiveMembers === true) {
-                userRole.activeMemberRefs = await OrgCheckProcessor.carte(userRole.activeMemberIds, (id) => users.get(id));
+                userRole.activeMemberRefs = await OrgCheckProcessor.map(userRole.activeMemberIds, (id) => users.get(id));
             }
             if (userRole.hasParent === true) {
                 userRole.parentRef = userRoles.get(userRole.parentId);
@@ -43,12 +43,12 @@ export class OrgCheckRecipeUserRoles extends OrgCheckRecipe {
         const array = [];
         if (includesExternalRoles === true) {
             // in this case do not filter!
-            await OrgCheckProcessor.chaque(userRoles, (userRole) => {
+            await OrgCheckProcessor.forEach(userRoles, (userRole) => {
                 array.push(userRole);
             });
         } else {
             // in this case please filter
-            await OrgCheckProcessor.chaque(userRoles, (userRole) => {
+            await OrgCheckProcessor.forEach(userRoles, (userRole) => {
                 if (userRole.isExternal === false) array.push(userRole);
             });
         }

@@ -30,18 +30,16 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
         const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
         const profiles = data.get(DATASET_PROFILES_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(permissionSets, async (permissionSet) => {
-            permissionSet.assigneeProfileRefs = await OrgCheckProcessor.carte(
-                await OrgCheckProcessor.filtre(
-                    permissionSet.assigneeProfileIds,
-                    (id) => profiles.has(id)
-                ),
-                (id) => profiles.get(id)
+        await OrgCheckProcessor.forEach(permissionSets, async (permissionSet) => {
+            permissionSet.assigneeProfileRefs = await OrgCheckProcessor.map(
+                permissionSet.assigneeProfileIds,
+                (id) => profiles.get(id),
+                (id) => profiles.has(id)
             );
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(permissionSets, (permissionSet) => {
+        await OrgCheckProcessor.forEach(permissionSets, (permissionSet) => {
             if (namespace === '*' || permissionSet.package === namespace) {
                 array.push(permissionSet);
             }

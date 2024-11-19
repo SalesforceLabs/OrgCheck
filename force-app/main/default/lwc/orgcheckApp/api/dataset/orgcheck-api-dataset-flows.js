@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_FLOW_DEFINITION, TYPE_FLOW_VERSION } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
 
 export class OrgCheckDatasetFlows extends OrgCheckDataset {
@@ -28,8 +29,8 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
+        const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
             localLogger
         );
         
@@ -38,7 +39,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${flowDefRecords.length} flow definitions...`);
-        const flowDefinitions = new Map(await OrgCheckProcessor.carte(flowDefRecords, (record) => {
+        const flowDefinitions = new Map(await OrgCheckProcessor.map(flowDefRecords, (record) => {
         
             // Get the ID15 of this flow definition and others
             const id = sfdcManager.caseSafeId(record.Id);
@@ -47,19 +48,23 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
             // Create the instance
             const flowDefinition = flowDefinitionDataFactory.create({
-                id: id,
-                name: record.DeveloperName,
-                url: sfdcManager.setupUrl('flowDefinition', id),
-                apiVersion: record.ApiVersion,
-                currentVersionId: activeVersionId ?? latestVersionId,
-                isLatestCurrentVersion: activeVersionId === latestVersionId,
-                isVersionActive: activeVersionId ? true : false,
-                versionsCount: 0,
-                description: record.Description,
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                dependenciesFor: 'currentVersionId',
-                allDependencies: dependencies
+                    properties: {
+                    id: id,
+                    name: record.DeveloperName,
+                    apiVersion: record.ApiVersion,
+                    currentVersionId: activeVersionId ?? latestVersionId,
+                    isLatestCurrentVersion: activeVersionId === latestVersionId,
+                    isVersionActive: activeVersionId ? true : false,
+                    versionsCount: 0,
+                    description: record.Description,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    url: sfdcManager.setupUrl(id, TYPE_FLOW_DEFINITION)
+                }, 
+                dependencies: {
+                    data: flowDefinitionsDependencies,
+                    idField: 'currentVersionId'
+                }
             });
                 
             // Add only the active flow (the ones we want to analyze)
@@ -71,7 +76,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
         // Add count of Flow verions (whatever they are active or not)
         localLogger.log(`Parsing ${flowRecords.length} flow versions...`);
-        await OrgCheckProcessor.chaque(flowRecords, (record) => {
+        await OrgCheckProcessor.forEach(flowRecords, (record) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
@@ -82,7 +87,6 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
             // Add to the version counter (whatever the status);
             flowDefinition.versionsCount++;
             flowDefinition.type = record.ProcessType;
-            flowDefinition.isProcessBuilder = 'Workflow';
         });
 
         // Get information about the previous identified active flows using metadata api
@@ -90,7 +94,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], localLogger); // There are GACKs throwing that errors for some flows!
 
         localLogger.log(`Parsing ${records.length} flow versions...`);
-        await OrgCheckProcessor.chaque(records, async (record)=> {
+        await OrgCheckProcessor.forEach(records, async (record)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
@@ -98,34 +102,37 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
             // Create the instance
             const activeFlowVersion = flowVersionDataFactory.create({
-                id: id,
-                name: record.FullName,
-                url: sfdcManager.setupUrl('flow', id),
-                version: record.VersionNumber,
-                apiVersion: record.ApiVersion,
-                totalNodeCount: ['actionCalls', 'apexPluginCalls', 'assignments',
-                                    'collectionProcessors', 'decisions', 'loops',
-                                    'orchestratedStages', 'recordCreates', 'recordDeletes',
-                                    'recordLookups', 'recordRollbacks', 'recordUpdates',
-                                    'screens', 'steps', 'waits'
-                                ].reduce((count, property) => count + record.Metadata[property]?.length || 0, 0),
-                dmlCreateNodeCount: record.Metadata.recordCreates?.length || 0,
-                dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
-                dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
-                screenNodeCount: record.Metadata.screens?.length || 0,
-                isActive: record.Status === 'Active',
-                description: record.Description,
-                type: record.ProcessType,
-                runningMode: record.RunInMode,
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate
+                properties: {
+                    id: id,
+                    name: record.FullName,
+                    version: record.VersionNumber,
+                    apiVersion: record.ApiVersion,
+                    totalNodeCount: ['actionCalls', 'apexPluginCalls', 'assignments',
+                                        'collectionProcessors', 'decisions', 'loops',
+                                        'orchestratedStages', 'recordCreates', 'recordDeletes',
+                                        'recordLookups', 'recordRollbacks', 'recordUpdates',
+                                        'screens', 'steps', 'waits'
+                                    ].reduce((count, property) => count + record.Metadata[property]?.length || 0, 0),
+                    dmlCreateNodeCount: record.Metadata.recordCreates?.length || 0,
+                    dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
+                    dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
+                    screenNodeCount: record.Metadata.screens?.length || 0,
+                    isActive: record.Status === 'Active',
+                    description: record.Description,
+                    type: record.ProcessType,
+                    runningMode: record.RunInMode,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    url: sfdcManager.setupUrl(id, TYPE_FLOW_VERSION)
+                }
             });
-            await OrgCheckProcessor.chaque(
-                await OrgCheckProcessor.filtre(record.Metadata.processMetadataValues, (m) => m.name === 'ObjectType' || m.name === 'TriggerType'),
+            await OrgCheckProcessor.forEach(
+                record.Metadata.processMetadataValues,
                 (m) => {
                     if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
                     if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
-                }
+                },
+                (m) => m.name === 'ObjectType' || m.name === 'TriggerType'
             );
 
             // Get the parent Flow definition
@@ -136,7 +143,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         });
 
         // Compute the score of all definitions
-        await OrgCheckProcessor.chaque(flowDefinitions, (flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));
+        await OrgCheckProcessor.forEach(flowDefinitions, (flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
         localLogger.log(`Done`);

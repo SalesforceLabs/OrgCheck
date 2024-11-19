@@ -33,12 +33,12 @@ export class OrgCheckRecipePackagesTypesAndObjects extends OrgCheckRecipe {
         const types = data.get(DATASET_OBJECTTYPES_ALIAS);
         const objects = data.get(DATASET_OBJECTS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(objects, (object) => {
+        await OrgCheckProcessor.forEach(objects, (object) => {
             object.typeRef = types.get(object.typeId);
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(objects, (object) => {
+        await OrgCheckProcessor.forEach(objects, (object) => {
             if ((namespace === '*' || object.package === namespace) &&
                 (type === '*' || object.typeRef?.id === type)) {
                 array.push(object);

@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_APEX_CLASS } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
@@ -47,42 +48,46 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(apexClassRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const apexClassesDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(apexClassRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
 
         // Part 1b- apex classes
         localLogger.log(`Parsing ${apexClassRecords.length} apex classes...`);
-        const apexClasses = new Map(await OrgCheckProcessor.carte(apexClassRecords, async (record) => {
+        const apexClasses = new Map(await OrgCheckProcessor.map(apexClassRecords, async (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
             const apexClass = apexClassDataFactory.create({
-                id: id,
-                url: sfdcManager.setupUrl('apex-class', id),
-                name: record.Name,
-                apiVersion: record.ApiVersion,
-                package: (record.NamespacePrefix || ''),
-                isTest: false,
-                isAbstract: false,
-                isClass: true,
-                isEnum: false,
-                isInterface: false,
-                isSchedulable: false,
-                isScheduled: false,
-                isSharingMissing: false,
-                length: record.LengthWithoutComments,
-                sourceCode: record.Body,
-                needsRecompilation: (!record.SymbolTable ? true : false),
-                coverage: 0, // by default no coverage!
-                relatedTestClasses: [],
-                relatedClasses: [],
-                createdDate: record.CreatedDate,
-                lastModifiedDate: record.LastModifiedDate,
-                allDependencies: dependencies
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    apiVersion: record.ApiVersion,
+                    package: (record.NamespacePrefix || ''),
+                    isTest: false,
+                    isAbstract: false,
+                    isClass: true,
+                    isEnum: false,
+                    isInterface: false,
+                    isSchedulable: false,
+                    isScheduled: false,
+                    isSharingMissing: false,
+                    length: record.LengthWithoutComments,
+                    sourceCode: record.Body,
+                    needsRecompilation: (!record.SymbolTable ? true : false),
+                    coverage: 0, // by default no coverage!
+                    relatedTestClasses: [],
+                    relatedClasses: [],
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    url: sfdcManager.setupUrl(id, TYPE_APEX_CLASS)
+                }, 
+                dependencies: {
+                    data: apexClassesDependencies
+                }
             });
 
             // Get information from the compilation output information by the Apex compiler on salesforce side (if available)
@@ -94,7 +99,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
                     apexClass.annotations = record.SymbolTable.tableDeclaration.annotations;
-                    await OrgCheckProcessor.chaque(record.SymbolTable.tableDeclaration.modifiers, m => {
+                    await OrgCheckProcessor.forEach(record.SymbolTable.tableDeclaration.modifiers, m => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;
                             case 'without sharing':   apexClass.specifiedSharing = 'without';   break;
@@ -150,24 +155,27 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         localLogger.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
         const relatedTestsByApexClass = new Map();
         const relatedClassesByApexTest = new Map();
-        await OrgCheckProcessor.chaque(
-            await OrgCheckProcessor.filtre(apexCodeCoverageRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId))), 
+        await OrgCheckProcessor.forEach(
+            apexCodeCoverageRecords,
             (record) => {
                 // Get the ID15 of the class that is tested and the test class
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
                 const testId = sfdcManager.caseSafeId(record.ApexTestClassId);
-                if (relatedTestsByApexClass.has(id) === false) relatedTestsByApexClass.set(id, new Set());
-                if (relatedClassesByApexTest.has(testId) === false) relatedClassesByApexTest.set(testId, new Set());
-                relatedTestsByApexClass.get(id).add(testId);
-                relatedClassesByApexTest.get(testId).add(id);
+                if (apexClasses.has(id)) { // make sure the id is an existing class!
+                    // Add the relationships between class and test class
+                    if (relatedTestsByApexClass.has(id) === false) relatedTestsByApexClass.set(id, new Set());
+                    if (relatedClassesByApexTest.has(testId) === false) relatedClassesByApexTest.set(testId, new Set());
+                    relatedTestsByApexClass.get(id).add(testId);
+                    relatedClassesByApexTest.get(testId).add(id);
+                }
             }
         );
-        await OrgCheckProcessor.chaque(relatedTestsByApexClass, (relatedTestsIds, apexClassId) => {
+        await OrgCheckProcessor.forEach(relatedTestsByApexClass, (relatedTestsIds, apexClassId) => {
             if (apexClasses.has(apexClassId)) { // Just to be safe!
                 apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
             }
         });
-        await OrgCheckProcessor.chaque(relatedClassesByApexTest, (relatedClassesIds, apexTestId) => {
+        await OrgCheckProcessor.forEach(relatedClassesByApexTest, (relatedClassesIds, apexTestId) => {
             if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
                 apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
             }
@@ -175,28 +183,34 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
         // Part 3- add the aggregate code coverage to apex classes
         localLogger.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
-        await OrgCheckProcessor.chaque(
-            await OrgCheckProcessor.filtre(apexCodeCoverageAggRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassOrTriggerId))),
+        await OrgCheckProcessor.forEach(
+            apexCodeCoverageAggRecords,
             (record) => {
                 // Get the ID15 of the class that is tested
                 const id = sfdcManager.caseSafeId(record.ApexClassOrTriggerId);
-                apexClasses.get(id).coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
+                if (apexClasses.has(id)) { // make sure the id is an existing class!
+                    // set the coverage of that class
+                    apexClasses.get(id).coverage = (record.NumLinesCovered / (record.NumLinesCovered + record.NumLinesUncovered));
+                }
             }
         );
 
         // Part 4- add if class is scheduled
         localLogger.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
-        await OrgCheckProcessor.chaque(
-            await OrgCheckProcessor.filtre(asyncApexJobRecords, (record) => apexClasses.has(sfdcManager.caseSafeId(record.ApexClassId))),
+        await OrgCheckProcessor.forEach(
+            asyncApexJobRecords,
             (record) => {
                 // Get the ID15 of the class that is scheduled
                 const id = sfdcManager.caseSafeId(record.ApexClassId);
-                apexClasses.get(id).isScheduled = true;
+                if (apexClasses.has(id)) { // make sure the id is an existing class!
+                    // set the scheduled flag to true
+                    apexClasses.get(id).isScheduled = true;
+                }
             }
         );
 
         // Compute the score of all items
-        await OrgCheckProcessor.chaque(apexClasses, (apexClass) => {
+        await OrgCheckProcessor.forEach(apexClasses, (apexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
 

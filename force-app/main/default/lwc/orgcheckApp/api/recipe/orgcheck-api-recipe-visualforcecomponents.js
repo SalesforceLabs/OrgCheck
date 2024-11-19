@@ -26,7 +26,7 @@ export class OrgCheckRecipeVisualForceComponents extends OrgCheckRecipe {
         const components = data.get(DATASET_VISUALFORCEOMPONENTS_ALIAS);
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(components, (component) => {
+        await OrgCheckProcessor.forEach(components, (component) => {
             if (namespace === '*' || component.package === namespace) {
                 array.push(component);
             }

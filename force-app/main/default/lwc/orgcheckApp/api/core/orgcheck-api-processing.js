@@ -8,7 +8,7 @@ export class OrgCheckProcessor {
      * 
      * @return Promise<void>
      */
-    static async chaque(iterable, iteratee) {
+    static async forEach(iterable, iteratee) {
         if (!iterable) return Promise.resolve();
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper Function.`);
         if (Array.isArray(iterable) === true) return Promise.all(iterable.map(async (item) => { await iteratee(item); return null; } ));
@@ -22,34 +22,19 @@ export class OrgCheckProcessor {
 
     /**
      * Runs in parallel a function for each item of a given iterable (must be an Array), and 
-     * constructs a new array with only the items where the function returned true.
-     * 
-     * @param {Array} iterable  An array to iterate over
-     * @param {Function} iteratee  A function to apply to each item in the iterable. Invoked with (item). Returns true or false.
-     * 
-     * @return Promise<Array>
-     */
-    static async filtre(iterable, iteratee) {
-        if (!iterable) return Promise.resolve([]);
-        if (Array.isArray(iterable) === false) throw new TypeError(`Given iterable is not a proper Array.`);
-        if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper Function.`);
-        return Promise.all(iterable.map(async (item, index) => { return iteratee(item) === true ? index : null }))
-            .then((indexes) => indexes.filter((index) => index !== null).map((index) => iterable[index]));
-    }
-
-    /**
-     * Runs in parallel a function for each item of a given iterable (must be an Array), and 
      * constructs a new array with the same size but with the results of each call to the function.
      * 
      * @param {Array} iterable  An array to iterate over
      * @param {Function} iteratee  A function to call on each item in the array. Invoked with (item). Supposed to return a new item based on the original item.
+     * @param {Function} filterIteratee  An optional function to call on each item in the array. Invoked with (item). Returns true or false.
      * 
      * @return Promise<Array>  
      */
-    static async carte(iterable, iteratee) {
+    static async map(iterable, iteratee, filterIteratee) {
         if (!iterable) return Promise.resolve([]);
         if (Array.isArray(iterable) === false) throw new TypeError(`Given iterable is not a proper Array.`);
         if (typeof iteratee !== 'function') throw new TypeError(`Given iteratee is not a proper Function.`);
-        return Promise.all(iterable.map(async (item) => iteratee(item)));
+        if (filterIteratee && typeof filterIteratee !== 'function') throw new TypeError(`Given filterIteratee is not a proper Function.`);
+        return Promise.all((filterIteratee ? iterable.filter((item) => filterIteratee(item)) : iterable).map(async (item) => iteratee(item)));
     }
 }

@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_PROFILE } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 
 export class OrgCheckDatasetProfiles extends OrgCheckDataset {
@@ -25,32 +26,34 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
         // Create the map
         const profileRecords = results[0].records;
         localLogger.log(`Parsing ${profileRecords.length} profiles...`);
-        const profiles = new Map(await OrgCheckProcessor.carte(profileRecords, (record) => {
+        const profiles = new Map(await OrgCheckProcessor.map(profileRecords, (record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.ProfileId);
 
             // Create the instance
             const profile = profileDataFactory.create({
-                id: id,
-                url: sfdcManager.setupUrl('profile', id),
-                name: record.Profile.Name,
-                apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Profile.Name,
-                description: record.Profile.Description,
-                license: (record.License ? record.License.Name : ''),
-                isCustom: record.IsCustom,
-                package: (record.NamespacePrefix || ''),
-                memberCounts: record.Assignments?.records.length || 0,
-                createdDate: record.CreatedDate, 
-                lastModifiedDate: record.LastModifiedDate,
-                nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                nbObjectPermissions: record.ObjectPerms?.records.length || 0,
-                type: 'Profile',
-                importantPermissions: {
-                    apiEnabled: record.PermissionsApiEnabled,
-                    viewSetup: record.PermissionsViewSetup, 
-                    modifyAllData: record.PermissionsModifyAllData, 
-                    viewAllData: record.PermissionsViewAllData
+                properties: {
+                    id: id,
+                    name: record.Profile.Name,
+                    apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Profile.Name,
+                    description: record.Profile.Description,
+                    license: (record.License ? record.License.Name : ''),
+                    isCustom: record.IsCustom,
+                    package: (record.NamespacePrefix || ''),
+                    memberCounts: record.Assignments?.records.length || 0,
+                    createdDate: record.CreatedDate, 
+                    lastModifiedDate: record.LastModifiedDate,
+                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
+                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    type: 'Profile',
+                    importantPermissions: {
+                        apiEnabled: record.PermissionsApiEnabled,
+                        viewSetup: record.PermissionsViewSetup, 
+                        modifyAllData: record.PermissionsModifyAllData, 
+                        viewAllData: record.PermissionsViewAllData
+                    },
+                    url: sfdcManager.setupUrl(id, TYPE_PROFILE)
                 }
             });
 
@@ -60,7 +63,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
 
         // Compute scores for all permission sets
         localLogger.log(`Computing the score for ${profiles.size} profiles...`);
-        await OrgCheckProcessor.chaque(profiles, (profile) => {
+        await OrgCheckProcessor.forEach(profiles, (profile) => {
             profileDataFactory.computeScore(profile);
         });
 

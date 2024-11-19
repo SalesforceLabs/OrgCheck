@@ -51,12 +51,15 @@ export class OrgCheckDataFactory2 {
         this.#isDependenciesNeeded = isDependenciesNeeded;
     }
 
-    create(setup) {
+    create(configuration) {
+        // Checks
+        if (!configuration) throw new TypeError("Configuration can't be null.");
+        if (!configuration.properties) throw new TypeError("Configuration.properties can't be null.");
         // Create a row from the protofype
         const row = new this.#dataClass();
-        // Copy properties from setup to object
-        // NB: Please note that ONLY the properties explicitely set in the class will be copied from setup to object
-        Object.keys(row).forEach((p) => { row[p] = setup[p]; });
+        // Copy properties from configuration.properties to object
+        // NB: Please note that ONLY the properties explicitely set in the class will be copied to object
+        Object.keys(row).forEach((p) => { row[p] = configuration.properties[p]; });
         // We want to make sure no new property is added to the row (there should be only the ones declared in classes!)
         Object.seal(row);
         // For this type if we have at least one validation rule, then score is needed
@@ -66,8 +69,8 @@ export class OrgCheckDataFactory2 {
             row.badReasonIds = [];
         }
         // If dependencies are needed...
-        if (this.#isDependenciesNeeded === true && setup.allDependencies) {
-            row.dependencies = new OrgCheckDataDependencies(setup.allDependencies, row[setup.dependenciesFor || 'id']);
+        if (this.#isDependenciesNeeded === true && configuration.dependencies) {
+            row.dependencies = new OrgCheckDataDependencies(configuration.dependencies.data, row[configuration.dependencies.idField || 'id']);
         }
         // Return the row finally
         return row;
@@ -198,15 +201,9 @@ export class OrgCheckDataFactory {
                 applicable: [ SFDC_ApexTrigger ]
             }, {
                 description: 'No direct member for this group',
-                formula: (d) => d.nbDirectMembers === 0,
+                formula: (d) => !d.nbDirectMembers || d.nbDirectMembers === 0,
                 errorMessage: 'This public group (or queue) does not contain any direct members (users or sub groups). Is it empty on purpose? Maybe you should review its use in your org...',
                 badField: 'nbDirectMembers',
-                applicable: [ SFDC_Group ]
-            }, {
-                description: 'No user for this group',
-                formula: (d) => d.nbUsers === 0,
-                errorMessage: 'This public group (or queue) does not contain any users either direclty or via a sub group. Is it empty as a result on purpose? Maybe you should review its use in your org...',
-                badField: 'nbUsers',
                 applicable: [ SFDC_Group ]
             }, {
                 description: 'Custom permset or profile with no member',

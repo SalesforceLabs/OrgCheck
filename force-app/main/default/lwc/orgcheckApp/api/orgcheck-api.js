@@ -20,8 +20,7 @@ import { OrgCheckRecipeManager,
     RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
     RECIPE_LIGHTNINGPAGES_ALIAS,
     RECIPE_VISUALFORCECOMPONENTS_ALIAS,
-    RECIPE_PUBLICGROUPS_ALIAS,
-    RECIPE_QUEUES_ALIAS, 
+    RECIPE_GROUPS_ALIAS, 
     RECIPE_APEXCLASSES_ALIAS, 
     RECIPE_APEXTRIGGERS_ALIAS,
     RECIPE_USERROLES_ALIAS,
@@ -393,33 +392,19 @@ export class OrgCheckAPI {
     }
     
     /**
-     * Get information about Public Groups
+     * Get information about Public Groups and Queues
      * 
      * @returns {SFDC_Group[]} List of items to return
      * @throws Exception if rate >= THRESHOLD
      */
-    async getPublicGroups() {
-        return this.#recipeManager.run(RECIPE_PUBLICGROUPS_ALIAS);
+    async getGroups() {
+        return this.#recipeManager.run(RECIPE_GROUPS_ALIAS);
     }
 
-    removeAllPublicGroupsCache() {
-        this.#recipeManager.clean(RECIPE_PUBLICGROUPS_ALIAS);
+    removeAllGroups() {
+        this.#recipeManager.clean(RECIPE_GROUPS_ALIAS);
     }
 
-    /**
-     * Get information about Queues
-     * 
-     * @returns {SFDC_Group[]} List of items to return
-     * @throws Exception if rate >= THRESHOLD
-     */
-    async getQueues() {
-        return this.#recipeManager.run(RECIPE_QUEUES_ALIAS);
-    }
-    
-    removeAllQueuesCache() {
-        this.#recipeManager.clean(RECIPE_QUEUES_ALIAS);
-    }
-    
     /**
      * Get information about Apex Classes (filtered out by namespace/pakage)
      * 

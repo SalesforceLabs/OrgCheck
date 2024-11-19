@@ -32,14 +32,16 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
         
         // Create the data
         const organization = organizationDataFactory.create({
-            id: sfdcManager.caseSafeId(record.Id),
-            name: record.Name,
-            type: type,
-            isDeveloperEdition: (type === ORGTYPE_DE),
-            isSandbox: (type === ORGTYPE_SANDBOX),
-            isTrial: (type === ORGTYPE_TRIAL),
-            isProduction: (type === ORGTYPE_PROD),
-            localNamespace: (record.NamespacePrefix || '')
+            properties: {
+                id: sfdcManager.caseSafeId(record.Id),
+                name: record.Name,
+                type: type,
+                isDeveloperEdition: (type === ORGTYPE_DE),
+                isSandbox: (type === ORGTYPE_SANDBOX),
+                isTrial: (type === ORGTYPE_TRIAL),
+                isProduction: (type === ORGTYPE_PROD),
+                localNamespace: (record.NamespacePrefix || '')
+            }
         });
 
         // Return data as map

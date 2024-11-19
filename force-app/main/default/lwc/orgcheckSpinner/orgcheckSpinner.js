@@ -40,7 +40,14 @@ export default class OrgCheckSpinner extends LightningElement {
                 this._setSection(sectionName, error, SECTION_STATUS_FAILED);
             } else {
                 this._setSection(sectionName, `${error.name}: ${error.message}`, SECTION_STATUS_FAILED, error);
-                console.error(sectionName, error);
+                console.error(
+                    `name of the section: ${sectionName}`, 
+                    `name of the error: ${error?.name}`,
+                    `message of the error: ${error?.message}`,
+                    `stacktrace of the error: ${error?.stack}`,
+                    `cause of the error: ${error?.cause}`,
+                    error
+                );
             }
         } else {
             this._setSection(sectionName, 'The error was undefined...', SECTION_STATUS_FAILED);

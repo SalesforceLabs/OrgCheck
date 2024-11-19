@@ -37,7 +37,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
         const objectsDescription = results[0]; 
         const entities = results[1][0].records;
         const entitiesByName = {};
-        const qualifiedApiNames = await OrgCheckProcessor.carte(
+        const qualifiedApiNames = await OrgCheckProcessor.map(
             entities, 
             (record) => { 
                 entitiesByName[record.QualifiedApiName] = record; 
@@ -48,33 +48,33 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
         // Create the map
         localLogger.log(`Parsing ${objectsDescription.length} custom labels...`);
 
-        const objects = new Map(await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(
-                objectsDescription, 
-                (object) => {
-                    return qualifiedApiNames.includes(object.name) && 
-                           sfdcManager.getObjectType(object.name, object.customSetting) ? true : false;
-                }
-            ),
+        const objects = new Map(await OrgCheckProcessor.map(
+            objectsDescription,
             (object) => {
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
 
                 // Create the instance
                 const obj = objectDataFactory.create({
-                    id: object.name,
-                    label: object.label,
-                    name: entity.DeveloperName,
-                    apiname: object.name,
-                    url: sfdcManager.setupUrl('object', '', entity.DurableId, type),
-                    package: (entity.NamespacePrefix || ''),
-                    typeId: type,
-                    externalSharingModel: entity.ExternalSharingModel,
-                    internalSharingModel: entity.InternalSharingModel
+                    properties: {
+                        id: object.name,
+                        label: object.label,
+                        name: entity.DeveloperName,
+                        apiname: object.name,
+                        package: (entity.NamespacePrefix || ''),
+                        typeId: type,
+                        externalSharingModel: entity.ExternalSharingModel,
+                        internalSharingModel: entity.InternalSharingModel,
+                        url: sfdcManager.setupUrl(entity.DurableId, type)
+                    }
                 });
 
                 // Add it to the map  
                 return [ obj.id, obj ];
+            },
+            (object) => {
+                return qualifiedApiNames.includes(object.name) && 
+                       sfdcManager.getObjectType(object.name, object.customSetting) ? true : false;
             }
         ));
 

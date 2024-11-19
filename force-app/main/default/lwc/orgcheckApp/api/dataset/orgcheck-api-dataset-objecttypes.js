@@ -29,7 +29,7 @@ export class OrgCheckDatasetObjectTypes extends OrgCheckDataset {
                 { id: OBJECTTYPE_ID_CUSTOM_BIG_OBJECT,       label: 'Big Object' }
             ].map((e) => [ 
                 e.id, 
-                objecTypeDataFactory.create({ id: e.id, label: e.label })
+                objecTypeDataFactory.create({ properties: { id: e.id, label: e.label }})
             ])
         );
     } 

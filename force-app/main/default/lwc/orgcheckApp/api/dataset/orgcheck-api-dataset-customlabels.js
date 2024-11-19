@@ -1,5 +1,6 @@
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { TYPE_CUSTOM_LABEL } from '../core/orgcheck-api-sfconnectionmanager';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
@@ -22,32 +23,36 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
         // Then retreive dependencies
         localLogger.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
-        const dependencies = await sfdcManager.dependenciesQuery(
-            await OrgCheckProcessor.carte(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+        const customLabelsDependencies = await sfdcManager.dependenciesQuery(
+            await OrgCheckProcessor.map(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             localLogger
         );
         
         // Create the map
         localLogger.log(`Parsing ${customLabelRecords.length} custom labels...`);
-        const customLabels = new Map(await OrgCheckProcessor.carte(customLabelRecords, (record) => {
+        const customLabels = new Map(await OrgCheckProcessor.map(customLabelRecords, (record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const customLabel = labelDataFactory.createWithScore({
-                id: id,
-                url: sfdcManager.setupUrl('custom-label', record.Id),
-                name: record.Name,
-                package: (record.NamespacePrefix || ''),
-                category: record.Category,
-                isProtected: record.IsProtected === true,
-                language: record.Language,
-                label: record.MasterLabel,
-                value: record.Value,
-                createdDate: record.CreatedDate, 
-                lastModifiedDate: record.LastModifiedDate,
-                allDependencies: dependencies
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    package: (record.NamespacePrefix || ''),
+                    category: record.Category,
+                    isProtected: record.IsProtected === true,
+                    language: record.Language,
+                    label: record.MasterLabel,
+                    value: record.Value,
+                    createdDate: record.CreatedDate, 
+                    lastModifiedDate: record.LastModifiedDate,
+                    url: sfdcManager.setupUrl(id, TYPE_CUSTOM_LABEL)
+                }, 
+                dependencies: {
+                    data: customLabelsDependencies
+                }
             });
 
             // Add it to the map  

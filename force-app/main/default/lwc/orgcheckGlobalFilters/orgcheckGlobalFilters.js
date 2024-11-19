@@ -143,7 +143,7 @@ export default class OrgcheckGlobalFilters extends LightningElement {
                 })
                 .map((o) => {
                     return {
-                        label: `${o.label} (api=${o.name}, type=${o.typeRef.label})`, 
+                        label: `${o.label} (api=${o.name}, type=${o.typeRef?.label})`, 
                         value: o.id
                     };
                 })

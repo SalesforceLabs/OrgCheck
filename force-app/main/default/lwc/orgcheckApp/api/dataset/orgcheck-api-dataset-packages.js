@@ -22,17 +22,19 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         // Create the map
         const packageRecords = results[0].records;
         localLogger.log(`Parsing ${packageRecords.length} installed packages...`);
-        const packages = new Map(await OrgCheckProcessor.carte(packageRecords, (record) => {
+        const packages = new Map(await OrgCheckProcessor.map(packageRecords, (record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
             const installedPackage = packageDataFactory.create({
-                id: id,
-                name: record.SubscriberPackage.Name,
-                namespace: record.SubscriberPackage.NamespacePrefix,
-                type: 'Installed'
+                properties: {
+                    id: id,
+                    name: record.SubscriberPackage.Name,
+                    namespace: record.SubscriberPackage.NamespacePrefix,
+                    type: 'Installed'
+                }
             });
 
             // Add it to the map  
@@ -44,10 +46,12 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         if (localPackage) {
             localLogger.log(`Adding your local package ${localPackage}...`);
             packages.set(localPackage, packageDataFactory.create({
-                id: localPackage, 
-                name: localPackage, 
-                namespace: localPackage, 
-                type: 'Local'
+                properties: {
+                    id: localPackage, 
+                    name: localPackage, 
+                    namespace: localPackage, 
+                    type: 'Local'
+                }
             }));
         }
 

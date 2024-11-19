@@ -5,7 +5,7 @@ export class SFDC_ObjectType extends OrgCheckData {
     label;
 }
 
-export const OBJECTTYPE_ID_STANDARD_SOBJECT = 'StandardObject';
+export const OBJECTTYPE_ID_STANDARD_SOBJECT = 'StandardEntity';
 export const OBJECTTYPE_ID_CUSTOM_SOBJECT = 'CustomObject';
 export const OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT = 'ExternalObject';
 export const OBJECTTYPE_ID_CUSTOM_SETTING = 'CustomSetting';

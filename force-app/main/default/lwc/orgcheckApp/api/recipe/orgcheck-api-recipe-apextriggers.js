@@ -30,12 +30,12 @@ export class OrgCheckRecipeApexTriggers extends OrgCheckRecipe {
         const apexTriggers = data.get(DATASET_APEXTRIGGERS_ALIAS);
         const objects = data.get(DATASET_OBJECTS_ALIAS);
         // Augment data
-        await OrgCheckProcessor.chaque(apexTriggers, (apexTrigger) => {
+        await OrgCheckProcessor.forEach(apexTriggers, (apexTrigger) => {
             apexTrigger.objectRef = objects.get(apexTrigger.objectId);
         });
         // Filter data
         const array = [];
-        await OrgCheckProcessor.chaque(apexTriggers, (apexTrigger) => {
+        await OrgCheckProcessor.forEach(apexTriggers, (apexTrigger) => {
             if (namespace === '*' || apexTrigger.package === namespace) {
                 array.push(apexTrigger);
             }

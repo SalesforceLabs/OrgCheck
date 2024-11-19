@@ -22,27 +22,30 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
         // Create the map
         const permissionRecords = results[0].records;
         localLogger.log(`Parsing ${permissionRecords.length} object permissions...`);
-        const permissions = new Map(await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(permissionRecords, (record) => record.Parent !== null), // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
+        const permissions = new Map(await OrgCheckProcessor.map(
+            permissionRecords,
             (record) => {
                 // Create the instance
                 const permission = permissionDataFactory.create({
-                    parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
-                    isParentProfile: record.Parent.IsOwnedByProfile === true,
-                    objectType: record.SobjectType,
-                    isRead: record.PermissionsRead,
-                    isCreate: record.PermissionsCreate,
-                    isEdit: record.PermissionsEdit,
-                    isDelete: record.PermissionsDelete,
-                    isViewAll: record.PermissionsViewAllRecords,
-                    isModifyAll: record.PermissionsModifyAllRecords,
-                    createdDate: record.CreatedDate, 
-                    lastModifiedDate: record.LastModifiedDate,
+                    properties: {
+                        parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
+                        isParentProfile: record.Parent.IsOwnedByProfile === true,
+                        objectType: record.SobjectType,
+                        isRead: record.PermissionsRead,
+                        isCreate: record.PermissionsCreate,
+                        isEdit: record.PermissionsEdit,
+                        isDelete: record.PermissionsDelete,
+                        isViewAll: record.PermissionsViewAllRecords,
+                        isModifyAll: record.PermissionsModifyAllRecords,
+                        createdDate: record.CreatedDate, 
+                        lastModifiedDate: record.LastModifiedDate,
+                    }
                 });
 
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.objectType}`, permission ];
-            }
+            },
+            (record) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
         ));
 
         // Return data as map

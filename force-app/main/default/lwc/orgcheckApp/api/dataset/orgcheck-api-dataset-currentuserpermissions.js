@@ -16,9 +16,10 @@ export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
         localLogger.log(`Parsing the results...`);            
 
         // Return data as map
-        return new Map(await OrgCheckProcessor.carte(
-            await OrgCheckProcessor.filtre(Object.keys(permissions), (field)=> field.startsWith('Permissions')),
-            (field) => [ field, permissions[field] ]
+        return new Map(await OrgCheckProcessor.map(
+            Object.keys(permissions),
+            (field) => [ field, permissions[field] ],
+            (field) => field.startsWith('Permissions')
         ));
     } 
 }

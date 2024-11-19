@@ -24,7 +24,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         // List of profile ids
         const profileIdRecords = results[0].records;
         localLogger.log(`Parsing ${profileIdRecords.length} Profiles...`);
-        const profileIds = await OrgCheckProcessor.carte(profileIdRecords, (record) => record.Id);
+        const profileIds = await OrgCheckProcessor.map(profileIdRecords, (record) => record.Id);
 
         // Init the factories
         const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
@@ -37,7 +37,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
         // Create the map
         localLogger.log(`Parsing ${records.length} profile restrictions...`);
-        const profileRestrictions = new Map(await OrgCheckProcessor.carte(records, async (record) => {
+        const profileRestrictions = new Map(await OrgCheckProcessor.map(records, async (record) => {
 
             // Get the ID15 of this profile
             const profileId = sfdcManager.caseSafeId(record.Id);
@@ -45,17 +45,18 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
             // Login Hours
             let loginHours;
             if (record.Metadata.loginHours) {
-                loginHours = await OrgCheckProcessor.carte(
+                loginHours = await OrgCheckProcessor.map(
                     WEEKDAYS,
                     (day) => {
                         const hourStart = record.Metadata.loginHours[day + 'Start'];
                         const hourEnd = record.Metadata.loginHours[day + 'End'];
                         return loginHourDataFactory.create({
-                            day: day,
-                            fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
-                            toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
-                            difference: hourEnd - hourStart
-                    });
+                            properties: {
+                                day: day,
+                                fromTime: (('0' + Math.floor(hourStart / 60)).slice(-2) + ':' + ('0' + (hourStart % 60)).slice(-2)),
+                                toTime:   (('0' + Math.floor(hourEnd   / 60)).slice(-2) + ':' + ('0' + (hourEnd   % 60)).slice(-2)),
+                                difference: hourEnd - hourStart
+                        }});
                 });
             } else {
                 loginHours = [];
@@ -64,17 +65,18 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
             // Ip Ranges
             let ipRanges;
             if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
-                ipRanges = await OrgCheckProcessor.carte(
+                ipRanges = await OrgCheckProcessor.map(
                     record.Metadata.loginIpRanges,
                     range => {
                         const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
                         const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
                         return ipRangeDataFactory.create({
-                            startAddress: range.startAddress,
-                            endAddress: range.endAddress,
-                            description: range.description || '(empty)',
-                            difference: endNumber - startNumber + 1
-                    });
+                            properties: {
+                                startAddress: range.startAddress,
+                                endAddress: range.endAddress,
+                                description: range.description || '(empty)',
+                                difference: endNumber - startNumber + 1
+                        }});
                 });
             } else {
                 ipRanges = [];
@@ -82,9 +84,11 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
             // Create the instance
             const profileRestriction = restrictionsFactory.createWithScore({
-                profileId: profileId,
-                ipRanges: ipRanges,
-                loginHours: loginHours
+                properties: {
+                    profileId: profileId,
+                    ipRanges: ipRanges,
+                    loginHours: loginHours
+                }
             });
 
             // Add it to the map  
