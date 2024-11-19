@@ -17,6 +17,11 @@
         }
         #loading-text {
         }
+        #additional-info-issue-454 {
+            display: none;
+            color: rgb(170, 54, 54);
+            width: 25em;
+        }
         .slds-dropdown-trigger_click .slds-dropdown {
             min-width: fit-content;
         }
@@ -32,38 +37,58 @@
                 </object>
             </div>
             <div id="loading-text">
-                Please wait while <b>Org Check</b> is loading...
+                Please wait while <b>Org Check</b> is loading...<br />
+                <br />
+                <span id="additional-info-issue-454">
+                    Hello! <br />
+                    <br />
+                    You see this message because <b>two settings</b> (under the section <code>Session</code>) 
+                       are <b>both enabled at the same time</b> in your org, and these two together are preventing Org Check to 
+                       load successfuly.<br />
+                    <br />
+                    The settings are :<br />
+                    1. Option <b><code>Enable Content Delivery Network (CDN) for Lightning Component framework</code></b><br />
+                    2. Option <b><code>Cross-Origin Embedder Policy (COEP)</code></b><br />
+                    <br />
+                    <b><u>Solution:</u> This issue is corrected if you disable either one of the two options previously mentioned in the <a href="/lightning/setup/SecuritySession/home" target="_blank">setup menu</a>.</b>
+                </span>
             </div>
         </div>
     </div>  
     <script>
-    /* Reset the cache of previous versions */
-    try {
-        Object.keys(localStorage)
-            .filter(e => e.startsWith('OrgCheck.'))
-            .forEach(e => localStorage.removeItem(e));
-    } catch (e) {
-        console.error('Error while resetting the cache of previous Org Check versions (prior to Lithium).')
-    }
-    /* Determine the namespace where the app is running (if local/standalone the package is 'c') */ 
-    const firstSubDomain = document.location.host.split('.')[0];
-    const subDomainParts = firstSubDomain.split('--');
-    const namespace = subDomainParts.pop(); // last part is the package name
-    /* Insert LWC app */
-    const app = `${namespace}:OrgCheck_App_Aura`;
-    const component = `${namespace}:orgcheckApp`;
-    $Lightning.use(app, () => {
-        $Lightning.createComponent(
-            component, 
-            { 
-                accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                userId: '{! JSENCODE($User.Id) }' 
-            },
-            'app',
-            () => {
-                document.getElementById('loading').style.display = 'none';
-            }
-        );
-    });
+        setTimeout(() => {
+            document.getElementById('additional-info-issue-454').style.display = 'block';
+        }, 15000);
+
+        /* Reset the cache of previous versions */
+        try {
+            Object.keys(localStorage)
+                .filter(e => e.startsWith('OrgCheck.'))
+                .forEach(e => localStorage.removeItem(e));
+        } catch (e) {
+            console.error('For your information, I had an error while resetting the cache of previous Org Check versions (prior to Lithium).')
+        }
+
+        /* Determine the namespace where the app is running (if local/standalone the package is 'c') */ 
+        const firstSubDomain = document.location.host.split('.')[0];
+        const subDomainParts = firstSubDomain.split('--');
+        const namespace = subDomainParts.pop(); // last part is the package name
+        
+        /* Insert LWC app */
+        const app = `${namespace}:OrgCheck_App_Aura`;
+        const component = `${namespace}:orgcheckApp`;
+        $Lightning.use(app, () => {
+            $Lightning.createComponent(
+                component, 
+                { 
+                    accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                    userId: '{! JSENCODE($User.Id) }' 
+                },
+                'app',
+                () => {
+                    document.getElementById('loading').style.display = 'none';
+                }
+            );
+        });
     </script>
 </apex:page>
