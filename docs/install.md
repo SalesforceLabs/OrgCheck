@@ -76,8 +76,18 @@ In case you have enabled the "**API Client Whitelisting**" feature, you will nee
 For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/118
 
 ### When installing the app from AppExchange I see error like "This package can’t be installed... Package namespace conflict"
-In this case it is more likely that you are trying to install the application from the AppExchange on a Salesforce Organization where the standalone package is already installed.
-This can be explained easily, both app share the same namespace (aka package name).
-So either you keep the standalone package or you remove it and try to install the app from the AppExchange again.
-Both version are FREE anyway and will be maintained!
-It is up to you to choose the one you prefer!
+- In this case it is more likely that you are trying to install the application from the AppExchange on a Salesforce Organization where the standalone package is already installed.
+- This can be explained easily, both app share the same namespace (aka package name).
+- So either you keep the standalone package or you remove it and try to install the app from the AppExchange again.
+- Both version are FREE anyway and will be maintained!
+- It is up to you to choose the one you prefer!
+
+### I have the error INSUFFICIENT_ACCESS: Requires Extra Verification
+- This error is because you have set up in your org to raise the user's session to high assurance when performing some actions.
+- Please check the setup page called "Identity Verification Setting” (under Setup > Security Controls > Identity Verification), and try to uncheck some actions.
+- For some users, changing the setup for both `Manage Sharing` and `Manage Users` solve the issue.
+- For other users, changing the setup for `Manage Data Export` was enough to solve the issue.
+- Of course we encourage you to change this setting ONLY if it's ok for you (like in a sandbox and not in production).
+- This error is documented by Salesforce at https://help.salesforce.com/s/articleView?id=000389171&type=1
+- For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/458
+
