@@ -2,6 +2,7 @@ import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
 import { OrgCheckAPI } from './api/orgcheck-api';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { LightningElement, api } from 'lwc';
+import { TYPE_APEX_CLASS, TYPE_FLOW_VERSION, TYPE_PAGE_LAYOUT } from "./api/core/orgcheck-api-sfconnectionmanager";
 
 export default class OrgCheckApp extends LightningElement {
 
@@ -493,9 +494,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Default Value',       type: 'text',             data: { value: 'defaultValue' }},
         { label: 'Using',               type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Ref. in Layout?',     type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
-        { label: 'Ref. in Apex Class?', type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
-        { label: 'Ref. in Flow?',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: TYPE_PAGE_LAYOUT }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: TYPE_APEX_CLASS }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          filter: 'dep', data: { ref: 'dependencies.referencedByTypes', value: TYPE_FLOW_VERSION }},
         { label: 'Dependencies',        type: 'dependencyViewer', filter: 'dep', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',        type: 'dateTime',         filter: 'noc', data: { value: 'createdDate' }},
         { label: 'Modified date',       type: 'dateTime',         filter: 'noc', data: { value: 'lastModifiedDate' }},
@@ -520,9 +521,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Protected?',          type: 'boolean',          data: { value: 'isProtected' }},
         { label: 'Using',               type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in',       type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.' }},
-        { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Layout' }},
-        { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Class' }},
-        { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: 'Flow' }},
+        { label: 'Ref. in Layout?',     type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: TYPE_PAGE_LAYOUT }},
+        { label: 'Ref. in Apex Class?', type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: TYPE_APEX_CLASS }},
+        { label: 'Ref. in Flow?',       type: 'numeric',          data: { ref: 'dependencies.referencedByTypes', value: TYPE_FLOW_VERSION }},
         { label: 'Dependencies',        type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
         { label: 'Created date',        type: 'dateTime',         data: { value: 'createdDate' }},
         { label: 'Modified date',       type: 'dateTime',         data: { value: 'lastModifiedDate' }},
