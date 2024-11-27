@@ -314,7 +314,7 @@ export class OrgCheckDataFactory {
                 badField: 'isVersionActive',
                 applicable: [ SFDC_Flow ]
             }, {
-                description: 'Too much versions under this flow',
+                description: 'Too many versions under this flow',
                 formula: (d) => d.versionsCount > 7,
                 errorMessage: 'This flow has more than seven versions. Maybe it is time to do some cleaning in this flow!',
                 badField: 'versionsCount',
