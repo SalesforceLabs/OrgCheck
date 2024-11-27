@@ -26,18 +26,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
     sobjectApiName = ANY_VALUES;
 
     /** 
-     * Show external roles option selected in the filter
-     * False by default;
-     */
-    showExternalRoles = FALSE_AS_STRING;
-
-    /** 
-     * Production by-pass option selected in the filter
-     * False by default;
-     */
-    useInProductionConfirmation = FALSE_AS_STRING;
-    
-    /** 
      * Package options
      */
     packageOptions;
@@ -57,8 +45,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      */
     sobjectApiNameData;
 
-    isCurrentOrgAProduction = false;
-
     /** 
      * Yes/No options
      */
@@ -66,6 +52,12 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         { label: 'Yes', value: TRUE_AS_STRING },
         { label: 'No', value: FALSE_AS_STRING }
     ];
+
+    showFilter = false;
+    
+    @api show() {
+        this.showFilter = true;
+    }
 
     /**
      * Update the list of package options.
@@ -125,10 +117,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         }
     }
 
-    @api updateIsCurrentOrgAProduction(isCurrentOrgAProduction) { 
-        this.isCurrentOrgAProduction = (isCurrentOrgAProduction === true); 
-    }
-
     /**
      * Internal filtering of object options
      */
@@ -186,10 +174,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
      */
     @api get isSelectedSObjectApiNameAny() { return this.sobjectApiName === ANY_VALUES; }
 
-    @api get isShowExternalRolesSelected() { return this.showExternalRoles === TRUE_AS_STRING; }
-
-    @api get isUseInProductionConfirmed() { return this.useInProductionConfirmation === TRUE_AS_STRING; }
-
     /**
      * This array indicates which filters has changed since last validation
      * By default, the array is empty.
@@ -245,8 +229,6 @@ export default class OrgcheckGlobalFilters extends LightningElement {
         this.package = ANY_VALUES;
         this.sobjectType = ANY_VALUES;
         this.sobjectApiName = ANY_VALUES;
-        this.showExternalRoles = FALSE_AS_STRING;
-        this.useInProductionConfirmation = FALSE_AS_STRING;
         this.propagateValues();
         this.filtersOriginallyChanged = false;
     }

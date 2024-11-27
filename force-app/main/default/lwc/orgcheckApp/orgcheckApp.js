@@ -11,6 +11,9 @@ export default class OrgCheckApp extends LightningElement {
      */
     logoURL = OrgCheckStaticRessource + '/img/Logo.svg';
 
+    useOrgCheckInThisOrgConfirmed = false;
+    useOrgCheckInThisOrgNeedConfirmation = false;
+
     orgCheckVersion;
     orgName;
     orgType;
@@ -45,7 +48,6 @@ export default class OrgCheckApp extends LightningElement {
     #api;
 
     #hasRenderOnce = false;
-    #keepSpinnerOpen = true;
     #spinner;
     #modal;
     #filters;
@@ -56,7 +58,7 @@ export default class OrgCheckApp extends LightningElement {
             this.#spinner = this.template.querySelector('c-orgcheck-spinner');
             this.#modal = this.template.querySelector('c-orgcheck-modal');
             this.#filters = this.template.querySelector('c-orgcheck-global-filters');
-            await this._loadAPI();
+            await this._load();
         }
     }
 
@@ -68,6 +70,13 @@ export default class OrgCheckApp extends LightningElement {
      */
     async handleFiltersValidated() {
         await this._updateCurrentTab();
+    }
+
+    async handleClickUsageAcceptance(event) {
+        if (event.target.checked) {
+            this.#api.acceptUsageTerms();
+            await this._load();
+        }
     }
 
     /**
@@ -221,75 +230,94 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     /**
-     * Internal method to load the Org Check API and its dependencies
+     * Internal method to load and set the Org Check API
      */ 
-    async _loadAPI() {
+    async _load() {
 
-        const LOG_SECTION = 'INIT';
+        const LOG_SECTION = 'LOAD API';
         this.#spinner.open();
         this.#spinner.sectionStarts(LOG_SECTION, "C'est parti !");
+        let doNotCloseYet = true;
 
         try {
-            this.#spinner.sectionContinues(LOG_SECTION, 'Loading JsForce and FFLate libraries...')
-            await Promise.all([
-                loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
-                loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
-            ]);
 
-            this.#spinner.sectionContinues(LOG_SECTION, 'Loading Org Check library...')
-            this.#api = new OrgCheckAPI(
-                // eslint-disable-next-line no-undef
-                jsforce,
-                // eslint-disable-next-line no-undef
-                fflate,
-                this.accessToken,
-                this.userId,
-                {
-                    begin: () => { this.#spinner.open(); },
-                    sectionStarts: (s, m) => { this.#spinner.sectionStarts(s, m); },
-                    sectionContinues: (s, m) => { this.#spinner.sectionContinues(s, m); },
-                    sectionEnded: (s, m) => { this.#spinner.sectionEnded(s, m); },
-                    sectionFailed: (s, e) => { this.#spinner.sectionFailed(s, e); },
-                    end: (s, f) => { if (this.#keepSpinnerOpen === true) return; if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
-                }
-            );
+            // Init of the Org Check api (only once!)
+            if (!this.#api) {
 
-            this.orgCheckVersion = this.#api.getVersion();
+                // Load JS dependencies
+                this.#spinner.sectionContinues(LOG_SECTION, 'Loading JsForce and FFLate libraries...')
+                await Promise.all([
+                    loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
+                    loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
+                ]);
 
-            this.#spinner.sectionContinues(LOG_SECTION, 'Checking if current user has enough permission...')
-            await this.#api.checkCurrentUserPermissions();
+                // Create the Org Check API
+                this.#spinner.sectionContinues(LOG_SECTION, 'Loading Org Check library...')
+                this.#api = new OrgCheckAPI(
+                    // eslint-disable-next-line no-undef
+                    jsforce,
+                    // eslint-disable-next-line no-undef
+                    fflate,
+                    this.accessToken,
+                    this.userId,
+                    {
+                        begin: () => { this.#spinner.open(); },
+                        sectionStarts: (s, m) => { this.#spinner.sectionStarts(s, m); },
+                        sectionContinues: (s, m) => { this.#spinner.sectionContinues(s, m); },
+                        sectionEnded: (s, m) => { this.#spinner.sectionEnded(s, m); },
+                        sectionFailed: (s, e) => { this.#spinner.sectionFailed(s, e); },
+                        end: (s, f) => { if (doNotCloseYet) return; if (f === 0) this.#spinner.close(); else this.#spinner.canBeClosed(); }
+                    }
+                );
 
-            this.#spinner.sectionContinues(LOG_SECTION, 'Gathering information from the org and fetching info for the global filter...');
-            const infoData = await Promise.all([
-                this.#api.getOrganizationInformation(),
-                this.#api.getPackagesTypesAndObjects('*', '*')
-            ]);
+                // Set the version
+                this.orgCheckVersion = this.#api.getVersion();
+            }
+
+            // Check if we can use this org
+            this.#spinner.sectionContinues(LOG_SECTION, 'Checking if we can use the org according to the terms...')
+            if (await this.#api.checkUsageTerms()) {
+                this.useOrgCheckInThisOrgNeedConfirmation = false;
+                this.useOrgCheckInThisOrgConfirmed = true;
+            } else {
+                this.useOrgCheckInThisOrgNeedConfirmation = true;
+                this.useOrgCheckInThisOrgConfirmed = false;
+            }
 
             // Information about the org
             this.#spinner.sectionContinues(LOG_SECTION, 'Information about the org...');
-            const orgInfo = infoData[0];
+            const orgInfo = await this.#api.getOrganizationInformation();
             this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
             this.orgType = orgInfo.type;
             this.isOrgProduction = orgInfo.isProduction;
             if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
             else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
             else this.themeForOrgType = 'slds-theme_success';
-            this.#filters.updateIsCurrentOrgAProduction(this.isOrgProduction === true);
 
-            // Data for the filters
-            this.#spinner.sectionContinues(LOG_SECTION, 'Data for the filters...');
-            const filtersData = infoData[1];
-            this.#filters.updateSObjectTypeOptions(filtersData.types);
-            this.#filters.updatePackageOptions(filtersData.packages);
-            this.#filters.updateSObjectApiNameOptions(filtersData.objects);
+            if (this.useOrgCheckInThisOrgConfirmed === true) {
+
+                // Check basic permission
+                this.#spinner.sectionContinues(LOG_SECTION, 'Checking if current user has enough permission...')
+                await this.#api.checkCurrentUserPermissions();
+                
+                // Data for the filters
+                this.#spinner.sectionContinues(LOG_SECTION, 'Data for the filters...');
+                const filtersData = await this.#api.getPackagesTypesAndObjects('*', '*');
+                this.#filters.updateSObjectTypeOptions(filtersData.types);
+                this.#filters.updatePackageOptions(filtersData.packages);
+                this.#filters.updateSObjectApiNameOptions(filtersData.objects);
+                this.#filters.show();
+
+                this._updateCurrentTab();
+            }
 
             // FINALLY!
+            doNotCloseYet = false;
             this.#spinner.sectionEnded(LOG_SECTION, 'All set!');
-            this._updateCurrentTab();
-            this._updateDailyAPIUsage();
-            this.#keepSpinnerOpen = false;
+            this.#spinner.close();
     
         } catch(error) {
+            this.#spinner.canBeClosed();
             this.#spinner.sectionFailed(LOG_SECTION, error);
         }
     }
@@ -328,19 +356,7 @@ export default class OrgCheckApp extends LightningElement {
         const namespace = this.#filters.isSelectedPackageAny === true ? '*' : (this.#filters.isSelectedPackageNo === true ? '' : this.#filters.selectedPackage);
         const sobjectType = this.#filters.isSelectedSObjectTypeAny === true ? '*' : this.#filters.selectedSObjectType;
         const sobject = this.#filters.isSelectedSObjectApiNameAny === true ? '*' : this.#filters.selectedSObjectApiName;
-        const shouldWeStop = this.isOrgProduction === true && this.#filters.isUseInProductionConfirmed === false;
-
-        if (shouldWeStop === true) {
-            this.#modal.open(
-                'Wait a minute!', 
-                'You are using the application in <b>Production</b>.<br /><br />'+
-                'Please accept to terms of conditions for direct usage in production by changing the filter "<code>Do you confirm running Org Check in production?</code>" to <code>YES</code>.<br /><br />'+
-                'Thank you and have a nice day!',
-                true
-            );
-            return;
-        }
-    
+        
         // Call the API depending on the current tab
         // If not supported we stop there
         // Finally send the data to the content component.
@@ -348,7 +364,8 @@ export default class OrgCheckApp extends LightningElement {
         const section = `TAB ${this.#currentTab}`;
         try {
             this.#spinner.open();
-            this.#keepSpinnerOpen = true;
+
+            // Continue calling the api...
             this.#spinner.sectionStarts(section, 'Call the corresponding Org Check API');
             this._updateDailyAPIUsage();
             switch (this.#currentTab) {
@@ -416,7 +433,6 @@ export default class OrgCheckApp extends LightningElement {
             this._updateDailyAPIUsage();
             this.#spinner.sectionEnded(section, 'Done');
             this.#spinner.close();
-            this.#keepSpinnerOpen = false;
 
         } catch (error) {
             this.#spinner.sectionFailed(section, error);

@@ -63,6 +63,11 @@ export class OrgCheckAPI {
     #logger;
 
     /**
+     * @property {Boolean} Is the current user accepted the terms to use Org Check in this org?
+     */
+    #usageTermsAccepted;
+
+    /**
      * Org Check constructor
      * 
      * @param {JsForce} jsConnectionFactory
@@ -76,6 +81,7 @@ export class OrgCheckAPI {
         this.#sfdcManager = new OrgCheckSalesforceManager(jsConnectionFactory, accessToken, userId, this.#logger);
         this.#datasetManager = new OrgCheckDatasetManager(this.#sfdcManager, jsCompression, this.#logger);
         this.#recipeManager = new OrgCheckRecipeManager(this.#datasetManager, this.#logger);
+        this.#usageTermsAccepted = false;
     }
     
     /**
@@ -140,6 +146,26 @@ export class OrgCheckAPI {
      */
     async getOrganizationInformation() {
         return this.#recipeManager.run(RECIPE_ORGANIZATION_ALIAS);
+    }
+
+    /**
+     * Check if we can use the current org according to the terms (specially if this is a production org)
+     * 
+     * @returns true 
+     * @throws Exception if the org is a Production and terms are not accepted
+     */
+    async checkUsageTerms() {
+        const orgInfo = await this.#recipeManager.run(RECIPE_ORGANIZATION_ALIAS);
+        if (orgInfo.isProduction === true) {
+            if (this.#usageTermsAccepted === false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    acceptUsageTerms() {
+        this.#usageTermsAccepted = true;
     }
 
     /**
