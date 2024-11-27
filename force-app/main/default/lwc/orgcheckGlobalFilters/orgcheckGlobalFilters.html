@@ -1,70 +1,52 @@
 <template>
-    <ul class="slds-button-group-row">
-        <li class="slds-button-group-item">
-            <lightning-combobox
-                data-id="package"
-                label="Package"
-                value={package}
-                options={packageOptions}
-                onchange={filterChanged} ></lightning-combobox>
-        </li>
-        <li class="slds-button-group-item">
-            <lightning-combobox
-                data-id="sobjectType"
-                label="SObject Type"
-                value={sobjectType}
-                options={sobjectTypeOptions}
-                onchange={filterChanged} ></lightning-combobox>
-        </li>
-        <li class="slds-button-group-item">
-            <lightning-combobox 
-                data-id="sobjectApiName"
-                label="SObject"
-                value={sobjectApiName}
-                options={sobjectApiNameOptions}
-                onchange={filterChanged}></lightning-combobox>
-        </li>
-        <!--
-        <li class="slds-button-group-item">
-            <lightning-combobox
-                data-id="showExternalRoles"
-                label="Show external roles?"
-                value={showExternalRoles}
-                options={yesNoOptions}
-                onchange={filterChanged} ></lightning-combobox>
-        </li>
-        -->
-        <template lwc:if={isCurrentOrgAProduction}>
+    <template if:true={showFilter}>
+        <ul class="slds-button-group-row">
             <li class="slds-button-group-item">
                 <lightning-combobox
-                    data-id="useInProductionConfirmation"
-                    label="Do you confirm running Org Check in production?"
-                    value={useInProductionConfirmation}
-                    options={yesNoOptions}
+                    data-id="package"
+                    label="Package"
+                    value={package}
+                    options={packageOptions}
                     onchange={filterChanged} ></lightning-combobox>
             </li>
-        </template>
-        <template lwc:if={filtersChanged}>
             <li class="slds-button-group-item">
-                <label class="slds-form-element__label">{whichFiltersChanged.length} filter(s) changed</label><br />
-                <lightning-button 
-                    variant="brand" 
-                    label="Apply" 
-                    icon-name="utility:download" 
-                    title="You are ready to apply these filters in the app..." 
-                    onclick={propagateValues}></lightning-button>
+                <lightning-combobox
+                    data-id="sobjectType"
+                    label="SObject Type"
+                    value={sobjectType}
+                    options={sobjectTypeOptions}
+                    onchange={filterChanged} ></lightning-combobox>
             </li>
-        </template>
-        <template lwc:if={filtersOriginallyChanged}>
             <li class="slds-button-group-item">
-                <label class="slds-form-element__label">Go back to the initial values</label><br />
-                <lightning-button 
-                    variant="destructive" 
-                    label="Reset" 
-                    icon-name="utility:delete" 
-                    title="Reset the filters and go back to the initial values..." 
-                    onclick={resetValues}></lightning-button>
+                <lightning-combobox 
+                    data-id="sobjectApiName"
+                    label="SObject"
+                    value={sobjectApiName}
+                    options={sobjectApiNameOptions}
+                    onchange={filterChanged}></lightning-combobox>
             </li>
-        </template>
-    </ul>
+            <template lwc:if={filtersChanged}>
+                <li class="slds-button-group-item">
+                    <label class="slds-form-element__label">{whichFiltersChanged.length} filter(s) changed</label><br />
+                    <lightning-button 
+                        variant="brand" 
+                        label="Apply" 
+                        icon-name="utility:download" 
+                        title="You are ready to apply these filters in the app..." 
+                        onclick={propagateValues}></lightning-button>
+                </li>
+            </template>
+            <template lwc:if={filtersOriginallyChanged}>
+                <li class="slds-button-group-item">
+                    <label class="slds-form-element__label">Go back to the initial values</label><br />
+                    <lightning-button 
+                        variant="destructive" 
+                        label="Reset" 
+                        icon-name="utility:delete" 
+                        title="Reset the filters and go back to the initial values..." 
+                        onclick={resetValues}></lightning-button>
+                </li>
+            </template>
+        </ul>
+    </template>
 </template>

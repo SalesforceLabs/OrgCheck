@@ -67,7 +67,7 @@ Edit the `sfdx-project.json` file to specify the namespace:
   ],
   "namespace": "<namespace>",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "60.0"
+  "sourceApiVersion": "62.0"
 }
 ```
 Replace `<namespace>` with your actual namespace.
