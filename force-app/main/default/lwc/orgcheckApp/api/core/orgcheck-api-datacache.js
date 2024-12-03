@@ -1,3 +1,5 @@
+import { TextEncoder, TextDecoder } from 'util';
+
 const CACHE_PREFIX = 'OrgCheck.';
 
 const NB_MILLISEC_IN_ONE_DAY = 1000*60*60*24;
@@ -26,12 +28,14 @@ const fromHexToBuffer = (hex) => {
     }
     return new Uint8Array(arr);
 }
+
+const TEXT_ENCODER = new TextEncoder();
+const TEXT_DECODER = new TextDecoder();
   
 export class OrgCheckDataCacheManager {
 
-    #jsCompression;
-    #textEncoder;
-    #textDecoder;
+    #compress;
+    #decompress;
 
     _generatePhysicalKey = (key) => {
         return key.startsWith(CACHE_PREFIX) ? key : CACHE_PREFIX + key;
@@ -46,8 +50,8 @@ export class OrgCheckDataCacheManager {
             const hexValue = localStorage.getItem(key);
             if (hexValue) {
                 const bufferValue = fromHexToBuffer(hexValue);
-                const uncompressedValue = this.#jsCompression.unzlibSync(bufferValue);
-                const decodedValue = this.#textDecoder.decode(uncompressedValue);
+                const uncompressedValue = this.#decompress(bufferValue);
+                const decodedValue = TEXT_DECODER.decode(uncompressedValue);
                 return decodedValue;
             }
         } catch (error) {
@@ -58,8 +62,8 @@ export class OrgCheckDataCacheManager {
     
     _setItemFromLocalStorage = (key, stringValue) => {
         try {
-            const encodedValue = this.#textEncoder.encode(stringValue);
-            const compressedValue = this.#jsCompression.zlibSync(encodedValue, { level: 9 });
+            const encodedValue = TEXT_ENCODER.encode(stringValue);
+            const compressedValue = this.#compress(encodedValue);
             const hexValue = fromBufferToHex(compressedValue);
             localStorage.setItem(key, hexValue);
         } catch (error) {
@@ -78,13 +82,11 @@ export class OrgCheckDataCacheManager {
     /**
      * Dataset Manager constructor
      * 
-     * @param {FFlate} jsCompression
+     * @param configuration
      */
-    constructor(jsCompression) {
-        this.#jsCompression = jsCompression;
-        this.#textEncoder = new TextEncoder();
-        this.#textDecoder = new TextDecoder();
-    
+    constructor(configuration) {
+        this.#compress = configuration.compress;
+        this.#decompress = configuration.decompress;
     }
 
     has(key) {

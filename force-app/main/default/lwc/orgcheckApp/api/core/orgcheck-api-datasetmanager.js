@@ -114,8 +114,11 @@ export class OrgCheckDatasetManager {
         this.#sfdcManager = sfdcManager;
         this.#logger = logger;
         this.#datasets = new Map();
-        this.#cache = new OrgCheckDataCacheManager(jsCompression);
         this.#dataFactory = new OrgCheckDataFactory(sfdcManager);
+        this.#cache = new OrgCheckDataCacheManager({
+            compress:   (data) => { return jsCompression.zlibSync(data, { level: 9 }); },
+            decompress: (data) => { return jsCompression.unzlibSync(data); }
+        });
 
         this.#datasets.set(DATASET_CUSTOMFIELDS_ALIAS, new OrgCheckDatasetCustomFields());
         this.#datasets.set(DATASET_CUSTOMLABELS_ALIAS, new OrgCheckDatasetCustomLabels());
