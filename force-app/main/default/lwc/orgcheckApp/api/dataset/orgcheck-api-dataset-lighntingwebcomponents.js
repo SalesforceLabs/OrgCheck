@@ -45,7 +45,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
-                    url: sfdcManager.setupUrm(id, TYPE_LIGHTNING_WEB_COMPONENT)
+                    url: sfdcManager.setupUrl(id, TYPE_LIGHTNING_WEB_COMPONENT)
                 }, 
                 dependencies: {
                     data: componentsDependencies
