@@ -10,9 +10,6 @@
 # Salesforce scratch org history
 .sf/
 
-# LWC VSCode autocomplete
-**/lwc/jsconfig.json
-
 # Logs
 logs
 *.log
@@ -34,3 +31,6 @@ Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 $RECYCLE.BIN/
+
+#Others
+package-lock.json
