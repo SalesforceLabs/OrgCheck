@@ -27,20 +27,20 @@
                                     <br />
                                 </template>
                                 <ol class="slds-progress__list">
-                                    <template for:each={sections} for:item="msg">
-                                        <li key={msg.id} class={msg.liClasses}>
-                                            <div class={msg.markerClasses}></div>
-                                            <div class="slds-progress__item_content"><b>{msg.id}</b> {msg.label}</div>
+                                    <template for:each={sections} for:item="section">
+                                        <li key={section.id} class={section.liClasses}>
+                                            <div class={section.markerClasses}></div>
+                                            <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
                                         </li>
-                                        <template lwc:if={msg.stack}>
-                                            <li key={msg.id}>
-                                                <pre>{msg.stack}</pre>
+                                        <template lwc:if={section.stack}>
+                                            <li key={section.id}>
+                                                <pre>{section.stack}</pre>
                                             </li>
                                         </template>
-                                        <template lwc:if={msg.context}>
-                                            <li key={msg.id}>
-                                                WHEN: <pre>{msg.context.when}</pre>
-                                                WHAT: <pre>{msg.context.what}</pre>
+                                        <template lwc:if={section.context}>
+                                            <li key={section.id}>
+                                                WHEN: <pre>{section.context.when}</pre>
+                                                WHAT: <pre>{section.context.what}</pre>
                                             </li>
                                         </template>
                                     </template>
