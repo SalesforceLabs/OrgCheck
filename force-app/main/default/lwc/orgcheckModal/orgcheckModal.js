@@ -10,10 +10,15 @@ export default class OrgCheckModal extends LightningElement {
         this.isClosable = false;
     }
     
+    /**
+     * @param {string} title
+     * @param {Error | string | object} content
+     * @param {boolean} isClosable
+     */
     @api open(title, content, isClosable=true) {
         if (this.isShown === false) {
             this.isShown = true;
-            this.title = title;
+            this.headerTitle = title;
             this.isClosable = isClosable;
             if (content) {
                 if (content instanceof Error) {
@@ -32,13 +37,35 @@ export default class OrgCheckModal extends LightningElement {
         }
     }
 
+    /**
+     * Handle a click on the close button to.... close the modal!
+     */
     handleClose() {
         this.isShown = false;
     }
 
+    /**
+     * @type {boolean}
+     */
     isShown;
+
+    /**
+     * @type {boolean}
+     */
     isClosable;
-    title;
+    
+    /**
+     * @type {string}
+     */
+    headerTitle;
+    
+    /**
+     * @type {string}
+     */
     message;
+
+    /**
+     * @type {string}
+     */
     stack;
 }
