@@ -1,4 +1,4 @@
-import { createElement } from 'lwc';
+import { createElement } from '@lwc/engine-dom';
 import OrgcheckSpinner from 'c/orgcheckSpinner';
     
 describe('c-orgcheck-spinner', () => {

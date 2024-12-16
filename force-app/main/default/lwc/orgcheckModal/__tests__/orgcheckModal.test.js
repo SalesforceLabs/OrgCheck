@@ -1,4 +1,4 @@
-import { createElement } from 'lwc';
+import { createElement } from '@lwc/engine-dom';
 import OrgcheckModal from 'c/orgcheckModal';
     
 describe('c-orgcheck-modal', () => {

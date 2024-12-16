@@ -1,3 +1,4 @@
+// @ts-check
 import { LightningElement, api, track } from 'lwc';
 import OrgCheckStaticRessource from '@salesforce/resourceUrl/OrgCheck_SR';
 
