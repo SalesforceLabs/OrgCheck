@@ -65,8 +65,8 @@ class SfdcManagerMock {
     return id; 
   }
 
-  setupUrl() { 
-    return '/';
+  setupUrl(id, type) {
+    return `/setupURL/type/${type}/id/${id}`;
   }
 
   readMetadataAtScale(type, members) {
@@ -86,7 +86,7 @@ const DATA_FACTORY_MOCK = {
   getInstance: () => {
     return {
       create: (setup) => { return setup.properties; },
-      createWithScore: (setup) => { return setup.properties; }
+      createWithScore: (setup) => { setup.score = 0; return setup.properties; }
     }; 
   }
 };
@@ -284,6 +284,99 @@ describe('api.code.OrgCheckDatasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
+    });
+
+    it('checks if we do not have a regression for issue #476', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const describeGlobal = [
+        {
+          activateable: false, associateEntityType: "ChangeEvent", associateParentEntity: "Activation__c",
+          createable: false, custom: false, customSetting: false, deepCloneable: false, deletable: false, 
+          deprecatedAndHidden: false, feedEnabled: false, hasSubtypes: false, isInterface: false, 
+          isSubtype: false, keyPrefix: null, layoutable: false, mergeable: false, mruEnabled: false,
+          label: "Change Event: Activation", labelPlural: "Change Event: Activation", name: "Activation__ChangeEvent", 
+          queryable: false, replicateable: false, retrieveable: true, searchable: false, triggerable: true, 
+          undeletable: false, updateable: false,
+          urls: {
+            rowTemplate: "/services/data/v60.0/sobjects/Activation__ChangeEvent/{ID}",
+            eventSchema: "/services/data/v60.0/sobjects/Activation__ChangeEvent/eventSchema",
+            describe: "/services/data/v60.0/sobjects/Activation__ChangeEvent/describe",
+            sobject: "/services/data/v60.0/sobjects/Activation__ChangeEvent"
+          }
+        },
+        {
+          activateable: false, associateEntityType: "Feed", associateParentEntity: "Activation__c",
+          createable: false, custom: false, customSetting: false, deepCloneable: false, deletable: true, 
+          deprecatedAndHidden: false, feedEnabled: false, hasSubtypes: false, isInterface: false, 
+          isSubtype: false, keyPrefix: null, layoutable: false, mergeable: false, mruEnabled: false, 
+          label: "Feed: Activation", labelPlural: "Feed: Activation", name: "Activation__Feed", 
+          queryable: true, replicateable: true, retrieveable: true, searchable: false, triggerable: false, 
+          undeletable: false, updateable: false,
+          urls: {
+            rowTemplate: "/services/data/v60.0/sobjects/Activation__Feed/{ID}",
+            describe: "/services/data/v60.0/sobjects/Activation__Feed/describe",
+            sobject: "/services/data/v60.0/sobjects/Activation__Feed"
+          }
+        }, {
+          activateable: false, associateEntityType: null, associateParentEntity: null, createable: true, 
+          custom: true, customSetting: false, deepCloneable: false, deletable: true, deprecatedAndHidden: false, 
+          feedEnabled: true, hasSubtypes: false, isInterface: false, isSubtype: false, keyPrefix: "a3L", 
+          layoutable: true, mergeable: false, mruEnabled: true, queryable: true, replicateable: true, 
+          label: "Activation", labelPlural: "Activations", name: "Activation__c", 
+          retrieveable: true, searchable: true, triggerable: true, undeletable: true, updateable: true,
+          urls: {
+            compactLayouts: "/services/data/v60.0/sobjects/Activation__c/describe/compactLayouts",
+            rowTemplate: "/services/data/v60.0/sobjects/Activation__c/{ID}",
+            approvalLayouts: "/services/data/v60.0/sobjects/Activation__c/describe/approvalLayouts",
+            describe: "/services/data/v60.0/sobjects/Activation__c/describe",
+            quickActions: "/services/data/v60.0/sobjects/Activation__c/quickActions",
+            layouts: "/services/data/v60.0/sobjects/Activation__c/describe/layouts",
+            sobject: "/services/data/v60.0/sobjects/Activation__c"
+          }
+        }, {
+          activateable: false, associateEntityType: null, associateParentEntity: null, createable: true, 
+          custom: true, customSetting: false, deepCloneable: false, deletable: true, deprecatedAndHidden: false, 
+          feedEnabled: true, hasSubtypes: false, isInterface: false, isSubtype: false, keyPrefix: "a3V", 
+          layoutable: true, mergeable: false, mruEnabled: true, queryable: true, replicateable: true, 
+          label: "CR Volunteers", labelPlural: "CR Volunteers", name: "CR_Volunteers__c", 
+          retrieveable: true, searchable: true, triggerable: true, undeletable: true, updateable: true,
+          urls: {
+            compactLayouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/compactLayouts",
+            rowTemplate: "/services/data/v60.0/sobjects/CR_Volunteers__c/{ID}",
+            approvalLayouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/approvalLayouts",
+            describe: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe",
+            quickActions: "/services/data/v60.0/sobjects/CR_Volunteers__c/quickActions",
+            layouts: "/services/data/v60.0/sobjects/CR_Volunteers__c/describe/layouts",
+            sobject: "/services/data/v60.0/sobjects/CR_Volunteers__c"
+          }
+        }
+      ];
+      const entityDefinitions = [
+        { DurableId: '0117V000000VJvx', NamespacePrefix: '', DeveloperName: 'Activation', 
+          QualifiedApiName: 'Activation__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' },
+        { DurableId: '0117V000000VJw7', NamespacePrefix: null, DeveloperName: 'CR_Volunteers', 
+          QualifiedApiName: 'CR_Volunteers__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
+      ];
+      for (let o = 0; o < 10; o++) {
+        entityDefinitions.push({ DurableId: `0117V000000${o}`, DeveloperName: `${o}`, QualifiedApiName: `${o}__c` });
+        describeGlobal.push({ activateable: false, associateEntityType: null, associateParentEntity: null,
+          createable: true, custom: true, customSetting: false, deepCloneable: false,
+          deletable: true, deprecatedAndHidden: false, feedEnabled: true, hasSubtypes: false,
+          isInterface: false, isSubtype: false, keyPrefix: "a3V", label: `${o}`,
+          labelPlural: `${o}s`, layoutable: true, mergeable: false, mruEnabled: true,
+          name: `${o}__c`, queryable: true, replicateable: true, retrieveable: true,
+          searchable: true, triggerable: true, undeletable: true, updateable: true })
+      }
+      sfdcManager.setDescribeGolbal(describeGlobal);
+      sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', entityDefinitions);
+      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(12);
+      expect(results.has('Activation__c')).toBeTruthy();
+      expect(results.has('CR_Volunteers__c')).toBeTruthy();
+      expect(results.has('0__c')).toBeTruthy();
+      expect(results.has('9__c')).toBeTruthy();
     });
   });
 
