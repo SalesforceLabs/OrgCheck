@@ -1,9 +1,25 @@
+// @ts-check
 export class OrgCheckDataDependencies {
 
+    /**
+     * @type Array<{ id: string, name: string, type: string, url: string }>
+     */
     using;
+
+    /**
+     * @type Array<{ id: string, name: string, type: string, url: string }>
+     */
     referenced;
+
+    /**
+     * @type any
+     */
     referencedByTypes;
 
+    /**
+     * @param {Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>} data 
+     * @param {string} whatId 
+     */
     constructor(data, whatId) {
 
         this.using = data.filter(e => e.id === whatId).map(n => { 

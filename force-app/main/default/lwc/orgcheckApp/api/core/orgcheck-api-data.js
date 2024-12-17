@@ -1,3 +1,6 @@
+// @ts-check
+import { OrgCheckDataDependencies } from "./orgcheck-api-data-dependencies";
+
 /**
  * This class represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
  * Such class are created by a "data factory" (see OrgCheckDataFactory) which also computes its "score" based on specific best practices rules. 
@@ -9,21 +12,21 @@ export class OrgCheckData {
      * Zero means the data follows best practices. 
      * Positive value means some areas need to be corrected.
      * 
-     * @type Number
+     * @type number
      */
     score;
     
     /**
      * If the above score is positive, then this property will contain a list of fields that need to be corrected.
      * 
-     * @type Array<String>
+     * @type Array<string>
      */
     badFields;
     
     /**
      * If the above score is positive, then this property will contain a list of reasons ids that explain why the score is positive.
      * 
-     * @type Array<String>
+     * @type Array<string>
      */
     badReasonIds;
 
