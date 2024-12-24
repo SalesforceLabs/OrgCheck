@@ -121,7 +121,7 @@ export default class OrgCheckApp extends LightningElement {
      */
     async handleRemoveCache(event) {
         if (event.detail.allItems === true) {
-            this.#api.removeAllCache();
+            this.#api.removeAllFromCache();
         } else {
             this.#api.removeCache(event.detail.itemName);
         }
@@ -168,32 +168,32 @@ export default class OrgCheckApp extends LightningElement {
                         }
                         break;
                     }
-                    case 'object-permissions':         this.#api.removeAllObjectPermissionsCache(); break;
-                    case 'objects-owd':                this.#api.removeAllPackagesTypesAndObjects(); break;
-                    case 'app-permissions':            this.#api.removeAllAppPermissionsCache(); break;
-                    case 'custom-fields':              this.#api.removeAllCustomFieldsCache(); break;
-                    case 'users':                      this.#api.removeAllActiveUsersCache(); break;
-                    case 'profiles':                   this.#api.removeAllProfilesCache(); break;
-                    case 'permission-sets':            this.#api.removeAllPermSetsCache(); break;
-                    case 'profile-restrictions':       this.#api.removeAllProfileRestrictionsCache(); break;
-                    case 'profile-password-policies':  this.#api.removeAllProfilePasswordPoliciesCache(); break;
+                    case 'object-permissions':         this.#api.removeAllObjectPermissionsFromCache(); break;
+                    case 'objects-owd':                this.#api.removeAllPackagesTypesAndObjectsFromCache(); break;
+                    case 'app-permissions':            this.#api.removeAllAppPermissionsFromCache(); break;
+                    case 'custom-fields':              this.#api.removeAllCustomFieldsFromCache(); break;
+                    case 'users':                      this.#api.removeAllActiveUsersFromCache(); break;
+                    case 'profiles':                   this.#api.removeAllProfilesFromCache(); break;
+                    case 'permission-sets':            this.#api.removeAllPermSetsFromCache(); break;
+                    case 'profile-restrictions':       this.#api.removeAllProfileRestrictionsFromCache(); break;
+                    case 'profile-password-policies':  this.#api.removeAllProfilePasswordPoliciesFromCache(); break;
                     case 'roles-listing':
-                    case 'roles-explorer':             this.#api.removeAllRolesCache(); break;
-                    case 'public-groups':              this.#api.removeAllPublicGroupsCache(); break;
-                    case 'queues':                     this.#api.removeAllQueuesCache(); break;
-                    case 'flows':                      this.#api.removeAllFlowsCache(); break;
-                    case 'process-builders':           this.#api.removeAllProcessBuildersCache(); break;
-                    case 'workflows':                  this.#api.removeAllWorkflowsCache(); break;
-                    case 'custom-labels':              this.#api.removeAllCustomLabelsCache(); break;
-                    case 'visual-force-pages':         this.#api.removeAllVisualForcePagesCache(); break;
-                    case 'visual-force-components':    this.#api.removeAllVisualForceComponentsCache(); break;
-                    case 'lightning-pages':            this.#api.removeAllLightningPagesCache(); break;
-                    case 'lightning-aura-components':  this.#api.removeAllLightningAuraComponentsCache(); break;
-                    case 'lightning-web-components':   this.#api.removeAllLightningWebComponentsCache(); break;
+                    case 'roles-explorer':             this.#api.removeAllRolesFromCache(); break;
+                    case 'public-groups':              this.#api.removeAllPublicGroupsFromCache(); break;
+                    case 'queues':                     this.#api.removeAllQueuesFromCache(); break;
+                    case 'flows':                      this.#api.removeAllFlowsFromCache(); break;
+                    case 'process-builders':           this.#api.removeAllProcessBuildersFromCache(); break;
+                    case 'workflows':                  this.#api.removeAllWorkflowsFromCache(); break;
+                    case 'custom-labels':              this.#api.removeAllCustomLabelsFromCache(); break;
+                    case 'visual-force-pages':         this.#api.removeAllVisualForcePagesFromCache(); break;
+                    case 'visual-force-components':    this.#api.removeAllVisualForceComponentsFromCache(); break;
+                    case 'lightning-pages':            this.#api.removeAllLightningPagesFromCache(); break;
+                    case 'lightning-aura-components':  this.#api.removeAllLightningAuraComponentsFromCache(); break;
+                    case 'lightning-web-components':   this.#api.removeAllLightningWebComponentsFromCache(); break;
                     case 'apex-classes':
                     case 'apex-unit-tests':
-                    case 'apex-recompilation-needed':  this.#api.removeAllApexClassesCache(); break; 
-                    case 'apex-triggers':              this.#api.removeAllApexTriggersCache(); break;
+                    case 'apex-recompilation-needed':  this.#api.removeAllApexClassesFromCache(); break; 
+                    case 'apex-triggers':              this.#api.removeAllApexTriggersFromCache(); break;
                     default:
                 }
             });
@@ -270,8 +270,8 @@ export default class OrgCheckApp extends LightningElement {
                     }
                 );
 
-                // Set the version
-                this.orgCheckVersion = this.#api.getVersion();
+                // Set the version in the app
+                this.orgCheckVersion = this.#api.version;
             }
 
             // Check if we can use this org

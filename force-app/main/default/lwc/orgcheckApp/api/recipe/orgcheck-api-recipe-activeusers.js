@@ -1,36 +1,38 @@
+// @ts-check
+
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_USERS_ALIAS, 
-    DATASET_PROFILES_ALIAS, 
-    DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation } from '../core/orgcheck-api-datasetmanager';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
 
-    /** 
-     * Return the list of dataset you need 
-     * 
-     * @returns {Array<string>}
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @returns {Array<string | OrgCheckDatasetRunInformation>}
+     * @public
      */
     extract() {
         return [
-            DATASET_USERS_ALIAS, 
-            DATASET_PROFILES_ALIAS, 
-            DATASET_PERMISSIONSETS_ALIAS
+            OrgCheckDatasetAliases.USERS, 
+            OrgCheckDatasetAliases.PROFILES, 
+            OrgCheckDatasetAliases.PERMISSIONSETS
         ];
     }
 
     /**
-     * Get a list of active users (async method)
-     * 
-     * @param {Map} data extracted
-     * 
-     * @returns {Array<SFDC_User>}
+     * @description transform the data from the datasets and return the final result as a Map
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
+     * @async
+     * @public
      */
     async transform(data) {
         // Get data
-        const users = data.get(DATASET_USERS_ALIAS);
-        const profiles = data.get(DATASET_PROFILES_ALIAS);
-        const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
+        const users = data.get(OrgCheckDatasetAliases.USERS);
+        const profiles = data.get(OrgCheckDatasetAliases.PROFILES);
+        const permissionSets = data.get(OrgCheckDatasetAliases.PERMISSIONSETS);
         // Augment data
         await OrgCheckProcessor.forEach(users, async (user) => {
             user.profileRef = profiles.get(user.profileId);

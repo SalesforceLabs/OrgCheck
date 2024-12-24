@@ -1,42 +1,43 @@
+// @ts-check
+
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_OBJECT_ALIAS, 
-    DatasetRunInformation, 
-    DATASET_OBJECTTYPES_ALIAS, 
-    DATASET_APEXTRIGGERS_ALIAS,
-    DATASET_CUSTOMFIELDS_ALIAS} from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation} from '../core/orgcheck-api-datasetmanager';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeObject extends OrgCheckRecipe {
 
-    /** 
-     * Return the list of dataset you need 
-     * 
-     * @returns {Array<string|DatasetRunInformation>}
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @param {string} object Name of the object to describe in this recipe's instance.
+     * @returns {Array<string | OrgCheckDatasetRunInformation>}
+     * @public
      */
     extract(object) {
-        const datasetRunInfoObject = new DatasetRunInformation(DATASET_OBJECT_ALIAS, `${DATASET_OBJECT_ALIAS}_${object}`);
-        const datasetRunInfoCustomField = new DatasetRunInformation(DATASET_CUSTOMFIELDS_ALIAS, `${DATASET_CUSTOMFIELDS_ALIAS}_${object}`);
+        const datasetRunInfoObject = new OrgCheckDatasetRunInformation(OrgCheckDatasetAliases.OBJECT, `${OrgCheckDatasetAliases.OBJECT}_${object}`);
+        const datasetRunInfoCustomField = new OrgCheckDatasetRunInformation(OrgCheckDatasetAliases.CUSTOMFIELDS, `${OrgCheckDatasetAliases.CUSTOMFIELDS}_${object}`);
         datasetRunInfoObject.parameters.set('object', object);
         datasetRunInfoCustomField.parameters.set('object', object);
         return [ datasetRunInfoObject, 
-            DATASET_OBJECTTYPES_ALIAS,
-            DATASET_APEXTRIGGERS_ALIAS,
+            OrgCheckDatasetAliases.OBJECTTYPES,
+            OrgCheckDatasetAliases.APEXTRIGGERS,
             datasetRunInfoCustomField
         ];
     }
 
     /**
-     * Get the object information (async method)
-     * 
-     * @param {Map} data extracted
-     * 
-     * @returns {SFDC_Object}
+     * @description transform the data from the datasets and return the final result as an Array
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
+     * @async
+     * @public
      */
     async transform(data) {
-        const types = data.get(DATASET_OBJECTTYPES_ALIAS);
-        const object = data.get(DATASET_OBJECT_ALIAS);
-        const apexTriggers = data.get(DATASET_APEXTRIGGERS_ALIAS);
-        const customFields = data.get(DATASET_CUSTOMFIELDS_ALIAS);
+        const types = data.get(OrgCheckDatasetAliases.OBJECTTYPES);
+        const object = data.get(OrgCheckDatasetAliases.OBJECT);
+        const apexTriggers = data.get(OrgCheckDatasetAliases.APEXTRIGGERS);
+        const customFields = data.get(OrgCheckDatasetAliases.CUSTOMFIELDS);
         // Augment data
         object.typeRef = types.get(object.typeId);
         object.apexTriggerRefs = await OrgCheckProcessor.map(

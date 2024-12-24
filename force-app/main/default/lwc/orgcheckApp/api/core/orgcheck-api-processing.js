@@ -1,3 +1,5 @@
+// @ts-check
+
 export class OrgCheckProcessor {
 
     /**
@@ -6,7 +8,7 @@ export class OrgCheckProcessor {
      * @param {Array | Map} iterable  An array or a map to iterate over
      * @param {Function} iteratee  A function to call on each item in the array. Invoked with (item). Not supposed to return anything.
      * 
-     * @return Promise<void>
+     * @returns Promise<void>
      */
     static async forEach(iterable, iteratee) {
         if (!iterable) return Promise.resolve();
@@ -26,9 +28,9 @@ export class OrgCheckProcessor {
      * 
      * @param {Array} iterable  An array to iterate over
      * @param {Function} iteratee  A function to call on each item in the array. Invoked with (item). Supposed to return a new item based on the original item.
-     * @param {Function} filterIteratee  An optional function to call on each item in the array. Invoked with (item). Returns true or false.
+     * @param {Function} [filterIteratee]  An optional function to call on each item in the array. Invoked with (item). Returns true or false.
      * 
-     * @return Promise<Array>  
+     * @returns Promise<Array>  
      */
     static async map(iterable, iteratee, filterIteratee) {
         if (!iterable) return Promise.resolve([]);

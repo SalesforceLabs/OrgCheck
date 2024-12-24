@@ -5,7 +5,7 @@ import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation } from '../core/o
 import { OrgCheckData } from '../core/orgcheck-api-data';
 import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
 
-export class OrgCheckRecipeProfilePasswordPolicies extends OrgCheckRecipe {
+export class OrgCheckRecipeObjectTypes extends OrgCheckRecipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -13,11 +13,11 @@ export class OrgCheckRecipeProfilePasswordPolicies extends OrgCheckRecipe {
      * @public
      */
     extract() {
-        return [ OrgCheckDatasetAliases.PROFILEPWDPOLICY ];
+        return [ OrgCheckDatasetAliases.OBJECTTYPES ];
     }
 
     /**
-     * @description transform the data from the datasets and return the final result as an Array
+     * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
      * @async
@@ -25,8 +25,8 @@ export class OrgCheckRecipeProfilePasswordPolicies extends OrgCheckRecipe {
      */
     async transform(data) {
         // Get data
-        const policies = data.get(OrgCheckDatasetAliases.PROFILEPWDPOLICY);
-        // Return all data
-        return [... policies.values()];
+        const types = data.get(OrgCheckDatasetAliases.OBJECTTYPES);
+        // Return data
+        return [... types.values()];
     }
 }

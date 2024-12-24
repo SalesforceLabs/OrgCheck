@@ -1,28 +1,31 @@
+// @ts-check
+
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_WORKFLOWS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeWorkflows extends OrgCheckRecipe {
 
-    /** 
-     * Return the list of dataset you need 
-     * 
-     * @returns {Array<string>}
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @returns {Array<string | OrgCheckDatasetRunInformation>}
+     * @public
      */
     extract() {
-        return [DATASET_WORKFLOWS_ALIAS];
+        return [OrgCheckDatasetAliases.WORKFLOWS];
     }
 
     /**
-     * Get a list of workflows (async method)
-     * 
-     * @param {Map} data extracted
-     * @param {string} namespace you want to list (optional), '*' for any
-     * 
-     * @returns {Array<SFDC_Workflow>}
+     * @description transform the data from the datasets and return the final result as an Array
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
+     * @async
+     * @public
      */
     async transform(data) {
         // Get data
-        const workflows = data.get(DATASET_WORKFLOWS_ALIAS);
+        const workflows = data.get(OrgCheckDatasetAliases.WORKFLOWS);
         // Return data
         return [... workflows.values()];
     }

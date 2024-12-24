@@ -1,7 +1,16 @@
+// @ts-check
+
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_ObjectType extends OrgCheckData {
+    
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
     id;
+    
     label;
 }
 

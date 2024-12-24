@@ -1,37 +1,39 @@
+// @ts-check
+
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { DATASET_APPPERMISSIONS_ALIAS,
-    DATASET_PROFILES_ALIAS,
-    DATASET_PERMISSIONSETS_ALIAS } from '../core/orgcheck-api-datasetmanager';
+import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation} from '../core/orgcheck-api-datasetmanager';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
 
-    /** 
-     * Return the list of dataset you need 
-     * 
-     * @returns {Array<string>}
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @returns {Array<string | OrgCheckDatasetRunInformation>}
+     * @public
      */
     extract() {
         return [
-            DATASET_APPPERMISSIONS_ALIAS,
-            DATASET_PROFILES_ALIAS,
-            DATASET_PERMISSIONSETS_ALIAS
+            OrgCheckDatasetAliases.APPPERMISSIONS,
+            OrgCheckDatasetAliases.PROFILES,
+            OrgCheckDatasetAliases.PERMISSIONSETS
         ];
     }
 
     /**
-     * Get a list of object permissions per parent (async method)
-     * 
-     * @param {Map} data extracted
-     * @param {string} namespace you want to list (optional), '*' for any
-     * 
-     * @returns {Any} with objects property as Array<string> and permissions property as Array<SFDC_AppPermissionsPerParent>}
+     * @description transform the data from the datasets and return the final result as a Map
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @param {string} namespace Name of the package (if all use '*')
+     * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
+     * @async
+     * @public
      */
     async transform(data, namespace) {
         // Get data
-        const permissions = data.get(DATASET_APPPERMISSIONS_ALIAS);
-        const profiles = data.get(DATASET_PROFILES_ALIAS);
-        const permissionSets = data.get(DATASET_PERMISSIONSETS_ALIAS);
+        const permissions = data.get(OrgCheckDatasetAliases.APPPERMISSIONS);
+        const profiles = data.get(OrgCheckDatasetAliases.PROFILES);
+        const permissionSets = data.get(OrgCheckDatasetAliases.PERMISSIONSETS);
 
         // Augment data
         await OrgCheckProcessor.forEach(permissions, (permission) => {
@@ -43,24 +45,19 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         });
 
         // Filter data
-        const permissionsBy = new Map();
-        const properties = new Set();
+        const matrix = new OrgCheckMatrixData();
         await OrgCheckProcessor.forEach(permissions, (permission) => {
             if (namespace === '*' || permission.parentRef.package === namespace) {
-                if (permissionsBy.has(permission.parentId) === false) {
-                    permissionsBy.set(permission.parentId, {
-                        parentRef: permission.parentRef,
-                        appPermissions: {}
-                    });
-                }
-                permissionsBy.get(permission.parentId).appPermissions[permission.appName] =
-                    (permission.isAccessible?'A':'') +
-                    (permission.isVisible?'V':'');
-                properties.add(permission.appName);
+                matrix.addValueToProperty(
+                    permission.parentId,
+                    permission.parentName,
+                    permission.appName,
+                    (permission.isAccessible?'A':'') + (permission.isVisible?'V':'')
+                )
             }
         });
 
         // Return data
-        return { apps: Array.from(properties), permissionsBy: Array.from(permissionsBy.values())};
+        return matrix;
     }
 }
