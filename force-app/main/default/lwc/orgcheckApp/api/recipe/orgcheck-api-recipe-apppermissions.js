@@ -47,22 +47,21 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
         if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(permissions, (permission) => {
-            if (permission.isParentProfile === true) {
-                permission.parentRef = profiles.get(permission.parentId);
-            } else {
-                permission.parentRef = permissionSets.get(permission.parentId);
-            }
-        });
-
         // Filter data
         const workingMatrix = OrgCheckDataMatrixFactory.create();
+        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>()} */
+        const profilesAndPermSets = new Map();
         await OrgCheckProcessor.forEach(permissions, (permission) => {
-            if (namespace === '*' || permission.parentRef.package === namespace) {
+            if (namespace === '*' || permission.parentRef.package === namespace || permission.appPackage === namespace ) {
+                if (profilesAndPermSets.has(permission.parentId) === false) {
+                    if (permission.isParentProfile === true) {
+                        profilesAndPermSets.set(permission.parentId, profiles.get(permission.parentId));
+                    } else {
+                        profilesAndPermSets.set(permission.parentId, permissionSets.get(permission.parentId));
+                    }
+                }
                 workingMatrix.addValueToProperty(
                     permission.parentId,
-                    permission.parentName,
                     permission.appName,
                     (permission.isAccessible?'A':'') + (permission.isVisible?'V':'')
                 )
@@ -70,6 +69,6 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         });
 
         // Return data
-        return workingMatrix.toDataMatrix();
+        return workingMatrix.toDataMatrix(profilesAndPermSets);
     }
 }

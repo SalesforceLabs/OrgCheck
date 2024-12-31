@@ -501,32 +501,31 @@ export default class OrgCheckApp extends LightningElement {
                     }
                     break;
                 }
-                case 'object-permissions': {
-                    const dataMatrix = await this._api.getObjectPermissionsPerParent(namespace);
-                    /** @type { Array<{label: string, type: string, data: { ref: string, value: string, url?: string }, sorted?: string, orientation?: string}>} */
-                    const columns = [
-                        { label: 'Parent',  type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',     data: { ref: 'parentRef', value: 'package' }},
-                        { label: 'Type',    type: 'text',     data: { ref: 'parentRef', value: 'type' }},
-                        { label: 'Custom',  type: 'boolean',  data: { ref: 'parentRef', value: 'isCustom' }}
-                    ];
-                    dataMatrix.properties.forEach(object => columns.push({ label: object, type: 'text', data: { ref: 'objectPermissions', value: object }, orientation: 'vertical' }));
-                    this.objectPermissionsTableColumns = columns;
-                    this.objectPermissionsTableData = dataMatrix.rows;
-                    break;
-                }
+                case 'object-permissions':
                 case 'app-permissions': {
-                    const dataMatrix = await this._api.getApplicationPermissionsPerParent(namespace);
-                    /** @type { Array<{label: string, type: string, data: { ref: string, value: string, url?: string }, sorted?: string, orientation?: string}>} */
+                    const dataMatrix = 
+                        (this._currentTab === 'object-permissions') ? 
+                        (await this._api.getObjectPermissionsPerParent(namespace)) :
+                        (await this._api.getApplicationPermissionsPerParent(namespace)); // implicitly: this._currentTab === 'app-permissions')
+                    const permissionRefs = dataMatrix.rowHeaderReferences;
+                    const getProp = (/** @type {string} */ id, /** @type {string} */ property) => { 
+                        return permissionRefs.has(id) ? permissionRefs.get(id)[property] : ''; 
+                    };
+                    /** @type { Array<{label: string, type: string, data: { ref: string, value: string|Function, url?: string|Function }, sorted?: string, orientation?: string}>} */
                     const columns = [
-                        { label: 'Parent',  type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',     data: { ref: 'parentRef', value: 'package' }},
-                        { label: 'Type',    type: 'text',     data: { ref: 'parentRef', value: 'type' }},
-                        { label: 'Custom',  type: 'boolean',  data: { ref: 'parentRef', value: 'isCustom' }}
+                        { label: 'Parent',  type: 'id',       data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'name'), url: (/** @type {string} */ i) => getProp(i, 'url') }, sorted: 'asc' },
+                        { label: 'Package', type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'package') }},
+                        { label: 'Type',    type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'type') }},
+                        { label: 'Custom',  type: 'boolean',  data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'isCustom') }}
                     ];
-                    dataMatrix.properties.forEach(app => columns.push({ label: app, type: 'text', data: { ref: 'appPermissions', value: app }, orientation: 'vertical' }));
-                    this.appPermissionsTableColumns = columns;
-                    this.appPermissionsTableData = dataMatrix.rows;
+                    dataMatrix.columnHeaderIds.forEach(h => columns.push({ label: h, type: 'text', data: { ref: 'data', value: h }, orientation: 'vertical' }));
+                    if (this._currentTab === 'object-permissions') {
+                        this.objectPermissionsTableColumns = columns;
+                        this.objectPermissionsTableData = dataMatrix.rows;
+                    } else { // implicitly: this._currentTab === 'app-permissions')
+                        this.appPermissionsTableColumns = columns;
+                        this.appPermissionsTableData = dataMatrix.rows;
+                    }
                     break;
                 }
                 case 'objects-owd':                        this.objectsOWDTableData = (await this._api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
@@ -986,9 +985,9 @@ export default class OrgCheckApp extends LightningElement {
     rolesTableData;
 
     roleBoxColorsDecorator = (depth, data) => {
-        if (depth === 0) return '_2f89a8';
-        if (data.record.hasActiveMembers === false) return '_fdc223';
-        return '_5fc9f8';
+        if (depth === 0) return '#2f89a8';
+        if (data.record.hasActiveMembers === false) return '#fdc223';
+        return '#5fc9f8';
     };
 
     roleBoxInnerHtmlDecorator = (depth, data) => {

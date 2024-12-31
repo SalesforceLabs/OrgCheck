@@ -30,28 +30,29 @@ export class OrgCheckDataMatrixWorking {
     
     /**
      * @description Convert this working object into a data matrix object
+     * @param {Map<string, any>} rowHeaderReferences 
      * @returns {OrgCheckDataMatrix}
      */
-    toDataMatrix() {
+    toDataMatrix(rowHeaderReferences) {
         return { 
-            properties: Array.from(this._properties), 
+            columnHeaderIds: Array.from(this._properties), 
+            rowHeaderReferences: rowHeaderReferences,
             rows: Array.from(this._rows.values()) 
         };
     }
 
     /**
-     * @description Add a value to the property of a specific row given its id (and later on visible given its name)
+     * @description Add a value to the property of a specific row given its id
      * @param {string} rowId 
-     * @param {string} rowName 
      * @param {string} property 
      * @param {string} value 
      * @public
      */
-    addValueToProperty(rowId, rowName, property, value) {
+    addValueToProperty(rowId, property, value) {
         if (this._rows.has(rowId) === false) {
-            this._rows.set(rowId, { name: rowName, data: {}});
+            this._rows.set(rowId, { headerId: rowId, data: {}});
         }
-        this._rows.get(rowName).data[property] = value;
+        this._rows.get(rowId).data[property] = value;
         this._properties.add(property);
     }
 

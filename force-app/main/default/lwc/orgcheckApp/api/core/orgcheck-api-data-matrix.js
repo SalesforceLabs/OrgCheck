@@ -5,19 +5,28 @@
 export class OrgCheckDataMatrix {
 
     /**
-     * @description List of properties on the row's data object. Each property is used as column header in the matrix view.
+     * @description List of column header ids which correspond to properties in data rows (can be salesforce id and you will map it with labels in the UI).
      * @type {Array<string>}
      * @public
      */
-    properties;
+    columnHeaderIds;
+
+    /**
+     * @description List of row header references identified by its headerId
+     * @type {Map<string, any>}
+     * @public
+     */
+    rowHeaderReferences;
 
     /** 
-     * @description List of data for each "row". A row will have a name (used as row header in the matrix view). And data is an object with as many properties.
+     * @description List of data for each "row". A row will have a headerId (used as row header in the matrix view). And data is an object with as many properties.
      * @type {Array<OrgCheckDataMatrixRow>}
      * @public
      */
     rows;
 }
+
+
 
 /**
  * @description This class represents a row in a matrix data.
@@ -25,11 +34,11 @@ export class OrgCheckDataMatrix {
 export class OrgCheckDataMatrixRow {
     
     /**
-     * @description Name of the matrix row
+     * @description Header id of the matrix row
      * @type {string}
      * @public
      */
-    name;
+    headerId;
     
     /** 
      * @description Data of the row as an object with dynamic properties (defined in the parent OrgCheckDataMatrix object).
