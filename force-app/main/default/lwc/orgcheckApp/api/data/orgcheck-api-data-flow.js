@@ -1,9 +1,9 @@
-import { OrgCheckData, OrgCheckInnerData } from '../core/orgcheck-api-data';
+import { OrgCheckDataWithDependencies, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 
 /**
  * Represents a Flow Definition and its Flow Version children
  */
-export class SFDC_Flow extends OrgCheckData {
+export class SFDC_Flow extends OrgCheckDataWithDependencies {
     
     /**
      * @description Salesforce Id
@@ -32,13 +32,26 @@ export class SFDC_Flow extends OrgCheckData {
      * @public
      */
     apiVersion;
+
     currentVersionId;
+    
     currentVersionRef;
+    
     isLatestCurrentVersion;
+    
     isVersionActive;
+    
     versionsCount;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
+    
     type;
+    
     isProcessBuilder;
     
     /**
@@ -59,7 +72,7 @@ export class SFDC_Flow extends OrgCheckData {
 /**
  * Represents a Flow Version
  */
-export class SFDC_FlowVersion extends OrgCheckInnerData {
+export class SFDC_FlowVersion extends OrgCheckDataWithoutScoring {
     
     /**
      * @description Salesforce Id
@@ -89,14 +102,33 @@ export class SFDC_FlowVersion extends OrgCheckInnerData {
      * @public
      */
     apiVersion;
+
     totalNodeCount;
+    
     dmlCreateNodeCount;
+    
     dmlDeleteNodeCount;
+    
     dmlUpdateNodeCount;
+    
     screenNodeCount;
+    
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
     isActive;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
+
     type;
+    
     runningMode;
     
     /**
@@ -112,6 +144,8 @@ export class SFDC_FlowVersion extends OrgCheckInnerData {
      * @public
      */
     lastModifiedDate;
+    
     sobject;
+    
     triggerType;
 }

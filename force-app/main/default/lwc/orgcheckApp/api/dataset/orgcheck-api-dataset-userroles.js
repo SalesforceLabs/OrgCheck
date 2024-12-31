@@ -1,26 +1,39 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_ROLE } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 
 export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_UserRole>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying REST API about UserRole in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, '+
-                        '(SELECT Id, IsActive FROM Users)'+
-                    ' FROM UserRole '
-        }], localLogger);
+        logger?.log(`Querying REST API about UserRole in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
+                        '(SELECT Id, IsActive FROM Users)' +
+                    ' FROM UserRole ',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const userRoleDataFactory = dataFactory.getInstance(SFDC_UserRole);
 
         // Create the map
         const userRoleRecords = results[0].records;
-        localLogger.log(`Parsing ${userRoleRecords.length} user roles...`);
+        logger?.log(`Parsing ${userRoleRecords.length} user roles...`);
         const roles = new Map(await OrgCheckProcessor.map(userRoleRecords, async (record) => {
 
             // Get the ID15 of this custom label
@@ -40,7 +53,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
                     inactiveMembersCount: 0,
                     hasInactiveMembers: false,
                     isExternal: (record.PortalType !== 'None') ? true : false,
-                    url: sfdcManager.setupUrl(id, TYPE_ROLE)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.ROLE)
                 }
             });         
             await OrgCheckProcessor.forEach(
@@ -65,7 +78,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return roles;
     } 
 }

@@ -1,29 +1,44 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ProfileRestrictions, 
             SFDC_ProfileIpRangeRestriction,
             SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
 
 const COMPUTE_NUMBER_FROM_IP = (ip) => {
-    return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { return prev + Number(currentItem) * Math.pow(255, array.length-1-currentIndex); }, 0);
+    return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
+        return prev + Number(currentItem) * Math.pow(255, array.length-1-currentIndex); 
+    }, 0);
 }
 
 const WEEKDAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
 
 export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_ProfileRestrictions>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
         // (only ids because metadata can't be read via SOQL in bulk!
-        localLogger.log(`Querying REST API about Profile in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT Id FROM Profile'
-        }], localLogger);
+        logger?.log(`Querying REST API about Profile in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id FROM Profile',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
             
         // List of profile ids
         const profileIdRecords = results[0].records;
-        localLogger.log(`Parsing ${profileIdRecords.length} Profiles...`);
+        logger?.log(`Parsing ${profileIdRecords.length} Profiles...`);
         const profileIds = await OrgCheckProcessor.map(profileIdRecords, (record) => record.Id);
 
         // Init the factories
@@ -32,11 +47,11 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         const loginHourDataFactory = dataFactory.getInstance(SFDC_ProfileLoginHourRestriction);
 
         // Get information about profiles using metadata
-        localLogger.log(`Calling Tooling API Composite to get more information about these ${profileIds.length} profiles...`);
-        const records = await sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ], localLogger);
+        logger?.log(`Calling Tooling API Composite to get more information about these ${profileIds.length} profiles...`);
+        const records = await sfdcManager.readMetadataAtScale('Profile', profileIds, [ 'UNKNOWN_EXCEPTION' ], logger);
 
         // Create the map
-        localLogger.log(`Parsing ${records.length} profile restrictions...`);
+        logger?.log(`Parsing ${records.length} profile restrictions...`);
         const profileRestrictions = new Map(await OrgCheckProcessor.map(records, async (record) => {
 
             // Get the ID15 of this profile
@@ -96,7 +111,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return profileRestrictions;
     } 
 }

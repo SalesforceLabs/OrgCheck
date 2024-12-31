@@ -1,35 +1,47 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_LIGHTNING_WEB_COMPONENT } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
 
 export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_LightningWebComponent>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying Tooling API about LightningComponentBundle in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
+        logger?.log(`Querying Tooling API about LightningComponentBundle in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, '+ 
-                        'CreatedDate, LastModifiedDate '+
-                    'FROM LightningComponentBundle '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
-        }], localLogger);
+            string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, ' +
+                        'CreatedDate, LastModifiedDate ' +
+                    'FROM LightningComponentBundle ' +
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const componentDataFactory = dataFactory.getInstance(SFDC_LightningWebComponent);
         const componentRecords = results[0].records;
 
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
+        logger?.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
-            localLogger
+            logger
         );
 
         // Create the map
-        localLogger.log(`Parsing ${componentRecords.length} lightning web components...`);
+        logger?.log(`Parsing ${componentRecords.length} lightning web components...`);
         const components = new Map(await OrgCheckProcessor.map(componentRecords, (record) => {
 
             // Get the ID15 of this custom field
@@ -45,7 +57,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
-                    url: sfdcManager.setupUrl(id, TYPE_LIGHTNING_WEB_COMPONENT)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.LIGHTNING_WEB_COMPONENT)
                 }, 
                 dependencies: {
                     data: componentsDependencies
@@ -57,7 +69,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return components;
     } 
 }

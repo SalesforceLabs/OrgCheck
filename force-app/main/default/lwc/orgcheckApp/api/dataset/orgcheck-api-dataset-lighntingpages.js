@@ -1,36 +1,48 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_LIGHTNING_PAGE } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 
 export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_LightningPage>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying Tooling API about FlexiPage in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
+        logger?.log(`Querying Tooling API about FlexiPage in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, '+
+            string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, ' +
                         'Type, NamespacePrefix, Description, ' +
-                        'CreatedDate, LastModifiedDate '+
-                    'FROM FlexiPage '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '
-        }], localLogger);
+                        'CreatedDate, LastModifiedDate ' +
+                    'FROM FlexiPage ' +
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const pageDataFactory = dataFactory.getInstance(SFDC_LightningPage);
         const pageRecords = results[0].records;
 
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);
+        logger?.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);
         const pagesDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
-            localLogger
+            logger
         );
 
         // Create the map
-        localLogger.log(`Parsing ${pageRecords.length} lightning pages...`);
+        logger?.log(`Parsing ${pageRecords.length} lightning pages...`);
         const pages = new Map(await OrgCheckProcessor.map(pageRecords, (record) => {
 
             // Get the ID15
@@ -46,7 +58,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
-                    url: sfdcManager.setupUrl(id, TYPE_LIGHTNING_PAGE)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.LIGHTNING_PAGE)
                 }, 
                 dependencies: {
                     data: pagesDependencies
@@ -58,7 +70,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return pages;
     } 
 }

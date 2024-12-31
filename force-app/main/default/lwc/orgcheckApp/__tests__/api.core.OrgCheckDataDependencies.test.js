@@ -1,4 +1,4 @@
-import { OrgCheckDataDependencies } from '../api/core/orgcheck-api-data-dependencies';
+import { OrgCheckDataDependenciesFactory } from "../api/core/orgcheck-api-data-dependencies-factory";
 
 const APEX_TYPE = 'ApexClass';
 const CUSTOMFIELD_TYPE = 'CustomField';
@@ -53,7 +53,7 @@ describe('api.core.OrgCheckDataDependencies', () => {
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Apex Class 001 are well defined', () => {
 
     // In the relationShip 001, ApexClass001 uses ApexClass002 and CustomField001 and is referenced in ApexClass003 and CustomField002.
-    const dataDep = new OrgCheckDataDependencies(RELATIONSHIP_001, APEXCLASS_001.id);
+    const dataDep = OrgCheckDataDependenciesFactory.create(RELATIONSHIP_001, APEXCLASS_001.id);
     
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -85,7 +85,7 @@ describe('api.core.OrgCheckDataDependencies', () => {
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Apex Class 002 are well defined', () => {
 
     // In the relationShip 001, ApexClass002 uses ApexClass003 and is referenced in ApexClass001.
-    const dataDep = new OrgCheckDataDependencies(RELATIONSHIP_001, APEXCLASS_002.id);
+    const dataDep = OrgCheckDataDependenciesFactory.create(RELATIONSHIP_001, APEXCLASS_002.id);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -114,7 +114,7 @@ describe('api.core.OrgCheckDataDependencies', () => {
   describe('Using a predefined set of relationship (001), make sure the using, referenced and refByTypes properties for Custom Field 001 are well defined', () => {
 
     // In the relationShip 001, CustomField001 uses CustomField002 and is referenced in ApexClass001.
-    const dataDep = new OrgCheckDataDependencies(RELATIONSHIP_001, CUSTOMFIELD_001.id);
+    const dataDep = OrgCheckDataDependenciesFactory.create(RELATIONSHIP_001, CUSTOMFIELD_001.id);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;
@@ -143,7 +143,7 @@ describe('api.core.OrgCheckDataDependencies', () => {
   describe('Using a predefined set of relationship (002), make sure the using, referenced and refByTypes properties for Custom Field 001 are well defined', () => {
 
     // In the relationShip 002, CustomField001 uses nothing and is referenced in 4 page layouts and in ApexClass001.
-    const dataDep = new OrgCheckDataDependencies(RELATIONSHIP_002, CUSTOMFIELD_001.id);
+    const dataDep = OrgCheckDataDependenciesFactory.create(RELATIONSHIP_002, CUSTOMFIELD_001.id);
 
     it('checks if using property is well defined', () => {
       const using = dataDep.using;

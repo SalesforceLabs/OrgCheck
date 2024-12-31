@@ -1,0 +1,183 @@
+/**
+ * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
+ * @type {number}
+ * @private
+ */
+const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
+ 
+/**
+ * @description Threshold value when percentage is reaching a "critical" zone.
+ * @type {number}
+ * @private
+*/
+const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90; // =90%
+
+/**
+ * @description If limit information are older than this, force a refresh
+ * @type {number}
+ * @private
+ */
+const IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH = 1*60*1000; // =1 minute
+
+/**
+ * @description Information about the current Daily API Request usage limit
+ */
+export class OrgCheckSalesforceUsageInformation {
+
+    /**
+     * @description Current ratio (not percentage!) of Daily API Request limit usage
+     * @type {number}
+     * @public
+     */
+    currentUsageRatio = 0;
+
+    /**
+     * @description Current percentage of Daily API Request limit usage
+     * @type {string}
+     * @public
+     */
+    currentUsagePercentage = '';
+
+    /**
+     * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
+     * @type {number}
+     * @public
+     */
+    get yellowThresholdPercentage() {
+        return DAILY_API_REQUEST_WARNING_THRESHOLD;
+    }
+
+    /**
+     * @description Threshold value when percentage is reaching a "critical" zone.
+     * @type {number}
+     * @public
+     */
+    get redThresholdPercentage() {
+        return DAILY_API_REQUEST_FATAL_THRESHOLD;
+    }
+
+    /**
+     * @description Is the current percentage in the "OK" zone?
+     * @type {boolean}
+     * @public
+     */
+    get isGreenZone() {
+        return this.currentUsageRatio < DAILY_API_REQUEST_WARNING_THRESHOLD;
+    }
+
+    /**
+     * @description Is the current percentage in the "warning" zone?
+     * @type {boolean}
+     * @public
+     */
+    get isYellowZone() {
+        return this.currentUsageRatio >= DAILY_API_REQUEST_WARNING_THRESHOLD &&
+               this.currentUsageRatio < DAILY_API_REQUEST_FATAL_THRESHOLD;
+    }
+
+    /**
+     * @description Is the current percentage in the "critical" zone?
+     * @type {boolean}
+     * @public
+     */
+    get isRedZone() {
+        return this.currentUsageRatio >= DAILY_API_REQUEST_FATAL_THRESHOLD;
+    }
+}
+
+/**
+ * @description Watchdog to make sure you don't use too much Salesforce Daily API Request
+ */
+export class OrgCheckSalesforceWatchDog {
+
+    /**
+     * @description Constructor
+     * @param {() => { used: number, max: number }} apiLimitExtractor
+     * @public
+     */
+    constructor(apiLimitExtractor) {
+        this._apiLimitExtractor = apiLimitExtractor;
+        this._lastRequestToSalesforce = undefined;
+        this._lastApiUsage = new OrgCheckSalesforceUsageInformation();
+    }
+
+    /**
+     * @description Function that knows how to return the current API limit usage
+     * @type {() => { used: number, max: number }}
+     * @private
+     */
+    _apiLimitExtractor;
+
+    /**
+     * @description Timestamp of the last request we have made to Salesforce.
+     *   Why we do this? to better appreciate the limitInfo we have from the last request.
+     *   If the information is fresh then no need to ask again the API, if not we need to try calling.
+     * @type {number}
+     * @private
+     */
+    _lastRequestToSalesforce;
+
+    /**
+     * @description Last ratio the Salesforce API gave us about the Daily API Request. 
+     * @type {OrgCheckSalesforceUsageInformation}
+     * @private
+     */
+    _lastApiUsage;
+
+    /**
+     * @description Before calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
+     * @param {function} [callback]
+     * @throws {TypeError} If we reach the limit
+     * @public
+     */
+    beforeRequest(callback) {
+        if (this._lastRequestToSalesforce && 
+            Date.now() - this._lastRequestToSalesforce <= IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH && 
+            this._lastApiUsage.isRedZone
+        ) {
+            const error = new TypeError(
+                `WATCH DOG: Daily API Request limit is ${RATIO_TO_PERCENTAGE(this._lastApiUsage.currentUsageRatio)}%, `+
+                `and our internal threshold is ${RATIO_TO_PERCENTAGE(this._lastApiUsage.redThresholdPercentage)}%. `+
+                'We stop there to keep your org safe.'
+            );
+            if (callback) callback(error); 
+            throw error;
+        }
+    }
+
+    /**
+     * @description After calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
+     * @param {function} [callback]
+     * @throws {TypeError} If we reach the limit
+     * @public
+     */
+    afterRequest(callback) {
+        const apiUsage = this._apiLimitExtractor();
+        if (apiUsage) {
+            this._lastApiUsage.currentUsageRatio = apiUsage.used / apiUsage.max;
+            this._lastApiUsage.currentUsagePercentage = RATIO_TO_PERCENTAGE(this._lastApiUsage.currentUsageRatio); 
+            this._lastRequestToSalesforce = Date.now();
+            this.beforeRequest(callback);
+        }
+    }
+
+    /**
+     * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
+     * @returns {OrgCheckSalesforceUsageInformation} Information of the current usage of the Daily Request API
+     * @public
+     */
+    get dailyApiRequestLimitInformation() {
+        return this._lastApiUsage;
+    }
+}
+
+/**
+ * @description Return the percentage representation of a ratio as a string (without the percentage sign)
+ * @param {number} ratio 
+ * @param {number} [decimals=2]
+ * @returns {string}
+ * @private
+ */
+const RATIO_TO_PERCENTAGE = (ratio, decimals=2) => {
+    return (ratio*100).toFixed(decimals);
+}

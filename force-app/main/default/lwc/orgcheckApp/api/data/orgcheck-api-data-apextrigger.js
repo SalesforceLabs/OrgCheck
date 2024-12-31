@@ -1,7 +1,9 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
+import { SFDC_Object } from './orgcheck-api-data-object';
 
+/**
+ * @description Representation of an Apex Trigger in Org Check
+ */
 export class SFDC_ApexTrigger extends OrgCheckData {
     
     /**
@@ -39,18 +41,95 @@ export class SFDC_ApexTrigger extends OrgCheckData {
      */
     package;
 
+    /**
+     * @description Number of characters used in the class (without comments)
+     * @type {number}
+     * @public
+     */
     length;
+
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
     isActive;
+    
+    /**
+     * @description Is this trigger before insert or not?
+     * @type {boolean}
+     * @public
+     */
     beforeInsert;
+    
+    /**
+     * @description Is this trigger after insert or not?
+     * @type {boolean}
+     * @public
+     */
     afterInsert;
+    
+    /**
+     * @description Is this trigger before update or not?
+     * @type {boolean}
+     * @public
+     */
     beforeUpdate;
+    
+    /**
+     * @description Is this trigger after update or not?
+     * @type {boolean}
+     * @public
+     */
     afterUpdate;
+    
+    /**
+     * @description Is this trigger before delete or not?
+     * @type {boolean}
+     * @public
+     */
     beforeDelete;
+    
+    /**
+     * @description Is this trigger after delete or not?
+     * @type {boolean}
+     * @public
+     */
     afterDelete;
+    
+    /**
+     * @description Is this trigger after undelete or not?
+     * @type {boolean}
+     * @public
+     */
     afterUndelete;
+    
+    /**
+     * @description Identifier of the object for this trigger
+     * @type {string}
+     * @public
+     */
     objectId; 
+    
+    /**
+     * @description Reference of the object for this trigger
+     * @type {SFDC_Object}
+     * @public
+     */
     objectRef;
+    
+    /**
+     * @description Is this trigger containing SOQL statement?
+     * @type {boolean}
+     * @public
+     */
     hasSOQL;
+    
+    /**
+     * @description Is this trigger containing DML statement?
+     * @type {boolean}
+     * @public
+     */
     hasDML;
     
     /**

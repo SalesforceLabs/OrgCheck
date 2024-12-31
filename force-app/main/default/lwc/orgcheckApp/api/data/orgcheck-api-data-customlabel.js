@@ -1,8 +1,9 @@
-// @ts-check
+import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_CustomLabel extends OrgCheckData {
+/**
+ * @description Representation of a Custom Label in Org Check
+ */
+export class SFDC_CustomLabel extends OrgCheckDataWithDependencies {
     
     /**
      * @description Salesforce Id
@@ -18,19 +19,42 @@ export class SFDC_CustomLabel extends OrgCheckData {
      */
     name;
     
-    
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}
      * @public
      */
     package;
+
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
     label;
+
+    /**
+     * @description Category
+     * @type {string}
+     * @public
+     */
     category;
+
     isProtected;
+
+    /**
+     * @description Language code for the label
+     * @type {string}
+     * @public
+     */
     language;
+
+    /**
+     * @description Value
+     * @type {string}
+     * @public
+     */
     value;
-    
     
     /**
      * @description Setup URL of this item

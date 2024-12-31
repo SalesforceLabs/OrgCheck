@@ -1,5 +1,3 @@
-// @ts-check
-
 import { OrgCheckDataDependencies } from "./orgcheck-api-data-dependencies";
 
 /**
@@ -28,6 +26,12 @@ export class OrgCheckData {
      * @public
      */
     badReasonIds;
+}
+
+/**
+ * @description In some cases, the DAPI can retrieve dependencies for org check data and having dependencies participate in the computation of the score.
+ */
+export class OrgCheckDataWithDependencies extends OrgCheckData {
 
     /**
      * @description Optionnal dependencies information for this data.
@@ -38,9 +42,7 @@ export class OrgCheckData {
 }
 
 /**
- * @description This class represents a sub set of information included in an instance of OrgCheckData, but it does not need score and 
- *   dependencies automation at its level. The best example of this is a FlowDefinition and its active FlowVersion. The flowDefinition will 
- *   be a OrgCheckData, including a reference to a OrgCheckInnerData to represent the FlowVersion. All score information and dependencies will 
- *   be reported to the flowDef instance. 
+ * @description This class represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
+ *   Such class are created by a "data factory" (see OrgCheckDataFactory) BUT do not need any scoring. 
  */
-export class OrgCheckInnerData {}
+export class OrgCheckDataWithoutScoring {}

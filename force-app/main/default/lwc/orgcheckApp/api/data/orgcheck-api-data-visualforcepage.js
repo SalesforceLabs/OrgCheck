@@ -1,8 +1,6 @@
-// @ts-check
+import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_VisualForcePage extends OrgCheckData {
+export class SFDC_VisualForcePage extends OrgCheckDataWithDependencies {
     
     /**
      * @description Salesforce Id
@@ -17,7 +15,6 @@ export class SFDC_VisualForcePage extends OrgCheckData {
      * @public
      */
     name;
-    
     
     /**
      * @description API Version (as a number) set in the metadata for this item.
@@ -47,8 +44,13 @@ export class SFDC_VisualForcePage extends OrgCheckData {
      * @public
      */
     lastModifiedDate;
-    description;
     
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
     
     /**
      * @description Setup URL of this item

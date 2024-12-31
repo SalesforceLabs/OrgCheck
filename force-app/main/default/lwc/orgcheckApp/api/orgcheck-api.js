@@ -1,21 +1,5 @@
-// @ts-check
-
-import { DailyApiRequestLimitInformation, OrgCheckSalesforceManager } from './core/orgcheck-api-sfconnectionmanager';
-import { OrgCheckLogger } from './core/orgcheck-api-logger';
-import { OrgCheckDatasetManager } from './core/orgcheck-api-datasetmanager';
-import { OrgCheckRecipeManager, RECIPE_ACTIVEUSERS_ALIAS, RECIPE_CUSTOMFIELDS_ALIAS, 
-    RECIPE_CUSTOMLABELS_ALIAS, RECIPE_OBJECT_ALIAS, RECIPE_OBJECTPERMISSIONS_ALIAS,
-    RECIPE_APPPERMISSIONS_ALIAS, RECIPE_ORGANIZATION_ALIAS, RECIPE_CURRENTUSERPERMISSIONS_ALIAS,
-    RECIPE_PERMISSIONSETS_ALIAS, RECIPE_PROFILES_ALIAS, RECIPE_PROFILERESTRICTIONS_ALIAS,
-    RECIPE_PROFILEPWDPOLICIES_ALIAS, RECIPE_VISUALFORCEPAGES_ALIAS,
-    RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS,
-    RECIPE_LIGHTNINGPAGES_ALIAS, RECIPE_VISUALFORCECOMPONENTS_ALIAS, RECIPE_GROUPS_ALIAS, 
-    RECIPE_APEXCLASSES_ALIAS, RECIPE_APEXTRIGGERS_ALIAS, RECIPE_USERROLES_ALIAS,
-    RECIPE_FLOWS_ALIAS, RECIPE_PROCESSBUILDERS_ALIAS, RECIPE_WORKFLOWS_ALIAS, 
-    RECIPE_PACKAGES_ALIAS,
-    RECIPE_OBJECTTYPES_ALIAS,
-    RECIPE_OBJECTS_ALIAS} from './core/orgcheck-api-recipemanager';
-import { OrgCheckDataCacheItem } from './core/orgcheck-api-datacache';
+import { OrgCheckSalesforceManagerIntf } from './core/orgcheck-api-salesforcemanager';
+import { OrgCheckDataCacheItem, OrgCheckDataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
 import { OrgCheckValidationRule } from './core/orgcheck-api-datafactory';
 import { SFDC_ApexClass } from './data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './data/orgcheck-api-data-apextrigger';
@@ -37,13 +21,21 @@ import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { SFDC_Package } from './data/orgcheck-api-data-package';
 import { SFDC_ObjectType } from './data/orgcheck-api-data-objecttype';
-import { OrgCheckData } from './core/orgcheck-api-data';
-import { SFDC_ObjectPermission } from './data/orgcheck-api-data-objectpermission';
 import { SFDC_ProfileRestrictions } from './data/orgcheck-api-data-profilerestrictions';
+import { OrgCheckDataMatrix } from './core/orgcheck-api-data-matrix';
+import { OrgCheckSalesforceUsageInformation } from './core/orgcheck-api-salesforce-watchdog';
+import { OrgCheckDataCacheManager } from './core/orgcheck-api-cachemanager-impl';
+import { OrgCheckDatasetManager } from './core/orgcheck-api-datasetmanager-impl';
+import { OrgCheckLogger } from './core/orgcheck-api-logger-impl';
+import { OrgCheckRecipeManager } from './core/orgcheck-api-recipemanager-impl';
+import { OrgCheckRecipeAliases } from './core/orgcheck-api-recipes-aliases';
+import { OrgCheckDatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
+import { OrgCheckLoggerIntf } from './core/orgcheck-api-logger';
+import { OrgCheckRecipeManagerIntf } from './core/orgcheck-api-recipemanager';
+import { OrgCheckSalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
 
 /**
  * @description Org Check API main class
- * @property {string} version - String representation of the Org Check version in a form of Element [El,n]
  */
 export class OrgCheckAPI {
 
@@ -53,42 +45,59 @@ export class OrgCheckAPI {
      * @public
      */
     get version() {
-        return 'Beryllium [Be,4]';
+        return 'Boron [B,5]';
     }
 
     /**
+     * @description Numerical representation of the Salesforce API Version we use
+     * @type {number}
+     * @public
+     */
+    get salesforceApiVersion() {
+        return this._sfdcManager.apiVersion;
+    }
+    
+    /**
      * @description Private Recipe Manager property used to run a recipe given its alias
-     * @type {OrgCheckRecipeManager} 
+     * @type {OrgCheckRecipeManagerIntf} 
      * @private
      */
-    private_recipeManager;
+    _recipeManager;
 
     /**
      * @description Private Dataset Manager property used to run a dataset given its alias
-     * @type {OrgCheckDatasetManager}
+     * @type {OrgCheckDatasetManagerIntf}
      * @private
      */
-    private_datasetManager;
+    _datasetManager;
 
     /**
      * @description Private Salesforce Manager property used to call the salesforce APIs using JsForce framework
-     * @type {OrgCheckSalesforceManager}
+     * @type {OrgCheckSalesforceManagerIntf}
      * @private
      */
-    private_sfdcManager;
+    _sfdcManager;
+
+    /**
+     * @description Private data cache manager to store data from datasetManager
+     * @type {OrgCheckDataCacheManagerIntf}
+     * @private
+     */
+    _cacheManager;
 
     /**
      * @description Private Logger property used to send log information to the UI (if any)
-     * @type {OrgCheckLogger}
+     * @type {OrgCheckLoggerIntf}
      * @private
      */
-    private_logger;
+    _logger;
 
     /**
      * @description Is the current user accepted the terms to use Org Check in this org?
      * @type {boolean}
+     * @private
      */
-    private_usageTermsAccepted;
+    _usageTermsAccepted;
 
     /**
      * @description Org Check constructor
@@ -99,19 +108,25 @@ export class OrgCheckAPI {
      * @param {any} loggerSetup
      */
     constructor(jsConnectionFactory, jsCompression, accessToken, userId, loggerSetup) {
-        this.private_logger = new OrgCheckLogger(loggerSetup);
-        this.private_sfdcManager = new OrgCheckSalesforceManager(jsConnectionFactory, accessToken); //, userId, this.private_logger);
-        this.private_datasetManager = new OrgCheckDatasetManager(this.private_sfdcManager, jsCompression, this.private_logger);
-        this.private_recipeManager = new OrgCheckRecipeManager(this.private_datasetManager, this.private_logger);
-        this.private_usageTermsAccepted = false;
+        this._logger = new OrgCheckLogger(loggerSetup);
+        this._sfdcManager = new OrgCheckSalesforceManager(jsConnectionFactory, accessToken); //, userId, this._logger);
+        this._cacheManager = new OrgCheckDataCacheManager({
+            compress:   (data) => { return jsCompression.zlibSync(data, { level: 9 }); },
+            decompress: (data) => { return jsCompression.unzlibSync(data); },
+            encode:     (data) => { return TEXTENCODER.encode(data); },
+            decode:     (data) => { return TEXTDECODER.decode(data); }
+        });
+        this._datasetManager = new OrgCheckDatasetManager(this._sfdcManager, this._cacheManager, this._logger);
+        this._recipeManager = new OrgCheckRecipeManager(this._datasetManager, this._logger);
+        this._usageTermsAccepted = false;
     }
     
     /**
      * @description Remove all cache from dataset manager
      * @public
      */
-    removeAllCache() {
-        this.private_datasetManager.removeAllCache();
+    removeAllFromCache() {
+        this._cacheManager.clear();
     }
 
     /**
@@ -119,8 +134,8 @@ export class OrgCheckAPI {
      * @param {string} name 
      * @public
      */
-    removeCache(name) {
-        this.private_datasetManager.removeCache(name);
+    removeFromCache(name) {
+        this._cacheManager.remove(name);
     }
 
     /**
@@ -129,26 +144,26 @@ export class OrgCheckAPI {
      * @public
      */
     getCacheInformation() {
-        return this.private_datasetManager.getCacheInformation();
+        return this._cacheManager.details();
     }
 
     /**
      * @description Get the information of the given Validation Rule
-     * @param {string} id
+     * @param {number} id
      * @returns {OrgCheckValidationRule} Information about a validation rule
      * @public
      */
     getValidationRule(id) {
-        return this.private_datasetManager.getValidationRule(id);
+        return this._datasetManager.getValidationRule(id);
     }
 
     /**
      * @description Get the lastest Daily API Usage from JSForce, and the level of confidence we have in this ratio to continue using org check.
-     * @returns {DailyApiRequestLimitInformation} Percentage of the daily api usage and a confidence precentage.
+     * @returns {OrgCheckSalesforceUsageInformation} Percentage of the daily api usage and a confidence precentage.
      * @public
      */
-    getDailyApiRequestLimitInformation() {
-        return this.private_sfdcManager.getDailyApiRequestLimitInformation();
+    get dailyApiRequestLimitInformation() {
+        return this._sfdcManager.dailyApiRequestLimitInformation;
     }
 
     /**
@@ -159,7 +174,7 @@ export class OrgCheckAPI {
      * @public
      */
     async runAllTestsAsync() {
-        return this.private_sfdcManager.runAllTests();
+        return Promise.resolve('todo'); //this._sfdcManager.runAllTests();
     }
 
     /**
@@ -170,7 +185,7 @@ export class OrgCheckAPI {
      * @public
      */
     async compileClasses(classes) {
-        return this.private_sfdcManager.compileClasses(classes);
+        return Promise.resolve([]); // return this._sfdcManager.compileClasses(classes);
     }
 
     /**
@@ -181,11 +196,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getOrganizationInformation() {
-        const result = await this.private_recipeManager.run(RECIPE_ORGANIZATION_ALIAS);
-        if (result instanceof SFDC_Organization) {
-            return result;
-        }
-        throw new TypeError(`The recipe ${RECIPE_ORGANIZATION_ALIAS} did not return an instance of SFDC_Organization`);
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.ORGANIZATION));
     }
 
     /**
@@ -197,7 +209,7 @@ export class OrgCheckAPI {
      */
     async checkUsageTerms() {
         const orgInfo = await this.getOrganizationInformation();
-        if (orgInfo.isProduction === true && this.private_usageTermsAccepted === false) {
+        if (orgInfo.isProduction === true && this._usageTermsAccepted === false) {
             return false;
         }
         return true;
@@ -208,7 +220,7 @@ export class OrgCheckAPI {
      * @public
      */
     acceptUsageTerms() {
-        this.private_usageTermsAccepted = true;
+        this._usageTermsAccepted = true;
     }
 
     /**
@@ -219,10 +231,8 @@ export class OrgCheckAPI {
      * @public
      */
     async checkCurrentUserPermissions() {
-        const perms = await this.private_recipeManager.run(RECIPE_CURRENTUSERPERMISSIONS_ALIAS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]);
-        if (perms instanceof Map === false) {
-            throw new TypeError(`The recipe ${RECIPE_CURRENTUSERPERMISSIONS_ALIAS} did not return an instance of Map`);
-        }
+        // @ts-ignore
+        const /** @type {Map} */ perms = await this._recipeManager.run(OrgCheckRecipeAliases.CURRENT_USER_PERMISSIONS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]);
         if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
             perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
                 throw (new TypeError(
@@ -246,21 +256,12 @@ export class OrgCheckAPI {
      * @public
      */
     async getPackagesTypesAndObjects(namespace, sobjectType) {
-        const results = await Promise.all([
-            this.private_recipeManager.run(RECIPE_PACKAGES_ALIAS),
-            this.private_recipeManager.run(RECIPE_OBJECTTYPES_ALIAS),
-            this.private_recipeManager.run(RECIPE_OBJECTS_ALIAS, namespace, sobjectType)
-        ]);
-        if (results[0] instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PACKAGES_ALIAS} did not return an instance of Array`);
-        }
-        if (results[1] instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_OBJECTTYPES_ALIAS} did not return an instance of Array`);
-        }
-        if (results[2] instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_OBJECTS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
+        const /** @type {Array<Array>} */ results = await Promise.all([
+            this._recipeManager.run(OrgCheckRecipeAliases.PACKAGES),
+            this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_TYPES),
+            this._recipeManager.run(OrgCheckRecipeAliases.OBJECTS, namespace, sobjectType)
+        ]);
         return { packages: results[0], types: results[1], objects: results[2] };
     }
 
@@ -269,9 +270,9 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllPackagesTypesAndObjectsFromCache() {
-        this.private_recipeManager.clean(RECIPE_PACKAGES_ALIAS);
-        this.private_recipeManager.clean(RECIPE_OBJECTTYPES_ALIAS);
-        this.private_recipeManager.clean(RECIPE_OBJECTS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PACKAGES);
+        this._recipeManager.clean(OrgCheckRecipeAliases.OBJECT_TYPES);
+        this._recipeManager.clean(OrgCheckRecipeAliases.OBJECTS);
     }
 
     /**
@@ -283,11 +284,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getObject(sobject) {
-        const result = await this.private_recipeManager.run(RECIPE_OBJECT_ALIAS, sobject);
-        if (result instanceof SFDC_Object === false) {
-            throw new TypeError(`The recipe ${RECIPE_OBJECT_ALIAS} did not return an instance of SFDC_Object`);
-        }
-        return result;
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.OBJECT, sobject));
     }
 
     /**
@@ -296,48 +294,41 @@ export class OrgCheckAPI {
      * @public
      */
     removeObjectFromCache(sobject) {
-        this.private_recipeManager.clean(RECIPE_OBJECT_ALIAS, sobject);
+        this._recipeManager.clean(OrgCheckRecipeAliases.OBJECT, sobject);
     }
 
     /**
      * @description Get information about object permissions per parent (kind of matrix view)
      * @param {string} namespace 
-     * @returns {Promise<Array<SFDC_ObjectPermission>>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
+     * @returns {Promise<OrgCheckDataMatrix>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
     async getObjectPermissionsPerParent(namespace) {
-        const results = this.private_recipeManager.run(RECIPE_OBJECTPERMISSIONS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_OBJECTPERMISSIONS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_PERMISSIONS, namespace));
     }
 
     /**
      * @description Remove all the cached information about object permissions
      * @public
      */
-    removeAllObjectPermissionsCache() {
-        this.private_recipeManager.clean(RECIPE_OBJECTPERMISSIONS_ALIAS);
+    removeAllObjectPermissionsFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.OBJECT_PERMISSIONS);
     }
 
     /**
      * @description Get information about application permissions per parent (kind of matrix view)
      * @param {string} namespace 
-     * @returns {Promise<OrgCheckMatrixData>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
+     * @returns {Promise<OrgCheckDataMatrix>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
      * @public
      */
     async getApplicationPermissionsPerParent(namespace) {
-        const matrixData = await this.private_recipeManager.run(RECIPE_APPPERMISSIONS_ALIAS, namespace);
-        if (matrixData instanceof OrgCheckMatrixData === false) {
-            throw new TypeError(`The recipe ${RECIPE_APPPERMISSIONS_ALIAS} did not return an instance of OrgCheckMatrixData`);
-        }
-        return matrixData;
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.APP_PERMISSIONS, namespace));
     }
 
     /**
@@ -345,7 +336,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllAppPermissionsFromCache() {
-        this.private_recipeManager.clean(RECIPE_APPPERMISSIONS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.APP_PERMISSIONS);
     }
 
     /**
@@ -359,12 +350,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getCustomFields(namespace, sobjectType, sobject) {
-        const results = await this.private_recipeManager.run(RECIPE_CUSTOMFIELDS_ALIAS, namespace, sobjectType, sobject);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_CUSTOMFIELDS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.CUSTOM_FIELDS, namespace, sobjectType, sobject));
     }
 
     /**
@@ -372,7 +359,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllCustomFieldsFromCache() {
-        this.private_recipeManager.clean(RECIPE_CUSTOMFIELDS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.CUSTOM_FIELDS);
     }
 
     /**
@@ -384,12 +371,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getPermissionSets(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_PERMISSIONSETS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PERMISSIONSETS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PERMISSION_SETS, namespace));
     }
     
     /**
@@ -397,7 +380,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllPermSetsFromCache() {
-        this.private_recipeManager.clean(RECIPE_PERMISSIONSETS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PERMISSION_SETS);
     }
 
     /**
@@ -409,12 +392,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getProfiles(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_PROFILES_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PROFILES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PROFILES, namespace));
     }
 
     /**
@@ -422,7 +401,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllProfilesFromCache() {
-        this.private_recipeManager.clean(RECIPE_PROFILES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PROFILES);
     }
 
     /**
@@ -434,12 +413,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getProfileRestrictions(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_PROFILERESTRICTIONS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PROFILERESTRICTIONS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PROFILE_RESTRICTIONS, namespace));
     }
 
     /**
@@ -447,7 +422,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllProfileRestrictionsFromCache() {
-        this.private_recipeManager.clean(RECIPE_PROFILERESTRICTIONS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PROFILE_RESTRICTIONS);
     }
 
     /**
@@ -458,12 +433,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getProfilePasswordPolicies() {
-        const results = await this.private_recipeManager.run(RECIPE_PROFILEPWDPOLICIES_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PROFILEPWDPOLICIES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PROFILE_PWD_POLICIES));
     }
 
     /**
@@ -471,7 +442,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllProfilePasswordPoliciesFromCache() {
-        this.private_recipeManager.clean(RECIPE_PROFILEPWDPOLICIES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PROFILE_PWD_POLICIES);
     }
 
     /**
@@ -482,12 +453,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getActiveUsers() {
-        const results = await this.private_recipeManager.run(RECIPE_ACTIVEUSERS_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_ACTIVEUSERS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.ACTIVE_USERS));
     }
 
     /**
@@ -495,7 +462,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllActiveUsersFromCache() {
-        this.private_recipeManager.clean(RECIPE_ACTIVEUSERS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.ACTIVE_USERS);
     }
 
     /**
@@ -507,12 +474,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getCustomLabels(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_CUSTOMLABELS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_CUSTOMLABELS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.CUSTOM_LABELS, namespace));
     }
 
     /**
@@ -520,7 +483,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllCustomLabelsFromCache() {
-        this.private_recipeManager.clean(RECIPE_CUSTOMLABELS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.CUSTOM_LABELS);
     }
 
     /**
@@ -532,12 +495,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getLightningWebComponents(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.LIGHTNING_WEB_COMPONENTS, namespace));
     }
     
     /**
@@ -545,7 +504,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllLightningWebComponentsFromCache() {
-        this.private_recipeManager.clean(RECIPE_LIGHTNINGPWEBCOMPONENTS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.LIGHTNING_WEB_COMPONENTS);
     }
 
     /**
@@ -557,12 +516,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getLightningAuraComponents(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (this._recipeManager.run(OrgCheckRecipeAliases.LIGHTNING_AURA_COMPONENTS, namespace));
     }
 
     /**
@@ -570,7 +525,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllLightningAuraComponentsFromCache() {
-        this.private_recipeManager.clean(RECIPE_LIGHTNINGAURACOMPONENTS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.LIGHTNING_AURA_COMPONENTS);
     }
 
     /**
@@ -582,12 +537,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getLightningPages(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_LIGHTNINGPAGES_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_LIGHTNINGPAGES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.LIGHTNING_PAGES, namespace));
     }
 
     /**
@@ -595,7 +546,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllLightningPagesFromCache() {
-        this.private_recipeManager.clean(RECIPE_LIGHTNINGPAGES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.LIGHTNING_PAGES);
     }
     
     /**
@@ -607,12 +558,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getVisualForceComponents(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_VISUALFORCECOMPONENTS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_VISUALFORCECOMPONENTS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.VISUALFORCE_COMPONENTS, namespace));
     }
     
     /**
@@ -620,7 +567,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllVisualForceComponentsFromCache() {
-        this.private_recipeManager.clean(RECIPE_VISUALFORCECOMPONENTS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.VISUALFORCE_COMPONENTS);
     }
 
     /**
@@ -632,12 +579,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getVisualForcePages(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_VISUALFORCEPAGES_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_VISUALFORCEPAGES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.VISUALFORCE_PAGES, namespace));
     }
 
     /**
@@ -645,7 +588,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllVisualForcePagesFromCache() {
-        this.private_recipeManager.clean(RECIPE_VISUALFORCEPAGES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.VISUALFORCE_PAGES);
     }
     
     /**
@@ -656,20 +599,16 @@ export class OrgCheckAPI {
      * @public
      */
     async getGroups() {
-        const results = await this.private_recipeManager.run(RECIPE_GROUPS_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_GROUPS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.GROUPS));
     }
 
     /**
      * @description Remove all the cached information about public groups and queues
      * @public
      */
-    removeAllGroups() {
-        this.private_recipeManager.clean(RECIPE_GROUPS_ALIAS);
+    removeAllGroupsFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.GROUPS);
     }
 
     /**
@@ -681,12 +620,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getApexClasses(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_APEXCLASSES_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_APEXCLASSES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.APEX_CLASSES, namespace));
     }
 
     /**
@@ -694,7 +629,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllApexClassesFromCache() {
-        this.private_recipeManager.clean(RECIPE_APEXCLASSES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.APEX_CLASSES);
     }
     
     /**
@@ -706,12 +641,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getApexTriggers(namespace) {
-        const results = await this.private_recipeManager.run(RECIPE_APEXTRIGGERS_ALIAS, namespace);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_APEXTRIGGERS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.APEX_TRIGGERS, namespace));
     }
 
     /**
@@ -719,7 +650,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllApexTriggersFromCache() {
-        this.private_recipeManager.clean(RECIPE_APEXTRIGGERS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.APEX_TRIGGERS);
     }
 
     /**
@@ -730,12 +661,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getRoles() {
-        const results = await this.private_recipeManager.run(RECIPE_USERROLES_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_USERROLES_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.USER_ROLES));
     }
 
     /**
@@ -743,7 +670,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllRolesFromCache() {
-        this.private_recipeManager.clean(RECIPE_USERROLES_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.USER_ROLES);
     }
 
     /**
@@ -766,7 +693,7 @@ export class OrgCheckAPI {
         //        * 'record' (undefined for root, mandatory for other than root -- of type: SFDC_UserRole)
         const allNodes = new Map();
         // Key for artificial ROOT
-        const ROOT_KEY = '##i am root##';
+        const ROOT_KEY = '__i am root__';
         // Note that 'allRoles' is an 'Array'
         allRoles.forEach((role) => { 
             // is this node already registered? if false create (with no children!) and set in the map
@@ -798,12 +725,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getWorkflows() {
-        const results = await this.private_recipeManager.run(RECIPE_WORKFLOWS_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_WORKFLOWS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.WORKFLOWS));
     }
 
     /**
@@ -811,7 +734,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllWorkflowsFromCache() {
-        this.private_recipeManager.clean(RECIPE_WORKFLOWS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.WORKFLOWS);
     }
 
     /**
@@ -822,12 +745,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getFlows() {
-        const results = await this.private_recipeManager.run(RECIPE_FLOWS_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_FLOWS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.FLOWS));
     }
 
     /**
@@ -835,7 +754,7 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllFlowsFromCache() {
-        this.private_recipeManager.clean(RECIPE_FLOWS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.FLOWS);
     }
     
     /**
@@ -846,12 +765,8 @@ export class OrgCheckAPI {
      * @public
      */
     async getProcessBuilders() {
-        const results = await this.private_recipeManager.run(RECIPE_PROCESSBUILDERS_ALIAS);
-        if (results instanceof Array === false) {
-            throw new TypeError(`The recipe ${RECIPE_PROCESSBUILDERS_ALIAS} did not return an instance of Array`);
-        }
         // @ts-ignore
-        return results;
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PROCESS_BUILDERS));
     }
 
     /**
@@ -859,6 +774,9 @@ export class OrgCheckAPI {
      * @public
      */
     removeAllProcessBuildersFromCache() {
-        this.private_recipeManager.clean(RECIPE_PROCESSBUILDERS_ALIAS);
+        this._recipeManager.clean(OrgCheckRecipeAliases.PROCESS_BUILDERS);
     }    
 }
+
+const TEXTENCODER = new TextEncoder();
+const TEXTDECODER = new TextDecoder();

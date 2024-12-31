@@ -1,19 +1,31 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ProfilePasswordPolicy } from '../data/orgcheck-api-data-profilepasswordpolicy';
 
 export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_ProfilePasswordPolicy>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First Metadata API query
-        localLogger.log(`Querying Metadata API about ProfilePasswordPolicy...`);
+        logger?.log(`Querying Metadata API about ProfilePasswordPolicy...`);
         const results = await sfdcManager.readMetadata([{ 
             type: 'ProfilePasswordPolicy',
             members: [ '*' ]
-        }], localLogger);
+        }], logger);
             
         // List of policies
+        logger?.debug(`results: ${JSON.stringify(results)}`);
+        logger?.debug(`results.ProfilePasswordPolicy: ${JSON.stringify(results.ProfilePasswordPolicy)}`);
         const profilePasswordPolicies = results?.ProfilePasswordPolicy;
         if (!profilePasswordPolicies) return new Map();
 
@@ -21,7 +33,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
         const policyDataFactory = dataFactory.getInstance(SFDC_ProfilePasswordPolicy);
 
         // Create the map
-        localLogger.log(`Parsing ${profilePasswordPolicies.length} profile password policies...`);        
+        logger?.log(`Parsing ${profilePasswordPolicies.length} profile password policies...`);        
         const policies = new Map(
             await OrgCheckProcessor.map(
                 profilePasswordPolicies,
@@ -53,7 +65,7 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
         );
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return policies;
     } 
 }

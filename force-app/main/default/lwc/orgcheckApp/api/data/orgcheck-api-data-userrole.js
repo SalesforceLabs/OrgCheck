@@ -1,5 +1,3 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_UserRole extends OrgCheckData {
@@ -19,13 +17,12 @@ export class SFDC_UserRole extends OrgCheckData {
      */
     name;
     
-    api
     /**
-     * @description Name
+     * @description API Name
      * @type {string}
      * @public
      */
-    name;
+    apiname;
     
     /**
      * @description Setup URL of this item
@@ -33,14 +30,34 @@ export class SFDC_UserRole extends OrgCheckData {
      * @public
      */
     url;
+
+    /**
+     * @description Salesforce Id of the related parent Role
+     * @type {string}
+     * @public
+     */
     parentId;
+
+    /**
+     * @description The related parent reference
+     * @type {SFDC_UserRole}}
+     * @public
+     */
     parentRef;
+    
     hasParent;
+    
     activeMembersCount;
+    
     activeMemberIds;
+    
     activeMemberRefs;
+    
     hasActiveMembers;
+    
     inactiveMembersCount;
+    
     hasInactiveMembers;
+    
     isExternal;
 }

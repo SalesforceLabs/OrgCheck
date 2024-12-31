@@ -1,25 +1,40 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_FLOW_DEFINITION, TYPE_FLOW_VERSION } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
 
 export class OrgCheckDatasetFlows extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_Flow>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying Tooling API about FlowDefinition in the org...`);            
+        logger?.log(`Querying Tooling API about FlowDefinition in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             // List all FlowDefinition (on top of flow verions)
-            string: 'SELECT Id, MasterLabel, DeveloperName, ApiVersion, Description, ActiveVersionId, '+
-                        'LatestVersionId, CreatedDate, LastModifiedDate '+
+            string: 'SELECT Id, MasterLabel, DeveloperName, ApiVersion, Description, ActiveVersionId, ' +
+                        'LatestVersionId, CreatedDate, LastModifiedDate ' +
                     'FROM FlowDefinition',
-            tooling: true
+            tooling: true,
+            byPasses: [],
+            queryMoreField: ''
         }, {
             // List all Flow (attached to a FlowDefintion)
-            string: 'SELECT Id, DefinitionId, Status, ProcessType FROM Flow where DefinitionId <> null',
-            tooling: true
-        }], localLogger);
+            string: 'SELECT Id, DefinitionId, Status, ProcessType '+
+                    'FROM Flow where DefinitionId <> null',
+            tooling: true,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
             
         // Init the factories
         const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
@@ -28,17 +43,17 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         const flowRecords = results[1].records;
         
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
+        logger?.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
         const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
-            localLogger
+            logger
         );
         
         // List of active flows that we need to get information later (with Metadata API)
         const activeFlowIds = [];
 
         // Create the map
-        localLogger.log(`Parsing ${flowDefRecords.length} flow definitions...`);
+        logger?.log(`Parsing ${flowDefRecords.length} flow definitions...`);
         const flowDefinitions = new Map(await OrgCheckProcessor.map(flowDefRecords, (record) => {
         
             // Get the ID15 of this flow definition and others
@@ -59,7 +74,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                     description: record.Description,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, TYPE_FLOW_DEFINITION)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.FLOW_DEFINITION)
                 }, 
                 dependencies: {
                     data: flowDefinitionsDependencies,
@@ -75,7 +90,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         }));
 
         // Add count of Flow verions (whatever they are active or not)
-        localLogger.log(`Parsing ${flowRecords.length} flow versions...`);
+        logger?.log(`Parsing ${flowRecords.length} flow versions...`);
         await OrgCheckProcessor.forEach(flowRecords, (record) => {
                 
             // Get the ID15s of the parent flow definition
@@ -90,10 +105,10 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         });
 
         // Get information about the previous identified active flows using metadata api
-        localLogger.log(`Calling Tooling API Composite to get more information about these ${activeFlowIds.length} flow versions...`);
-        const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], localLogger); // There are GACKs throwing that errors for some flows!
+        logger?.log(`Calling Tooling API Composite to get more information about these ${activeFlowIds.length} flow versions...`);
+        const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], logger); // There are GACKs throwing that errors for some flows!
 
-        localLogger.log(`Parsing ${records.length} flow versions...`);
+        logger?.log(`Parsing ${records.length} flow versions...`);
         await OrgCheckProcessor.forEach(records, async (record)=> {
 
             // Get the ID15s of this flow version and parent flow definition
@@ -123,7 +138,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                     runningMode: record.RunInMode,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, TYPE_FLOW_VERSION)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
             await OrgCheckProcessor.forEach(
@@ -131,8 +146,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
                 (m) => {
                     if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
                     if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
-                },
-                (m) => m.name === 'ObjectType' || m.name === 'TriggerType'
+                }
             );
 
             // Get the parent Flow definition
@@ -146,7 +160,7 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         await OrgCheckProcessor.forEach(flowDefinitions, (flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return flowDefinitions;
     } 
 }

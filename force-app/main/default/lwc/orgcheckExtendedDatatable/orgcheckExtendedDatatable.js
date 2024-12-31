@@ -425,7 +425,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Event} event 
      */
     handleSearchInputChanged(event) {
-        this.#filteringSearchInput = event.target.value;
+        this.#filteringSearchInput = event.target['value'];
         this._filterAllRows();
         this._setVisibleRows();
     }
@@ -436,7 +436,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @param {Event} event 
      */
     handleSortColumnClick(event) {
-        this.#sortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10);
+        this.#sortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10);
         this.#sortingOrder = SORT_ORDER_ASC;
         this.#columns.forEach((column) => {
             if (column.index === this.#sortingColumnIndex) {
@@ -455,22 +455,28 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * Handler when a user click on the dependency link to open the modal dialog
+     * Handler when a user click on the dependency link to open the modal dialog with dependency diagram
      * 
      * @param {Event} event 
      */
     handleViewDependency(event) {
+        /** @type {any} */
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
-        viewer.open(event.target.whatId, event.target.whatName, event.target.dependencies);
+        viewer.open(event.target['whatId'], event.target['whatName'], event.target['dependencies']);
     }
 
+    /**
+     * Handler when a user click on the score link to open the modal dialog with score explanation
+     * 
+     * @param {Event} event 
+     */
     handleViewScore(event) {
         this.dispatchEvent(new CustomEvent('viewscore', { detail: { 
-            whatId: event.target.whatId,
-            whatName: event.target.whatName,
-            score: event.target.score,
-            reasonIds: event.target.reasonIds, 
-            fields: event.target.fields 
+            whatId: event.target['whatId'],
+            whatName: event.target['whatName'],
+            score: event.target['score'],
+            reasonIds: event.target['reasonIds'], 
+            fields: event.target['fields']
         }}));
     }
 

@@ -1,8 +1,6 @@
-// @ts-check
+import { OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_Organization extends OrgCheckData {
+export class SFDC_Organization extends OrgCheckDataWithoutScoring {
     
     /**
      * @description Salesforce Id

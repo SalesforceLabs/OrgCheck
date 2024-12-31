@@ -1,35 +1,47 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_CUSTOM_LABEL } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 
 export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_CustomLabel>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying Tooling API about ExternalString in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
+        logger?.log(`Querying Tooling API about ExternalString in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value, '+
-                        'CreatedDate, LastModifiedDate '+
-                    'FROM ExternalString '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
-        }], localLogger);
+            string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, '+
+                        'MasterLabel, Value, CreatedDate, LastModifiedDate ' +
+                    'FROM ExternalString ' +
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
         const customLabelRecords = results[0].records;
 
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
+        logger?.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
         const customLabelsDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
-            localLogger
+            logger
         );
         
         // Create the map
-        localLogger.log(`Parsing ${customLabelRecords.length} custom labels...`);
+        logger?.log(`Parsing ${customLabelRecords.length} custom labels...`);
         const customLabels = new Map(await OrgCheckProcessor.map(customLabelRecords, (record) => {
 
             // Get the ID15 of this custom label
@@ -48,7 +60,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
                     value: record.Value,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, TYPE_CUSTOM_LABEL)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.CUSTOM_LABEL)
                 }, 
                 dependencies: {
                     data: customLabelsDependencies
@@ -60,7 +72,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return customLabels;
     } 
 }

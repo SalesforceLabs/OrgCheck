@@ -1,7 +1,9 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
+import { SFDC_ObjectType } from './orgcheck-api-data-objecttype';
 
+/**
+ * @description Representation of as SObject in Org Check
+ */
 export class SFDC_Object extends OrgCheckData {
     
     /**
@@ -11,12 +13,33 @@ export class SFDC_Object extends OrgCheckData {
      */
     id;
     
+    /**
+     * @description Label of this object
+     * @type {string}
+     * @public
+     */
     label;
+
+    /**
+     * @description Plural label of this object
+     * @type {string}
+     * @public
+     */
     labelPlural;
+
     isCustom;
+    
     isFeedEnabled;
+    
     isMostRecentEnabled;
+    
     isSearchable;
+    
+    /**
+     * @description Prefix for this object (the three first digits of every record's salesforce id from this sobject)
+     * @type {string}
+     * @public
+     */
     keyPrefix;
     
     /**
@@ -26,13 +49,12 @@ export class SFDC_Object extends OrgCheckData {
      */
     name;
     
-    api
     /**
-     * @description Name
+     * @description API name
      * @type {string}
      * @public
      */
-    name;
+    apiname;
     
     /**
      * @description Setup URL of this item
@@ -47,22 +69,65 @@ export class SFDC_Object extends OrgCheckData {
      * @public
      */
     package;
+
+    /**
+     * @description Id of the type of this object
+     * @type {string}
+     * @public
+     */
     typeId;
+
+    /**
+     * @description Reference of the type of this object
+     * @type {SFDC_ObjectType}
+     * @public
+     */
     typeRef;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
+
+    /**
+     * @description External OWD 
+     * @type {string}
+     * @public
+     */
     externalSharingModel;
+    
+    /**
+     * @description Internal OWD 
+     * @type {string}
+     * @public
+     */
     internalSharingModel;
+    
     apexTriggerIds;
+    
     apexTriggerRefs;
+    
     fieldSets;
+    
     layouts;
+    
     limits;
+    
     validationRules;
+    
     webLinks;
+    
     standardFields;
+    
     customFieldIds;
+    
     customFieldRefs;
+    
     recordTypes;
+    
     relationships;
+    
     recordCount;
 }

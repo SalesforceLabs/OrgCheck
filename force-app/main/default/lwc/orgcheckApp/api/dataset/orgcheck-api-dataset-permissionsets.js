@@ -1,41 +1,59 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_PERMISSION_SET, TYPE_PERMISSION_SET_GROUP } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_PermissionSet>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL queries
-        localLogger.log(`Querying REST API about PermissionSet, PermissionSetAssignment and PermissionSet (with a PermissionSetGroupId populated) in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, '+
-                        'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, '+
-                        'CreatedDate, LastModifiedDate, '+
-                        '(SELECT Id FROM FieldPerms LIMIT 51), '+
-                        '(SELECT Id FROM ObjectPerms LIMIT 51)'+
-                    'FROM PermissionSet '+
-                    'WHERE IsOwnedByProfile = FALSE' 
-        }, { 
-            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId '+
-                    'FROM PermissionSetAssignment '+
-                    'WHERE Assignee.IsActive = TRUE '+
-                    'AND PermissionSet.IsOwnedByProfile = FALSE '+
-                    'ORDER BY PermissionSetId '
+        logger?.log(`Querying REST API about PermissionSet, PermissionSetAssignment and PermissionSet (with a PermissionSetGroupId populated) in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, ' +
+                        'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, ' +
+                        'CreatedDate, LastModifiedDate, ' +
+                        '(SELECT Id FROM FieldPerms LIMIT 51), ' +
+                        '(SELECT Id FROM ObjectPerms LIMIT 51)' +
+                    'FROM PermissionSet ' +
+                    'WHERE IsOwnedByProfile = FALSE',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
         }, {
-            byPasses: [ 'INVALID_TYPE' ], // in some org PermissionSetGroup is not defined!
-            string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description '+
-                    'FROM PermissionSet '+
-                    'WHERE PermissionSetGroupId != null ' 
-        }], localLogger);
+            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId ' +
+                    'FROM PermissionSetAssignment ' +
+                    'WHERE Assignee.IsActive = TRUE ' +
+                    'AND PermissionSet.IsOwnedByProfile = FALSE ' +
+                    'ORDER BY PermissionSetId ',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }, {
+            byPasses: ['INVALID_TYPE'], // in some org PermissionSetGroup is not defined!
+            string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description ' +
+                    'FROM PermissionSet ' +
+                    'WHERE PermissionSetGroupId != null ',
+            tooling: false,
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
 
         // Create the map
         const permissionSetRecords = results[0].records;
-        localLogger.log(`Parsing ${permissionSetRecords.length} permission sets...`);
+        logger?.log(`Parsing ${permissionSetRecords.length} permission sets...`);
         const permissionSets = new Map(await OrgCheckProcessor.map(permissionSetRecords, (record) => {
 
             // Get the ID15
@@ -67,7 +85,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                         modifyAllData: record.PermissionsModifyAllData, 
                         viewAllData: record.PermissionsViewAllData
                     },
-                    url: (isPermissionSetGroup === false ? sfdcManager.setupUrl(id, TYPE_PERMISSION_SET) : '')
+                    url: (isPermissionSetGroup === false ? sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.PERMISSION_SET) : '')
                 }
             });
 
@@ -76,7 +94,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         }));
 
         const permissionSetAssignmentRecords = results[1].records;
-        localLogger.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
+        logger?.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
         const assigneeProfileIdsByPermSetId = new Map();
         await OrgCheckProcessor.forEach(permissionSetAssignmentRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
@@ -96,7 +114,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         });
 
         const permissionSetGroupRecords = results[2].records;
-        localLogger.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
+        logger?.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
         await OrgCheckProcessor.forEach(permissionSetGroupRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
@@ -104,19 +122,19 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 const permissionSet = permissionSets.get(permissionSetId);
                 permissionSet.isGroup = true;
                 permissionSet.groupId = permissionSetGroupId;
-                permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, TYPE_PERMISSION_SET_GROUP);
+                permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, OrgCheckSalesforceMetadataTypes.PERMISSION_SET_GROUP);
 
             }
         });
 
         // Compute scores for all permission sets
-        localLogger.log(`Computing the score for ${permissionSets.size} permission sets...`);
+        logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
         await OrgCheckProcessor.forEach(permissionSets, (permissionSet) => {
             permissionSetDataFactory.computeScore(permissionSet);
         });
         
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return permissionSets;
     } 
 }

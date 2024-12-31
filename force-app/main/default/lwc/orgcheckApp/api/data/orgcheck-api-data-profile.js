@@ -1,5 +1,3 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_Profile extends OrgCheckData {
@@ -26,6 +24,12 @@ export class SFDC_Profile extends OrgCheckData {
     name;
     
     apiName;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
     license;
     isCustom;

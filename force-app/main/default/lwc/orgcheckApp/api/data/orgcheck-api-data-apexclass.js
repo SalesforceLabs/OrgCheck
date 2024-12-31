@@ -1,11 +1,9 @@
-// @ts-check
-
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
 /**
  * @description Representation of an Apex Class in Org Check
  */
-export class SFDC_ApexClass extends OrgCheckData {
+export class SFDC_ApexClass extends OrgCheckDataWithDependencies {
 
     /**
      * @description Salesforce Id
@@ -62,8 +60,6 @@ export class SFDC_ApexClass extends OrgCheckData {
      * @public
      */
     nbSystemAsserts;
-
-    type;
 
     /**
      * @description Is this class with the Asbtract modifier?

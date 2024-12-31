@@ -1,34 +1,46 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_WORKFLOW_RULE } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 
 export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_Workflow>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
         // (only ids because metadata can't be read via SOQL in bulk!
-        localLogger.log(`Querying Tooling API about WorkflowRule in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT Id FROM WorkflowRule', 
-            tooling: true 
-        }], localLogger);
+        logger?.log(`Querying Tooling API about WorkflowRule in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id FROM WorkflowRule',
+            tooling: true,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
         
         // List of flow ids
         const workflowRuleRecords = results[0].records;
-        localLogger.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
+        logger?.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
         const workflowRuleIds = await OrgCheckProcessor.map(workflowRuleRecords, (record) => record.Id);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
 
         // Get information about flows and process builders using metadata
-        localLogger.log(`Calling Tooling API Composite to get more information about these ${workflowRuleIds.length} workflow rules...`);
-        const records = await sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ], localLogger);
+        logger?.log(`Calling Tooling API Composite to get more information about these ${workflowRuleIds.length} workflow rules...`);
+        const records = await sfdcManager.readMetadataAtScale('WorkflowRule', workflowRuleIds, [ 'UNKNOWN_EXCEPTION' ], logger);
 
         // Create the map
-        localLogger.log(`Parsing ${records.length} workflows...`);
+        logger?.log(`Parsing ${records.length} workflows...`);
         const workflows = new Map(await OrgCheckProcessor.map(records, async (record) => {
 
             // Get the ID15 of this user
@@ -46,7 +58,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
                     hasAction: true,
                     futureActions: [],
                     emptyTimeTriggers: [],
-                    url: sfdcManager.setupUrl(id, TYPE_WORKFLOW_RULE)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.WORKFLOW_RULE)
                 }
             });
 
@@ -95,7 +107,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return workflows;
     } 
 }

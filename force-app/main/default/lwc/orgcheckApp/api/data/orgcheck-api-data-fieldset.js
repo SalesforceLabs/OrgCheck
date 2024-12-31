@@ -1,7 +1,8 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
+/**
+ * @description Representation of a Field Set in Org Check
+ */
 export class SFDC_FieldSet extends OrgCheckData {
     
     /**
@@ -11,9 +12,19 @@ export class SFDC_FieldSet extends OrgCheckData {
      */
     id;
     
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
     label;
-    description;
     
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
     
     /**
      * @description Setup URL of this item

@@ -1,8 +1,9 @@
-// @ts-check
+import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_LightningPage extends OrgCheckData {
+/**
+ * @description Representation of a Lightning Page in Org Check
+ */
+export class SFDC_LightningPage extends OrgCheckDataWithDependencies {
     
     /**
      * @description Salesforce Id
@@ -17,7 +18,6 @@ export class SFDC_LightningPage extends OrgCheckData {
      * @public
      */
     name;
-    
     
     /**
      * @description API Version (as a number) set in the metadata for this item.
@@ -46,8 +46,14 @@ export class SFDC_LightningPage extends OrgCheckData {
      * @public
      */
     lastModifiedDate;
-    description;
+
     
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
     
     /**
      * @description Setup URL of this item

@@ -1,27 +1,40 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ObjectPermission } from '../data/orgcheck-api-data-objectpermission';
 
 export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_ObjectPermission>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying REST API about ObjectPermissions in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT ParentId, Parent.IsOwnedByProfile, Parent.ProfileId, SobjectType, '+
-                        'CreatedDate, LastModifiedDate,PermissionsRead, PermissionsCreate, '+
-                        'PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, '+
-                        'PermissionsModifyAllRecords '+
-                    'FROM ObjectPermissions'
-        }], localLogger);
+        logger?.log(`Querying REST API about ObjectPermissions in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT ParentId, Parent.IsOwnedByProfile, Parent.ProfileId, SobjectType, ' +
+                        'CreatedDate, LastModifiedDate,PermissionsRead, PermissionsCreate, ' +
+                        'PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, ' +
+                        'PermissionsModifyAllRecords ' +
+                    'FROM ObjectPermissions',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const permissionDataFactory = dataFactory.getInstance(SFDC_ObjectPermission);
 
         // Create the map
         const permissionRecords = results[0].records;
-        localLogger.log(`Parsing ${permissionRecords.length} object permissions...`);
+        logger?.log(`Parsing ${permissionRecords.length} object permissions...`);
         const permissions = new Map(await OrgCheckProcessor.map(
             permissionRecords,
             (record) => {
@@ -49,7 +62,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
         ));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return permissions;
     } 
 }

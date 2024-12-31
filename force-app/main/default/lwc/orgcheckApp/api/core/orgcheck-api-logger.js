@@ -1,66 +1,78 @@
-// @ts-check
+/**
+ * @description Logger Interface for OrgCheck 
+ */ 
+export class OrgCheckLoggerIntf {
 
-export class OrgCheckLogger {
+    /**
+     * @description The logger begins
+     * @public
+     */
+    begin() { throw new TypeError(`You need to implement the method "begin()"`); }
 
-    #setup;
-    #countSuccesses;
-    #countFailures;
+    /**
+     * @description The given section starts (with an optional message)
+     * @param {string} sectionName 
+     * @param {string} [message] 
+     * @public
+     */
+    sectionStarts(sectionName, message) { throw new TypeError(`You need to implement the method "sectionStarts()"`); }
 
-    constructor(setup) {
-        this.#setup = setup;
-        this.#countSuccesses = 0;
-        this.#countFailures = 0;
-    }
+    /**
+     * @description The given section continues (with an optional message)
+     * @param {string} sectionName 
+     * @param {string} [message] 
+     * @public
+     */
+    sectionContinues(sectionName, message) { throw new TypeError(`You need to implement the method "sectionContinues()"`); }
 
-    begin() {
-        if (this.#setup.begin) {
-            this.#setup.begin();
-        } else {
-            console.info('Let the show begin...');
-        }
-    }
+    /**
+     * @description The given section ends (with an optional message)
+     * @param {string} sectionName 
+     * @param {string} [message] 
+     * @public
+     */
+    sectionEnded(sectionName, message) { throw new TypeError(`You need to implement the method "sectionEnded()"`); }
 
-    sectionStarts(sectionName, message='...') {
-        if (this.#setup.sectionStarts) {
-            this.#setup.sectionStarts(sectionName, message);
-        } else {
-            console.info(sectionName, message);
-        }
-    }
+    /**
+     * @description The given section starts (with an optional message)
+     * @param {string} sectionName 
+     * @param {Error | string} [error] 
+     * @public
+     */
+    sectionFailed(sectionName, error) { throw new TypeError(`You need to implement the method "sectionFailed()"`); }
 
-    sectionContinues(sectionName, message='...') {
-        if (this.#setup.sectionContinues) {
-            this.#setup.sectionContinues(sectionName, message);
-        } else {
-            console.info(sectionName, message);
-        }
-    }
+    /**
+     * @description The logger ends
+     * @param {number} [countSuccesses=0]
+     * @param {number} [countFailures=0]
+     * @public
+     */
+    end(countSuccesses=0, countFailures=0) { throw new TypeError(`You need to implement the method "end()"`); }
 
-    sectionEnded(sectionName, message='...') {
-        this.#countSuccesses++;
-        if (this.#setup.sectionEnded) {
-            this.#setup.sectionEnded(sectionName, message);
-        } else {
-            console.info(sectionName, message);
-        }
-    }
+    /**
+     * @description Turn this logger into a simple logger for a specific section
+     * @param {string} sectionName 
+     * @returns {OrgCheckSimpleLoggerIntf}
+     */ 
+    toSimpleLogger(sectionName) { throw new TypeError(`You need to implement the method "toSimpleLogger()"`); }
+}
 
-    sectionFailed(sectionName, error) {
-        this.#countFailures++;
-        if (this.#setup.sectionFailed) {
-            this.#setup.sectionFailed(sectionName, error);
-        } else {
-            console.error(sectionName, error);
-        }
-    }
+/**
+ * @description Simple Logger interface
+ */
+export class OrgCheckSimpleLoggerIntf {
 
-    end() {
-        if (this.#setup.end) {
-            this.#setup.end(this.#countSuccesses, this.#countFailures);
-        } else {
-            console.info(`All shows come to an end, in your case you had ${this.#countSuccesses} success(es) and ${this.#countFailures} failure(s).`);
-        }
-        this.#countSuccesses = 0;
-        this.#countFailures = 0;
-    }
+    /**
+     * @description Simple log method with a message to output somewhere
+     * @type {(message: string) => void}
+     * @public
+     */
+    log(message) { throw new TypeError(`You need to implement the method "log()"`); };
+
+    /**
+     * @description Simple debug method with a message to output somewhere
+     * @type {(message: string) => void}
+     * @public
+     */
+    debug(message) { throw new TypeError(`You need to implement the method "debug()"`); };
 }

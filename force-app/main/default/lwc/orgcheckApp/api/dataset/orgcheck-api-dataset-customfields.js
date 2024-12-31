@@ -1,29 +1,42 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_CUSTOM_FIELD } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
 export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger, parameters) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @param {Map} parameters
+     * @returns {Promise<Map<string, SFDC_Field>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger, parameters) {
 
         const fullObjectApiName = parameters?.get('object');
 
         // First SOQL query
-        localLogger.log(`Querying Tooling API about CustomField in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
+        logger?.log(`Querying Tooling API about CustomField in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting '+
-                    'FROM CustomField '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') '+
-                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
-        }], localLogger);
+            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting ' +
+                    'FROM CustomField ' +
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
+                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : ''),
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
         const customFieldRecords = results[0].records;
 
-        localLogger.log(`Parsing ${customFieldRecords.length} custom fields...`);        
+        logger?.log(`Parsing ${customFieldRecords.length} custom fields...`);        
         
         const entityInfoByCustomFieldId = new Map(await OrgCheckProcessor.map(
             customFieldRecords, 
@@ -38,18 +51,18 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
         ));
 
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
+        logger?.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
         const customFieldsDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
-            localLogger
+            logger
         );
 
         // Get information about custom fields using metadata
-        localLogger.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
-        const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()), localLogger);
+        logger?.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
+        const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()), [], logger);
 
         // Create the map
-        localLogger.log(`Parsing ${records.length} custom fields...`);
+        logger?.log(`Parsing ${records.length} custom fields...`);
         const customFields = new Map(await OrgCheckProcessor.map(records, (record) => {
 
             // Get the ID15
@@ -79,7 +92,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                     isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
                     defaultValue: record.Metadata.defaultValue,
                     formula: record.Metadata.formula,
-                    url: sfdcManager.setupUrl(id, TYPE_CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
                 }, 
                 dependencies: {
                     data: customFieldsDependencies
@@ -91,7 +104,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return customFields;
     } 
 }

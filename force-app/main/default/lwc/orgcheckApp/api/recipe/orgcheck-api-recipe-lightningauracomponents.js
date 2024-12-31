@@ -1,33 +1,41 @@
-// @ts-check
-
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
-import { OrgCheckDatasetAliases, OrgCheckDatasetRunInformation } from '../core/orgcheck-api-datasetmanager';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { OrgCheckData } from '../core/orgcheck-api-data';
-import { OrgCheckMatrixData } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
+import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
+import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
+import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
+import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 
 export class OrgCheckRecipeLightningAuraComponents extends OrgCheckRecipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Array<string | OrgCheckDatasetRunInformation>}
      * @public
      */
-    extract() {
+    extract(logger) {
         return [OrgCheckDatasetAliases.LIGHTNINGAURACOMPONENTS];
     }
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @param {OrgCheckSimpleLoggerIntf} logger
      * @param {string} namespace Name of the package (if all use '*')
-     * @returns {Promise<Array<OrgCheckData> | OrgCheckMatrixData | OrgCheckData | Map>}
+     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, namespace) {
+    async transform(data, logger, namespace) {
+
         // Get data
-        const components = data.get(OrgCheckDatasetAliases.LIGHTNINGAURACOMPONENTS);
+        const /** @type {Map<string, SFDC_LightningAuraComponent>} */ components = data.get(OrgCheckDatasetAliases.LIGHTNINGAURACOMPONENTS);
+
+        // Checking data
+        if (!components) throw new Error(`Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
+
         // Filter data
         const array = [];
         await OrgCheckProcessor.forEach(components, (component) => {
@@ -35,6 +43,7 @@ export class OrgCheckRecipeLightningAuraComponents extends OrgCheckRecipe {
                 array.push(component);
             }
         });
+
         // Return data
         return array;
     }

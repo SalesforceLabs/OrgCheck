@@ -1,3 +1,6 @@
+import { OrgCheckDataFactoryIntf } from '../api/core/orgcheck-api-datafactory';
+import { OrgCheckSimpleLoggerIntf } from '../api/core/orgcheck-api-logger';
+import { OrgCheckSalesforceManagerIntf } from '../api/core/orgcheck-api-salesforcemanager';
 import { OrgCheckDatasetApexClasses } from '../api/dataset/orgcheck-api-dataset-apexclasses';
 import { OrgCheckDatasetApexTriggers } from '../api/dataset/orgcheck-api-dataset-apextriggers';
 import { OrgCheckDatasetAppPermissions } from '../api/dataset/orgcheck-api-dataset-apppermissions';
@@ -25,7 +28,9 @@ import { OrgCheckDatasetVisualForceComponents } from '../api/dataset/orgcheck-ap
 import { OrgCheckDatasetVisualForcePages } from '../api/dataset/orgcheck-api-dataset-visualforcepages';
 import { OrgCheckDatasetWorkflows } from '../api/dataset/orgcheck-api-dataset-workflows';
 
-class SfdcManagerMock { 
+class SfdcManagerMock extends OrgCheckSalesforceManagerIntf { 
+
+  SfdcManagerMock() {}
 
   #soqlQueryResponses = {};
   #describeGlobal = [];
@@ -38,71 +43,71 @@ class SfdcManagerMock {
     this.#describeGlobal = describeGlobal;
   }
 
-  describeGlobal() {
-    return this.#describeGlobal;
-  }
+  // ---------------------------------------------------------------------------
+  // METHODS FROM OrgCheckSalesforceManager
+  // ---------------------------------------------------------------------------
 
-  describe(objectName) {
-    return {};
-  }
+  get apiVersion() { return 53; }
 
-  recordCount(objectName) {
-    return 0;
-  }
+  caseSafeId(id) { return id; }
+
+  setupUrl(id, type, parentId, parentType) { return `/setupURL/type/${type}/id/${id}`; }
 
   getObjectType(objectName, isCustomSetting) {
     return isCustomSetting ? 'CustomSetting' : 'StandardObject';
   }
 
-  soqlQuery(queries) { 
+  get dailyApiRequestLimitInformation() { return null; }
+
+  async soqlQuery(queries, logger) { 
     return queries.map((query) => { 
       const key = Object.keys(this.#soqlQueryResponses).find((p) => query?.string?.indexOf(p) !== -1);
       return { records: (key ? this.#soqlQueryResponses[key] : []) }; 
     });
   }
 
-  caseSafeId(id) { 
-    return id; 
-  }
+  async dependenciesQuery(ids, logger) { return []; }
 
-  setupUrl(id, type) {
-    return `/setupURL/type/${type}/id/${id}`;
-  }
+  async readMetadata(metadatas, logger) { return metadatas.map(() => { return []; }); }
 
-  readMetadataAtScale(type, members) {
-    return members.map(() => { return []; });
-  }
+  async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
 
-  readMetadata(metadatas) {
-    return metadatas.map(() => { return []; });
-  }
+  async describeGlobal(logger) { return this.#describeGlobal; }
 
-  dependenciesQuery(ids) { 
-    return []; 
-  }
+  async describe(sobjectDevName, logger) { return {}; }
+
+  async recordCount(sobjectDevName, logger) { return 0; }
+
 }
 
-const DATA_FACTORY_MOCK = {
-  getInstance: () => {
+class DataFactoryMock extends OrgCheckDataFactoryIntf { 
+
+  getValidationRule(id) { return null; }
+
+  getInstance(dataClass) {
     return {
       create: (setup) => { return setup.properties; },
-      createWithScore: (setup) => { setup.score = 0; return setup.properties; }
-    }; 
+      createWithScore: (setup) => { setup.score = 0; return setup.properties; },
+      computeScore: (row) => { row.score = 0; return row; }
+    }
   }
 };
 
-const LOCAL_LOGGER_MOCK = { 
-  log: () => {}
-};
+class SimpleLoggerMock extends OrgCheckSimpleLoggerIntf {
+  log() {}
+  debug() {}
+}
 
-describe('api.code.OrgCheckDatasets', () => {
+describe('api.core.OrgCheckDatasets', () => {
 
   describe('Test OrgCheckDatasetApexClasses', () => {
   
     const dataset = new OrgCheckDatasetApexClasses();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -116,7 +121,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetApexTriggers();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -128,7 +135,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetAppPermissions();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -145,7 +154,10 @@ describe('api.code.OrgCheckDatasets', () => {
         { PermissionsB: true },
         { PermissionsC: true }
       ]);
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK, { get: () => ['a', 'b'] });
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const parameters = new Map([ ['permissions', ['a', 'b']] ]);
+      const results = await dataset.run(sfdcManager, dataFactory, logger, parameters);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(1);
@@ -157,7 +169,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetCustomFields();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger, null);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -169,7 +183,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetCustomLabels();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -181,7 +197,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetFlows();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -193,7 +211,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetGroups();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -205,7 +225,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetLightningAuraComponents();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -217,7 +239,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetLightningPages();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -229,7 +253,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetLightningWebComponents();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -243,8 +269,11 @@ describe('api.code.OrgCheckDatasets', () => {
       const sfdcManager = new SfdcManagerMock();
       sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', [
         { DurableId: 'Account', NamespacePrefix: null, DeveloperName: 'Account', QualifiedApiName: 'Account', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
-      ])
-      const result = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK, { get: () => 'Account' });
+      ]);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const parameters = new Map([ ['object', 'Account'] ]);
+      const result = await dataset.run(sfdcManager, dataFactory, logger, parameters);
       expect(result).toBeDefined();
       expect(result instanceof Map).toBeFalsy();
       expect(result instanceof Object).toBeTruthy();
@@ -258,7 +287,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetObjectPermissions();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -280,7 +311,9 @@ describe('api.code.OrgCheckDatasets', () => {
         { DurableId: 'b', NamespacePrefix: 'test', DeveloperName: 'b', QualifiedApiName: 'test__b__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' },
         { DurableId: 'c', NamespacePrefix: null, DeveloperName: 'c', QualifiedApiName: 'c__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
       ]);
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -358,18 +391,28 @@ describe('api.code.OrgCheckDatasets', () => {
           QualifiedApiName: 'CR_Volunteers__c', ExternalSharingModel: 'private', InternalSharingModel: 'private' }
       ];
       for (let o = 0; o < 10; o++) {
-        entityDefinitions.push({ DurableId: `0117V000000${o}`, DeveloperName: `${o}`, QualifiedApiName: `${o}__c` });
+        entityDefinitions.push({ 
+          DurableId: `0117V000000${o}`, NamespacePrefix: '', DeveloperName: `${o}`, 
+          QualifiedApiName: `${o}__c`, ExternalSharingModel: 'private', InternalSharingModel: 'private' });
         describeGlobal.push({ activateable: false, associateEntityType: null, associateParentEntity: null,
           createable: true, custom: true, customSetting: false, deepCloneable: false,
           deletable: true, deprecatedAndHidden: false, feedEnabled: true, hasSubtypes: false,
           isInterface: false, isSubtype: false, keyPrefix: "a3V", label: `${o}`,
           labelPlural: `${o}s`, layoutable: true, mergeable: false, mruEnabled: true,
           name: `${o}__c`, queryable: true, replicateable: true, retrieveable: true,
-          searchable: true, triggerable: true, undeletable: true, updateable: true })
+          searchable: true, triggerable: true, undeletable: true, updateable: true, urls: {
+            rowTemplate: "/services/data/v60.0/sobjects/${o}__c/{ID}",
+            eventSchema: "/services/data/v60.0/sobjects/${o}__c/eventSchema",
+            describe: "/services/data/v60.0/sobjects/${o}__c/describe",
+            sobject: "/services/data/v60.0/sobjects/${o}__c"
+          }
+ })
       }
       sfdcManager.setDescribeGolbal(describeGlobal);
       sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', entityDefinitions);
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(12);
@@ -384,7 +427,9 @@ describe('api.code.OrgCheckDatasets', () => {
   
     const dataset = new OrgCheckDatasetObjectTypes();      
     it('checks if this dataset class runs correctly', async () => {
-      const results = await dataset.run(null, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(null, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).not.toBe(0); 
@@ -399,10 +444,14 @@ describe('api.code.OrgCheckDatasets', () => {
       sfdcManager.addSoqlQueryResponse('FROM Organization', [
         { Id: '00Dxxxx', Name: 'name', IsSandbox: 'false', OrganizationType: 'Production', TrialExpirationDate: null, NamespacePrefix: '' }
       ]);
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(1);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const result = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(result).toBeDefined();
+      expect(result instanceof Map).toBeFalsy();
+      expect(result instanceof Object).toBeTruthy();
+      expect(result).toHaveProperty('id');
+      expect(result.id).toBe('00Dxxxx');
     });
   });
 
@@ -418,7 +467,9 @@ describe('api.code.OrgCheckDatasets', () => {
         { Id: '0000000', SubscriberPackage: { NamespacePrefix: 'test', Name: 'Testing Package' }},
         { Id: '0000001', SubscriberPackage: { NamespacePrefix: 'starwars', Name: 'Padawan Package' }}
       ]);
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(3);
@@ -430,7 +481,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetPermissionSets();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -442,7 +495,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetProfilePasswordPolicies();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -454,7 +509,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetProfileRestrictions();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -466,7 +523,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetProfiles();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -478,7 +537,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetUserRoles();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -490,7 +551,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetUsers();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -502,7 +565,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetVisualForceComponents();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -514,7 +579,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetVisualForcePages();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
@@ -526,7 +593,9 @@ describe('api.code.OrgCheckDatasets', () => {
     const dataset = new OrgCheckDatasetWorkflows();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      const results = await dataset.run(sfdcManager, DATA_FACTORY_MOCK, LOCAL_LOGGER_MOCK);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);

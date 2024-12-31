@@ -1,7 +1,8 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
+/**
+ * @description Representation of a User Group in Org Check
+ */
 export class SFDC_Group extends OrgCheckData {
     
     /**
@@ -25,16 +26,32 @@ export class SFDC_Group extends OrgCheckData {
      */
     name;
     
+    /**
+     * @description Developer Name
+     * @type {string}
+     * @public
+     */
     developerName;
+
     includeBosses;
+
     includeSubordinates;
+
     relatedId;
+
     nbDirectMembers;
+
     directUserIds;
+
     directUserRefs;
+
     directGroupIds;
+
     directGroupRefs;
+
     isPublicGroup;
+
     isQueue;
+
     type;
 }

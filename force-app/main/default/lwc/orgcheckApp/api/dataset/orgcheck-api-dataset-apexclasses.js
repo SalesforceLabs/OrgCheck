@@ -1,6 +1,9 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_APEX_CLASS } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
@@ -11,33 +14,47 @@ const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\(|Ass
 
 export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_ApexClass>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL queries
-        localLogger.log(`Querying Tooling API about ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate and AsyncApexJob in the org...`);            
+        logger?.log(`Querying Tooling API about ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate and AsyncApexJob in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, '+
-                        'Body, LengthWithoutComments, SymbolTable, '+
-                        'CreatedDate, LastModifiedDate '+
-                    'FROM ApexClass '+
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\') ',
+            string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, ' +
+                        'Body, LengthWithoutComments, SymbolTable, ' +
+                        'CreatedDate, LastModifiedDate ' +
+                    'FROM ApexClass ' +
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
             tooling: true,
-            queryMore: false,
-            uniqueFieldName: 'Id', // unique field name (to be used by the custom QueryMore)
+            byPasses: [],
+            queryMoreField: 'Id'
         }, {
-            string: 'SELECT ApexClassOrTriggerId, ApexTestClassId '+
+            string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
                     'FROM ApexCodeCoverage',
-            tooling: true
+            tooling: true,
+            byPasses: [],
+            queryMoreField: ''
         }, {
-            string: 'SELECT ApexClassorTriggerId, NumLinesCovered, '+
-                        'NumLinesUncovered, Coverage '+
+            string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
+                        'NumLinesUncovered, Coverage ' +
                     'FROM ApexCodeCoverageAggregate',
-            tooling: true
-        }, { 
-            string: 'SELECT ApexClassId '+
-                    'FROM AsyncApexJob '+
-                    'WHERE JobType = \'ScheduledApex\' '
-        }], localLogger);
+            tooling: true,
+            byPasses: [],
+            queryMoreField: ''
+        }, {
+            string: 'SELECT ApexClassId ' +
+                    'FROM AsyncApexJob ' +
+                    'WHERE JobType = \'ScheduledApex\' ',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records and records
         const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
@@ -47,14 +64,14 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         const asyncApexJobRecords = results[3].records;
 
         // Then retreive dependencies
-        localLogger.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
+        logger?.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
         const apexClassesDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(apexClassRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
-            localLogger
+            logger
         );
 
         // Part 1b- apex classes
-        localLogger.log(`Parsing ${apexClassRecords.length} apex classes...`);
+        logger?.log(`Parsing ${apexClassRecords.length} apex classes...`);
         const apexClasses = new Map(await OrgCheckProcessor.map(apexClassRecords, async (record) => {
 
             // Get the ID15
@@ -83,7 +100,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     relatedClasses: [],
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, TYPE_APEX_CLASS)
+                    url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.APEX_CLASS)
                 }, 
                 dependencies: {
                     data: apexClassesDependencies
@@ -130,17 +147,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 }
             }
 
-            // Define type
-            if (apexClass.isTest === true) {
-                apexClass.type = 'test';
-            } else if (apexClass.isInterface === true) {
-                apexClass.type = 'interface';
-            } else if (apexClass.isEnum === true) {
-                apexClass.type = 'enum';
-            } else {
-                apexClass.type = 'class';
-            }
-
             // Refine sharing spec
             if (apexClass.isEnum === true || apexClass.isInterface === true) apexClass.specifiedSharing = 'Not applicable';
             if (apexClass.isTest === false && apexClass.isClass === true && !apexClass.specifiedSharing) {
@@ -152,7 +158,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         }));
 
         // Part 2- add the related tests to apex classes
-        localLogger.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
+        logger?.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
         const relatedTestsByApexClass = new Map();
         const relatedClassesByApexTest = new Map();
         await OrgCheckProcessor.forEach(
@@ -182,7 +188,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         });
 
         // Part 3- add the aggregate code coverage to apex classes
-        localLogger.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
+        logger?.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
         await OrgCheckProcessor.forEach(
             apexCodeCoverageAggRecords,
             (record) => {
@@ -196,7 +202,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         );
 
         // Part 4- add if class is scheduled
-        localLogger.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
+        logger?.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
         await OrgCheckProcessor.forEach(
             asyncApexJobRecords,
             (record) => {
@@ -215,7 +221,7 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         });
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return apexClasses;
     } 
 }

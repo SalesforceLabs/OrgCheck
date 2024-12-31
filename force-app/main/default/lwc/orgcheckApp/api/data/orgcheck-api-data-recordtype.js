@@ -1,5 +1,3 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_RecordType extends OrgCheckData {
@@ -20,13 +18,18 @@ export class SFDC_RecordType extends OrgCheckData {
     
     developerName;
     
-    
     /**
      * @description Setup URL of this item
      * @type {string}
      * @public
      */
     url;
+
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
     isActive;
     isAvailable;
     isDefaultRecordTypeMapping;

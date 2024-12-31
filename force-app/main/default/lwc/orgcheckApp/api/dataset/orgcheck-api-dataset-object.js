@@ -9,11 +9,22 @@ import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_ObjectRelationShip } from '../data/orgcheck-api-data-objectrelationship';
-import { TYPE_FIELD_SET, TYPE_PAGE_LAYOUT, TYPE_RECORD_TYPE, TYPE_STANDARD_FIELD, TYPE_VALIDATION_RULE, TYPE_WEB_LINK } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 
 export class OrgCheckDatasetObject extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger, parameters) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger
+     * @param {Map} parameters
+     * @returns {Promise<SFDC_Object>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger, parameters) {
 
         // Init the factories
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
@@ -26,29 +37,31 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         const relationshipDataFactory = dataFactory.getInstance(SFDC_ObjectRelationShip);
         const objectDataFactory = dataFactory.getInstance(SFDC_Object);
 
-        const fullObjectApiName = parameters.get('object');
+        const fullObjectApiName = parameters?.get('object');
         const splittedApiName = fullObjectApiName.split('__');
         const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
         
         const results = await Promise.all([
-            sfdcManager.describe(fullObjectApiName),
-            sfdcManager.soqlQuery([{ 
+            sfdcManager.describe(fullObjectApiName, logger),
+            sfdcManager.soqlQuery([{
                 tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
-                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, '+
-                            '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), '+
-                            '(SELECT Id FROM ApexTriggers), '+
-                            '(SELECT Id, MasterLabel, Description FROM FieldSets), '+
-                            '(SELECT Id, Name, LayoutType FROM Layouts), '+
-                            '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), '+
-                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
-                                'ValidationName FROM ValidationRules), '+
-                            '(SELECT Id, Name FROM WebLinks) '+
-                        'FROM EntityDefinition '+
-                        `WHERE QualifiedApiName = '${fullObjectApiName}' `+
-                        (packageName ? `AND NamespacePrefix = '${packageName}' `: '') +
-                        'LIMIT 1' // We should get zero or one record, not more!
-            }]),
-            sfdcManager.recordCount(fullObjectApiName)
+                string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, ' +
+                            '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), ' +
+                            '(SELECT Id FROM ApexTriggers), ' +
+                            '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
+                            '(SELECT Id, Name, LayoutType FROM Layouts), ' +
+                            '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ' +
+                            'ValidationName FROM ValidationRules), ' +
+                            '(SELECT Id, Name FROM WebLinks) ' +
+                        'FROM EntityDefinition ' +
+                        `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
+                        (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
+                        'LIMIT 1', // We should get zero or one record, not more!
+                byPasses: [],
+                queryMoreField: ''
+            }], logger),
+            sfdcManager.recordCount(fullObjectApiName, logger)
         ]);
 
         // the first promise was describe
@@ -102,7 +115,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                         isIndexed: fieldMapper.isIndexed,
                         defaultValue: field.defaultValue,
                         formula: field.calculatedFormula,
-                        url: sfdcManager.setupUrl(fieldMapper.id, TYPE_STANDARD_FIELD, entity.DurableId, sobjectType)
+                        url: sfdcManager.setupUrl(fieldMapper.id, OrgCheckSalesforceMetadataTypes.STANDARD_FIELD, entity.DurableId, sobjectType)
                     }
                 });
             },
@@ -123,7 +136,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     id: sfdcManager.caseSafeId(t.Id), 
                     label: t.MasterLabel, 
                     description: t.Description,
-                    url: sfdcManager.setupUrl(t.Id, TYPE_FIELD_SET, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id, OrgCheckSalesforceMetadataTypes.FIELD_SET, entity.DurableId)
                 }
             })
         );
@@ -136,7 +149,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
                     type: t.LayoutType,
-                    url: sfdcManager.setupUrl(t.Id, TYPE_PAGE_LAYOUT, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id, OrgCheckSalesforceMetadataTypes.PAGE_LAYOUT, entity.DurableId)
                 }
             })
         );
@@ -168,7 +181,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     description: t.Description,
                     errorDisplayField: t.ErrorDisplayField,
                     errorMessage: t.ErrorMessage,
-                    url: sfdcManager.setupUrl(t.Id, TYPE_VALIDATION_RULE)
+                    url: sfdcManager.setupUrl(t.Id, OrgCheckSalesforceMetadataTypes.VALIDATION_RULE)
                 }
             })
         );
@@ -180,7 +193,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
-                    url: sfdcManager.setupUrl(t.Id, TYPE_WEB_LINK, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.Id, OrgCheckSalesforceMetadataTypes.WEB_LINK, entity.DurableId)
                 }
             })
         );
@@ -197,7 +210,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                     isAvailable: t.available,
                     isDefaultRecordTypeMapping: t.defaultRecordTypeMapping,
                     isMaster: t.master,
-                    url: sfdcManager.setupUrl(t.recordTypeId, TYPE_RECORD_TYPE, entity.DurableId)
+                    url: sfdcManager.setupUrl(t.recordTypeId, OrgCheckSalesforceMetadataTypes.RECORD_TYPE, entity.DurableId)
                 }
             })
         );
@@ -250,7 +263,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
         });
 
         // Return data as object (and not as a map!!!)
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return object;
     } 
 }

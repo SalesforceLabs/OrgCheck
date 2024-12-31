@@ -1,8 +1,9 @@
-// @ts-check
+import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
-import { OrgCheckData } from '../core/orgcheck-api-data';
-
-export class SFDC_Field extends OrgCheckData {
+/**
+ * @description Representation of a Standard Field or a Custom Field in Org Check
+ */
+export class SFDC_Field extends OrgCheckDataWithDependencies {
     
     /**
      * @description Salesforce Id
@@ -33,6 +34,12 @@ export class SFDC_Field extends OrgCheckData {
      * @public
      */
     package;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
     
     /**
@@ -48,16 +55,43 @@ export class SFDC_Field extends OrgCheckData {
      * @public
      */
     lastModifiedDate;
+
+    /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
     objectId; 
+
     objectRef;
+
     isCustom;
+
+    /**
+     * @description Tooltip
+     * @type {string}
+     * @public
+     */
     tooltip;
+
     type;
+
     length;
+
     isUnique;
+
     isEncrypted;
+
     isExternalId;
+
     isIndexed;
+
+    /**
+     * @description Default value
+     * @type {string}
+     * @public
+     */
     defaultValue;
+
     formula;
 }

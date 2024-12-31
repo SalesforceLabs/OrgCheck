@@ -1,26 +1,39 @@
+import { OrgCheckDataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { OrgCheckDataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { TYPE_PUBLIC_GROUP, TYPE_QUEUE, TYPE_ROLE, TYPE_TECHNICAL_GROUP } from '../core/orgcheck-api-sfconnectionmanager';
+import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
+import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
 export class OrgCheckDatasetGroups extends OrgCheckDataset {
 
-    async run(sfdcManager, dataFactory, localLogger) {
+    /**
+     * @description Run the dataset and return the result
+     * @param {OrgCheckSalesforceManagerIntf} sfdcManager
+     * @param {OrgCheckDataFactoryIntf} dataFactory
+     * @param {OrgCheckSimpleLoggerIntf} logger List of optional argument to pass
+     * @returns {Promise<Map<string, SFDC_Group>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        localLogger.log(`Querying REST API about Group in the org...`);            
-        const results = await sfdcManager.soqlQuery([{ 
-            string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, '+
-                        '(SELECT UserOrGroupId From GroupMembers)'+
-                    'FROM Group '
-        }], localLogger);
+        logger?.log(`Querying REST API about Group in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, ' +
+                        '(SELECT UserOrGroupId From GroupMembers)' +
+                    'FROM Group ',
+            tooling: false,
+            byPasses: [],
+            queryMoreField: ''
+        }], logger);
 
         // Init the factory and records
         const groupDataFactory = dataFactory.getInstance(SFDC_Group);
 
         // Create the map
         const groupRecords = results[0].records;
-        localLogger.log(`Parsing ${groupRecords.length} groups...`);
+        logger?.log(`Parsing ${groupRecords.length} groups...`);
         const groups = new Map(await OrgCheckProcessor.map(groupRecords, async (record) => {
         
             // Get the ID15 of this custom field
@@ -31,7 +44,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
             switch (record.Type) {
                 case 'Regular': 
                 case 'Queue': {
-                    groupType = record.Type === 'Regular' ? TYPE_PUBLIC_GROUP : TYPE_QUEUE;
+                    groupType = record.Type === 'Regular' ? OrgCheckSalesforceMetadataTypes.PUBLIC_GROUP : OrgCheckSalesforceMetadataTypes.QUEUE;
                     groupName = record.Name;
                     groupDeveloperName = record.DeveloperName;
                     groupIncludesBosses = record.DoesIncludeBosses;
@@ -40,7 +53,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                 case 'Role':
                 case 'RoleAndSubordinates':
                 case 'RoleAndSubordinatesInternal': {
-                    groupType = TYPE_ROLE;
+                    groupType = OrgCheckSalesforceMetadataTypes.ROLE;
                     groupName = record.Related.Name;
                     groupIncludesSubordinates = record.Type !== 'Role';
                     groupRelatedId = sfdcManager.caseSafeId(record.RelatedId);
@@ -52,7 +65,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
                 case 'GuestUserGroup':
                 default: {
                     groupName = record.Type;
-                    groupType = TYPE_TECHNICAL_GROUP;
+                    groupType = OrgCheckSalesforceMetadataTypes.TECHNICAL_GROUP;
                     break;
                 }
             }
@@ -93,7 +106,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
         }));
 
         // Return data as map
-        localLogger.log(`Done`);
+        logger?.log(`Done`);
         return groups;
     } 
 }

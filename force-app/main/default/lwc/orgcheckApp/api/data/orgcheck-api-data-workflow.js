@@ -1,5 +1,3 @@
-// @ts-check
-
 import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_Workflow extends OrgCheckData {
@@ -24,10 +22,22 @@ export class SFDC_Workflow extends OrgCheckData {
      * @public
      */
     url;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
     description;
     actions;
     futureActions;
     emptyTimeTriggers;
+
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
     isActive;
     
     /**
