@@ -536,7 +536,7 @@ export default class OrgCheckApp extends LightningElement {
                     } else { // implicitly: this._currentTab === 'app-permissions')
                         dataMatrix.columnHeaderIds
                             .map(c => { return { label: getColumnHeaderProp(c, 'label'), id: c }; })
-                            .sort((a, b) => a.label < b.label ? -1: 1)
+                            .sort((a, b) => { return a.label < b.label ? -1: 1; })
                             .forEach(c => columns.push({ label: c.label, type: 'text', data: { ref: 'data', value: c.id }, orientation: 'vertical' }));
                         this.appPermissionsTableColumns = columns;
                         this.appPermissionsTableData = dataMatrix.rows;
