@@ -1,10 +1,10 @@
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 import { SFDC_ObjectType } from './orgcheck-api-data-objecttype';
 
 /**
  * @description Representation of as SObject in Org Check
  */
-export class SFDC_Object extends OrgCheckData {
+export class SFDC_Object extends OrgCheckDataWithoutScoring {
     
     /**
      * @description Salesforce Id

@@ -39,6 +39,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                             // 02c	*Share for custom objects
                             // 0D5	*Feed for custom objects
                             // 1CE	*Event for custom objects
+                tooling: true, // Using Tooling to get the Activity object
                 queryMoreField: 'DurableId' // entityDef does not support calling QueryMore, use the custom instead
             }], logger)
         ]);
@@ -55,11 +56,11 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
         );
 
         // Create the map
-        logger?.log(`Parsing ${objectsDescription.length} custom labels...`);
-
+        logger?.log(`Parsing ${objectsDescription.length} objects...`);
         const objects = new Map(await OrgCheckProcessor.map(
             objectsDescription,
             (object) => {
+
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
 
@@ -82,8 +83,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                 return [ obj.id, obj ];
             },
             (object) => {
-                return qualifiedApiNames.includes(object.name) && 
-                       sfdcManager.getObjectType(object.name, object.customSetting) ? true : false;
+                return qualifiedApiNames.includes(object.name) ? true : false;
             }
         ));
 

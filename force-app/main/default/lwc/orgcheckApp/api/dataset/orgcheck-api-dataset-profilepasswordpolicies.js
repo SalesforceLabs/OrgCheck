@@ -24,8 +24,6 @@ export class OrgCheckDatasetProfilePasswordPolicies extends OrgCheckDataset {
         }], logger);
             
         // List of policies
-        logger?.debug(`results: ${JSON.stringify(results)}`);
-        logger?.debug(`results.ProfilePasswordPolicy: ${JSON.stringify(results.ProfilePasswordPolicy)}`);
         const profilePasswordPolicies = results?.ProfilePasswordPolicy;
         if (!profilePasswordPolicies) return new Map();
 

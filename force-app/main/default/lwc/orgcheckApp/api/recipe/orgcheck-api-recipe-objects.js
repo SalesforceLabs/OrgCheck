@@ -55,6 +55,6 @@ export class OrgCheckRecipeObjects extends OrgCheckRecipe {
         });
 
         // Return data
-        return array;
+        return array.sort((a, b) => { return a.label < b.label ? -1 : 1; });
     }
 }

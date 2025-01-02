@@ -32,7 +32,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
         const componentRecords = results[0].records;
 
         // Then retreive dependencies
-        logger?.log(`Retrieving dependencies of ${componentRecords.length} custom labels...`);
+        logger?.log(`Retrieving dependencies of ${componentRecords.length} lightning web components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
             await OrgCheckProcessor.map(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
             logger

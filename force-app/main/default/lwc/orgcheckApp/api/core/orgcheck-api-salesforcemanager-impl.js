@@ -129,7 +129,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                 switch (parentType) {
                     case OrgCheckSalesforceMetadataTypes.STANDARD_OBJECT:
                     case OrgCheckSalesforceMetadataTypes.CUSTOM_OBJECT:
-                    case OrgCheckSalesforceMetadataTypes.KNOWLEDGE_ARTICLE:    return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/FieldsAndRelationships/${id}/view` : `page?address=%2F${id}`;
+                    case OrgCheckSalesforceMetadataTypes.KNOWLEDGE_ARTICLE:    return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/FieldsAndRelationships/${id}/view` : `page?address=%2F${id}`);
                     case OrgCheckSalesforceMetadataTypes.CUSTOM_BIG_OBJECT:    return `/lightning/setup/BigObjects/page?address=%2F${id}%3Fsetupid%3DBigObjects`;
                     case OrgCheckSalesforceMetadataTypes.CUSTOM_EVENT:         return `/lightning/setup/EventObjects/page?address=%2F${id}%3Fsetupid%3DEventObjects`;
                     case OrgCheckSalesforceMetadataTypes.CUSTOM_SETTING:       return `/lightning/setup/CustomSettings/page?address=%2F${id}%3Fsetupid%3DCustomSettings`;
@@ -148,12 +148,12 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
             case OrgCheckSalesforceMetadataTypes.CUSTOM_METADATA_TYPE:    return `/lightning/setup/CustomMetadata/page?address=%2F${id}%3Fsetupid%3DCustomMetadata`;
             case OrgCheckSalesforceMetadataTypes.EXTERNAL_OBJECT:         return `/lightning/setup/ExternalObjects/page?address=%2F${id}%3Fsetupid%3DExternalObjects`;
             // SOBJECT COMPONENTS
-            case OrgCheckSalesforceMetadataTypes.PAGE_LAYOUT:             return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/PageLayouts/${id}/view` : `page?address=%2F${id}`;
+            case OrgCheckSalesforceMetadataTypes.PAGE_LAYOUT:             return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/PageLayouts/${id}/view` : `page?address=%2F${id}`);
             case OrgCheckSalesforceMetadataTypes.VALIDATION_RULE:         return `/lightning/setup/ObjectManager/page?address=%2F${id}`;
-            case OrgCheckSalesforceMetadataTypes.WEB_LINK:                return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/ButtonsLinksActions/${id}/view` : `page?address=%2F${id}`;
-            case OrgCheckSalesforceMetadataTypes.RECORD_TYPE:             return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/RecordTypes/${id}/view` : `page?address=%2F${id}`;
-            case OrgCheckSalesforceMetadataTypes.APEX_TRIGGER:            return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/ApexTriggers/${id}/view` : `page?address=%2F${id}`;
-            case OrgCheckSalesforceMetadataTypes.FIELD_SET:               return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/FieldSets/${id}/view` : `page?address=%2F${id}`;
+            case OrgCheckSalesforceMetadataTypes.WEB_LINK:                return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/ButtonsLinksActions/${id}/view` : `page?address=%2F${id}`);
+            case OrgCheckSalesforceMetadataTypes.RECORD_TYPE:             return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/RecordTypes/${id}/view` : `page?address=%2F${id}`);
+            case OrgCheckSalesforceMetadataTypes.APEX_TRIGGER:            return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/ApexTriggers/${id}/view` : `page?address=%2F${id}`);
+            case OrgCheckSalesforceMetadataTypes.FIELD_SET:               return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/FieldSets/${id}/view` : `page?address=%2F${id}`);
             // SECURITY AND ACCESS
             case OrgCheckSalesforceMetadataTypes.USER:                    return `/lightning/setup/ManageUsers/page?address=%2F${id}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
             case OrgCheckSalesforceMetadataTypes.PROFILE:                 return `/lightning/setup/EnhancedProfiles/page?address=%2F${id}`;
@@ -177,7 +177,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
             case OrgCheckSalesforceMetadataTypes.VISUAL_FORCE_COMPONENT:  return `/lightning/setup/ApexComponent/page?address=%2F${id}`;
             case OrgCheckSalesforceMetadataTypes.AURA_WEB_COMPONENT:
             case OrgCheckSalesforceMetadataTypes.LIGHTNING_WEB_COMPONENT: return `/lightning/setup/LightningComponentBundles/page?address=%2F${id}`;
-            case OrgCheckSalesforceMetadataTypes.LIGHTNING_PAGE:          return `/lightning/setup/ObjectManager/` + parentId ? `${parentId}/LightningPages/${id}/view` : `page?address=%2F${id}`;
+            case OrgCheckSalesforceMetadataTypes.LIGHTNING_PAGE:          return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/LightningPages/${id}/view` : `page?address=%2F${id}`);
             // APEX PROGAMMATION
             case OrgCheckSalesforceMetadataTypes.APEX_CLASS:              return `/lightning/setup/ApexClasses/page?address=%2F${id}`;
             // Other types or even undefined type
@@ -290,7 +290,6 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                                 nbQueryMore++;
                                 // Call the custom query more
                                 sequential_query(recursive_query);
-logger?.debug(`soqlQuery --- call # ${nbQueryMore} --- calling sequential_query(recursive_query) with queryMoreStartingId=${queryMoreStartingId} -- QUERY_STRING=${query.string}`);
                             }
                         } else {
                             // Here we can call queryMore if fetching is not done...
@@ -304,14 +303,12 @@ logger?.debug(`soqlQuery --- call # ${nbQueryMore} --- calling sequential_query(
                                 // Not done yet more sub query to do
                                 nbQueryMore++;
                                 // Call the queryMore with the nextRecordsUrl
-logger?.debug(`soqlQuery --- call # ${nbQueryMore}) --- conn.queryMore(${d.nextRecordsUrl}, recursive_query) -- QUERY_STRING=${query.string}`);
                                 conn.queryMore(d.nextRecordsUrl, recursive_query);
                             }
                         }
                     }
                     logger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
-logger?.debug(`soqlQuery --- calling the first time: sequential_query(recursive_query) -- QUERY_STRING=${query.string}`);
                 sequential_query(recursive_query);
             });
         }));
@@ -553,6 +550,8 @@ logger?.debug(`soqlQuery --- calling the first time: sequential_query(recursive_
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Call the global describe
         const response = await this._connection.describeGlobal();
+        // Adding support of the Activity object from describe
+        response.sobjects.push(ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE);
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
         // return the sobjects property
@@ -566,6 +565,8 @@ logger?.debug(`soqlQuery --- calling the first time: sequential_query(recursive_
      * @returns {Promise<any>}
      */
     async describe(sobjectDevName, logger) {
+        // Adding support of the Activity object from describe
+        if (sobjectDevName === 'Activity') return ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE;
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const object = await this._connection.describe(sobjectDevName);
@@ -681,3 +682,16 @@ logger?.debug(`soqlQuery --- calling the first time: sequential_query(recursive_
  * @returns {Array<any>}
  */
 const MAKE_IT_AN_ARRAY = (/** @type {any} */ data) => data ? (Array.isArray(data) ? data : [ data ]) : []; 
+
+/**
+ * @description Activity object that is not present in the describe API
+ * @type {any}
+ */
+const ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE = {
+    name: 'Activity',
+    label: 'Activity',
+    labelPlural: 'Activities',
+    customSetting: false,
+    custom: false,
+    keyPrefix: '00T'
+};
