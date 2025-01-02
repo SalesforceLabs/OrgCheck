@@ -7,12 +7,17 @@ export class OrgCheckDataDependenciesFactory {
     
     /**
      * @description Create a new instance of OrgCheckDataDependencies
-     * @param {Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>} data 
+     * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
      * @param {string} whatId 
-     * @returns {OrgCheckDataDependencies}
+     * @returns {OrgCheckDataDependencies | any}
      */
     static create(data, whatId) {
-        const using = data.filter(e => e.id === whatId).map(n => { 
+        if (data.errors.includes(whatId)) {
+            return {
+                hadError: true
+            };
+        }
+        const using = data.records.filter(e => e.id === whatId).map(n => { 
             return { 
                 id: n.refId, 
                 name: n.refName, 
@@ -21,7 +26,7 @@ export class OrgCheckDataDependenciesFactory {
             }; 
         });
         const referencedByTypes = {};
-        const referenced = data.filter(e => e.refId === whatId).map(n => {
+        const referenced = data.records.filter(e => e.refId === whatId).map(n => {
             if (referencedByTypes[n.type] === undefined) {
                 referencedByTypes[n.type] = 1;
             } else {

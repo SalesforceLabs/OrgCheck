@@ -1,6 +1,9 @@
 <template>
     <template lwc:if={numberOfDependencies}>
-        <lightning-button variant="base" label="Dependencies" onclick={handleClick} icon-name="utility:search" icon-position="right"></lightning-button>
+        <lightning-button variant="base" label="Dependencies" onclick={handleViewClick} icon-name="utility:search" icon-position="right"></lightning-button>
+    </template>
+    <template lwc:elseif={hadError}>
+        <lightning-button variant="destructive" label="Error" icon-name="utility:warning" icon-position="right" disabled></lightning-button>
     </template>
     <template lwc:else>
         No dependency

@@ -120,7 +120,7 @@ export class OrgCheckSalesforceManagerIntf {
      * @param {Array<string>} ids
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @async
-     * @returns {Promise<Array<any>>}
+     * @returns {Promise<{ records: Array<any>, errors: Array<string> }>}
      * @public
      */
     async dependenciesQuery(ids, logger) { throw new Error('Not implemented'); }

@@ -8,21 +8,21 @@ export class OrgCheckData {
     
     /**
      * @description Badness score of the data. Zero means the data follows best practices. Positive value means some areas need to be corrected.
-     * @type number
+     * @type {number}
      * @public
      */
     score;
     
     /**
      * @description If the above score is positive, then this property will contain a list of fields that need to be corrected.
-     * @type Array<string>
+     * @type {Array<string>}
      * @public
      */
     badFields;
     
     /**
      * @description If the above score is positive, then this property will contain a list of reasons ids that explain why the score is positive.
-     * @type Array<string>
+     * @type {Array<string>}
      * @public
      */
     badReasonIds;
@@ -35,7 +35,7 @@ export class OrgCheckDataWithDependencies extends OrgCheckData {
 
     /**
      * @description Optionnal dependencies information for this data.
-     * @type OrgCheckDataDependencies
+     * @type {OrgCheckDataDependencies}
      * @public
      */
     dependencies;

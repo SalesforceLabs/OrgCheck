@@ -318,7 +318,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @see OrgCheckSalesforceManagerIntf.dependenciesQuery
      * @param {Array<string>} ids
      * @param {OrgCheckSimpleLoggerIntf} logger
-     * @returns {Promise<Array<any>>}
+     * @returns {Promise<{ records: Array<any>, errors: Array<string> }>}
      */
     async dependenciesQuery(ids, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -357,47 +357,56 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
             });    
         }));
         logger?.log(`Got all the results`);
-        const records = [];
+        const dependenciesRecords = []; // dependencies records
+        const idsInError = []; // ids contained in a batch that has an error
+        const duplicateCheck = new Set(); // Using a set to filter duplicates
         results.forEach((result) => {
             result.compositeResponse.forEach((/** @type {any} */ response) => {
                 if (response.httpStatusCode === 200) {
                     logger?.log(`This response had a code: 200 so we add the ${response?.body?.records?.length} records`);
-                    records.push(... response.body.records); // multiple response in one batch
+                    dependenciesRecords.push(... response.body.records // multiple response in one batch
+                        .map((r) => { // Duplicates will be "null" and will get removed in further filter() call 
+                            const id = this.caseSafeId(r.MetadataComponentId);
+                            const refId = this.caseSafeId(r.RefMetadataComponentId);
+                            const key = `${id}-${refId}`;
+                            if (duplicateCheck.has(key)) return null;
+                            duplicateCheck.add(key);
+                            return {
+                                id: id,
+                                name: r.MetadataComponentName, 
+                                type: r.MetadataComponentType,
+                                url: this.setupUrl(id, r.MetadataComponentType),
+                                refId: refId, 
+                                refName: r.RefMetadataComponentName,
+                                refType: r.RefMetadataComponentType,
+                                refUrl: this.setupUrl(refId, r.RefMetadataComponentType)
+                            }
+                        })
+                        .filter((r) => r !== null) // Remove duplicates
+                    ); 
                 } else {
                     const errorCode = response.body[0].errorCode;
-                    logger?.log(`This response had a code: ${errorCode}`);
-                    const error = new TypeError(`One of the request had an issue with HTTP errorCode=${errorCode}`);
-                    throw Object.assign(error, { 
-                        context: { 
-                            when: 'Calling Composite Tooling API to get dependencies.',
-                            what: {
-                                ids: ids,
-                                body: response.body
+                    if (errorCode === 'UNKNOWN_EXCEPTION') {
+                        // This is a known issue with the DAPI in case the metadata in the org is messy for one of the IDs
+                        logger?.log(`This response had a code: ${errorCode}`);
+                        idsInError.push(... ids);
+                    } else {
+                        logger?.log(`This response had a code: ${errorCode}`);
+                        const error = new TypeError(`One of the request had an issue with HTTP errorCode=${errorCode}`);
+                        throw Object.assign(error, { 
+                            context: { 
+                                when: 'Calling Composite Tooling API to get dependencies.',
+                                what: {
+                                    ids: ids,
+                                    body: response.body
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
             });
         });
-        const duplicateCheck = new Set(); // Using a set to filter duplicates
-        return records.map((record) => { // Duplicates will be "null" and will get removed in further filter() call 
-            const id = this.caseSafeId(record.MetadataComponentId);
-            const refId = this.caseSafeId(record.RefMetadataComponentId);
-            const key = `${id}-${refId}`;
-            if (duplicateCheck.has(key)) return null;
-            logger?.log(`Keep ${key}`);
-            duplicateCheck.add(key);
-            return {
-                id: id,
-                name: record.MetadataComponentName, 
-                type: record.MetadataComponentType,
-                url: this.setupUrl(id, record.MetadataComponentType),
-                refId: refId, 
-                refName: record.RefMetadataComponentName,
-                refType: record.RefMetadataComponentType,
-                refUrl: this.setupUrl(refId, record.RefMetadataComponentType)
-            }
-        }).filter((r) => r !== null); // Remove duplicates
+        return { records: dependenciesRecords, errors: idsInError };
     }
 
     /**
