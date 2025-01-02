@@ -31,29 +31,20 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexClass ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            tooling: true,
-            byPasses: [],
-            queryMoreField: 'Id'
+            tooling: true
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
                     'FROM ApexCodeCoverage',
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
                         'NumLinesUncovered, Coverage ' +
                     'FROM ApexCodeCoverageAggregate',
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }, {
             string: 'SELECT ApexClassId ' +
                     'FROM AsyncApexJob ' +
-                    'WHERE JobType = \'ScheduledApex\' ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE JobType = \'ScheduledApex\' '
         }], logger);
 
         // Init the factory and records and records

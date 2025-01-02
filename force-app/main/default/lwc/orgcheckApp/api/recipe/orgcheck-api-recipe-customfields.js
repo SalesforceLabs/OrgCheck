@@ -32,7 +32,7 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
      * @param {string} namespace Name of the package (if all use '*')
      * @param {string} objecttype Name of the type (if all use '*')
      * @param {string} object API name of the object (if all use '*')
-     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
+     * @returns {Promise<Array<OrgCheckData>>}
      * @async
      * @public
      */

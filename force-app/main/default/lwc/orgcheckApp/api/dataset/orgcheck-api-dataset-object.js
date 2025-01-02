@@ -57,9 +57,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
                         (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
-                        'LIMIT 1', // We should get zero or one record, not more!
-                byPasses: [],
-                queryMoreField: ''
+                        'LIMIT 1' // We should get zero or one record, not more!
             }], logger),
             sfdcManager.recordCount(fullObjectApiName, logger)
         ]);

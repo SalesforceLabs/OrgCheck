@@ -28,7 +28,7 @@ export class OrgCheckRecipeApexTriggers extends OrgCheckRecipe {
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @param {string} namespace Name of the package (if all use '*')
-     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
+     * @returns {Promise<Array<OrgCheckData>>}
      * @async
      * @public
      */

@@ -24,9 +24,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexPage ' +
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')',
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')'
         }], logger);
 
         // Init the factory and records

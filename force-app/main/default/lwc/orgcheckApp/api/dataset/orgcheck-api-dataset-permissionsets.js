@@ -26,26 +26,18 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                         '(SELECT Id FROM FieldPerms LIMIT 51), ' +
                         '(SELECT Id FROM ObjectPerms LIMIT 51)' +
                     'FROM PermissionSet ' +
-                    'WHERE IsOwnedByProfile = FALSE',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE IsOwnedByProfile = FALSE'
         }, {
             string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId ' +
                     'FROM PermissionSetAssignment ' +
                     'WHERE Assignee.IsActive = TRUE ' +
                     'AND PermissionSet.IsOwnedByProfile = FALSE ' +
-                    'ORDER BY PermissionSetId ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'ORDER BY PermissionSetId '
         }, {
             byPasses: ['INVALID_TYPE'], // in some org PermissionSetGroup is not defined!
             string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description ' +
                     'FROM PermissionSet ' +
-                    'WHERE PermissionSetGroupId != null ',
-            tooling: false,
-            queryMoreField: ''
+                    'WHERE PermissionSetGroupId != null '
         }], logger);
 
         // Init the factory and records

@@ -25,9 +25,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                         'Type, NamespacePrefix, Description, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM FlexiPage ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            byPasses: [],
-            queryMoreField: ''
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
 
         // Init the factory and records

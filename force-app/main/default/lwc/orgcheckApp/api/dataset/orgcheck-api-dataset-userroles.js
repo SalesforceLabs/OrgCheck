@@ -22,10 +22,7 @@ export class OrgCheckDatasetUserRoles extends OrgCheckDataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
                         '(SELECT Id, IsActive FROM Users)' +
-                    ' FROM UserRole ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    ' FROM UserRole '
         }], logger);
 
         // Init the factory and records

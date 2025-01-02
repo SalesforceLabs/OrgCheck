@@ -39,9 +39,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
                             // 02c	*Share for custom objects
                             // 0D5	*Feed for custom objects
                             // 1CE	*Event for custom objects
-                queryMoreField: 'DurableId', // entityDef does not support calling QueryMore, use the custom instead
-                tooling: false,
-                byPasses: []
+                queryMoreField: 'DurableId' // entityDef does not support calling QueryMore, use the custom instead
             }], logger)
         ]);
 

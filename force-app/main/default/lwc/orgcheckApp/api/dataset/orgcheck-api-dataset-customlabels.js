@@ -24,9 +24,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
             string: 'SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, '+
                         'MasterLabel, Value, CreatedDate, LastModifiedDate ' +
                     'FROM ExternalString ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            byPasses: [],
-            queryMoreField: ''
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
 
         // Init the factory and records

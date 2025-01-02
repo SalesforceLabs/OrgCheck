@@ -38,39 +38,40 @@ export class OrgCheckRecipeObjectPermissions extends OrgCheckRecipe {
     async transform(data, logger, namespace) {
 
         // Get data
-        const /** @type {Map<string, SFDC_ObjectPermission>} */ permissions = data.get(OrgCheckDatasetAliases.OBJECTPERMISSIONS);
+        const /** @type {Map<string, SFDC_ObjectPermission>} */ objectPermissions = data.get(OrgCheckDatasetAliases.OBJECTPERMISSIONS);
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(OrgCheckDatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(OrgCheckDatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!permissions) throw new Error(`Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
+        if (!objectPermissions) throw new Error(`Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
         if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
+        // Augment data
+        await OrgCheckProcessor.forEach(objectPermissions, (op) => {
+            if (op.parentId.startsWith('0PS') === true) {
+                op.parentRef = permissionSets.get(op.parentId);
+            } else {
+                op.parentRef = profiles.get(op.parentId);
+            }
+        });
+
         // Filter data
         const workingMatrix = OrgCheckDataMatrixFactory.create();
-        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>()} */
-        const profilesAndPermSets = new Map();
-        await OrgCheckProcessor.forEach(permissions, (permission) => {
-            if (namespace === '*' || permission.parentRef.package === namespace) {
-                if (profilesAndPermSets.has(permission.parentId) === false) {
-                    if (permission.isParentProfile === true) {
-                        profilesAndPermSets.set(permission.parentId, profiles.get(permission.parentId));
-                    } else {
-                        profilesAndPermSets.set(permission.parentId, permissionSets.get(permission.parentId));
-                    }
-                }
+        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>} */
+        const rowHeaderReferences = new Map();
+        await OrgCheckProcessor.forEach(objectPermissions, (op) => {
+            if (namespace === '*' || op.parentRef.package === namespace) {
                 workingMatrix.addValueToProperty(
-                    permission.parentId,
-                    permission.objectType,
-                    (permission.isCreate?'C':'') + (permission.isRead?'R':'') +
-                      (permission.isEdit?'U':'') +  (permission.isDelete?'D':'') + 
-                      (permission.isViewAll?'v':'') + (permission.isModifyAll?'m':'')
-                )
+                    op.parentId,
+                    op.objectType,
+                    (op.isCreate?'C':'')+(op.isRead?'R':'')+(op.isEdit?'U':'')+(op.isDelete?'D':'')+(op.isViewAll?'v':'')+(op.isModifyAll?'m':'')
+                );
+                rowHeaderReferences.set(op.parentId, op.parentRef);
             }
         });
 
         // Return data
-        return workingMatrix.toDataMatrix(profilesAndPermSets);
+        return workingMatrix.toDataMatrix(rowHeaderReferences);
     }
 }

@@ -24,9 +24,7 @@ export class OrgCheckDatasetVisualForceComponents extends OrgCheckDataset {
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexComponent ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            byPasses: [],
-            queryMoreField: ''
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
 
         // Init the factory and records

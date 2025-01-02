@@ -21,14 +21,9 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name ' +
-                    'FROM InstalledSubscriberPackage ',
-            byPasses: [],
-            queryMoreField: ''
+                    'FROM InstalledSubscriberPackage '
         }, {
-            string: 'SELECT NamespacePrefix FROM Organization LIMIT 1 ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+            string: 'SELECT NamespacePrefix FROM Organization LIMIT 1 '
         }], logger);
 
         // Init the factory and records

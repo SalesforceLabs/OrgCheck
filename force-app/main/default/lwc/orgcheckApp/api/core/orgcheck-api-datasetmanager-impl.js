@@ -33,6 +33,7 @@ import { OrgCheckDatasetRunInformation } from './orgcheck-api-dataset-runinforma
 import { OrgCheckDataFactory } from './orgcheck-api-datafactory-impl';
 import { OrgCheckDatasetAliases } from './orgcheck-api-datasets-aliases';
 import { OrgCheckDatasetManagerIntf } from './orgcheck-api-datasetmanager';
+import { OrgCheckDatasetApplications } from '../dataset/orgcheck-api-dataset-applications';
 
 /**
  * @description Dataset manager
@@ -99,6 +100,7 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
 
         this._datasets.set(OrgCheckDatasetAliases.APEXCLASSES, new OrgCheckDatasetApexClasses());
         this._datasets.set(OrgCheckDatasetAliases.APEXTRIGGERS, new OrgCheckDatasetApexTriggers());
+        this._datasets.set(OrgCheckDatasetAliases.APPLICATIONS, new OrgCheckDatasetApplications());
         this._datasets.set(OrgCheckDatasetAliases.APPPERMISSIONS, new OrgCheckDatasetAppPermissions());
         this._datasets.set(OrgCheckDatasetAliases.CURRENTUSERPERMISSIONS, new OrgCheckDatasetCurrentUserPermissions());
         this._datasets.set(OrgCheckDatasetAliases.CUSTOMFIELDS, new OrgCheckDatasetCustomFields());

@@ -31,12 +31,14 @@ export class OrgCheckDataMatrixWorking {
     /**
      * @description Convert this working object into a data matrix object
      * @param {Map<string, any>} rowHeaderReferences 
+     * @param {Map<string, any>} [columnHeaderReferences]
      * @returns {OrgCheckDataMatrix}
      */
-    toDataMatrix(rowHeaderReferences) {
+    toDataMatrix(rowHeaderReferences, columnHeaderReferences) {
         return { 
             columnHeaderIds: Array.from(this._properties), 
             rowHeaderReferences: rowHeaderReferences,
+            columnHeaderReferences: columnHeaderReferences,
             rows: Array.from(this._rows.values()) 
         };
     }

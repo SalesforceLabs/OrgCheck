@@ -24,7 +24,7 @@ export class OrgCheckRecipeCurrentUserPermissions extends OrgCheckRecipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {OrgCheckSimpleLoggerIntf} logger
-     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
+     * @returns {Promise<Map<string, boolean>>}
      * @async
      * @public
      */

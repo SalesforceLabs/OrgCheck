@@ -27,10 +27,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                         '(SELECT Id FROM ObjectPerms LIMIT 51), ' +
                         '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) ' +
                     'FROM PermissionSet ' + // oh yes we are not mistaken!
-                    'WHERE isOwnedByProfile = TRUE',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE isOwnedByProfile = TRUE'
         }], logger);
 
         // Init the factory and records

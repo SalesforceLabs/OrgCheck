@@ -27,10 +27,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
-                    'AND Profile.Id != NULL ', // we do not want the Automated Process users!
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'AND Profile.Id != NULL ' // we do not want the Automated Process users!
         }], logger);
 
         // Init the factory and records

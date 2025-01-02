@@ -23,10 +23,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate,PermissionsRead, PermissionsCreate, ' +
                         'PermissionsEdit, PermissionsDelete, PermissionsViewAllRecords, ' +
                         'PermissionsModifyAllRecords ' +
-                    'FROM ObjectPermissions',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'FROM ObjectPermissions'
         }], logger);
 
         // Init the factory and records
@@ -42,7 +39,6 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
                 const permission = permissionDataFactory.create({
                     properties: {
                         parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
-                        isParentProfile: record.Parent.IsOwnedByProfile === true,
                         objectType: record.SobjectType,
                         isRead: record.PermissionsRead,
                         isCreate: record.PermissionsCreate,

@@ -22,10 +22,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, ' +
                         '(SELECT UserOrGroupId From GroupMembers)' +
-                    'FROM Group ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'FROM Group '
         }], logger);
 
         // Init the factory and records

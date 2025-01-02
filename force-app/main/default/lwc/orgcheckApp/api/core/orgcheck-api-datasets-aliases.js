@@ -2,6 +2,7 @@
  * @description Dataset aliases
  * @property {string} APEXCLASSES
  * @property {string} APEXTRIGGERS
+ * @property {string} APPLICATIONS
  * @property {string} APPPERMISSIONS
  * @property {string} CURRENTUSERPERMISSIONS
  * @property {string} CUSTOMFIELDS
@@ -30,6 +31,7 @@
 export const OrgCheckDatasetAliases = {
     APEXCLASSES: 'apex-classes',
     APEXTRIGGERS: 'apex-triggers',
+    APPLICATIONS: 'applications',
     APPPERMISSIONS: 'app-permisions',
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',

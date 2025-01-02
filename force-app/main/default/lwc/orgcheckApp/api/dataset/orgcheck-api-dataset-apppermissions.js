@@ -17,80 +17,60 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
     async run(sfdcManager, dataFactory, logger) {
 
         // First SOQL query
-        // Thanks to SimplySFDC: https://www.simplysfdc.com/2018/04/salesforce-app-visibility-and-query.html
-        logger?.log(`Querying REST API about AppMenuItem and SetupEntityAccess in the org...`);            
+        logger?.log(`Querying REST API about SetupEntityAccess for TabSet in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT ApplicationId, Name, Label, NamespacePrefix, IsAccessible, IsVisible ' +
+            string: 'SELECT ApplicationId, IsAccessible, IsVisible '+
                     'FROM AppMenuItem ' +
-                    'WHERE Type = \'TabSet\' ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE Type = \'TabSet\' '
         }, {
             string: 'SELECT SetupEntityId, ParentId, Parent.IsOwnedByProfile, Parent.ProfileId ' +
                     'FROM SetupEntityAccess ' +
-                    'WHERE SetupEntityType = \'TabSet\' ',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'WHERE SetupEntityType = \'TabSet\' '
         }], logger);
 
         // Init the factory and records
         const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
+        const appMenuItems = results[0].records;
+        const setupEntityAccesses = results[1].records;
 
-        // Set the application map (as reference)
-        const applicationRecords = results[0].records;
-        logger?.log(`Parsing ${applicationRecords.length} Application Menu Items...`);
-        const applications = new Map(await OrgCheckProcessor.map(applicationRecords, (record) => {
-
-            // Get the ID15 of this application
-            const id = sfdcManager.caseSafeId(record.ApplicationId);
-
-            // Create the app instance
-            const application = {
-                id: id,
-                name: record.Name, 
-                label: record.Label, 
-                package: (record.NamespacePrefix || ''),
-                isAccessible: record.IsAccessible,
-                isVisible: record.IsVisible
-            };
-
-            // Add the app in map
-            return [ id, application ];
+        // Create a map of the app menu items
+        logger?.log(`Parsing ${appMenuItems.length} Application Menu Items...`);
+        const appMenuItemAccesses = new Map(await OrgCheckProcessor.map(appMenuItems, (record) => {
+            return [ sfdcManager.caseSafeId(record.ApplicationId), { a: record.IsAccessible, v: record. IsVisible }] ;
         }));
 
         // Create the map
-        const permissionRecords = results[1].records;
-        logger?.log(`Parsing ${permissionRecords.length} setup entity accesses...`);
-        const permissions = new Map(await OrgCheckProcessor.map(
-            permissionRecords,
+        logger?.log(`Parsing ${setupEntityAccesses.length} Application Menu Items...`);
+        const appPermissions = new Map(await OrgCheckProcessor.map(setupEntityAccesses, 
             (record) => {
+                // Get the ID15 of this application
                 const appId = sfdcManager.caseSafeId(record.SetupEntityId);
-                const app = applications.get(appId);
-                
+                const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
+
+                // Get the appMenuItemAccesses
+                const accesses = appMenuItemAccesses.get(appId);
+
                 // Create the instance
-                const permission = appPermissionDataFactory.create({
+                const appPermission = appPermissionDataFactory.create({
                     properties: {
-                        parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),
-                        isParentProfile: record.Parent.IsOwnedByProfile === true,
                         appId: appId,
-                        appName: app.name,
-                        appLabel: app.label,
-                        appPackage: app.package,
-                        isAccessible: app.isAccessible,
-                        isVisible: app.isVisible
+                        parentId: parentId,
+                        isAccessible: accesses.a,
+                        isVisible: accesses.v
                     }
                 });
 
-                // Add it to the map  
-                return [ `${permission.parentId}_${permission.appId}`, permission ];
-            },
-            (record) => applications.has(sfdcManager.caseSafeId(record.SetupEntityId)) // Application must be one that we know about... 
+                // Add the app in map
+                return [ `${appId}-${parentId}`, appPermission ];
+            }, 
+            (record) => { 
+                // Make sure we only get the access for Application that have in AppMenuItem
+                return appMenuItemAccesses.has(sfdcManager.caseSafeId(record.SetupEntityId));
+            }
         ));
 
         // Return data as map
         logger?.log(`Done`);
-        return permissions;
+        return appPermissions;
     }
 }

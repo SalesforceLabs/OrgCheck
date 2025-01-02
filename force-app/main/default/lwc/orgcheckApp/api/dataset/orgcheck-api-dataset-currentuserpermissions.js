@@ -23,10 +23,7 @@ export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
         const results = await sfdcManager.soqlQuery([{
             string: `SELECT ${permissionFields.map(p => `Permissions${p}`).join(`, `)} ` +
                     'FROM UserPermissionAccess '+
-                    'LIMIT 1',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'LIMIT 1'
         }], logger);
         const permissions = results[0].records[0];
         logger?.log(`Parsing the results...`);            

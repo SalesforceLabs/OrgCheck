@@ -31,8 +31,7 @@ export default class OrgcheckDependencyViewer extends LightningElement {
         switch (depth) {
             case 0: return `<center><b>${ESCAPE_DATA(data.label)}</b></center>`;
             case 3: {
-                if (data.url) return `<a href="${data.url}" target="_blank"><b>${ESCAPE_DATA(data.label)}</b></a>`;
-                return `<b>${ESCAPE_DATA(data.label)}</b>`;
+                return `${data.url ? `<a href="${data.url}" target="_blank">`: ''}<b>${ESCAPE_DATA(data.label)}</b><br /><small><code>${data.id}</code></small>${data.url ? '</a>' : ''}`;
             }
             default: {
                 const nbChildren = data.children?.length ?? 0;

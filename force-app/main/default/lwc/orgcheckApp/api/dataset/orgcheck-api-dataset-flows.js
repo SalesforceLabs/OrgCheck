@@ -24,16 +24,12 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
             string: 'SELECT Id, MasterLabel, DeveloperName, ApiVersion, Description, ActiveVersionId, ' +
                         'LatestVersionId, CreatedDate, LastModifiedDate ' +
                     'FROM FlowDefinition',
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }, {
             // List all Flow (attached to a FlowDefintion)
             string: 'SELECT Id, DefinitionId, Status, ProcessType '+
                     'FROM Flow where DefinitionId <> null',
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }], logger);
             
         // Init the factories

@@ -507,22 +507,37 @@ export default class OrgCheckApp extends LightningElement {
                         (this._currentTab === 'object-permissions') ? 
                         (await this._api.getObjectPermissionsPerParent(namespace)) :
                         (await this._api.getApplicationPermissionsPerParent(namespace)); // implicitly: this._currentTab === 'app-permissions')
-                    const permissionRefs = dataMatrix.rowHeaderReferences;
-                    const getProp = (/** @type {string} */ id, /** @type {string} */ property) => { 
-                        return permissionRefs.has(id) ? permissionRefs.get(id)[property] : ''; 
+                    const getProp = (/** @type {Map} */ refs, /** @type {string} */ id, /** @type {string} */ property) => { 
+                        try {
+                            return refs.get(id)[property] ?? id;
+                        } catch (e) {
+                            return id;
+                        }
+                    };
+                    const getRowHeaderProp = (/** @type {string} */ id, /** @type {string} */ property) => {
+                        return getProp(dataMatrix.rowHeaderReferences, id, property);
+                    };
+                    const getColumnHeaderProp = (/** @type {string} */ id, /** @type {string} */ property) => {
+                        return getProp(dataMatrix.columnHeaderReferences, id, property);
                     };
                     /** @type { Array<{label: string, type: string, data: { ref: string, value: string|Function, url?: string|Function }, sorted?: string, orientation?: string}>} */
                     const columns = [
-                        { label: 'Parent',  type: 'id',       data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'name'), url: (/** @type {string} */ i) => getProp(i, 'url') }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'package') }},
-                        { label: 'Type',    type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'type') }},
-                        { label: 'Custom',  type: 'boolean',  data: { ref: 'headerId', value: (/** @type {string} */ i) => getProp(i, 'isCustom') }}
+                        { label: 'Parent',  type: 'id',       data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'name'), url: (/** @type {string} */ i) => getRowHeaderProp(i, 'url') }, sorted: 'asc' },
+                        { label: 'Package', type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'package') }},
+                        { label: 'Type',    type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'type') }},
+                        { label: 'Custom',  type: 'boolean',  data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'isCustom') }}
                     ];
-                    dataMatrix.columnHeaderIds.forEach(h => columns.push({ label: h, type: 'text', data: { ref: 'data', value: h }, orientation: 'vertical' }));
                     if (this._currentTab === 'object-permissions') {
+                        dataMatrix.columnHeaderIds
+                            .sort()
+                            .forEach(c => columns.push({ label: c, type: 'text', data: { ref: 'data', value: c }, orientation: 'vertical' }));
                         this.objectPermissionsTableColumns = columns;
                         this.objectPermissionsTableData = dataMatrix.rows;
                     } else { // implicitly: this._currentTab === 'app-permissions')
+                        dataMatrix.columnHeaderIds
+                            .map(c => { return { label: getColumnHeaderProp(c, 'label'), id: c }; })
+                            .sort((a, b) => a.label < b.label ? -1: 1)
+                            .forEach(c => columns.push({ label: c.label, type: 'text', data: { ref: 'data', value: c.id }, orientation: 'vertical' }));
                         this.appPermissionsTableColumns = columns;
                         this.appPermissionsTableData = dataMatrix.rows;
                     }

@@ -9,6 +9,7 @@ import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_AppPermission } from '../data/orgcheck-api-data-apppermission';
+import { SFDC_Application } from '../data/orgcheck-api-data-application';
 
 export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
 
@@ -20,6 +21,7 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
      */
     extract(logger) {
         return [
+            OrgCheckDatasetAliases.APPLICATIONS,
             OrgCheckDatasetAliases.APPPERMISSIONS,
             OrgCheckDatasetAliases.PROFILES,
             OrgCheckDatasetAliases.PERMISSIONSETS
@@ -38,37 +40,50 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
     async transform(data, logger, namespace) {
 
         // Get data
-        const /** @type {Map<string, SFDC_AppPermission>} */ permissions = data.get(OrgCheckDatasetAliases.APPPERMISSIONS);
+        const /** @type {Map<string, SFDC_Application>} */ applications = data.get(OrgCheckDatasetAliases.APPLICATIONS);
+        const /** @type {Map<string, SFDC_AppPermission>} */ appPermissions = data.get(OrgCheckDatasetAliases.APPPERMISSIONS);
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(OrgCheckDatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(OrgCheckDatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!permissions) throw new Error(`Data from dataset alias 'APPPERMISSIONS' was undefined.`);
+        if (!applications) throw new Error(`Data from dataset alias 'APPLICATIONS' was undefined.`);
+        if (!appPermissions) throw new Error(`Data from dataset alias 'APPPERMISSIONS' was undefined.`);
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
         if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
+        // Augment data
+        await OrgCheckProcessor.forEach(appPermissions, (ap) => {
+            ap.appRef = applications.get(ap.appId);
+            if (ap.parentId.startsWith('0PS') === true) {
+                ap.parentRef = permissionSets.get(ap.parentId);
+            } else {
+                ap.parentRef = profiles.get(ap.parentId);
+            }
+        });
+
         // Filter data
         const workingMatrix = OrgCheckDataMatrixFactory.create();
-        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>()} */
-        const profilesAndPermSets = new Map();
-        await OrgCheckProcessor.forEach(permissions, (permission) => {
-            if (namespace === '*' || permission.parentRef.package === namespace || permission.appPackage === namespace ) {
-                if (profilesAndPermSets.has(permission.parentId) === false) {
-                    if (permission.isParentProfile === true) {
-                        profilesAndPermSets.set(permission.parentId, profiles.get(permission.parentId));
-                    } else {
-                        profilesAndPermSets.set(permission.parentId, permissionSets.get(permission.parentId));
-                    }
+        /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>} */
+        const rowHeaderReferences = new Map();
+        /** @type {Map<string, SFDC_Application>} */
+        const columnHeaderReferences = new Map();
+        await OrgCheckProcessor.forEach(appPermissions, (ap) => {
+            if (namespace === '*' || ap.parentRef.package === namespace || ap.appRef.appPackage === namespace ) {
+                if (rowHeaderReferences.has(ap.parentId) === false) {
+                    rowHeaderReferences.set(ap.parentId, ap.parentRef);
+                }
+                if (columnHeaderReferences.has(ap.appId) === false) {
+                    columnHeaderReferences.set(ap.appId, ap.appRef);
                 }
                 workingMatrix.addValueToProperty(
-                    permission.parentId,
-                    permission.appName,
-                    (permission.isAccessible?'A':'') + (permission.isVisible?'V':'')
+                    ap.parentId,
+                    ap.appId,
+                    (ap.isAccessible?'A':'') + (ap.isVisible?'V':'')
                 )
             }
         });
 
         // Return data
-        return workingMatrix.toDataMatrix(profilesAndPermSets);
+        return workingMatrix.toDataMatrix(rowHeaderReferences, columnHeaderReferences);
     }
 }

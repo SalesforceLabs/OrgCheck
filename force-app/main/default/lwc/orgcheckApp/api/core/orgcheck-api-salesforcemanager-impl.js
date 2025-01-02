@@ -22,10 +22,11 @@ const MAX_NOQUERYMORE_BATCH_SIZE = 2000;
 const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE = 10;
 
 /**
- * @description Maximum number of sub queries we want to have in a single composite query
- *                  Where the salesforce maximum is 25.
+ * @description Maximum number of sub queries we want to have in a single composite request
+ *              Where the salesforce maximum is 25 BUT ony 5 can be query or sobject operations
+ * @see https://developer.salesforce.com/docs/atlas.en-us.232.0.api_rest.meta/api_rest/resources_composite_composite.htm
  */
-const MAX_COMPOSITE_REQUEST_SIZE = 12;
+const MAX_COMPOSITE_REQUEST_SIZE = 5;
 
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
@@ -289,6 +290,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                                 nbQueryMore++;
                                 // Call the custom query more
                                 sequential_query(recursive_query);
+logger?.debug(`soqlQuery --- call # ${nbQueryMore} --- calling sequential_query(recursive_query) with queryMoreStartingId=${queryMoreStartingId} -- QUERY_STRING=${query.string}`);
                             }
                         } else {
                             // Here we can call queryMore if fetching is not done...
@@ -302,12 +304,14 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                                 // Not done yet more sub query to do
                                 nbQueryMore++;
                                 // Call the queryMore with the nextRecordsUrl
+logger?.debug(`soqlQuery --- call # ${nbQueryMore}) --- conn.queryMore(${d.nextRecordsUrl}, recursive_query) -- QUERY_STRING=${query.string}`);
                                 conn.queryMore(d.nextRecordsUrl, recursive_query);
                             }
                         }
                     }
                     logger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
                 }
+logger?.debug(`soqlQuery --- calling the first time: sequential_query(recursive_query) -- QUERY_STRING=${query.string}`);
                 sequential_query(recursive_query);
             });
         }));

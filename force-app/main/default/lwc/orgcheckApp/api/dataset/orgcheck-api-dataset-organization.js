@@ -26,10 +26,7 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
             string: 'SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate, ' +
                         'NamespacePrefix ' + 
                     'FROM Organization ' +
-                    'LIMIT 1',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+                    'LIMIT 1'
         }], logger);
         const record = results[0].records[0];
         logger?.log(`Parsing the result...`);

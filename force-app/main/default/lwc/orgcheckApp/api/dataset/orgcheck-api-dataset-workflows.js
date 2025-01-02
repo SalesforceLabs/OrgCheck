@@ -22,9 +22,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         logger?.log(`Querying Tooling API about WorkflowRule in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id FROM WorkflowRule',
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }], logger);
         
         // List of flow ids

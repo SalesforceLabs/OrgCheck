@@ -16,22 +16,25 @@ export class OrgCheckSalesforceQueryRequest {
     
     /** 
      * @description Use the tooling or not (false by default)
-     * @type {boolean}
+     * @type {boolean | undefined} [tooling=false]
      * @public
+     * @readonly
      */
     tooling;
     
     /**
      * @description List of error codes to by-pass (empty by default)
-     * @type {Array<string>}
+     * @type {Array<string> | undefined} [byPasses]
      * @public
+     * @readonly
      */
     byPasses;
     
     /** 
      * @description Unique field name to use for the custom QueryMore (Id by default)
-     * @type {string}
+     * @type {string | undefined} [queryMoreField]
      * @public
+     * @readonly
      */
     queryMoreField;
 }
@@ -105,7 +108,7 @@ export class OrgCheckSalesforceManagerIntf {
 
     /**
      * @description Method to call a list of SOQL queries (tooling or not)
-     * @param {Array<OrgCheckSalesforceQueryRequest>} queries 
+     * @param {Array<OrgCheckSalesforceQueryRequest | any>} queries 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @async
      * @returns {Promise<Array<any>>}

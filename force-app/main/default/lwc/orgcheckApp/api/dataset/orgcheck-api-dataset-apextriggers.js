@@ -35,9 +35,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexTrigger ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            tooling: true,
-            byPasses: [],
-            queryMoreField: ''
+            tooling: true
         }], logger);
 
         // Init the factory and records

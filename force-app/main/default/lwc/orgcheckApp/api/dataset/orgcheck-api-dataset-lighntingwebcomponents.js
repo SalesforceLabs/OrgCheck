@@ -24,9 +24,7 @@ export class OrgCheckDatasetLightningWebComponents extends OrgCheckDataset {
             string: 'SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM LightningComponentBundle ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            byPasses: [],
-            queryMoreField: ''
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
 
         // Init the factory and records

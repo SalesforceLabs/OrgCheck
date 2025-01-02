@@ -30,10 +30,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         // (only ids because metadata can't be read via SOQL in bulk!
         logger?.log(`Querying REST API about Profile in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id FROM Profile',
-            tooling: false,
-            byPasses: [],
-            queryMoreField: ''
+            string: 'SELECT Id FROM Profile'
         }], logger);
             
         // List of profile ids

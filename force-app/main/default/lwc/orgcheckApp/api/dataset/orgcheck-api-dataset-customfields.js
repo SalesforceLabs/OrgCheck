@@ -27,9 +27,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
             string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting ' +
                     'FROM CustomField ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
-                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : ''),
-            byPasses: [],
-            queryMoreField: ''
+                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
         }], logger);
 
         // Init the factory and records

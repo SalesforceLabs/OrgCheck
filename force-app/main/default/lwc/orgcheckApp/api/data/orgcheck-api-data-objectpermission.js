@@ -8,26 +8,19 @@ import { SFDC_Profile } from './orgcheck-api-data-profile';
 export class SFDC_ObjectPermission extends OrgCheckData {
 
     /**
-     * @description Salesforce Id of the related parent
+     * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}
      * @public
      */
     parentId;
-
+    
     /**
-     * @description Is the related parent is a profile? (if not this is a permission set)
-     * @type {boolean}
-     * @public
-     */
-    isParentProfile;
-
-    /**
-     * @description The related parent reference
-     * @type {SFDC_Profile | SFDC_PermissionSet}}
+     * @description Reference of the related parent
+     * @type {SFDC_Profile | SFDC_PermissionSet}
      * @public
      */
     parentRef;
-
+    
     /** 
      * @description The object’s API name. For example, Merchandise__c
      * @type {string}

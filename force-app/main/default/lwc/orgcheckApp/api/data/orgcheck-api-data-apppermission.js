@@ -1,29 +1,23 @@
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
+import { SFDC_Application } from './orgcheck-api-data-application';
 import { SFDC_PermissionSet } from './orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './orgcheck-api-data-profile';
 
 /**
  * @description Representation of an Application permission for a specific parent (profile or permission set) in Org Check
  */
-export class SFDC_AppPermission extends OrgCheckData {
+export class SFDC_AppPermission extends OrgCheckDataWithoutScoring {
     
     /**
-     * @description Salesforce Id of the related parent
+     * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}
      * @public
      */
     parentId;
     
     /**
-     * @description Is the related parent is a profile? (if not this is a permission set)
-     * @type {boolean}
-     * @public
-     */
-    isParentProfile;
-    
-    /**
-     * @description The related parent reference
-     * @type {SFDC_Profile | SFDC_PermissionSet}}
+     * @description Reference of the related parent
+     * @type {SFDC_Profile | SFDC_PermissionSet}
      * @public
      */
     parentRef;
@@ -36,26 +30,12 @@ export class SFDC_AppPermission extends OrgCheckData {
     appId;
     
     /**
-     * @description Name of the application
-     * @type {string}
+     * @description Reference of the related application
+     * @type {SFDC_Application}
      * @public
      */
-    appName;
-    
-    /**
-     * @description Label of the application
-     * @type {string}
-     * @public
-     */
-    appLabel;
-    
-    /**
-     * @description Name of the potential namespace/package where this application comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    appPackage;
-    
+    appRef;
+
     /**
      * @description Permission for this related parent to access this app?
      * @type {boolean}

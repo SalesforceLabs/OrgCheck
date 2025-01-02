@@ -12,11 +12,18 @@ export class OrgCheckDataMatrix {
     columnHeaderIds;
 
     /**
-     * @description List of row header references identified by its headerId
+     * @description List of row header references identified by its id
      * @type {Map<string, any>}
      * @public
      */
     rowHeaderReferences;
+
+    /**
+     * @description List of column header references identified by its id
+     * @type {Map<string, any>}
+     * @public
+     */
+    columnHeaderReferences;
 
     /** 
      * @description List of data for each "row". A row will have a headerId (used as row header in the matrix view). And data is an object with as many properties.
