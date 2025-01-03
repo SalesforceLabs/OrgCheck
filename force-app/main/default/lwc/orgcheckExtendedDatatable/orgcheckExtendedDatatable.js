@@ -51,26 +51,30 @@ const CELL_PREPARE = (rowScore, reference, column, cell = { data: {}}) => {
         if (column.modifier?.preformatted === true) {
             cell.isPreformatted = true;
         }
-        if (column.modifier?.valueIfEmpty && !cell.data.value) {
+        if (column.modifier?.valueIfEmpty && IS_EMPTY(cell.data.value)) {
             cell.data.decoratedValue = column.modifier.valueIfEmpty;
             cell.isEmpty = true;
-        }
-        if (column.modifier?.max && cell.data.value > column.modifier.max) {
+        } else if (column.modifier?.max && cell.data.value > column.modifier.max) {
             cell.data.decoratedValue = column.modifier.valueAfterMax;
             cell.isMaxReached = true;
         } else if (column.modifier?.min && cell.data.value < column.modifier.min) {
             cell.data.decoratedValue = column.modifier.valueBeforeMin;
             cell.isMinReached = true;
-        }
-        if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
+        } else if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
             cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
             cell.isValueTruncated = true;
-        }
-        if (column.modifier?.template) {
+        } else if (column.modifier?.template) {
             cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
         }
     }
     return cell;
+}
+
+const IS_EMPTY = (value) => {
+    if (value === 0) return false;
+    if (!value) return true;
+    if (typeof value === 'string' && value.trim().length === 0) return true;
+    return false;
 }
 
 const CELL_CSSCLASS = (row, cell) => {

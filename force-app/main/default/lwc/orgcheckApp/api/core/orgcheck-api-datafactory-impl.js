@@ -56,9 +56,11 @@ const IS_OLD_APIVERSION = (currentVersion, version, definition_of_old = 3) => {
  * @private
  */
 const IS_EMPTY = (value) => {
+    // In case we have a numerial value as input
+    if (typeof value === 'number' && value === 0) return false;
     // if the value is undefined or null --> it's EMPTY!
     if (!value) return true;
-    // length is a property both used in Array and string. Oviously if the length is zero --> it's EMPTY!
+    // length is a property both used in Array and string. Obviously if the length is zero --> it's EMPTY!
     if (value.length === 0) return true;
     // sometimes a string contains only spaces and we want to consider this as empty as well.
     // only if the value is a string, use trim() to get rid of the spaces on the left and right, and check the final length
@@ -102,24 +104,31 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
             { 
                 id: counter++,
                 description: 'Not referenced anywhere',
-                formula: (/** @type {SFDC_CustomLabel | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage} */ d) => IS_EMPTY(d.dependencies?.referenced), 
+                formula: (/** @type {SFDC_CustomLabel | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage} */ d) => d.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 id: counter++,
                 description: 'No reference anywhere for custom field',
-                formula: (/** @type {SFDC_Field} */ d) => d.isCustom === true && IS_EMPTY(d.dependencies?.referenced), 
+                formula: (/** @type {SFDC_Field} */ d) => d.isCustom === true && d.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This custom field is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_Field ]
             }, {
                 id: counter++,
                 description: 'No reference anywhere for apex class',
-                formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === false && IS_EMPTY(d.dependencies?.referenced), 
+                formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === false && d.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
                 errorMessage: 'This apex class is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
                 badField: 'dependencies.referenced.length',
                 applicable: [ SFDC_ApexClass ]
+            }, {
+                id: counter++,
+                description: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item',
+                formula: (/** @type {OrgCheckDataWithDependencies} */ d) => d.dependencies && d.dependencies.hadError === true, 
+                errorMessage: 'Sorry, we had an issue with the Dependency API to gather the dependencies of this item.',
+                badField: 'dependencies.referenced.length',
+                applicable: [ SFDC_Field, SFDC_ApexClass, SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ]
             }, {
                 id: counter++,
                 description: 'API Version too old',

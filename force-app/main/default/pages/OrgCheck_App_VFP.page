@@ -42,11 +42,20 @@
                 <span id="additional-info-issue-454">
                     Hello! <br />
                     <br />
-                    You see this message because <b>two settings</b> (under the section <code>Session</code>) 
-                       are <b>both enabled at the same time</b> in your org, and these two together are preventing Org Check to 
-                       load successfuly.<br />
+                    You see this message because Org Check is taking more than 15 seconds to load.<br />
                     <br />
-                    The settings are :<br />
+                    <br />
+                    This may be due to a new version that has been pushed to your org or maybe this is 
+                      the first time you run Org Check.<br />                    
+                    <br />
+                    <b><u>Solution:</u> In that case, just wait a little longer, at the application will come shortly.</b>
+                    <br />
+                    <br />
+                    There might be another explanation that is preventing Org Check to load successfuly.<br />
+                    Under the section <code>Session</code> in the setup menu of this org, there must be 
+                       two specific settings <b>both enabled at the same time</b> that are causing this 
+                       issue.<br />
+                    These settings are :<br />
                     1. Option <b><code>Enable Content Delivery Network (CDN) for Lightning Component framework</code></b><br />
                     2. Option <b><code>Cross-Origin Embedder Policy (COEP)</code></b><br />
                     <br />
