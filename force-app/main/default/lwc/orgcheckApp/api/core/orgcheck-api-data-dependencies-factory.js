@@ -12,7 +12,7 @@ export class OrgCheckDataDependenciesFactory {
      * @returns {OrgCheckDataDependencies | any}
      */
     static create(data, whatId) {
-        if (whatId === '0663V0000002NTs' || whatId === '0663V0000002NIZ' || data.errors.includes(whatId)) {
+        if (data.errors.includes(whatId)) {
             return {
                 hadError: true
             };

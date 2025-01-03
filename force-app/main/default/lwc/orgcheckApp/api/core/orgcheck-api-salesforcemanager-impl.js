@@ -241,8 +241,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                                `ORDER BY ${query.queryMoreField} `+
                                `LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`, { autoFetch: false }, callback);
                 } else {
-                    // Standard use of queryMore with AutoFetch from JsForce
-                    conn.query(query.string, { autoFetch: true }, callback);
+                    // We will call the standard Query More ourself (JsForce call it automatically but has a hard limit in terms of record number)
+                    conn.query(query.string, { autoFetch: false }, callback);
                 }
             }
             // Finally we return the promise that will call the query (and maybe more queries if needed!)
