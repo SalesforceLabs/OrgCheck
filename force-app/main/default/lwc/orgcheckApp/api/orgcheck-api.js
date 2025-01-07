@@ -174,7 +174,7 @@ export class OrgCheckAPI {
      * @public
      */
     async runAllTestsAsync() {
-        return Promise.resolve('todo'); //this._sfdcManager.runAllTests();
+        return this._sfdcManager.runAllTests(this._logger.toSimpleLogger('Run All Tests'));
     }
 
     /**
@@ -185,7 +185,7 @@ export class OrgCheckAPI {
      * @public
      */
     async compileClasses(classes) {
-        return Promise.resolve([]); // return this._sfdcManager.compileClasses(classes);
+        return this._sfdcManager.compileClasses(classes, this._logger.toSimpleLogger(`Compile ${classes.length} classe(s)`));
     }
 
     /**
@@ -208,7 +208,7 @@ export class OrgCheckAPI {
      * @public
      */
     async checkUsageTerms() {
-        const orgInfo = await this.getOrganizationInformation();
+        const orgInfo = (await this.getOrganizationInformation());
         if (orgInfo.isProduction === true && this._usageTermsAccepted === false) {
             return false;
         }
@@ -232,7 +232,7 @@ export class OrgCheckAPI {
      */
     async checkCurrentUserPermissions() {
         // @ts-ignore
-        const /** @type {Map} */ perms = await this._recipeManager.run(OrgCheckRecipeAliases.CURRENT_USER_PERMISSIONS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]);
+        const /** @type {Map} */ perms = (await this._recipeManager.run(OrgCheckRecipeAliases.CURRENT_USER_PERMISSIONS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]));
         if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
             perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
                 throw (new TypeError(
@@ -257,11 +257,11 @@ export class OrgCheckAPI {
      */
     async getPackagesTypesAndObjects(namespace, sobjectType) {
         // @ts-ignore
-        const /** @type {Array<Array>} */ results = await Promise.all([
+        const /** @type {Array<Array>} */ results = (await Promise.all([
             this._recipeManager.run(OrgCheckRecipeAliases.PACKAGES),
             this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_TYPES),
             this._recipeManager.run(OrgCheckRecipeAliases.OBJECTS, namespace, sobjectType)
-        ]);
+        ]));
         return { packages: results[0], types: results[1], objects: results[2] };
     }
 
@@ -307,7 +307,7 @@ export class OrgCheckAPI {
      */
     async getObjectPermissionsPerParent(namespace) {
         // @ts-ignore
-        return (this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_PERMISSIONS, namespace));
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_PERMISSIONS, namespace));
     }
 
     /**
@@ -517,7 +517,7 @@ export class OrgCheckAPI {
      */
     async getLightningAuraComponents(namespace) {
         // @ts-ignore
-        return (this._recipeManager.run(OrgCheckRecipeAliases.LIGHTNING_AURA_COMPONENTS, namespace));
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.LIGHTNING_AURA_COMPONENTS, namespace));
     }
 
     /**
@@ -682,7 +682,7 @@ export class OrgCheckAPI {
      */
     async getRolesTree() {
         // Get data
-        const allRoles = await this.getRoles();
+        const allRoles = (await this.getRoles());
         // @ts-ignore
         // Create a map that stores all nodes
         // Where:

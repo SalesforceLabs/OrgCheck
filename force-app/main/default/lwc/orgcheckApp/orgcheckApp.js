@@ -170,6 +170,17 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     /**
+     * @description Reset the filters values
+     * @public
+     * @async
+     */
+    async handleFiltersRefreshed() {
+        this._doNotCloseSpinnerYet = true;
+        await this._loadFilters();
+        this._doNotCloseSpinnerYet = false;
+    }
+
+    /**
      * @description Handle when the userclick on the acceptance use button
      * @param {Event} event 
      * @public
@@ -230,10 +241,11 @@ export default class OrgCheckApp extends LightningElement {
     async handleRemoveCache(event) {
         if (event['detail'].allItems === true) {
             this._api.removeAllFromCache();
+            window.location.reload();
         } else {
             this._api.removeFromCache(event['detail'].itemName);
+            await this._updateCurrentTab();
         }
-        this._updateCurrentTab();
     }
 
     /**
@@ -262,16 +274,24 @@ export default class OrgCheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRunAllTests() {
+        const LOG_SECTION = 'RUN ALL TESTS';
         this._spinner.open();
-        this._spinner.sectionStarts('run-all-tests', 'Launching...');
-        const asyncApexJobId = await this._api.runAllTestsAsync();
-        this._spinner.sectionEnded('run-all-tests', 'Done!');
-        this._spinner.close();
-        let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
-        htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
-        htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
-        htmlContent += `<li>Check with Tooling API the status of the following record: /tooling/sobjects/AsyncApexJob/${asyncApexJobId}</li><ul>`;
-        this._modal.open('Asynchronous Run All Test Asked', htmlContent);
+        this._spinner.sectionStarts(LOG_SECTION, 'Launching...');
+        try {
+            const asyncApexJobId = await this._api.runAllTestsAsync();
+            this._spinner.sectionEnded(LOG_SECTION, 'Done!');
+            this._spinner.close();
+
+            let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
+            htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
+            htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
+            htmlContent += `<li>Check with Tooling API the status of the following record: /tooling/sobjects/AsyncApexJob/${asyncApexJobId}</li><ul>`;
+            this._modal.open('Asynchronous Run All Test Asked', htmlContent);
+
+        } catch (error) {
+            this._spinner.canBeClosed();
+            this._spinner.sectionFailed(LOG_SECTION, error);
+        }
     }
 
     /**
@@ -321,24 +341,25 @@ export default class OrgCheckApp extends LightningElement {
                     default:
                 }
             });
-            this._updateCurrentTab();
+            await this._updateCurrentTab();
         }
     }
 
     async handleClickRecompile() {
+        const LOG_SECTION = 'RECOMPILE';
         this._spinner.open();
         const classes = new Map();
-        this._spinner.sectionStarts('request-to-recompile', 'Processing...');
+        this._spinner.sectionStarts(LOG_SECTION, 'Processing...');
         this.apexUncompiledTableData.forEach(c => {
-            this._spinner.sectionStarts(`request-to-recompile-${c.id}`, `Asking to recompile class: ${c.name}`);
+            this._spinner.sectionStarts(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
             classes.set(c.id, c);
         });
         const responses = await this._api.compileClasses(this.apexUncompiledTableData);
-        this._spinner.sectionContinues('request-to-recompile', 'Done');
+        this._spinner.sectionContinues(LOG_SECTION, 'Done');
         responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
             const c = classes.get(cr.referenceId);
             if (cr.body.success === true) {
-                this._spinner.sectionEnded(`request-to-recompile-${c.id}`, `Recompilation requested for class: ${c.name}`);
+                this._spinner.sectionEnded(`${LOG_SECTION}-${c.id}`, `Recompilation requested for class: ${c.name}`);
             } else {
                 let reasons = [];
                 if (cr.body && Array.isArray(cr.body)) {
@@ -346,12 +367,14 @@ export default class OrgCheckApp extends LightningElement {
                 } else if (cr.errors && Array.isArray(cr.errors)) {
                     reasons = cr.errors;
                 }
-                this._spinner.sectionFailed(`request-to-recompile-${c.id}`, `Errors for class ${c.name}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
+                this._spinner.sectionFailed(`${LOG_SECTION}-${c.id}`, `Errors for class ${c.name}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
             }
         }));
-        this._spinner.sectionEnded('request-to-recompile', 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
+        this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
         this._spinner.canBeClosed();
     }
+
+    _doNotCloseSpinnerYet;
 
     /**
      * Internal method to load and set the Org Check API
@@ -361,7 +384,7 @@ export default class OrgCheckApp extends LightningElement {
         const LOG_SECTION = 'LOAD API';
         this._spinner.open();
         this._spinner.sectionStarts(LOG_SECTION, "C'est parti !");
-        let doNotCloseYet = true;
+        this._doNotCloseSpinnerYet = true;
 
         try {
 
@@ -390,7 +413,7 @@ export default class OrgCheckApp extends LightningElement {
                         sectionContinues: (s, m) => { this._spinner.sectionContinues(s, m); },
                         sectionEnded: (s, m) => { this._spinner.sectionEnded(s, m); },
                         sectionFailed: (s, e) => { this._spinner.sectionFailed(s, e); },
-                        end: (s, f) => { if (doNotCloseYet) return; if (f === 0) this._spinner.close(); else this._spinner.canBeClosed(); }
+                        end: (s, f) => { if (this._doNotCloseSpinnerYet) return; if (f === 0) this._spinner.close(); else this._spinner.canBeClosed(); }
                     }
                 );
 
@@ -399,7 +422,7 @@ export default class OrgCheckApp extends LightningElement {
                 this.salesforceApiVersion = this._api.salesforceApiVersion;
             }
 
-            // Check if we can use this org
+            // Check if the terms are accepted and thus we can continue to use this org
             this._spinner.sectionContinues(LOG_SECTION, 'Checking if we can use the org according to the terms...')
             if (await this._api.checkUsageTerms()) {
                 this.useOrgCheckInThisOrgNeedConfirmation = false;
@@ -408,36 +431,32 @@ export default class OrgCheckApp extends LightningElement {
                 this.useOrgCheckInThisOrgNeedConfirmation = true;
                 this.useOrgCheckInThisOrgConfirmed = false;
             }
-
-            // Information about the org
-            this._spinner.sectionContinues(LOG_SECTION, 'Information about the org...');
-            const orgInfo = await this._api.getOrganizationInformation();
-            this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-            this.orgType = orgInfo.type;
-            this.isOrgProduction = orgInfo.isProduction;
-            if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-            else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-            else this.themeForOrgType = 'slds-theme_success';
-
+    
             if (this.useOrgCheckInThisOrgConfirmed === true) {
 
+                // Information about the org
+                this._spinner.sectionContinues(LOG_SECTION, 'Information about the org...');
+                const orgInfo = await this._api.getOrganizationInformation();
+                this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+                this.orgType = orgInfo.type;
+                this.isOrgProduction = orgInfo.isProduction;
+                if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+                else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+                else this.themeForOrgType = 'slds-theme_success';
+        
                 // Check basic permission
                 this._spinner.sectionContinues(LOG_SECTION, 'Checking if current user has enough permission...')
-                await this._api.checkCurrentUserPermissions();
-                
-                // Data for the filters
-                this._spinner.sectionContinues(LOG_SECTION, 'Data for the filters...');
-                const filtersData = await this._api.getPackagesTypesAndObjects('*', '*');
-                this._filters.updateSObjectTypeOptions(filtersData.types);
-                this._filters.updatePackageOptions(filtersData.packages);
-                this._filters.updateSObjectApiNameOptions(filtersData.objects);
-                this._filters.show();
+                await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
 
-                this._updateCurrentTab();
+                // Data for the filters
+                this._spinner.sectionContinues(LOG_SECTION, 'Load the filters...');
+                await this._loadFilters();
+                this._spinner.sectionContinues(LOG_SECTION, 'Synching the filters with the current tab...');
+                await this._updateCurrentTab();
             }
 
             // FINALLY!
-            doNotCloseYet = false;
+            this._doNotCloseSpinnerYet = false;
             this._spinner.sectionEnded(LOG_SECTION, 'All set!');
             this._spinner.close();
     
@@ -445,6 +464,25 @@ export default class OrgCheckApp extends LightningElement {
             this._spinner.canBeClosed();
             this._spinner.sectionFailed(LOG_SECTION, error);
         }
+    }
+
+    async _loadFilters() {
+        const LOG_SECTION = 'GLOBAL FILTERS';
+        this._spinner.open();
+        this._spinner.sectionStarts(LOG_SECTION, 'Hide the filter panel...');
+        this._filters.hide();
+        this._spinner.sectionContinues(LOG_SECTION, 'Remove data from cache (if any)...');
+        this._api.removeAllPackagesTypesAndObjectsFromCache();
+        this._spinner.sectionContinues(LOG_SECTION, 'Get packages, types and objects from the org...');
+        const filtersData = await this._api.getPackagesTypesAndObjects('*', '*');
+        this._spinner.sectionContinues(LOG_SECTION, 'Loading data in the drop boxes...');
+        this._filters.updateSObjectTypeOptions(filtersData.types);
+        this._filters.updatePackageOptions(filtersData.packages);
+        this._filters.updateSObjectApiNameOptions(filtersData.objects);
+        this._spinner.sectionContinues(LOG_SECTION, 'Done. Showing the filters...');
+        this._filters.show();
+        this._spinner.sectionEnded(LOG_SECTION, 'Done!');
+        this._spinner.close();
     }
 
     _updateDailyAPIUsage() {
@@ -923,6 +961,10 @@ export default class OrgCheckApp extends LightningElement {
     ];
 
     apexUncompiledTableData;
+
+    get isThereAnyApexUncompiled() {
+        return this.apexUncompiledTableData?.length > 0;
+    }
 
     apexTriggersTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
