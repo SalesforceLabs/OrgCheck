@@ -48,7 +48,7 @@ table.dontuseallspace {
 
 th.sticky {
     position: sticky;
-    top: 0; /* Don't forget this, required for the stickiness */
+    top: var(--lwc-spacingXxxSmall, 0); /* Don't forget this, required for the stickiness */
     z-index: 1000; /* when scrolling the header should stay on top */
     vertical-align: bottom;
 }

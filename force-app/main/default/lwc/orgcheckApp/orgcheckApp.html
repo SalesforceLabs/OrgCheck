@@ -29,7 +29,7 @@
                 </div>
             </lightning-layout-item>
         </lightning-layout>
-        <c-orgcheck-global-filters onvalidatechange={handleFiltersValidated}></c-orgcheck-global-filters>
+        <c-orgcheck-global-filters onvalidatechange={handleFiltersValidated} onrefresh={handleFiltersRefreshed}></c-orgcheck-global-filters>
         <c-orgcheck-spinner></c-orgcheck-spinner>
         <c-orgcheck-modal></c-orgcheck-modal>
     </div>
@@ -787,7 +787,7 @@
                     <lightning-layout-item>
                         <lightning-button label="Run All Tests" title="Run All Tests" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:apex" onclick={handleClickRunAllTests}></lightning-button>
                     </lightning-layout-item>
-                    <template if:true={apexUncompiledTableData}>
+                    <template if:true={isThereAnyApexUncompiled}>
                         <lightning-layout-item>
                             <lightning-button label="You have uncompiled classes, ask for recompilation!" title="You have uncompiled classes, ask for recompilation!" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRecompile}></lightning-button>
                         </lightning-layout-item>
