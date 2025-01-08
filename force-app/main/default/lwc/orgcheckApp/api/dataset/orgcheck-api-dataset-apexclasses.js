@@ -9,8 +9,8 @@ import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
 const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
 const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
-const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\(.*SeeAllData=true.*\\)", 'i');
-const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\(|Assert\\.[a-zA-Z]*\\()", 'ig');
+const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
+const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
 
 export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
@@ -100,10 +100,10 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
             // Get information from the compilation output information by the Apex compiler on salesforce side (if available)
             if (record.SymbolTable) {
-                apexClass.innerClassesCount = record.SymbolTable.innerClasses.length || 0;
+                apexClass.innerClassesCount = record.SymbolTable.innerClasses?.length || 0;
                 apexClass.interfaces = record.SymbolTable.interfaces;
                 apexClass.isSchedulable = record.SymbolTable.interfaces?.includes('System.Schedulable') ?? false;
-                apexClass.methodsCount = record.SymbolTable.methods.length || 0;
+                apexClass.methodsCount = record.SymbolTable.methods?.length || 0;
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
                     apexClass.annotations = record.SymbolTable.tableDeclaration.annotations;
