@@ -15,7 +15,7 @@ class SalesforceManagerMock extends OrgCheckSalesforceManagerIntf {
   getObjectType(objectName, isCustomSetting) { return null; }
   get dailyApiRequestLimitInformation() { return null; }
   async soqlQuery(queries, logger) { return queries.map((e) => { return { records: [] }; }); }
-  async dependenciesQuery(ids, logger) { return { dependencies: [], errors: [] }; }
+  async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
   async readMetadata(metadatas, logger) { return metadatas.map(() => { return []; }); }
   async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
   async describeGlobal(logger) { return null; }

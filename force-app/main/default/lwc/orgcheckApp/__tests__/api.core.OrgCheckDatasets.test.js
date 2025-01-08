@@ -66,7 +66,7 @@ class SfdcManagerMock extends OrgCheckSalesforceManagerIntf {
     });
   }
 
-  async dependenciesQuery(ids, logger) { return { dependencies: [], errors: [] }; }
+  async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
 
   async readMetadata(metadatas, logger) { return metadatas.map(() => { return []; }); }
 
@@ -111,8 +111,68 @@ describe('api.core.OrgCheckDatasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
+    });
+
+    it('checks if regex are correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM ApexClass ', [
+        {
+          Id: '01',
+          Name: 'TestA',
+          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
+          Body: "@isTest \nprivate class TestA {\n public static void test() {\n assert.fail ();\n //Assert.fail();\n /*Assert.areEqual(true, '', 'ii'); aSSert.isFalse(1 == 1, 'false');*/\n}\n}"
+        },
+        {
+          Id: '02',
+          Name: 'TestB',
+          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
+          Body: "@isTest (SeeAllData=true) \nprivate class TestB {\n public static void test() {\n assert.fail ();\n Assert.fail();\n /*Assert.areEqual(true, '', 'ii'); aSSert.isFalse(1 == 1, 'false');*/\n}\n}"
+        },
+        {
+          Id: '03',
+          Name: 'TestC',
+          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
+          Body: "@isTest (SeeAllData=false) \nprivate class TestC {\n public static void test() {\n assert.fail ();\n Assert.fail();\n Assert.areEqual(true, '', 'ii'); aSSert.isFalse(1 == 1, 'false');\n}\n}"
+        },
+        {
+          Id: '04',
+          Name: 'C',
+          SymbolTable: { tableDeclaration: { modifiers: [] }},
+          Body: "public class C {\n public static void doSomething() {\n assert.fail ();\n}\n}"
+        },
+        {
+          Id: '05',
+          Name: 'TestD',
+          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
+          Body: "@isTest(SeeAllData=true) \nprivate class TestD {\n public static void test() {\n}\n}"
+        }
+      ])
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
+      expect(results.size).toBe(5);
+      expect(results.get('01').name).toBe('TestA');
+      expect(results.get('01').isTest).toBeTruthy();
+      expect(results.get('01').isTestSeeAllData).toBeFalsy();
+      expect(results.get('01').nbSystemAsserts).toBe(1);
+      expect(results.get('02').name).toBe('TestB');
+      expect(results.get('02').isTest).toBeTruthy();
+      expect(results.get('02').isTestSeeAllData).toBeTruthy();
+      expect(results.get('02').nbSystemAsserts).toBe(2);
+      expect(results.get('03').name).toBe('TestC');
+      expect(results.get('03').isTest).toBeTruthy();
+      expect(results.get('03').isTestSeeAllData).toBeFalsy();
+      expect(results.get('03').nbSystemAsserts).toBe(4);
+      expect(results.get('04').name).toBe('C');
+      expect(results.get('04').isTest).toBeFalsy();
+      expect(results.get('04').isTestSeeAllData).toBeFalsy();
+      expect(results.get('04').nbSystemAsserts).toBeUndefined();
+      expect(results.get('05').name).toBe('TestD');
+      expect(results.get('05').isTest).toBeTruthy();
+      expect(results.get('05').isTestSeeAllData).toBeTruthy();
+      expect(results.get('05').nbSystemAsserts).toBe(0);
     });
   });
 
