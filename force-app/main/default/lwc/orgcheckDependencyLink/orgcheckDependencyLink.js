@@ -13,7 +13,7 @@ export default class OrgcheckDependencyLink extends LightningElement {
         this.hadError = this.dependencies?.hadError || false;
     }
 
-    handleErrorClick() {
+    handleViewClick() {
         this.dispatchEvent(new CustomEvent('view', { detail: { whatId: this.whatId, whatName: this.whatName, dependencies: this.dependencies } }));
     }
 }
