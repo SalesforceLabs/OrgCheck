@@ -603,7 +603,7 @@ export default class OrgCheckApp extends LightningElement {
                 case 'custom-labels':                      this.customLabelsTableData = await this._api.getCustomLabels(namespace); break;
                 case 'visual-force-pages':                 this.visualForcePagesTableData = await this._api.getVisualForcePages(namespace); break;
                 case 'visual-force-components':            this.visualForceComponentsTableData = await this._api.getVisualForceComponents(namespace); break;
-                case 'lightning-pages':                    this.lightningPagesTableData = await this._api.getLightningPages(namespace); break;
+                case 'lightning-pages':                    this.flexiPagesTableData = await this._api.getLightningPages(namespace); break;
                 case 'lightning-aura-components':          this.auraComponentsTableData = await this._api.getLightningAuraComponents(namespace); break;
                 case 'lightning-web-components':           this.lightningWebComponentsTableData = await this._api.getLightningWebComponents(namespace); break;
                 case 'apex-classes':                       this.apexClassesTableData = (await this._api.getApexClasses(namespace)).filter((r) => r.isTest === false && r.needsRecompilation === false); break;
@@ -746,10 +746,12 @@ export default class OrgCheckApp extends LightningElement {
 
     auraComponentsTableData;
 
-    lightningPagesTableColumns = [
+    flexiPagesTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'Type',          type: 'text',             data: { value: 'type' }},
         { label: 'Package',       type: 'text',             data: { value: 'package' }},
+        { label: 'Object',        type: 'id',               filter: 'obj', data: { ref: 'objectRef', value: 'name', url: 'url' }, modifier: { valueIfEmpty: 'Not related to an object.'}},
         { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
         { label: 'Referenced in', type: 'numeric',          data: { ref: 'dependencies.referenced', value: 'length' }, modifier: { min: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
         { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
@@ -757,8 +759,11 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
         { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
+    flexiPagesInObjectTableColumns = this.flexiPagesTableColumns.filter(c =>
+        c.filter === undefined || c.filter !== 'obj'
+    );
 
-    lightningPagesTableData;
+    flexiPagesTableData;
 
     lightningWebComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
@@ -1169,144 +1174,57 @@ export default class OrgCheckApp extends LightningElement {
             },
             {
                 header: 'Standard Fields',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Package', field: 'package' },
-                    { label: 'Type', field: 'type' },
-                    { label: 'Length', field: 'length' },
-                    { label: 'Unique?', field: 'isUnique' },
-                    { label: 'Encrypted?', field: 'isEncrypted' },
-                    { label: 'External?', field: 'isExternalId' },
-                    { label: 'Indexed?', field: 'isIndexed' },
-                    { label: 'Tooltip', field: 'tooltip' },
-                    { label: 'Formula', field: 'formula' },
-                    { label: 'Default Value', field: 'defaultValue' },
-                    { label: 'Created date', field: 'createdDate' },
-                    { label: 'Modified date', field: 'lastModifiedDate' },
-                    { label: 'Description', field: 'description'}
-                ], 
+                columns: this.standardFieldsInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.standardFields
             },
             {
                 header: 'Custom Fields',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Package', field: 'package' },
-                    { label: 'Type', field: 'type' },
-                    { label: 'Length', field: 'length' },
-                    { label: 'Unique?', field: 'isUnique' },
-                    { label: 'Encrypted?', field: 'isEncrypted' },
-                    { label: 'External?', field: 'isExternalId' },
-                    { label: 'Indexed?', field: 'isIndexed' },
-                    { label: 'Tooltip', field: 'tooltip' },
-                    { label: 'Formula', field: 'formula' },
-                    { label: 'Default Value', field: 'defaultValue' },
-                    { label: 'Created date', field: 'createdDate' },
-                    { label: 'Modified date', field: 'lastModifiedDate' },
-                    { label: 'Description', field: 'description'}
-                ], 
+                columns: this.customFieldsInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.customFieldRefs
             },
             {
                 header: 'Apex Triggers',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                ], 
+                columns: this.apexTriggersTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.apexTriggers
             },
             {
                 header: 'Field Sets',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'label' },  
-                    { label: 'Description', field: 'description' }
-                ], 
+                columns: this.fieldSetsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.fieldSets
             },
             {
                 header: 'Page Layouts',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Type', field: 'type' }
-                ], 
+                columns: this.layoutsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.layouts
-            },           
+            },
+            {
+                header: 'Lightning Pages',
+                columns: this.flexiPagesInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                rows: this.objectInformationData.flexiPages
+            },
             {
                 header: 'Limits',
-                columns: [
-                    { label: 'Name', field: 'label' },  
-                    { label: 'Maximum', field: 'max' },  
-                    { label: 'Used', field: 'used' },  
-                    { label: 'Remaining', field: 'remaining' },  
-                    { label: 'Type', field: 'type' }
-                ], 
+                columns: this.limitsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.limits
             },
             {
                 header: 'Validation Rules',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'label' },  
-                    { label: 'Is Active?', field: 'isActive' },  
-                    { label: 'Error Display Field', field: 'errorDisplayField' },  
-                    { label: 'Error Message', field: 'errorMessage' },  
-                    { label: 'Description', field: 'description' }
-                ], 
+                columns: this.validationRulesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.validationRules
             },
             {
                 header: 'Web Links',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'URL', field: 'url' }
-                ], 
+                columns: this.webLinksColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.webLinks
             },
             {
-                header: 'Fields',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Custom', field: 'isCustom' },  
-                    { label: 'Tooltip', field: 'tooltip' },  
-                    { label: 'Type', field: 'type' },  
-                    { label: 'Length', field: 'length' },  
-                    { label: 'Unique', field: 'isUnique' },  
-                    { label: 'Encrypted', field: 'isEncrypted' },  
-                    { label: 'External Id', field: 'isExternalId' },  
-                    { label: 'Default', field: 'defaultValue' },  
-                    { label: 'Formula', field: 'formula' },  
-                    { label: 'Description', field: 'description' }
-                ], 
-                rows: this.objectInformationData.fields
-            },
-            {
                 header: 'Record Types',
-                columns: [
-                    { label: 'Id', field: 'id' },  
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Developer Name', field: 'ladeveloperNamebel' },  
-                    { label: 'Master', field: 'isMaster' },  
-                    { label: 'Is Active?', field: 'isActive' },  
-                    { label: 'Is Available?', field: 'isAvailable' },  
-                    { label: 'Default Mapping', field: 'isDefaultRecordTypeMapping' }
-                ], 
+                columns: this.recordTypesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.recordTypes
             },
             {
                 header: 'Relationships',
-                columns: [
-                    { label: 'Name', field: 'name' },  
-                    { label: 'Child Object', field: 'childObject' },  
-                    { label: 'Field', field: 'fieldName' },  
-                    { label: 'Cascade Delete?', field: 'isCascadeDelete' },  
-                    { label: 'Restricted Delete?', field: 'isRestrictedDelete' }
-                ], 
+                columns: this.relationshipsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectInformationData.relationships
             }
         ];

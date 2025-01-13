@@ -132,10 +132,10 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
             }, {
                 id: counter++,
                 description: 'API Version too old',
-                formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent} */ d) => IS_OLD_APIVERSION(currentApiVersion, d.apiVersion),
+                formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent} */ d) => IS_OLD_APIVERSION(currentApiVersion, d.apiVersion),
                 errorMessage: 'The API version of this component is too old. Please update it to a newest version.',
                 badField: 'apiVersion',
-                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent ]
+                applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent ]
             }, {
                 id: counter++,
                 description: 'No assert in this Apex Test',

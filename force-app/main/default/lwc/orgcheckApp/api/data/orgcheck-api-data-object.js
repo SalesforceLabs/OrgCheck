@@ -112,6 +112,8 @@ export class SFDC_Object extends OrgCheckDataWithoutScoring {
     fieldSets;
     
     layouts;
+
+    flexiPages;
     
     limits;
     

@@ -1,5 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+// @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckGraphics extends LightningElement {
@@ -18,7 +19,7 @@ export default class OrgcheckGraphics extends LightningElement {
       loadScript(this, OrgCheckStaticRessource + '/js/d3.js')
         .then(() => {
           this.#apiInitialized = true;
-          // eslint-disable-next-line no-undef
+          // @ts-ignore
           this.#api = d3; 
 
           // draw graph now

@@ -9,6 +9,7 @@ import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
+import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 
 export class OrgCheckRecipeObject extends OrgCheckRecipe {
 
@@ -27,6 +28,7 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
         return [ datasetRunInfoObject, 
             OrgCheckDatasetAliases.OBJECTTYPES,
             OrgCheckDatasetAliases.APEXTRIGGERS,
+            OrgCheckDatasetAliases.LIGHTNINGPAGES,
             datasetRunInfoCustomField
         ];
     }
@@ -45,12 +47,14 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(OrgCheckDatasetAliases.OBJECTTYPES);
         const /** @type {SFDC_Object} */ object = data.get(OrgCheckDatasetAliases.OBJECT);
         const /** @type {Map<string, SFDC_ApexTrigger>} */ apexTriggers = data.get(OrgCheckDatasetAliases.APEXTRIGGERS);
+        const /** @type {Map<string, SFDC_LightningPage>} */ pages = data.get(OrgCheckDatasetAliases.LIGHTNINGPAGES);
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(OrgCheckDatasetAliases.CUSTOMFIELDS);
 
         // Checking data
         if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
         if (!object) throw new Error(`Data from dataset alias 'OBJECT' was undefined.`);
         if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
         if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
@@ -64,6 +68,12 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
             },
             (id) => apexTriggers.has(id)
         );
+        object.flexiPages = [];
+        await OrgCheckProcessor.forEach(pages, (page) => {
+            if (page.objectId === object.id) {
+                object.flexiPages.push(page);
+            }
+        });
         object.customFieldRefs = await OrgCheckProcessor.map(
             object.customFieldIds,
             (id) => { 

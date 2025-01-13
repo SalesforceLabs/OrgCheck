@@ -1,4 +1,5 @@
 import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
+import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of a Lightning Page in Org Check
@@ -19,12 +20,7 @@ export class SFDC_LightningPage extends OrgCheckDataWithDependencies {
      */
     name;
     
-    /**
-     * @description API Version (as a number) set in the metadata for this item.
-     * @type {number}
-     * @public
-     */
-    apiVersion;
+    type;
     
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
@@ -47,7 +43,20 @@ export class SFDC_LightningPage extends OrgCheckDataWithDependencies {
      */
     lastModifiedDate;
 
+    /**
+     * @description Identifier of the related object for this page (if any)
+     * @type {string}
+     * @public
+     */
+    objectId; 
     
+    /**
+     * @description Reference of the related object for this page (if any)
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
+
     /**
      * @description Full description of that item
      * @type {string}

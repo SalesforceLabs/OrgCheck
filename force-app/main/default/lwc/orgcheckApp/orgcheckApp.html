@@ -239,7 +239,24 @@
                                     rows={objectInformationData.layouts}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
-                    
+
+                            <!-- FLEXIPAGES / LIGHTNING PAGES SECTION -->
+                            <template lwc:if={objectInformationData.flexiPages.length}>
+                                <h1 class="slds-text-heading_medium">Lightning Pages</h1>
+                                <c-orgcheck-extended-datatable
+                                    show-row-number-column
+                                    dont-use-all-space
+                                    onviewscore={handleViewScore}
+                                    show-search
+                                    show-statistics
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                    columns={flexiPagesInObjectTableColumns}
+                                    rows={objectInformationData.flexiPages}></c-orgcheck-extended-datatable>
+                                <br /><br />
+                            </template>
+
                             <!-- LIMITS SECTION -->
                             <template lwc:if={objectInformationData.limits.length}>
                                 <h1 class="slds-text-heading_medium">Limits</h1>
@@ -743,8 +760,8 @@
                             is-infinite-scrolling
                             infinite-scrolling-initial-nb-rows=25
                             infinite-scrolling-additional-nb-rows=100
-                            columns={lightningPagesTableColumns}
-                            rows={lightningPagesTableData}
+                            columns={flexiPagesTableColumns}
+                            rows={flexiPagesTableData}
                             show-export-button
                             export-basename="LightningPages"></c-orgcheck-extended-datatable>
                     </lightning-tab>
