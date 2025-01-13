@@ -21,7 +21,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
         logger?.log(`Querying Tooling API about FlexiPage in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, MasterLabel, EntityDefinition.DeveloperName, ' +
+            string: 'SELECT Id, MasterLabel, EntityDefinition.QualifiedApiName, ' +
                         'Type, NamespacePrefix, Description, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM FlexiPage ' +
@@ -51,11 +51,12 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
                 properties: {
                     id: id,
                     name: record.MasterLabel,
-                    apiVersion: record.ApiVersion,
+                    type: record.Type,
                     package: (record.NamespacePrefix || ''),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     description: record.Description,
+                    objectId: (record.EntityDefinition?.QualifiedApiName || ''),
                     url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.LIGHTNING_PAGE)
                 }, 
                 dependencies: {

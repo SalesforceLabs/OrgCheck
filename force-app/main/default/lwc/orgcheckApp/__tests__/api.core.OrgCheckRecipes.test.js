@@ -240,7 +240,7 @@ describe('api.core.OrgCheckRecipes', () => {
       const datasets = recipe.extract(logger);
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
-      expect(datasets.length).toBe(1);
+      expect(datasets.length).toBe(2);
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
@@ -280,7 +280,7 @@ describe('api.core.OrgCheckRecipes', () => {
       const datasets = recipe.extract(logger, 'Account');
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
-      expect(datasets.length).toBe(4);
+      expect(datasets.length).toBe(5);
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());

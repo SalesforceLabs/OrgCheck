@@ -1,5 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+// @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckExportButton extends LightningElement {
@@ -17,7 +18,7 @@ export default class OrgcheckExportButton extends LightningElement {
                 .then(() => {
                     this.#apiInitialized = true;
                     this.buttonDisabled = false;
-                    // eslint-disable-next-line no-undef
+                    // @ts-ignore
                     this.#api = XLSX; 
                 })
                 .catch((e) => {

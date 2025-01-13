@@ -359,6 +359,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                 nbRecords += records.length;
             } catch (error) {
                 errorEntities.push(entityName);
+                throw error;
             } finally {
                 const index = pendingEntities.indexOf(entityName);
                 if (index > -1) pendingEntities.splice(index, 1);
