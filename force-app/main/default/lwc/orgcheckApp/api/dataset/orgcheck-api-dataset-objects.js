@@ -45,7 +45,7 @@ export class OrgCheckDatasetObjects extends OrgCheckDataset {
         ]);
 
         const objectsDescription = results[0]; 
-        const entities = results[1][0].records;
+        const entities = results[1][0];
         const entitiesByName = {};
         const qualifiedApiNames = await OrgCheckProcessor.map(
             entities, 

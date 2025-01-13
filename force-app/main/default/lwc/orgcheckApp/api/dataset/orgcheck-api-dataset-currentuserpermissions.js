@@ -25,7 +25,7 @@ export class OrgCheckDatasetCurrentUserPermissions extends OrgCheckDataset {
                     'FROM UserPermissionAccess '+
                     'LIMIT 1'
         }], logger);
-        const permissions = results[0].records[0];
+        const permissions = results[0][0];
         logger?.log(`Parsing the results...`);            
 
         // Return data as map

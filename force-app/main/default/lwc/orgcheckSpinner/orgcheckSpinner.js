@@ -101,7 +101,7 @@ export default class OrgCheckSpinner extends LightningElement {
    * @param {string} message - The message associated with starting the section.
    */
   @api sectionStarts(sectionName, message) {
-    this.setSection(sectionName, message, SectionStatus.STARTED);
+    this._setSection(sectionName, message, SectionStatus.STARTED);
   }
 
   /**
@@ -110,7 +110,7 @@ export default class OrgCheckSpinner extends LightningElement {
    * @param {string} message - The message to display for the continuation.
    */
   @api sectionContinues(sectionName, message) {
-    this.setSection(sectionName, message, SectionStatus.IN_PROGRESS);
+    this._setSection(sectionName, message, SectionStatus.IN_PROGRESS);
   }
 
   /**
@@ -119,7 +119,7 @@ export default class OrgCheckSpinner extends LightningElement {
    * @param {string} message - An optional message to provide additional context.
    */
   @api sectionEnded(sectionName, message) {
-    this.setSection(sectionName, message, SectionStatus.ENDED);
+    this._setSection(sectionName, message, SectionStatus.ENDED);
   }
 
   /**
@@ -132,9 +132,9 @@ export default class OrgCheckSpinner extends LightningElement {
     this.hadError = true;
     if (error) {
       if (typeof error === 'string') {
-        this.setSection(sectionName, error, SectionStatus.FAILED);
+        this._setSection(sectionName, error, SectionStatus.FAILED);
       } else {
-        this.setSection(sectionName, `${error.name}: ${error.message}`, SectionStatus.FAILED, error);
+        this._setSection(sectionName, `${error.name}: ${error.message}`, SectionStatus.FAILED, error);
         console.error(
           `name of the section: ${sectionName}`,
           `name of the error: ${error?.name}`,
@@ -145,7 +145,7 @@ export default class OrgCheckSpinner extends LightningElement {
         );
       }
     } else {
-      this.setSection(sectionName, 'The error was undefined...', SectionStatus.FAILED);
+      this._setSection(sectionName, 'The error was undefined...', SectionStatus.FAILED);
     }
   }
 
@@ -274,7 +274,7 @@ export default class OrgCheckSpinner extends LightningElement {
    * @param {any} error - Any error associated with the section.
    * @private
    */
-  setSection(sectionName, message, status, error) {
+  _setSection(sectionName, message, status, error) {
     
     /** @type {Section} */
     let section = {
@@ -294,7 +294,7 @@ export default class OrgCheckSpinner extends LightningElement {
         section.markerClasses += ' progress-marker-started';
         break;
       case SectionStatus.ENDED:
-        section.liClasses += ' slds-is-completed';
+        section.liClasses += ' slds-is-completed li-ended';
         section.markerClasses += ' progress-marker-ended';
         break;
       case SectionStatus.FAILED:

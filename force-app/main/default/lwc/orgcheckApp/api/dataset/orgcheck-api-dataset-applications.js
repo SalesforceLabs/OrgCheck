@@ -26,7 +26,7 @@ export class OrgCheckDatasetApplications extends OrgCheckDataset {
 
         // Init the factory and records
         const applicationDataFactory = dataFactory.getInstance(SFDC_Application);
-        const applicationRecords = results[0].records;
+        const applicationRecords = results[0];
 
         // Create the map
         logger?.log(`Parsing ${applicationRecords.length} applications...`);

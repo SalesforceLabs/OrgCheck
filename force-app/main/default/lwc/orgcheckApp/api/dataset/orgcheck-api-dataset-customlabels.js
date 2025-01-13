@@ -29,7 +29,7 @@ export class OrgCheckDatasetCustomLabels extends OrgCheckDataset {
 
         // Init the factory and records
         const labelDataFactory = dataFactory.getInstance(SFDC_CustomLabel);
-        const customLabelRecords = results[0].records;
+        const customLabelRecords = results[0];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);

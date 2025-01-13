@@ -34,7 +34,7 @@ export class OrgCheckDatasetProfileRestrictions extends OrgCheckDataset {
         }], logger);
             
         // List of profile ids
-        const profileIdRecords = results[0].records;
+        const profileIdRecords = results[0];
         logger?.log(`Parsing ${profileIdRecords.length} Profiles...`);
         const profileIds = await OrgCheckProcessor.map(profileIdRecords, (record) => record.Id);
 

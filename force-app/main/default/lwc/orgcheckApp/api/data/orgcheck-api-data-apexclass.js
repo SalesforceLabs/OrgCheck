@@ -1,4 +1,35 @@
-import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
+import { OrgCheckDataWithDependencies, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
+
+export class SFDC_ApexTestMethodResult extends OrgCheckDataWithoutScoring {
+
+    /**
+     * @description Name of this method
+     * @type {string}
+     * @public
+     */
+    methodName;
+
+    /**
+     * @description Is this method was successful or failed
+     * @type {boolean}
+     * @public
+     */
+    isSuccessful;
+
+    /**
+     * @description Runtime of that method whatever its result
+     * @type {number}
+     * @public
+     */
+    runtime;
+
+    /**
+     * @description If the method failed this is the error stack trace
+     * @type {string}
+     * @public
+     */
+    stacktrace;
+}
 
 /**
  * @description Representation of an Apex Class in Org Check
@@ -90,13 +121,6 @@ export class SFDC_ApexClass extends OrgCheckDataWithDependencies {
     isInterface;
 
     /**
-     * @description Is the sharing model specified?
-     * @type {boolean}
-     * @public
-     */
-    isSharingMissing;
-
-    /**
      * @description Number of inner classs in this class
      * @type {number}
      * @public
@@ -132,11 +156,39 @@ export class SFDC_ApexClass extends OrgCheckDataWithDependencies {
     extends;
 
     /**
-     * @description Number of methods in this class
+     * @description Number of methods in this class (Note: if the class is a test, this not only the testing methods, this is ALL the methods)
      * @type {number}
      * @public
      */
     methodsCount;
+
+    /**
+     * @description List of test methods that were OK in the last run results
+     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @public
+     */
+    testPassedMethods;
+
+    /**
+     * @description List of test methods that were OK in the last run results
+     * @type {Array<SFDC_ApexTestMethodResult>}
+     * @public
+     */
+    testFailedMethods;
+
+    /**
+     * @description Date/Time when this test class was last run. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastTestRunDate;
+
+    /**
+     * @description Entire time (at the class level) it took to run all test methods (whatever their result) during the last run.
+     * @type {number}
+     * @public
+     */
+    testMethodsRunTime;
 
     /**
      * @description List of annotations that this class uses

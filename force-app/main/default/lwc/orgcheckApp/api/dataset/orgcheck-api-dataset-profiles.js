@@ -34,7 +34,7 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
         const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
 
         // Create the map
-        const profileRecords = results[0].records;
+        const profileRecords = results[0];
         logger?.log(`Parsing ${profileRecords.length} profiles...`);
         const profiles = new Map(await OrgCheckProcessor.map(profileRecords, (record) => {
 

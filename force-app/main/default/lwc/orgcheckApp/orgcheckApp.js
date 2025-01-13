@@ -176,7 +176,7 @@ export default class OrgCheckApp extends LightningElement {
      */
     async handleFiltersRefreshed() {
         this._doNotCloseSpinnerYet = true;
-        await this._loadFilters();
+        await this._loadFilters(true);
         this._doNotCloseSpinnerYet = false;
     }
 
@@ -381,9 +381,9 @@ export default class OrgCheckApp extends LightningElement {
      */ 
     async _load() {
 
-        const LOG_SECTION = 'LOAD API';
+        const MAIN_LOG_SECTION = 'LOAD APIS';
         this._spinner.open();
-        this._spinner.sectionStarts(LOG_SECTION, "C'est parti !");
+        this._spinner.sectionStarts(MAIN_LOG_SECTION, "C'est parti !");
         this._doNotCloseSpinnerYet = true;
 
         try {
@@ -392,14 +392,14 @@ export default class OrgCheckApp extends LightningElement {
             if (!this._api) {
 
                 // Load JS dependencies
-                this._spinner.sectionContinues(LOG_SECTION, 'Loading JsForce and FFLate libraries...')
+                this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Loading JsForce and FFLate libraries...')
                 await Promise.all([
                     loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
                     loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
                 ]);
 
                 // Create the Org Check API
-                this._spinner.sectionContinues(LOG_SECTION, 'Loading Org Check library...')
+                this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Loading Org Check library...')
                 this._api = new OrgCheckAPI(
                     // @ts-ignore
                     jsforce,
@@ -423,7 +423,7 @@ export default class OrgCheckApp extends LightningElement {
             }
 
             // Check if the terms are accepted and thus we can continue to use this org
-            this._spinner.sectionContinues(LOG_SECTION, 'Checking if we can use the org according to the terms...')
+            this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Checking if we can use the org according to the terms...')
             if (await this._api.checkUsageTerms()) {
                 this.useOrgCheckInThisOrgNeedConfirmation = false;
                 this.useOrgCheckInThisOrgConfirmed = true;
@@ -431,11 +431,18 @@ export default class OrgCheckApp extends LightningElement {
                 this.useOrgCheckInThisOrgNeedConfirmation = true;
                 this.useOrgCheckInThisOrgConfirmed = false;
             }
+            this._spinner.sectionEnded(MAIN_LOG_SECTION, 'All set!');
     
             if (this.useOrgCheckInThisOrgConfirmed === true) {
 
+                // Check basic permission
+                this._spinner.sectionContinues('Current user check', 'Checking if current user has enough permission...')
+                await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
+                this._spinner.sectionEnded('Current user check');
+
                 // Information about the org
-                this._spinner.sectionContinues(LOG_SECTION, 'Information about the org...');
+                const ORG_LOG_SECTION = 'ORGANIZATION PANEL';
+                this._spinner.sectionContinues(ORG_LOG_SECTION, 'Information about the org...');
                 const orgInfo = await this._api.getOrganizationInformation();
                 this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
                 this.orgType = orgInfo.type;
@@ -443,36 +450,34 @@ export default class OrgCheckApp extends LightningElement {
                 if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
                 else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
                 else this.themeForOrgType = 'slds-theme_success';
+                this._spinner.sectionEnded(ORG_LOG_SECTION);
         
-                // Check basic permission
-                this._spinner.sectionContinues(LOG_SECTION, 'Checking if current user has enough permission...')
-                await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
-
                 // Data for the filters
-                this._spinner.sectionContinues(LOG_SECTION, 'Load the filters...');
                 await this._loadFilters();
-                this._spinner.sectionContinues(LOG_SECTION, 'Synching the filters with the current tab...');
+
+                // Update the current tab if needed
                 await this._updateCurrentTab();
             }
 
             // FINALLY!
             this._doNotCloseSpinnerYet = false;
-            this._spinner.sectionEnded(LOG_SECTION, 'All set!');
             this._spinner.close();
     
         } catch(error) {
             this._spinner.canBeClosed();
-            this._spinner.sectionFailed(LOG_SECTION, error);
+            this._spinner.sectionFailed(MAIN_LOG_SECTION, error);
         }
     }
 
-    async _loadFilters() {
+    async _loadFilters(forceReload=false) {
         const LOG_SECTION = 'GLOBAL FILTERS';
         this._spinner.open();
         this._spinner.sectionStarts(LOG_SECTION, 'Hide the filter panel...');
         this._filters.hide();
-        this._spinner.sectionContinues(LOG_SECTION, 'Remove data from cache (if any)...');
-        this._api.removeAllPackagesTypesAndObjectsFromCache();
+        if (forceReload === true) {
+            this._spinner.sectionContinues(LOG_SECTION, 'Remove data from cache (if any)...');
+            this._api.removeAllPackagesTypesAndObjectsFromCache();
+        }
         this._spinner.sectionContinues(LOG_SECTION, 'Get packages, types and objects from the org...');
         const filtersData = await this._api.getPackagesTypesAndObjects('*', '*');
         this._spinner.sectionContinues(LOG_SECTION, 'Loading data in the drop boxes...');
@@ -996,20 +1001,24 @@ export default class OrgCheckApp extends LightningElement {
     apexTriggersTableData;
 
     apexTestsTableColumns = [
-        { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
-        { label: 'API Version',   type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-        { label: 'Package',       type: 'text',             data: { value: 'package' }},
-        { label: 'Size',          type: 'numeric',          data: { value: 'length' }},
-        { label: 'Nb Asserts',    type: 'numeric',          data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
-        { label: 'Methods',       type: 'numeric',          data: { value: 'methodsCount' }},
-        { label: 'Inner Classes', type: 'numeric',          data: { value: 'innerClassesCount' }},
-        { label: 'Sharing',       type: 'text',             data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
-        { label: 'Covering',      type: 'ids',              data: { ref: 'relatedClassRefs', value: 'name', url: 'url' }},
-        { label: 'Using',         type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
-        { label: 'Dependencies',  type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
-        { label: 'Created date',  type: 'dateTime',         data: { value: 'createdDate' }},
-        { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
+        { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'API Version',     type: 'numeric',          data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+        { label: 'Package',         type: 'text',             data: { value: 'package' }},
+        { label: 'Size',            type: 'numeric',          data: { value: 'length' }},
+        { label: 'Nb Asserts',      type: 'numeric',          data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
+        { label: 'Methods',         type: 'numeric',          data: { value: 'methodsCount' }},
+        { label: 'Latest Run Date', type: 'dateTime',         data: { value: 'lastTestRunDate' }},
+        { label: 'Runtime',         type: 'numeric',          data: { value: 'testMethodsRunTime' }},
+        { label: 'Passed methods',  type: 'objects',          data: { ref: 'testPassedMethods' }, modifier: { template: '{methodName} ({runtime} ms)' }},
+        { label: 'Failed methods',  type: 'objects',          data: { ref: 'testFailedMethods' }, modifier: { template: '{methodName} ({stacktrace})' }},
+        { label: 'Inner Classes',   type: 'numeric',          data: { value: 'innerClassesCount' }},
+        { label: 'Sharing',         type: 'text',             data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+        { label: 'Covering',        type: 'ids',              data: { ref: 'relatedClassRefs', value: 'name', url: 'url' }},
+        { label: 'Using',           type: 'numeric',          data: { ref: 'dependencies.using', value: 'length' }},
+        { label: 'Dependencies',    type: 'dependencyViewer', data: { value: 'dependencies', id: 'id', name: 'name' }},
+        { label: 'Created date',    type: 'dateTime',         data: { value: 'createdDate' }},
+        { label: 'Modified date',   type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
     
     apexTestsTableData;

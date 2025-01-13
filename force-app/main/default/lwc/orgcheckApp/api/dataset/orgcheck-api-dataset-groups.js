@@ -29,7 +29,7 @@ export class OrgCheckDatasetGroups extends OrgCheckDataset {
         const groupDataFactory = dataFactory.getInstance(SFDC_Group);
 
         // Create the map
-        const groupRecords = results[0].records;
+        const groupRecords = results[0];
         logger?.log(`Parsing ${groupRecords.length} groups...`);
         const groups = new Map(await OrgCheckProcessor.map(groupRecords, async (record) => {
         

@@ -30,7 +30,7 @@ export class OrgCheckDatasetLightningPages extends OrgCheckDataset {
 
         // Init the factory and records
         const pageDataFactory = dataFactory.getInstance(SFDC_LightningPage);
-        const pageRecords = results[0].records;
+        const pageRecords = results[0];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);

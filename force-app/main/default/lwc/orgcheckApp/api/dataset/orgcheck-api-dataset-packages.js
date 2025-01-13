@@ -30,7 +30,7 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         const packageDataFactory = dataFactory.getInstance(SFDC_Package);
 
         // Create the map
-        const packageRecords = results[0].records;
+        const packageRecords = results[0];
         logger?.log(`Parsing ${packageRecords.length} installed packages...`);
         const packages = new Map(await OrgCheckProcessor.map(packageRecords, (record) => {
 
@@ -52,7 +52,7 @@ export class OrgCheckDatasetPackages extends OrgCheckDataset {
         }));
 
         // Add potential package of the organization if it is set up
-        const localPackage = results[1].records[0].NamespacePrefix;
+        const localPackage = results[1][0].NamespacePrefix;
         if (localPackage) {
             logger?.log(`Adding your local package ${localPackage}...`);
             packages.set(localPackage, packageDataFactory.create({

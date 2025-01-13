@@ -29,7 +29,7 @@ export class OrgCheckDatasetVisualForcePages extends OrgCheckDataset {
 
         // Init the factory and records
         const pageDataFactory = dataFactory.getInstance(SFDC_VisualForcePage);
-        const pageRecords = results[0].records;
+        const pageRecords = results[0];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords.length} visualforce pages...`);

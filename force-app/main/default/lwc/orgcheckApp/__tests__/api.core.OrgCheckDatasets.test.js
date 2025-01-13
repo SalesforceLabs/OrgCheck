@@ -62,7 +62,7 @@ class SfdcManagerMock extends OrgCheckSalesforceManagerIntf {
   async soqlQuery(queries, logger) { 
     return queries.map((query) => { 
       const key = Object.keys(this.#soqlQueryResponses).find((p) => query?.string?.indexOf(p) !== -1);
-      return { records: (key ? this.#soqlQueryResponses[key] : []) }; 
+      return (key ? this.#soqlQueryResponses[key] : []); 
     });
   }
 

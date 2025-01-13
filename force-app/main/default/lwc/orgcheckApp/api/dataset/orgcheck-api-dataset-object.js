@@ -69,7 +69,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
 
         // the second promise was the soql query on EntityDefinition
         // so we get the record of that query and map it to the previous object.
-        const entity = results[1][0].records[0];
+        const entity = results[1][0][0];
         if (!entity) { // If that entity was not found in the tooling API
             throw new TypeError(`No entity definition record found for: ${fullObjectApiName}`)
         }

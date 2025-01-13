@@ -34,7 +34,7 @@ export class OrgCheckDatasetUsers extends OrgCheckDataset {
         const userDataFactory = dataFactory.getInstance(SFDC_User);
 
         // Create the map
-        const userRecords = results[0].records;
+        const userRecords = results[0];
         logger?.log(`Parsing ${userRecords.length} users...`);
         const users = new Map(await OrgCheckProcessor.map(userRecords, async (record) => {
         

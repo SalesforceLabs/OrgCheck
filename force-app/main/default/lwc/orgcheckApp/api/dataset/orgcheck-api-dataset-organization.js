@@ -28,7 +28,9 @@ export class OrgCheckDatasetOrganization extends OrgCheckDataset {
                     'FROM Organization ' +
                     'LIMIT 1'
         }], logger);
-        const record = results[0].records[0];
+        logger?.log(`Received result=${JSON.stringify(results)}`);
+        logger?.log(`We need to get the first result and from there the first record...`);
+        const record = results[0][0];
         logger?.log(`Parsing the result...`);
 
         // Init the factory and records

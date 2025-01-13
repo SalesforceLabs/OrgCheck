@@ -29,7 +29,7 @@ export class OrgCheckDatasetLightningAuraComponents extends OrgCheckDataset {
 
         // Init the factory and records
         const componentDataFactory = dataFactory.getInstance(SFDC_LightningAuraComponent);
-        const componentRecords = results[0].records;
+        const componentRecords = results[0];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords.length} lightning aura components...`);

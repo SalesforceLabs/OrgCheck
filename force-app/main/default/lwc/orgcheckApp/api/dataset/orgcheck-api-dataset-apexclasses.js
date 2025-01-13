@@ -4,7 +4,7 @@ import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { OrgCheckSalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { OrgCheckSalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
-import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
+import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from '../data/orgcheck-api-data-apexclass';
 
 const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
 const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
@@ -44,15 +44,25 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
         }, {
             string: 'SELECT ApexClassId ' +
                     'FROM AsyncApexJob ' +
-                    'WHERE JobType = \'ScheduledApex\' '
+                    `WHERE JobType = 'ScheduledApex' `
+        }, {
+            string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
+                        'RunTime, Outcome, StackTrace '+
+                    'FROM ApexTestResult '+
+                    `WHERE ApexTestRunResult.Status = 'Completed' `+
+                    `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `+
+                    'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
+                tooling: true
         }], logger);
 
         // Init the factory and records and records
         const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
-        const apexClassRecords = results[0].records;
-        const apexCodeCoverageRecords = results[1].records;
-        const apexCodeCoverageAggRecords = results[2].records;
-        const asyncApexJobRecords = results[3].records;
+        const apexTestResultDataFactory = dataFactory.getInstance(SFDC_ApexTestMethodResult);
+        const apexClassRecords = results[0];
+        const apexCodeCoverageRecords = results[1];
+        const apexCodeCoverageAggRecords = results[2];
+        const asyncApexJobRecords = results[3];
+        const apexTestResultRecords = results[4];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
@@ -82,7 +92,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                     isInterface: false,
                     isSchedulable: false,
                     isScheduled: false,
-                    isSharingMissing: false,
                     length: record.LengthWithoutComments,
                     sourceCode: record.Body,
                     needsRecompilation: (!record.SymbolTable ? true : false),
@@ -140,9 +149,6 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
 
             // Refine sharing spec
             if (apexClass.isEnum === true || apexClass.isInterface === true) apexClass.specifiedSharing = 'Not applicable';
-            if (apexClass.isTest === false && apexClass.isClass === true && !apexClass.specifiedSharing) {
-                apexClass.isSharingMissing = true;
-            }
 
             // Add it to the map  
             return [ apexClass.id, apexClass ];
@@ -202,6 +208,39 @@ export class OrgCheckDatasetApexClasses extends OrgCheckDataset {
                 if (apexClasses.has(id)) { // make sure the id is an existing class!
                     // set the scheduled flag to true
                     apexClasses.get(id).isScheduled = true;
+                }
+            }
+        );
+
+        // Part 4- add if class is scheduled
+        logger?.log(`Parsing ${apexTestResultRecords.length} test results...`);
+        await OrgCheckProcessor.forEach(
+            apexTestResultRecords,
+            (record) => {
+                // Get the ID15 of the related test class
+                const id = sfdcManager.caseSafeId(record.ApexClassId);
+                if (apexClasses.has(id)) { // make sure the id is an existing class
+                    const tc = apexClasses.get(id);
+                    if (tc.isTest === true) { // make sure this is a Test class!
+                        if (!tc.lastTestRunDate) {
+                            tc.lastTestRunDate = record.ApexTestRunResult?.CreatedDate;
+                            tc.testMethodsRunTime = 0;
+                            tc.testPassedMethods = [];
+                            tc.testFailedMethods = [];
+                        }
+                        if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
+                            const result = apexTestResultDataFactory.create({ 
+                                properties: {
+                                    methodName: record.MethodName,
+                                    isSuccessful: record.Outcome === 'Pass',
+                                    runtime: record.RunTime,
+                                    stacktrace: record.StackTrace
+                                }
+                            });
+                            tc.testMethodsRunTime += result.runtime;
+                            (result.isSuccessful ? tc.testPassedMethods : tc.testFailedMethods).push(result);
+                        }
+                    }
                 }
             }
         );

@@ -35,8 +35,8 @@ export class OrgCheckDatasetFlows extends OrgCheckDataset {
         // Init the factories
         const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
         const flowVersionDataFactory = dataFactory.getInstance(SFDC_FlowVersion);
-        const flowDefRecords = results[0].records;
-        const flowRecords = results[1].records;
+        const flowDefRecords = results[0];
+        const flowRecords = results[1];
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);

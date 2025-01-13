@@ -44,7 +44,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
 
         // Create the map
-        const permissionSetRecords = results[0].records;
+        const permissionSetRecords = results[0];
         logger?.log(`Parsing ${permissionSetRecords.length} permission sets...`);
         const permissionSets = new Map(await OrgCheckProcessor.map(permissionSetRecords, (record) => {
 
@@ -85,7 +85,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             return [ permissionSet.id, permissionSet ];
         }));
 
-        const permissionSetAssignmentRecords = results[1].records;
+        const permissionSetAssignmentRecords = results[1];
         logger?.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
         const assigneeProfileIdsByPermSetId = new Map();
         await OrgCheckProcessor.forEach(permissionSetAssignmentRecords, (record) => {
@@ -105,7 +105,7 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
             permissionSets.get(permissionSetId).assigneeProfileIds = Array.from(assigneeProfileIds);
         });
 
-        const permissionSetGroupRecords = results[2].records;
+        const permissionSetGroupRecords = results[2];
         logger?.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
         await OrgCheckProcessor.forEach(permissionSetGroupRecords, (record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.Id);

@@ -11,6 +11,7 @@ export class OrgCheckSalesforceQueryRequest {
      * @description SOQL query string
      * @type {string}
      * @public
+     * @readonly
      */
     string;
     
@@ -66,7 +67,7 @@ export class OrgCheckSalesforceManagerIntf {
 
     /**
      * @description Numerical representation of the Salesforce API used by the manager
-     * @type {number}
+     * @returns {number}
      * @public
      */
     get apiVersion() { throw new Error('Not implemented'); }
@@ -111,7 +112,7 @@ export class OrgCheckSalesforceManagerIntf {
      * @param {Array<OrgCheckSalesforceQueryRequest | any>} queries 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @async
-     * @returns {Promise<Array<any>>}
+     * @returns {Promise<Array<Array<any>>>}
      * @public
      */
     async soqlQuery(queries, logger) { throw new Error('Not implemented'); }

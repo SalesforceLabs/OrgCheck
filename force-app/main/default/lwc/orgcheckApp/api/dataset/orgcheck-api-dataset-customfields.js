@@ -32,7 +32,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
 
         // Init the factory and records
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
-        const customFieldRecords = results[0].records;
+        const customFieldRecords = results[0];
 
         logger?.log(`Parsing ${customFieldRecords.length} custom fields...`);        
         

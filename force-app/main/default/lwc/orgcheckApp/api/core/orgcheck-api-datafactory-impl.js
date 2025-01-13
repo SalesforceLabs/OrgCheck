@@ -160,7 +160,7 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
             }, {
                 id: counter++,
                 description: 'No explicit sharing in apex class',
-                formula: (/** @type {SFDC_ApexClass} */ d) => d.isSharingMissing === true,
+                formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === false && d.isClass === true && !d.specifiedSharing,
                 errorMessage: 'This Apex Class does not specify a sharing model. Best practices force you to specify with, without or inherit sharing to better control the visibility of the data you process in Apex.',
                 badField: 'specifiedSharing',
                 applicable: [ SFDC_ApexClass ]
@@ -191,6 +191,13 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
                 formula: (/** @type {SFDC_ApexClass} */ d) => d.coverage > 0 && d.coverage < 0.75,
                 errorMessage: 'This Apex Class does not have enough code coverage (less than 75% of lines are covered by successful unit tests). Maybe you ran not all the unit tests to cover this class entirely? If you did, then consider augmenting that coverage with new test methods.',
                 badField: 'coverage',
+                applicable: [ SFDC_ApexClass ]
+            }, {
+                id: counter++,
+                description: 'At least one testing method failed',
+                formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === true && d.testFailedMethods && d.testFailedMethods.length > 0,
+                errorMessage: 'This Apex Test Class has at least one failed method.',
+                badField: 'testFailedMethods',
                 applicable: [ SFDC_ApexClass ]
             }, {
                 id: counter++,

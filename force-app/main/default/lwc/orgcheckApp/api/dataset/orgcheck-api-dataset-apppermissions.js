@@ -30,8 +30,8 @@ export class OrgCheckDatasetAppPermissions extends OrgCheckDataset {
 
         // Init the factory and records
         const appPermissionDataFactory = dataFactory.getInstance(SFDC_AppPermission);
-        const appMenuItems = results[0].records;
-        const setupEntityAccesses = results[1].records;
+        const appMenuItems = results[0];
+        const setupEntityAccesses = results[1];
 
         // Create a map of the app menu items
         logger?.log(`Parsing ${appMenuItems.length} Application Menu Items...`);

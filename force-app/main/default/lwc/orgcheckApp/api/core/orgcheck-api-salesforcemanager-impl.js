@@ -7,29 +7,47 @@ import { OrgCheckSalesforceManagerIntf, OrgCheckSalesforceMetadataRequest, OrgCh
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
+ * @private
  */
 const MAX_IDS_IN_DAPI_REQUEST_SIZE = 100;
 
 /**
  * @description When an SObject does not support QueryMore we use an alternative that will gather a maximum number of records
  *                  Where the salesforce maximum is 2000 for EntityDefinition
+ * @private
  */
 const MAX_NOQUERYMORE_BATCH_SIZE = 2000;
 
 /**
+ * @description Maximum batch size when calling the Query api (saleforce can choose to use less). This is only up to the 
+ *                  server to decide how many records it returns
+ * @private
+ */
+const MAX_STANDARDSOQL_BATCH_SIZE = 2000;
+
+/**
+ * @description Maximum size JsForce will query/retrieve data from the Query api.
+ * @private
+ */
+const MAX_STANDARDSOQL_GLOBAL_SIZE = 1000000000000;
+
+/**
  * @description Maximum number of members we want per type/request 
+ * @private
  */
 const MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE = 10;
 
 /**
  * @description Maximum number of sub queries we want to have in a single composite request
  *              Where the salesforce maximum is 25 BUT ony 5 can be query or sobject operations
+ * @private
  * @see https://developer.salesforce.com/docs/atlas.en-us.232.0.api_rest.meta/api_rest/resources_composite_composite.htm
  */
 const MAX_COMPOSITE_REQUEST_SIZE = 5;
 
 /** 
  * @description Salesforce APIs Manager Implementation with JsForce Connection
+ * @public
  */
 export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
 
@@ -58,6 +76,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @description Construct the connection manager from a ConnectionFactory (like JSForce) and a VFP accesstoken
      * @param {any} jsConnectionFactory 
      * @param {string} accessToken 
+     * @public
      */
     constructor(jsConnectionFactory, accessToken) {
 
@@ -92,7 +111,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
 
     /**
      * @see OrgCheckSalesforceManagerIntf.apiVersion
-     * @type {number}
+     * @returns {number}
+     * @public
      */
     get apiVersion() {
         return this._apiVersion;
@@ -102,6 +122,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @see OrgCheckSalesforceManagerIntf.caseSafeId
      * @param {string} id 
      * @returns {string}
+     * @public
      */
     caseSafeId(id) {
         if (id && id.length === 18) return id.substr(0, 15);
@@ -115,6 +136,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {string} [parentId] In case the template URL has a reference to the parent, this optional property will contain the parent identification.
      * @param {string} [parentType] In case the template URL has a reference to the parent, this optional property will contain the parent type.
      * @returns {string} 
+     * @public
      */
     setupUrl(id, type, parentId, parentType) {
         // If the salesforce identifier is not set, just return a blank url!
@@ -193,6 +215,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {string} apiName 
      * @param {boolean} isCustomSetting 
      * @returns {string}
+     * @public
      */
     getObjectType(apiName, isCustomSetting) {
         if (isCustomSetting === true) return OBJECTTYPE_ID_CUSTOM_SETTING;
@@ -208,110 +231,148 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
     /**
      * @see OrgCheckSalesforceManagerIntf.dailyApiRequestLimitInformation
      * @returns {OrgCheckSalesforceUsageInformation} Information of the current usage of the Daily Request API
+     * @public
      */
     get dailyApiRequestLimitInformation() {
         return this._watchDog.dailyApiRequestLimitInformation;
     }
 
     /**
+     * @param {boolean} useTooling Use the tooling or not
+     * @param {string} query SOQL query string
+     * @param {Array<string>} byPasses List of error codes to by-pass
+     * @returns {Promise<Array<any>>}
+     * @async
+     * @private
+     */
+    async _standardSOQLQuery(useTooling, query, byPasses) {
+        // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
+        const conn = useTooling === true ? this._connection.tooling : this._connection;
+        try {
+            // Let's start to check if we are 'allowed' to use the Salesforce API...
+            this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
+            // Run this query
+            const results = await conn.query(query, { 
+                autoFetch: true, 
+                maxFetch: MAX_STANDARDSOQL_GLOBAL_SIZE,
+                headers: { 'Sforce-Query-Options': `batchSize=${MAX_STANDARDSOQL_BATCH_SIZE}` }
+            });
+            // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+            this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
+            // Return all the records
+            return results.records;
+        } catch (error) {
+            if (byPasses && byPasses.includes && byPasses.includes(error.errorCode)) {
+                // by pass this error! and return an empty array
+                return [];
+            } else {
+                // Throw the error
+                throw Object.assign(error, { 
+                    context: { 
+                        when: 'While running a SOQL query with the standard queryMore', 
+                        what: query 
+                }});
+            }
+        }
+    }
+
+    /**
+     * @param {boolean} useTooling Use the tooling or not
+     * @param {string} query SOQL query string
+     * @param {string} fieldId Unique field name to use for the custom QueryMore (Id by default)
+     * @returns {Promise<Array<any>>}
+     * @async
+     * @private
+     */
+    async _customSOQLQuery(useTooling, query, fieldId) {
+        // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
+        const conn = useTooling === true ? this._connection.tooling : this._connection;
+        // the records to return
+        const allRecords = [];
+        // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
+        const doNextQuery = async (/** @type {string} */ startingId) => {
+            const realQuery = `${query} AND ${fieldId}>'${startingId}' ORDER BY ${fieldId} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+            // Let's start to check if we are 'allowed' to use the Salesforce API...
+            this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
+            // Deactivate AutoFetch to avoid the automatic call to queryMore by JsForce!
+            const results = await conn.query(realQuery, { 
+                autoFetch: false,
+                headers: { 'Sforce-Query-Options': `batchSize=${MAX_NOQUERYMORE_BATCH_SIZE}` }
+            });
+            // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+            this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
+            // Adding records to the global array.
+            allRecords.push(... results.records);
+            // Check if this was the last batch?
+            if (results.records.length >= MAX_NOQUERYMORE_BATCH_SIZE) { // this was not yet the last batch
+                // Update the last ID to start the next batch
+                const newStartingId = allRecords[allRecords.length-1][fieldId];
+                // call the next Batch
+                await doNextQuery(newStartingId);
+            }
+        }
+        try {
+            // Call the first time with a fake Id that will always be first
+            await doNextQuery('000000000000000000'); // and then the method will chain next calls
+            // return the records
+            return allRecords;
+        } catch (error) {
+            // Throw the error
+            throw Object.assign(error, { 
+                context: { 
+                    when: 'While running a SOQL query with the custom queryMore', 
+                    what: query 
+            }});
+        }
+    }
+
+    /**
      * @see OrgCheckSalesforceManagerIntf.soqlQuery
      * @param {Array<OrgCheckSalesforceQueryRequest>} queries 
      * @param {OrgCheckSimpleLoggerIntf} logger
-     * @returns {Promise<Array<any>>}
+     * @returns {Promise<Array<Array<any>>>}
+     * @public
      */
     async soqlQuery(queries, logger) {
-        // Let's start to check if we are 'allowed' to use the Salesforce API...
-        this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Preparing ${queries.length} SOQL ${queries.length>1?'queries':'query'}...`);
-        // Here some statisitcs to monitor the progress in the logs
-        let nbQueriesDone = 0, nbQueriesByPassed = 0, nbQueriesError = 0, nbQueryMore = 0, nbQueriesPending = queries.length;
+        let nbRecords = 0;
+        const pendingEntities = [], doneEntities = [], errorEntities = [];
         // We'll run the queries in parallel, each query will be mapped as a promise and ran with Promise.all()
-        return Promise.all(queries.map((query) => {
-            // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
-            const conn = query.tooling === true ? this._connection.tooling : this._connection;
-            // In case the query does not support queryMore we have an alternative, based on ids
-            let queryMoreStartingId = '000000000000000000';
-            const sequential_query = (/** @type {Function} */ callback) => {
+        const allPromisesResult = await Promise.all(queries.map(async (query) => {
+            // Dynamically get the entityName of the Query
+            const str = query.string.lastIndexOf('FROM ')+5;
+            const end = query.string.indexOf(' ', str);
+            const entityName = query.string.substring(str, end === -1 ? query.string.length : end);
+            pendingEntities.push(entityName);
+            // Are we doing a custom Query More?
+            let records;
+            try {
                 if (query.queryMoreField) {
-                    // Alternative to queryMore based on ID ordering (inspired by Maroun IMAD!)
-                    // Deactivate AutoFetch to avoid the automatic call to queryMore by JsForce!
-                    conn.query(`${query.string} `+
-                               `AND ${query.queryMoreField} > '${queryMoreStartingId}' `+
-                               `ORDER BY ${query.queryMoreField} `+
-                               `LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`, { autoFetch: false }, callback);
+                    // yes!! do the custom one -- In case the query does not support queryMore we have an alternative, based on ids
+                    records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField);
                 } else {
-                    // We will call the standard Query More ourself (JsForce call it automatically but has a hard limit in terms of record number)
-                    conn.query(query.string, { autoFetch: false }, callback);
+                    // no!!! use the standard one
+                    records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses);
                 }
+                doneEntities.push(entityName)
+                nbRecords += records.length;
+            } catch (error) {
+                errorEntities.push(entityName);
+            } finally {
+                const index = pendingEntities.indexOf(entityName);
+                if (index > -1) pendingEntities.splice(index, 1);
             }
-            // Finally we return the promise that will call the query (and maybe more queries if needed!)
-            return new Promise((resolve, reject) => {
-                // Array of records that we store along the way, will be used with resolve()
-                const records = [];
-                // Recursive query function that will be called for each query and each queryMore
-                const recursive_query = (/** @type {{errorCode: string}} */ error, /** @type {any} */ d) => {
-                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-                    this._watchDog?.afterRequest(reject); // if limit has been reached, we reject the promise with a specific error and stop the process
-                    if (error) { 
-                        // Error has been raised but it might be one of the ones we want to by-pass
-                        if (query.byPasses && query.byPasses.includes && query.byPasses.includes(error.errorCode)) {
-                            // By-passed! 
-                            nbQueriesByPassed++;
-                            // Let's resolve the promise
-                            resolve();
-                        } else {
-                            // That's an error we can't by-pass
-                            nbQueriesError++;
-                            // We reject the promise with the current error and additional context information
-                            reject(Object.assign(error, { 
-                                context: { 
-                                    when: 'While creating a promise to call a SOQL query.', 
-                                    what: query 
-                            }}));  
-                        }
-                        // This query is done, so we decrement the pending counter
-                        nbQueriesPending--;
-                    } else {
-                        // Add the records to the global array
-                        records.push(... d.records);
-                        if (query.queryMoreField) {
-                            // Here we can't call queryMore (the sobject in the FROM statment does not support it, like EntityDefinition)
-                            if (d.records.length < MAX_NOQUERYMORE_BATCH_SIZE) {
-                                // This query is done, so we increment the done counter AND decrement the pending counter
-                                nbQueriesDone++;
-                                nbQueriesPending--;
-                                // Resolve the promise with the records
-                                resolve({ records: records });
-                            } else {
-                                // Update the last ID to start the next batch
-                                queryMoreStartingId = records[records.length-1][query.queryMoreField];
-                                // Not done yet more sub query to do
-                                nbQueryMore++;
-                                // Call the custom query more
-                                sequential_query(recursive_query);
-                            }
-                        } else {
-                            // Here we can call queryMore if fetching is not done...
-                            if (d.done === true) {
-                                // This query is done, so we increment the done counter AND decrement the pending counter
-                                nbQueriesDone++;
-                                nbQueriesPending--;
-                                // Resolve the promise with the records
-                                resolve({ records: records });
-                            } else {
-                                // Not done yet more sub query to do
-                                nbQueryMore++;
-                                // Call the queryMore with the nextRecordsUrl
-                                conn.queryMore(d.nextRecordsUrl, recursive_query);
-                            }
-                        }
-                    }
-                    logger?.log(`Statistics of ${queries.length} SOQL ${queries.length>1?'queries':'query'}: ${nbQueryMore} queryMore done, ${nbQueriesPending} pending, ${nbQueriesDone} done, ${nbQueriesByPassed} by-passed, ${nbQueriesError} in error...`);
-                }
-                sequential_query(recursive_query);
-            });
+            logger?.log(
+                `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
+                `Records retrieved: ${nbRecords}, `+
+                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
+                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
+                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`);
+            return records;
         }));
+        logger?.log(`Done running ${queries.length} SOQL ${queries.length>1?'queries':'query'}.`);
+        return allPromisesResult;
     }
 
     /**
@@ -319,6 +380,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {Array<string>} ids
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<{ records: Array<any>, errors: Array<string> }>}
+     * @public
+     * @async
      */
     async dependenciesQuery(ids, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -344,17 +407,30 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
                 referenceId: `chunk${i}`
             });
         }
-        logger?.log(`Divided the query into ${bodies.length} Tooling composite queries...`);
+        let nbPending = bodies.length, nbDone = 0, nbErrors = 0;
         const results = await Promise.all(bodies.map(async (body) => {
-            // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-            this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
-            // Call the tooling composite request
-            return this._connection.tooling.request({
-                url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
-                method: 'POST',
-                body: JSON.stringify(body), 
-                headers: { 'Content-Type': 'application/json' }
-            });    
+            try {
+                // Call the tooling composite request
+                const results = await this._connection.tooling.request({
+                    url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
+                    method: 'POST',
+                    body: JSON.stringify(body), 
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+                this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
+                // Update the stats
+                nbDone++;
+                // Returning this results
+                return results;
+            } catch (error) {
+                // Update the stats
+                nbErrors++;
+            } finally {
+                // Update the stats
+                nbPending--;
+                logger?.log(`Processing ${bodies.length} Tooling composite queries... Pending: ${nbPending}, Done: ${nbDone}, Error: ${nbErrors}`);
+            }
         }));
         logger?.log(`Got all the results`);
         const dependenciesRecords = []; // dependencies records
@@ -414,6 +490,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {Array<OrgCheckSalesforceMetadataRequest>} metadatas 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<any>}
+     * @public
+     * @async
      */
     async readMetadata(metadatas, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -493,6 +571,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {any[]} ids
      * @param {string[]} byPasses
      * @returns {Promise<Array<any>>}
+     * @public
+     * @async
      */
     async readMetadataAtScale(type, ids, byPasses, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -553,6 +633,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @see OrgCheckSalesforceManagerIntf.describeGlobal
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<Array<any>>}
+     * @public
+     * @async
      */
     async describeGlobal(logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -572,6 +654,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {string} sobjectDevName 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<any>}
+     * @public
+     * @async
      */
     async describe(sobjectDevName, logger) {
         // Adding support of the Activity object from describe
@@ -590,6 +674,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {string} sobjectDevName 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<number>}
+     * @public
+     * @async
      */
     async recordCount(sobjectDevName, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -608,12 +694,14 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @see OrgCheckSalesforceManagerIntf.runAllTests
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<string>}
+     * @public
+     * @async
      */ 
     async runAllTests(logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const result = await this._connection.request({ 
-            url: `/services/data/v${this._connection.version}/tooling/runTestsAsynchronous`,
+            url: `/tooling/runTestsAsynchronous`,
             method: 'POST',
             body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
             headers: { 'Content-Type': 'application/json' }
@@ -629,6 +717,8 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @param {Array<SFDC_ApexClass>} classes
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @returns {Promise<Array<any>>}
+     * @public
+     * @async
      */ 
     async compileClasses(classes, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
@@ -689,12 +779,14 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
  * @description Metadata API returns an array or a single object!
  * @param {any} data
  * @returns {Array<any>}
+ * @private
  */
 const MAKE_IT_AN_ARRAY = (/** @type {any} */ data) => data ? (Array.isArray(data) ? data : [ data ]) : []; 
 
 /**
  * @description Activity object that is not present in the describe API
  * @type {any}
+ * @private
  */
 const ACTIVITY_OBJECT_THAT_SHOULD_BE_RETURNED_BY_DESCRIBE = {
     name: 'Activity',

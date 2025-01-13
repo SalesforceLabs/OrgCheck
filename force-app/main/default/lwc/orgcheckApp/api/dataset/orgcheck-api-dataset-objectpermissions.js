@@ -30,7 +30,7 @@ export class OrgCheckDatasetObjectPermissions extends OrgCheckDataset {
         const permissionDataFactory = dataFactory.getInstance(SFDC_ObjectPermission);
 
         // Create the map
-        const permissionRecords = results[0].records;
+        const permissionRecords = results[0];
         logger?.log(`Parsing ${permissionRecords.length} object permissions...`);
         const permissions = new Map(await OrgCheckProcessor.map(
             permissionRecords,

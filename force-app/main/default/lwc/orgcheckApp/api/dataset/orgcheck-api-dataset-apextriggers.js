@@ -40,7 +40,7 @@ export class OrgCheckDatasetApexTriggers extends OrgCheckDataset {
 
         // Init the factory and records
         const apexTriggerDataFactory = dataFactory.getInstance(SFDC_ApexTrigger);
-        const apexTriggerRecords = results[0].records;
+        const apexTriggerRecords = results[0];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexTriggerRecords.length} apex triggers...`);

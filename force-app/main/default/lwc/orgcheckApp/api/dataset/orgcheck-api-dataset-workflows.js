@@ -26,7 +26,7 @@ export class OrgCheckDatasetWorkflows extends OrgCheckDataset {
         }], logger);
         
         // List of flow ids
-        const workflowRuleRecords = results[0].records;
+        const workflowRuleRecords = results[0];
         logger?.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
         const workflowRuleIds = await OrgCheckProcessor.map(workflowRuleRecords, (record) => record.Id);
 
