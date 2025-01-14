@@ -490,7 +490,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
      * @see OrgCheckSalesforceManagerIntf.readMetadata
      * @param {Array<OrgCheckSalesforceMetadataRequest>} metadatas 
      * @param {OrgCheckSimpleLoggerIntf} logger
-     * @returns {Promise<any>}
+     * @returns {Promise<Map<string, Array<any>>>}
      * @public
      * @async
      */
@@ -499,30 +499,34 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
         logger?.log(`Starting to call Metadata API for ${metadatas.length} types...`);
-        // First, if the metadatas contains an item with member='*' we want to list for this 
-        // type and substitute the '*' with the fullNames
+        // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
         await Promise.all(
             // only get the types that have at least '*' once
             metadatas.filter((m) => m.members.includes('*'))
             // then turn this filtered list into a list of promises
-            .map((m) => async () => { // using async as we just want to run parallel processes without manipulating their return values
+            .map(async (metadata) => { // using async as we just want to run parallel processes without manipulating their return values
                 try {
                     // each promise will call the List metadata api operation for a specific type
-                    const members = await this._connection.metadata.list([{ type: m.type }], this._apiVersion);
+                    const members = await this._connection.metadata.list([{ type: metadata.type }], this._apiVersion);
                     // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
                     this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
                     // clear the members (remove the stars)
-                    m.members = m.members.filter((/** @type {string} */ b) => b !== '*'); // 'metadatas' will be altered!
+                    metadata.members = metadata.members.filter((/** @type {string} */ b) => b !== '*'); // 'metadatas' will be altered!
                     // Add the rerieved fullNames to the members array
-                    MAKE_IT_AN_ARRAY(members).forEach(f => { m.members.push(f.fullName); }); 
-                    // don't return anything we are just altering the m.members.
+                    MAKE_IT_AN_ARRAY(members).forEach(f => { metadata.members.push(f.fullName); }); 
+                    // don't return anything we are just altering the metadata.members.
                 } catch (error) {
+                    logger?.log(`The method metadata.list returned an error: ${JSON.stringify(error)}`);
                     // We reject the promise with the current error and additional context information
                     throw Object.assign(error, { 
                         context: { 
-                            when: 'While calling a metadata api list.', 
-                            what: { type: m.type } 
-                    }});  
+                            when: 'Calling Metadata API to get a list of metadata.',
+                            what: {
+                                type: metadata.type,
+                                apiVersion: this._apiVersion
+                            }
+                        }
+                    });
                 }
             })
         );
@@ -530,38 +534,47 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
         // At this point, no more wildcard, only types and legitime member values in 'metadatas'.
         // Second, we want to read the metatda for these types and members
         const promises = [];
-        metadatas.forEach(m => {
-            while (m.members.length > 0) {
+        const response = new Map(); 
+        metadatas.forEach((metadata) => {
+            // Init the response array for this type 
+            logger?.log(`Init the response array for this type: ${metadata.type}`);
+            response.set(metadata.type, []);
+            // The API call to Metadata.Read will be done in slice, if for one type we have more than a certain amount 
+            // of members we will do more queries
+            logger?.log(`Starting looping for type ${metadata.type} and metadata.members.length=${metadata.members.length}`);
+            while (metadata.members.length > 0) {
                 // Slice the members in batch of MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE
-                const currentMembers = m.members.splice(0, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE); // get the first members
-                // These first members have been removed from m.members (so next time we don't see them anymore
-                promises.push(new Promise((resolve, reject) => { // using Promise to manage the result propperly
-                    this._connection.metadata.read(m.type, currentMembers, (/** @type {Error} */ error, /** @type {any} */ members) => {
+                const currentMembers = metadata.members.splice(0, MAX_MEMBERS_IN_METADATAAPI_REQUEST_SIZE); // get the first members
+                // These first members have been removed from metadata.members (so next time we don't see them anymore
+                promises.push(new Promise(async (resolve, reject) => {
+                    logger?.log(`Try to call metadata read for type ${metadata.type} and currentMembers=${currentMembers}`);
+                    try {
+                        const members = await this._connection.metadata.read(metadata.type, currentMembers);
                         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-                        this._watchDog?.afterRequest(reject); // if limit has been reached, we reject the promise with a specific error and stop the process
-                        if (error) {
-                            // We reject the promise with the current error and additional context information
-                            reject(Object.assign(error, {
-                                context: { 
-                                    when: 'While calling a metadata api read.',
-                                    what: { type: m.type, members: currentMembers }
-                            }}));
-                        } else {
-                            // return the member(s) for this type (their might be another batch with the same type!)
-                            resolve({ type: m.type, members: MAKE_IT_AN_ARRAY(results) });
-                        }
-                    });
+                        this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
+                        // Add the received member to the global response (there might be another batch with the same type!)
+                        response.get(metadata.type).push(... MAKE_IT_AN_ARRAY(members));
+                        resolve();
+                    } catch (error) {
+                        logger?.log(`The method metadata.read returned an error: ${JSON.stringify(error)}`);
+                        // We reject the promise with the current error and additional context information
+                        reject(Object.assign(error, { 
+                            context: { 
+                                when: 'Calling Metadata API to read a list of metadata.',
+                                what: {
+                                    type: metadata.type,
+                                    pendingMembers: metadata.members,
+                                    membersInProcess: currentMembers,
+                                }
+                            }
+                        }));
+                    };
                 }));
             }
         }); // Promises are ready to be run
-        const results = await Promise.all(promises);
-        // Here we have the results, but we need to group them by type
-        const response = {};
-        results.forEach((r, i) => {
-            const m = response[r.type] || [];
-            m.push(...r.members);
-            response[r.type] = m;
-        });
+        logger?.log(`Calling all promises: ${promises.length}`);
+        await Promise.all(promises); // response will be updated in the promises
+        logger?.log(`All promises ended and response is like: ${JSON.stringify(Array.from(response.entries()))}`);
         return response;
     }
 

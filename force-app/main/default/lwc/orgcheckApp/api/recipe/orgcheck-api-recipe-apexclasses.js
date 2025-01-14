@@ -38,15 +38,17 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
         // Checking data
         if (!apexClasses) throw new Error(`Data from dataset alias 'APEXCLASSES' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(apexClasses, async (apexClass) => {
-            apexClass.relatedTestClassRefs = await OrgCheckProcessor.map(apexClass.relatedTestClassIds, id => apexClasses.get(id));
-            apexClass.relatedClassRefs = await OrgCheckProcessor.map(apexClass.relatedClassIds, id => apexClasses.get(id));
-        });
-
-        // Filter data
+        // Augment and filter data
         const array = [];
-        await OrgCheckProcessor.forEach(apexClasses, (apexClass) => {
+        await OrgCheckProcessor.forEach(apexClasses, async (apexClass) => {            
+            // Augment data
+            const results = await Promise.all([
+                OrgCheckProcessor.map(apexClass.relatedTestClassIds, id => apexClasses.get(id)),
+                OrgCheckProcessor.map(apexClass.relatedClassIds, id => apexClasses.get(id))
+            ]);
+            apexClass.relatedTestClassRefs = results[0];
+            apexClass.relatedClassRefs = results[1];
+            // Filter data
             if (namespace === '*' || apexClass.package === namespace) {
                 array.push(apexClass);
             }

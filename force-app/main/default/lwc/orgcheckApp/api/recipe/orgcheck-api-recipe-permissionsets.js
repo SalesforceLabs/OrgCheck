@@ -42,18 +42,16 @@ export class OrgCheckRecipePermissionSets extends OrgCheckRecipe {
         if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
 
-        // Augment data
+        // Augment and Filter data
+        const array = [];
         await OrgCheckProcessor.forEach(permissionSets, async (permissionSet) => {
+            // Augment data
             permissionSet.assigneeProfileRefs = await OrgCheckProcessor.map(
                 permissionSet.assigneeProfileIds,
                 (id) => profiles.get(id),
                 (id) => profiles.has(id)
             );
-        });
-
-        // Filter data
-        const array = [];
-        await OrgCheckProcessor.forEach(permissionSets, (permissionSet) => {
+            // Filter data
             if (namespace === '*' || permissionSet.package === namespace) {
                 array.push(permissionSet);
             }

@@ -42,14 +42,12 @@ export class OrgCheckRecipeProfileRestrictions extends OrgCheckRecipe {
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
         if (!profileRestrictions) throw new Error(`Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(profileRestrictions, (restriction) => {
-            restriction.profileRef = profiles.get(restriction.profileId);
-        });
-
-        // Filter data
+        // Augment and Filter data
         const array = [];
         await OrgCheckProcessor.forEach(profileRestrictions, (restriction) => {
+            // Augment data
+            restriction.profileRef = profiles.get(restriction.profileId);
+            // Filter data
             if (namespace === '*' || restriction.profileRef?.package === namespace) {
                 array.push(restriction);
             }

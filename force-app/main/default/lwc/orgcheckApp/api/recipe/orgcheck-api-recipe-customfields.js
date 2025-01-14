@@ -49,12 +49,14 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
         if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
-        await OrgCheckProcessor.forEach(objects, (obj) => {
-            obj.typeRef = types.get(obj.typeId);
-        });
-        await OrgCheckProcessor.forEach(customFields, (customField) => {
-            customField.objectRef = objects.get(customField.objectId);
-        });
+        await Promise.all([
+            OrgCheckProcessor.forEach(objects, (obj) => {
+                obj.typeRef = types.get(obj.typeId);
+            }),
+            OrgCheckProcessor.forEach(customFields, (customField) => {
+                customField.objectRef = objects.get(customField.objectId);
+            })
+        ]);
 
         // Filter data
         const array = [];
