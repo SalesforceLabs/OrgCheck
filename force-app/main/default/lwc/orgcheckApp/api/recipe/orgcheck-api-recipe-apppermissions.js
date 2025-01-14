@@ -51,23 +51,21 @@ export class OrgCheckRecipeAppPermissions extends OrgCheckRecipe {
         if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
         if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(appPermissions, (ap) => {
-            ap.appRef = applications.get(ap.appId);
-            if (ap.parentId.startsWith('0PS') === true) {
-                ap.parentRef = permissionSets.get(ap.parentId);
-            } else {
-                ap.parentRef = profiles.get(ap.parentId);
-            }
-        });
-
-        // Filter data
+        // Augment and filter data
         const workingMatrix = OrgCheckDataMatrixFactory.create();
         /** @type {Map<string, SFDC_Profile | SFDC_PermissionSet>} */
         const rowHeaderReferences = new Map();
         /** @type {Map<string, SFDC_Application>} */
         const columnHeaderReferences = new Map();
         await OrgCheckProcessor.forEach(appPermissions, (ap) => {
+            // Augment data
+            ap.appRef = applications.get(ap.appId);
+            if (ap.parentId.startsWith('0PS') === true) {
+                ap.parentRef = permissionSets.get(ap.parentId);
+            } else {
+                ap.parentRef = profiles.get(ap.parentId);
+            }
+            // Filter data
             if (namespace === '*' || ap.parentRef.package === namespace || ap.appRef.appPackage === namespace ) {
                 if (rowHeaderReferences.has(ap.parentId) === false) {
                     rowHeaderReferences.set(ap.parentId, ap.parentRef);

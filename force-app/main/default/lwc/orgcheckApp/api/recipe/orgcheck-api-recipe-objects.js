@@ -40,14 +40,12 @@ export class OrgCheckRecipeObjects extends OrgCheckRecipe {
         if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
         if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(objects, (object) => {
-            object.typeRef = types.get(object.typeId);
-        });
-
-        // Filter data
+        // Augment and Filter data
         const array = [];
         await OrgCheckProcessor.forEach(objects, (object) => {
+            // Augment data
+            object.typeRef = types.get(object.typeId);
+            // Filter data
             if ((namespace === '*' || object.package === namespace) &&
                 (type === '*' || object.typeRef?.id === type)) {
                 array.push(object);

@@ -42,29 +42,22 @@ export class OrgCheckRecipeUserRoles extends OrgCheckRecipe {
         if (!userRoles) throw new Error(`Data from dataset alias 'USERROLES' was undefined.`);
         if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
 
-        // Augment data
+        // Augment and Filter data
+        const array = [];
         await OrgCheckProcessor.forEach(userRoles, async (userRole) => {
+            // Augment data
             if (userRole.hasActiveMembers === true) {
                 userRole.activeMemberRefs = await OrgCheckProcessor.map(userRole.activeMemberIds, (id) => users.get(id));
             }
             if (userRole.hasParent === true) {
                 userRole.parentRef = userRoles.get(userRole.parentId);
             }
+            // Filter data
+            if (includesExternalRoles === true || userRole.isExternal === false) {
+                array.push(userRole);
+            }
         });
 
-        // Filter data
-        const array = [];
-        if (includesExternalRoles === true) {
-            // in this case do not filter!
-            await OrgCheckProcessor.forEach(userRoles, (userRole) => {
-                array.push(userRole);
-            });
-        } else {
-            // in this case please filter
-            await OrgCheckProcessor.forEach(userRoles, (userRole) => {
-                if (userRole.isExternal === false) array.push(userRole);
-            });
-        }
         // Return data
         return array;
     }
