@@ -59,30 +59,34 @@ export class OrgCheckRecipeObject extends OrgCheckRecipe {
 
         // Augment data
         object.typeRef = types.get(object.typeId);
-        object.apexTriggerRefs = await OrgCheckProcessor.map(
-            object.apexTriggerIds,
-            (id) => { 
-                const apexTrigger = apexTriggers.get(id);
-                apexTrigger.objectRef = object;
-                return apexTrigger;
-            },
-            (id) => apexTriggers.has(id)
-        );
         object.flexiPages = [];
-        await OrgCheckProcessor.forEach(pages, (page) => {
-            if (page.objectId === object.id) {
-                object.flexiPages.push(page);
-            }
-        });
-        object.customFieldRefs = await OrgCheckProcessor.map(
-            object.customFieldIds,
-            (id) => { 
-                const customField = customFields.get(id);
-                customField.objectRef = object;
-                return customField;
-            },
-            (id) => customFields.has(id)
-        );
+        const result = await Promise.all([
+            OrgCheckProcessor.map( // returns apexTriggerRefs
+                object.apexTriggerIds,
+                (id) => { 
+                    const apexTrigger = apexTriggers.get(id);
+                    apexTrigger.objectRef = object;
+                    return apexTrigger;
+                },
+                (id) => apexTriggers.has(id)
+            ),
+            OrgCheckProcessor.forEach(pages, (page) => {
+                if (page.objectId === object.id) {
+                    object.flexiPages.push(page);
+                }
+            }),
+            OrgCheckProcessor.map( // returns customFieldRefs
+                object.customFieldIds,
+                (id) => { 
+                    const customField = customFields.get(id);
+                    customField.objectRef = object;
+                    return customField;
+                },
+                (id) => customFields.has(id)
+            )
+        ]);
+        object.apexTriggerRefs = result[0];
+        object.customFieldRefs = result[2];
 
         // Return data
         return object;

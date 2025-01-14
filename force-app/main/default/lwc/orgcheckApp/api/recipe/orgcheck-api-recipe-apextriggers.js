@@ -42,14 +42,12 @@ export class OrgCheckRecipeApexTriggers extends OrgCheckRecipe {
         if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
         if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
 
-        // Augment data
-        await OrgCheckProcessor.forEach(apexTriggers, (apexTrigger) => {
-            apexTrigger.objectRef = objects.get(apexTrigger.objectId);
-        });
-
-        // Filter data
+        // Augment and filter data
         const array = [];
         await OrgCheckProcessor.forEach(apexTriggers, (apexTrigger) => {
+            // Augment data
+            apexTrigger.objectRef = objects.get(apexTrigger.objectId);
+            // Filter data
             if (namespace === '*' || apexTrigger.package === namespace) {
                 array.push(apexTrigger);
             }

@@ -1,7 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
-import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckData } from '../core/orgcheck-api-data';
 import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
@@ -38,8 +37,10 @@ export class OrgCheckRecipeGroups extends OrgCheckRecipe {
         if (!groups) throw new Error(`Data from dataset alias 'GROUPS' was undefined.`);
         if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
 
-        // Augment data
+        // Augment and filter data
+        const array = [];
         await OrgCheckProcessor.forEach(groups, async (group) => {
+            // Augment data
             group.directUserRefs = await OrgCheckProcessor.map(
                 group.directUserIds,
                 (id) => users.get(id),
@@ -50,11 +51,7 @@ export class OrgCheckRecipeGroups extends OrgCheckRecipe {
                 (id) => groups.get(id),
                 (id) => groups.has(id)
             );
-        });
-
-        // Filter data
-        const array = [];
-        await OrgCheckProcessor.forEach(groups, async (group) => {
+            // Filter data
             if (group.isPublicGroup === true || group.isQueue === true) {
                 array.push(group);
             }

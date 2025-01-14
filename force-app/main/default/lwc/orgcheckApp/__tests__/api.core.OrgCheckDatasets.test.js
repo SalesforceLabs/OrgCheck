@@ -68,7 +68,7 @@ class SfdcManagerMock extends OrgCheckSalesforceManagerIntf {
 
   async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
 
-  async readMetadata(metadatas, logger) { return metadatas.map(() => { return []; }); }
+  async readMetadata(metadatas, logger) { return new Map(); }
 
   async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
 

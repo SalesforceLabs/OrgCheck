@@ -131,7 +131,7 @@ export class OrgCheckSalesforceManagerIntf {
      * @param {Array<OrgCheckSalesforceMetadataRequest>} metadatas 
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @async
-     * @returns {Promise<any>}
+     * @returns {Promise<Map<string, Array<any>>>}
      * @public
      */
     async readMetadata(metadatas, logger) { throw new Error('Not implemented'); }

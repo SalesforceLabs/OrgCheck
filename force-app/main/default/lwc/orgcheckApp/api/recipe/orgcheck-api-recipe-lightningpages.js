@@ -42,17 +42,15 @@ export class OrgCheckRecipeLightningPages extends OrgCheckRecipe {
         if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
         if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
 
-        // Augment data
+        // Augment and filter data
+        const array = [];
         await OrgCheckProcessor.forEach(pages, (page) => {
+            // Augment data
             if (page.objectId) {
                 // if objectId was specified in the page, get the reference of the object
                 page.objectRef = objects.get(page.objectId);
             }
-        });
-
-        // Filter data
-        const array = [];
-        await OrgCheckProcessor.forEach(pages, (page) => {
+            // Filter data
             if (namespace === '*' || page.package === namespace) {
                 array.push(page);
             }
