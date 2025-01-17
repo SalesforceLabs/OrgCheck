@@ -1,7 +1,6 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
-import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckData } from '../core/orgcheck-api-data';
 import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';

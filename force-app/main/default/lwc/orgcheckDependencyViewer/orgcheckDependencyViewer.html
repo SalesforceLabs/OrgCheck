@@ -10,9 +10,10 @@
                     <lightning-tabset variant="scoped">
                         <lightning-tab label="Graphical View">
                             <c-orgcheck-graphics 
+                                type="hierarchy"
                                 name={whatName}
-                                box-color-decorator={dependencyBoxColorsDecorator}
-                                box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
+                                hierarchy-box-color-decorator={dependencyBoxColorsDecorator}
+                                hierarchy-box-inner-html-decorator={dependencyBoxInnerHtmlDecorator}
                                 source={dependencyTreeByType}></c-orgcheck-graphics>
                         </lightning-tab>
                         <lightning-tab label="Tabular View">

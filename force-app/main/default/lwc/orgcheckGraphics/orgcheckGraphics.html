@@ -1,5 +1,9 @@
 <template>
-    <div class="slds-var-m-around_medium">
-        <div class="orgcheck-graph" lwc:dom="manual"></div>
-    </div>
+    <div id="orgcheck-graph" class={containerClass} lwc:dom="manual"></div>
+    <template if:true={isPie}>
+        <b>{name}</b><br />
+        <template for:each={pieCategories} for:item="category">
+            {category.color} - {category.value}<br key={category.color} />
+        </template>
+    </template>
 </template>

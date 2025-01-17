@@ -7,7 +7,6 @@ import { OrgCheckRecipeCurrentUserPermissions } from "../api/recipe/orgcheck-api
 import { OrgCheckRecipeCustomFields } from "../api/recipe/orgcheck-api-recipe-customfields";
 import { OrgCheckRecipeCustomLabels } from "../api/recipe/orgcheck-api-recipe-customlabels";
 import { OrgCheckRecipeFlows } from "../api/recipe/orgcheck-api-recipe-flows";
-import { OrgCheckRecipeGroups } from "../api/recipe/orgcheck-api-recipe-groups";
 import { OrgCheckRecipeLightningAuraComponents } from "../api/recipe/orgcheck-api-recipe-lightningauracomponents";
 import { OrgCheckRecipeLightningPages } from "../api/recipe/orgcheck-api-recipe-lightningpages";
 import { OrgCheckRecipeLightningWebComponents } from "../api/recipe/orgcheck-api-recipe-lightningwebcomponents";
@@ -22,6 +21,8 @@ import { OrgCheckRecipeProcessBuilders } from "../api/recipe/orgcheck-api-recipe
 import { OrgCheckRecipeProfilePasswordPolicies } from "../api/recipe/orgcheck-api-recipe-profilepasswordpolicies";
 import { OrgCheckRecipeProfileRestrictions } from "../api/recipe/orgcheck-api-recipe-profilerestrictions";
 import { OrgCheckRecipeProfiles } from "../api/recipe/orgcheck-api-recipe-profiles";
+import { OrgCheckRecipePublicGroups } from "../api/recipe/orgcheck-api-recipe-publicgroups";
+import { OrgCheckRecipeQueues } from "../api/recipe/orgcheck-api-recipe-queues";
 import { OrgCheckRecipeUserRoles } from "../api/recipe/orgcheck-api-recipe-userroles";
 import { OrgCheckRecipeVisualForceComponents } from "../api/recipe/orgcheck-api-recipe-visualforcecomponents";
 import { OrgCheckRecipeVisualForcePages } from "../api/recipe/orgcheck-api-recipe-visualforcepages";
@@ -191,9 +192,29 @@ describe('api.core.OrgCheckRecipes', () => {
 
   });
 
-  describe('Test OrgCheckRecipeGroups', () => {
+  describe('Test OrgCheckRecipePublicGroups', () => {
   
-    const recipe = new OrgCheckRecipeGroups();
+    const recipe = new OrgCheckRecipePublicGroups();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(2);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test OrgCheckRecipeQueues', () => {
+  
+    const recipe = new OrgCheckRecipeQueues();
     const logger = new SimpleLoggerMock();
     it('checks if this recipe class extracts and transforms correctly', async () => {
 
