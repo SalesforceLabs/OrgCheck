@@ -149,14 +149,14 @@
                         Here you can get information about Data Model, Objects, Org-Wide Defaults and Custom Fields in your org. <br />
                     </lightning-tab>
                     <lightning-tab value="object" label="⚽ Object Documentation" onactive={handleSubTabActivation}>
-                        <template if:false={objectInformationData}>
+                        <template if:false={objectData}>
                             There is no specific object set in the global filter above. <br />
                             <br />
                             Please set the <b>SObject</b> value in the global filter and hit <b>'Apply'</b> button to see something here.<br />
                             <br />
                             Thank you!
                         </template>
-                        <template if:true={objectInformationData}>
+                        <template if:true={objectData}>
                             <lightning-layout>
                                 <lightning-layout-item>
                                     <h1 class="slds-text-heading_large">{objectData.label} ({objectData.apiname})</h1>
@@ -396,7 +396,7 @@
                             infinite-scrolling-initial-nb-rows=25
                             infinite-scrolling-additional-nb-rows=100
                             columns={owdTableColumns}
-                            rows={owdTableData}
+                            rows={objectsTableData}
                             show-export-button
                             export-basename="OrgWideDefault"></c-orgcheck-extended-datatable>
                     </lightning-tab>

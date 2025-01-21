@@ -30,7 +30,7 @@ import { OrgCheckLogger } from './core/orgcheck-api-logger-impl';
 import { OrgCheckRecipeManager } from './core/orgcheck-api-recipemanager-impl';
 import { OrgCheckRecipeAliases } from './core/orgcheck-api-recipes-aliases';
 import { OrgCheckDatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
-import { OrgCheckLoggerIntf } from './core/orgcheck-api-logger';
+import { OrgCheckBasicLoggerIntf, OrgCheckLoggerIntf } from './core/orgcheck-api-logger';
 import { OrgCheckRecipeManagerIntf } from './core/orgcheck-api-recipemanager';
 import { OrgCheckSalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
 import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
@@ -106,7 +106,7 @@ export class OrgCheckAPI {
      * @param {any} jsCompression
      * @param {string} accessToken
      * @param {string} userId
-     * @param {any} loggerSetup
+     * @param {OrgCheckBasicLoggerIntf} loggerSetup
      */
     constructor(jsConnectionFactory, jsCompression, accessToken, userId, loggerSetup) {
         this._logger = new OrgCheckLogger(loggerSetup);

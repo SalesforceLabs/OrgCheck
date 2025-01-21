@@ -138,74 +138,63 @@ export class OrgCheckRecipeManager extends OrgCheckRecipeManagerIntf {
          */
         const recipe = this._recipes.get(alias);
 
+        // -------------------
+        // Extract
+        // -------------------
+        this._logger.log(section, 'How many datasets this recipe has?');
+
+        /**
+         * @description The list of datasets to be used by this recipe
+         * @type {Array<string | OrgCheckDatasetRunInformation>}}
+         */
+        let datasets;
         try {
-            // Start the logger
-            this._logger.begin();
-
-            // -------------------
-            // Extract
-            // -------------------
-            this._logger.sectionStarts(section, 'List the datasets that are needed...');
-
-            /**
-             * @description The list of datasets to be used by this recipe
-             * @type {Array<string | OrgCheckDatasetRunInformation>}}
-             */
-            let datasets;
-            try {
-                datasets = recipe.extract(
-                    // local logger
-                    this._logger.toSimpleLogger(section),
-                    // all parameters
-                    ...parameters
-                );
-            } catch(error) {
-                this._logger.sectionFailed(section, error);
-                throw error;
-            }
-            this._logger.sectionContinues(section, 'Run all the datasets and extract their data...');
-            let data;
-            try {
-                data = await this._datasetManager.run(datasets);
-            } catch(error) {
-                // the detail of the error should have been logged by dataset manager
-                // just mentionning that there was an error on the dataset layer
-                this._logger.sectionFailed(section, 'Error in dataset!');
-                throw error;
-            }
-            this._logger.sectionContinues(section, 'Information succesfully retrieved!');
-
-            // -------------------
-            // Transform
-            // -------------------
-            this._logger.sectionContinues(section, 'Transform the information...');
-
-            /**
-             * @description The final data that we will return as it is.
-             * @type {Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map}
-             */
-            let finalData;
-            try {
-                finalData = await recipe.transform(
-                    // Data from datasets
-                    data, 
-                    // local logger
-                    this._logger.toSimpleLogger(section),
-                    // all parameters
-                    ...parameters);
-            } catch(error) {
-                this._logger.sectionFailed(section, error);
-                throw error;
-            }
-            this._logger.sectionEnded(section, 'Transformation done!');
-
-            // Return value
-            return finalData;
-
-        } finally {
-            // End the logger
-            this._logger.end();
+            datasets = recipe.extract(
+                // local logger
+                this._logger.toSimpleLogger(section),
+                // all parameters
+                ...parameters
+            );
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
         }
+        this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof OrgCheckDatasetRunInformation ? d.alias : d ).join(', ')}...`);
+        let data;
+        try {
+            data = await this._datasetManager.run(datasets);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.log(section, 'Datasets information successfuly retrieved!');
+
+        // -------------------
+        // Transform
+        // -------------------
+        this._logger.log(section, 'This recipe will now transform all this information...');
+
+        /**
+         * @description The final data that we will return as it is.
+         * @type {Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map}
+         */
+        let finalData;
+        try {
+            finalData = await recipe.transform(
+                // Data from datasets
+                data, 
+                // local logger
+                this._logger.toSimpleLogger(section),
+                // all parameters
+                ...parameters);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.ended(section, 'Transformation successfuly done!');
+
+        // Return value
+        return finalData;
     }
 
     /**
@@ -224,43 +213,34 @@ export class OrgCheckRecipeManager extends OrgCheckRecipeManagerIntf {
         const section = `RECIPE ${alias}`;
         const recipe = this._recipes.get(alias);
 
+        // -------------------
+        // Extract
+        // -------------------
+        this._logger.log(section, 'How many datasets this recipe has?');
+        let datasets;
         try {
-            // Start the logger
-            this._logger.begin();
-
-            // -------------------
-            // Extract
-            // -------------------
-            this._logger.sectionStarts(section, 'List the datasets that were needed...');
-            let datasets;
-            try {
-                datasets = recipe.extract(
-                    // local logger
-                    this._logger.toSimpleLogger(section),
-                    // all parameters
-                    ...parameters
-                );
-            } catch(error) {
-                this._logger.sectionFailed(section, error);
-                throw error;
-            }
-            this._logger.sectionContinues(section, 'Information succesfully retrieved!');
-
-            // -------------------
-            // Clean
-            // -------------------
-            this._logger.sectionContinues(section, 'Clean all datasets...');
-            try {
-                this._datasetManager.clean(datasets);
-            } catch(error) {
-                this._logger.sectionFailed(section, error);
-                throw error;
-            }
-            this._logger.sectionEnded(section, 'Datasets succesfully cleaned!');
-
-        } finally {
-            // End the logger
-            this._logger.end();
+            datasets = recipe.extract(
+                // local logger
+                this._logger.toSimpleLogger(section),
+                // all parameters
+                ...parameters
+            );
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
         }
+        this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof OrgCheckDatasetRunInformation ? d.alias : d ).join(', ')}...`);
+
+        // -------------------
+        // Clean
+        // -------------------
+        this._logger.log(section, 'Clean all datasets...');
+        try {
+            this._datasetManager.clean(datasets);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.ended(section, 'Datasets succesfully cleaned!');
     }
 }

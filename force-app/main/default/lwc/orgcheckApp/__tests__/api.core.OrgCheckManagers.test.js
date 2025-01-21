@@ -74,12 +74,9 @@ class CacheManagerMock extends OrgCheckDataCacheManagerIntf {
 }
 
 class LoggerMock extends OrgCheckLoggerIntf {
-  begin() { }
-  sectionStarts(sectionName, message) { }
-  sectionContinues(sectionName, message) { }
-  sectionEnded(sectionName, message) { }
-  sectionFailed(sectionName, error) { }
-  end(countSuccesses=0, countFailures=0) { }
+  log(sectionName, message) { }
+  ended(sectionName, message) { }
+  failed(sectionName, error) { }
   toSimpleLogger() { return { log: () => {}, debug: () => {} }; }
 }
 

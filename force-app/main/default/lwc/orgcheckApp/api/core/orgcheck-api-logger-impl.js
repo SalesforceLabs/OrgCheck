@@ -1,4 +1,8 @@
-import { OrgCheckLoggerIntf, OrgCheckSimpleLoggerIntf } from "./orgcheck-api-logger";
+import { OrgCheckBasicLoggerIntf, OrgCheckLoggerIntf, OrgCheckSimpleLoggerIntf } from "./orgcheck-api-logger";
+
+export const LOG_OPERATION_IN_PROGRESS = 0;
+export const LOG_OPERATION_DONE = 1;
+export const LOG_OPERATION_FAILED = 2;
 
 /**
  * @description Logger for OrgCheck 
@@ -7,20 +11,27 @@ export class OrgCheckLogger extends OrgCheckLoggerIntf {
 
     /**
      * @description Logger gets an injected logger :)
-     * @type {OrgCheckLoggerIntf}
+     * @type {OrgCheckBasicLoggerIntf}
      * @private
      */
     _logger;
 
     /**
-     * @description Count of successful sections
+     * @description Operation names that are/were logged
+     * @type {Map<string, number>}}
+     * @private
+     */
+    _operationNames;
+
+    /**
+     * @description Count of successful operations
      * @type {number}
      * @private
      */
     _countSuccesses;
 
     /**
-     * @description Count of failed sections
+     * @description Count of failed operations
      * @type {number}
      * @private
      */
@@ -28,89 +39,66 @@ export class OrgCheckLogger extends OrgCheckLoggerIntf {
 
     /**
      * @description Constructor
-     * @param {OrgCheckLoggerIntf} logger 
+     * @param {OrgCheckBasicLoggerIntf} logger 
      */
     constructor(logger) {
         super()
         this._logger = logger;
         this._countSuccesses = 0;
         this._countFailures = 0;
+        this._operationNames = new Map();
     }
 
     /**
-     * @see OrgCheckLoggerIntf.begin
-     */ 
-    begin() {
-        CONSOLE_LOG('global', 'begin');
-        this._logger?.begin();
-    }
-
-    /**
-     * @see OrgCheckLoggerIntf.sectionStarts
-     * @param {string} sectionName 
+     * @see OrgCheckLoggerIntf.log
+     * @param {string} operationName
      * @param {string} [message] 
-     */ 
-    sectionStarts(sectionName, message='...') {
-        CONSOLE_LOG(sectionName, 'start', message);
-        this._logger?.sectionStarts(sectionName, message);
+     */
+    log(operationName, message) { 
+        CONSOLE_LOG(operationName, 'LOG', message);
+        this._logger?.log(operationName, message);
+        this._operationNames.set(operationName, LOG_OPERATION_IN_PROGRESS);
     }
 
     /**
-     * @see OrgCheckLoggerIntf.sectionContinues
-     * @param {string} sectionName 
+     * @see OrgCheckLoggerIntf.ended
+     * @param {string} operationName
      * @param {string} [message] 
-     */ 
-    sectionContinues(sectionName, message='...') {
-        CONSOLE_LOG(sectionName, 'in-progress', message);
-        this._logger?.sectionContinues(sectionName, message);
-    }
-
-    /**
-     * @see OrgCheckLoggerIntf.sectionEnded
-     * @param {string} sectionName 
-     * @param {string} [message] 
-     */ 
-    sectionEnded(sectionName, message='...') {
+     */
+    ended(operationName, message) { 
+        CONSOLE_LOG(operationName, 'ENDED', message);
         this._countSuccesses++;
-        CONSOLE_LOG(sectionName, 'end', message);
-        this._logger?.sectionEnded(sectionName, message);
+        this._logger?.ended(operationName, message);
+        this._operationNames.set(operationName, LOG_OPERATION_DONE);
     }
 
     /**
-     * @see OrgCheckLoggerIntf.sectionFailed
-     * @param {string} sectionName 
+     * @see OrgCheckLoggerIntf.failed
+     * @param {string} operationName
      * @param {Error | string} [error] 
-     */ 
-    sectionFailed(sectionName, error) {
+     * @public
+     */
+    failed(operationName, error) { 
+        CONSOLE_LOG(operationName, 'FAILED', error);
         this._countFailures++;
-        CONSOLE_LOG(sectionName, 'failure', error);
-        this._logger?.sectionFailed(sectionName, error);
-    }
-
-    /**
-     * @see OrgCheckLoggerIntf.end
-     */ 
-    end() {
-        CONSOLE_LOG('global', 'end', `Successes: ${this._countSuccesses}, Failures: ${this._countFailures}`);
-        this._logger?.end(this._countSuccesses, this._countFailures);
-        this._countSuccesses = 0;
-        this._countFailures = 0;
+        this._logger?.failed(operationName, error);
+        this._operationNames.set(operationName, LOG_OPERATION_FAILED);
     }
 
     /**
      * @description Turn this logger into a simple logger for a specific section
-     * @param {string} sectionName 
+     * @param {string} operationName
      * @returns {OrgCheckSimpleLoggerIntf}
      */ 
-    toSimpleLogger(sectionName) {
+    toSimpleLogger(operationName) {
         const internalLogger = this._logger;
         return { 
             log: (message) => { 
-                CONSOLE_LOG(sectionName, 'log', message);
-                internalLogger?.sectionContinues(sectionName, message);
+                CONSOLE_LOG(operationName, 'LOG', message);
+                internalLogger?.log(operationName, message);
             },
             debug: (message) => { 
-                CONSOLE_LOG(sectionName, 'debug', message);
+                CONSOLE_LOG(operationName, 'DEBUG', message);
             }
         };
     }
@@ -118,10 +106,10 @@ export class OrgCheckLogger extends OrgCheckLoggerIntf {
 
 /**
  * @description Logs the end of this section
- * @param {string} section 
- * @param {string} moment 
+ * @param {string} operationName
+ * @param {string} event 
  * @param {string | Error} [message='...']
  */
-const CONSOLE_LOG = (section, moment, message='...') => { 
-    console.error(`${new Date().toISOString()} - ${section} - ${moment} - ${message}`); 
+const CONSOLE_LOG = (operationName, event, message='...') => { 
+    console.error(`${new Date().toISOString()} - ${operationName} - ${event} - ${message}`); 
 }

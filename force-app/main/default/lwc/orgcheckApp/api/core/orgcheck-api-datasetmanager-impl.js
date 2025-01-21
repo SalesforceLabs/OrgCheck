@@ -144,17 +144,17 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             const section = `DATASET ${alias}`;
             return new Promise((resolve, reject) => {
-                this._logger.sectionContinues(section, `Checking the cache for key=${cacheKey}...`);
+                this._logger.log(section, `Checking the cache for key=${cacheKey}...`);
                 // Check cache if any
                 if (this._cache.has(cacheKey) === true) {
                     // Set the results from cache
-                    this._logger.sectionEnded(section, 'There was data in cache, we use it!');
+                    this._logger.ended(section, 'There was data in cache, we use it!');
                     // Return the key/alias and value from the cache
                     resolve([ alias, this._cache.get(cacheKey) ]); // when data comes from cache instanceof won't work! (keep that in mind)
                     // Stop there
                     return;
                 }
-                this._logger.sectionContinues(section, 'There was no data in cache. Let\'s retrieve data.');
+                this._logger.log(section, 'There was no data in cache. Let\'s retrieve data.');
                 // Calling the retriever
                 this._datasets.get(alias).run(
                     // sfdc manager
@@ -169,12 +169,12 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
                     // Cache the data (if possible and not too big)
                     this._cache.set(cacheKey, data); 
                     // Some logs
-                    this._logger.sectionEnded(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                    this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
                     // Return the key/alias and value from the cache
                     resolve([ alias, data ]);
                 }).catch((error) => {
                     // Reject with this error
-                    this._logger.sectionFailed(section, error);
+                    this._logger.failed(section, error);
                     reject(error);
                 });
             });

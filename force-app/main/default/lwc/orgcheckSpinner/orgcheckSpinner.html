@@ -26,6 +26,9 @@
                                     Thank you!<br />
                                     <br />
                                 </template>
+                                <template if:false={hadError}>
+                                    {inProgressMessage}<br /><br />
+                                </template>
                                 <ol class="slds-progress__list">
                                     <template for:each={sections} for:item="section">
                                         <li key={section.id} class={section.liClasses}>

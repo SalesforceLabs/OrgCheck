@@ -3,64 +3,69 @@ import { LightningElement, api, track } from 'lwc';
 import OrgCheckStaticRessource from '@salesforce/resourceUrl/OrgCheck_SR';
 
 /**
- * Represents the different statuses of a section
+ * @description Represents the different statuses of a section
  */
 const SectionStatus = {
-  STARTED: 'started',
   IN_PROGRESS: 'in-progress',
   ENDED: 'ended',
   FAILED: 'failed' 
 };
 
 /**
- * Represents an section with specific properties
+ * @description Represents an section with specific properties
  */
 class Section {
 
   /** 
-   * The unique identifier of the section
+   * @description The unique identifier of the section
    * @type {string} 
    */
   id;
 
   /** 
-   * The CSS classes for the list section
+   * @description The current status of the section
+   * @type {string} 
+   */
+  status;
+
+  /** 
+   * @description The CSS classes for the list section
    * @type {string} 
    */
   liClasses;
 
   /** 
-   * The CSS classes for the marker
+   * @description The CSS classes for the marker
    * @type {string} 
    */
   markerClasses;
 
   /** 
-   * The label of the section
+   * T@description he label of the section
    * @type {string} 
    */
   label;
 
   /**
-   * The error stack trace (if any) that happened during the execution of the section
+   * @description The error stack trace (if any) that happened during the execution of the section
    * @type {string} 
    */
   stack;
 
   /** 
-   * The context information of the section (mostly when an error occured)
+   * @description The context information of the section (mostly when an error occured)
    * @type {string} 
    */
   context;
 }
 
 /**
- * Displays a spinner to indicate that the organization check is in progress.
+ * @description Displays a spinner to indicate that the organization check is in progress.
  */
-export default class OrgCheckSpinner extends LightningElement {
+export default class OrgcheckSpinner extends LightningElement {
 
   /**
-   * Hide the element by setting the isShown property to false.
+   * @description Hide the element by setting the isShown property to false.
    * @private
    */
   hide() {
@@ -68,7 +73,7 @@ export default class OrgCheckSpinner extends LightningElement {
   }
 
   /**
-   * Prevents the object from being closed.
+   * @description Prevents the object from being closed.
    * @private
    */
   cantBeClosed() {
@@ -76,18 +81,19 @@ export default class OrgCheckSpinner extends LightningElement {
   }
 
   /**
-   * Initializes the object by setting default values for sections, error flag, waiting time, and keys index.
+   * @description Initializes the object by setting default values for sections, error flag, waiting time, and keys index.
    * @private
    */
   init() {
     this.sections = [];
     this.hadError = false;
     this.waitingTime = 0;
-    this.keysIndex = new Map();
+    this._keysIndex = new Map();
+    this.inProgressMessage = '';
   }
 
   /**
-   * Connected callback function
+   * @description Connected callback function
    */
   connectedCallback() {
     this.hide();
@@ -96,25 +102,16 @@ export default class OrgCheckSpinner extends LightningElement {
   }
 
   /**
-   * Marks the start of a new section in the spinner.
-   * @param {string} sectionName - The name of the section being started.
-   * @param {string} message - The message associated with starting the section.
-   */
-  @api sectionStarts(sectionName, message) {
-    this._setSection(sectionName, message, SectionStatus.STARTED);
-  }
-
-  /**
-   * Continues the specified section in the spinner with the given message.
+   * @description Continues the specified section in the spinner with the given message.
    * @param {string} sectionName - The name of the section to continue.
    * @param {string} message - The message to display for the continuation.
    */
-  @api sectionContinues(sectionName, message) {
+  @api sectionLog(sectionName, message) {
     this._setSection(sectionName, message, SectionStatus.IN_PROGRESS);
   }
 
   /**
-   * Marks the end of a section in the spinner with the given section name and optional message.
+   * @description Marks the end of a section in the spinner with the given section name and optional message.
    * @param {string} sectionName - The name of the section being ended.
    * @param {string} message - An optional message to provide additional context.
    */
@@ -123,83 +120,76 @@ export default class OrgCheckSpinner extends LightningElement {
   }
 
   /**
-   * Handles a failed section by updating the state variables and setting the section status.
+   * @description Handles a failed section by updating the state variables and setting the section status.
    * @param {string} sectionName - The name of the section that failed.
-   * @param {any} error - The error object or message associated with the failure.
+   * @param {string | Error} error - The error object or message associated with the failure.
    */
   @api sectionFailed(sectionName, error) {
-    if (this.isShown === false) this.isShown = true;
     this.hadError = true;
-    if (error) {
-      if (typeof error === 'string') {
-        this._setSection(sectionName, error, SectionStatus.FAILED);
-      } else {
-        this._setSection(sectionName, `${error.name}: ${error.message}`, SectionStatus.FAILED, error);
-        console.error(
-          `name of the section: ${sectionName}`,
-          `name of the error: ${error?.name}`,
-          `message of the error: ${error?.message}`,
-          `stacktrace of the error: ${error?.stack}`,
-          `cause of the error: ${error?.cause}`,
-          error
-        );
-      }
-    } else {
-      this._setSection(sectionName, 'The error was undefined...', SectionStatus.FAILED);
+    if (error instanceof Error) {
+      console.error(
+        `name of the section: ${sectionName}`,
+        `name of the error: ${error?.name}`,
+        `message of the error: ${error?.message}`,
+        `stacktrace of the error: ${error?.stack}`,
+        `cause of the error: ${error?.cause}`,
+        error
+      );
     }
+    this._setSection(sectionName, error, SectionStatus.FAILED);
   }
 
   /**
-   * Opens the spinner and initializes necessary properties and timers.
-   * If the spinner is not already shown, it resets sections, keys index, and sets the open time.
-   * It then starts a timer to update the waiting time every second.
+   * @description Opens the spinner and initializes necessary properties and timers.
+   *                If the spinner is not already shown, it resets sections, keys index, and sets the open time.
+   *                It then starts a timer to update the waiting time every second.
    */
   @api open() {
     if (this.isShown === false) {
       this.cantBeClosed();
       this.init();
-      this.openSince = new Date().getTime();
+      this._openSince = Date.now();
       this.isShown = true;
       const updateWaitingTime = () => {
-        this.waitingTime = (new Date().getTime() - this.openSince) / 1000;
+        this.waitingTime = (Date.now() - this._openSince) / 1000;
       };
-      clearInterval(this.intervalId);
+      clearInterval(this._intervalId);
       // eslint-disable-next-line @lwc/lwc/no-async-operation
-      this.intervalId = setInterval(updateWaitingTime, 1000);
+      this._intervalId = setInterval(updateWaitingTime, 1000);
     }
   }
 
   /**
-   * Sets the 'isClosable' property to true and clears the interval timer
+   * @description Sets the 'isClosable' property to true and clears the interval timer
    */
   @api canBeClosed() {
     this.isClosable = true;
-    clearInterval(this.intervalId);
+    clearInterval(this._intervalId);
   }
 
   /**
-   * Handles the closing of a section by resetting all relevant properties and clearing intervals
+   * @description Handles the closing of a section by resetting all relevant properties and clearing intervals
    */
   handleClose() {
     this.hide();
     this.init();
-    this.openSince = undefined;
-    clearInterval(this.intervalId);
+    this._openSince = undefined;
+    clearInterval(this._intervalId);
   }
 
   /**
-   * Closes the spinner after a specified wait time.
+   * @description Closes the spinner after a specified wait time.
    * @param {number} waitBeforeClosing - The time to wait before closing the API.
    * @async
    */
   @api async close(waitBeforeClosing) {
     this.cantBeClosed();
-    const shownFor = new Date().getTime() - this.openSince;
+    const shownFor = Date.now() - this._openSince;
     const realClose = () => {
       this.hide();
       this.init();
-      this.openSince = undefined;
-      clearInterval(this.intervalId);
+      this._openSince = undefined;
+      clearInterval(this._intervalId);
     };
     if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
       // eslint-disable-next-line @lwc/lwc/no-async-operation
@@ -210,105 +200,117 @@ export default class OrgCheckSpinner extends LightningElement {
   }
 
   /**
-   * URL of the spinning mascot
+   * @description URL of the spinning mascot
    * @type {string}
    */
   spinningURL = OrgCheckStaticRessource + '/img/Mascot+Animated.svg';
 
   /**
-   * Switch to show the spinner or not
+   * @description Switch to show the spinner or not
    * @type {boolean}
    */
   isShown;
 
   /**
-   * Switch to show the close button of the spinner or not
+   * @description Switch to show the close button of the spinner or not
    * @type {boolean}
    */
   isClosable;
 
   /**
-   * Number of millisecond to wait before closing the spinner
+   * @description Number of millisecond to wait before closing the spinner
    * @type {number}
    */
   waitingTime;
 
   /**
-   * Say if we had an error during spinning and then need to stop to let the user see the error
+   * @description Say if we had an error during spinning and then need to stop to let the user see the error
    * @type {boolean}
    */
   hadError;
 
   /**
-   * Map to find the section index from its name
+   * @description Map to find the section index from its name
    * @type {Map}
    * @private
    */
-  keysIndex;
+  _keysIndex;
 
   /**
-   * Open since what time?
+   * @description Open since what time?
    * @type {number}
    * @private
    */
-  openSince;
+  _openSince;
 
   /**
-   * Information to use internally with setInterval method.
+   * @description Information to use internally with setInterval method.
    * @type {any}
    * @private
    */
-  intervalId;
+  _intervalId;
 
   /**
-   * List of sections to show in the spinner
+   * @description Progression message
+   * @type {string}
+   * @public
+   */ 
+  inProgressMessage;
+
+  /**
+   * @description List of sections to show in the spinner
    * @type {Array<Section>}
    */
   @track sections;
 
   /**
-   * Sets a section with the given section name, message, status, and error.
+   * @description Sets a section with the given section name, message, status, and error. We show the spinner if not yet opened.
    * @param {string} sectionName - The name of the section.
-   * @param {string} message - The message to display in the section.
+   * @param {string | Error} message - The message (string or error) to handle in the section.
    * @param {string} status - The status of the section.
-   * @param {any} error - Any error associated with the section.
    * @private
    */
-  _setSection(sectionName, message, status, error) {
-    
+  _setSection(sectionName, message, status) {
+
+    // make sure the spinner is open (if not already)
+    this.open();
+
     /** @type {Section} */
     let section = {
       id: sectionName,
+      status: status,
+      label: (message instanceof Error ? `${message.name}: ${message.message}` : message),
+      stack: (message instanceof Error ? message?.stack : ''),
+      context: (message instanceof Error ? JSON.stringify(message['context']) : ''),
       liClasses: 'slds-progress__item',
-      markerClasses: 'slds-progress__marker',
-      label: message,
-      stack: error?.stack,
-      context: error ? JSON.stringify(error.context) : undefined
+      markerClasses: 'slds-progress__marker'
     };
 
+    // Add specific classes depending on the status
     switch (status) {
-      case SectionStatus.STARTED:
-      case SectionStatus.IN_PROGRESS:
-      default:
-        section.liClasses += ' slds-is-completed';
-        section.markerClasses += ' progress-marker-started';
-        break;
-      case SectionStatus.ENDED:
-        section.liClasses += ' slds-is-completed li-ended';
-        section.markerClasses += ' progress-marker-ended';
-        break;
-      case SectionStatus.FAILED:
-        section.liClasses += ' slds-has-error';
-        section.markerClasses += ' progress-marker-error';
-        break;
+      case SectionStatus.IN_PROGRESS: section.liClasses += ' slds-is-completed';          section.markerClasses += ' progress-marker-started'; break;
+      case SectionStatus.ENDED:       section.liClasses += ' slds-is-completed li-ended'; section.markerClasses += ' progress-marker-ended';   break;
+      case SectionStatus.FAILED:      section.liClasses += ' slds-has-error';             section.markerClasses += ' progress-marker-error';   break;
     }
     
-    if (this.keysIndex.has(section.id) === false) {
-      this.keysIndex.set(section.id, this.sections.length);
-      this.sections.push(section);
+    // Is it a new section?
+    if (this._keysIndex.has(sectionName) === false) {
+      // Yes it's a new section!
+      this._keysIndex.set(sectionName, this.sections.length);
+      this.sections.push(section); // insert this section
     } else {
-      const index = this.keysIndex.get(section.id);
-      this.sections[index] = section;
+      // Existing section...
+      const index = this._keysIndex.get(sectionName);
+      this.sections[index] = section; // update the section
+    }
+
+    // Count the in_progress sections
+    const countInProgressSections = this.sections.filter(s => s.status === SectionStatus.IN_PROGRESS).length;
+    if (countInProgressSections === 0) {
+      this.inProgressMessage = '';
+      this.close(0);
+    } else {
+      this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress with a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
     }
   }
 }
