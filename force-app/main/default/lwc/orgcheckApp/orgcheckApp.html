@@ -34,7 +34,7 @@
         <c-orgcheck-modal></c-orgcheck-modal>
     </div>
     <lightning-tabset variant="scoped">
-        <lightning-tab label="Home" onactive={handleTabActivation}>
+        <lightning-tab label="Home" onactive={handleMainTabActivation}>
             <lightning-tabset>
                 <lightning-tab value="welcome" label="Welcome!" onactive={handleSubTabActivation}>
                     <lightning-layout>
@@ -107,7 +107,7 @@
                         </lightning-layout-item>
                         <lightning-layout-item size="4">
                             <template if:true={useOrgCheckInThisOrgConfirmed}>
-                                <c-orgcheck-cache-manager onload={handleSubTabContentLoaded} onremovecache={handleRemoveCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
+                                <c-orgcheck-cache-manager onload={handleSubTabContentLoaded} onremovecache={handleRemoveAllCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
                             </template>
                             <template if:true={useOrgCheckInThisOrgNeedConfirmation}>
                                 <lightning-card icon-name="utility:signature" title="Usage acceptance">
@@ -132,23 +132,24 @@
             </lightning-tabset>
         </lightning-tab>
         <template if:true={useOrgCheckInThisOrgConfirmed}>
-            <lightning-tab label="⚽ Objects, OWDs and Fields" onactive={handleTabActivation}>
+            <lightning-tab label="⚽ Objects, OWDs and Fields" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
                             label="Refresh" 
-                            title="Refresh" 
+                            title="Refresh the data used in this tab..."
                             variant="brand-outline" 
                             class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="object,objects,custom-fields"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Data Model, Objects, Org-Wide Defaults and Custom Fields in your org. <br />
                     </lightning-tab>
-                    <lightning-tab value="object" label="⚽ Object Documentation" onactive={handleSubTabActivation}>
+                    <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
                         <template if:false={objectData}>
                             There is no specific object set in the global filter above. <br />
                             <br />
@@ -418,20 +419,21 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="👮 Users, Profiles and Permission Sets" onactive={handleTabActivation}>
+            <lightning-tab label="👮 Users, Profiles and Permission Sets" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
                             label="Refresh" 
-                            title="Refresh" 
+                            title="Refresh the data used in this tab..."
                             variant="brand-outline" 
                             class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="active-users,profiles,permission-sets,profile-restrictions,profile-password-policies,object-permissions,app-permissions"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Active Internal Users, Profiles, Permission Sets, Profile restrictions and passwrod policies and matrix view of object and application permissions in your org.
                     </lightning-tab>
                     <lightning-tab value="active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
@@ -450,7 +452,7 @@
                             show-export-button
                             export-basename="Users"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="profiles" label="👮 Profiles" onactive={handleSubTabActivation}>
+                    <lightning-tab value="profiles" label="🚓 Profiles" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable
                             empty-message="There is no profile to show."
                             show-search
@@ -552,23 +554,24 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🐇 Roles, Public Groups and Queues" onactive={handleTabActivation}>
+            <lightning-tab label="🐇 Roles, Public Groups and Queues" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
                             label="Refresh" 
-                            title="Refresh" 
+                            title="Refresh the data used in this tab..."
                             variant="brand-outline" 
                             class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about the Role Hierarchy, the Public groups and the Queues in your org.
                     </lightning-tab>
-                    <lightning-tab value="roles-explorer" label="🐇 Role Explorer" onactive={handleSubTabActivation}>
+                    <lightning-tab value="roles-explorer" label="🐙 Role Explorer" onactive={handleSubTabActivation}>
                         <c-orgcheck-graphics 
                             type="hierarchy"
                             name="Role Hierarchy" 
@@ -578,7 +581,7 @@
                             hierarchy-show-level
                             source={rolesTree}></c-orgcheck-graphics>
                     </lightning-tab>
-                    <lightning-tab value="roles-listing" label="🐰 Role Listing" onactive={handleSubTabActivation}>
+                    <lightning-tab value="roles-listing" label="🦓 Role Listing" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable
                             empty-message="There is no role to show."
                             show-search
@@ -594,7 +597,7 @@
                             show-export-button
                             export-basename="Roles"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="public-groups" label="🦆 Public Groups" onactive={handleSubTabActivation}>
+                    <lightning-tab value="public-groups" label="🐘 Public Groups" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable
                             empty-message="There is no public group to show."
                             show-search
@@ -610,7 +613,7 @@
                             show-export-button
                             export-basename="PublicGroups"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="queues" label="🦌 Queues" onactive={handleSubTabActivation}>
+                    <lightning-tab value="queues" label="🦒 Queues" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable
                             empty-message="There is no queue to show."
                             show-search
@@ -628,20 +631,21 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🤖 Automations" onactive={handleTabActivation}>
+            <lightning-tab label="🤖 Automations" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
                             label="Refresh" 
-                            title="Refresh" 
+                            title="Refresh the data used in this tab..."
                             variant="brand-outline" 
                             class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="flows,process-builders,workflows"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Automations like Flows, Process Builders and Workflows in your org.
                     </lightning-tab>
                     <lightning-tab value="flows" label="🏎️ Flows" onactive={handleSubTabActivation}>
@@ -694,20 +698,21 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🎁 Setting artefacts" onactive={handleTabActivation}>
+            <lightning-tab label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
                             label="Refresh" 
-                            title="Refresh" 
+                            title="Refresh the data used in this tab..."
                             variant="brand-outline" 
                             class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="custom-labels"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Settngs artefacts like Custom Labels in your org.
                     </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
@@ -728,20 +733,21 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🥐 Visual Components" onactive={handleTabActivation}>
+            <lightning-tab label="🥐 Visual Components" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button 
-                            label="Refresh" 
-                            title="Refresh" 
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
+                        label="Refresh" 
+                        title="Refresh the data used in this tab..."
+                        variant="brand-outline" 
+                        class="slds-var-m-left_x-small" 
+                        icon-name="utility:refresh"
+                        onclick={handleClickRefreshCurrentTab}
+                        value="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Visualforce pages, Visualforce components, Lightning Pages, Aura Components and Lightning Web Components in your org.
                     </lightning-tab>
                     <lightning-tab value="visual-force-pages" label="🥖 Visual Force Pages" onactive={handleSubTabActivation}>
@@ -826,28 +832,35 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🔥 Apex" onactive={handleTabActivation}>
+            <lightning-tab label="🔥 Apex" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Run All Tests" title="Run All Tests" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:apex" onclick={handleClickRunAllTests}></lightning-button>
+                        <lightning-button 
+                            label="Refresh" 
+                            title="Refresh the data used in this tab..."
+                            variant="brand-outline" 
+                            class="slds-var-m-left_x-small" 
+                            icon-name="utility:refresh"
+                            onclick={handleClickRefreshCurrentTab}
+                            data-recipes="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>
+                    </lightning-layout-item>
+                    <lightning-layout-item>
+                        <lightning-button 
+                            label="Run All Tests" 
+                            title="Run All Tests" 
+                            variant="brand-outline" 
+                            class="slds-var-m-left_x-small" 
+                            icon-name="utility:apex" 
+                            onclick={handleClickRunAllTests}></lightning-button>
                     </lightning-layout-item>
                     <template if:true={isThereAnyApexUncompiled}>
                         <lightning-layout-item>
                             <lightning-button label="You have uncompiled classes, ask for recompilation!" title="You have uncompiled classes, ask for recompilation!" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRecompile}></lightning-button>
                         </lightning-layout-item>
                     </template>
-                    <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh" 
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh" 
-                            onclick={handleClickRefresh}></lightning-button>
-                    </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary">
+                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
                         Here you can get information about Apex classes (compiled, uncompiled, unit tests) and Apex triggers in your org.
                     </lightning-tab>
                     <lightning-tab value="apex-classes" label="❤️‍🔥 Apex Classes" onactive={handleSubTabActivation}>

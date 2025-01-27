@@ -6,19 +6,17 @@
             <div class="slds-progress slds-progress_vertical">
                 <ol class="slds-progress__list" id="list-loading-items">
                     <template for:each={items} for:item="item">
-                        <li key={item.name} class="slds-progress__item slds-is-completed">
-                            <div class="slds-progress__marker"></div>
-                            <div class="slds-progress__item_content">
-                                <b>{item.name}</b>: 
-                                <template lwc:if={item.isEmpty}> (empty)</template>
-                                <template lwc:else>
+                        <template if:false={item.isEmpty}>
+                            <li key={item.name} class="slds-progress__item slds-is-completed">
+                                <div class="slds-progress__marker"></div>
+                                <div class="slds-progress__item_content">
+                                    <b>{item.name}</b>: 
                                     <template lwc:if={item.isMap}> {item.length} in a map</template>
                                     <template lwc:else> 1 in an object</template>
-                                </template>
-                                <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
-                            </div>
-                            <lightning-button label="Remove" variant="destructive-text" onclick={handleRemoveOneCache} data-item-name={item.name}></lightning-button>
-                        </li>
+                                    <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
+                                </div>
+                            </li>
+                        </template>
                     </template>
                 </ol>
             </div>

@@ -131,15 +131,6 @@ export class OrgCheckAPI {
     }
 
     /**
-     * @description Remove a given cache from dataset manager
-     * @param {string} name 
-     * @public
-     */
-    removeFromCache(name) {
-        this._cacheManager.remove(name);
-    }
-
-    /**
      * @description Get cache information from dataset manager
      * @returns {Array<OrgCheckDataCacheItem>} list of cache information 
      * @public

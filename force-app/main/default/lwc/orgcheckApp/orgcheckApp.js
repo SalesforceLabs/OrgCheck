@@ -1,7 +1,8 @@
-import { OrgCheckAPI } from './api/orgcheck-api';
-import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+import { OrgCheckAPI } from './api/orgcheck-api';
+import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
+import { OrgCheckDataCacheItem } from './api/core/orgcheck-api-cachemanager';
 import { SFDC_Flow } from './api/data/orgcheck-api-data-flow';
 import { SFDC_Field } from './api/data/orgcheck-api-data-field';
 import { SFDC_CustomLabel } from './api/data/orgcheck-api-data-customlabel';
@@ -106,6 +107,13 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     themeForOrgLimit;
+
+    /**
+     * @description list of items stored in org check cache
+     * @type {Array<OrgCheckDataCacheItem>}
+     * @public 
+     */ 
+    cacheManagerData;
 
     /**
      * @description Salesforce Id of the current user passed by Visual Force page
@@ -261,12 +269,16 @@ export default class OrgcheckApp extends LightningElement {
         );
     }
 
+    get isThereAnyApexUncompiled() {
+        return this.apexUncompiledTableData?.length > 0 || false;
+    }
+
     _internalTransformers = {
         'active-users':              { data: 'usersTableData',                   remove: () => { this._api.removeAllActiveUsersFromCache(); },             getAlias: () => '',                                                       get: async () => { return this._api.getActiveUsers(); }},
         'apex-classes':              { data: 'apexClassesTableData',             remove: () => { this._api.removeAllApexClassesFromCache(); },             getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexClasses(this._namespace); }},
-        'apex-tests':                { data: 'apexTestsTableData',               remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTests(this._namespace); }},
+        'apex-unit-tests':           { data: 'apexTestsTableData',               remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTests(this._namespace); }},
         'apex-triggers':             { data: 'apexTriggersTableData',            remove: () => { this._api.removeAllApexTriggersFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTriggers(this._namespace); }},
-        'apex-uncompiled':           { data: 'apexUncompiledTableData',          remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this._namespace); }},
+        'apex-recompilation-needed': { data: 'apexUncompiledTableData',          remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this._namespace); }},
         'app-permissions':           { data: 'appPermissionsData',               remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this._namespace); }},
         'custom-fields':             { data: 'customFieldsTableData',            remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this._namespace}-${this._objectType}-${this._object}`, get: async () => { return this._api.getCustomFields(this._namespace, this._objectType, this._object); }},
         'custom-labels':             { data: 'customLabelsTableData',            remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getCustomLabels(this._namespace); }},
@@ -284,12 +296,13 @@ export default class OrgcheckApp extends LightningElement {
         'profiles':                  { data: 'profilesTableData',                remove: () => { this._api.removeAllProfilesFromCache(); },                getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getProfiles(this._namespace); }},
         'public-groups':             { data: 'publicGroupsTableData',            remove: () => { this._api.removeAllPublicGroupsFromCache(); },            getAlias: () => '',                                                       get: async () => { return this._api.getPublicGroups(); }},
         'queues':                    { data: 'queuesTableData',                  remove: () => { this._api.removeAllQueuesFromCache(); },                  getAlias: () => '',                                                       get: async () => { return this._api.getQueues(); }},
-        'roles':                     { data: 'rolesTableData',                   remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRoles(); }},
+        'roles-listing':             { data: 'rolesTableData',                   remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRoles(); }},
+        'roles-explorer':            { data: 'rolesTree',                        remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRolesTree(); }},
         'visual-force-components':   { data: 'visualForceComponentsTableData',   remove: () => { this._api.removeAllVisualForceComponentsFromCache(); },   getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForceComponents(this._namespace); }},
         'visual-force-pages':        { data: 'visualForcePagesTableData',        remove: () => { this._api.removeAllVisualForcePagesFromCache(); },        getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForcePages(this._namespace); }},
         'workflows':                 { data: 'workflowsTableData',               remove: () => { this._api.removeAllWorkflowsFromCache(); },               getAlias: () => '',                                                       get: async () => { return this._api.getWorkflows(); }}
     }
-
+    
     /**
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
      * @param {string} recipe 
@@ -298,26 +311,33 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _updateData(recipe, forceRefresh=false) {
-        console.error('_updateData :: recipe: ', recipe, ', forceRefresh: ', forceRefresh);
         const transformer = this._internalTransformers[recipe]; 
-        console.error('_updateData :: transformer: ', transformer);
         if (transformer) {
             if (forceRefresh === true) {
+                // Call the remove cache from the API for this recipe
                 transformer.remove();
             }
-            const alias = transformer.getAlias();
-            if (transformer.lastAlias !== alias) {
-                transformer.lastAlias = alias;
-                this[transformer.data] = await transformer.get();
+            // Is this recipe related to the current opened tab?
+            // In this case, we would like to gather the data to update at rest the data
+            // If not we will wait for the user to switch to that tab specifically
+            if (recipe === this._currentTab) {
+                // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
+                const alias = transformer.getAlias();
+                // If you forced the refresh the data should be retrieved even if the alias is the same
+                // OR
+                // If the alias has changed (like the combinaison of filters value which will pontentially change the returned value from the API
+                if (forceRefresh === true || transformer.lastAlias !== alias) {
+                    transformer.lastAlias = alias;
+                    this[transformer.data] = await transformer.get();
+                }
             }
-            console.error('_updateData :: changed ', transformer.data);
-
+        } else {
+            console.error(`Transformer not found for recipe: ${recipe}`);
         }
-        console.error('_updateData :: done');
     }
 
     /**
-     * @description Update the Daily APU Request Limit information in the UI from the API
+     * @description Update the Daily API Request Limit information in the UI from the API
      * @private
      */ 
     _updateLimits() {
@@ -328,6 +348,14 @@ export default class OrgcheckApp extends LightningElement {
             else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
             this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;
         }
+    }
+
+    /**
+     * @description Update the api cache information in the UI from the API
+     * @private
+     */ 
+    _updateCacheInformation() {
+        this.cacheManagerData = this._api.getCacheInformation();
     }
 
     /**
@@ -425,11 +453,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersValidated() {
-        console.error('handleFiltersValidated :: start');
         await this._updateCurrentTab();
-        console.error('handleFiltersValidated :: ', this.objectData);
-        console.error('handleFiltersValidated :: ', this.objectData?.apiname);
-        console.error('handleFiltersValidated :: end');
     }
 
     /**
@@ -461,11 +485,21 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      * @async
      */
-    async handleTabActivation(event) {
-        const firstTabset = event.target['querySelector']('lightning-tabset');
-        if (firstTabset) {
-            await this._updateCurrentTab(firstTabset.activeTabValue);
-        }
+    async handleMainTabActivation(event) {
+        // The source of the event is the main tab
+        const mainTab = event.target;
+        // In each main tab there is an inner tabset that we want to get
+        const subTabset = mainTab['querySelector']('lightning-tabset');
+        // do nothing if we did not find any tabset (example the welcome tab does not have any!)
+        if (!subTabset) return;
+        // That subTabSet contains the last active tab
+        const currentActivatedSubTab = subTabset.activeTabValue;
+        // In case the current activated subTab is undefined we also do nothing
+        if (!currentActivatedSubTab) return;
+        // And that value is the next current tab we want to store
+        this._currentTab = currentActivatedSubTab;
+        // Ask to update the current data
+        await this._updateCurrentTab();
     }
 
     /**
@@ -475,8 +509,12 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleSubTabActivation(event) {
-        // the value of the selected tab is used to guess what needs to be gathered
-        await this._updateCurrentTab(event.target['value']);
+        // The source of the event is a sub tab
+        const subTab = event.target;
+        // That subTab's name will be the next currentTab
+        this._currentTab = subTab['value'];
+        // Ask to update the current data
+        await this._updateCurrentTab();
     }
 
     /**
@@ -484,25 +522,19 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      * @async
      */
-    async handleSubTabContentLoaded() {
-        await this._updateCurrentTab();
+    handleSubTabContentLoaded() {
+        this._updateCacheInformation();
     }
 
     /**
-     * @description Method called when the user ask to remove an item or all the cache in the UI
-     * @param {Event} event should contain a detail property with two properties: "allItems" (boolean) 
-     *                      and optinally "itemName" (string), if allItems=true, all items should be removed, 
-     *                      if not, the "itemName" gives us the name if the cache entry to be removed.
+     * @description Method called when the user ask to remove all the cache in the UI
      * @public
      * @async
      */
-    async handleRemoveCache(event) {
-        if (event['detail'].allItems === true) {
+    async handleRemoveAllCache() {
+        if (this._api) {
             this._api.removeAllFromCache();
             window.location.reload();
-        } else {
-            this._api.removeFromCache(event['detail'].itemName);
-            await this._updateCurrentTab();
         }
     }
 
@@ -553,17 +585,14 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Event called when the user clicks on the "Refresh" button
+     * @description Event called when the user clicks on the "Refresh" button from the current tab
      * @param {Event} event 
      * @async
      * @public
      */ 
-    async handleClickRefresh(event) {
-        //const recipes = event.target['getAttribute']('data-recipes')?.split(',');
-        //await Promise.all(recipes.map((/** @type {string} */ recipe) => {
-        //    this._callApiRemoveFromCache(recipe);
-        //    return this._callApiGetData(recipe);
-        //}));
+    async handleClickRefreshCurrentTab(event) {
+        const recipes = event.target['getAttribute']('data-recipes')?.split(',');
+        await Promise.all(recipes.map((/** @type {string} */ recipe) => { this._updateData(recipe, true); } ));
     }
 
     /**
@@ -607,40 +636,29 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Unique method to propagate a change to be done in the current tab.
-     *              If the given input value is specified, this must be different from the current tab property, otherwise this method does nothing.
-     *              If the given input value is undefined, the method will use the current tab.
-     *              This can be because end user selected another tab
-     *              This can be also because a filter was validated and needs to be propagated into the current tab
-     *              This can be also if the current tab is finally loaded
-     *              Usage: as this method is async, you should await when calling it!
-     * @param {string} [nextCurrentTab] Next current tab that will be activated/selected.
      */
-    async _updateCurrentTab(nextCurrentTab) {
-
-        console.error('_updateCurrentTab :: start');
+    async _updateCurrentTab() {
 
         if (this._hasRenderOnce === false) return;
-        this._updateLimits();
         
-        console.error('_updateCurrentTab :: continue');
-
-        // If the next current tab is specified, we use it to reset the current tab property
-        if (nextCurrentTab) this._currentTab = nextCurrentTab;
-
-        console.error('_updateCurrentTab :: this._currentTab: ', this._currentTab);
-
-        const TAB_SECTION = `TAB ${this._currentTab}`;
-        try {
-            this._spinner.open();
-            this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
-            await this._updateData(this._currentTab);
-            this._spinner.sectionEnded(TAB_SECTION, `Done.`);
-            this._spinner.close(0);
-
-        } catch (error) {
-            this._spinner.sectionFailed(TAB_SECTION, error);
-            this._spinner.canBeClosed();
+        if (this._currentTab === 'welcome') {
+            this._updateCacheInformation();
+        } else {
+            const TAB_SECTION = `TAB ${this._currentTab}`;
+            try {
+                this._spinner.open();
+                this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
+                await this._updateData(this._currentTab);
+                this._spinner.sectionEnded(TAB_SECTION, `Done.`);
+                this._spinner.close(0);
+            } catch (error) {
+                this._spinner.sectionFailed(TAB_SECTION, error);
+                this._spinner.canBeClosed();
+            } finally {
+                this._updateLimits();
+            }
         }
+        
 
 
     /*
@@ -1238,6 +1256,9 @@ export default class OrgcheckApp extends LightningElement {
      */
     processBuildersTableColumns = this.flowsTableColumns;
     
+    /**
+     * @description Columns descriptions for the data table about workflows
+     */
     workflowsTableColumns = [
         { label: 'Score',             type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',              type: 'id',       data: { value: 'name', url: 'url' }},
@@ -1329,9 +1350,6 @@ export default class OrgcheckApp extends LightningElement {
     
 
 
-
-
-    cacheManagerData;
 
     scorePieCategoriesAggregateDecorator = (data) => {
         const all = data.length;
