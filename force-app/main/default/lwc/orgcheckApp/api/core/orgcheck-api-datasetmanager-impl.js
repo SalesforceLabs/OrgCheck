@@ -48,11 +48,18 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
     _datasets;
 
     /**
-     * @description Cache manager
+     * @description Datasets promise cache
+     * @type {Map<string, Promise>}
+     * @private
+     */
+    _datasetPromisesCache;
+
+    /**
+     * @description Data cache manager
      * @type {OrgCheckDataCacheManagerIntf}
      * @private
      */
-    _cache;
+    _dataCache;
 
     /**
      * @description Salesforce manager
@@ -94,8 +101,9 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
         
         this._sfdcManager = sfdcManager;
         this._logger = logger;
-        this._cache = cacheManager;
+        this._dataCache = cacheManager;
         this._datasets = new Map();
+        this._datasetPromisesCache = new Map();
         this._dataFactory = new OrgCheckDataFactory(sfdcManager);
 
         this._datasets.set(OrgCheckDatasetAliases.APEXCLASSES, new OrgCheckDatasetApexClasses());
@@ -143,41 +151,43 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
             const section = `DATASET ${alias}`;
-            return new Promise((resolve, reject) => {
-                this._logger.log(section, `Checking the cache for key=${cacheKey}...`);
-                // Check cache if any
-                if (this._cache.has(cacheKey) === true) {
-                    // Set the results from cache
-                    this._logger.ended(section, 'There was data in cache, we use it!');
-                    // Return the key/alias and value from the cache
-                    resolve([ alias, this._cache.get(cacheKey) ]); // when data comes from cache instanceof won't work! (keep that in mind)
-                    // Stop there
-                    return;
-                }
-                this._logger.log(section, 'There was no data in cache. Let\'s retrieve data.');
-                // Calling the retriever
-                this._datasets.get(alias).run(
-                    // sfdc manager
-                    this._sfdcManager,
-                    // data factory
-                    this._dataFactory,
-                    // local logger
-                    this._logger.toSimpleLogger(section),
-                    // Send any parameters if needed
-                    parameters
-                ).then((data) => {
-                    // Cache the data (if possible and not too big)
-                    this._cache.set(cacheKey, data); 
-                    // Some logs
-                    this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
-                    // Return the key/alias and value from the cache
-                    resolve([ alias, data ]);
-                }).catch((error) => {
-                    // Reject with this error
-                    this._logger.failed(section, error);
-                    reject(error);
-                });
-            });
+            if (this._datasetPromisesCache.has(cacheKey) === false) {
+                this._datasetPromisesCache.set(cacheKey, new Promise((resolve, reject) => {
+                    this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
+                    // Check data cache if any
+                    if (this._dataCache.has(cacheKey) === true) {
+                        // Set the results from data cache
+                        this._logger.ended(section, 'There was data in data cache, we use it!');
+                        // Return the key/alias and value from the data cache
+                        resolve([ alias, this._dataCache.get(cacheKey) ]); // when data comes from cache instanceof won't work! (keep that in mind)
+                    } else {
+                        this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
+                        // Calling the retriever
+                        this._datasets.get(alias).run(
+                            // sfdc manager
+                            this._sfdcManager,
+                            // data factory
+                            this._dataFactory,
+                            // local logger
+                            this._logger.toSimpleLogger(section),
+                            // Send any parameters if needed
+                            parameters
+                        ).then((data) => {
+                            // Cache the data (if possible and not too big)
+                            this._dataCache.set(cacheKey, data); 
+                            // Some logs
+                            this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
+                            // Return the key/alias and value from the cache
+                            resolve([ alias, data ]);
+                        }).catch((error) => {
+                            // Reject with this error
+                            this._logger.failed(section, error);
+                            reject(error);
+                        });
+                    }
+                }));
+            }
+            return this._datasetPromisesCache.get(cacheKey);
         }))));
     }
 
@@ -192,7 +202,8 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
         }
         datasets.forEach((dataset) => {
             const cacheKey = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
-            this._cache.remove(cacheKey);
+            this._dataCache.remove(cacheKey);
+            this._datasetPromisesCache.delete(cacheKey);
         });
     }
 

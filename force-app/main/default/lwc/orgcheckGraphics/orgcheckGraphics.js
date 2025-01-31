@@ -38,6 +38,7 @@ export default class OrgcheckGraphics extends LightningElement {
    */
   @api set source(data) {
     this.#data = data;
+    this.hasNoData = data === undefined ;
     this.drawGraph();
   }
 
@@ -63,22 +64,30 @@ export default class OrgcheckGraphics extends LightningElement {
   @api hierarchyBoxTextPadding = 3;
   @api hierarchyBoxVerticalPadding = 5;
   @api hierarchyBoxHorizontalPadding = 50;
-  @api hierarchyBoxColorDecorator = (depth, data) => { console.debug(depth, data); return 'red'; };
-  @api hierarchyBoxInnerHtmlDecorator = (depth, data) => { console.debug(depth, data); return ''; };
-  @api hierarchyBoxOnClickDecorator = (depth, data) => { console.debug(depth, data); };
+  @api hierarchyBoxColorLegend = [];
+  @api hierarchyBoxColorDecorator = (depth, data) => { console.debug('hierarchyBoxColorDecorator', depth, data); return 0; };
+  @api hierarchyBoxInnerHtmlDecorator = (depth, data) => { console.debug('hierarchyBoxInnerHtmlDecorator', depth, data); return ''; };
+  @api hierarchyBoxOnClickDecorator = (depth, data) => { console.debug('hierarchyBoxOnClickDecorator', depth, data); };
   @api hierarchyEdgeColor = '#2f89a8';
   @api hierarchyShowLevel = false;
 
   @api pieSize = 30;
   @api pieStrokeWidth = 1;
-//  @api pieCategoriesAggregateDecorator = ()
+  @api pieCategoriesDecorator = (data) => { console.debug('pieCategoriesDecorator', data); return []; };
+
+  pieCategories;
+  pieTotal;
+  hierarchyLegend;
+  hasNoData = true;
+
   get isPie() {
     return this.type === 'pie';
   }
-  getPieCategories() {
-    return this.#data;
+
+  get isHierarchy() {
+    return this.type === 'hierarchy';
   }
-  
+
   /**
    * Draw the dependency graph
    */
@@ -86,31 +95,46 @@ export default class OrgcheckGraphics extends LightningElement {
 
     // If API not loaded yet, then just skip!
     if (this.#apiInitialized === false) {
-      console.error('drawGraph was called but the api is not yet loaded!');
       return;
     }
 
     // If no data to show, then just skip!
     if (this.#data === undefined) {
-      console.error('drawGraph was called but, the api has been loaded BUT there is no data set yet!');
       return;
     }
  
     switch (this.type) {
       case 'hierarchy':  this._drawHierarchy(); break;
       case 'pie':        this._drawPie();       break;
-      default:           console.error('drawGraph was called but, the api has been loaded, there is data, BUT there is no type set!');
+      default:           console.error(`Unsupported type=${this.type}`);
     }
   }
 
   _drawHierarchy() {
+    // If specified from the parent component (via @api), these properties will be typed as string! 
+    // Making sure it is considered as a number whatever the case
+    const boxHeight = this.hierarchyBoxHeight/1; 
+    const boxWidth = this.hierarchyBoxWidth/1;
+    const boxVerticalPadding = this.hierarchyBoxVerticalPadding/1;
+    const boxHorizontalPadding = this.hierarchyBoxHorizontalPadding/1;
+    const boxTextPadding = this.hierarchyBoxTextPadding/1;
+
+    // add the css style to the legend
+    this.hierarchyLegend = this.hierarchyBoxColorLegend.map((c) => {
+      return {
+        name: c.name,
+        color: c.color,
+        cssStyle: `background-color: ${c.color}`
+      };
+    });
+
     // Gives an idea of how big the tree will be
     const root = this.#api.hierarchy(this.#data);
     let mdepth = 0;
     root.each(d => { if (mdepth < d.depth) mdepth = d.depth });
-    root.dx = this.hierarchyBoxHeight + this.hierarchyBoxVerticalPadding;
-    root.dy = this.hierarchyBoxWidth + this.hierarchyBoxHorizontalPadding;
-    const WIDTH = this.hierarchyBoxWidth * (mdepth+1) + this.hierarchyBoxHorizontalPadding * mdepth;
+    root.dx = boxHeight + boxVerticalPadding;
+    root.dy = boxWidth + boxHorizontalPadding;
+    const WIDTH = boxWidth * (mdepth+1) + boxHorizontalPadding * mdepth;
 
     // Generate tree
     this.#api.tree().nodeSize([root.dx, root.dy])(root);
@@ -137,7 +161,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .append('g')
       .attr('font-family', this.fontFamily)
       .attr('font-size', this.fontSize)
-      .attr('transform', `translate(${root.dy / 2 - this.hierarchyBoxWidth},${root.dx - x0})`);
+      .attr('transform', `translate(${root.dy / 2 - boxWidth},${root.dx - x0})`);
 
     // Generate NODES with global click handler
     const nodes = graph.append('g')
@@ -151,21 +175,21 @@ export default class OrgcheckGraphics extends LightningElement {
 
     // Add a colored square for each node
     nodes.append('rect')
-      .attr('fill', (d) => this.hierarchyBoxColorDecorator(d.depth, d.data))
+      .attr('fill', (d) => this.hierarchyBoxColorLegend[this.hierarchyBoxColorDecorator(d.depth, d.data)]?.color)
       .attr('rx', 6)
       .attr('ry', 6)
       .attr('x', 0)
-      .attr('y', - this.hierarchyBoxHeight / 2)
-      .attr('width', this.hierarchyBoxWidth)
-      .attr('height', this.hierarchyBoxHeight);
+      .attr('y', - boxHeight / 2)
+      .attr('width', boxWidth)
+      .attr('height', boxHeight);
 
     // Add the content (in HTML) for each node
     nodes.append('foreignObject')
       .attr('class', 'slds-scrollable')
-      .attr('x', this.hierarchyBoxTextPadding)
-      .attr('y', - this.hierarchyBoxHeight / 2 + this.hierarchyBoxTextPadding)
-      .attr('width', () => this.hierarchyBoxWidth - 2 * this.hierarchyBoxTextPadding)
-      .attr('height', this.hierarchyBoxHeight - 2 * this.hierarchyBoxTextPadding)
+      .attr('x', boxTextPadding)
+      .attr('y', - boxHeight / 2 + boxTextPadding)
+      .attr('width', () => boxWidth - 2 * boxTextPadding)
+      .attr('height', boxHeight - 2 * boxTextPadding)
       .append('xhtml').html((d) => this.hierarchyBoxInnerHtmlDecorator(d.depth, d.data));
 
     // Generate EDGES
@@ -177,27 +201,39 @@ export default class OrgcheckGraphics extends LightningElement {
       .selectAll('path')
       .data(root.links())
       .join('path')
-      .attr('d', (d) => `M${d.source.y + this.hierarchyBoxWidth},${d.source.x}` +
-                        `C${d.source.y + 1.25*this.hierarchyBoxWidth},${d.source.x}` +
-                        ` ${d.source.y + 1.0*this.hierarchyBoxWidth},${d.target.x}` +
+      .attr('d', (d) => `M${d.source.y + boxWidth},${d.source.x}` +
+                        `C${d.source.y + 1.25*boxWidth},${d.source.x}` +
+                        ` ${d.source.y + 1.0*boxWidth},${d.target.x}` +
                         ` ${d.target.y},${d.target.x}`);
 
     if (this.hierarchyShowLevel === true) {
       // Add the level of each node
       nodes.filter((d) => d.depth > 0)
         .append('foreignObject')
-        .attr('x', -this.hierarchyBoxHorizontalPadding)
+        .attr('x', -boxHorizontalPadding)
         .attr('y', -15)
-        .attr('width', this.hierarchyBoxHorizontalPadding - this.hierarchyBoxTextPadding)
+        .attr('width', boxHorizontalPadding - boxTextPadding)
         .attr('height', 15)
         .append('xhtml').html((d) => `<div style="text-align: right;">Level #${d.depth}</div>`);
-    } 
+    }
   }
 
   _drawPie() {
-    const values = this.#data.map((d) => d.value);
-    const colors = this.#data.map((d) => d.color);
-    const radius = this.pieSize / 2;
+    this.pieTotal = 0;
+    this.pieCategories = this.pieCategoriesDecorator(this.#data).map((c) => { 
+      this.pieTotal += c.value;
+      return { 
+        name: c.name,
+        value: c.value,
+        color: c.color,
+        cssStyle: `background-color: ${c.color}`
+      }; 
+    });
+    const values = this.pieCategories.map((d) => d.value);
+    const colors = this.pieCategories.map((d) => d.color);
+    const diameter = this.pieSize / 1; // if size is specified its type will be string! making sure it is considered as a number whatever the case
+    const radius = diameter / 2;
+    const stroke = this.pieStrokeWidth/1; // same for stroke!
 
     // Get the main tag 
     const mainTag = this.#api.select(this.template.querySelector('.orgcheck-graph'));
@@ -205,36 +241,28 @@ export default class OrgcheckGraphics extends LightningElement {
     // Clean previous graph if needed
     mainTag.selectAll('*').remove();
     
-    const arc = this.#api.arc()
-      .innerRadius(radius / 2)
-      .outerRadius(radius)
-      .cornerRadius(8)
-      .padAngle(0.06);
-
-    const svg = mainTag
+    // Draw the pie
+    mainTag
       .append('svg')
-      .attr('width', this.pieSize)
-      .attr('height', this.pieSize)
-      .attr('viewBox', [
-        0, 
-        -this.pieSize/2 - this.pieStrokeWidth, 
-        this.pieSize/2 + this.pieStrokeWidth, 
-        this.pieSize + 2*this.pieStrokeWidth
-      ]);
-
-    const g = svg.selectAll('g')
+      .attr('width', diameter)
+      .attr('height', diameter)
+      .attr('viewBox', [ 0, -radius-stroke, stroke, diameter+2*stroke ])
+      .selectAll('g')
       .data(() => [this.#api.pie()(values)])
       .join('g')
-      .attr('transform', (d, i) => `translate(${this.pieSize / 2 * (i + 0.5)})`);
-
-    g.append('g')
+      .append('g')
       .attr('stroke', '#000')
-      .attr('stroke-width', `${this.pieStrokeWidth}px`)
+      .attr('stroke-width', `${stroke}px`)
       .attr('stroke-linejoin', 'round')
       .selectAll('path')
       .data(arcs => arcs)
       .join('path')
       .attr('fill', (d, i) => colors[i])
-      .attr('d', arc);
+      .attr('d', this.#api.arc()
+        .innerRadius(radius / 2)
+        .outerRadius(radius)
+        .cornerRadius(8)
+        .padAngle(0.06)
+      );
   }
 }

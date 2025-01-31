@@ -7,8 +7,9 @@ describe('c-orgcheck-spinner', () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
-    document.body.appendChild(element);    
-    expect(element.shadowRoot.textContent).toBe('');
+    document.body.appendChild(element);
+    const section = element.shadowRoot.querySelector('section');
+    expect(section.classList.contains('slds-hide')).toBeTruthy();
   });
 
   it('spinner is shown after calling open(), by default without the closing icon', () => {
@@ -18,7 +19,9 @@ describe('c-orgcheck-spinner', () => {
     document.body.appendChild(element);   
     element.open(); 
     return Promise.resolve().then(() => {
-      expect(element.shadowRoot.textContent).not.toBe('');
+      const section = element.shadowRoot.querySelector('section');
+      expect(section.classList.contains('slds-hide')).toBeFalsy();
+      expect(element.shadowRoot.element).not.toBe('');
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).toBeNull();
     });
@@ -34,10 +37,10 @@ describe('c-orgcheck-spinner', () => {
     return Promise.resolve().then(() => {
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).not.toBeNull();
-
       closeIcon.dispatchEvent(new CustomEvent('click'));
       return Promise.resolve().then(() => {
-        expect(element.shadowRoot.textContent).toBe('');
+        const section = element.shadowRoot.querySelector('section');
+        expect(section.classList.contains('slds-hide')).toBeTruthy();
       });
     });
   });

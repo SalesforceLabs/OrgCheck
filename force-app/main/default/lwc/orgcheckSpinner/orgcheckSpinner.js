@@ -65,40 +65,12 @@ class Section {
 export default class OrgcheckSpinner extends LightningElement {
 
   /**
-   * @description Hide the element by setting the isShown property to false.
-   * @private
-   */
-  hide() {
-    this.isShown = false;
-  }
-
-  /**
-   * @description Prevents the object from being closed.
-   * @private
-   */
-  cantBeClosed() {
-    this.isClosable = false;
-  }
-
-  /**
-   * @description Initializes the object by setting default values for sections, error flag, waiting time, and keys index.
-   * @private
-   */
-  init() {
-    this.sections = [];
-    this.hadError = false;
-    this.waitingTime = 0;
-    this._keysIndex = new Map();
-    this.inProgressMessage = '';
-  }
-
-  /**
    * @description Connected callback function
    */
   connectedCallback() {
-    this.hide();
-    this.cantBeClosed();
-    this.init();
+    this._hide();
+    this._cantBeClosed();
+    this._init();
   }
 
   /**
@@ -145,11 +117,13 @@ export default class OrgcheckSpinner extends LightningElement {
    *                It then starts a timer to update the waiting time every second.
    */
   @api open() {
-    if (this.isShown === false) {
-      this.cantBeClosed();
-      this.init();
+    if (this._isOpened === false) {
+      this._cantBeClosed();
+      this._init();
       this._openSince = Date.now();
-      this.isShown = true;
+      this._isOpened = true;
+      this.dialogCssClasses = 'slds-modal slds-fade-in-open slds-modal_medium';
+      this.backdropCssClasses = 'slds-backdrop slds-backdrop_open';
       const updateWaitingTime = () => {
         this.waitingTime = (Date.now() - this._openSince) / 1000;
       };
@@ -168,26 +142,16 @@ export default class OrgcheckSpinner extends LightningElement {
   }
 
   /**
-   * @description Handles the closing of a section by resetting all relevant properties and clearing intervals
-   */
-  handleClose() {
-    this.hide();
-    this.init();
-    this._openSince = undefined;
-    clearInterval(this._intervalId);
-  }
-
-  /**
    * @description Closes the spinner after a specified wait time.
    * @param {number} waitBeforeClosing - The time to wait before closing the API.
    * @async
    */
   @api async close(waitBeforeClosing) {
-    this.cantBeClosed();
+    this._cantBeClosed();
     const shownFor = Date.now() - this._openSince;
     const realClose = () => {
-      this.hide();
-      this.init();
+      this._hide();
+      this._init();
       this._openSince = undefined;
       clearInterval(this._intervalId);
     };
@@ -200,34 +164,78 @@ export default class OrgcheckSpinner extends LightningElement {
   }
 
   /**
+   * @description Handles the closing of a section by resetting all relevant properties and clearing intervals
+   */
+  handleClose() {
+    this._hide();
+    this._init();
+    this._openSince = undefined;
+    clearInterval(this._intervalId);
+  }
+  
+  /**
    * @description URL of the spinning mascot
    * @type {string}
+   * @public
    */
   spinningURL = OrgCheckStaticRessource + '/img/Mascot+Animated.svg';
 
   /**
-   * @description Switch to show the spinner or not
-   * @type {boolean}
+   * @description CSS Classes for the main dialog dependengin on the _isOpened property
+   * @type {string}
+   * @public
    */
-  isShown;
+  dialogCssClasses;
+//    return `slds-modal slds-fade-in-open slds-modal_medium ${this._isOpened ? '' : 'slds-hide'}`;
+
+  /**
+   * @description CSS Classes for the backdrop dependengin on the _isOpened property
+   * @type {string}
+   * @public
+   */ 
+  backdropCssClasses;
+//    return `slds-backdrop ${this._isOpened ? 'slds-backdrop_open' : 'slds-backdrop_close'}`;
 
   /**
    * @description Switch to show the close button of the spinner or not
    * @type {boolean}
+   * @public
    */
   isClosable;
 
   /**
    * @description Number of millisecond to wait before closing the spinner
    * @type {number}
+   * @public
    */
   waitingTime;
 
   /**
    * @description Say if we had an error during spinning and then need to stop to let the user see the error
    * @type {boolean}
+   * @public
    */
   hadError;
+
+  /**
+   * @description Progression message
+   * @type {string}
+   * @public
+   */ 
+  inProgressMessage;
+
+  /**
+   * @description List of sections to show in the spinner
+   * @type {Array<Section>}
+   */
+  @track sections;
+
+  /**
+   * @description Switch to show the spinner or not
+   * @type {boolean}
+   * @private
+   */
+  _isOpened;
 
   /**
    * @description Map to find the section index from its name
@@ -249,19 +257,6 @@ export default class OrgcheckSpinner extends LightningElement {
    * @private
    */
   _intervalId;
-
-  /**
-   * @description Progression message
-   * @type {string}
-   * @public
-   */ 
-  inProgressMessage;
-
-  /**
-   * @description List of sections to show in the spinner
-   * @type {Array<Section>}
-   */
-  @track sections;
 
   /**
    * @description Sets a section with the given section name, message, status, and error. We show the spinner if not yet opened.
@@ -310,7 +305,37 @@ export default class OrgcheckSpinner extends LightningElement {
       this.inProgressMessage = '';
       this.close(0);
     } else {
-      this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress with a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
+      this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress over a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
     }
+  }
+
+  /**
+   * @description Hide the element by setting the isShown property to false.
+   * @private
+   */
+  _hide() {
+    this._isOpened = false;
+    this.dialogCssClasses = 'slds-modal slds-fade-in-open slds-modal_medium slds-hide';
+    this.backdropCssClasses = 'slds-backdrop slds-backdrop_close';    
+  }
+
+  /**
+   * @description Prevents the object from being closed.
+   * @private
+   */
+  _cantBeClosed() {
+    this.isClosable = false;
+  }
+
+  /**
+   * @description Initializes the object by setting default values for sections, error flag, waiting time, and keys index.
+   * @private
+   */
+  _init() {
+    this.sections = [];
+    this.hadError = false;
+    this.waitingTime = 0;
+    this._keysIndex = new Map();
+    this.inProgressMessage = '';
   }
 }

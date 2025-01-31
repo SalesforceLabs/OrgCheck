@@ -24,8 +24,10 @@
                     <lightning-badge label={orgName}></lightning-badge>
                     <br />
                     <lightning-badge label={orgType} class={themeForOrgType}></lightning-badge>
-                    &nbsp;
-                    <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge>
+                    <template lwc:if={orgLimit}>
+                        &nbsp;
+                        <lightning-badge label={orgLimit} class={themeForOrgLimit}></lightning-badge>
+                    </template>
                 </div>
             </lightning-layout-item>
         </lightning-layout>
@@ -129,26 +131,35 @@
                         </lightning-layout-item>
                     </lightning-layout>
                 </lightning-tab>
+                <lightning-tab value="global-view" label="Global View" onactive={handleGlobalViewTabActivation}>
+                    <lightning-layout multiple-rows>
+                        <template for:each={globalViewItems} for:item="item" >
+                            <lightning-layout-item size="3" padding="around-small" key={item.label}>
+                                <div class="slds-box slds-text-align_center">
+                                    <h1 class="slds-text-heading_medium">{item.label}</h1>
+                                    <lightning-layout>
+                                        <lightning-layout-item size="6">
+                                            <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-legend-in-one-line pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
+                                        </lightning-layout-item>
+                                        <lightning-layout-item size="6">
+                                            <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-legend-in-one-line pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
+                                        </lightning-layout-item>
+                                    </lightning-layout>
+                                </div>
+                            </lightning-layout-item>    
+                        </template>
+                    </lightning-layout>
+                </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
         <template if:true={useOrgCheckInThisOrgConfirmed}>
             <lightning-tab label="⚽ Objects, OWDs and Fields" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="object,objects,custom-fields"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Data Model, Objects, Org-Wide Defaults and Custom Fields in your org. <br />
-                    </lightning-tab>
                     <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
                         <template if:false={objectData}>
                             There is no specific object set in the global filter above. <br />
@@ -204,14 +215,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={apexTriggersInObjectTableColumns}
-                                    rows={objectData.apexTriggerRefs}></c-orgcheck-extended-datatable>
+                                    columns={apexTriggersInObjectTableColumns} rows={objectData.apexTriggerRefs}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -221,14 +230,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={fieldSetsColumns}
-                                    rows={objectData.fieldSets}></c-orgcheck-extended-datatable>
+                                    columns={fieldSetsColumns} rows={objectData.fieldSets}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                     
@@ -238,14 +245,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={layoutsColumns}
-                                    rows={objectData.layouts}></c-orgcheck-extended-datatable>
+                                    columns={layoutsColumns} rows={objectData.layouts}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
 
@@ -255,14 +260,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={flexiPagesInObjectTableColumns}
-                                    rows={objectData.flexiPages}></c-orgcheck-extended-datatable>
+                                    columns={flexiPagesInObjectTableColumns} rows={objectData.flexiPages}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
 
@@ -272,14 +275,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={limitsColumns}
-                                    rows={objectData.limits}></c-orgcheck-extended-datatable>
+                                    columns={limitsColumns} rows={objectData.limits}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -289,14 +290,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={validationRulesColumns}
-                                    rows={objectData.validationRules}></c-orgcheck-extended-datatable>
+                                    columns={validationRulesColumns} rows={objectData.validationRules}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -306,14 +305,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={webLinksColumns}
-                                    rows={objectData.webLinks}></c-orgcheck-extended-datatable>
+                                    columns={webLinksColumns} rows={objectData.webLinks}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -323,14 +320,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={customFieldsInObjectTableColumns}
-                                    rows={objectData.customFieldRefs}></c-orgcheck-extended-datatable>
+                                    columns={customFieldsInObjectTableColumns} rows={objectData.customFieldRefs}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -340,14 +335,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={standardFieldsInObjectTableColumns}
-                                    rows={objectData.standardFields}></c-orgcheck-extended-datatable>
+                                    columns={standardFieldsInObjectTableColumns} rows={objectData.standardFields}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
 
@@ -357,14 +350,12 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={recordTypesColumns}
-                                    rows={objectData.recordTypes}></c-orgcheck-extended-datatable>
+                                    columns={recordTypesColumns} rows={objectData.recordTypes}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -374,484 +365,142 @@
                                 <c-orgcheck-extended-datatable
                                     show-row-number-column
                                     dont-use-all-space
-                                    onviewscore={handleViewScore}
-                                    show-search
+                                    onviewscore={handleViewScore} show-search
                                     show-statistics
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                    columns={relationshipsColumns}
-                                    rows={objectData.relationships}></c-orgcheck-extended-datatable>
+                                    columns={relationshipsColumns} rows={objectData.relationships}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                         </template>
                     </lightning-tab>
                     <lightning-tab value="objects" label="🏉 Org Wide Defaults" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no org wide default to show."
-                            show-search
-                            show-statistics
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={owdTableColumns}
-                            rows={objectsTableData}
-                            show-export-button
-                            export-basename="OrgWideDefault"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no org wide default to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={owdTableColumns} rows={objectsTableData} show-export-button export-basename="OrgWideDefault"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="custom-fields" label="🏈 Custom Fields" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no custom field to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={customFieldsTableColumns}
-                            rows={customFieldsTableData}
-                            show-export-button
-                            export-basename="CustomFields"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no custom field to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={customFieldsTableColumns} rows={customFieldsTableData} show-export-button export-basename="CustomFields"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="👮 Users, Profiles and Permission Sets" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="active-users,profiles,permission-sets,profile-restrictions,profile-password-policies,object-permissions,app-permissions"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="active-users,profiles,permission-sets,profile-restrictions,profile-password-policies,object-permissions,app-permissions"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Active Internal Users, Profiles, Permission Sets, Profile restrictions and passwrod policies and matrix view of object and application permissions in your org.
-                    </lightning-tab>
                     <lightning-tab value="active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no active internal user to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={usersTableColumns}
-                            rows={usersTableData}
-                            show-export-button
-                            export-basename="Users"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no active internal user to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={usersTableColumns} rows={usersTableData} show-export-button export-basename="Users"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="profiles" label="🚓 Profiles" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no profile to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={profilesTableColumns}
-                            rows={profilesTableData}
-                            show-export-button
-                            export-basename="Profiles"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no profile to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={profilesTableColumns} rows={profilesTableData} show-export-button export-basename="Profiles"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="permission-sets" label="🚔 Permission Sets" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no permission to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={permissionSetsTableColumns}
-                            rows={permissionSetsTableData}
-                            show-export-button
-                            export-basename="PermissionSets"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no permission to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={permissionSetsTableColumns} rows={permissionSetsTableData} show-export-button export-basename="PermissionSets"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="profile-restrictions" label="🚸 Profile Restrictions" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no profile restriction to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={profileRestrictionsTableColumns}
-                            rows={profileRestrictionsTableData}
-                            show-export-button
-                            export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no profile restriction to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={profileRestrictionsTableColumns} rows={profileRestrictionsTableData} show-export-button export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="profile-password-policies" label="⛖ Profile Password Policies" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no profile password policy to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={profilePasswordPoliciesTableColumns}
-                            rows={profilePasswordPoliciesTableData}
-                            show-export-button
-                            export-basename="ProfilePasswordPolicies"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no profile password policy to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={profilePasswordPoliciesTableColumns} rows={profilePasswordPoliciesTableData} show-export-button export-basename="ProfilePasswordPolicies"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="object-permissions" label="🚦 Object Permissions" onactive={handleSubTabActivation}>
                         <div style="text-align: right;">
                             <b>Legend:</b> C means <i>Create</i>, R means <i>Read</i>, U means <i>Update/Modify</i>, D means <i>Delete</i>, v means <i>View All</i> and m means <i>Modify All</i>.
                         </div>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no object permission to show."
-                            show-search
-                            show-statistics
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={objectPermissionsTableColumns}
-                            rows={objectPermissionsTableData}
-                            show-export-button
-                            export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no object permission to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={objectPermissionsTableColumns} rows={objectPermissionsTableData} show-export-button export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="app-permissions" label="⛕ Application Permissions" onactive={handleSubTabActivation}>
                         <div style="text-align: right;">
                             <b>Legend:</b> A means <i>Accessible</i> and V means <i>Visible</i>.
                         </div>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no application permission to show."
-                            show-search
-                            show-statistics
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={appPermissionsTableColumns}
-                            rows={appPermissionsTableData}
-                            show-export-button
-                            export-basename="AppPermissions"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no application permission to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={appPermissionsTableColumns} rows={appPermissionsTableData} show-export-button export-basename="AppPermissions"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="🐇 Roles, Public Groups and Queues" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about the Role Hierarchy, the Public groups and the Queues in your org.
-                    </lightning-tab>
                     <lightning-tab value="roles-explorer" label="🐙 Role Explorer" onactive={handleSubTabActivation}>
-                        <c-orgcheck-graphics 
-                            type="hierarchy"
-                            name="Role Hierarchy" 
-                            hierarchy-box-color-decorator={roleBoxColorsDecorator}
-                            hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator}
-                            hierarchy-box-on-click-decorator={roleBoxOnClickDecorator}
-                            hierarchy-show-level
-                            source={rolesTree}></c-orgcheck-graphics>
+                        <c-orgcheck-graphics type="hierarchy" name="Role Hierarchy" hierarchy-box-color-legend={roleBoxColorsLegend} hierarchy-box-color-decorator={roleBoxColorsDecorator} hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} hierarchy-show-level source={rolesTree}></c-orgcheck-graphics>
                     </lightning-tab>
                     <lightning-tab value="roles-listing" label="🦓 Role Listing" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no role to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={rolesTableColumns}
-                            rows={rolesTableData}
-                            show-export-button
-                            export-basename="Roles"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no role to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={rolesTableColumns} rows={rolesTableData} show-export-button export-basename="Roles"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="public-groups" label="🐘 Public Groups" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no public group to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={publicGroupsTableColumns}
-                            rows={publicGroupsTableData}
-                            show-export-button
-                            export-basename="PublicGroups"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no public group to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={publicGroupsTableColumns} rows={publicGroupsTableData} show-export-button export-basename="PublicGroups"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="queues" label="🦒 Queues" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no queue to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={queuesTableColumns}
-                            rows={queuesTableData}
-                            show-export-button
-                            export-basename="Queues"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no queue to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={queuesTableColumns} rows={queuesTableData} show-export-button export-basename="Queues"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="🤖 Automations" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="flows,process-builders,workflows"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="flows,process-builders,workflows"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Automations like Flows, Process Builders and Workflows in your org.
-                    </lightning-tab>
                     <lightning-tab value="flows" label="🏎️ Flows" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no flow to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={flowsTableColumns}
-                            rows={flowsTableData}
-                            show-export-button
-                            export-basename="Flows"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no flow to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={flowsTableColumns} rows={flowsTableData} show-export-button export-basename="Flows"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="process-builders" label="🛺 Process Builders" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no process builder to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={processBuildersTableColumns}
-                            rows={processBuildersTableData}
-                            show-export-button
-                            export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no process builder to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={processBuildersTableColumns} rows={processBuildersTableData} show-export-button export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="workflows" label="🚗 Workflows" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no workflow to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={workflowsTableColumns}
-                            rows={workflowsTableData}
-                            show-export-button
-                            export-basename="Workflows"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no workflow to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={workflowsTableColumns} rows={workflowsTableData} show-export-button export-basename="Workflows"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="custom-labels"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Settngs artefacts like Custom Labels in your org.
-                    </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no custom label to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={customLabelsTableColumns}
-                            rows={customLabelsTableData}
-                            show-export-button
-                            export-basename="CustomLabels"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no custom label to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={customLabelsTableColumns} rows={customLabelsTableData} show-export-button export-basename="CustomLabels"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="🥐 Visual Components" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                        label="Refresh" 
-                        title="Refresh the data used in this tab..."
-                        variant="brand-outline" 
-                        class="slds-var-m-left_x-small" 
-                        icon-name="utility:refresh"
-                        onclick={handleClickRefreshCurrentTab}
-                        value="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} value="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Visualforce pages, Visualforce components, Lightning Pages, Aura Components and Lightning Web Components in your org.
-                    </lightning-tab>
                     <lightning-tab value="visual-force-pages" label="🥖 Visual Force Pages" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no visual force page to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={visualForcePagesTableColumns}
-                            rows={visualForcePagesTableData}
-                            show-export-button
-                            export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no visual force page to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={visualForcePagesTableColumns} rows={visualForcePagesTableData} show-export-button export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="visual-force-components" label="🍞 Visual Force Components" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no visual force component to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={visualForceComponentsTableColumns}
-                            rows={visualForceComponentsTableData}
-                            show-export-button
-                            export-basename="VisualForceComponents"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no visual force component to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={visualForceComponentsTableColumns} rows={visualForceComponentsTableData} show-export-button export-basename="VisualForceComponents"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="lightning-pages" label="🎂 Lightning Pages" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Lightning Page to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={flexiPagesTableColumns}
-                            rows={flexiPagesTableData}
-                            show-export-button
-                            export-basename="LightningPages"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Lightning Page to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={flexiPagesTableColumns} rows={flexiPagesTableData} show-export-button export-basename="LightningPages"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="lightning-aura-components" label="🧁 Lightning Aura Components" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Lightning Aura Component to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={auraComponentsTableColumns}
-                            rows={auraComponentsTableData}
-                            show-export-button
-                            export-basename="LightningAuraComponents"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Lightning Aura Component to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={auraComponentsTableColumns} rows={auraComponentsTableData} show-export-button export-basename="LightningAuraComponents"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="lightning-web-components" label="🍰 Lightning Web Components" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Lightning Web Component to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={lightningWebComponentsTableColumns}
-                            rows={lightningWebComponentsTableData}
-                            show-export-button
-                            export-basename="LightningWebComponents"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Lightning Web Component to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={lightningWebComponentsTableColumns} rows={lightningWebComponentsTableData} show-export-button export-basename="LightningWebComponents"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab label="🔥 Apex" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Refresh" 
-                            title="Refresh the data used in this tab..."
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:refresh"
-                            onclick={handleClickRefreshCurrentTab}
-                            data-recipes="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>
                     </lightning-layout-item>
                     <lightning-layout-item>
-                        <lightning-button 
-                            label="Run All Tests" 
-                            title="Run All Tests" 
-                            variant="brand-outline" 
-                            class="slds-var-m-left_x-small" 
-                            icon-name="utility:apex" 
-                            onclick={handleClickRunAllTests}></lightning-button>
+                        <lightning-button label="Run All Tests" title="Run All Tests" variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:apex" onclick={handleClickRunAllTests}></lightning-button>
                     </lightning-layout-item>
                     <template if:true={isThereAnyApexUncompiled}>
                         <lightning-layout-item>
@@ -860,72 +509,17 @@
                     </template>
                 </lightning-layout>
                 <lightning-tabset>
-                    <lightning-tab value="summary" label="Summary" onactive={handleSubTabActivation}>
-                        Here you can get information about Apex classes (compiled, uncompiled, unit tests) and Apex triggers in your org.
-                    </lightning-tab>
                     <lightning-tab value="apex-classes" label="❤️‍🔥 Apex Classes" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Apex Class to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={apexClassesTableColumns}
-                            rows={apexClassesTableData}
-                            show-export-button
-                            export-basename="ApexClasses"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Apex Class to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={apexClassesTableColumns} rows={apexClassesTableData} show-export-button export-basename="ApexClasses"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="apex-recompilation-needed" label="🧨 Apex Classes That Need Recompilation" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Apex Uncompiled Class to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={apexUncompiledTableColumns}
-                            rows={apexUncompiledTableData}
-                            show-export-button
-                            export-basename="ApexClassesNeedCompilation"></c-orgcheck-extended-datatable>
+                    <lightning-tab value="apex-recompilation-needed" label="🌋 Apex Classes That Need Recompilation" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no Apex Uncompiled Class to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={apexUncompiledTableColumns} rows={apexUncompiledTableData} show-export-button export-basename="ApexClassesNeedCompilation"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="apex-triggers" label="🧨 Apex Triggers" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Apex Trigger to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={apexTriggersTableColumns}
-                            rows={apexTriggersTableData}
-                            show-export-button
-                            export-basename="ApexTriggers"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Apex Trigger to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={apexTriggersTableColumns} rows={apexTriggersTableData} show-export-button export-basename="ApexTriggers"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="apex-unit-tests" label="🚒 Apex Unit Tests" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable
-                            empty-message="There is no Apex Unit Test to show."
-                            show-search
-                            show-statistics
-                            onviewscore={handleViewScore}
-                            show-row-number-column
-                            is-sticky-headers
-                            is-infinite-scrolling
-                            infinite-scrolling-initial-nb-rows=25
-                            infinite-scrolling-additional-nb-rows=100
-                            columns={apexTestsTableColumns}
-                            rows={apexTestsTableData}
-                            show-export-button
-                            export-basename="ApexUnitTests"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no Apex Unit Test to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={apexTestsTableColumns} rows={apexTestsTableData} show-export-button export-basename="ApexUnitTests"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

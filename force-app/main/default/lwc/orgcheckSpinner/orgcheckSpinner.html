@@ -1,59 +1,57 @@
 <template>
-    <template lwc:if={isShown}>
-        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open slds-modal_medium">
-            <div class="slds-modal__container">
-                <template lwc:if={isClosable}>
-                    <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
-                </template>
-                <div class="slds-modal__header">
-                    <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Org Check is spinning around for <lightning-formatted-number value={waitingTime} maximum-fraction-digits="0"></lightning-formatted-number> seconds...</h1>
-                </div>
-                <div class="slds-modal__content">
-                    <div class="slds-grid slds-gutters">
-                        <div class="slds-col slds-size_1-of-3 slds-text-align_center">
-                            <object type="image/svg+xml" data={spinningURL} width="256" height="256">
-                                <img src={spinningURL} width="256" height="256" />
-                            </object>
-                        </div>
-                        <div class="slds-col slds-size_2-of-3">
-                            <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
-                                <template if:true={hadError}>
-                                    <br />
-                                    <b>We really apologize for this error.</b><br />
-                                    <br />
-                                    Please consider <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">logging a new 
-                                    issue</a> with all information that may help to reproduce the error you have (including some red message in your browser console). <br /><br />
-                                    Thank you!<br />
-                                    <br />
-                                </template>
-                                <template if:false={hadError}>
-                                    {inProgressMessage}<br /><br />
-                                </template>
-                                <ol class="slds-progress__list">
-                                    <template for:each={sections} for:item="section">
-                                        <li key={section.id} class={section.liClasses}>
-                                            <div class={section.markerClasses}></div>
-                                            <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
+    <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="modal-heading-01" class={dialogCssClasses}>
+        <div class="slds-modal__container">
+            <template lwc:if={isClosable}>
+                <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close" onclick={handleClose} class="slds-modal__close"></lightning-icon>
+            </template>
+            <div class="slds-modal__header">
+                <h1 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Org Check is spinning around for <lightning-formatted-number value={waitingTime} maximum-fraction-digits="0"></lightning-formatted-number> seconds...</h1>
+            </div>
+            <div class="slds-modal__content">
+                <div class="slds-grid slds-gutters">
+                    <div class="slds-col slds-size_1-of-3 slds-text-align_center">
+                        <object type="image/svg+xml" data={spinningURL} width="256" height="256">
+                            <img src={spinningURL} width="256" height="256" />
+                        </object>
+                    </div>
+                    <div class="slds-col slds-size_2-of-3">
+                        <div class="slds-progress slds-progress_shade slds-progress_vertical" style="width: 100%; height: 100%;">
+                            <template if:true={hadError}>
+                                <br />
+                                <b>We really apologize for this error.</b><br />
+                                <br />
+                                Please consider <a href="https://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">logging a new 
+                                issue</a> with all information that may help to reproduce the error you have (including some red message in your browser console). <br /><br />
+                                Thank you!<br />
+                                <br />
+                            </template>
+                            <template if:false={hadError}>
+                                {inProgressMessage}<br /><br />
+                            </template>
+                            <ol class="slds-progress__list">
+                                <template for:each={sections} for:item="section">
+                                    <li key={section.id} class={section.liClasses}>
+                                        <div class={section.markerClasses}></div>
+                                        <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
+                                    </li>
+                                    <template lwc:if={section.stack}>
+                                        <li key={section.id}>
+                                            <pre>{section.stack}</pre>
                                         </li>
-                                        <template lwc:if={section.stack}>
-                                            <li key={section.id}>
-                                                <pre>{section.stack}</pre>
-                                            </li>
-                                        </template>
-                                        <template lwc:if={section.context}>
-                                            <li key={section.id}>
-                                                WHEN: <pre>{section.context.when}</pre>
-                                                WHAT: <pre>{section.context.what}</pre>
-                                            </li>
-                                        </template>
                                     </template>
-                                </ol>
-                            </div>
+                                    <template lwc:if={section.context}>
+                                        <li key={section.id}>
+                                            WHEN: <pre>{section.context.when}</pre>
+                                            WHAT: <pre>{section.context.what}</pre>
+                                        </li>
+                                    </template>
+                                </template>
+                            </ol>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-        <div class="slds-backdrop slds-backdrop_open" role="presentation"></div>
-    </template>
+        </div>
+    </section>
+    <div class={backdropCssClasses} role="presentation"></div>
 </template>
