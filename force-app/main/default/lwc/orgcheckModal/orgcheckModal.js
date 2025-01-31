@@ -1,7 +1,7 @@
 // @ts-check
 import { LightningElement, api } from 'lwc';
 
-export default class OrgCheckModal extends LightningElement {
+export default class OrgcheckModal extends LightningElement {
 
     /**
      * Connected callback function

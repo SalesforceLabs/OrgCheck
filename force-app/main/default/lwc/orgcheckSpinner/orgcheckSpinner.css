@@ -23,7 +23,10 @@ pre {
 }
 
 .li-ended {
+    color: rgb(84, 165, 84);
+    /*
     opacity: 0;
     height: var(--lwc-spacingXxxSmall, 0);
     transition: opacity 1s linear, height 1s linear;
+    */
 }

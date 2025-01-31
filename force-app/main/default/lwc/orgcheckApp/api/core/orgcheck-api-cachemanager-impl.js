@@ -2,10 +2,43 @@
 import { OrgCheckDataCacheItem, OrgCheckDataCacheManagerIntf } from "./orgcheck-api-cachemanager";
 
 /**
- * @description Cache prefix to use
- * @type {string} 
- */
-const CACHE_PREFIX = 'OrgCheck.';
+ * @description Global information stored in cache (both for data and metdata!)
+ */ 
+class ItemInCache {
+
+    /** 
+     * @type {number}
+     */
+    created;
+}
+
+/**
+ * @description Data information stored in cache (not the metadata!)
+ */ 
+class DataItemInCache extends ItemInCache {
+
+    /** 
+     * @type {Array<any>}
+     */
+    content;
+}
+
+/**
+ * @description Metadata information stored in cache (not the data!)
+ */ 
+class MetadataItemInCache extends ItemInCache {
+
+    /** 
+     * @type {string}
+     */
+    type;
+
+    /** 
+     * @type {number}
+     */
+    length;
+}
+
 
 /** 
  * @description Cache Manager class implementation
@@ -54,26 +87,89 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
     }
 
     /**
-     * @description Is the cache has a specific key?
+     * @description Is the cache has a specific key? (based on the metadata entry to make it faster!)
      * @param {string} key 
      * @returns {boolean} true if the cache has the key, false if not
      * @public
      */
     has(key) {
-        return this._getEntryFromCache(this._generatePhysicalKey(key)) !== null;
+        const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
+        const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
+        // Get information about this key in the metadata first (it will be faster to deserialize!)
+        /** @type {MetadataItemInCache} */
+        const metadataEntry = this._getEntryFromCache(metadataPhysicalKey);
+        // if we get null it means the data is not in the cache or it is too old
+        if (metadataEntry === null) {
+            // making sure the metadata and related data are removed from local storage if necessary
+            localStorage.removeItem(metadataPhysicalKey);
+            localStorage.removeItem(dataPhysicalKey);
+        } else {
+            // making sure the data exists in the localstorage (just the key -- do not spend time deserializing!)
+            let dataKeyExists = false;
+            for (let i = 0; i < localStorage.length && dataKeyExists === false; i++) {
+                if (localStorage.key(i) === dataPhysicalKey) {
+                    dataKeyExists = true;
+                }
+            }
+            if (dataKeyExists === false) {
+                // the related data does not exist in the local storage
+                // even though the metadata says the contrary...
+                // so we are going to align the metadata with the data, by removing the metadata entry and return false
+                localStorage.removeItem(metadataPhysicalKey);
+                return false;
+            }
+        }
+        // in this case, the metadata and the data are aligned we can return this statement
+        return (metadataEntry !== null);
     }
 
     /**
-     * @description Get the entry form the cache
+     * @description Get the entry form the cache (based on the data entry this time!)
      * @param {string} key 
      * @returns {Map | any}
      * @public
      */
     get(key) {
-        const entry = this._getEntryFromCache(this._generatePhysicalKey(key));
-        if (!entry) return null;
-        if (entry.type === 'map') return new Map(entry.data);
-        return entry.data;
+        const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
+        const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
+        // Get information about this key in the metadata first
+        /** @type {MetadataItemInCache} */
+        const metadataEntry = this._getEntryFromCache(metadataPhysicalKey);
+        if (metadataEntry === null) {
+            // making sure the metadata and related data are removed from local storage if necessary
+            localStorage.removeItem(metadataPhysicalKey);
+            localStorage.removeItem(dataPhysicalKey);  
+            // return null as the metadata is not in the cache
+            return null;          
+        }
+        // now get the data from the local storage
+        /** @type {DataItemInCache} */
+        const dataEntry = this._getEntryFromCache(dataPhysicalKey);
+        if (dataEntry === null) {
+            // here the metadata is in the cache but the data is not -- strange!
+            // let's correct this by removing the metadata and return null
+            localStorage.removeItem(metadataPhysicalKey);
+            return null;
+        }
+        // Make sure the metadata is up to date with the data
+        metadataEntry.length = dataEntry.content.length;
+        // ... and is saved!
+        this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
+        // if the data is a map
+        if (metadataEntry.type === 'map') {
+            try {
+                // create the map from the data (double array structure)
+                return new Map(dataEntry.content);
+            } catch (error) {
+                // something went wrong when trying to create the map, so destroying everything!
+                localStorage.removeItem(metadataPhysicalKey);
+                localStorage.removeItem(dataPhysicalKey);  
+                // return null as the metadata is not in the cache anymore
+                return null;
+            }
+        } else { // if the data is something else
+            return dataEntry.content;
+        }
     }
 
     /**
@@ -83,30 +179,31 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
      * @public
      */
     set(key, value) {
-        try {
-            const physicalKey = this._generatePhysicalKey(key);
-            if (value === null) {
-                localStorage.remove(physicalKey);
-            } else if (value instanceof Map) {
-                this._setItemFromLocalStorage(
-                    physicalKey, 
-                    JSON.stringify(
-                        { 
-                            type: 'map', 
-                            length: value.size,
-                            data: Array.from(value.entries().filter(([k]) => k.endsWith('Ref') === false)),
-                            created: Date.now()
-                        }
-                    )
-                );
-            } else {
-                this._setItemFromLocalStorage(
-                    physicalKey, 
-                    JSON.stringify({ data : value, created: Date.now() })
-                );
+        const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
+        const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
+        if (value === null) {
+            localStorage.removeItem(metadataPhysicalKey);
+            localStorage.removeItem(dataPhysicalKey);
+        } else {
+            const now = Date.now();
+            /** @type {MetadataItemInCache} */
+            const metadataEntry = value instanceof Map ? {
+                type: 'map', length: value.size, created: now
+            } : {
+                type: 'array', length: value.length, created: now
+            };
+            /** @type {DataItemInCache} */
+            const dataEntry = value instanceof Map ? {
+                content: Array.from(value.entries().filter(([k]) => k.endsWith('Ref') === false)), created: now
+            } : {
+                content: value, created: now
+            };
+            try {
+                this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
+                this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry));
+            } catch(error) {
+                console.warn('Not able to store in local store that amount of data.')
             }
-        } catch(error) {
-            console.warn('Not able to store in local store that amount of data.')
         }
     }
 
@@ -115,21 +212,20 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
      * @returns {Array<OrgCheckDataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     details() {
-        const info = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith(CACHE_PREFIX)) {
+        return Object.keys(localStorage)
+            .filter((key) => key.startsWith(METADATA_CACHE_PREFIX))
+            .map((key) => {
+                /** @type {MetadataItemInCache} */
                 const entry = this._getEntryFromCache(key);
-                info.push({
-                    name: this._generateLogicalKey(key),
-                    isEmpty: entry === null,
-                    isMap: entry?.type === 'map',
-                    length: entry?.length,
-                    created: entry?.created
-                });
+                return {
+                    name: GENERATE_LOGICAL_KEY(key),
+                    isEmpty: entry.length === 0,
+                    isMap: entry.type === 'map',
+                    length: entry.length,
+                    created: entry.created
+                };
             }
-        }
-        return info;
+        );
     }
 
     /**
@@ -138,60 +234,18 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
      * @public
      */
     remove(key) {
-        localStorage.removeItem(this._generatePhysicalKey(key));
+        localStorage.removeItem(GENERATE_PHYSICAL_KEY_DATA(key));
+        localStorage.removeItem(GENERATE_PHYSICAL_KEY_METADATA(key));
     }
 
     /**
-     * @description Remove all entries in the cache.
+     * @description Remove all Org-Check-related entries from the cache.
      * @public
      */
     clear() {
-        localStorage.clear();
-    }
-
-    /**
-     * @description Generate the physical key from either the logic key or the physical key. Physical key 
-     *   starts with the CACHE_PREFIX and then the key itself.
-     * @param {string} key
-     * @returns {string} the physical key
-     * @private
-     */
-    _generatePhysicalKey = (key) => {
-        return key.startsWith(CACHE_PREFIX) ? key : CACHE_PREFIX + key;
-    }
-    
-    /**
-     * @description Generate the logic key from either the logic key or the physical key. Logical key 
-     *   does no start with the CACHE_PREFIX.
-     * @param {string} key
-     * @returns {string} the logical key
-     * @private
-     */
-    _generateLogicalKey = (key) => {
-        return key.startsWith(CACHE_PREFIX) ? key.substring(CACHE_PREFIX.length) : key;
-    }
-
-    /**
-     * @description Get the item from local storage from its key. The data is stored in hexadecimal format.
-     *   We turn the hexadecimal value into a binary data. Then as that data is compressed, it needs to be 
-     *   decompressed. Finally we decode the uncompressed data into a string value
-     * @param {string} key
-     * @returns {string} the item from local storage
-     * @private
-     */
-    _getItemFromLocalStorage = (key) => {
-        try {
-            const hexValue = localStorage.getItem(key);
-            if (hexValue) {
-                const bufferValue = fromHexToBuffer(hexValue);
-                const uncompressedValue = this._decompress(bufferValue);
-                const decodedValue = this._decode(uncompressedValue);
-                return decodedValue;
-            }
-        } catch (error) {
-            console.error(`Error occured when trying to get the value for key ${key}`, error);
-        }
-        return null;
+        return Object.keys(localStorage)
+            .filter((key) => key.startsWith(CACHE_PREFIX))
+            .forEach((key) => localStorage.removeItem(key));
     }
 
     /**
@@ -203,11 +257,11 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
      * @param {string} stringValue
      * @private
      */
-    _setItemFromLocalStorage = (key, stringValue) => {
+    _setItemToCache = (key, stringValue) => {
         try {
             const encodedValue = this._encode(stringValue);
             const compressedValue = this._compress(encodedValue);
-            const hexValue = fromBufferToHex(compressedValue);
+            const hexValue = FROM_BUFFER_TO_HEX(compressedValue);
             localStorage.setItem(key, hexValue);
         } catch (error) {
             console.error(`Error occured when trying to save the value for key ${key}`, error);
@@ -217,16 +271,84 @@ export class OrgCheckDataCacheManager extends OrgCheckDataCacheManagerIntf {
     /**
      * @description Get the entry from the cache. If the entry is older than one day, it is removed from the cache.
      * @param {string} key
-     * @returns {object} the entry from the cache
+     * @returns {any} the entry from the cache
      * @private
      */
     _getEntryFromCache = (key) => {
-        const entryFromStorage = this._getItemFromLocalStorage(key);
+        let entryFromStorage = null;
+        try {
+            const hexValue = localStorage.getItem(key);
+            if (hexValue) {
+                const bufferValue = FROM_HEX_TO_BUFFER(hexValue);
+                const uncompressedValue = this._decompress(bufferValue);
+                const decodedValue = this._decode(uncompressedValue);
+                entryFromStorage = decodedValue;
+            }
+        } catch (error) {
+            console.error(`Error occured when trying to get the value for key ${key}`, error);
+        }
         if (!entryFromStorage) return null
-        const entry = JSON.parse(entryFromStorage);
-        if (Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
-        return entry;
+        try {
+            /** @type {ItemInCache} */
+            const entry = JSON.parse(entryFromStorage);
+            if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
+            return entry;
+        } catch (error) {
+            return null;
+        }
     }
+}
+
+/**
+ * @description Cache prefix to use for any items stored in the local storage for Org Check
+ * @type {string} 
+ */
+const CACHE_PREFIX = 'OrgCheck';
+
+/**
+ * @description Cache prefix to use for data stored in the local storage
+ * @type {string} 
+ */
+const DATA_CACHE_PREFIX = `${CACHE_PREFIX}.`;
+
+/**
+ * @description Cache prefix to use for metadata stored in the local storage
+ * @type {string} 
+ */
+const METADATA_CACHE_PREFIX = `${CACHE_PREFIX}_`;
+
+/**
+ * @description Generate the data physical key from either the logic key or the physical key. 
+ *                  Data physical key starts with the DATA_CACHE_PREFIX and then the key itself.
+ * @param {string} key
+ * @returns {string} the data physical key
+ * @private
+ */
+const GENERATE_PHYSICAL_KEY_DATA = (key) => {
+    return key.startsWith(DATA_CACHE_PREFIX) ? key : DATA_CACHE_PREFIX + key;
+}
+
+/**
+ * @description Generate the metadata physical key from either the logic key or the physical key. 
+ *                  Metadata physical key starts with the METADATA_CACHE_PREFIX and then the key itself.
+ * @param {string} key
+ * @returns {string} the metadata physical key
+ * @private
+ */
+const GENERATE_PHYSICAL_KEY_METADATA = (key) => {
+    return key.startsWith(METADATA_CACHE_PREFIX) ? key : METADATA_CACHE_PREFIX + key;
+}
+
+/**
+ * @description Generate the logical key from either the logic key or the physical key. 
+ * @param {string} key
+ * @returns {string} the logical key
+ * @private
+ */
+const GENERATE_LOGICAL_KEY = (key) => {
+    if (key.startsWith(METADATA_CACHE_PREFIX)) return key.substring(METADATA_CACHE_PREFIX.length);
+    if (key.startsWith(DATA_CACHE_PREFIX)) return key.substring(DATA_CACHE_PREFIX.length);
+    return key;
 }
 
 /**
@@ -259,7 +381,7 @@ for (let n = 0; n < 0x100; n++) {
  * @returns {string}
  * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
  */
-const fromBufferToHex = (buffer) => {
+const FROM_BUFFER_TO_HEX = (buffer) => {
   let out = '';
   for (let idx = 0, edx = buffer.length; idx < edx; idx++) {
     out += LUT_HEX_8b[buffer[idx]];
@@ -274,7 +396,7 @@ const fromBufferToHex = (buffer) => {
  * @returns {Uint8Array}
  * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
  */
-const fromHexToBuffer = (hex) => {
+const FROM_HEX_TO_BUFFER = (hex) => {
     const arr = [];
     for (let i = 0; i < hex.length; i += 2) {
         arr.push(parseInt(hex.substring(i, i+2), 16));

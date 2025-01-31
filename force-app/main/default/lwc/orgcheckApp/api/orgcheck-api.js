@@ -30,9 +30,10 @@ import { OrgCheckLogger } from './core/orgcheck-api-logger-impl';
 import { OrgCheckRecipeManager } from './core/orgcheck-api-recipemanager-impl';
 import { OrgCheckRecipeAliases } from './core/orgcheck-api-recipes-aliases';
 import { OrgCheckDatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
-import { OrgCheckLoggerIntf } from './core/orgcheck-api-logger';
+import { OrgCheckBasicLoggerIntf, OrgCheckLoggerIntf } from './core/orgcheck-api-logger';
 import { OrgCheckRecipeManagerIntf } from './core/orgcheck-api-recipemanager';
 import { OrgCheckSalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
+import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
 
 /**
  * @description Org Check API main class
@@ -105,7 +106,7 @@ export class OrgCheckAPI {
      * @param {any} jsCompression
      * @param {string} accessToken
      * @param {string} userId
-     * @param {any} loggerSetup
+     * @param {OrgCheckBasicLoggerIntf} loggerSetup
      */
     constructor(jsConnectionFactory, jsCompression, accessToken, userId, loggerSetup) {
         this._logger = new OrgCheckLogger(loggerSetup);
@@ -127,15 +128,6 @@ export class OrgCheckAPI {
      */
     removeAllFromCache() {
         this._cacheManager.clear();
-    }
-
-    /**
-     * @description Remove a given cache from dataset manager
-     * @param {string} name 
-     * @public
-     */
-    removeFromCache(name) {
-        this._cacheManager.remove(name);
     }
 
     /**
@@ -247,31 +239,56 @@ export class OrgCheckAPI {
     }
 
     /**
-     * @description Get information about the packages, the object types and objects (used for global filters)
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @returns {Promise<{packages: Array<SFDC_Package>, types: Array<SFDC_ObjectType>, objects: Array<SFDC_Object>}>} Information about packages (list of SFDC_Package), types (list of SFDC_ObjectType) and objects (list of SFDC_Object)
+     * @description Get information about the packages
+     * @returns {Promise<Array<SFDC_Package>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getPackagesTypesAndObjects(namespace, sobjectType) {
+    async getPackages() {
         // @ts-ignore
-        const /** @type {Array<Array>} */ results = (await Promise.all([
-            this._recipeManager.run(OrgCheckRecipeAliases.PACKAGES),
-            this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_TYPES),
-            this._recipeManager.run(OrgCheckRecipeAliases.OBJECTS, namespace, sobjectType)
-        ]));
-        return { packages: results[0], types: results[1], objects: results[2] };
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PACKAGES));
     }
 
     /**
-     * @description Remove all the cached information about packages, types and objects
+     * @description Remove all the cached information about packages
      * @public
      */
-    removeAllPackagesTypesAndObjectsFromCache() {
+    removeAllPackagesFromCache() {
         this._recipeManager.clean(OrgCheckRecipeAliases.PACKAGES);
-        this._recipeManager.clean(OrgCheckRecipeAliases.OBJECT_TYPES);
+    }
+
+    /**
+     * @description Get information about the object types
+     * @returns {Promise<Array<SFDC_ObjectType>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getObjectTypes() {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.OBJECT_TYPES));
+    }
+
+    /**
+     * @description Get information about the objects 
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @returns {Promise<Array<SFDC_Object>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getObjects(namespace, sobjectType) {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.OBJECTS, namespace, sobjectType));
+    }
+
+    /**
+     * @description Remove all the cached information about objects
+     * @public
+     */
+    removeAllObjectsFromCache() {
         this._recipeManager.clean(OrgCheckRecipeAliases.OBJECTS);
     }
 
@@ -365,7 +382,7 @@ export class OrgCheckAPI {
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
      * @param {string} namespace 
-     * @returns {Promise<Array<SFDC_Profile>>} List of items to return
+     * @returns {Promise<Array<SFDC_PermissionSet>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
@@ -592,23 +609,43 @@ export class OrgCheckAPI {
     }
     
     /**
-     * @description Get information about Public Groups and Queues
+     * @description Get information about Public Groups
      * @returns {Promise<Array<SFDC_Group>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getGroups() {
+    async getPublicGroups() {
         // @ts-ignore
-        return (await this._recipeManager.run(OrgCheckRecipeAliases.GROUPS));
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PUBLIC_GROUPS));
     }
 
     /**
-     * @description Remove all the cached information about public groups and queues
+     * @description Remove all the cached information about public groups
      * @public
      */
-    removeAllGroupsFromCache() {
-        this._recipeManager.clean(OrgCheckRecipeAliases.GROUPS);
+    removeAllPublicGroupsFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.PUBLIC_GROUPS);
+    }
+
+    /**
+     * @description Get information about Queues
+     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getQueues() {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.QUEUES));
+    }
+
+    /**
+     * @description Remove all the cached information about queues
+     * @public
+     */
+    removeAllQueuesFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.QUEUES);
     }
 
     /**
@@ -633,6 +670,27 @@ export class OrgCheckAPI {
     }
     
     /**
+     * @description Get information about Apex Tests (filtered out by namespace/pakage)
+     * @param {string} namespace 
+     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getApexTests(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.APEX_TESTS, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about apex tests
+     * @public
+     */
+    removeAllApexTestsFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.APEX_TESTS);
+    }
+
+    /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
      * @param {string} namespace 
      * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
@@ -651,6 +709,27 @@ export class OrgCheckAPI {
      */
     removeAllApexTriggersFromCache() {
         this._recipeManager.clean(OrgCheckRecipeAliases.APEX_TRIGGERS);
+    }
+
+    /**
+     * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
+     * @param {string} namespace 
+     * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getApexUncompiled(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.APEX_UNCOMPILED, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about apex uncompiled classes
+     * @public
+     */
+    removeAllApexUncompiledFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.APEX_UNCOMPILED);
     }
 
     /**

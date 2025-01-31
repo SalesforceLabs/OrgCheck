@@ -18,13 +18,19 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     whatName;
     dependencyData;
     dependencyTreeByType;
+    dependencyBoxColorsLegend = [
+        { color: '#2f89a8', name: 'Root' },
+        { color: '#3fb9b8', name: '1st level' },
+        { color: '#4fb9c8', name: '2nd level' },
+        { color: '#5fc9f8', name: '3rd+ level' }
+    ];
     dependencyBoxColorsDecorator = (depth) => {
         switch (depth) {
-            case 0:  return '#2f89a8'; 
-            case 1:  return '#3fb9b8'; 
-            case 2:  return '#4fb9c8'; 
+            case 0:  return 0; // root
+            case 1:  return 1; // 1st level
+            case 2:  return 2; // 2nd level
             case 3: 
-            default: return '#5fc9f8'; 
+            default: return 3; // 3rd+ level
         }
     };
     dependencyBoxInnerHtmlDecorator = (depth, data) => {

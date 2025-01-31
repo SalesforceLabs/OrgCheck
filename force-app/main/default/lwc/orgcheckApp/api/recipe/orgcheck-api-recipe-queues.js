@@ -7,7 +7,7 @@ import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 
-export class OrgCheckRecipeGroups extends OrgCheckRecipe {
+export class OrgCheckRecipeQueues extends OrgCheckRecipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -52,7 +52,7 @@ export class OrgCheckRecipeGroups extends OrgCheckRecipe {
                 (id) => groups.has(id)
             );
             // Filter data
-            if (group.isPublicGroup === true || group.isQueue === true) {
+            if (group.isQueue === true) {
                 array.push(group);
             }
         });

@@ -14,7 +14,7 @@ export default class OrgcheckCacheManager extends LightningElement {
     /**
      * Set the component data.
      * 
-     * @param {Array<DatasetCacheInfo>} data 
+     * @param {Array<any>} data 
      */
     @api set cacheManagerData(data) {
         if (data && typeof data === 'string') {
@@ -35,10 +35,6 @@ export default class OrgcheckCacheManager extends LightningElement {
     }
 
     handleRemoveAllCache() {
-        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: true } }));
-    }
-
-    handleRemoveOneCache(event) {
-        this.dispatchEvent(new CustomEvent('removecache', { detail: { allItems: false, itemName: event.srcElement.getAttribute('data-item-name') } }));
+        this.dispatchEvent(new CustomEvent('removecache'));
     }
 }

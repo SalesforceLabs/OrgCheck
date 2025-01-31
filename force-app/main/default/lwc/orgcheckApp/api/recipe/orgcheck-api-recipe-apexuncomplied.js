@@ -6,7 +6,7 @@ import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runi
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 
-export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
+export class OrgCheckRecipeApexUncompiled extends OrgCheckRecipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -48,7 +48,7 @@ export class OrgCheckRecipeApexClasses extends OrgCheckRecipe {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === '*' || apexClass.package === namespace) && apexClass.isTest === false && apexClass.needsRecompilation === false) {
+            if ((namespace === '*' || apexClass.package === namespace) && apexClass.needsRecompilation === true) {
                 array.push(apexClass);
             }
         });

@@ -1,11 +1,32 @@
-import { OrgCheckAPI } from './api/orgcheck-api';
-import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+import { OrgCheckAPI } from './api/orgcheck-api';
+import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
+import { OrgCheckDataCacheItem } from './api/core/orgcheck-api-cachemanager';
+import { SFDC_Flow } from './api/data/orgcheck-api-data-flow';
+import { SFDC_Field } from './api/data/orgcheck-api-data-field';
+import { SFDC_CustomLabel } from './api/data/orgcheck-api-data-customlabel';
+import { SFDC_LightningAuraComponent } from './api/data/orgcheck-api-data-lightningauracomponent';
+import { SFDC_LightningPage } from './api/data/orgcheck-api-data-lightningpage';
+import { SFDC_LightningWebComponent } from './api/data/orgcheck-api-data-lightningwebcomponent';
+import { SFDC_PermissionSet } from './api/data/orgcheck-api-data-permissionset';
+import { SFDC_Profile } from './api/data/orgcheck-api-data-profile';
+import { SFDC_ProfileRestrictions } from './api/data/orgcheck-api-data-profilerestrictions';
+import { SFDC_ProfilePasswordPolicy } from './api/data/orgcheck-api-data-profilepasswordpolicy';
+import { SFDC_User } from './api/data/orgcheck-api-data-user';
+import { SFDC_VisualForceComponent } from './api/data/orgcheck-api-data-visualforcecomponent';
+import { SFDC_VisualForcePage } from './api/data/orgcheck-api-data-visualforcepage';
+import { SFDC_ApexClass } from './api/data/orgcheck-api-data-apexclass';
+import { SFDC_ApexTrigger } from './api/data/orgcheck-api-data-apextrigger';
+import { SFDC_UserRole } from './api/data/orgcheck-api-data-userrole';
+import { SFDC_Workflow } from './api/data/orgcheck-api-data-workflow';
+import { SFDC_Group } from './api/data/orgcheck-api-data-group';
+import { SFDC_Object } from './api/data/orgcheck-api-data-object';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
+import { OrgCheckDataMatrix } from './api/core/orgcheck-api-data-matrix';
 
-export default class OrgCheckApp extends LightningElement {
+export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description URL for the logo in the header
@@ -33,14 +54,18 @@ export default class OrgCheckApp extends LightningElement {
      * @type {string} 
      * @public
      */
-    orgCheckVersion;
+    get orgCheckVersion() {
+        return this._api?.version ?? '';
+    }
 
     /**
      * @description Numerical representation of the Salesforce API Version we use in Org Check
      * @type {number}
      * @public
      */
-    salesforceApiVersion;
+    get salesforceApiVersion() {
+        return this._api?.salesforceApiVersion ?? NaN;
+    }
 
     /**
      * @description Org name
@@ -85,6 +110,13 @@ export default class OrgCheckApp extends LightningElement {
     themeForOrgLimit;
 
     /**
+     * @description list of items stored in org check cache
+     * @type {Array<OrgCheckDataCacheItem>}
+     * @public 
+     */ 
+    cacheManagerData;
+
+    /**
      * @description Salesforce Id of the current user passed by Visual Force page
      *                 This value is decorated by "api" so it can be passed by the parent.
      *                 Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
@@ -99,13 +131,6 @@ export default class OrgCheckApp extends LightningElement {
      * @type {string}
      */
     @api accessToken;
-
-    /**
-     * @description The name of the curent selected tab. This property is private
-     * @type {string}
-     * @private
-     */
-    _currentTab = 'welcome';
 
     /**
      * @description The OrgCheck api
@@ -143,6 +168,13 @@ export default class OrgCheckApp extends LightningElement {
     _filters;
 
     /**
+     * @description Current sub tab which is displayed
+     * @type {string}
+     * @private
+     */
+    _currentTab = 'welcome';
+
+    /**
      * @description After the component is fully load let's init some elements and the api
      * @public
      * @async
@@ -153,35 +185,409 @@ export default class OrgCheckApp extends LightningElement {
             this._spinner = this.template.querySelector('c-orgcheck-spinner');
             this._modal = this.template.querySelector('c-orgcheck-modal');
             this._filters = this.template.querySelector('c-orgcheck-global-filters');
-            await this._load();
+            await this._loadAPI();
+            await this._loadBasicInformationIfAccepted();
+        }
+    }
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Global filter: getter for selected values and (re)load values in list
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description Getter for the selected namespace from the global filter
+     * @returns {string} Empty string ('') if 'no namespace' selected, Wildcard ('*') if 'any namespace' selected, otherwise the name of the seleted namespace.
+     * @private
+     */ 
+    get _namespace() {
+        if (this._filters.isSelectedPackageAny === true) {
+            return '*';
+        }
+        if (this._filters.isSelectedPackageNo === true) {
+            return '';
+        }
+        return this._filters.selectedPackage;
+    }
+
+    /**
+     * @description Getter for the selected sobject type from the global filter
+     * @returns {string} Wildcard ('*') if 'any type' selected, otherwise the name of the seleted type.
+     * @private
+     */ 
+    get _objectType() {
+        if (this._filters.isSelectedSObjectTypeAny === true) {
+            return '*';
+        }
+        return this._filters.selectedSObjectType;
+    }
+
+    /**
+     * @description Getter for the selected sobject name from the global filter
+     * @returns {string} Wildcard ('*') if 'any sobject' selected, otherwise the name of the seleted sobject.
+     * @private
+     */ 
+    get _object() {
+        if (this._filters.isSelectedSObjectApiNameAny === true) {
+            return '*';
+        }
+        return this._filters.selectedSObjectApiName;
+    }
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Some other getter for the UI
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description List of elements to put in the global view
+     * @type {Array<{label: string, dataTable: Array<any>}>}
+     */ 
+    get globalViewItems() {
+        return Object.keys(this._internalTransformers)
+            .filter((/** @type {string} */ recipe) => this._internalTransformers[recipe].isGlobalView)
+            .map((/** @type {string} */ recipe) => { 
+                const transfomer = this._internalTransformers[recipe]; 
+                return { label: transfomer.label, dataTable: this[transfomer.data] };
+            });
+    }
+    
+    /**
+     * @description Do we show the "Apex Uncompiled" button in the Apex tab (depends on the size of apexUncompiledTableData)
+     * @type {boolean}
+     * @public
+     */ 
+    get isThereAnyApexUncompiled() {
+        return this.apexUncompiledTableData?.length > 0 || false;
+    }
+
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Org Check API loading, calls and update limit info in the UI
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description Load the Org Check API (and it dependencies) only the first time
+     * @param {any} [logger]
+     * @private
+     * @async
+     */ 
+    async _loadAPI(logger) {
+        // Init of the Org Check api (only once!)
+        if (this._api) return;
+
+        // Load JS dependencies
+        logger?.log('Loading JsForce and FFLate libraries...');
+        await Promise.all([
+            loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
+            loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
+        ]);
+
+        // Create the Org Check API
+        logger?.log('Loading Org Check library...')
+        this._api = new OrgCheckAPI(
+            // @ts-ignore
+            jsforce, fflate,
+            this.accessToken, this.userId,
+            {
+                log: (section, message) => { this._spinner.sectionLog(section, message); },
+                ended: (section, message) => { this._spinner.sectionEnded(section, message); },
+                failed: (section, error) => { this._spinner.sectionFailed(section, error); }
+            }
+        );
+    }
+
+    /**
+     * @description List of internal transformers to get data from the API
+     * @private
+     */
+    _internalTransformers = {
+        'active-users':              { label: '👥 Active Internal Users',     isGlobalView: true,  data: 'usersTableData',                        remove: () => { this._api.removeAllActiveUsersFromCache(); },             getAlias: () => '',                                                       get: async () => { return this._api.getActiveUsers(); }},
+        'apex-classes':              { label: '❤️‍🔥 Apex Classes',              isGlobalView: true,  data: 'apexClassesTableData',                  remove: () => { this._api.removeAllApexClassesFromCache(); },             getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexClasses(this._namespace); }},
+        'apex-unit-tests':           { label: '🚒 Apex Unit Tests',           isGlobalView: true,  data: 'apexTestsTableData',                    remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTests(this._namespace); }},
+        'apex-triggers':             { label: '🧨 Apex Triggers',             isGlobalView: true,  data: 'apexTriggersTableData',                 remove: () => { this._api.removeAllApexTriggersFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTriggers(this._namespace); }},
+        'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',           isGlobalView: true,  data: 'apexUncompiledTableData',               remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this._namespace); }},
+        'app-permissions':           { label: 'XXX',                          isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this._namespace); }},
+        'custom-fields':             { label: '🏈 Custom Fields',             isGlobalView: true,  data: 'customFieldsTableData',                 remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this._namespace}-${this._objectType}-${this._object}`, get: async () => { return this._api.getCustomFields(this._namespace, this._objectType, this._object); }},
+        'custom-labels':             { label: '🏷️ Custom Labels',             isGlobalView: true,  data: 'customLabelsTableData',                 remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getCustomLabels(this._namespace); }},
+        'flows':                     { label: '🏎️ Flows',                     isGlobalView: true,  data: 'flowsTableData',                        remove: () => { this._api.removeAllFlowsFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getFlows(); }},
+        'lightning-aura-components': { label: '🧁 Lightning Aura Components', isGlobalView: true,  data: 'auraComponentsTableData',               remove: () => { this._api.removeAllLightningAuraComponentsFromCache(); }, getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningAuraComponents(this._namespace); }},
+        'lightning-pages':           { label: '🎂 Lightning Pages',           isGlobalView: true,  data: 'flexiPagesTableData',                   remove: () => { this._api.removeAllLightningPagesFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningPages(this._namespace); }},
+        'lightning-web-components':  { label: '🍰 Lightning Web Components',  isGlobalView: true,  data: 'lightningWebComponentsTableData',       remove: () => { this._api.removeAllLightningWebComponentsFromCache(); },  getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningWebComponents(this._namespace); }},
+        'object':                    { label: 'XXX',                          isGlobalView: false, data: 'objectData',                            remove: () => { this._api.removeObjectFromCache(this._object); },         getAlias: () => `${this._object}`,                                        get: async () => { return this._object !== '*' ? this._api.getObject(this._object) : undefined; }},
+        'object-permissions':        { label: 'XXX',                          isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this._namespace); }},
+        'objects':                   { label: 'XXX',                          isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this._namespace}-${this._objectType}`,                 get: async () => { return this._api.getObjects(this._namespace, this._objectType); }},
+        'permission-sets':           { label: '🚔 Permission Sets',           isGlobalView: true,  data: 'permissionSetsTableData',               remove: () => { this._api.removeAllPermSetsFromCache(); },                getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getPermissionSets(this._namespace); }},
+        'process-builders':          { label: '🛺 Process Builders',          isGlobalView: true,  data: 'processBuildersTableData',              remove: () => { this._api.removeAllProcessBuildersFromCache(); },         getAlias: () => '',                                                       get: async () => { return this._api.getProcessBuilders(); }},
+        'profile-password-policies': { label: '⛖ Profile Password Policies', isGlobalView: true,  data: 'profilePasswordPoliciesTableData',       remove: () => { this._api.removeAllProfilePasswordPoliciesFromCache(); }, getAlias: () => '',                                                       get: async () => { return this._api.getProfilePasswordPolicies(); }},
+        'profile-restrictions':      { label: '🚸 Profile Restrictions',      isGlobalView: true,  data: 'profileRestrictionsTableData',          remove: () => { this._api.removeAllProfileRestrictionsFromCache(); },     getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getProfileRestrictions(this._namespace); }},
+        'profiles':                  { label: '🚓 Profiles',                  isGlobalView: true,  data: 'profilesTableData',                     remove: () => { this._api.removeAllProfilesFromCache(); },                getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getProfiles(this._namespace); }},
+        'public-groups':             { label: '🐘 Public Groups',             isGlobalView: true,  data: 'publicGroupsTableData',                 remove: () => { this._api.removeAllPublicGroupsFromCache(); },            getAlias: () => '',                                                       get: async () => { return this._api.getPublicGroups(); }},
+        'queues':                    { label: '🦒 Queues',                    isGlobalView: true,  data: 'queuesTableData',                       remove: () => { this._api.removeAllQueuesFromCache(); },                  getAlias: () => '',                                                       get: async () => { return this._api.getQueues(); }},
+        'roles-listing':             { label: '🦓 Role Listing',              isGlobalView: true,  data: 'rolesTableData',                        remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRoles(); }},
+        'roles-explorer':            { label: 'XXX',                          isGlobalView: false, data: 'rolesTree',                             remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRolesTree(); }},
+        'visual-force-components':   { label: '🍞 Visual Force Components',   isGlobalView: true,  data: 'visualForceComponentsTableData',        remove: () => { this._api.removeAllVisualForceComponentsFromCache(); },   getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForceComponents(this._namespace); }},
+        'visual-force-pages':        { label: '🥖 Visual Force Pages',        isGlobalView: true,  data: 'visualForcePagesTableData',             remove: () => { this._api.removeAllVisualForcePagesFromCache(); },        getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForcePages(this._namespace); }},
+        'workflows':                 { label: '🚗 Workflows',                 isGlobalView: true,  data: 'workflowsTableData',                    remove: () => { this._api.removeAllWorkflowsFromCache(); },               getAlias: () => '',                                                       get: async () => { return this._api.getWorkflows(); }}
+    }
+
+    /**
+     * @description List of transformer keys that will be included in the global view tab
+     * @private
+     */
+    _globalViewTransformersKeys = Object.keys(this._internalTransformers).filter((/** @type {string} */ recipe) => this._internalTransformers[recipe].isGlobalView === true)
+
+    /**
+     * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
+     * @param {string} recipe 
+     * @param {boolean} [forceRefresh=false] 
+     * @param {boolean} [lazyRefresh=true] 
+     * @private
+     * @async
+     */ 
+    async _updateData(recipe, forceRefresh=false, lazyRefresh=true) {
+        const transformer = this._internalTransformers[recipe]; 
+        if (transformer) {
+            if (forceRefresh === true) {
+                // Call the remove cache from the API for this recipe
+                transformer.remove();
+            }
+            // IF we set the lazy refresh to TRUE THEN
+            //     Only update the data if the current tab ("this._currentTab") is the one we are looking for ("recipe")
+            // ELSE
+            //     Update the data whatever the current tab is.
+            // The IF statement could be like: 
+            //     (lazyRefresh === true && recipe === this._currentTab) || lazyRefresh === false
+            // Let's do some Bool logic!!
+            // The previous IF statement is equivalent to:
+            //     NOT(  NOT( (lazyRefresh === true && recipe === this._currentTab)     ||  lazyRefresh === false )  )
+            //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  NOT(lazyRefresh === false)  )
+            //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  lazyRefresh === true  )
+            //     NOT( (NOT(lazyRefresh === true) || NOT(recipe === this._currentTab)) &&  lazyRefresh === true  )
+            //     NOT( (    lazyRefresh === false ||     recipe !== this._currentTab ) &&  lazyRefresh === true  )
+            //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
+            //     NOT( (                    false                      ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
+            //     NOT( (recipe !== this._currentTab && lazyRefresh === true )
+            // This is magic! ;)
+            if (!(recipe !== this._currentTab && lazyRefresh === true)) {
+                // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
+                const alias = transformer.getAlias();
+                // If you forced the refresh the data should be retrieved even if the alias is the same
+                // OR
+                // If the alias has changed (like the combinaison of filters value which will pontentially change the returned value from the API
+                if (forceRefresh === true || transformer.lastAlias !== alias) {
+                    transformer.lastAlias = alias;
+                    this[transformer.data] = await transformer.get();
+                }
+            }
+        } else {
+            console.error(`Transformer not found for recipe: ${recipe}`);
         }
     }
 
     /**
-     * @description After changing the filters value, a button appears on the UI.
-     *              Event called when the user click on this new button. 
-     *              The idea here is to populate the appropriate data on the current tab
-     *              This method is async because it awaits for the internal _updateCurrentTab method.
+     * @description Update the Daily API Request Limit information in the UI from the API
+     * @private
+     */ 
+    _updateLimits() {
+        if (this._api) {
+            const dailyApiInformation = this._api.dailyApiRequestLimitInformation;
+            if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
+                if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
+                else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
+                else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
+                this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;    
+            } else {
+                this.orgLimit = undefined;
+            }
+        }
+    }
+
+    /**
+     * @description Update the api cache information in the UI from the API
+     * @private
+     */ 
+    _updateCacheInformation() {
+        this.cacheManagerData = this._api.getCacheInformation();
+    }
+
+    /**
+     * @description Check if the terms are accepted and thus we can continue to use this org
+     * @private
+     * @async
+     */ 
+    async _checkTermsAcceptance() {
+        if (await this._api.checkUsageTerms()) {
+            this.useOrgCheckInThisOrgNeedConfirmation = false;
+            this.useOrgCheckInThisOrgConfirmed = true;
+        } else {
+            this.useOrgCheckInThisOrgNeedConfirmation = true;
+            this.useOrgCheckInThisOrgConfirmed = false;
+        }
+    }
+
+    /**
+     * @description Load basic information to use the app (including the filters)
+     * @param {any} [logger]
+     * @throws {Error} If the current user has not enough permissions to run the app (please display the error it has information about missing permissions)
+     * @private
+     * @async
+     */ 
+    async _loadBasicInformationIfAccepted(logger) {
+
+        // Check for acceptance
+        await this._checkTermsAcceptance();
+        if (this.useOrgCheckInThisOrgConfirmed === false) return;
+
+        // Check basic permission for the current user
+        logger?.log('Checking if current user has enough permission...')
+        await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
+
+        // Information about the org
+        logger?.log('Information about the org...');
+        const orgInfo = await this._api.getOrganizationInformation();
+        this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+        this.orgType = orgInfo.type;
+        this.isOrgProduction = orgInfo.isProduction;
+        if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+        else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+        else this.themeForOrgType = 'slds-theme_success';
+        
+        // Data for the filters
+        logger?.log('Load filters...');
+        await this._loadFilters();
+
+        // Update daily API limit information
+        logger?.log('Update the daily API limit informations...');
+        this._updateLimits();
+    }
+
+    /**
+     * @description Load the list of values for the filter
+     * @param {boolean} [forceRefresh=false] 
+     * @param {any} [logger]
+     * @private
+     * @async
+     */ 
+    async _loadFilters(forceRefresh=false, logger) {
+        logger?.log('Hide the filter panel...');
+        this._filters.hide();
+
+        if (forceRefresh === true) {
+            logger?.log('Clean data from cache (if any)...');
+            this._api.removeAllObjectsFromCache();
+            this._api.removeAllPackagesFromCache();
+        }
+
+        logger?.log('Get packages, types and objects from the org...');
+        const filtersData = await Promise.all([
+            this._api.getPackages(),
+            this._api.getObjectTypes(),
+            this._api.getObjects(this._namespace, this._objectType)
+        ])
+
+        logger?.log('Loading data in the drop boxes...');
+        this._filters.updatePackageOptions(filtersData[0]);
+        this._filters.updateSObjectTypeOptions(filtersData[1]);
+        this._filters.updateSObjectApiNameOptions(filtersData[2]);
+
+        logger?.log('Showing the filter panel...');
+        this._filters.show();
+
+        logger?.log('Update the daily API limit informations...');
+        this._updateLimits();
+    }
+
+    /**
+     * @description Unique method to launch the update of all data and update the screen accordingly
+     * @private
+     * @async
+     */
+    async _updateGlobalView() {
+        await Promise.all(this._globalViewTransformersKeys.map((/** @type {string} */ recipe) => { this._updateData(recipe, false, false); } ));
+    }
+
+    /**
+     * @description Unique method to propagate a change to be done in the current tab.
+     * @private
+     * @async
+     */
+    async _updateCurrentTab() {
+
+        if (this._hasRenderOnce === false) return;
+        
+        switch (this._currentTab) {
+            case 'welcome': {
+                this._updateCacheInformation();
+                break;
+            }
+            case 'global-view': {
+                await this._updateGlobalView();
+                break;
+            }
+            default: {
+                const TAB_SECTION = `TAB ${this._currentTab}`;
+                try {
+                    this._spinner.open();
+                    this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
+                    await this._updateData(this._currentTab);
+                    this._spinner.sectionEnded(TAB_SECTION, `Done.`);
+                    this._spinner.close(0);
+                } catch (error) {
+                    this._spinner.sectionFailed(TAB_SECTION, error);
+                    this._spinner.canBeClosed();
+                }
+            }
+        }
+        this._updateLimits();
+    }
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // User Experience Handlers
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description New filters were "applied" in the global filters, therefore the current screen needs to be updated
      * @public
      * @async
      */
     async handleFiltersValidated() {
-        await this._updateCurrentTab();
+        return this._updateCurrentTab();
     }
 
     /**
-     * @description Reset the filters values
+     * @description The "refresh" button in the global filters was pushed, therefore the filters needs to be reloaded
      * @public
      * @async
      */
     async handleFiltersRefreshed() {
-        this._doNotCloseSpinnerYet = true;
-        await this._loadFilters(true);
-        this._doNotCloseSpinnerYet = false;
+        return this._loadFilters(true);
     }
 
     /**
-     * @description Handle when the userclick on the acceptance use button
+     * @description When the org is a production, we show a message and a checkbox. This event is triggered when the user clicks on this checkbox.
+     *              This should activate the usage of the Salesforce API from Org Check API.
      * @param {Event} event 
      * @public
      * @async
@@ -189,67 +595,71 @@ export default class OrgCheckApp extends LightningElement {
     async handleClickUsageAcceptance(event) {
         if (event.target['checked'] === true) {
             this._api.acceptUsageTerms();
-            await this._load();
+            return this._loadBasicInformationIfAccepted();
         }
     }
 
     /**
      * @description Event called when user selects a main tab
-     *              This updates the internal private property called "_currentTab" that represents the name of the tab currently opened/visible.
-     *              This method is async because it awaits for the internal _updateCurrentTab method.
-     * @param {Event} event triggered when a user is selecting a main tab, thus the current tab will be the current selected sub tab within this main tab.
+     * @param {Event} event
      * @public
      * @async
      */
-    async handleTabActivation(event) {
-        const firstTabset = event.target['querySelector']('lightning-tabset');
-        if (firstTabset) {
-            await this._updateCurrentTab(firstTabset.activeTabValue);
-        }
+    async handleMainTabActivation(event) {
+        // The source of the event is the main tab
+        const mainTab = event.target;
+        // In each main tab there is an inner tabset that we want to get
+        const subTabset = mainTab['querySelector']('lightning-tabset');
+        // do nothing if we did not find any tabset (example the welcome tab does not have any!)
+        if (!subTabset) return;
+        // That subTabSet contains the last active tab
+        const currentActivatedSubTab = subTabset.activeTabValue;
+        // In case the current activated subTab is undefined we also do nothing
+        if (!currentActivatedSubTab) return;
+        // And that value is the next current tab we want to store
+        this._currentTab = currentActivatedSubTab;
+        // Ask to update the current data
+        return this._updateCurrentTab();
     }
 
     /**
      * @description Event called when user selects a sub tab (within a main tab)
-     *              This updates the internal private property called "_currentTab" that represents the name of the tab currently opened/visible.
-     *              This method is async because it awaits for the internal _updateCurrentTab method.
-     * @param {Event} event triggered when a user is selecting a sub tab, thus its target is actually the current tab.
+     * @param {Event} event 
      * @public
      * @async
      */
     async handleSubTabActivation(event) {
-        await this._updateCurrentTab(event.target['value']);
+        // The source of the event is a sub tab
+        const subTab = event.target;
+        // That subTab's name will be the next currentTab
+        this._currentTab = subTab['value'];
+        // Ask to update the current data
+        return this._updateCurrentTab();
     }
 
     /**
      * @description Event called when the content of a sub tab is fully loaded
-     *              This method is async because it awaits for the internal _updateCurrentTab method.
      * @public
      * @async
      */
-    async handleSubTabContentLoaded() {
-        await this._updateCurrentTab();
+    handleSubTabContentLoaded() {
+        this._updateCacheInformation();
     }
 
     /**
-     * @description Method called when the user ask to remove an item or all the cache in the UI
-     * @param {Event} event should contain "allItems" (boolean) and optinally "itemName" (string), if allItems=true 
-     *                      all items should be removed, if not, the "itemName" gives us the name if the cache entry
-     *                      to be removed.
+     * @description Method called when the user ask to remove all the cache in the UI
      * @public
      * @async
      */
-    async handleRemoveCache(event) {
-        if (event['detail'].allItems === true) {
+    async handleRemoveAllCache() {
+        if (this._api) {
             this._api.removeAllFromCache();
             window.location.reload();
-        } else {
-            this._api.removeFromCache(event['detail'].itemName);
-            await this._updateCurrentTab();
         }
     }
 
     /**
-     * @description Event called when the user clicks on the "View Score" button
+     * @description Event called when the user clicks on the "View Score" button on a data table
      * @param {Event} event 
      * @async
      * @public
@@ -269,18 +679,18 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     /**
-     * @description Event called when the user clicks on the "Run All Tests" button
+     * @description Event called when the user clicks on the "Run All Tests" button in the Apex tab
      * @async
      * @public
      */ 
     async handleClickRunAllTests() {
         const LOG_SECTION = 'RUN ALL TESTS';
         this._spinner.open();
-        this._spinner.sectionStarts(LOG_SECTION, 'Launching...');
+        this._spinner.sectionLog(LOG_SECTION, 'Launching...');
         try {
             const asyncApexJobId = await this._api.runAllTestsAsync();
             this._spinner.sectionEnded(LOG_SECTION, 'Done!');
-            this._spinner.close();
+            this._spinner.close(0);
 
             let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
             htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
@@ -295,67 +705,41 @@ export default class OrgCheckApp extends LightningElement {
     }
 
     /**
-     * @description Event called when the user clicks on the "Refresh" button
+     * @description Event called when the user clicks on the "Refresh" button from the current tab
      * @param {Event} event 
      * @async
      * @public
      */ 
-    async handleClickRefresh(event) {
-        const dataTabs = event.target['getAttribute']('data-tabs');
-        if (dataTabs) {
-            dataTabs.split(',').forEach((/** @type {string} */ tab) => {
-                switch (tab) {
-                    case 'object-information': {
-                        const sobject = this._filters.isSelectedSObjectApiNameAny === true ? '*' : this._filters.selectedSObjectApiName;
-                        if (sobject !== '*') {
-                            this._api.removeObjectFromCache(sobject); 
-                        }
-                        break;
-                    }
-                    case 'object-permissions':         this._api.removeAllObjectPermissionsFromCache(); break;
-                    case 'objects-owd':                this._api.removeAllPackagesTypesAndObjectsFromCache(); break;
-                    case 'app-permissions':            this._api.removeAllAppPermissionsFromCache(); break;
-                    case 'custom-fields':              this._api.removeAllCustomFieldsFromCache(); break;
-                    case 'users':                      this._api.removeAllActiveUsersFromCache(); break;
-                    case 'profiles':                   this._api.removeAllProfilesFromCache(); break;
-                    case 'permission-sets':            this._api.removeAllPermSetsFromCache(); break;
-                    case 'profile-restrictions':       this._api.removeAllProfileRestrictionsFromCache(); break;
-                    case 'profile-password-policies':  this._api.removeAllProfilePasswordPoliciesFromCache(); break;
-                    case 'roles-listing':
-                    case 'roles-explorer':             this._api.removeAllRolesFromCache(); break;
-                    case 'public-groups':
-                    case 'queues':                     this._api.removeAllGroupsFromCache(); break;
-                    case 'flows':                      this._api.removeAllFlowsFromCache(); break;
-                    case 'process-builders':           this._api.removeAllProcessBuildersFromCache(); break;
-                    case 'workflows':                  this._api.removeAllWorkflowsFromCache(); break;
-                    case 'custom-labels':              this._api.removeAllCustomLabelsFromCache(); break;
-                    case 'visual-force-pages':         this._api.removeAllVisualForcePagesFromCache(); break;
-                    case 'visual-force-components':    this._api.removeAllVisualForceComponentsFromCache(); break;
-                    case 'lightning-pages':            this._api.removeAllLightningPagesFromCache(); break;
-                    case 'lightning-aura-components':  this._api.removeAllLightningAuraComponentsFromCache(); break;
-                    case 'lightning-web-components':   this._api.removeAllLightningWebComponentsFromCache(); break;
-                    case 'apex-classes':
-                    case 'apex-unit-tests':
-                    case 'apex-recompilation-needed':  this._api.removeAllApexClassesFromCache(); break; 
-                    case 'apex-triggers':              this._api.removeAllApexTriggersFromCache(); break;
-                    default:
-                }
-            });
-            await this._updateCurrentTab();
-        }
+    async handleClickRefreshCurrentTab(event) {
+        const recipes = event.target['getAttribute']('data-recipes')?.split(',');
+        return Promise.all(recipes.map((/** @type {string} */ recipe) => { this._updateData(recipe, true); } ));
     }
 
+    /**
+     * @description When you activate the global view tab it should automatically retrieve all recipes
+     * @async
+     * @public
+     */ 
+    async handleGlobalViewTabActivation() {
+        return this._updateGlobalView();
+    }
+
+    /**
+     * @description Event called when the user clicks on the "Recompile" button
+     * @async
+     * @public
+     */ 
     async handleClickRecompile() {
-        const LOG_SECTION = 'RECOMPILE';
         this._spinner.open();
+        const LOG_SECTION = 'RECOMPILE';
         const classes = new Map();
-        this._spinner.sectionStarts(LOG_SECTION, 'Processing...');
+        this._spinner.sectionLog(LOG_SECTION, 'Processing...');
         this.apexUncompiledTableData.forEach(c => {
-            this._spinner.sectionStarts(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
+            this._spinner.sectionLog(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
             classes.set(c.id, c);
         });
         const responses = await this._api.compileClasses(this.apexUncompiledTableData);
-        this._spinner.sectionContinues(LOG_SECTION, 'Done');
+        this._spinner.sectionLog(LOG_SECTION, 'Done');
         responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
             const c = classes.get(cr.referenceId);
             if (cr.body.success === true) {
@@ -374,265 +758,34 @@ export default class OrgCheckApp extends LightningElement {
         this._spinner.canBeClosed();
     }
 
-    _doNotCloseSpinnerYet;
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Column header definition for all data tables in the app
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * Internal method to load and set the Org Check API
-     */ 
-    async _load() {
-
-        const MAIN_LOG_SECTION = 'LOAD APIS';
-        this._spinner.open();
-        this._spinner.sectionStarts(MAIN_LOG_SECTION, "C'est parti !");
-        this._doNotCloseSpinnerYet = true;
-
-        try {
-
-            // Init of the Org Check api (only once!)
-            if (!this._api) {
-
-                // Load JS dependencies
-                this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Loading JsForce and FFLate libraries...')
-                await Promise.all([
-                    loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
-                    loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
-                ]);
-
-                // Create the Org Check API
-                this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Loading Org Check library...')
-                this._api = new OrgCheckAPI(
-                    // @ts-ignore
-                    jsforce,
-                    // @ts-ignore
-                    fflate,
-                    this.accessToken,
-                    this.userId,
-                    {
-                        begin: () => { this._spinner.open(); },
-                        sectionStarts: (s, m) => { this._spinner.sectionStarts(s, m); },
-                        sectionContinues: (s, m) => { this._spinner.sectionContinues(s, m); },
-                        sectionEnded: (s, m) => { this._spinner.sectionEnded(s, m); },
-                        sectionFailed: (s, e) => { this._spinner.sectionFailed(s, e); },
-                        end: (s, f) => { if (this._doNotCloseSpinnerYet) return; if (f === 0) this._spinner.close(); else this._spinner.canBeClosed(); }
-                    }
-                );
-
-                // Set the version in the app
-                this.orgCheckVersion = this._api.version;
-                this.salesforceApiVersion = this._api.salesforceApiVersion;
-            }
-
-            // Check if the terms are accepted and thus we can continue to use this org
-            this._spinner.sectionContinues(MAIN_LOG_SECTION, 'Checking if we can use the org according to the terms...')
-            if (await this._api.checkUsageTerms()) {
-                this.useOrgCheckInThisOrgNeedConfirmation = false;
-                this.useOrgCheckInThisOrgConfirmed = true;
-            } else {
-                this.useOrgCheckInThisOrgNeedConfirmation = true;
-                this.useOrgCheckInThisOrgConfirmed = false;
-            }
-            this._spinner.sectionEnded(MAIN_LOG_SECTION, 'All set!');
-    
-            if (this.useOrgCheckInThisOrgConfirmed === true) {
-
-                // Check basic permission
-                this._spinner.sectionContinues('Current user check', 'Checking if current user has enough permission...')
-                await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
-                this._spinner.sectionEnded('Current user check');
-
-                // Information about the org
-                const ORG_LOG_SECTION = 'ORGANIZATION PANEL';
-                this._spinner.sectionContinues(ORG_LOG_SECTION, 'Information about the org...');
-                const orgInfo = await this._api.getOrganizationInformation();
-                this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-                this.orgType = orgInfo.type;
-                this.isOrgProduction = orgInfo.isProduction;
-                if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-                else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-                else this.themeForOrgType = 'slds-theme_success';
-                this._spinner.sectionEnded(ORG_LOG_SECTION);
-        
-                // Data for the filters
-                await this._loadFilters();
-
-                // Update the current tab if needed
-                await this._updateCurrentTab();
-            }
-
-            // FINALLY!
-            this._doNotCloseSpinnerYet = false;
-            this._spinner.close();
-    
-        } catch(error) {
-            this._spinner.canBeClosed();
-            this._spinner.sectionFailed(MAIN_LOG_SECTION, error);
-        }
-    }
-
-    async _loadFilters(forceReload=false) {
-        const LOG_SECTION = 'GLOBAL FILTERS';
-        this._spinner.open();
-        this._spinner.sectionStarts(LOG_SECTION, 'Hide the filter panel...');
-        this._filters.hide();
-        if (forceReload === true) {
-            this._spinner.sectionContinues(LOG_SECTION, 'Remove data from cache (if any)...');
-            this._api.removeAllPackagesTypesAndObjectsFromCache();
-        }
-        this._spinner.sectionContinues(LOG_SECTION, 'Get packages, types and objects from the org...');
-        const filtersData = await this._api.getPackagesTypesAndObjects('*', '*');
-        this._spinner.sectionContinues(LOG_SECTION, 'Loading data in the drop boxes...');
-        this._filters.updateSObjectTypeOptions(filtersData.types);
-        this._filters.updatePackageOptions(filtersData.packages);
-        this._filters.updateSObjectApiNameOptions(filtersData.objects);
-        this._spinner.sectionContinues(LOG_SECTION, 'Done. Showing the filters...');
-        this._filters.show();
-        this._spinner.sectionEnded(LOG_SECTION, 'Done!');
-        this._spinner.close();
-    }
-
-    _updateDailyAPIUsage() {
-        const dailyApiInformation = this._api.dailyApiRequestLimitInformation;
-        if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
-        else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
-        else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
-        this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;
-    }
-
-    /**
-     * @description Unique method to propagate a change to be done in the current tab.
-     *              If the given input value is specified, this must be different from the current tab property, otherwise this method does nothing.
-     *              If the given input value is undefined, the method will use the current tab.
-     *              This can be because end user selected another tab
-     *              This can be also because a filter was validated and needs to be propagated into the current tab
-     *              This can be also if the current tab is finally loaded
-     *              Usage: as this method is async, you should await when calling it!
-     * @param {string} [nextCurrentTab] Next current tab that will be activated/selected.
+     * @description Columns descriptions for the data table about field sets
      */
-    async _updateCurrentTab(nextCurrentTab) {
-
-        // If for some reason the api is not yet loaded, we stop there
-        if (!this._api) return;
-
-        // If the next current tab is the same as the current one, we stop here
-        if (nextCurrentTab && nextCurrentTab === this._currentTab) return;
-
-        // If the next current tab is specified, we use it to reset the current tab property
-        if (nextCurrentTab) this._currentTab = nextCurrentTab;
-
-        // Get the global filter parameters
-        const namespace = this._filters.isSelectedPackageAny === true ? '*' : (this._filters.isSelectedPackageNo === true ? '' : this._filters.selectedPackage);
-        const sobjectType = this._filters.isSelectedSObjectTypeAny === true ? '*' : this._filters.selectedSObjectType;
-        const sobject = this._filters.isSelectedSObjectApiNameAny === true ? '*' : this._filters.selectedSObjectApiName;
-        
-        // Call the API depending on the current tab
-        // If not supported we stop there
-        // Finally send the data to the content component.
-        // All is surrounded by a try catch that will show error modal if any.
-        const section = `TAB ${this._currentTab}`;
-        try {
-            this._spinner.open();
-
-            // Continue calling the api...
-            this._spinner.sectionStarts(section, 'Call the corresponding Org Check API');
-            this._updateDailyAPIUsage();
-            switch (this._currentTab) {
-                case 'object-information': {
-                    if (sobject !== '*') {
-                        this.objectInformationData = await this._api.getObject(sobject); 
-                    } else {
-                        this.objectInformationData = undefined; 
-                    }
-                    break;
-                }
-                case 'object-permissions':
-                case 'app-permissions': {
-                    const dataMatrix = 
-                        (this._currentTab === 'object-permissions') ? 
-                        (await this._api.getObjectPermissionsPerParent(namespace)) :
-                        (await this._api.getApplicationPermissionsPerParent(namespace)); // implicitly: this._currentTab === 'app-permissions')
-                    const getProp = (/** @type {Map} */ refs, /** @type {string} */ id, /** @type {string} */ property) => { 
-                        try {
-                            return refs.get(id)[property] ?? id;
-                        } catch (e) {
-                            return id;
-                        }
-                    };
-                    const getRowHeaderProp = (/** @type {string} */ id, /** @type {string} */ property) => {
-                        return getProp(dataMatrix.rowHeaderReferences, id, property);
-                    };
-                    const getColumnHeaderProp = (/** @type {string} */ id, /** @type {string} */ property) => {
-                        return getProp(dataMatrix.columnHeaderReferences, id, property);
-                    };
-                    /** @type { Array<{label: string, type: string, data: { ref: string, value: string|Function, url?: string|Function }, sorted?: string, orientation?: string}>} */
-                    const columns = [
-                        { label: 'Parent',  type: 'id',       data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'name'), url: (/** @type {string} */ i) => getRowHeaderProp(i, 'url') }, sorted: 'asc' },
-                        { label: 'Package', type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'package') }},
-                        { label: 'Type',    type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'type') }},
-                        { label: 'Custom',  type: 'boolean',  data: { ref: 'headerId', value: (/** @type {string} */ i) => getRowHeaderProp(i, 'isCustom') }}
-                    ];
-                    if (this._currentTab === 'object-permissions') {
-                        dataMatrix.columnHeaderIds
-                            .sort()
-                            .forEach(c => columns.push({ label: c, type: 'text', data: { ref: 'data', value: c }, orientation: 'vertical' }));
-                        this.objectPermissionsTableColumns = columns;
-                        this.objectPermissionsTableData = dataMatrix.rows;
-                    } else { // implicitly: this._currentTab === 'app-permissions')
-                        dataMatrix.columnHeaderIds
-                            .map(c => { return { label: getColumnHeaderProp(c, 'label'), id: c }; })
-                            .sort((a, b) => { return a.label < b.label ? -1: 1; })
-                            .forEach(c => columns.push({ label: c.label, type: 'text', data: { ref: 'data', value: c.id }, orientation: 'vertical' }));
-                        this.appPermissionsTableColumns = columns;
-                        this.appPermissionsTableData = dataMatrix.rows;
-                    }
-                    break;
-                }
-                case 'objects-owd':                        this.objectsOWDTableData = (await this._api.getPackagesTypesAndObjects(namespace, sobjectType)).objects; break;
-                case 'custom-fields':                      this.customFieldsTableData = await this._api.getCustomFields(namespace, sobjectType, sobject); break;
-                case 'users':                              this.usersTableData = await this._api.getActiveUsers(); break;
-                case 'profiles':                           this.profilesTableData = await this._api.getProfiles(namespace); break;
-                case 'permission-sets':                    this.permissionSetsTableData = await this._api.getPermissionSets(namespace); break;
-                case 'profile-restrictions':               this.profileRestrictionsTableData = await this._api.getProfileRestrictions(namespace); break;
-                case 'profile-password-policies':          this.profilePasswordPoliciesTableData = await this._api.getProfilePasswordPolicies(); break;
-                case 'roles-listing':                      this.rolesTableData = await this._api.getRoles(); break;
-                case 'roles-explorer':                     this.rolesTree = await this._api.getRolesTree(); break;
-                case 'public-groups':                      this.publicGroupsTableData = (await this._api.getGroups()).filter((r) => r.isPublicGroup === true); break;
-                case 'queues':                             this.queuesTableData = (await this._api.getGroups()).filter((r) => r.isQueue === true); break;
-                case 'flows':                              this.flowsTableData = await this._api.getFlows(); break;
-                case 'process-builders':                   this.processBuildersTableData = await this._api.getProcessBuilders(); break;
-                case 'workflows':                          this.workflowsTableData = await this._api.getWorkflows(); break;
-                case 'custom-labels':                      this.customLabelsTableData = await this._api.getCustomLabels(namespace); break;
-                case 'visual-force-pages':                 this.visualForcePagesTableData = await this._api.getVisualForcePages(namespace); break;
-                case 'visual-force-components':            this.visualForceComponentsTableData = await this._api.getVisualForceComponents(namespace); break;
-                case 'lightning-pages':                    this.flexiPagesTableData = await this._api.getLightningPages(namespace); break;
-                case 'lightning-aura-components':          this.auraComponentsTableData = await this._api.getLightningAuraComponents(namespace); break;
-                case 'lightning-web-components':           this.lightningWebComponentsTableData = await this._api.getLightningWebComponents(namespace); break;
-                case 'apex-classes':                       this.apexClassesTableData = (await this._api.getApexClasses(namespace)).filter((r) => r.isTest === false && r.needsRecompilation === false); break;
-                case 'apex-unit-tests':                    this.apexTestsTableData = (await this._api.getApexClasses(namespace)).filter((r) => r.isTest === true); break;
-                case 'apex-recompilation-needed':          this.apexUncompiledTableData = (await this._api.getApexClasses(namespace)).filter((r) => r.needsRecompilation === true); break; 
-                case 'apex-triggers':                      this.apexTriggersTableData = await this._api.getApexTriggers(namespace); break;
-                case 'welcome':                            this.cacheManagerData = await this._api.getCacheInformation(); break;
-                default:
-            }
-            this._updateDailyAPIUsage();
-            this._spinner.sectionEnded(section, 'Done');
-            this._spinner.close();
-
-        } catch (error) {
-            this._spinner.sectionFailed(section, error);
-            console.error(error);
-        }
-    }
-
     fieldSetsColumns = [
         { label: 'Label',       type: 'id',       data: { value: 'label', url: 'url' }},
         { label: 'Description', type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
+    /**
+     * @description Columns descriptions for the data table about page layouts
+     */
     layoutsColumns = [
         { label: 'Label', type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Type',  type: 'text',     data: { value: 'type' }},
     ];
 
+    /**
+     * @description Columns descriptions for the data table about object limits
+     */
     limitsColumns = [
         { label: 'Score',     type: 'score',      data: { id: 'id', name: 'label' }, sorted: 'desc' },
         { label: 'Label',     type: 'text',       data: { value: 'label' }},
@@ -643,6 +796,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Remaining', type: 'numeric',    data: { value: 'remaining' }}
     ];
 
+    /**
+     * @description Columns descriptions for the data table about validation rules
+     */
     validationRulesColumns = [
         { label: 'Score',            type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',             type: 'id',        data: { value: 'name', url: 'url' }},
@@ -652,10 +808,16 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',      type: 'text',      data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
+    /**
+     * @description Columns descriptions for the data table about web links
+     */
     webLinksColumns = [
-        { label: 'Name', type: 'id',       data: { value: 'name' }},
+        { label: 'Name', type: 'id', data: { value: 'name' }},
     ];
 
+    /**
+     * @description Columns descriptions for the data table about record types
+     */
     recordTypesColumns = [
         { label: 'Score',          type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',           type: 'id',       data: { value: 'name', url: 'url' }},
@@ -667,6 +829,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',    type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
+    /**
+     * @description Columns descriptions for the data table about sobject relationships
+     */
     relationshipsColumns = [
         { label: 'Name',                 type: 'text',    data: { value: 'name' }},
         { label: 'Field Name',           type: 'text',    data: { value: 'fieldName' }},
@@ -675,6 +840,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Is Restricive Delete', type: 'boolean', data: { value: 'isRestrictedDelete' }}
     ];
     
+    /**
+     * @description Columns descriptions for the data table about custom fields
+     */
     customFieldsTableColumns = [
         { label: 'Score',               type: 'score',            filter: 'sco', data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Field',               type: 'id',               data: { value: 'name', url: 'url' }},
@@ -701,15 +869,24 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date',       type: 'dateTime',         filter: 'noc', data: { value: 'lastModifiedDate' }},
         { label: 'Description',         type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
+
+    /**
+     * @description Columns descriptions for the data table about custom fields within an SObject
+     */
     customFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c =>
         c.filter === undefined || c.filter !== 'obj'
     );
+
+    /**
+     * @description Columns descriptions for the data table about standard fields within an SObject
+     */
     standardFieldsInObjectTableColumns = this.customFieldsTableColumns.filter(c => 
         c.filter === undefined
     );
 
-    customFieldsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about custom labels
+     */
     customLabelsTableColumns = [
         { label: 'Score',               type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                type: 'id',               data: { value: 'name', url: 'url' }},
@@ -729,8 +906,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Value',               type: 'text',             data: { value: 'value'}, modifier: { maximumLength: 45 }}
     ];
 
-    customLabelsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about lightning aura components
+     */
     auraComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -744,8 +922,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    auraComponentsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about lightning pages
+     */
     flexiPagesTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -759,12 +938,17 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }},
         { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
+
+    /**
+     * @description Columns descriptions for the data table about lightning pages within an SObject
+     */
     flexiPagesInObjectTableColumns = this.flexiPagesTableColumns.filter(c =>
         c.filter === undefined || c.filter !== 'obj'
     );
 
-    flexiPagesTableData;
-
+    /**
+     * @description Columns descriptions for the data table about lightning web components
+     */
     lightningWebComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -778,8 +962,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ]
 
-    lightningWebComponentsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about permission sets
+     */
     permissionSetsTableColumns = [
         { label: 'Score',            type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',             type: 'id',        data: { value: 'name', url: 'url' }},
@@ -800,8 +985,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',      type: 'text',      data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    permissionSetsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about profiles
+     */
     profilesTableColumns = [
         { label: 'Score',           type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { value: 'name', url: 'url' }},
@@ -820,8 +1006,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',     type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    profilesTableData;
-
+    /**
+     * @description Columns descriptions for the data table about profile restrictions
+     */
     profileRestrictionsTableColumns = [
         { label: 'Score',           type: 'score',    data: { ref: 'profileRef', id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',       data: { ref: 'profileRef', value: 'name', url: 'url' }},
@@ -832,8 +1019,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',     type: 'text',     data: { ref: 'profileRef', value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    profileRestrictionsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about profiles password policies
+     */
     profilePasswordPoliciesTableColumns = [
         { label: 'Score',                                     type: 'score',   data: { id: 'profileName', name: 'profileName' }, sorted: 'desc' },
         { label: 'Name',                                      type: 'text',    data: { value: 'profileName' }},
@@ -848,8 +1036,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Security Question Hidden',                  type: 'boolean', data: { value: 'obscure' }},
     ];
     
-    profilePasswordPoliciesTableData;
-
+    /**
+     * @description Columns descriptions for the data table about public groups
+     */
     publicGroupsTableColumns = [
         { label: 'Score',                  type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                   type: 'id',        data: { value: 'name', url: 'url' }},
@@ -860,8 +1049,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Explicit users',         type: 'ids',       data: { ref: 'directUserRefs', value: 'name', url: 'url' }}
     ];
 
-    publicGroupsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about queues
+     */
     queuesTableColumns = [
         { label: 'Score',                  type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',                   type: 'id',        data: { value: 'name', url: 'url' }},
@@ -872,8 +1062,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Explicit users',         type: 'ids',       data: { ref: 'directUserRefs', value: 'name', url: 'url' }}
     ];
 
-    queuesTableData;
-
+    /**
+     * @description Columns descriptions for the data table about active internal users
+     */
     usersTableColumns = [
         { label: 'Score',                        type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'User Name',                    type: 'id',        data: { value: 'name', url: 'url' }},
@@ -892,8 +1083,10 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Profile',                      type: 'id',        data: { ref: 'profileRef', value: 'name', url: 'url' }},
         { label: 'Permission Sets',              type: 'ids',       data: { ref: 'permissionSetRefs', value: 'name', url: 'url' }}
     ];
-    usersTableData;
 
+    /**
+     * @description Columns descriptions for the data table about visualforce components
+     */
     visualForceComponentsTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -907,8 +1100,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',   type: 'text',             data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    visualForceComponentsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about visualforce pages
+     */
     visualForcePagesTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -923,8 +1117,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Description',   type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
 
-    visualForcePagesTableData;
-
+    /**
+     * @description Columns descriptions for the data table about apex classes (compiled and not tests)
+     */
     apexClassesTableColumns = [
         { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
@@ -953,8 +1148,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date',   type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
 
-    apexClassesTableData;
-    
+    /**
+     * @description Columns descriptions for the data table about uncompiled apex classes
+     */    
     apexUncompiledTableColumns = [
         { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
@@ -970,12 +1166,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date',   type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
 
-    apexUncompiledTableData;
-
-    get isThereAnyApexUncompiled() {
-        return this.apexUncompiledTableData?.length > 0;
-    }
-
+    /**
+     * @description Columns descriptions for the data table about apex triggers
+     */
     apexTriggersTableColumns = [
         { label: 'Score',         type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',          type: 'id',               data: { value: 'name', url: 'url' }},
@@ -999,12 +1192,16 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date', type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
 
+    /**
+     * @description Columns descriptions for the data table about apex triggers within SObject
+     */
     apexTriggersInObjectTableColumns = this.apexTriggersTableColumns.filter(c =>
         c.filter !== 'nob'
     );
 
-    apexTriggersTableData;
-
+    /**
+     * @description Columns descriptions for the data table about apex classes that are tests
+     */
     apexTestsTableColumns = [
         { label: 'Score',           type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',            type: 'id',               data: { value: 'name', url: 'url' }},
@@ -1026,9 +1223,10 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date',   type: 'dateTime',         data: { value: 'lastModifiedDate' }}
     ];
     
-    apexTestsTableData;
-
-    objectsOWDTableColumns = [
+    /**
+     * @description Columns descriptions for the data table about SObject Org Wide Default
+     */
+    owdTableColumns = [
         { label: 'Label',     type: 'text',  data: { value: 'label' }, sorted: 'asc'},
         { label: 'Name',      type: 'text',  data: { value: 'name' }},
         { label: 'Package',   type: 'text',  data: { value: 'package' }},
@@ -1036,61 +1234,9 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'External',  type: 'text',  data: { value: 'externalSharingModel' }}
     ];
 
-    objectsOWDTableData;
-
-    objectPermissionsTableColumns;
-    objectPermissionsTableData;
-
-    appPermissionsTableColumns;
-    appPermissionsTableData;
-
-    rolesTableColumns = [
-        { label: 'Score',                       type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',                        type: 'id',       data: { value: 'name', url: 'url' }},
-        { label: 'Developer Name',              type: 'text',     data: { value: 'apiname' }},
-        { label: 'Number of active members',    type: 'numeric',  data: { value: 'activeMembersCount' }},
-        { label: 'Number of inactive members',  type: 'numeric',  data: { value: 'inactiveMembersCount' }},
-        { label: 'Parent',                      type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }}
-    ];
-
-    rolesTableData;
-
-    roleBoxColorsDecorator = (depth, data) => {
-        if (depth === 0) return '#2f89a8';
-        if (data.record.hasActiveMembers === false) return '#fdc223';
-        return '#5fc9f8';
-    };
-
-    roleBoxInnerHtmlDecorator = (depth, data) => {
-        if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
-        return `<center><b>${data.record.name}</b><br />${data.record.apiname}</center>`;
-    }
-
-    roleBoxOnClickDecorator = (depth, data) => {
-        if (depth === 0) return;
-        let htmlContent = `Role Name: <b>${data.record.name}</b><br />`;
-        htmlContent += `Salesforce Id: <b>${data.record.id}</b><br />`;
-        htmlContent += `Developer Name: <b>${data.record.apiname}</b><br />`;
-        htmlContent += '<br />';
-        htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
-        htmlContent += '<br />';
-        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
-        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${activeMember.name}</li>`; });
-        htmlContent += '</ul><br />';
-        htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
-        htmlContent += '<br />';
-        if (data.record.parentRef) {
-            htmlContent += `Parent Role Name: <b>${data.record.parentRef.name}</b><br />`;
-            htmlContent += `Parent Salesforce Id: <b>${data.record.parentRef.id}</b><br />`;
-            htmlContent += `Parent Developer Name: <b>${data.record.parentRef.apiname}</b><br />`;
-        } else {
-            htmlContent += 'No parent';
-        }
-        this._modal.open(`Details for role ${data.record.name}`, htmlContent);
-    }
-
-    rolesTree;
-
+    /**
+     * @description Columns descriptions for the data table about flows
+     */
     flowsTableColumns = [
         { label: 'Score',              type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',               type: 'id',               data: { value: 'name', url: 'url' }},
@@ -1118,12 +1264,14 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Dependencies',       type: 'dependencyViewer', data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }},
     ];
 
-    flowsTableData;
-
+    /**
+     * @description Columns descriptions for the data table about process builders
+     */
     processBuildersTableColumns = this.flowsTableColumns;
-
-    processBuildersTableData;
     
+    /**
+     * @description Columns descriptions for the data table about workflows
+     */
     workflowsTableColumns = [
         { label: 'Score',             type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',              type: 'id',       data: { value: 'name', url: 'url' }},
@@ -1136,18 +1284,190 @@ export default class OrgCheckApp extends LightningElement {
         { label: 'Modified date',     type: 'dateTime', data: { value: 'lastModifiedDate' }},
         { label: 'Description',       type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
-    
-    workflowsTableData;
 
-    cacheManagerData;
+    /**
+     * @description Columns descriptions for the data table about roles
+     */
+    rolesTableColumns = [
+        { label: 'Score',                       type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                        type: 'id',       data: { value: 'name', url: 'url' }},
+        { label: 'Developer Name',              type: 'text',     data: { value: 'apiname' }},
+        { label: 'Number of active members',    type: 'numeric',  data: { value: 'activeMembersCount' }},
+        { label: 'Number of inactive members',  type: 'numeric',  data: { value: 'inactiveMembersCount' }},
+        { label: 'Parent',                      type: 'id',       data: { ref: 'parentRef', value: 'name', url: 'url' }}
+    ];
 
-    objectInformationData;
 
 
-    get objectInformationExportBasename() {
-        return this.objectInformationData.apiname;
+
+    _internalObjectPermissionsDataMatrix;
+
+    get objectPermissionsTableData() {
+        return this._internalObjectPermissionsDataMatrix?.rows || [];
+    }
+
+    get objectPermissionsTableColumns() {
+        if (! this._internalObjectPermissionsDataMatrix) {
+            return [];
+        }
+        const columns = GET_STARTING_MATRIX_COLUMNS(this._internalObjectPermissionsDataMatrix);
+        this._internalObjectPermissionsDataMatrix.columnHeaderIds
+            .sort()
+            .forEach((c) => columns.push({ label: c, type: 'text', data: { ref: 'data', value: c }, orientation: 'vertical' }));
+        return columns;
     }
     
+    _internalAppPermissionsDataMatrix;
+
+    get appPermissionsTableData() {
+        return this._internalAppPermissionsDataMatrix?.rows || [];
+    }
+
+    get appPermissionsTableColumns() {
+        if (! this._internalAppPermissionsDataMatrix) {
+            return [];
+        }
+        const columns = GET_STARTING_MATRIX_COLUMNS(this._internalAppPermissionsDataMatrix);
+        this._internalAppPermissionsDataMatrix.columnHeaderIds
+            .map(c => { return { label: GET_COLUMN_HEADER_PROPERTY(this._internalAppPermissionsDataMatrix, c, 'label'), id: c }; })
+            .sort((a, b) => { return a.label < b.label ? -1: 1; })
+            .forEach(c => columns.push({ label: c.label, type: 'text', data: { ref: 'data', value: c.id }, orientation: 'vertical' }));
+        return columns;
+    }
+
+
+
+
+
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Decoration for Role Hierarchy graphic view
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /** 
+     * @description Legend for the role hierarchy graphic view
+     * @type {Array<{color: string, name: string}>}
+     * @public
+     */
+    roleBoxColorsLegend = [
+        { color: '#2f89a8', name: 'Root' },
+        { color: '#fdc223', name: 'Empty role (no active user)' },
+        { color: '#5fc9f8', name: 'Role with active members' }
+    ];
+
+    /** 
+     * @description Color decorator for the role hierarchy graphic view.
+     * @param {number} depth The depth of the current role in the hierarchy
+     * @param {any} data The data of the current role
+     * @returns {number} The index of the color in the legend
+     * @public
+     */
+    roleBoxColorsDecorator = (depth, data) => {
+        if (depth === 0) return 0; // root
+        if (data.record.hasActiveMembers === false) return 1; // empty role
+        return 2; // role with active members
+    };
+
+    /**
+     * @description Inner HTML decorator for the role hierarchy graphic view
+     * @param {number} depth The depth of the current role in the hierarchy
+     * @param {any} data The data of the current role
+     * @returns {string} The inner HTML to display in the role box
+     * @public
+     */
+    roleBoxInnerHtmlDecorator = (depth, data) => {
+        if (depth === 0) return `<center><b>Role Hierarchy</b></center>`;
+        return `<center><b>${data.record.name}</b><br />${data.record.apiname}</center>`;
+    }
+
+    /** 
+     * @description Decorator for the Pop-Up dialog when clikcing in a role box
+     * @param {number} depth The depth of the current role in the hierarchy
+     * @param {any} data The data of the current role
+     * @returns {string} The inner HTML to display in the pop-up box
+     * @public
+     */ 
+    roleBoxOnClickDecorator = (depth, data) => {
+        if (depth === 0) return;
+        let htmlContent = `Role Name: <b>${data.record.name}</b><br />`;
+        htmlContent += `Salesforce Id: <b>${data.record.id}</b><br />`;
+        htmlContent += `Developer Name: <b>${data.record.apiname}</b><br />`;
+        htmlContent += '<br />';
+        htmlContent += `Level in hierarchy: <b>${depth}</b><br />`;
+        htmlContent += '<br />';
+        htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
+        data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${activeMember.name}</li>`; });
+        htmlContent += '</ul><br />';
+        htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
+        htmlContent += '<br />';
+        if (data.record.parentRef) {
+            htmlContent += `Parent Role Name: <b>${data.record.parentRef.name}</b><br />`;
+            htmlContent += `Parent Salesforce Id: <b>${data.record.parentRef.id}</b><br />`;
+            htmlContent += `Parent Developer Name: <b>${data.record.parentRef.apiname}</b><br />`;
+        } else {
+            htmlContent += 'No parent';
+        }
+        this._modal.open(`Details for role ${data.record.name}`, htmlContent);
+    }
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Decoration for Global View 
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    pieCategoriesDecorator = (data) => {
+        if (data) {
+            const all = data.length;
+            const badOnes = data.filter((d) => d?.score > 0).length;
+            const goodOnes = all - badOnes;
+            return [ 
+                { name: 'Bad',  value: badOnes,  color: 'red' }, 
+                { name: 'Good', value: goodOnes, color: 'green' } 
+            ];
+        };
+    }
+
+    _colors = ['#2f89a8', '#fdc223', '#5fc9f8', '#f8b195', '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576', '#f8b195', '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576'];
+
+    pieCategoriesDecorator2 = (data) => {
+        if (data) {
+            const series = new Map();
+            data.forEach((d) => { 
+                d.badReasonIds.forEach(id => {
+                    series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
+                });
+            });
+            return Array.from(series.keys()).map((id, index) => { return { 
+                name: this._api.getValidationRule(id).description, value: series.get(id), 'color': this._colors[index]
+            }});
+        };
+    }
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Export structure for objects (which is needed because multiple tables)
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /**
+     * @description Representation of an export for SObject Description data
+     * @type {Array<{header: string, columns: Array<{label: string, field: string}>, rows: Array<{label: string, value: any}>}>}
+     */
     get objectInformationExportSource() {
         return [
             {
@@ -1157,76 +1477,275 @@ export default class OrgCheckApp extends LightningElement {
                     { label: 'Value', field: 'value' }
                 ], 
                 rows: [
-                    { label: 'API Name', value: this.objectInformationData.apiname },
-                    { label: 'Package', value: this.objectInformationData.package },
-                    { label: 'Singular Label', value: this.objectInformationData.label },
-                    { label: 'Plural Label', value: this.objectInformationData.labelPlural },
-                    { label: 'Description', value: this.objectInformationData.description },
-                    { label: 'Key Prefix', value: this.objectInformationData.keyPrefix },
-                    { label: 'Record Count (including deleted ones)', value: this.objectInformationData.recordCount },
-                    { label: 'Is Custom?', value: this.objectInformationData.isCustom },
-                    { label: 'Feed Enable?', value: this.objectInformationData.isFeedEnabled },
-                    { label: 'Most Recent Enabled?', value: this.objectInformationData.isMostRecentEnabled },
-                    { label: 'Global Search Enabled?', value: this.objectInformationData.isSearchable },
-                    { label: 'Internal Sharing', value: this.objectInformationData.internalSharingModel },
-                    { label: 'External Sharing', value: this.objectInformationData.externalSharingModel }
+                    { label: 'API Name', value: this.objectData.apiname },
+                    { label: 'Package', value: this.objectData.package },
+                    { label: 'Singular Label', value: this.objectData.label },
+                    { label: 'Plural Label', value: this.objectData.labelPlural },
+                    { label: 'Description', value: this.objectData.description },
+                    { label: 'Key Prefix', value: this.objectData.keyPrefix },
+                    { label: 'Record Count (including deleted ones)', value: this.objectData.recordCount },
+                    { label: 'Is Custom?', value: this.objectData.isCustom },
+                    { label: 'Feed Enable?', value: this.objectData.isFeedEnabled },
+                    { label: 'Most Recent Enabled?', value: this.objectData.isMostRecentEnabled },
+                    { label: 'Global Search Enabled?', value: this.objectData.isSearchable },
+                    { label: 'Internal Sharing', value: this.objectData.internalSharingModel },
+                    { label: 'External Sharing', value: this.objectData.externalSharingModel }
                 ]
             },
             {
                 header: 'Standard Fields',
                 columns: this.standardFieldsInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.standardFields
+                rows: this.objectData.standardFields
             },
             {
                 header: 'Custom Fields',
                 columns: this.customFieldsInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.customFieldRefs
+                rows: this.objectData.customFieldRefs
             },
             {
                 header: 'Apex Triggers',
                 columns: this.apexTriggersTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.apexTriggers
+                rows: this.objectData.apexTriggerRefs
             },
             {
                 header: 'Field Sets',
                 columns: this.fieldSetsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.fieldSets
+                rows: this.objectData.fieldSets
             },
             {
                 header: 'Page Layouts',
                 columns: this.layoutsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.layouts
+                rows: this.objectData.layouts
             },
             {
                 header: 'Lightning Pages',
                 columns: this.flexiPagesInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.flexiPages
+                rows: this.objectData.flexiPages
             },
             {
                 header: 'Limits',
                 columns: this.limitsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.limits
+                rows: this.objectData.limits
             },
             {
                 header: 'Validation Rules',
                 columns: this.validationRulesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.validationRules
+                rows: this.objectData.validationRules
             },
             {
                 header: 'Web Links',
                 columns: this.webLinksColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.webLinks
+                rows: this.objectData.webLinks
             },
             {
                 header: 'Record Types',
                 columns: this.recordTypesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.recordTypes
+                rows: this.objectData.recordTypes
             },
             {
                 header: 'Relationships',
                 columns: this.relationshipsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
-                rows: this.objectInformationData.relationships
+                rows: this.objectData.relationships
             }
         ];
     }
+
+
+
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // All tables in the app
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+
+    /** 
+     * @description Data table for Org Wide default in the org 
+     * @type {Array<SFDC_Object>}
+     */
+    objectsTableData;
+
+    /** 
+     * @description Data table for Org Wide default in the org 
+     * @type {SFDC_Object}
+     */
+    objectData;
+
+    /** 
+     * @description Data table for custom fields 
+     * @type {Array<SFDC_Field>}
+     */
+    customFieldsTableData;
+
+    /** 
+     * @description Data table for custom labels 
+     * @type {Array<SFDC_CustomLabel>}
+     */
+    customLabelsTableData;
+
+    /** 
+     * @description Data table for lightning aura components 
+     * @type {Array<SFDC_LightningAuraComponent>}
+     */
+    auraComponentsTableData;
+
+    /** 
+     * @description Data table for lightning pages 
+     * @type {Array<SFDC_LightningPage>}
+     */
+    flexiPagesTableData;
+
+    /** 
+     * @description Data table for lightning web components 
+     * @type {Array<SFDC_LightningWebComponent>}
+     */
+    lightningWebComponentsTableData;
+
+    /** 
+     * @description Data table for permission sets
+     * @type {Array<SFDC_PermissionSet>}
+     */
+    permissionSetsTableData;
+
+    /** 
+     * @description Data table for profiles
+     * @type {Array<SFDC_Profile>}
+     */
+    profilesTableData;
+
+    /** 
+     * @description Data table for profile restrictions 
+     * @type {Array<SFDC_ProfileRestrictions>}
+     */
+    profileRestrictionsTableData;
+
+    /** 
+     * @description Data table for profile password policies 
+     * @type {Array<SFDC_ProfilePasswordPolicy>}
+     */
+    profilePasswordPoliciesTableData;
+
+    /** 
+     * @description Data table for process builders 
+     * @type {Array<SFDC_Group>}
+     */
+    publicGroupsTableData;
+
+    /** 
+     * @description Data table for queues
+     * @type {Array<SFDC_Group>}
+     */
+    queuesTableData;
+
+    /** 
+     * @description Data table for active users 
+     * @type {Array<SFDC_User>}
+     */
+    usersTableData;
+
+    /** 
+     * @description Data table for visualforce components 
+     * @type {Array<SFDC_VisualForceComponent>}
+     */
+    visualForceComponentsTableData;
+
+    /** 
+     * @description Data table for visualforce pages
+     * @type {Array<SFDC_VisualForcePage>}
+     */
+    visualForcePagesTableData;
+
+    /** 
+     * @description Data table for apex classes (compiled and not unit test)
+     * @type {Array<SFDC_ApexClass>}
+     */
+    apexClassesTableData;
+
+    /** 
+     * @description Data table for uncompiled apex classes
+     * @type {Array<SFDC_ApexClass>}
+     */
+    apexUncompiledTableData;
+
+    /** 
+     * @description Data table for apex triggers
+     * @type {Array<SFDC_ApexTrigger>}
+     */
+    apexTriggersTableData;
+
+    /** 
+     * @description Data table for apex classes that are unit tests 
+     * @type {Array<SFDC_ApexClass>}
+     */
+    apexTestsTableData;
+
+    /** 
+     * @description Data table for internal user roles 
+     * @type {Array<SFDC_UserRole>}
+     */
+    rolesTableData;
+
+    /** 
+     * @description Top level user role tree, where each record may have children.
+     * @type {SFDC_UserRole}
+     */
+    rolesTree;
+
+    /** 
+     * @description Data table for flows 
+     * @type {Array<SFDC_Flow>}
+     */
+    flowsTableData;
+
+    /** 
+     * @description Data table for process builders 
+     * @type {Array<SFDC_Flow>}
+     */
+    processBuildersTableData;
+
+    /** 
+     * @description Data table for workflows 
+     * @type {Array<SFDC_Workflow>}
+     */
+    workflowsTableData;
+}
+
+/**
+ * @description Get the value of an item in the row header references' map for a specific property
+ * @param {OrgCheckDataMatrix} dataMatrix
+ * @param {string} id
+ * @param {string} property
+ * @return {any}
+ */
+const GET_ROW_HEADER_PROPERTY = (dataMatrix, id, property) => {
+    return (dataMatrix.rowHeaderReferences.get(id)[property] ?? id) || id;
+}
+
+/**
+ * @description Get the value of an item in the column header references' map for a specific property
+ * @param {OrgCheckDataMatrix} dataMatrix
+ * @param {string} id
+ * @param {string} property
+ * @return {any}
+ */
+const GET_COLUMN_HEADER_PROPERTY = (dataMatrix, id, property) => {
+    return (dataMatrix.columnHeaderReferences.get(id)[property] ?? id) || id;
+}
+
+/**
+ * @description Get the basics of the columns for a data matrix
+ * @param {OrgCheckDataMatrix} dataMatrix
+ * @return { Array<{label: string, type: string, data: { ref: string, value: string|Function, url?: string|Function }, sorted?: string, orientation?: string}>}
+ */
+const GET_STARTING_MATRIX_COLUMNS = (dataMatrix) => {
+    return [
+        { label: 'Parent',  type: 'id',       data: { ref: 'headerId', value: (/** @type {string} */ i) => GET_ROW_HEADER_PROPERTY(dataMatrix, i, 'name'), url: (/** @type {string} */ i) => GET_ROW_HEADER_PROPERTY(dataMatrix, i, 'url') }, sorted: 'asc' },
+        { label: 'Package', type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => GET_ROW_HEADER_PROPERTY(dataMatrix, i, 'package') }},
+        { label: 'Type',    type: 'text',     data: { ref: 'headerId', value: (/** @type {string} */ i) => GET_ROW_HEADER_PROPERTY(dataMatrix, i, 'type') }},
+        { label: 'Custom',  type: 'boolean',  data: { ref: 'headerId', value: (/** @type {string} */ i) => GET_ROW_HEADER_PROPERTY(dataMatrix, i, 'isCustom') }}
+    ];
 }
