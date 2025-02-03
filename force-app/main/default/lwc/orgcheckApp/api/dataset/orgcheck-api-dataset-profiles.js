@@ -46,7 +46,6 @@ export class OrgCheckDatasetProfiles extends OrgCheckDataset {
                 properties: {
                     id: id,
                     name: record.Profile.Name,
-                    apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Profile.Name,
                     description: record.Profile.Description,
                     license: (record.License ? record.License.Name : ''),
                     isCustom: record.IsCustom,

@@ -204,7 +204,7 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {string} Empty string ('') if 'no namespace' selected, Wildcard ('*') if 'any namespace' selected, otherwise the name of the seleted namespace.
      * @private
      */ 
-    get _namespace() {
+    get namespace() {
         if (this._filters.isSelectedPackageAny === true) {
             return '*';
         }
@@ -219,7 +219,7 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {string} Wildcard ('*') if 'any type' selected, otherwise the name of the seleted type.
      * @private
      */ 
-    get _objectType() {
+    get objectType() {
         if (this._filters.isSelectedSObjectTypeAny === true) {
             return '*';
         }
@@ -231,10 +231,12 @@ export default class OrgcheckApp extends LightningElement {
      * @returns {string} Wildcard ('*') if 'any sobject' selected, otherwise the name of the seleted sobject.
      * @private
      */ 
-    get _object() {
+    get object() {
         if (this._filters.isSelectedSObjectApiNameAny === true) {
+            this.isObjectSpecified = false;
             return '*';
         }
+        this.isObjectSpecified = true;
         return this._filters.selectedSObjectApiName;
     }
 
@@ -269,6 +271,12 @@ export default class OrgcheckApp extends LightningElement {
     get isThereAnyApexUncompiled() {
         return this.apexUncompiledTableData?.length > 0 || false;
     }
+
+    /**
+     * @description Some tabs require object to be specified in the filter (like Object Description and Field Permissions)
+     * @type {boolean}
+     */ 
+    isObjectSpecified;
 
 
 
@@ -318,32 +326,33 @@ export default class OrgcheckApp extends LightningElement {
      */
     _internalTransformers = {
         'active-users':              { label: '👥 Active Internal Users',     isGlobalView: true,  data: 'usersTableData',                        remove: () => { this._api.removeAllActiveUsersFromCache(); },             getAlias: () => '',                                                       get: async () => { return this._api.getActiveUsers(); }},
-        'apex-classes':              { label: '❤️‍🔥 Apex Classes',              isGlobalView: true,  data: 'apexClassesTableData',                  remove: () => { this._api.removeAllApexClassesFromCache(); },             getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexClasses(this._namespace); }},
-        'apex-unit-tests':           { label: '🚒 Apex Unit Tests',           isGlobalView: true,  data: 'apexTestsTableData',                    remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTests(this._namespace); }},
-        'apex-triggers':             { label: '🧨 Apex Triggers',             isGlobalView: true,  data: 'apexTriggersTableData',                 remove: () => { this._api.removeAllApexTriggersFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexTriggers(this._namespace); }},
-        'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',           isGlobalView: true,  data: 'apexUncompiledTableData',               remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this._namespace); }},
-        'app-permissions':           { label: 'XXX',                          isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this._namespace); }},
-        'custom-fields':             { label: '🏈 Custom Fields',             isGlobalView: true,  data: 'customFieldsTableData',                 remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this._namespace}-${this._objectType}-${this._object}`, get: async () => { return this._api.getCustomFields(this._namespace, this._objectType, this._object); }},
-        'custom-labels':             { label: '🏷️ Custom Labels',             isGlobalView: true,  data: 'customLabelsTableData',                 remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getCustomLabels(this._namespace); }},
-        'flows':                     { label: '🏎️ Flows',                     isGlobalView: true,  data: 'flowsTableData',                        remove: () => { this._api.removeAllFlowsFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getFlows(); }},
-        'lightning-aura-components': { label: '🧁 Lightning Aura Components', isGlobalView: true,  data: 'auraComponentsTableData',               remove: () => { this._api.removeAllLightningAuraComponentsFromCache(); }, getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningAuraComponents(this._namespace); }},
-        'lightning-pages':           { label: '🎂 Lightning Pages',           isGlobalView: true,  data: 'flexiPagesTableData',                   remove: () => { this._api.removeAllLightningPagesFromCache(); },          getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningPages(this._namespace); }},
-        'lightning-web-components':  { label: '🍰 Lightning Web Components',  isGlobalView: true,  data: 'lightningWebComponentsTableData',       remove: () => { this._api.removeAllLightningWebComponentsFromCache(); },  getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getLightningWebComponents(this._namespace); }},
-        'object':                    { label: 'XXX',                          isGlobalView: false, data: 'objectData',                            remove: () => { this._api.removeObjectFromCache(this._object); },         getAlias: () => `${this._object}`,                                        get: async () => { return this._object !== '*' ? this._api.getObject(this._object) : undefined; }},
-        'object-permissions':        { label: 'XXX',                          isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this._namespace); }},
-        'objects':                   { label: 'XXX',                          isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this._namespace}-${this._objectType}`,                 get: async () => { return this._api.getObjects(this._namespace, this._objectType); }},
-        'permission-sets':           { label: '🚔 Permission Sets',           isGlobalView: true,  data: 'permissionSetsTableData',               remove: () => { this._api.removeAllPermSetsFromCache(); },                getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getPermissionSets(this._namespace); }},
-        'process-builders':          { label: '🛺 Process Builders',          isGlobalView: true,  data: 'processBuildersTableData',              remove: () => { this._api.removeAllProcessBuildersFromCache(); },         getAlias: () => '',                                                       get: async () => { return this._api.getProcessBuilders(); }},
-        'profile-password-policies': { label: '⛖ Profile Password Policies', isGlobalView: true,  data: 'profilePasswordPoliciesTableData',       remove: () => { this._api.removeAllProfilePasswordPoliciesFromCache(); }, getAlias: () => '',                                                       get: async () => { return this._api.getProfilePasswordPolicies(); }},
-        'profile-restrictions':      { label: '🚸 Profile Restrictions',      isGlobalView: true,  data: 'profileRestrictionsTableData',          remove: () => { this._api.removeAllProfileRestrictionsFromCache(); },     getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getProfileRestrictions(this._namespace); }},
-        'profiles':                  { label: '🚓 Profiles',                  isGlobalView: true,  data: 'profilesTableData',                     remove: () => { this._api.removeAllProfilesFromCache(); },                getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getProfiles(this._namespace); }},
-        'public-groups':             { label: '🐘 Public Groups',             isGlobalView: true,  data: 'publicGroupsTableData',                 remove: () => { this._api.removeAllPublicGroupsFromCache(); },            getAlias: () => '',                                                       get: async () => { return this._api.getPublicGroups(); }},
-        'queues':                    { label: '🦒 Queues',                    isGlobalView: true,  data: 'queuesTableData',                       remove: () => { this._api.removeAllQueuesFromCache(); },                  getAlias: () => '',                                                       get: async () => { return this._api.getQueues(); }},
-        'roles-listing':             { label: '🦓 Role Listing',              isGlobalView: true,  data: 'rolesTableData',                        remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRoles(); }},
-        'roles-explorer':            { label: 'XXX',                          isGlobalView: false, data: 'rolesTree',                             remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                       get: async () => { return this._api.getRolesTree(); }},
-        'visual-force-components':   { label: '🍞 Visual Force Components',   isGlobalView: true,  data: 'visualForceComponentsTableData',        remove: () => { this._api.removeAllVisualForceComponentsFromCache(); },   getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForceComponents(this._namespace); }},
-        'visual-force-pages':        { label: '🥖 Visual Force Pages',        isGlobalView: true,  data: 'visualForcePagesTableData',             remove: () => { this._api.removeAllVisualForcePagesFromCache(); },        getAlias: () => `${this._namespace}`,                                     get: async () => { return this._api.getVisualForcePages(this._namespace); }},
-        'workflows':                 { label: '🚗 Workflows',                 isGlobalView: true,  data: 'workflowsTableData',                    remove: () => { this._api.removeAllWorkflowsFromCache(); },               getAlias: () => '',                                                       get: async () => { return this._api.getWorkflows(); }}
+        'apex-classes':              { label: '❤️‍🔥 Apex Classes',              isGlobalView: true,  data: 'apexClassesTableData',                  remove: () => { this._api.removeAllApexClassesFromCache(); },             getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexClasses(this.namespace); }},
+        'apex-unit-tests':           { label: '🚒 Apex Unit Tests',           isGlobalView: true,  data: 'apexTestsTableData',                    remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexTests(this.namespace); }},
+        'apex-triggers':             { label: '🧨 Apex Triggers',             isGlobalView: true,  data: 'apexTriggersTableData',                 remove: () => { this._api.removeAllApexTriggersFromCache(); },            getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexTriggers(this.namespace); }},
+        'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',           isGlobalView: true,  data: 'apexUncompiledTableData',               remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this.namespace); }},
+        'app-permissions':           { label: 'XXX',                          isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this.namespace); }},
+        'custom-fields':             { label: '🏈 Custom Fields',             isGlobalView: true,  data: 'customFieldsTableData',                 remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this.namespace}-${this.objectType}-${this.object}`,   get: async () => { return this._api.getCustomFields(this.namespace, this.objectType, this.object); }},
+        'custom-labels':             { label: '🏷️ Custom Labels',             isGlobalView: true,  data: 'customLabelsTableData',                 remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getCustomLabels(this.namespace); }},
+        'field-permissions':         { label: '🚦 Field Permissions',         isGlobalView: false, data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api.removeAllFieldPermissionsFromCache(); },        getAlias: () => `${this.object}-${this.namespace}`,                      get: async () => { return this._api.getFieldPermissions(this.object, this.namespace); }},
+        'flows':                     { label: '🏎️ Flows',                     isGlobalView: true,  data: 'flowsTableData',                        remove: () => { this._api.removeAllFlowsFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getFlows(); }},
+        'lightning-aura-components': { label: '🧁 Lightning Aura Components', isGlobalView: true,  data: 'auraComponentsTableData',               remove: () => { this._api.removeAllLightningAuraComponentsFromCache(); }, getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningAuraComponents(this.namespace); }},
+        'lightning-pages':           { label: '🎂 Lightning Pages',           isGlobalView: true,  data: 'flexiPagesTableData',                   remove: () => { this._api.removeAllLightningPagesFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningPages(this.namespace); }},
+        'lightning-web-components':  { label: '🍰 Lightning Web Components',  isGlobalView: true,  data: 'lightningWebComponentsTableData',       remove: () => { this._api.removeAllLightningWebComponentsFromCache(); },  getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningWebComponents(this.namespace); }},
+        'object':                    { label: 'XXX',                          isGlobalView: false, data: 'objectData',                            remove: () => { this._api.removeObjectFromCache(this.object); },          getAlias: () => `${this.object}`,                                        get: async () => { return this.object !== '*' ? this._api.getObject(this.object) : undefined; }},
+        'object-permissions':        { label: 'XXX',                          isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this.namespace); }},
+        'objects':                   { label: 'XXX',                          isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this.namespace}-${this.objectType}`,                  get: async () => { return this._api.getObjects(this.namespace, this.objectType); }},
+        'permission-sets':           { label: '🚔 Permission Sets',           isGlobalView: true,  data: 'permissionSetsTableData',               remove: () => { this._api.removeAllPermSetsFromCache(); },                getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getPermissionSets(this.namespace); }},
+        'process-builders':          { label: '🛺 Process Builders',          isGlobalView: true,  data: 'processBuildersTableData',              remove: () => { this._api.removeAllProcessBuildersFromCache(); },         getAlias: () => '',                                                      get: async () => { return this._api.getProcessBuilders(); }},
+        'profile-password-policies': { label: '⛖ Profile Password Policies', isGlobalView: true,  data: 'profilePasswordPoliciesTableData',       remove: () => { this._api.removeAllProfilePasswordPoliciesFromCache(); }, getAlias: () => '',                                                      get: async () => { return this._api.getProfilePasswordPolicies(); }},
+        'profile-restrictions':      { label: '🚸 Profile Restrictions',      isGlobalView: true,  data: 'profileRestrictionsTableData',          remove: () => { this._api.removeAllProfileRestrictionsFromCache(); },     getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getProfileRestrictions(this.namespace); }},
+        'profiles':                  { label: '🚓 Profiles',                  isGlobalView: true,  data: 'profilesTableData',                     remove: () => { this._api.removeAllProfilesFromCache(); },                getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getProfiles(this.namespace); }},
+        'public-groups':             { label: '🐘 Public Groups',             isGlobalView: true,  data: 'publicGroupsTableData',                 remove: () => { this._api.removeAllPublicGroupsFromCache(); },            getAlias: () => '',                                                      get: async () => { return this._api.getPublicGroups(); }},
+        'queues':                    { label: '🦒 Queues',                    isGlobalView: true,  data: 'queuesTableData',                       remove: () => { this._api.removeAllQueuesFromCache(); },                  getAlias: () => '',                                                      get: async () => { return this._api.getQueues(); }},
+        'roles-listing':             { label: '🦓 Role Listing',              isGlobalView: true,  data: 'rolesTableData',                        remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getRoles(); }},
+        'roles-explorer':            { label: 'XXX',                          isGlobalView: false, data: 'rolesTree',                             remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getRolesTree(); }},
+        'visual-force-components':   { label: '🍞 Visual Force Components',   isGlobalView: true,  data: 'visualForceComponentsTableData',        remove: () => { this._api.removeAllVisualForceComponentsFromCache(); },   getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getVisualForceComponents(this.namespace); }},
+        'visual-force-pages':        { label: '🥖 Visual Force Pages',        isGlobalView: true,  data: 'visualForcePagesTableData',             remove: () => { this._api.removeAllVisualForcePagesFromCache(); },        getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getVisualForcePages(this.namespace); }},
+        'workflows':                 { label: '🚗 Workflows',                 isGlobalView: true,  data: 'workflowsTableData',                    remove: () => { this._api.removeAllWorkflowsFromCache(); },               getAlias: () => '',                                                      get: async () => { return this._api.getWorkflows(); }}
     }
 
     /**
@@ -498,7 +507,7 @@ export default class OrgcheckApp extends LightningElement {
         const filtersData = await Promise.all([
             this._api.getPackages(),
             this._api.getObjectTypes(),
-            this._api.getObjects(this._namespace, this._objectType)
+            this._api.getObjects(this.namespace, this.objectType)
         ])
 
         logger?.log('Loading data in the drop boxes...');
@@ -1334,7 +1343,23 @@ export default class OrgcheckApp extends LightningElement {
             .forEach(c => columns.push({ label: c.label, type: 'text', data: { ref: 'data', value: c.id }, orientation: 'vertical' }));
         return columns;
     }
+    
+    _internalFieldPermissionsDataMatrix;
 
+    get fieldPermissionsTableData() {
+        return this._internalFieldPermissionsDataMatrix?.rows || [];
+    }
+    
+    get fieldPermissionsTableColumns() {
+        if (! this._internalFieldPermissionsDataMatrix) {
+            return [];
+        }
+        const columns = GET_STARTING_MATRIX_COLUMNS(this._internalFieldPermissionsDataMatrix);
+        this._internalFieldPermissionsDataMatrix.columnHeaderIds
+            .sort()
+            .forEach((c) => columns.push({ label: c, type: 'text', data: { ref: 'data', value: c }, orientation: 'vertical' }));
+        return columns;
+    }
 
 
 
@@ -1722,7 +1747,7 @@ export default class OrgcheckApp extends LightningElement {
  * @return {any}
  */
 const GET_ROW_HEADER_PROPERTY = (dataMatrix, id, property) => {
-    return (dataMatrix.rowHeaderReferences.get(id)[property] ?? id) || id;
+    return (dataMatrix.rowHeaderReferences.get(id)[property]);
 }
 
 /**
@@ -1733,7 +1758,7 @@ const GET_ROW_HEADER_PROPERTY = (dataMatrix, id, property) => {
  * @return {any}
  */
 const GET_COLUMN_HEADER_PROPERTY = (dataMatrix, id, property) => {
-    return (dataMatrix.columnHeaderReferences.get(id)[property] ?? id) || id;
+    return (dataMatrix.columnHeaderReferences.get(id)[property]);
 }
 
 /**

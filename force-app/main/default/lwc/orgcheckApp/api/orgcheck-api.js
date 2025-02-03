@@ -817,6 +817,28 @@ export class OrgCheckAPI {
     }
 
     /**
+     * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
+     * @param {string} sobject
+     * @param {string} namespace
+     * @returns {Promise<OrgCheckDataMatrix>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getFieldPermissions(sobject, namespace) {
+        // @ts-ignore    
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.FIELD_PERMISSIONS, sobject, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about field permissions
+     * @public
+     */
+    removeAllFieldPermissionsFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.FIELD_PERMISSIONS);
+    }
+
+    /**
      * @description Get information about Flows
      * @returns {Promise<Array<SFDC_Flow>>} List of items to return
      * @throws Exception from recipe manager

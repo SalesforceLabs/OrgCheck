@@ -7,6 +7,7 @@ import { OrgCheckDatasetAppPermissions } from '../api/dataset/orgcheck-api-datas
 import { OrgCheckDatasetCurrentUserPermissions } from '../api/dataset/orgcheck-api-dataset-currentuserpermissions';
 import { OrgCheckDatasetCustomFields } from '../api/dataset/orgcheck-api-dataset-customfields';
 import { OrgCheckDatasetCustomLabels } from '../api/dataset/orgcheck-api-dataset-customlabels';
+import { OrgCheckDatasetFieldPermissions } from '../api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { OrgCheckDatasetFlows } from '../api/dataset/orgcheck-api-dataset-flows';
 import { OrgCheckDatasetGroups } from '../api/dataset/orgcheck-api-dataset-groups';
 import { OrgCheckDatasetLightningAuraComponents } from '../api/dataset/orgcheck-api-dataset-lighntingauracomponents';
@@ -249,6 +250,26 @@ describe('api.core.OrgCheckDatasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
+    });
+  });
+
+  describe('Test OrgCheckDatasetFieldPermissions', () => {
+  
+    const dataset = new OrgCheckDatasetFieldPermissions();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      sfdcManager.addSoqlQueryResponse('FROM FieldPermissions', [
+        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: true, ParentId: '123', Parent: { IsOwnedByProfile: false, ProfileId: null }},
+        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: false, ParentId: '456', Parent: { IsOwnedByProfile: true, ProfileId: 'ABC' }},
+        { Field: 'Account.Name', PermissionsRead: false, PermissionsEdit: false, ParentId: '789', Parent: { IsOwnedByProfile: true, ProfileId: 'XYZ' }}
+      ]);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const parameters = new Map([ ['object', 'Account'] ]);
+      const results = await dataset.run(sfdcManager, dataFactory, logger, parameters);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(3);
     });
   });
 

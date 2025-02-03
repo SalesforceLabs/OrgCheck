@@ -59,7 +59,6 @@ export class OrgCheckDatasetPermissionSets extends OrgCheckDataset {
                 properties: {
                     id: id,
                     name: record.Name,
-                    apiName: (record.NamespacePrefix ? (record.NamespacePrefix + '__') : '') + record.Name,
                     description: record.Description,
                     license: (record.License ? record.License.Name : ''),
                     isCustom: record.IsCustom,

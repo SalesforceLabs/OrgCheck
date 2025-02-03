@@ -9,6 +9,7 @@
  * @property {string} CURRENT_USER_PERMISSIONS
  * @property {string} CUSTOM_FIELDS
  * @property {string} CUSTOM_LABELS
+ * @property {string} FIELD_PERMISSIONS
  * @property {string} FLOWS
  * @property {string} LIGHTNING_AURA_COMPONENTS
  * @property {string} LIGHTNING_PAGES
@@ -41,6 +42,7 @@ export const OrgCheckRecipeAliases = {
     CURRENT_USER_PERMISSIONS: 'current-user-permissions',
     CUSTOM_FIELDS: 'custom-fields',
     CUSTOM_LABELS: 'custom-labels',
+    FIELD_PERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     LIGHTNING_AURA_COMPONENTS: 'lightning-aura-components',
     LIGHTNING_PAGES: 'lightning-pages',

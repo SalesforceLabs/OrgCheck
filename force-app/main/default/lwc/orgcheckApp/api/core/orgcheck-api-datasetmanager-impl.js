@@ -34,6 +34,7 @@ import { OrgCheckDataFactory } from './orgcheck-api-datafactory-impl';
 import { OrgCheckDatasetAliases } from './orgcheck-api-datasets-aliases';
 import { OrgCheckDatasetManagerIntf } from './orgcheck-api-datasetmanager';
 import { OrgCheckDatasetApplications } from '../dataset/orgcheck-api-dataset-applications';
+import { OrgCheckDatasetFieldPermissions } from '../dataset/orgcheck-api-dataset-fieldpermissions';
 
 /**
  * @description Dataset manager
@@ -113,6 +114,7 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
         this._datasets.set(OrgCheckDatasetAliases.CURRENTUSERPERMISSIONS, new OrgCheckDatasetCurrentUserPermissions());
         this._datasets.set(OrgCheckDatasetAliases.CUSTOMFIELDS, new OrgCheckDatasetCustomFields());
         this._datasets.set(OrgCheckDatasetAliases.CUSTOMLABELS, new OrgCheckDatasetCustomLabels());
+        this._datasets.set(OrgCheckDatasetAliases.FIELDPERMISSIONS, new OrgCheckDatasetFieldPermissions());
         this._datasets.set(OrgCheckDatasetAliases.FLOWS, new OrgCheckDatasetFlows());
         this._datasets.set(OrgCheckDatasetAliases.GROUPS, new OrgCheckDatasetGroups());
         this._datasets.set(OrgCheckDatasetAliases.LIGHTNINGAURACOMPONENTS, new OrgCheckDatasetLightningAuraComponents());
