@@ -36,6 +36,7 @@ import { OrgCheckRecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-vi
 import { OrgCheckRecipeWorkflows } from '../recipe/orgcheck-api-recipe-workflows';
 import { OrgCheckRecipeApexTests } from '../recipe/orgcheck-api-recipe-apextests';
 import { OrgCheckRecipeApexUncompiled } from '../recipe/orgcheck-api-recipe-apexuncomplied';
+import { OrgCheckRecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermissions';
 
 /**
  * @description Recipe Manager
@@ -91,6 +92,7 @@ export class OrgCheckRecipeManager extends OrgCheckRecipeManagerIntf {
         this._recipes.set(OrgCheckRecipeAliases.CURRENT_USER_PERMISSIONS, new OrgCheckRecipeCurrentUserPermissions());
         this._recipes.set(OrgCheckRecipeAliases.CUSTOM_FIELDS, new OrgCheckRecipeCustomFields());
         this._recipes.set(OrgCheckRecipeAliases.CUSTOM_LABELS, new OrgCheckRecipeCustomLabels());
+        this._recipes.set(OrgCheckRecipeAliases.FIELD_PERMISSIONS, new OrgCheckRecipeFieldPermissions());
         this._recipes.set(OrgCheckRecipeAliases.FLOWS, new  OrgCheckRecipeFlows());
         this._recipes.set(OrgCheckRecipeAliases.LIGHTNING_AURA_COMPONENTS, new OrgCheckRecipeLightningAuraComponents());
         this._recipes.set(OrgCheckRecipeAliases.LIGHTNING_PAGES, new OrgCheckRecipeLightningPages());

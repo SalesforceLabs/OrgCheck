@@ -6,6 +6,7 @@ import { OrgCheckRecipeAppPermissions } from "../api/recipe/orgcheck-api-recipe-
 import { OrgCheckRecipeCurrentUserPermissions } from "../api/recipe/orgcheck-api-recipe-currentuserpermissions";
 import { OrgCheckRecipeCustomFields } from "../api/recipe/orgcheck-api-recipe-customfields";
 import { OrgCheckRecipeCustomLabels } from "../api/recipe/orgcheck-api-recipe-customlabels";
+import { OrgCheckRecipeFieldPermissions } from "../api/recipe/orgcheck-api-recipe-fieldpermissions";
 import { OrgCheckRecipeFlows } from "../api/recipe/orgcheck-api-recipe-flows";
 import { OrgCheckRecipeLightningAuraComponents } from "../api/recipe/orgcheck-api-recipe-lightningauracomponents";
 import { OrgCheckRecipeLightningPages } from "../api/recipe/orgcheck-api-recipe-lightningpages";
@@ -167,6 +168,26 @@ describe('api.core.OrgCheckRecipes', () => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
       });
       const results = await recipe.transform(data, logger, 'namespace');
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test OrgCheckRecipeFieldPermissions', () => {
+  
+    const recipe = new OrgCheckRecipeFieldPermissions();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger, 'Account');
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(3);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger, '');
       expect(results).toBeDefined();
     });
 

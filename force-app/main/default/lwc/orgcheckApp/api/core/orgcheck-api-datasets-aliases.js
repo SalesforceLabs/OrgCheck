@@ -36,6 +36,7 @@ export const OrgCheckDatasetAliases = {
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',
     CUSTOMLABELS: 'custom-labels',
+    FIELDPERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     GROUPS: 'groups',
     LIGHTNINGAURACOMPONENTS: 'lightning-aura-components',

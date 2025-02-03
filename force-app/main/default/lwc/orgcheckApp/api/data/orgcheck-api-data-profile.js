@@ -23,8 +23,6 @@ export class SFDC_Profile extends OrgCheckData {
      */
     name;
     
-    apiName;
-    
     /**
      * @description Full description of that item
      * @type {string}

@@ -161,7 +161,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
-                        <template if:false={objectData}>
+                        <template if:false={isObjectSpecified}>
                             There is no specific object set in the global filter above. <br />
                             <br />
                             Please set the <b>SObject</b> value in the global filter and hit <b>'Apply'</b> button to see something here.<br />
@@ -410,6 +410,23 @@
                             <b>Legend:</b> C means <i>Create</i>, R means <i>Read</i>, U means <i>Update/Modify</i>, D means <i>Delete</i>, v means <i>View All</i> and m means <i>Modify All</i>.
                         </div>
                         <c-orgcheck-extended-datatable empty-message="There is no object permission to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={objectPermissionsTableColumns} rows={objectPermissionsTableData} show-export-button export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="field-permissions" label="🚦 Field Permissions" onactive={handleSubTabActivation}>
+                        <template if:false={isObjectSpecified}>
+                            There is no specific object set in the global filter above. <br />
+                            <br />
+                            Please set the <b>SObject</b> value in the global filter and hit <b>'Apply'</b> button to see something here.<br />
+                            <br />
+                            Thank you!
+                        </template>
+                        <template if:true={isObjectSpecified}>
+                            <h1 class="slds-text-heading_large">{object}</h1>
+                            <br /><br />
+                            <div style="text-align: right;">
+                                <b>Legend:</b> R means <i>field can be read</i>, U means <i>field can be updated</i>.
+                            </div>
+                            <c-orgcheck-extended-datatable empty-message="There is no field permission to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={fieldPermissionsTableColumns} rows={fieldPermissionsTableData} show-export-button export-basename="FieldPermissions"></c-orgcheck-extended-datatable>
+                        </template>
                     </lightning-tab>
                     <lightning-tab value="app-permissions" label="⛕ Application Permissions" onactive={handleSubTabActivation}>
                         <div style="text-align: right;">
