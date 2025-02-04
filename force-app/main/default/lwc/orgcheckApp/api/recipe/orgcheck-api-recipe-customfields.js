@@ -1,13 +1,13 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
 import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
-import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
 import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
+import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
 
@@ -32,7 +32,7 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
      * @param {string} namespace Name of the package (if all use '*')
      * @param {string} objecttype Name of the type (if all use '*')
      * @param {string} object API name of the object (if all use '*')
-     * @returns {Promise<Array<OrgCheckData>>}
+     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
      * @async
      * @public
      */
@@ -49,14 +49,13 @@ export class OrgCheckRecipeCustomFields extends OrgCheckRecipe {
         if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
-        await Promise.all([
-            OrgCheckProcessor.forEach(objects, (obj) => {
-                obj.typeRef = types.get(obj.typeId);
-            }),
-            OrgCheckProcessor.forEach(customFields, (customField) => {
-                customField.objectRef = objects.get(customField.objectId);
-            })
-        ]);
+        await OrgCheckProcessor.forEach(customFields, (customField) => {
+            const object = objects.get(customField.objectId);
+            if (object && !object.typeRef) {
+                object.typeRef = types.get(object.typeId);
+            }
+            customField.objectRef = object;
+        });
 
         // Filter data
         const array = [];

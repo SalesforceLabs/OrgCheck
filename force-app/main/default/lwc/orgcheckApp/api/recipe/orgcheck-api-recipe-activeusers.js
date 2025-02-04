@@ -1,12 +1,13 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
+import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
 
@@ -28,7 +29,7 @@ export class OrgCheckRecipeActiveUsers extends OrgCheckRecipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {OrgCheckSimpleLoggerIntf} logger
-     * @returns {Promise<Array<OrgCheckData>>}
+     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
      * @async
      * @public
      */
