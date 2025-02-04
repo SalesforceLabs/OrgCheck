@@ -35,6 +35,7 @@ import { OrgCheckDatasetAliases } from './orgcheck-api-datasets-aliases';
 import { OrgCheckDatasetManagerIntf } from './orgcheck-api-datasetmanager';
 import { OrgCheckDatasetApplications } from '../dataset/orgcheck-api-dataset-applications';
 import { OrgCheckDatasetFieldPermissions } from '../dataset/orgcheck-api-dataset-fieldpermissions';
+import { OrgCheckDatasetValidationRules } from '../dataset/orgcheck-api-dataset-validationrules';
 
 /**
  * @description Dataset manager
@@ -132,6 +133,7 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
         this._datasets.set(OrgCheckDatasetAliases.PROFILES, new OrgCheckDatasetProfiles());
         this._datasets.set(OrgCheckDatasetAliases.USERROLES, new OrgCheckDatasetUserRoles());
         this._datasets.set(OrgCheckDatasetAliases.USERS, new OrgCheckDatasetUsers());
+        this._datasets.set(OrgCheckDatasetAliases.VALIDATIONRULES, new OrgCheckDatasetValidationRules());
         this._datasets.set(OrgCheckDatasetAliases.VISUALFORCECOMPONENTS, new OrgCheckDatasetVisualForceComponents());
         this._datasets.set(OrgCheckDatasetAliases.VISUALFORCEPAGES, new OrgCheckDatasetVisualForcePages());
         this._datasets.set(OrgCheckDatasetAliases.WORKFLOWS, new OrgCheckDatasetWorkflows());
