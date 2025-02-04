@@ -34,6 +34,7 @@ import { OrgCheckBasicLoggerIntf, OrgCheckLoggerIntf } from './core/orgcheck-api
 import { OrgCheckRecipeManagerIntf } from './core/orgcheck-api-recipemanager';
 import { OrgCheckSalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
 import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
+import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 
 /**
  * @description Org Check API main class
@@ -876,7 +877,27 @@ export class OrgCheckAPI {
      */
     removeAllProcessBuildersFromCache() {
         this._recipeManager.clean(OrgCheckRecipeAliases.PROCESS_BUILDERS);
-    }    
+    }
+    
+    /**
+     * @description Get information about Validation rules
+     * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getValidationRules() {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.VALIDATION_RULES));
+    }
+    
+    /**
+     * @description Remove all the cached information about validation rules
+     * @public
+     */
+    removeAllValidationRulesFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.VALIDATION_RULES);
+    }
 }
 
 const TEXTENCODER = new TextEncoder();

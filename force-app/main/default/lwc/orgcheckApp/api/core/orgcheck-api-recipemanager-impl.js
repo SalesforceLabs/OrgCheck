@@ -37,6 +37,7 @@ import { OrgCheckRecipeWorkflows } from '../recipe/orgcheck-api-recipe-workflows
 import { OrgCheckRecipeApexTests } from '../recipe/orgcheck-api-recipe-apextests';
 import { OrgCheckRecipeApexUncompiled } from '../recipe/orgcheck-api-recipe-apexuncomplied';
 import { OrgCheckRecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermissions';
+import { OrgCheckRecipeValidationRules } from '../recipe/orgcheck-api-recipe-validationrules';
 
 /**
  * @description Recipe Manager
@@ -111,6 +112,7 @@ export class OrgCheckRecipeManager extends OrgCheckRecipeManagerIntf {
         this._recipes.set(OrgCheckRecipeAliases.PUBLIC_GROUPS, new OrgCheckRecipePublicGroups());
         this._recipes.set(OrgCheckRecipeAliases.QUEUES, new OrgCheckRecipeQueues());
         this._recipes.set(OrgCheckRecipeAliases.USER_ROLES, new OrgCheckRecipeUserRoles());
+        this._recipes.set(OrgCheckRecipeAliases.VALIDATION_RULES, new OrgCheckRecipeValidationRules());
         this._recipes.set(OrgCheckRecipeAliases.VISUALFORCE_COMPONENTS, new OrgCheckRecipeVisualForceComponents());
         this._recipes.set(OrgCheckRecipeAliases.VISUALFORCE_PAGES, new OrgCheckRecipeVisualForcePages());
         this._recipes.set(OrgCheckRecipeAliases.WORKFLOWS, new OrgCheckRecipeWorkflows());

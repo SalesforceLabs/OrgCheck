@@ -51,8 +51,7 @@ export class OrgCheckDatasetObject extends OrgCheckDataset {
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
-                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ' +
-                            'ValidationName FROM ValidationRules), ' +
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName FROM ValidationRules), ' +
                             '(SELECT Id, Name FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +

@@ -1,10 +1,11 @@
 import { OrgCheckRecipe } from '../core/orgcheck-api-recipe';
 import { OrgCheckProcessor } from '../core/orgcheck-api-processing';
-import { OrgCheckData } from '../core/orgcheck-api-data';
+import { OrgCheckData, OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 import { OrgCheckSimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { OrgCheckDatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { OrgCheckDatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
+import { OrgCheckDataMatrix } from '../core/orgcheck-api-data-matrix';
 
 export class OrgCheckRecipeApexTests extends OrgCheckRecipe {
 
@@ -25,7 +26,7 @@ export class OrgCheckRecipeApexTests extends OrgCheckRecipe {
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {OrgCheckSimpleLoggerIntf} logger
      * @param {string} namespace Name of the package (if all use '*')
-     * @returns {Promise<Array<OrgCheckData>>}
+     * @returns {Promise<Array<OrgCheckData | OrgCheckDataWithoutScoring> | OrgCheckDataMatrix | OrgCheckData | OrgCheckDataWithoutScoring | Map>}
      * @async
      * @public
      */

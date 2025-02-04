@@ -25,6 +25,7 @@ import { OrgCheckRecipeProfiles } from "../api/recipe/orgcheck-api-recipe-profil
 import { OrgCheckRecipePublicGroups } from "../api/recipe/orgcheck-api-recipe-publicgroups";
 import { OrgCheckRecipeQueues } from "../api/recipe/orgcheck-api-recipe-queues";
 import { OrgCheckRecipeUserRoles } from "../api/recipe/orgcheck-api-recipe-userroles";
+import { OrgCheckRecipeValidationRules } from "../api/recipe/orgcheck-api-recipe-validationrules";
 import { OrgCheckRecipeVisualForceComponents } from "../api/recipe/orgcheck-api-recipe-visualforcecomponents";
 import { OrgCheckRecipeVisualForcePages } from "../api/recipe/orgcheck-api-recipe-visualforcepages";
 import { OrgCheckRecipeWorkflows } from "../api/recipe/orgcheck-api-recipe-workflows";
@@ -187,7 +188,7 @@ describe('api.core.OrgCheckRecipes', () => {
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
       });
-      const results = await recipe.transform(data, logger, '');
+      const results = await recipe.transform(data, logger, '*', '*');
       expect(results).toBeDefined();
     });
 
@@ -543,6 +544,26 @@ describe('api.core.OrgCheckRecipes', () => {
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
       expect(datasets.length).toBe(2);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test OrgCheckRecipeValidationRules', () => {
+  
+    const recipe = new OrgCheckRecipeValidationRules();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(3);
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());

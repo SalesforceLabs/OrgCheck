@@ -24,6 +24,7 @@
  * @property {string} PROFILES
  * @property {string} USERROLES
  * @property {string} USERS
+ * @property {string} VALIDATIONRULES
  * @property {string} VISUALFORCECOMPONENTS
  * @property {string} VISUALFORCEPAGES
  * @property {string} WORKFLOWS
@@ -54,6 +55,7 @@ export const OrgCheckDatasetAliases = {
     PROFILES: 'profiles',
     USERROLES: 'user-roles',
     USERS: 'users',
+    VALIDATIONRULES: 'validation-rules',
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
     WORKFLOWS: 'workflows'

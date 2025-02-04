@@ -9,8 +9,8 @@
   "scripts": {
     "lint": "npm run lint:lwc",
     "lint:lwc": "eslint force-app/main/default/lwc",
-    "git:clean": "git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
-    "git:list": "git branch -vv ",
+    "sf:open": "sf force org open",
+    "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:debug": "sfdx-lwc-jest --debug",
     "test:unit:watch": "sfdx-lwc-jest --watch",

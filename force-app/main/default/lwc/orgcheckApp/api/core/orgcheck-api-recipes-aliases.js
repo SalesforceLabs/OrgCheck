@@ -28,6 +28,7 @@
  * @property {string} PUBLIC_GROUPS
  * @property {string} QUEUES
  * @property {string} USER_ROLES
+ * @property {string} VALIDATION_RULES
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
@@ -61,6 +62,7 @@ export const OrgCheckRecipeAliases = {
     PUBLIC_GROUPS: 'public-groups',
     QUEUES: 'queues',
     USER_ROLES: 'user-roles',
+    VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
     WORKFLOWS: 'workflows'
