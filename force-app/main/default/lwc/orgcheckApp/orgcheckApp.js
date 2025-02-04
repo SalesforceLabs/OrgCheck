@@ -3,7 +3,7 @@ import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
 import { OrgCheckAPI } from './api/orgcheck-api';
 import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
 import { OrgCheckDataCacheItem } from './api/core/orgcheck-api-cachemanager';
-import { SFDC_Flow } from './api/data/orgcheck-api-data-flow';
+import { SFDC_Flow, SFDC_FlowVersion } from './api/data/orgcheck-api-data-flow';
 import { SFDC_Field } from './api/data/orgcheck-api-data-field';
 import { SFDC_CustomLabel } from './api/data/orgcheck-api-data-customlabel';
 import { SFDC_LightningAuraComponent } from './api/data/orgcheck-api-data-lightningauracomponent';
@@ -11,12 +11,12 @@ import { SFDC_LightningPage } from './api/data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from './api/data/orgcheck-api-data-lightningwebcomponent';
 import { SFDC_PermissionSet } from './api/data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './api/data/orgcheck-api-data-profile';
-import { SFDC_ProfileRestrictions } from './api/data/orgcheck-api-data-profilerestrictions';
+import { SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfileRestrictions } from './api/data/orgcheck-api-data-profilerestrictions';
 import { SFDC_ProfilePasswordPolicy } from './api/data/orgcheck-api-data-profilepasswordpolicy';
 import { SFDC_User } from './api/data/orgcheck-api-data-user';
 import { SFDC_VisualForceComponent } from './api/data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from './api/data/orgcheck-api-data-visualforcepage';
-import { SFDC_ApexClass } from './api/data/orgcheck-api-data-apexclass';
+import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from './api/data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './api/data/orgcheck-api-data-apextrigger';
 import { SFDC_UserRole } from './api/data/orgcheck-api-data-userrole';
 import { SFDC_Workflow } from './api/data/orgcheck-api-data-workflow';
@@ -26,6 +26,16 @@ import { SFDC_Object } from './api/data/orgcheck-api-data-object';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { OrgCheckDataMatrix } from './api/core/orgcheck-api-data-matrix';
 import { SFDC_ValidationRule } from './api/data/orgcheck-api-data-validationrule';
+import { SFDC_PageLayout } from './api/data/orgcheck-api-data-pagelayout';
+import { SFDC_FieldSet } from './api/data/orgcheck-api-data-fieldset';
+import { SFDC_Limit } from './api/data/orgcheck-api-data-limit';
+import { SFDC_WebLink } from './api/data/orgcheck-api-data-weblink';
+import { SFDC_RecordType } from './api/data/orgcheck-api-data-recordtype';
+import { SFDC_AppPermission } from './api/data/orgcheck-api-data-apppermission';
+import { SFDC_ObjectPermission } from './api/data/orgcheck-api-data-objectpermission';
+import { SFDC_FieldPermission } from './api/data/orgcheck-api-data-fieldpermission';
+import { SFDC_ObjectRelationShip } from './api/data/orgcheck-api-data-objectrelationship';
+import { OrgCheckScoreRule } from './api/core/orgcheck-api-datafactory';
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -319,6 +329,9 @@ export default class OrgcheckApp extends LightningElement {
                 failed: (section, error) => { this._spinner.sectionFailed(section, error); }
             }
         );
+
+        // Set the score rules for information
+        this.allScoreRulesTableData = this._api.getAllScoreRules();
     }
 
     /**
@@ -334,7 +347,7 @@ export default class OrgcheckApp extends LightningElement {
         'app-permissions':           { label: '⛕ Application Permissions',    isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this.namespace); }},
         'custom-fields':             { label: '🏈 Custom Fields',             isGlobalView: true,  data: 'customFieldsTableData',                 remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this.namespace}-${this.objectType}-${this.object}`,   get: async () => { return this._api.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',             isGlobalView: true,  data: 'customLabelsTableData',                 remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getCustomLabels(this.namespace); }},
-        'field-permissions':         { label: '🚦 Field Permissions',         isGlobalView: false, data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api.removeAllFieldPermissionsFromCache(); },        getAlias: () => `${this.object}-${this.namespace}`,                      get: async () => { return this._api.getFieldPermissions(this.object, this.namespace); }},
+        'field-permissions':         { label: '🚧 Field Level Securities',    isGlobalView: false, data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api.removeAllFieldPermissionsFromCache(); },        getAlias: () => `${this.object}-${this.namespace}`,                      get: async () => { return this._api.getFieldPermissions(this.object, this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                     isGlobalView: true,  data: 'flowsTableData',                        remove: () => { this._api.removeAllFlowsFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getFlows(); }},
         'lightning-aura-components': { label: '🧁 Lightning Aura Components', isGlobalView: true,  data: 'auraComponentsTableData',               remove: () => { this._api.removeAllLightningAuraComponentsFromCache(); }, getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',           isGlobalView: true,  data: 'flexiPagesTableData',                   remove: () => { this._api.removeAllLightningPagesFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningPages(this.namespace); }},
@@ -406,8 +419,6 @@ export default class OrgcheckApp extends LightningElement {
                     this[transformer.data] = await transformer.get();
                 }
             }
-        } else {
-            console.error(`Transformer not found for recipe: ${recipe}`);
         }
     }
 
@@ -682,7 +693,7 @@ export default class OrgcheckApp extends LightningElement {
         const reasonIds = event['detail'].reasonIds;
         let htmlContent = `The component <code><b>${whatname}</b></code> (<code>${whatid}</code>) has a score of <b><code>${score}</code></b> because of the following reasons:<br /><ul>`;
         reasonIds.forEach((/** @type {number} */ id) => {
-            const reason = this._api.getValidationRule(id);
+            const reason = this._api.getScoreRule(id);
             htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
         });
         htmlContent += '</ul>';
@@ -1373,13 +1384,25 @@ export default class OrgcheckApp extends LightningElement {
         return columns;
     }
 
-
-
-
-
-
-
-
+    get scoreRulesTableColumns() {
+        if (! this.allScoreRulesTableData) {
+            return [];
+        };
+        /** @type {any} */
+        const columns = [ 
+            { label: '#',    type: 'numeric', data: { value: 'id' }},
+            { label: 'Name', type: 'text',    data: { value: 'description' }} 
+        ];
+        const classes = new Set();
+        this.allScoreRulesTableData.forEach((t) => t.applicable.forEach((c) => classes.add(c)));
+        Array.from(classes)
+            .sort((a, b) => { return a.label < b.label ? -1: 1; })
+            .forEach((c) => { 
+                columns.push({ label: c.label, type: 'boolean', data: { ref: 'applicable', value: (a) => a.includes(c) }, orientation: 'vertical' });
+            });
+        return columns;
+    };
+    
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -1486,7 +1509,7 @@ export default class OrgcheckApp extends LightningElement {
                 });
             });
             return Array.from(series.keys()).map((id, index) => { return { 
-                name: this._api.getValidationRule(id).description, value: series.get(id), 'color': this._colors[index]
+                name: this._api.getScoreRule(id).description, value: series.get(id), 'color': this._colors[index]
             }});
         };
     }
@@ -1755,6 +1778,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<SFDC_Workflow>}
      */
     workflowsTableData;
+
+    /** 
+     * @description Data table for all score rules
+     * @type {Array<OrgCheckScoreRule>}
+     */
+    allScoreRulesTableData;
 }
 
 /**

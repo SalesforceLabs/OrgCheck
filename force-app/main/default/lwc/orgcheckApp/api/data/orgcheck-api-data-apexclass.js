@@ -2,6 +2,14 @@ import { OrgCheckDataWithDependencies, OrgCheckDataWithoutScoring } from '../cor
 
 export class SFDC_ApexTestMethodResult extends OrgCheckDataWithoutScoring {
 
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Apex Test Result' };
+
     /**
      * @description Name of this method
      * @type {string}
@@ -35,6 +43,14 @@ export class SFDC_ApexTestMethodResult extends OrgCheckDataWithoutScoring {
  * @description Representation of an Apex Class in Org Check
  */
 export class SFDC_ApexClass extends OrgCheckDataWithDependencies {
+
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Apex Class' };
 
     /**
      * @description Salesforce Id

@@ -2,6 +2,14 @@ import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
 
 export class SFDC_VisualForcePage extends OrgCheckDataWithDependencies {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Visualforce Page' };
+
     /**
      * @description Salesforce Id
      * @type {string}

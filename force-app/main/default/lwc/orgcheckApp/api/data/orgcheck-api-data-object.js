@@ -6,6 +6,14 @@ import { SFDC_ObjectType } from './orgcheck-api-data-objecttype';
  */
 export class SFDC_Object extends OrgCheckDataWithoutScoring {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'SObject' };
+
     /**
      * @description Salesforce Id
      * @type {string}

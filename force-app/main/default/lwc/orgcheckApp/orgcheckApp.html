@@ -131,6 +131,10 @@
                         </lightning-layout-item>
                     </lightning-layout>
                 </lightning-tab>
+                <lightning-tab value="help" label="Help" onactive={handleSubTabActivation}>
+                    <h1 class="slds-text-heading_large">What are the rules you apply for your score?</h1>
+                    <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space columns={scoreRulesTableColumns} rows={allScoreRulesTableData}></c-orgcheck-extended-datatable>
+                </lightning-tab>
                 <lightning-tab value="global-view" label="Global View" onactive={handleGlobalViewTabActivation}>
                     <lightning-layout multiple-rows>
                         <template for:each={globalViewItems} for:item="item" >
@@ -160,6 +164,15 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-01" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Data model world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🎳 Object Documentation</b>: Get a full documentation of a given specific SObject in one page -- use the global filter to select the object. </li>
+                            <li><b>🏉 Org Wide Defaults</b>: List all your objects and their org wide default (internal and external)</li>
+                            <li><b>🏈 Custom Fields</b>: List all your custom fields along with their score to check which one should be fixed first!</li>
+                            <li><b>🎾 Validation Rules</b>: List all your validation rules from your org (whatever the object) in one page!</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
                         <template if:false={isObjectSpecified}>
                             There is no specific object set in the global filter above. <br />
@@ -393,6 +406,19 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-02" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Security and Access world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>👥 Active Internal Users</b>: List all the internal active users and see who has critical system permission and why (includes <i>Api Enabled</i>, <i>View Setup</i>, <i>Modify All Data</i> and <i>View All Data</i>).</li>
+                            <li><b>🚓 Profiles</b>: List all your profiles, see if they are assigned, how many FLS, CRUD and Critical Permission are set up in them</li>
+                            <li><b>🚔 Permission Sets</b>: List all your permission sets and permission set groups and see if they are assigned, how many FLS, CRUD and Critical Permission are set up in them</li>
+                            <li><b>🚸 Profile Restrictions</b>: Check the IP Range restrictions and the Login Hour Restrictions for all your profiles and detect restrictions that are unnecessary</li>
+                            <li><b>⛖ Profile Password Policies</b>: Check password policies that are not secure enough</li>
+                            <li><b>🚦 Object Permissions</b>: Get the matrix of the CRUDs for all objects per profiles and permission sets</li>
+                            <li><b>🚧 Field Level Securities</b>: Get the matrix of the FLSs for all fields of a sepcific object (use the global filter to select one) per profiles and permission sets</li>
+                            <li><b>⛕ Application Permissions</b>: Get the matrix of the application access per profiles and permission sets</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no active internal user to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={usersTableColumns} rows={usersTableData} show-export-button export-basename="Users"></c-orgcheck-extended-datatable>
                     </lightning-tab>
@@ -414,7 +440,7 @@
                         </div>
                         <c-orgcheck-extended-datatable empty-message="There is no object permission to show." show-search show-statistics show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100  columns={objectPermissionsTableColumns} rows={objectPermissionsTableData} show-export-button export-basename="ObjectPermissions"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="field-permissions" label="🚦 Field Permissions" onactive={handleSubTabActivation}>
+                    <lightning-tab value="field-permissions" label="🚧 Field Level Securities" onactive={handleSubTabActivation}>
                         <template if:false={isObjectSpecified}>
                             There is no specific object set in the global filter above. <br />
                             <br />
@@ -446,6 +472,15 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-03" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Boxes world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🐙 Role Explorer</b>: All the internal roles of your org as a hierarchical graph and see which role is empty or not</li>
+                            <li><b>🦓 Role Listing</b>: All the internal roles of your org as a tabular table</li>
+                            <li><b>🐘 Public Groups</b>: Get the list of public groups in your org</li>
+                            <li><b>🦒 Queues</b>: Get the list of queues in your org</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="roles-explorer" label="🐙 Role Explorer" onactive={handleSubTabActivation}>
                         <c-orgcheck-graphics type="hierarchy" name="Role Hierarchy" hierarchy-box-color-legend={roleBoxColorsLegend} hierarchy-box-color-decorator={roleBoxColorsDecorator} hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} hierarchy-show-level source={rolesTree}></c-orgcheck-graphics>
                     </lightning-tab>
@@ -467,6 +502,14 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-04" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Automation world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🏎️ Flows</b>: Check all your flows along with their active version and see which ones need to be fixed</li>
+                            <li><b>🛺 Process Builders</b>: Process builders of your org</li>
+                            <li><b>🚗 Workflows</b>: Workflows of your org</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="flows" label="🏎️ Flows" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no flow to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={flowsTableColumns} rows={flowsTableData} show-export-button export-basename="Flows"></c-orgcheck-extended-datatable>
                     </lightning-tab>
@@ -485,6 +528,12 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-05" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Setting world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🏷️ Custom Labels</b>: List your custom labels in one table and see which one is not used!</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no custom label to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={customLabelsTableColumns} rows={customLabelsTableData} show-export-button export-basename="CustomLabels"></c-orgcheck-extended-datatable>
                     </lightning-tab>
@@ -497,6 +546,16 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-06" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the User Interface world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🥖 Visual Force Pages</b>: list Visualforce pages that may have an old API version, not used in your org and without description </li>
+                            <li><b>🍞 Visual Force Components</b>: list Visualforce components that may have an old API version, not used in your org and without description </li>
+                            <li><b>🎂 Lightning Pages</b>: list pages that are either not used in your org or without any description </li>
+                            <li><b>🧁 Lightning Aura Components</b>: list pages that may have an old API version, not used in your org or without any description</li>
+                            <li><b>🍰 Lightning Web Components</b>: list pages that that may have an old API version, not used in your org or without any description</li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="visual-force-pages" label="🥖 Visual Force Pages" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no visual force page to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={visualForcePagesTableColumns} rows={visualForcePagesTableData} show-export-button export-basename="VisualForcePages"></c-orgcheck-extended-datatable>
                     </lightning-tab>
@@ -529,6 +588,15 @@
                     </template>
                 </lightning-layout>
                 <lightning-tabset>
+                    <lightning-tab value="summary-07" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">Welcome in the Programmatic world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>❤️‍🔥 Apex Classes</b>: list apex classes with key metrics that will help you clean your apex org, also the unit tests that could cover their code.</li>
+                            <li><b>🌋 Apex Classes That Need Recompilation</b>: list apex classes that have no compilation information (aka 'SymbolTable') and may need an explicit recompilation request from your side</li>
+                            <li><b>🧨 Apex Triggers</b>: list apex triggers in your org and potentially check if they contain logic!</li>
+                            <li><b>🚒 Apex Unit Tests</b>: list apex classes that are Unit Tests in your org and some key metrics as well </li>
+                        </ul>
+                    </lightning-tab>
                     <lightning-tab value="apex-classes" label="❤️‍🔥 Apex Classes" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no Apex Class to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={apexClassesTableColumns} rows={apexClassesTableData} show-export-button export-basename="ApexClasses"></c-orgcheck-extended-datatable>
                     </lightning-tab>

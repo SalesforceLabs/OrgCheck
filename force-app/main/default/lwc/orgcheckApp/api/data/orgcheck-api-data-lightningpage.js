@@ -6,6 +6,14 @@ import { SFDC_Object } from './orgcheck-api-data-object';
  */
 export class SFDC_LightningPage extends OrgCheckDataWithDependencies {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Lightning Page' };
+
     /**
      * @description Salesforce Id
      * @type {string}

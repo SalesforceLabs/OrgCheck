@@ -1,4 +1,4 @@
-import { OrgCheckValidationRule } from './orgcheck-api-datafactory';
+import { OrgCheckScoreRule } from './orgcheck-api-datafactory';
 import { OrgCheckDatasetRunInformation } from './orgcheck-api-dataset-runinformation';
 
 /**
@@ -23,10 +23,17 @@ export class OrgCheckDatasetManagerIntf {
     clean(datasets) { throw new TypeError(`You need to implement the method "clean()"`); }
 
     /**
-     * @description Get the validation rule given its id
+     * @description Get the Org Check "score rule" given its id
      * @param {number} id
-     * @returns {OrgCheckValidationRule}
+     * @returns {OrgCheckScoreRule}
      * @public
      */
-    getValidationRule(id) { throw new TypeError(`You need to implement the method "clean()"`); }
- }
+    getScoreRule(id) { throw new TypeError(`You need to implement the method "getScoreRule()"`); }
+
+    /**
+     * @description Get the list of all Org Check "score rules"
+     * @returns {Array<OrgCheckScoreRule>} Information about validation rules
+     * @public
+     */
+    getAllScoreRules() { throw new TypeError(`You need to implement the method "getAllScoreRules()"`);}
+}

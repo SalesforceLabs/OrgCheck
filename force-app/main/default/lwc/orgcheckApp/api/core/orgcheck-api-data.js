@@ -6,6 +6,14 @@ import { OrgCheckDataDependencies } from "./orgcheck-api-data-dependencies";
  */
 export class OrgCheckData {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { console.error('Need to implement static label() method for', this, JSON.stringify(this), this.name); return this.name; };
+
     /**
      * @description Badness score of the data. Zero means the data follows best practices. Positive value means some areas need to be corrected.
      * @type {number}

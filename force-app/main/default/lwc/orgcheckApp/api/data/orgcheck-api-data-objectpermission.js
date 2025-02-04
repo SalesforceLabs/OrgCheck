@@ -7,6 +7,14 @@ import { SFDC_Profile } from './orgcheck-api-data-profile';
  */
 export class SFDC_ObjectPermission extends OrgCheckData {
 
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Object Permissions from Profile or Permission Set' };
+
     /**
      * @description Salesforce Id of the related parent (profile or permission set)
      * @type {string}

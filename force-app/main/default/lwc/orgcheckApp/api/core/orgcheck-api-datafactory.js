@@ -1,8 +1,8 @@
 /**
- * @description Validation Rule used to qualify if an item is bad or not
+ * @description Org Check "score rule" used to qualify if an item is bad or not
  * @public
  */
-export class OrgCheckValidationRule {
+export class OrgCheckScoreRule {
 
     /**
      * @description Unique identifier of that rule
@@ -54,13 +54,20 @@ export class OrgCheckValidationRule {
 export class OrgCheckDataFactoryIntf {
 
     /**
-     * @description Get the validation Rule given its ID
+     * @description Get the Org Check "score rule" given its ID
      * @param {number} id
-     * @returns {OrgCheckValidationRule}
+     * @returns {OrgCheckScoreRule}
      * @throws if the given id is not found in the validation rules list
      * @public
      */
-    getValidationRule(id) { throw new Error('Not implemented'); }
+    getScoreRule(id) { throw new Error('Not implemented'); }
+
+    /**
+     * @description Get the list of all Org Check "score rules"
+     * @returns {Array<OrgCheckScoreRule>} Information about validation rules
+     * @public
+     */
+    getAllScoreRules() { throw new Error('Not implemented');}
 
     /**
      * @description Get the instance of the factiry for a given data class

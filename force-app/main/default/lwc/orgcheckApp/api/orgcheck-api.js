@@ -1,6 +1,6 @@
 import { OrgCheckSalesforceManagerIntf } from './core/orgcheck-api-salesforcemanager';
 import { OrgCheckDataCacheItem, OrgCheckDataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
-import { OrgCheckValidationRule } from './core/orgcheck-api-datafactory';
+import { OrgCheckScoreRule } from './core/orgcheck-api-datafactory';
 import { SFDC_ApexClass } from './data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './data/orgcheck-api-data-apextrigger';
 import { SFDC_CustomLabel } from './data/orgcheck-api-data-customlabel';
@@ -141,13 +141,22 @@ export class OrgCheckAPI {
     }
 
     /**
-     * @description Get the information of the given Validation Rule
+     * @description Get the information of the given Org Check "Score Rule"
      * @param {number} id
-     * @returns {OrgCheckValidationRule} Information about a validation rule
+     * @returns {OrgCheckScoreRule} Information about a score rule
      * @public
      */
-    getValidationRule(id) {
-        return this._datasetManager.getValidationRule(id);
+    getScoreRule(id) {
+        return this._datasetManager.getScoreRule(id);
+    }
+
+    /**
+     * @description Get the list of all Org Check "score rules"
+     * @returns {Array<OrgCheckScoreRule>} Information about score rules
+     * @public
+     */
+    getAllScoreRules() {
+        return this._datasetManager.getAllScoreRules();
     }
 
     /**

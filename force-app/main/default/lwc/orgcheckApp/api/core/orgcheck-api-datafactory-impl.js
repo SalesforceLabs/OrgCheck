@@ -23,7 +23,7 @@ import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { OrgCheckSalesforceManagerIntf } from './orgcheck-api-salesforcemanager';
 import { OrgCheckDataDependenciesFactory } from './orgcheck-api-data-dependencies-factory';
-import { OrgCheckDataFactoryIntf, OrgCheckValidationRule, OrgCheckDataFactoryInstanceIntf } from './orgcheck-api-datafactory';
+import { OrgCheckDataFactoryIntf, OrgCheckScoreRule, OrgCheckDataFactoryInstanceIntf } from './orgcheck-api-datafactory';
 
 /**
  * @description Checks if an instance extends a specific class (not necessary the direct class)
@@ -76,11 +76,11 @@ const IS_EMPTY = (value) => {
 export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
 
     /**
-     * @description List of all validation rule to apply in Org Check
-     * @type {Array<OrgCheckValidationRule>}
+     * @description List of all Org Check "score rules" to apply in Org Check
+     * @type {Array<OrgCheckScoreRule>}
      * @private
      */
-    _allValidations;
+    _allScoreRules;
     
     /**
      * @description Map of all factory instances given their "SFDC_*"" class
@@ -100,7 +100,7 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
         const currentApiVersion = sfdcManager.apiVersion;
 
         let counter = 0;
-        this._allValidations = [
+        this._allScoreRules = [
             { 
                 id: counter++,
                 description: 'Not referenced anywhere',
@@ -404,17 +404,25 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
                 applicable: [ SFDC_Limit ]
             }
         ];
-        Object.freeze(this._allValidations); 
+        Object.freeze(this._allScoreRules); 
         this._instances = new Map();
     }
 
     /**
-     * @see OrgCheckDataFactoryIntf.getValidationRule
+     * @see OrgCheckDataFactoryIntf.getScoreRule
      * @param {number} id
-     * @returns {OrgCheckValidationRule}
+     * @returns {OrgCheckScoreRule}
      */
-    getValidationRule(id) {
-        return this._allValidations[id];
+    getScoreRule(id) {
+        return this._allScoreRules[id];
+    }
+
+    /**
+     * @see OrgCheckDataFactoryIntf.getAllScoreRules
+     * @returns {Array<OrgCheckScoreRule>} Information about score rules
+     */
+    getAllScoreRules() { 
+        return this._allScoreRules;
     }
 
     /**
@@ -434,7 +442,7 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
         if (this._instances.has(dataClass) === false) {
             this._instances.set(dataClass, new OrgCheckDataFactoryInstance(
                 dataClass, 
-                isDataWithScoring ? this._allValidations.filter(v => v.applicable.includes(dataClass)) : [], 
+                isDataWithScoring ? this._allScoreRules.filter(v => v.applicable.includes(dataClass)) : [], 
                 isDataWithDependencies
             ));
         }
@@ -456,10 +464,10 @@ export class OrgCheckDataFactoryInstance extends OrgCheckDataFactoryInstanceIntf
     _dataClass;
 
     /**
-     * @type {Array<OrgCheckValidationRule>} 
+     * @type {Array<OrgCheckScoreRule>} 
      * @private
      */
-    _validations;
+    _scoreRules;
 
     /**
      * @type {boolean} 
@@ -470,13 +478,13 @@ export class OrgCheckDataFactoryInstance extends OrgCheckDataFactoryInstanceIntf
     /**
      * @description Constructor
      * @param {any} dataClass 
-     * @param {Array<OrgCheckValidationRule>} validations 
+     * @param {Array<OrgCheckScoreRule>} scoreRules 
      * @param {boolean} isDependenciesNeeded 
      */
-    constructor(dataClass, validations, isDependenciesNeeded) {
+    constructor(dataClass, scoreRules, isDependenciesNeeded) {
         super();
         this._dataClass = dataClass;
-        this._validations = validations;
+        this._scoreRules = scoreRules;
         this._isDependenciesNeeded = isDependenciesNeeded;
     }
 
@@ -498,8 +506,8 @@ export class OrgCheckDataFactoryInstance extends OrgCheckDataFactoryInstanceIntf
         Object.keys(row).forEach((p) => { row[p] = configuration.properties[p]; });
         // We want to make sure no new property is added to the row (there should be only the ones declared in classes!)
         Object.seal(row);
-        // For this type if we have at least one validation rule, then score is needed
-        if (this._validations.length > 0) {
+        // For this type if we have at least one Org Check "score rules", then score is needed
+        if (this._scoreRules.length > 0) {
             row.score = 0;
             row.badFields = [];
             row.badReasonIds = [];
@@ -519,7 +527,7 @@ export class OrgCheckDataFactoryInstance extends OrgCheckDataFactoryInstanceIntf
      * @public
      */
     computeScore(row) { 
-        this._validations.filter(v => { 
+        this._scoreRules.filter(v => { 
             try { 
                 if (v.formula(row) === true) return true;
             } catch (error) { 

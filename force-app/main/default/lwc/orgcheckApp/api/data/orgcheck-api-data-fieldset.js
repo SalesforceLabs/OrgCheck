@@ -5,6 +5,14 @@ import { OrgCheckData } from '../core/orgcheck-api-data';
  */
 export class SFDC_FieldSet extends OrgCheckData {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Field Set' };
+
     /**
      * @description Salesforce Id
      * @type {string}

@@ -1,7 +1,7 @@
 import { OrgCheckLoggerIntf } from './orgcheck-api-logger';
 import { OrgCheckDataCacheManagerIntf } from './orgcheck-api-cachemanager';
 import { OrgCheckSalesforceManagerIntf } from './orgcheck-api-salesforcemanager';
-import { OrgCheckDataFactoryIntf, OrgCheckValidationRule } from './orgcheck-api-datafactory';
+import { OrgCheckDataFactoryIntf, OrgCheckScoreRule } from './orgcheck-api-datafactory';
 import { OrgCheckDatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
 import { OrgCheckDatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
 import { OrgCheckDatasetObject } from '../dataset/orgcheck-api-dataset-object';
@@ -212,12 +212,21 @@ export class OrgCheckDatasetManager extends OrgCheckDatasetManagerIntf {
     }
 
     /**
-     * @description Get the validation rule given its id
+     * @description Get the Org Check "score rule" given its id
      * @param {number} id
-     * @returns {OrgCheckValidationRule}
+     * @returns {OrgCheckScoreRule}
      * @public
      */
-    getValidationRule(id) {
-        return this._dataFactory.getValidationRule(id);
+    getScoreRule(id) {
+        return this._dataFactory.getScoreRule(id);
     }
- }
+
+    /**
+     * @description Get the list of all Org Check "score rules"
+     * @returns {Array<OrgCheckScoreRule>} Information about score rules
+     * @public
+     */
+    getAllScoreRules() { 
+        return this._dataFactory.getAllScoreRules();
+    }
+}
