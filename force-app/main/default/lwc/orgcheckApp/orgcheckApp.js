@@ -25,6 +25,7 @@ import { SFDC_Object } from './api/data/orgcheck-api-data-object';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 import { OrgCheckDataMatrix } from './api/core/orgcheck-api-data-matrix';
+import { SFDC_ValidationRule } from './api/data/orgcheck-api-data-validationrule';
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -330,7 +331,7 @@ export default class OrgcheckApp extends LightningElement {
         'apex-unit-tests':           { label: '🚒 Apex Unit Tests',           isGlobalView: true,  data: 'apexTestsTableData',                    remove: () => { this._api.removeAllApexTestsFromCache(); },               getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexTests(this.namespace); }},
         'apex-triggers':             { label: '🧨 Apex Triggers',             isGlobalView: true,  data: 'apexTriggersTableData',                 remove: () => { this._api.removeAllApexTriggersFromCache(); },            getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexTriggers(this.namespace); }},
         'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',           isGlobalView: true,  data: 'apexUncompiledTableData',               remove: () => { this._api.removeAllApexUncompiledFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApexUncompiled(this.namespace); }},
-        'app-permissions':           { label: 'XXX',                          isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this.namespace); }},
+        'app-permissions':           { label: '⛕ Application Permissions',    isGlobalView: false, data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api.removeAllAppPermissionsFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getApplicationPermissionsPerParent(this.namespace); }},
         'custom-fields':             { label: '🏈 Custom Fields',             isGlobalView: true,  data: 'customFieldsTableData',                 remove: () => { this._api.removeAllCustomFieldsFromCache(); },            getAlias: () => `${this.namespace}-${this.objectType}-${this.object}`,   get: async () => { return this._api.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',             isGlobalView: true,  data: 'customLabelsTableData',                 remove: () => { this._api.removeAllCustomLabelsFromCache(); },            getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getCustomLabels(this.namespace); }},
         'field-permissions':         { label: '🚦 Field Permissions',         isGlobalView: false, data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api.removeAllFieldPermissionsFromCache(); },        getAlias: () => `${this.object}-${this.namespace}`,                      get: async () => { return this._api.getFieldPermissions(this.object, this.namespace); }},
@@ -338,9 +339,9 @@ export default class OrgcheckApp extends LightningElement {
         'lightning-aura-components': { label: '🧁 Lightning Aura Components', isGlobalView: true,  data: 'auraComponentsTableData',               remove: () => { this._api.removeAllLightningAuraComponentsFromCache(); }, getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',           isGlobalView: true,  data: 'flexiPagesTableData',                   remove: () => { this._api.removeAllLightningPagesFromCache(); },          getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningPages(this.namespace); }},
         'lightning-web-components':  { label: '🍰 Lightning Web Components',  isGlobalView: true,  data: 'lightningWebComponentsTableData',       remove: () => { this._api.removeAllLightningWebComponentsFromCache(); },  getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getLightningWebComponents(this.namespace); }},
-        'object':                    { label: 'XXX',                          isGlobalView: false, data: 'objectData',                            remove: () => { this._api.removeObjectFromCache(this.object); },          getAlias: () => `${this.object}`,                                        get: async () => { return this.object !== '*' ? this._api.getObject(this.object) : undefined; }},
-        'object-permissions':        { label: 'XXX',                          isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this.namespace); }},
-        'objects':                   { label: 'XXX',                          isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this.namespace}-${this.objectType}`,                  get: async () => { return this._api.getObjects(this.namespace, this.objectType); }},
+        'object':                    { label: '🎳 Object Documentation',      isGlobalView: false, data: 'objectData',                            remove: () => { this._api.removeObjectFromCache(this.object); },          getAlias: () => `${this.object}`,                                        get: async () => { return this.object !== '*' ? this._api.getObject(this.object) : undefined; }},
+        'object-permissions':        { label: '🚦 Object Permissions',        isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this.namespace); }},
+        'objects':                   { label: '🏉 Org Wide Defaults',         isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this.namespace}-${this.objectType}`,                  get: async () => { return this._api.getObjects(this.namespace, this.objectType); }},
         'permission-sets':           { label: '🚔 Permission Sets',           isGlobalView: true,  data: 'permissionSetsTableData',               remove: () => { this._api.removeAllPermSetsFromCache(); },                getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getPermissionSets(this.namespace); }},
         'process-builders':          { label: '🛺 Process Builders',          isGlobalView: true,  data: 'processBuildersTableData',              remove: () => { this._api.removeAllProcessBuildersFromCache(); },         getAlias: () => '',                                                      get: async () => { return this._api.getProcessBuilders(); }},
         'profile-password-policies': { label: '⛖ Profile Password Policies', isGlobalView: true,  data: 'profilePasswordPoliciesTableData',       remove: () => { this._api.removeAllProfilePasswordPoliciesFromCache(); }, getAlias: () => '',                                                      get: async () => { return this._api.getProfilePasswordPolicies(); }},
@@ -349,7 +350,8 @@ export default class OrgcheckApp extends LightningElement {
         'public-groups':             { label: '🐘 Public Groups',             isGlobalView: true,  data: 'publicGroupsTableData',                 remove: () => { this._api.removeAllPublicGroupsFromCache(); },            getAlias: () => '',                                                      get: async () => { return this._api.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                    isGlobalView: true,  data: 'queuesTableData',                       remove: () => { this._api.removeAllQueuesFromCache(); },                  getAlias: () => '',                                                      get: async () => { return this._api.getQueues(); }},
         'roles-listing':             { label: '🦓 Role Listing',              isGlobalView: true,  data: 'rolesTableData',                        remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getRoles(); }},
-        'roles-explorer':            { label: 'XXX',                          isGlobalView: false, data: 'rolesTree',                             remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getRolesTree(); }},
+        'roles-explorer':            { label: '🐙 Role Explorer',             isGlobalView: false, data: 'rolesTree',                             remove: () => { this._api.removeAllRolesFromCache(); },                   getAlias: () => '',                                                      get: async () => { return this._api.getRolesTree(); }},
+        'validation-rules':          { label: '🎾 Validation Rules',          isGlobalView: true,  data: 'validationRulesTableData',              remove: () => { this._api.removeAllValidationRulesFromCache(); },         getAlias: () => '',                                                      get: async () => { return this._api.getValidationRules(); }},
         'visual-force-components':   { label: '🍞 Visual Force Components',   isGlobalView: true,  data: 'visualForceComponentsTableData',        remove: () => { this._api.removeAllVisualForceComponentsFromCache(); },   getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getVisualForceComponents(this.namespace); }},
         'visual-force-pages':        { label: '🥖 Visual Force Pages',        isGlobalView: true,  data: 'visualForcePagesTableData',             remove: () => { this._api.removeAllVisualForcePagesFromCache(); },        getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getVisualForcePages(this.namespace); }},
         'workflows':                 { label: '🚗 Workflows',                 isGlobalView: true,  data: 'workflowsTableData',                    remove: () => { this._api.removeAllWorkflowsFromCache(); },               getAlias: () => '',                                                      get: async () => { return this._api.getWorkflows(); }}
@@ -779,7 +781,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Columns descriptions for the data table about field sets
      */
-    fieldSetsColumns = [
+    fieldSetsTableColumns = [
         { label: 'Label',       type: 'id',       data: { value: 'label', url: 'url' }},
         { label: 'Description', type: 'text',     data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
@@ -787,7 +789,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Columns descriptions for the data table about page layouts
      */
-    layoutsColumns = [
+    layoutsTableColumns = [
         { label: 'Label', type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Type',  type: 'text',     data: { value: 'type' }},
     ];
@@ -795,7 +797,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Columns descriptions for the data table about object limits
      */
-    limitsColumns = [
+    limitsTableColumns = [
         { label: 'Score',     type: 'score',      data: { id: 'id', name: 'label' }, sorted: 'desc' },
         { label: 'Label',     type: 'text',       data: { value: 'label' }},
         { label: 'Type',      type: 'text',       data: { value: 'type' }},
@@ -808,26 +810,36 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Columns descriptions for the data table about validation rules
      */
-    validationRulesColumns = [
-        { label: 'Score',            type: 'score',     data: { id: 'id', name: 'name' }, sorted: 'desc' },
-        { label: 'Name',             type: 'id',        data: { value: 'name', url: 'url' }},
-        { label: 'Is Active',        type: 'boolean',   data: { value: 'isActive' }},
-        { label: 'Display On Field', type: 'text',      data: { value: 'errorDisplayField' }},
-        { label: 'Error Message',    type: 'text',      data: { value: 'errorMessage' }},
-        { label: 'Description',      type: 'text',      data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+    validationRulesTableColumns = [
+        { label: 'Score',            type: 'score',            data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',             type: 'id',               data: { value: 'name', url: 'url' }},
+        { label: 'In this object',   type: 'id',               filter: 'obj', data: { ref: 'objectRef', value: 'name', url: 'url' }},
+        { label: 'Object Type',      type: 'text',             filter: 'obj', data: { ref: 'objectRef.typeRef', value: 'label' }},
+        { label: 'ObjectID',         type: 'text',             filter: 'obj', data: { value: 'objectId' }},
+        { label: 'Is Active',        type: 'boolean',          data: { value: 'isActive' }},
+        { label: 'Display On Field', type: 'text',             data: { value: 'errorDisplayField' }},
+        { label: 'Error Message',    type: 'text',             data: { value: 'errorMessage' }},
+        { label: 'Description',      type: 'text',             data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
     ];
+
+    /**
+     * @description Columns descriptions for the data table about validation rules within an SObject
+     */
+    validationRulesInObjectTableColumns = this.validationRulesTableColumns.filter(c =>
+        c.filter === undefined || c.filter !== 'obj'
+    );    
 
     /**
      * @description Columns descriptions for the data table about web links
      */
-    webLinksColumns = [
+    webLinksTableColumns = [
         { label: 'Name', type: 'id', data: { value: 'name' }},
     ];
 
     /**
      * @description Columns descriptions for the data table about record types
      */
-    recordTypesColumns = [
+    recordTypesTableColumns = [
         { label: 'Score',          type: 'score',    data: { id: 'id', name: 'name' }, sorted: 'desc' },
         { label: 'Name',           type: 'id',       data: { value: 'name', url: 'url' }},
         { label: 'Developer Name', type: 'text',     data: { value: 'developerName' }},
@@ -841,7 +853,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Columns descriptions for the data table about sobject relationships
      */
-    relationshipsColumns = [
+    relationshipsTableColumns = [
         { label: 'Name',                 type: 'text',    data: { value: 'name' }},
         { label: 'Field Name',           type: 'text',    data: { value: 'fieldName' }},
         { label: 'Child Object',         type: 'text',    data: { value: 'childObject' }},
@@ -1534,12 +1546,12 @@ export default class OrgcheckApp extends LightningElement {
             },
             {
                 header: 'Field Sets',
-                columns: this.fieldSetsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.fieldSetsTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.fieldSets
             },
             {
                 header: 'Page Layouts',
-                columns: this.layoutsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.layoutsTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.layouts
             },
             {
@@ -1549,27 +1561,27 @@ export default class OrgcheckApp extends LightningElement {
             },
             {
                 header: 'Limits',
-                columns: this.limitsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.limitsTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.limits
             },
             {
                 header: 'Validation Rules',
-                columns: this.validationRulesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.validationRulesInObjectTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.validationRules
             },
             {
                 header: 'Web Links',
-                columns: this.webLinksColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.webLinksTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.webLinks
             },
             {
                 header: 'Record Types',
-                columns: this.recordTypesColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.recordTypesTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.recordTypes
             },
             {
                 header: 'Relationships',
-                columns: this.relationshipsColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
+                columns: this.relationshipsTableColumns.filter((c) => !c.ref).map((c) => { return { label: c.label, field: c.data.value } }),
                 rows: this.objectData.relationships
             }
         ];
@@ -1671,6 +1683,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<SFDC_User>}
      */
     usersTableData;
+
+    /**
+     * @description Data table for validation rules
+     * @type {Array<SFDC_ValidationRule>}
+     */ 
+    validationRulesTableData;
 
     /** 
      * @description Data table for visualforce components 
