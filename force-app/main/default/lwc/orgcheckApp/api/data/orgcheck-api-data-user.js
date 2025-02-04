@@ -2,6 +2,14 @@ import { OrgCheckData } from '../core/orgcheck-api-data';
 
 export class SFDC_User extends OrgCheckData {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'User' };
+
     /**
      * @description Salesforce Id
      * @type {string}

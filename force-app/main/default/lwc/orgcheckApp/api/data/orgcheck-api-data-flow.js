@@ -5,6 +5,14 @@ import { OrgCheckDataWithDependencies, OrgCheckDataWithoutScoring } from '../cor
  */
 export class SFDC_Flow extends OrgCheckDataWithDependencies {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Flow or Process Builder' };
+
     /**
      * @description Salesforce Id
      * @type {string}

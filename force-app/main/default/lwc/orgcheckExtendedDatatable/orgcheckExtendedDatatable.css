@@ -21,6 +21,7 @@ th.sorted-desc {
 }
 
 th.vertical {
+    align-content: center;
     writing-mode: vertical-lr;
     background-position-x: left;
     transform: rotate(180deg);

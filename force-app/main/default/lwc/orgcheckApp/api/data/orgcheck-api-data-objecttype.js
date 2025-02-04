@@ -2,6 +2,14 @@ import { OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
 
 export class SFDC_ObjectType extends OrgCheckDataWithoutScoring {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'SObject Types' };
+
     /**
      * @description Technical representation of this type
      * @type {string}

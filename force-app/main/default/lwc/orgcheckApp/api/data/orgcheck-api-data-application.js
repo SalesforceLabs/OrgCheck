@@ -5,6 +5,14 @@ import { OrgCheckDataWithoutScoring } from '../core/orgcheck-api-data';
  */
 export class SFDC_Application extends OrgCheckDataWithoutScoring {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Application' };
+
     /**
      * @description Salesforce Id of the application
      * @type {string}

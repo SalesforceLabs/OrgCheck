@@ -6,6 +6,14 @@ import { SFDC_Object } from './orgcheck-api-data-object';
  */
 export class SFDC_ApexTrigger extends OrgCheckData {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Apex Trigger' };
+
     /**
      * @description Salesforce Id
      * @type {string}

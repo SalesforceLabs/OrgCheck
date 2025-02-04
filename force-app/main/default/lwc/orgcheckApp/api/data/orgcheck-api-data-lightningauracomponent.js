@@ -5,6 +5,14 @@ import { OrgCheckDataWithDependencies } from '../core/orgcheck-api-data';
  */
 export class SFDC_LightningAuraComponent extends OrgCheckDataWithDependencies {
     
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Aura Component' };
+
     /**
      * @description Salesforce Id
      * @type {string}

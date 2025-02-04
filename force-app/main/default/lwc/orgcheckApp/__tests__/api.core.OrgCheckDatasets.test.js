@@ -84,7 +84,7 @@ class SfdcManagerMock extends OrgCheckSalesforceManagerIntf {
 
 class DataFactoryMock extends OrgCheckDataFactoryIntf { 
 
-  getValidationRule(id) { return null; }
+  getScoreRule(id) { return null; }
 
   getInstance(dataClass) {
     return {
