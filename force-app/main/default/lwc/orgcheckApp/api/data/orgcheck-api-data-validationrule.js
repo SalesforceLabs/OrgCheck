@@ -33,6 +33,15 @@ export class SFDC_ValidationRule extends OrgCheckData {
     errorMessage;
     
     /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
+    objectId; 
+
+    objectRef;
+
+    /**
      * @description Setup URL of this item
      * @type {string}
      * @public

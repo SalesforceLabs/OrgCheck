@@ -25,6 +25,7 @@ import { OrgCheckDatasetProfileRestrictions } from '../api/dataset/orgcheck-api-
 import { OrgCheckDatasetProfiles } from '../api/dataset/orgcheck-api-dataset-profiles';
 import { OrgCheckDatasetUserRoles } from '../api/dataset/orgcheck-api-dataset-userroles';
 import { OrgCheckDatasetUsers } from '../api/dataset/orgcheck-api-dataset-users';
+import { OrgCheckDatasetValidationRules } from '../api/dataset/orgcheck-api-dataset-validationrules';
 import { OrgCheckDatasetVisualForceComponents } from '../api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { OrgCheckDatasetVisualForcePages } from '../api/dataset/orgcheck-api-dataset-visualforcepages';
 import { OrgCheckDatasetWorkflows } from '../api/dataset/orgcheck-api-dataset-workflows';
@@ -630,6 +631,20 @@ describe('api.core.OrgCheckDatasets', () => {
   describe('Test OrgCheckDatasetUsers', () => {
   
     const dataset = new OrgCheckDatasetUsers();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+  });
+
+  describe('Test OrgCheckDatasetValidationRules', () => {
+  
+    const dataset = new OrgCheckDatasetValidationRules();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
