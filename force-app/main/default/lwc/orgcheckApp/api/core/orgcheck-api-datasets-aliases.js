@@ -19,6 +19,7 @@
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
  * @property {string} PERMISSIONSETS
+ * @property {string} PERMISSIONSETLICENSES
  * @property {string} PROFILEPWDPOLICIES
  * @property {string} PROFILERESTRICTIONS
  * @property {string} PROFILES
@@ -50,6 +51,7 @@ export const OrgCheckDatasetAliases = {
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
     PERMISSIONSETS: 'permission-sets',
+    PERMISSIONSETLICENSES: 'permission-set-licenses',
     PROFILEPWDPOLICIES: 'profile-password-policies',
     PROFILERESTRICTIONS: 'profile-restrictions',
     PROFILES: 'profiles',

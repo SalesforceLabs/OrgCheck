@@ -165,7 +165,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-01" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Data model world!</h1>
+                        <h1 class="slds-text-heading_large">⚽ Welcome in the Data model world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🎳 Object Documentation</b>: Get a full documentation of a given specific SObject in one page -- use the global filter to select the object. </li>
                             <li><b>🏉 Org Wide Defaults</b>: List all your objects and their org wide default (internal and external)</li>
@@ -399,15 +399,16 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="👮 Users, Profiles and Permission Sets" onactive={handleMainTabActivation}>
+            <lightning-tab label="👮 Users, Profiles, Permission Sets, Licenses and Rights" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="active-users,profiles,permission-sets,profile-restrictions,profile-password-policies,object-permissions,app-permissions"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} 
+                        data-recipes="active-users,profiles,permission-sets,permission-set-licenses,profile-restrictions,profile-password-policies,object-permissions,field-permissions,app-permissions"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-02" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Security and Access world!</h1>
+                        <h1 class="slds-text-heading_large">👮 Welcome in the Security and Access world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>👥 Active Internal Users</b>: List all the internal active users and see who has critical system permission and why (includes <i>Api Enabled</i>, <i>View Setup</i>, <i>Modify All Data</i> and <i>View All Data</i>).</li>
                             <li><b>🚓 Profiles</b>: List all your profiles, see if they are assigned, how many FLS, CRUD and Critical Permission are set up in them</li>
@@ -427,6 +428,9 @@
                     </lightning-tab>
                     <lightning-tab value="permission-sets" label="🚔 Permission Sets" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no permission to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={permissionSetsTableColumns} rows={permissionSetsTableData} show-export-button export-basename="PermissionSets"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="permission-set-licenses" label="🚔 Permission Set Licenses" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no permission to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={permissionSetLicensesTableColumns} rows={permissionSetLicensesTableData} show-export-button export-basename="PermissionSetLicenses"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="profile-restrictions" label="🚸 Profile Restrictions" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no profile restriction to show." show-search show-statistics onviewscore={handleViewScore} show-row-number-column is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 columns={profileRestrictionsTableColumns} rows={profileRestrictionsTableData} show-export-button export-basename="ProfileRestrictions"></c-orgcheck-extended-datatable>
@@ -473,7 +477,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-03" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Boxes world!</h1>
+                        <h1 class="slds-text-heading_large">🐇 Welcome in the Boxes world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🐙 Role Explorer</b>: All the internal roles of your org as a hierarchical graph and see which role is empty or not</li>
                             <li><b>🦓 Role Listing</b>: All the internal roles of your org as a tabular table</li>
@@ -503,7 +507,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-04" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Automation world!</h1>
+                        <h1 class="slds-text-heading_large">🤖 Welcome in the Automation world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🏎️ Flows</b>: Check all your flows along with their active version and see which ones need to be fixed</li>
                             <li><b>🛺 Process Builders</b>: Process builders of your org</li>
@@ -529,7 +533,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-05" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Setting world!</h1>
+                        <h1 class="slds-text-heading_large">🎁 Welcome in the Setting world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🏷️ Custom Labels</b>: List your custom labels in one table and see which one is not used!</li>
                         </ul>
@@ -547,7 +551,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-06" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the User Interface world!</h1>
+                        <h1 class="slds-text-heading_large">🥐 Welcome in the User Interface world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🥖 Visual Force Pages</b>: list Visualforce pages that may have an old API version, not used in your org and without description </li>
                             <li><b>🍞 Visual Force Components</b>: list Visualforce components that may have an old API version, not used in your org and without description </li>
@@ -589,7 +593,7 @@
                 </lightning-layout>
                 <lightning-tabset>
                     <lightning-tab value="summary-07" label="Summary" onactive={handleSubTabActivation}>
-                        <h1 class="slds-text-heading_large">Welcome in the Programmatic world!</h1>
+                        <h1 class="slds-text-heading_large">🔥 Welcome in the Programmatic world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>❤️‍🔥 Apex Classes</b>: list apex classes with key metrics that will help you clean your apex org, also the unit tests that could cover their code.</li>
                             <li><b>🌋 Apex Classes That Need Recompilation</b>: list apex classes that have no compilation information (aka 'SymbolTable') and may need an explicit recompilation request from your side</li>

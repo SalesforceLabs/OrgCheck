@@ -35,6 +35,7 @@ import { OrgCheckRecipeManagerIntf } from './core/orgcheck-api-recipemanager';
 import { OrgCheckSalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
 import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
 import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
+import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
 
 /**
  * @description Org Check API main class
@@ -408,6 +409,26 @@ export class OrgCheckAPI {
      */
     removeAllPermSetsFromCache() {
         this._recipeManager.clean(OrgCheckRecipeAliases.PERMISSION_SETS);
+    }
+
+    /**
+     * @description Get information about permission set licenses
+     * @returns {Promise<Array<SFDC_PermissionSetLicense>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getPermissionSetLicenses() {
+        // @ts-ignore
+        return (await this._recipeManager.run(OrgCheckRecipeAliases.PERMISSION_SET_LICENSES));
+    }
+    
+    /**
+     * @description Remove all the cached information about permission set licenses
+     * @public
+     */
+    removeAllPermSetLicensesFromCache() {
+        this._recipeManager.clean(OrgCheckRecipeAliases.PERMISSION_SET_LICENSES);
     }
 
     /**

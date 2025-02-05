@@ -180,6 +180,7 @@ export class OrgCheckSalesforceManager extends OrgCheckSalesforceManagerIntf {
             case OrgCheckSalesforceMetadataTypes.USER:                    return `/lightning/setup/ManageUsers/page?address=%2F${id}%3Fnoredirect%3D1%26isUserEntityOverride%3D1`;
             case OrgCheckSalesforceMetadataTypes.PROFILE:                 return `/lightning/setup/EnhancedProfiles/page?address=%2F${id}`;
             case OrgCheckSalesforceMetadataTypes.PERMISSION_SET:          return `/lightning/setup/PermSets/page?address=%2F${id}`;
+            case OrgCheckSalesforceMetadataTypes.PERMISSION_SET_LICENSE:  return `/lightning/setup/PermissionSetLicense/page?address=%2F${id}`;
             case OrgCheckSalesforceMetadataTypes.PERMISSION_SET_GROUP:    return `/lightning/setup/PermSetGroups/page?address=%2F${id}`;
             case OrgCheckSalesforceMetadataTypes.ROLE:                    return `/lightning/setup/Roles/page?address=%2F${id}`;
             case OrgCheckSalesforceMetadataTypes.PUBLIC_GROUP:            return `/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D${id}`;

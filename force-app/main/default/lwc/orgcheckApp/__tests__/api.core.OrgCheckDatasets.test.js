@@ -19,6 +19,7 @@ import { OrgCheckDatasetObjects } from '../api/dataset/orgcheck-api-dataset-obje
 import { OrgCheckDatasetObjectTypes } from '../api/dataset/orgcheck-api-dataset-objecttypes';
 import { OrgCheckDatasetOrganization } from '../api/dataset/orgcheck-api-dataset-organization';
 import { OrgCheckDatasetPackages } from '../api/dataset/orgcheck-api-dataset-packages';
+import { OrgCheckDatasetPermissionSetLicenses } from '../api/dataset/orgcheck-api-dataset-permissionsetlicenses';
 import { OrgCheckDatasetPermissionSets } from '../api/dataset/orgcheck-api-dataset-permissionsets';
 import { OrgCheckDatasetProfilePasswordPolicies } from '../api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
 import { OrgCheckDatasetProfileRestrictions } from '../api/dataset/orgcheck-api-dataset-profilerestrictions';
@@ -561,6 +562,20 @@ describe('api.core.OrgCheckDatasets', () => {
   describe('Test OrgCheckDatasetPermissionSets', () => {
   
     const dataset = new OrgCheckDatasetPermissionSets();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+  });
+  
+  describe('Test OrgCheckDatasetPermissionSetLicenses', () => {
+  
+    const dataset = new OrgCheckDatasetPermissionSetLicenses();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();

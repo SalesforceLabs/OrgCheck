@@ -25,6 +25,7 @@ export const OrgCheckSalesforceMetadataTypes = {
     PAGE_LAYOUT: 'Layout',
     PERMISSION_SET: 'PermissionSet',
     PERMISSION_SET_GROUP: 'PermissionSetGroup',
+    PERMISSION_SET_LICENSE: 'PermissionSetLicense',
     PROFILE: 'Profile',
     PUBLIC_GROUP: 'PublicGroup',
     QUEUE: 'Queue',

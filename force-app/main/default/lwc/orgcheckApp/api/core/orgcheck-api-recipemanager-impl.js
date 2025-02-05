@@ -38,6 +38,7 @@ import { OrgCheckRecipeApexTests } from '../recipe/orgcheck-api-recipe-apextests
 import { OrgCheckRecipeApexUncompiled } from '../recipe/orgcheck-api-recipe-apexuncomplied';
 import { OrgCheckRecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermissions';
 import { OrgCheckRecipeValidationRules } from '../recipe/orgcheck-api-recipe-validationrules';
+import { OrgCheckRecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permissionsetlicenses';
 
 /**
  * @description Recipe Manager
@@ -105,6 +106,7 @@ export class OrgCheckRecipeManager extends OrgCheckRecipeManagerIntf {
         this._recipes.set(OrgCheckRecipeAliases.ORGANIZATION, new OrgCheckRecipeOrganization());
         this._recipes.set(OrgCheckRecipeAliases.PACKAGES, new OrgCheckRecipePackages());
         this._recipes.set(OrgCheckRecipeAliases.PERMISSION_SETS, new OrgCheckRecipePermissionSets());
+        this._recipes.set(OrgCheckRecipeAliases.PERMISSION_SET_LICENSES, new OrgCheckRecipePermissionSetLicenses());
         this._recipes.set(OrgCheckRecipeAliases.PROCESS_BUILDERS, new OrgCheckRecipeProcessBuilders());
         this._recipes.set(OrgCheckRecipeAliases.PROFILE_PWD_POLICIES, new OrgCheckRecipeProfilePasswordPolicies());
         this._recipes.set(OrgCheckRecipeAliases.PROFILE_RESTRICTIONS, new OrgCheckRecipeProfileRestrictions());
