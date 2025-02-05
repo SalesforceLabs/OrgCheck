@@ -3,7 +3,7 @@ import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
 import { OrgCheckAPI } from './api/orgcheck-api';
 import { OrgCheckSalesforceMetadataTypes } from "./api/core/orgcheck-api-salesforce-metadatatypes";
 import { OrgCheckDataCacheItem } from './api/core/orgcheck-api-cachemanager';
-import { SFDC_Flow, SFDC_FlowVersion } from './api/data/orgcheck-api-data-flow';
+import { SFDC_Flow } from './api/data/orgcheck-api-data-flow';
 import { SFDC_Field } from './api/data/orgcheck-api-data-field';
 import { SFDC_CustomLabel } from './api/data/orgcheck-api-data-customlabel';
 import { SFDC_LightningAuraComponent } from './api/data/orgcheck-api-data-lightningauracomponent';
@@ -11,12 +11,12 @@ import { SFDC_LightningPage } from './api/data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from './api/data/orgcheck-api-data-lightningwebcomponent';
 import { SFDC_PermissionSet } from './api/data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from './api/data/orgcheck-api-data-profile';
-import { SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfileRestrictions } from './api/data/orgcheck-api-data-profilerestrictions';
+import { SFDC_ProfileRestrictions } from './api/data/orgcheck-api-data-profilerestrictions';
 import { SFDC_ProfilePasswordPolicy } from './api/data/orgcheck-api-data-profilepasswordpolicy';
 import { SFDC_User } from './api/data/orgcheck-api-data-user';
 import { SFDC_VisualForceComponent } from './api/data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from './api/data/orgcheck-api-data-visualforcepage';
-import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from './api/data/orgcheck-api-data-apexclass';
+import { SFDC_ApexClass } from './api/data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './api/data/orgcheck-api-data-apextrigger';
 import { SFDC_UserRole } from './api/data/orgcheck-api-data-userrole';
 import { SFDC_Workflow } from './api/data/orgcheck-api-data-workflow';
@@ -26,16 +26,8 @@ import { SFDC_Object } from './api/data/orgcheck-api-data-object';
 import { loadScript } from 'lightning/platformResourceLoader';
 import { OrgCheckDataMatrix } from './api/core/orgcheck-api-data-matrix';
 import { SFDC_ValidationRule } from './api/data/orgcheck-api-data-validationrule';
-import { SFDC_PageLayout } from './api/data/orgcheck-api-data-pagelayout';
-import { SFDC_FieldSet } from './api/data/orgcheck-api-data-fieldset';
-import { SFDC_Limit } from './api/data/orgcheck-api-data-limit';
-import { SFDC_WebLink } from './api/data/orgcheck-api-data-weblink';
-import { SFDC_RecordType } from './api/data/orgcheck-api-data-recordtype';
-import { SFDC_AppPermission } from './api/data/orgcheck-api-data-apppermission';
-import { SFDC_ObjectPermission } from './api/data/orgcheck-api-data-objectpermission';
-import { SFDC_FieldPermission } from './api/data/orgcheck-api-data-fieldpermission';
-import { SFDC_ObjectRelationShip } from './api/data/orgcheck-api-data-objectrelationship';
 import { OrgCheckScoreRule } from './api/core/orgcheck-api-datafactory';
+import { SFDC_PermissionSetLicense } from './api/data/orgcheck-api-data-permissionsetlicense';
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -356,6 +348,7 @@ export default class OrgcheckApp extends LightningElement {
         'object-permissions':        { label: '🚦 Object Permissions',        isGlobalView: false, data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api.removeAllObjectPermissionsFromCache(); },       getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getObjectPermissionsPerParent(this.namespace); }},
         'objects':                   { label: '🏉 Org Wide Defaults',         isGlobalView: false, data: 'objectsTableData',                      remove: () => { this._api.removeAllObjectsFromCache(); },                 getAlias: () => `${this.namespace}-${this.objectType}`,                  get: async () => { return this._api.getObjects(this.namespace, this.objectType); }},
         'permission-sets':           { label: '🚔 Permission Sets',           isGlobalView: true,  data: 'permissionSetsTableData',               remove: () => { this._api.removeAllPermSetsFromCache(); },                getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getPermissionSets(this.namespace); }},
+        'permission-set-licenses':   { label: '🚔 Permission Set Licenses',   isGlobalView: true,  data: 'permissionSetLicensesTableData',        remove: () => { this._api.removeAllPermSetLicensesFromCache(); },         getAlias: () => '',                                                      get: async () => { return this._api.getPermissionSetLicenses(); }},
         'process-builders':          { label: '🛺 Process Builders',          isGlobalView: true,  data: 'processBuildersTableData',              remove: () => { this._api.removeAllProcessBuildersFromCache(); },         getAlias: () => '',                                                      get: async () => { return this._api.getProcessBuilders(); }},
         'profile-password-policies': { label: '⛖ Profile Password Policies', isGlobalView: true,  data: 'profilePasswordPoliciesTableData',       remove: () => { this._api.removeAllProfilePasswordPoliciesFromCache(); }, getAlias: () => '',                                                      get: async () => { return this._api.getProfilePasswordPolicies(); }},
         'profile-restrictions':      { label: '🚸 Profile Restrictions',      isGlobalView: true,  data: 'profileRestrictionsTableData',          remove: () => { this._api.removeAllProfileRestrictionsFromCache(); },     getAlias: () => `${this.namespace}`,                                     get: async () => { return this._api.getProfileRestrictions(this.namespace); }},
@@ -1018,6 +1011,25 @@ export default class OrgcheckApp extends LightningElement {
     ];
 
     /**
+     * @description Columns descriptions for the data table about permission set licenses
+     */
+    permissionSetLicensesTableColumns = [
+        { label: 'Score',                 type: 'score',      data: { id: 'id', name: 'name' }, sorted: 'desc' },
+        { label: 'Name',                  type: 'id',         data: { value: 'name', url: 'url' }},
+        { label: 'Total',                 type: 'numeric',    data: { value: 'totalCount' }},
+        { label: 'Used',                  type: 'numeric',    data: { value: 'usedCount' }},
+        { label: 'Used (%)',              type: 'percentage', data: { value: 'usedPercentage' }},
+        { label: 'Remaining',             type: 'numeric',    data: { value: 'remainingCount' }},
+        { label: 'Users Really Assigned', type: 'numeric',    data: { value: 'distinctActiveAssigneeCount' }},
+        { label: 'Permission Sets',       type: 'ids',        data: { ref: 'permissionSetRefs', value: 'name', url: 'url' }},
+        { label: 'Status',                type: 'text',       data: { value: 'status' }},
+        { label: 'Expiration Date',       type: 'dateTime',   data: { value: 'expirationDate' }},
+        { label: 'For Integration?',      type: 'boolean',    data: { value: 'isAvailableForIntegrations' }},
+        { label: 'Created date',          type: 'dateTime',   data: { value: 'createDate' }},
+        { label: 'Modified date',         type: 'dateTime',   data: { value: 'lastModifiedDate' }},
+    ];
+
+    /**
      * @description Columns descriptions for the data table about profiles
      */
     profilesTableColumns = [
@@ -1670,6 +1682,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<SFDC_PermissionSet>}
      */
     permissionSetsTableData;
+
+    /** 
+     * @description Data table for permission set licenses
+     * @type {Array<SFDC_PermissionSetLicense>}
+     */
+    permissionSetLicensesTableData;
 
     /** 
      * @description Data table for profiles

@@ -21,6 +21,7 @@
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
  * @property {string} PERMISSION_SETS
+ * @property {string} PERMISSION_SET_LICENSES
  * @property {string} PROCESS_BUILDERS
  * @property {string} PROFILE_PWD_POLICIES
  * @property {string} PROFILE_RESTRICTIONS
@@ -55,6 +56,7 @@ export const OrgCheckRecipeAliases = {
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
     PERMISSION_SETS: 'permission-sets',
+    PERMISSION_SET_LICENSES: 'permission-set-licenses',
     PROCESS_BUILDERS: 'process-builders',
     PROFILE_PWD_POLICIES: 'profile-password-policies',
     PROFILE_RESTRICTIONS: 'profile-restrictions',

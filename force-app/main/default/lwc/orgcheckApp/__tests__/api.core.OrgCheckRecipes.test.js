@@ -17,6 +17,7 @@ import { OrgCheckRecipeObjects } from "../api/recipe/orgcheck-api-recipe-objects
 import { OrgCheckRecipeObjectTypes } from "../api/recipe/orgcheck-api-recipe-objecttypes";
 import { OrgCheckRecipeOrganization } from "../api/recipe/orgcheck-api-recipe-organization";
 import { OrgCheckRecipePackages } from "../api/recipe/orgcheck-api-recipe-packages";
+import { OrgCheckRecipePermissionSetLicenses } from "../api/recipe/orgcheck-api-recipe-permissionsetlicenses";
 import { OrgCheckRecipePermissionSets } from "../api/recipe/orgcheck-api-recipe-permissionsets";
 import { OrgCheckRecipeProcessBuilders } from "../api/recipe/orgcheck-api-recipe-processbuilders";
 import { OrgCheckRecipeProfilePasswordPolicies } from "../api/recipe/orgcheck-api-recipe-profilepasswordpolicies";
@@ -449,6 +450,26 @@ describe('api.core.OrgCheckRecipes', () => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
       });
       const results = await recipe.transform(data, logger, 'namespace');
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test OrgCheckRecipePermissionSetLicenses', () => {
+  
+    const recipe = new OrgCheckRecipePermissionSetLicenses();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(2);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
       expect(results).toBeDefined();
     });
 

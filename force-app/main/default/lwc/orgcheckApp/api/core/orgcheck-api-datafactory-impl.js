@@ -24,6 +24,7 @@ import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { OrgCheckSalesforceManagerIntf } from './orgcheck-api-salesforcemanager';
 import { OrgCheckDataDependenciesFactory } from './orgcheck-api-data-dependencies-factory';
 import { OrgCheckDataFactoryIntf, OrgCheckScoreRule, OrgCheckDataFactoryInstanceIntf } from './orgcheck-api-datafactory';
+import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 
 /**
  * @description Checks if an instance extends a specific class (not necessary the direct class)
@@ -402,6 +403,20 @@ export class OrgCheckDataFactory extends OrgCheckDataFactoryIntf {
                 errorMessage: 'This limit is almost reached (>80%). Please review this.',
                 badField: 'usedPercentage',
                 applicable: [ SFDC_Limit ]
+            }, {
+                id: counter++,
+                description: 'Almost all licenses are used',
+                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.usedPercentage >= 0.80,
+                errorMessage: 'The number of seats for this license is almost reached (>80%). Please review this.',
+                badField: 'usedPercentage',
+                applicable: [ SFDC_PermissionSetLicense ]
+            }, {
+                id: counter++,
+                description: 'You could have licenses to free up',
+                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.distinctActiveAssigneeCount !==  d.usedCount,
+                errorMessage: 'The Used count from that permission set license does not match the number of disctinct active user assigned to the same license. Please check if you could free up some licenses!',
+                badField: 'distinctActiveAssigneeCount',
+                applicable: [ SFDC_PermissionSetLicense ]
             }
         ];
         Object.freeze(this._allScoreRules); 
