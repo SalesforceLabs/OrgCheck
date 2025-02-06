@@ -101,5 +101,7 @@ export class SFDC_Field extends OrgCheckDataWithDependencies {
      */
     defaultValue;
 
+    isRestrictedPicklist;
+
     formula;
 }

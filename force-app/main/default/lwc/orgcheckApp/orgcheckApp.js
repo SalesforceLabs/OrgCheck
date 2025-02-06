@@ -881,6 +881,7 @@ export default class OrgcheckApp extends LightningElement {
         { label: 'Encrypted?',          type: 'boolean',          data: { value: 'isEncrypted' }},
         { label: 'External?',           type: 'boolean',          data: { value: 'isExternalId' }},
         { label: 'Indexed?',            type: 'boolean',          data: { value: 'isIndexed' }},
+        { label: 'Restricted?',         type: 'boolean',          data: { value: 'isRestrictedPicklist' }},
         { label: 'Tooltip',             type: 'text',             data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
         { label: 'Formula',             type: 'text',             data: { value: 'formula' }, modifier: { maximumLength: 100, preformatted: true }},
         { label: 'Default Value',       type: 'text',             data: { value: 'defaultValue' }},
