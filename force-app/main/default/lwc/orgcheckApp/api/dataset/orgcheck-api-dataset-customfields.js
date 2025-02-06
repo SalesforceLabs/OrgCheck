@@ -89,6 +89,7 @@ export class OrgCheckDatasetCustomFields extends OrgCheckDataset {
                     isExternalId: record.Metadata.externalId === true,
                     isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
                     defaultValue: record.Metadata.defaultValue,
+                    isRestrictedPicklist: record.Metadata.valueSet && record.Metadata.valueSet.restricted === true,
                     formula: record.Metadata.formula,
                     url: sfdcManager.setupUrl(id, OrgCheckSalesforceMetadataTypes.CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
                 }, 
