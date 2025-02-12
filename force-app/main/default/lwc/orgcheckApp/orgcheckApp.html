@@ -136,6 +136,15 @@
                     <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space columns={scoreRulesTableColumns} rows={allScoreRulesTableData}></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="global-view" label="Global View" onactive={handleGlobalViewTabActivation}>
+                    <lightning-layout>
+                        <lightning-layout-item>
+                            <h1 class="slds-text-heading_large">Global View of your Salesforce organization <b>{orgName}</b></h1>
+                        </lightning-layout-item>
+                        <lightning-layout-item alignment-bump="left">
+                            <c-orgcheck-export-button label="Export all details" source={globalViewItemsExport} basename="GlobalView"  ></c-orgcheck-export-button>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    <br /><br />
                     <lightning-layout multiple-rows>
                         <template for:each={globalViewItems} for:item="item" >
                             <lightning-layout-item size="3" padding="around-small" key={item.label}>

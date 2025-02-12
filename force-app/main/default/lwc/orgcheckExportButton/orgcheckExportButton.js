@@ -40,9 +40,9 @@ export default class OrgcheckExportButton extends LightningElement {
      *         { label: 'Name', field: 'name' }
      *     ], 
      *     rows: [
-     *         { id: 'ida', name; 'namea' }, 
-     *         { id: 'idb', name; 'nameb' }, 
-     *         { id: 'idc', name; 'namec' }
+     *         { id: 'ida', name: 'namea' }, 
+     *         { id: 'idb', name: 'nameb' }, 
+     *         { id: 'idc', name: 'namec' }
      *     ]
      * }
      * 
@@ -63,6 +63,8 @@ export default class OrgcheckExportButton extends LightningElement {
     
     @api basename = 'Export';
 
+    @api label = 'Export';
+
     handleClickExportXLS() {
         try {
             const workbook = this._createTheWorkBook();
@@ -76,7 +78,7 @@ export default class OrgcheckExportButton extends LightningElement {
             this._releaseTheURL(url);
 
         } catch (error) {
-            console.error(error);
+            console.error(error, JSON.stringify(error), error.stack);
         }
     }
 
@@ -96,7 +98,8 @@ export default class OrgcheckExportButton extends LightningElement {
                 }, 10);
                 return maxWidth ? { wch: maxWidth } : {};
             });
-            this.#api.utils.book_append_sheet(workbook, worksheet, `${item.header} (${item.rows.length})`);
+            const sheetName = `${item.header} (${item.rows.length})`.substring(0, 31); // Cannot exceed 31 characters!
+            this.#api.utils.book_append_sheet(workbook, worksheet, sheetName);
         });
         return workbook;
     }
