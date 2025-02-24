@@ -125,7 +125,7 @@ describe('tests.api.unit.Managers', () => {
   describe('Test DataCacheManager implementation', () => {
 
     it('checks if the cache manager implementation runs correctly', async () => {
-      const manager = new DataCacheManager({});      
+      const manager = new DataCacheManager({ storage: {}});      
     });
   });
 

@@ -287,9 +287,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
         } catch (error) {
             console.error(`Error occured when trying to get the value for key ${key}`, error);
         }
-        if (!entryFromStorage) return null
+        if (!entryFromStorage) return null;
         try {
-            /** @type {ItemInCache} */
             const entry = JSON.parse(entryFromStorage);
             if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
             return entry;

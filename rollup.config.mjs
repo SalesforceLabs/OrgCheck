@@ -20,7 +20,7 @@ export default [
         ],
         plugins: [
             del({ targets: [ './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-ui.js' ]}),
-            copy({ targets: [{ src: './build/dist/orgcheck/orgcheck-ui.js', dest: './force-app/main/default/lwc/orgcheckApp/libs' }]})
+            copy({ targets: [{ src: './build/dist/orgcheck/orgcheck-ui.js', dest: [ './force-app/main/default/lwc/orgcheckApp/libs', './force-app/main/default/lwc/orgcheckExtendedDatatable/libs' ]}]})
         ]
     }, {
         input: './build/src/api/orgcheck-api-main.js',
@@ -28,12 +28,12 @@ export default [
             {
                 file: './build/dist/orgcheck/orgcheck-api.js',
                 format: 'es',
-                name: 'OrgCheckAP'
+                name: 'OrgCheckAPI'
             },
             {
                 file: './build/dist/orgcheck/orgcheck-api.min.js',
                 format: 'iife',
-                name: 'OrgCheckAP',
+                name: 'OrgCheckAPI',
                 plugins: [terser()]
             }
         ],

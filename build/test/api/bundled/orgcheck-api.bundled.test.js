@@ -3,6 +3,7 @@ import { API } from '../../../dist/orgcheck/orgcheck-api';
 class JsForceConnectionMock {
 }
 
+
 const JsForceMock = {
   Connection: JsForceConnectionMock
 }
@@ -26,7 +27,7 @@ const LoggerMock = {
 describe('tests.api.bundled.API', () => {
   describe('Test API once it has been bundled', () => {
 
-    const api = new API(JsForceMock, EncoderMock, CompressionMock, 'ACCESS_TOKEN', 'USER_ID', LoggerMock);
+    const api = new API('ACCESS_TOKEN', JsForceMock, localStorage, EncoderMock, CompressionMock, LoggerMock);
     
     it('Api should be instantiable', () => {
       expect(api).not.toBeNull();

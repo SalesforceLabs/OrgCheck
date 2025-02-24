@@ -1,4 +1,5 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, track } from 'lwc';
+import * as ocui from './libs/orgcheck-ui.js';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -45,12 +46,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {boolean}
      */
     @api showSearch = false;
-
-    /**
-     * @description Do you want to show the ROW NUMBER column in the table? No need to add it to the columns, flag this property to true. False by default.
-     * @type {boolean}
-     */
-    @api showRowNumberColumn = false;
 
     /**
      * @description Do you want to show the export button? False by default.
@@ -123,6 +118,12 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @type {boolean}
      */
     isFilterOn = false;
+
+    /**
+     * @description Is filter gives no data?
+     * @type {boolean}
+     */
+    isFilteredDataEmpty;
     
     /**
      * @description How many rows are currently shown?
@@ -143,6 +144,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     usesDependencyViewer = false;
 
     /**
+     * @description Column headers -- tracked so any change in css can be reflected in table
+     * @type {Array<{label: string, index: number, cssClass: string, isIterative: boolean}>}
+     * @private
+     */
+    @track columnHeaders = [];
+
+    /**
      * @description Array of all visible rows (filter and infiniteScrolling)
      * @type {array}
      */
@@ -152,20 +160,25 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @description Is the table sorted implicitely or explicitely?
      * @type {boolean}
      */
-    isSorted = false;
+    get isSorted() {
+        return this._sortingIndex !== undefined;
+    }
 
     /**
      * @description Label of the field the table is sorted by
      * @type {string}
      */
-    sortingField;
+    get sortingField() {
+        return this._tableDefinition.columns[this._sortingIndex].label;
+    }
 
     /**
      * @description Order of the sorting (ascending or descending)
      * @type {string}
      */
-    sortingOrder;
-
+    get sortingOrder() {
+        return this._sortingOrder === ocui.SortOrder.ASC ? 'ascending' : 'descending';
+    }
 
 
 
@@ -182,13 +195,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      * @private
      */
     _showScoreColumn = false;
-        
-    /**
-     * @description Internal array of columns
-     * @type {Array}
-     * @private
-     */
-    _columns;
 
     /**
      * @description Internal array of all rows
@@ -198,16 +204,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     _allRows;
 
     /**
-     * @description Internal property that indicates the current column index which is used by the sort method
-     * @type {number}
+     * @description Table definition with ordering ad columns information
+     * @type {ocui.Table}
      * @private
      */
-    _sortingColumnIndex;
+    _tableDefinition;
 
     /**
-     * @description Internal property that indicates the current order which is used by the sort method
+     * @description Index of the current column used to sort data
+     * @type {number}
+     */
+    _sortingIndex;
+
+    /**
+     * @description Current order used to sort data
      * @type {string}
-     * @private
      */
     _sortingOrder;
 
@@ -220,131 +231,114 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Setter for the columns (it will set the internal <code>_columns</code> property)
-     * @param {Array<any>} columns 
+     * @param {ocui.Table} tableDefinition 
      */
-    @api set columns(columns) {
-        if (columns) {
-            this.usesDependencyViewer = false;
-            this._showScoreColumn = false;
-            const _columns = [];
-            if (this.showRowNumberColumn === true) {
-                _columns.push({ label: '#', type: TYPE_INDEX });
+    @api set tableDefinition(tableDefinition) {
+
+        // In case the table definition is not set just skip that method
+        if (!tableDefinition) return;
+
+        // Set the tableDefinition
+        this._tableDefinition = tableDefinition;
+        this._sortingIndex = tableDefinition.orderIndex;
+        this._sortingOrder = tableDefinition.orderSort;
+        this.columnHeaders = tableDefinition.columns.map((c, i) => {
+            if (c.type === ocui.ColumnType.SCR) {
+                // if we show score column, bad cell will be highlighted as well so that we can understand the score (= nb of bad cells)
+                this._showScoreColumn = true; 
             }
-            _columns.push(...columns);
-            this._columns = _columns.map((c, i) => { 
-                if (c.type === TYPE_SCORE) {
-                    this._showScoreColumn = true;
-                }
-                if (c.sorted) {
-                    this._sortingColumnIndex = i;
-                    this._sortingOrder = c.sorted;
-                }
-                if (this.usesDependencyViewer === false && c.type === TYPE_DEPENDENCIES) {
-                    this.usesDependencyViewer = true;
-                }
-                return Object.assign({
-                    index: i, 
-                    cssClass: HEADER_CSSCLASS(c, this.isStickyHeaders),
-                    dataProperties: c.data ? (Object.keys(c.data).filter((k) => k !== 'ref')) : [],
-                    typeProperty: `is${c.type.charAt(0).toUpperCase()}${c.type.slice(1)}`,
-                    isIterative: c.type.endsWith('s')
-                }, c);
-            });
-        }
-    }
-   
-    /**
-     * Getter for the columns (it will return the internal <code>_columns</code> property)
-     * 
-     * @return {Array<any>} columns 
-     */
-    get columns() {
-        return this._columns;
+            if (c.type === ocui.ColumnType.DEP && this.usesDependencyViewer === false) {
+                this.usesDependencyViewer = true;
+            };
+            return {
+                index: i,
+                label: c.label,
+                isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
+                cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
+                          (this.isStickyHeaders ? 'sticky ': '') + 
+                          (c['orientation'] === ocui.Orientation.VERTICAL ? 'vertical ' : ' ')
+            }
+        });
     }
 
+    get tableDefinition() {
+        return this._tableDefinition;
+    }
+    
     /**
-     * Setter for the rows (it will set the internal <code>_allRows</code> property).
-     * 
+     * @description Setter for the rows (it will set the internal <code>_allRows</code> property).
      * @param {Array<any>} rows 
      */
     @api set rows(rows) {
-        if (!this._columns) return;
+
+        // Some sanity checks
+        if (!this._tableDefinition) return;
+        if (!this.columnHeaders) return;
         if (!rows) return;
 
+        // All rows (no filter no scrolling etc... all of the rows
         this.nbAllRows = rows.length || 0;
+        
+        // If infinite scrolling is set then set the starting nb of rows to display (will be incremented later when we hit the "more rows" button)
         if (this.isInfiniteScrolling === true) {
             // @api decorator returns a string, that's why we are using parseInt()
             this.infiniteScrollingCurrentNbRows = Number.parseInt(this.infiniteScrollingInitialNbRows, 10);
         }
+        
+        // Parse the rows
         this.nbBadRows = 0;
-        this._allRows = rows.map((r, i) => { 
-            // Initiate the row
-            const row = { 
-                key: i, 
-                index: i+1,
-                cssClass: ROW_CSSCLASS(r, this._showScoreColumn),
-                score: r.badFields?.length || 0,
-                badFields: r.badFields,
-                badReasonIds: r.badReasonIds,
-                cells: []
-            };
-            if (row.score > 0) {
-                this.nbBadRows++;
+        this._allRows = ocui.RowsFactory.create(
+            this.tableDefinition, 
+            rows, 
+            (row, isBad) => { 
+                if (isBad === true) {
+                    this.nbBadRows++;
+                    row.cssClass = 'bad';
+                }
+            }, 
+            (cell, isBad) => {
+                if (isBad === true) {
+                    cell.cssClass = 'bad';
+                }
             }
-            // Iterate over the columns to prepare the cells of that row
-            this._columns.forEach((c, j) => {
-                // By default the reference used in the properties is the row itself
-                // Unless the 'ref' property in column.data is specified 
-                let ref = r;
-                if (c.data?.ref) {
-                    c.data?.ref.split('.').forEach((p) => { if (ref) ref = ref[p]; });
-                }
-                // Prepare the cell information
-                const cell = { 
-                    key: `${i}.${j}`,
-                    cssClass: CELL_CSSCLASS(r, c),
-                    data: {}
-                };
-                cell[c.typeProperty] = true;
-                if (c.isIterative === true) {
-                    cell.data.values = ref?.map((rr) => CELL_PREPARE(row.score, rr, c)) || [];
-                } else {
-                    CELL_PREPARE(row.score, ref, c, cell);
-                }
-                row.cells.push(cell);
-            });
-            return row; 
-        });
+        );
         this._sortAllRows();
         this._filterAllRows();
         this._setVisibleRows();
     }
 
     /**
-     * Getter for the rows (it will return the internal <code>_allRows</code> property)
-     * 
+     * @description Getter for the rows (it will return the internal <code>_allRows</code> property)
      * @return {Array<any>} rows 
      */
     get rows() {
         return this._allRows;
     }
-    
-    get exportedRows() {
-        if (!this._columns || !this._allRows) return [];
-        return [
-            {
-                header: 'Data',
-                columns: this._columns.map(c => c.label),
-                rows: this._allRows.map(row => row.cells.map(cell => {
-                    if (cell.isIndex) return row.index;
-                    if (cell.data.values) return JSON.stringify(cell.data.values.map(v => v.data.decoratedValue ?? v.data.value));
-                    if (cell.data.value) return cell.data.decoratedValue ?? cell.data.value;
-                    return '';
-                }))
-            }
-        ];
-    }
 
+    /**
+     * @description Convert this table into an Excel data
+     * @returns {Array<{header: string, columns: Array<string>, rows: Array<Array<string>>}>}}
+     */ 
+    get exportedRows() {
+        if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
+            return [
+                {
+                    header: this.exportBasename,
+                    columns: this._tableDefinition.columns.map(c => c.label),
+                    rows: this._allRows.map((row) => row.cells?.map(cell => {
+                        if (cell.typeofindex) return row.index;
+                        if (cell.typeofscore) return `${row.score} (badField=${JSON.stringify(row.badFields)}, badReasonIds=${JSON.stringify(row.badReasonIds)})`;
+                        if (cell.typeofid) return `${cell.data.label} (${cell.data.value})`;
+                        if (cell.typeofids) return JSON.stringify(cell.data.values?.map(v => `${v.data.label} (${v.data.value})`));
+                        if (cell.data.values) return JSON.stringify(cell.data.values?.map(v => v.data.value));
+                        if (cell.data.value) return cell.data.value;
+                        return '';
+                    }))
+                }
+            ];
+        }
+        return [];
+    }
 
 
 
@@ -355,7 +349,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * Handler when a user click on the "Load more rows..." button
+     * @description Handler when a user click on the "Load more rows..." button
      */
     handleLoadMoreData() {
         // @api decorator returns a string, that's why we are using parseInt()
@@ -365,7 +359,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * Handler when a user click on the "Load all rows..." button
+     * @description Handler when a user click on the "Load all rows..." button
      */
     handleLoadAllData() {
         this.infiniteScrollingCurrentNbRows = this.nbAllRows;
@@ -373,8 +367,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * Handler when a user type a search text in the appropriate input text field
-     * 
+     * @description Handler when a user type a search text in the appropriate input text field
      * @param {Event} event 
      */
     handleSearchInputChanged(event) {
@@ -384,32 +377,49 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * Handler when a user clicks on a header of the table
-     * 
+     * @description Handler when a user clicks on a header of the table
      * @param {Event} event 
      */
     handleSortColumnClick(event) {
-        this._sortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10);
-        this._sortingOrder = SORT_ORDER_ASC;
-        this._columns.forEach((column) => {
-            if (column.index === this._sortingColumnIndex) {
-                if (!column.sorted || column.sorted === SORT_ORDER_DESC) {
-                    this._sortingOrder = column.sorted = SORT_ORDER_ASC;
-                } else {
-                    this._sortingOrder = column.sorted = SORT_ORDER_DESC;
-                }
+
+        // Get the old and new columns index
+        const previousSortingColumnIndex = this._sortingIndex;
+        const newSortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10);
+
+        // Set the new sorting column index
+        this._sortingIndex = newSortingColumnIndex;
+
+        // Setting the sorting order accordingly
+        if (previousSortingColumnIndex === newSortingColumnIndex) { 
+            // If the previous and new are the same, we just switch the order!
+            if (this._sortingOrder === ocui.SortOrder.ASC) {
+                this._sortingOrder = ocui.SortOrder.DESC;
             } else {
-                delete column.sorted;
+                this._sortingOrder = ocui.SortOrder.ASC
             }
-            column.cssClass = HEADER_CSSCLASS(column, this.isStickyHeaders);
-        });
+        } else { 
+            // if they are different, by default, the ordering is ASC
+            this._sortingOrder = ocui.SortOrder.ASC;
+        }
+
+        // Remove the style for the old column
+        const previousColumn = this.columnHeaders[previousSortingColumnIndex];
+        if (previousColumn) {
+            previousColumn.cssClass = previousColumn.cssClass.replaceAll(/(sorted sorted-asc|sorted sorted-desc)/g, '');
+        }
+
+        // Add the sorting style to the new column
+        const newColumn = this.columnHeaders[newSortingColumnIndex];
+        if (newColumn) {
+            newColumn.cssClass += (this._sortingOrder === ocui.SortOrder.ASC ? 'sorted sorted-asc' : 'sorted sorted-desc');
+        }
+
         this._sortAllRows();
         this._setVisibleRows();
     }
 
     /**
-     * Handler when a user click on the dependency link to open the modal dialog with dependency diagram
-     * 
+     * @description Handler when a user click on the dependency link to open the modal dialog with dependency diagram
      * @param {Event} event 
      */
     handleViewDependency(event) {
@@ -419,8 +429,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * Handler when a user click on the score link to open the modal dialog with score explanation
-     * 
+     * @description Handler when a user click on the score link to open the modal dialog with score explanation
      * @param {Event} event 
      */
     handleViewScore(event) {
@@ -442,198 +451,37 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * Internal filter method which takes into account the <code>_filteringSearchInput</code> property
+     * @description Internal filter method which takes into account the <code>_filteringSearchInput</code> property
+     * @private
      */
     _filterAllRows() {
-        const searchInput = this._filteringSearchInput;
-        if (searchInput && searchInput.length > 2) {
-            this.isFilterOn = true;
-            const s = searchInput.toUpperCase();
-            this.nbFilteredRows = 0;
-            this._allRows.forEach((row) => {
-                if (ARRAY_MATCHER(row.cells, s) === true) {
-                    delete row.isInvisible;
-                    row.index = ++this.nbFilteredRows;
-                } else {
-                    row.isInvisible = true;
-                }
-            });
-            this.isFilteredDataEmpty = (this.nbFilteredRows === 0);
-        } else {
-            this.isFilterOn = false;
-            this.isFilteredDataEmpty = false;
-            this._allRows.forEach((row, i) => { 
-                delete row.isInvisible;
-                row.index = i+1;
-            });
-        }
+        ocui.RowsFactory.filter(this._allRows, this._filteringSearchInput);
     }
 
     /**
-     * Internal sort method which takes into account the <code>_sortingColumnIndex</code> and <code>sortingOrder</code> properties
+     * @description Internal sort method which takes into account the <code>_sortingColumnIndex</code> and <code>sortingOrder</code> properties
+     * @private
      */
     _sortAllRows() {
-        if (this._sortingColumnIndex === undefined) {
-            this.isSorted = false;
-            return;
-        }
-        const columnIndex = this._sortingColumnIndex;
-        const iOrder = this._sortingOrder === SORT_ORDER_ASC ? 1 : -1;
-        const isIterative = this._columns[columnIndex].isIterative;
-        let value1, value2;
-        let index = 0;
-        this._allRows.sort((row1, row2) => {
-            if (isIterative === true) {
-                value1 = row1.cells[columnIndex].data.values.length || undefined;
-                value2 = row2.cells[columnIndex].data.values.length || undefined;
-            } else {
-                value1 = row1.cells[columnIndex].data.value;
-                value2 = row2.cells[columnIndex].data.value;
-            }
-            if (value1 && value1.toUpperCase) value1 = value1.toUpperCase();
-            if (value2 && value2.toUpperCase) value2 = value2.toUpperCase();
-            if (!value1 && value1 !== 0) return iOrder;
-            if (!value2 && value2 !== 0) return -iOrder;
-            return (value1 < value2 ? -iOrder : iOrder);
-        }).forEach((row) => { 
-            if (!row.isInvisible) {
-                row.index = ++index; 
-            }
-        });
-        this.isSorted = true;
-        this.sortingField = this._columns[columnIndex].label;
-        this.sortingOrder = this._sortingOrder === SORT_ORDER_ASC ? 'ascending' : 'descending';
+        ocui.RowsFactory.sort(this._tableDefinition, this._allRows, this._sortingIndex, this._sortingOrder);
     }
 
     /**
-     * Internal setter for visible rows array
+     * @description Internal setter for visible rows array
+     * @private
      */
     _setVisibleRows() {
-        const allVisibleRows = this._allRows.filter((row) => !row.isInvisible);
-        if (this.isInfiniteScrolling === true && allVisibleRows) {
-            this.isInfiniteScrollingMoreData = this.infiniteScrollingCurrentNbRows < allVisibleRows.length;
-        }
-        if (this.isInfiniteScrollingMoreData === true) {
-            this.visibleRows = allVisibleRows.slice(0, this.infiniteScrollingCurrentNbRows);
-        } else {
-            this.visibleRows = allVisibleRows;
-        }
-    }
-}
-
-
-const TYPE_INDEX = 'index';
-const TYPE_SCORE = 'score';
-const TYPE_DEPENDENCIES = 'dependencyViewer';
-
-const SORT_ORDER_ASC = 'asc';
-const SORT_ORDER_DESC = 'desc';
-
-const NUMBER_FORMATTER = Intl.NumberFormat();
-
-const OBJECT_TO_STRING = (template, object) => {
-    switch (typeof template) {
-        case 'string':
-            return template.replace(/{([A-Za-z0-9]+)(:(boolean|numeric)(:([^}]*))?)?}/g, function (_0, property, _1, type, _2, typeArg) {
-                const value = (object === undefined || typeof object[property] === 'undefined') ? '' : object[property];
-                if (type) {
-                    switch (type) {
-                        case 'numeric': return NUMBER_FORMATTER.format(value);
-                        case 'boolean': {
-                            if (typeArg) {
-                                return typeArg.split(',', 2)[value === true ? 0 : 1];
-                            }
-                            return value;
-                        }
-                        default: return value;
-                    }
-                } 
-                return value;
-            });
-        case 'function':
-            return template(object);
-        default:
-            return object;
-    }
-}
-
-const CELL_PREPARE = (rowScore, reference, column, cell = { data: {}}) => {
-    if (reference && column.dataProperties.length > 0) {
-        column.dataProperties.forEach((p) => {
-            const refProperty = column.data[p];
-            cell.data[p] = ((typeof refProperty === 'function') ? (refProperty(reference)) : (reference[refProperty]));
-        });
-    } else {
-        cell.data.value = reference || '';
-    }
-    if (column.type === TYPE_SCORE) {
-        cell.data.value = rowScore;
-    }
-    if (column.modifier) {
-        if (column.modifier?.preformatted === true) {
-            cell.isPreformatted = true;
-        }
-        if (column.modifier?.valueIfEmpty && IS_EMPTY(cell.data.value)) {
-            cell.data.decoratedValue = column.modifier.valueIfEmpty;
-            cell.isEmpty = true;
-        } else if (column.modifier?.max && cell.data.value > column.modifier.max) {
-            cell.data.decoratedValue = column.modifier.valueAfterMax;
-            cell.isMaxReached = true;
-        } else if (column.modifier?.min && cell.data.value < column.modifier.min) {
-            cell.data.decoratedValue = column.modifier.valueBeforeMin;
-            cell.isMinReached = true;
-        } else if (column.modifier?.maximumLength && cell.data.value?.length > column.modifier.maximumLength) {
-            cell.data.decoratedValue = cell.data.value.substr(0, column.modifier.maximumLength);
-            cell.isValueTruncated = true;
-        } else if (column.modifier?.template) {
-            cell.data.decoratedValue = OBJECT_TO_STRING(column.modifier.template, cell.data.value);
-        }
-    }
-    return cell;
-}
-
-const IS_EMPTY = (value) => {
-    if (value === 0) return false;
-    if (!value) return true;
-    if (typeof value === 'string' && value.trim().length === 0) return true;
-    return false;
-}
-
-const CELL_CSSCLASS = (row, cell) => {
-    if (cell.type === TYPE_SCORE && row.badFields?.length > 0) return 'bad';
-    return (row.badFields && row.badFields.some((field) => {
-        // if the field is iterative then only consider the ref as the field name
-        if (cell.isIterative === true && field === cell.data?.ref) return true;
-        // if the name of field is the ref + property
-        if (field === `${cell.data?.ref}.${cell.data?.value}`) return true;
-        // if the field is the property of the current row
-        if (cell.data?.ref === undefined && field === cell.data?.value) return true;
-        // otherwise
-        return false;
-    })) ? 'bad' : '';
-}
-
-const ROW_CSSCLASS = (row, showScore) => {
-    return ((showScore === true && row.badFields?.length > 0)? 'bad': '');
-}
-
-const HEADER_CSSCLASS = (column, isSticky) => {
-    return  (column.sorted ? `sorted sorted-${column.sorted} ` : ' ') +
-            (isSticky === true ? 'sticky ' : ' ') +
-            (column.orientation === 'vertical' ? 'vertical': '');
-}
-
-const STRING_MATCHER = (value, searchingValue) => {
-    return String(value).toUpperCase().indexOf(searchingValue) >= 0;
-}
-
-const ARRAY_MATCHER = (array, s) => {
-    return array.findIndex((item) => {
-        return Object.values(item.data).findIndex((property) => {
-            if (Array.isArray(property)) {
-                return ARRAY_MATCHER(property, s);
+        if (this._allRows) {
+            const allVisibleRows = this._allRows.filter((row) => row.isVisible === true);
+            this.isFilteredDataEmpty = this._filteringSearchInput && allVisibleRows.length === 0;
+            if (this.isInfiniteScrolling === true && allVisibleRows) {
+                this.isInfiniteScrollingMoreData = this.infiniteScrollingCurrentNbRows < allVisibleRows.length;
             }
-            return STRING_MATCHER(property, s);
-        }) >= 0;
-    }) >= 0
+            if (this.isInfiniteScrollingMoreData === true) {
+                this.visibleRows = allVisibleRows.slice(0, this.infiniteScrollingCurrentNbRows);
+            } else {
+                this.visibleRows = allVisibleRows;
+            }
+        }
+    }
 }

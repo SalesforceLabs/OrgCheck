@@ -55,16 +55,16 @@ export class WhereToGetLinksData extends WhereToGetLinkData {
 export class WhereToGetObjectsData {
 
     /**
-     * @description Template to use to generate a text which is a mix of hard coded text and merge fields
-     * @type {string}
-     */
-    value;
-
-    /**
      * @description Property containing the list to iterate over
      * @type {string}
      */
     values;
+
+    /**
+     * @description Template function to generate a text based on the object
+     * @type {function(any): string}
+     */
+    template;
 }
 
 export class WhereToGetTextsData {

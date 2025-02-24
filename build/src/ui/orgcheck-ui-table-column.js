@@ -1,7 +1,13 @@
-import { WhereToGetData, WhereToGetScoreData, WhereToGetLinkData, WhereToGetLinksData, WhereToGetObjectsData, WhereToGetTextsData } from "./orgcheck-ui-datagetters";
-import { TextTruncateModifier, IfEmptyModifier, IfLessModifier, IfGreaterModifier, PreformattedModifier } from "./orgcheck-ui-datamodifiers";
+import { WhereToGetData, WhereToGetScoreData, WhereToGetLinkData, WhereToGetLinksData, WhereToGetObjectsData, WhereToGetTextsData } from "./orgcheck-ui-table-datagetters";
+import { TextTruncatedModifier, PreformattedModifier, EmptyModifier, NumericMinimumModifier, NumericMaximumModifier, NumericMinMaxModifier } from "./orgcheck-ui-table-datamodifiers";
 
-export const Type = {
+
+export const Orientation = {
+    HORIZONTAL: 'horizontal',
+    VERTICAL: 'vertical'
+}
+
+export const ColumnType = {
     IDX:  'index',
     SCR:  'score',
     TXT:  'text',
@@ -16,11 +22,6 @@ export const Type = {
     OBJS: 'objects'
 }
 
-export const Orientation = {
-    HORIZONTAL: 'horizontal',
-    VERTICAL: 'vertical'
-}
-
 export class TableColumn {
 
     /** 
@@ -31,7 +32,23 @@ export class TableColumn {
 
     /** 
      * @description Type used in the header of the column
-     * @see Type
+     * @see ColumnType
+     * @type {string}
+     */ 
+    type;
+}
+
+export class TableColumnWithData {
+
+    /** 
+     * @description Label used in the header of the column
+     * @type {string}
+     */ 
+    label;
+
+    /** 
+     * @description Type used in the header of the column
+     * @see ColumnType
      * @type {string}
      */ 
     type;
@@ -47,9 +64,9 @@ export class TableColumnWithModifiers extends TableColumn {
 
     /** 
      * @description 
-     * @type {Array<TextTruncateModifier | IfEmptyModifier | IfLessModifier | IfGreaterModifier | PreformattedModifier>}
+     * @type {TextTruncatedModifier | PreformattedModifier | EmptyModifier | NumericMinimumModifier | NumericMaximumModifier | NumericMinMaxModifier}
      */
-    modifiers;
+    modifier;
 }
 
 export class TableColumnWithOrientation extends TableColumn {

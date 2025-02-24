@@ -1,4 +1,4 @@
-import { TableColumn, TableColumnWithModifiers, TableColumnWithOrientation } from "./orgcheck-ui-tablecolumn";
+import { TableColumn, TableColumnWithData, TableColumnWithModifiers, TableColumnWithOrientation } from "./orgcheck-ui-table-column";
 
 export const SortOrder = {
     DESC: 'desc',
@@ -9,12 +9,9 @@ export class Table {
 
     /**
      * @description List of columns in a table
-     * @type {Array<TableColumn | TableColumnWithModifiers | TableColumnWithOrientation>}
+     * @type {Array<TableColumn | TableColumnWithData | TableColumnWithModifiers | TableColumnWithOrientation>}
      */
     columns;
-}
-
-export class TableWithOrdering extends Table {
 
     /**
      * @description Which index column is used for ordering?
