@@ -162,7 +162,7 @@ class DataDependenciesFactory {
      * @returns {DataDependencies | any}
      */
     static create(data, whatId) {
-        if (data.errors.includes(whatId)) {
+        if (data.errors?.includes(whatId)) {
             return {
                 hadError: true
             };
@@ -4332,7 +4332,7 @@ class DatasetObject extends Dataset {
         await Processor.forEach(entity.Fields?.records, (f) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
-                if (f.DurableId.includes('.00N')) {
+                if (f.DurableId?.includes('.00N')) {
                     customFieldIds.push(id);
                 } else {
                     standardFieldsMapper.set(f.QualifiedApiName, { 
@@ -4721,7 +4721,7 @@ class DatasetObjects extends Dataset {
                 return [ obj.id, obj ];
             },
             (object) => {
-                return qualifiedApiNames.includes(object.name) ? true : false;
+                return qualifiedApiNames?.includes(object.name) ? true : false;
             }
         ));
 
@@ -6913,7 +6913,7 @@ class DataFactory extends DataFactoryIntf {
         if (this._instances.has(dataClass) === false) {
             this._instances.set(dataClass, new DataFactoryInstance(
                 dataClass, 
-                isDataWithScoring ? this._allScoreRules.filter(v => v.applicable.includes(dataClass)) : [], 
+                isDataWithScoring ? this._allScoreRules.filter(v => v.applicable?.includes(dataClass)) : [], 
                 isDataWithDependencies
             ));
         }
@@ -9930,7 +9930,7 @@ class SalesforceManager extends SalesforceManagerIntf {
         // First, if the metadatas contains an item with member='*' we want to list for this type and substitute the '*' with the fullNames
         await Promise.all(
             // only get the types that have at least '*' once
-            metadatas.filter((m) => m.members.includes('*'))
+            metadatas.filter((m) => m.members?.includes('*'))
             // then turn this filtered list into a list of promises
             .map(async (metadata) => { // using async as we just want to run parallel processes without manipulating their return values
                 try {

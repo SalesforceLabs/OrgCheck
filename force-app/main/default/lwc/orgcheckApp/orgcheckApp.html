@@ -133,7 +133,7 @@
                 </lightning-tab>
                 <lightning-tab value="help" label="Help" onactive={handleSubTabActivation}>
                     <h1 class="slds-text-heading_large">What are the rules you apply for your score?</h1>
-                    <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData}></c-orgcheck-extended-datatable>
+                    <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData} show-export-button export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="global-view" label="Global View" onactive={handleGlobalViewTabActivation}>
                     <lightning-layout>

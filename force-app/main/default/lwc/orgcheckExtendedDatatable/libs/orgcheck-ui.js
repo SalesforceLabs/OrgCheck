@@ -322,18 +322,20 @@ const DECORATE = (cell, modifier) => {
     if (modifier) {
         const data = ('value' in cell.data) ? cell.data.value : cell.data; // 'in syntax' used --> if cell.data.value === undefined!!!
         if (modifier.maximumLength !== undefined) {
-            if (data !== undefined && typeof data === 'string' && data.length > modifier.maximumLength) {
+            if (data && typeof data === 'string' && data.length > modifier.maximumLength) {
                 cell.decoration = data.substring(0, modifier.maximumLength);
             }
         }
         if (modifier.valueIfEmpty !== undefined) {
             if (
                 // Undefined (whatever the type)
-                data === undefined ||
+                data === undefined || 
+                // Null (whatever the type)
+                data === null || 
                 // Empty string
-                (data !== undefined && typeof data === 'string' && data.trim().length === 0) ||
+                (data && typeof data === 'string' && data.trim().length === 0) ||
                 // Empty array 
-                (data !== undefined && Array.isArray(data) && data.length === 0)
+                (data && Array.isArray(data) && data.length === 0)
             ) {
                 cell.decoration =  modifier.valueIfEmpty;
             }
@@ -382,6 +384,27 @@ class Table {
     orderSort;
 }
 
+class ExportedTable {
+
+    /**
+     * @description Name of the exported table (like a title)
+     * @type {string}
+     */
+    header;
+
+    /**
+     * @description List of column labels
+     * @type {Array<string>}
+     */
+    columns;
+
+    /**
+     * @description List of rows with cells
+     * @type {Array<Array<string>>}
+     */
+    rows;
+}
+
 class Row {
 
     /** @type {number} */
@@ -408,13 +431,13 @@ class RowsFactory {
     /**
      * @description Create the rows of a table
      * @param {Table} tableDefinition
-     * @param {Array<any>} rows 
+     * @param {Array<any>} records 
      * @param {Function} onEachRowCallback
      * @param {Function} onEachCellCallback
      * @returns {Array<Row>}
      */
-    static create(tableDefinition, rows, onEachRowCallback, onEachCellCallback) {
-        return rows.map((record, rIndex) => {
+    static create(tableDefinition, records, onEachRowCallback, onEachCellCallback) {
+        return records.map((record, rIndex) => {
             const row = {
                 index: rIndex+1, // 1-based index of the current row (should be recalculated after sorting)
                 score: record.score, // score is a global KPI at the row level (not at a cell i mean)
@@ -495,6 +518,42 @@ class RowsFactory {
             });
         }
     }
+
+    /**
+     * @description Export table
+     * @param {Table} tableDefintion
+     * @param {Array<Row>} rows
+     * @param {string} title 
+     * @returns {ExportedTable}
+     */ 
+    static export(tableDefintion, rows, title) {
+        return {
+            header: title,
+            columns: tableDefintion.columns.map(c => c.label),
+            rows: rows.map((row) => row.cells?.map(cell => {
+                if (cell.typeofindex) return row.index;
+                if (cell.typeofscore) return `${row.score} (badField=${JSON.stringify(row.badFields)}, badReasonIds=${JSON.stringify(row.badReasonIds)})`;
+                if (cell.typeofid) return `${cell.data.label} (${cell.data.value})`;
+                if (cell.typeofids) return JSON.stringify(cell.data.values?.map(v => `${v.data.label} (${v.data.value})`));
+                if (cell.data.values) return JSON.stringify(cell.data.values?.map(v => v.data.value));
+                if (cell.data.value) return cell.data.value;
+                return '';
+            }))
+        };
+    }
+
+    /**
+     * @description Export table
+     * @param {Table} tableDefintion
+     * @param {Array<Row>} records
+     * @param {string} title 
+     * @returns {ExportedTable}
+     */ 
+    static createAndExport(tableDefintion, records, title) {
+        const donothing = () => {};
+        const rows = RowsFactory.create(tableDefintion, records, donothing, donothing);
+        return RowsFactory.export(tableDefintion, rows, title);
+    }
 }
 
 const STRING_MATCHER = (value, searchingValue) => {
@@ -512,4 +571,4 @@ const ARRAY_MATCHER = (array, s) => {
     }) >= 0
 };
 
-export { CellFactory, ColumnType, EmptyModifier, NumericMaximumModifier, NumericMinMaxModifier, NumericMinimumModifier, Orientation, PreformattedModifier, Row, RowsFactory, SortOrder, Table, TableColumn, TableColumnWithData, TableColumnWithModifiers, TableColumnWithOrientation, TextTruncatedModifier, WhereToGetData, WhereToGetLinkData, WhereToGetLinksData, WhereToGetObjectsData, WhereToGetScoreData, WhereToGetTextsData };
+export { CellFactory, ColumnType, EmptyModifier, ExportedTable, NumericMaximumModifier, NumericMinMaxModifier, NumericMinimumModifier, Orientation, PreformattedModifier, Row, RowsFactory, SortOrder, Table, TableColumn, TableColumnWithData, TableColumnWithModifiers, TableColumnWithOrientation, TextTruncatedModifier, WhereToGetData, WhereToGetLinkData, WhereToGetLinksData, WhereToGetObjectsData, WhereToGetScoreData, WhereToGetTextsData };

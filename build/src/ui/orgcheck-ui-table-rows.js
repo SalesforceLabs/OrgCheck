@@ -1,4 +1,4 @@
-import { Table, SortOrder } from "./orgcheck-ui-table";
+import { Table, SortOrder, ExportedTable } from "./orgcheck-ui-table";
 import { CellFactory } from "./orgcheck-ui-table-cell";
 import { ColumnType } from './orgcheck-ui-table-column';
 
@@ -28,13 +28,13 @@ export class RowsFactory {
     /**
      * @description Create the rows of a table
      * @param {Table} tableDefinition
-     * @param {Array<any>} rows 
+     * @param {Array<any>} records 
      * @param {Function} onEachRowCallback
      * @param {Function} onEachCellCallback
      * @returns {Array<Row>}
      */
-    static create(tableDefinition, rows, onEachRowCallback, onEachCellCallback) {
-        return rows.map((record, rIndex) => {
+    static create(tableDefinition, records, onEachRowCallback, onEachCellCallback) {
+        return records.map((record, rIndex) => {
             const row = {
                 index: rIndex+1, // 1-based index of the current row (should be recalculated after sorting)
                 score: record.score, // score is a global KPI at the row level (not at a cell i mean)
@@ -114,6 +114,42 @@ export class RowsFactory {
                 row.index = index+1;
             });
         }
+    }
+
+    /**
+     * @description Export table
+     * @param {Table} tableDefintion
+     * @param {Array<Row>} rows
+     * @param {string} title 
+     * @returns {ExportedTable}
+     */ 
+    static export(tableDefintion, rows, title) {
+        return {
+            header: title,
+            columns: tableDefintion.columns.map(c => c.label),
+            rows: rows.map((row) => row.cells?.map(cell => {
+                if (cell.typeofindex) return row.index;
+                if (cell.typeofscore) return `${row.score} (badField=${JSON.stringify(row.badFields)}, badReasonIds=${JSON.stringify(row.badReasonIds)})`;
+                if (cell.typeofid) return `${cell.data.label} (${cell.data.value})`;
+                if (cell.typeofids) return JSON.stringify(cell.data.values?.map(v => `${v.data.label} (${v.data.value})`));
+                if (cell.data.values) return JSON.stringify(cell.data.values?.map(v => v.data.value));
+                if (cell.data.value) return cell.data.value;
+                return '';
+            }))
+        };
+    }
+
+    /**
+     * @description Export table
+     * @param {Table} tableDefintion
+     * @param {Array<Row>} records
+     * @param {string} title 
+     * @returns {ExportedTable}
+     */ 
+    static createAndExport(tableDefintion, records, title) {
+        const donothing = () => {};
+        const rows = RowsFactory.create(tableDefintion, records, donothing, donothing);
+        return RowsFactory.export(tableDefintion, rows, title);
     }
 }
 

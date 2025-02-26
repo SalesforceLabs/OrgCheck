@@ -26,3 +26,24 @@ export class Table {
      */
     orderSort;
 }
+
+export class ExportedTable {
+
+    /**
+     * @description Name of the exported table (like a title)
+     * @type {string}
+     */
+    header;
+
+    /**
+     * @description List of column labels
+     * @type {Array<string>}
+     */
+    columns;
+
+    /**
+     * @description List of rows with cells
+     * @type {Array<Array<string>>}
+     */
+    rows;
+}

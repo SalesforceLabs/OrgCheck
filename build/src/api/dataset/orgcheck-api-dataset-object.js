@@ -82,7 +82,7 @@ export class DatasetObject extends Dataset {
         await Processor.forEach(entity.Fields?.records, (f) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
-                if (f.DurableId.includes('.00N')) {
+                if (f.DurableId?.includes('.00N')) {
                     customFieldIds.push(id);
                 } else {
                     standardFieldsMapper.set(f.QualifiedApiName, { 

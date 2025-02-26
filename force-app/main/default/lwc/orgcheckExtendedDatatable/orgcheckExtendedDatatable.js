@@ -317,25 +317,11 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Convert this table into an Excel data
-     * @returns {Array<{header: string, columns: Array<string>, rows: Array<Array<string>>}>}}
+     * @returns {Array<ocui.ExportedTable>}
      */ 
     get exportedRows() {
         if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
-            return [
-                {
-                    header: this.exportBasename,
-                    columns: this._tableDefinition.columns.map(c => c.label),
-                    rows: this._allRows.map((row) => row.cells?.map(cell => {
-                        if (cell.typeofindex) return row.index;
-                        if (cell.typeofscore) return `${row.score} (badField=${JSON.stringify(row.badFields)}, badReasonIds=${JSON.stringify(row.badReasonIds)})`;
-                        if (cell.typeofid) return `${cell.data.label} (${cell.data.value})`;
-                        if (cell.typeofids) return JSON.stringify(cell.data.values?.map(v => `${v.data.label} (${v.data.value})`));
-                        if (cell.data.values) return JSON.stringify(cell.data.values?.map(v => v.data.value));
-                        if (cell.data.value) return cell.data.value;
-                        return '';
-                    }))
-                }
-            ];
+            return [ ocui.RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename) ];
         }
         return [];
     }

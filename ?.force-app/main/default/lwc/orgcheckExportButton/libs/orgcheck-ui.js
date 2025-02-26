@@ -431,13 +431,13 @@ class RowsFactory {
     /**
      * @description Create the rows of a table
      * @param {Table} tableDefinition
-     * @param {Array<any>} records 
+     * @param {Array<any>} rows 
      * @param {Function} onEachRowCallback
      * @param {Function} onEachCellCallback
      * @returns {Array<Row>}
      */
-    static create(tableDefinition, records, onEachRowCallback, onEachCellCallback) {
-        return records.map((record, rIndex) => {
+    static create(tableDefinition, rows, onEachRowCallback, onEachCellCallback) {
+        return rows.map((record, rIndex) => {
             const row = {
                 index: rIndex+1, // 1-based index of the current row (should be recalculated after sorting)
                 score: record.score, // score is a global KPI at the row level (not at a cell i mean)
@@ -540,19 +540,6 @@ class RowsFactory {
                 return '';
             }))
         };
-    }
-
-    /**
-     * @description Export table
-     * @param {Table} tableDefintion
-     * @param {Array<Row>} records
-     * @param {string} title 
-     * @returns {ExportedTable}
-     */ 
-    static createAndExport(tableDefintion, records, title) {
-        const donothing = () => {};
-        const rows = RowsFactory.create(tableDefintion, records, donothing, donothing);
-        return RowsFactory.export(tableDefintion, rows, title);
     }
 }
 

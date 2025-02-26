@@ -457,7 +457,7 @@ export class DataFactory extends DataFactoryIntf {
         if (this._instances.has(dataClass) === false) {
             this._instances.set(dataClass, new DataFactoryInstance(
                 dataClass, 
-                isDataWithScoring ? this._allScoreRules.filter(v => v.applicable.includes(dataClass)) : [], 
+                isDataWithScoring ? this._allScoreRules.filter(v => v.applicable?.includes(dataClass)) : [], 
                 isDataWithDependencies
             ));
         }

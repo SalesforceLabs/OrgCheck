@@ -12,7 +12,7 @@ export class DataDependenciesFactory {
      * @returns {DataDependencies | any}
      */
     static create(data, whatId) {
-        if (data.errors.includes(whatId)) {
+        if (data.errors?.includes(whatId)) {
             return {
                 hadError: true
             };

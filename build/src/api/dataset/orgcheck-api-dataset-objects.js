@@ -83,7 +83,7 @@ export class DatasetObjects extends Dataset {
                 return [ obj.id, obj ];
             },
             (object) => {
-                return qualifiedApiNames.includes(object.name) ? true : false;
+                return qualifiedApiNames?.includes(object.name) ? true : false;
             }
         ));
 

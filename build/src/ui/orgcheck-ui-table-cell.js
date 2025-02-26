@@ -67,18 +67,20 @@ const DECORATE = (cell, modifier) => {
     if (modifier) {
         const data = ('value' in cell.data) ? cell.data.value : cell.data; // 'in syntax' used --> if cell.data.value === undefined!!!
         if (modifier.maximumLength !== undefined) {
-            if (data !== undefined && typeof data === 'string' && data.length > modifier.maximumLength) {
+            if (data && typeof data === 'string' && data.length > modifier.maximumLength) {
                 cell.decoration = data.substring(0, modifier.maximumLength);
             }
         }
         if (modifier.valueIfEmpty !== undefined) {
             if (
                 // Undefined (whatever the type)
-                data === undefined ||
+                data === undefined || 
+                // Null (whatever the type)
+                data === null || 
                 // Empty string
-                (data !== undefined && typeof data === 'string' && data.trim().length === 0) ||
+                (data && typeof data === 'string' && data.trim().length === 0) ||
                 // Empty array 
-                (data !== undefined && Array.isArray(data) && data.length === 0)
+                (data && Array.isArray(data) && data.length === 0)
             ) {
                 cell.decoration =  modifier.valueIfEmpty;
             }

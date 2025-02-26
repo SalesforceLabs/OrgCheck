@@ -1876,7 +1876,7 @@ export default class OrgcheckApp extends LightningElement {
         /** @type {ocui.Table} */
         const table = {
             columns: [
-                { label: '#',    type: ocui.ColumnType.NUM, data: { value: 'header.id' }},
+                { label: 'ID',   type: ocui.ColumnType.NUM, data: { value: 'header.id' }},
                 { label: 'Name', type: ocui.ColumnType.TXT, data: { value: 'header.description' }} 
             ],
             orderIndex: 1,
@@ -2015,46 +2015,40 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Representation of an export for SObject Description data
-     * @type {Array<{header: string, tableDefinition: ocui.Table, rows: Array<{label: string, value: any}>}>}
+     * @type {Array<ocui.ExportedTable>}
      */
     get objectInformationExportSource() {
         return [
             { 
                 header: 'General information',
-                tableDefinition: {
-                    columns: [
-                        { label: 'Label', type: ocui.ColumnType.TXT, data: { value: 'label' }},  
-                        { label: 'Value', type: ocui.ColumnType.TXT, data: { value: 'value' }}
-                    ],
-                    orderIndex: 1,
-                    orderSort: ocui.SortOrder.ASC
-                }, 
+                columns: [ 'Label', 'Value' ],
                 rows: [
-                    { label: 'API Name', value: this.objectData.apiname },
-                    { label: 'Package', value: this.objectData.package },
-                    { label: 'Singular Label', value: this.objectData.label },
-                    { label: 'Plural Label', value: this.objectData.labelPlural },
-                    { label: 'Description', value: this.objectData.description },
-                    { label: 'Key Prefix', value: this.objectData.keyPrefix },
-                    { label: 'Record Count (including deleted ones)', value: this.objectData.recordCount },
-                    { label: 'Is Custom?', value: this.objectData.isCustom },
-                    { label: 'Feed Enable?', value: this.objectData.isFeedEnabled },
-                    { label: 'Most Recent Enabled?', value: this.objectData.isMostRecentEnabled },
-                    { label: 'Global Search Enabled?', value: this.objectData.isSearchable },
-                    { label: 'Internal Sharing', value: this.objectData.internalSharingModel },
-                    { label: 'External Sharing', value: this.objectData.externalSharingModel }
-                ] },
-            { header: 'Standard Fields',  tableDefinition: this.standardFieldsInObjectTableDefinition,  rows: this.objectData.standardFields },
-            { header: 'Custom Fields',    tableDefinition: this.customFieldsInObjectTableDefinition,    rows: this.objectData.customFieldRefs },
-            { header: 'Apex Triggers',    tableDefinition: this.apexTriggersTableDefinition,            rows: this.objectData.apexTriggerRefs },
-            { header: 'Field Sets',       tableDefinition: this.fieldSetsTableDefinition,               rows: this.objectData.fieldSets },
-            { header: 'Page Layouts',     tableDefinition: this.layoutsTableDefinition,                 rows: this.objectData.layouts },
-            { header: 'Lightning Pages',  tableDefinition: this.flexiPagesInObjectTableDefinition,      rows: this.objectData.flexiPages },
-            { header: 'Limits',           tableDefinition: this.limitsTableDefinition,                  rows: this.objectData.limits },
-            { header: 'Validation Rules', tableDefinition: this.validationRulesInObjectTableDefinition, rows: this.objectData.validationRules },
-            { header: 'Web Links',        tableDefinition: this.webLinksTableDefinition,                rows: this.objectData.webLinks },
-            { header: 'Record Types',     tableDefinition: this.recordTypesTableDefinition,             rows: this.objectData.recordTypes },
-            { header: 'Relationships',    tableDefinition: this.relationshipsTableDefinition,           rows: this.objectData.relationships }
+                    [ 'API Name', this.objectData.apiname ],
+                    [ 'Package', this.objectData.package ],
+                    [ 'Singular Label', this.objectData.label ],
+                    [ 'Plural Label', this.objectData.labelPlural ],
+                    [ 'Description', this.objectData.description ],
+                    [ 'Key Prefix', this.objectData.keyPrefix ],
+                    [ 'Record Count (including deleted ones)', this.objectData.recordCount ],
+                    [ 'Is Custom?', this.objectData.isCustom ],
+                    [ 'Feed Enable?', this.objectData.isFeedEnabled ],
+                    [ 'Most Recent Enabled?', this.objectData.isMostRecentEnabled ],
+                    [ 'Global Search Enabled?', this.objectData.isSearchable ],
+                    [ 'Internal Sharing', this.objectData.internalSharingModel ],
+                    [ 'External Sharing', this.objectData.externalSharingModel ]
+                ]
+            },
+            ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields'),
+            ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields'),
+            ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers'),
+            ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets'),
+            ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts'),
+            ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages'),
+            ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits'),
+            ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules'),
+            ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links'),
+            ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types'),
+            ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships'),
         ];
     }
 
