@@ -59,14 +59,18 @@ export class RecipeObjectPermissions extends Recipe {
             }
             // Filter data
             if (namespace === '*' || op.parentRef.package === namespace) {
+                if (workingMatrix.hasRowHeader(op.parentId) === false) {
+                    workingMatrix.setRowHeader(op.parentId, op.parentRef);
+                }
+                // Column header: key and value are same so not needed!
+                /* if (workingMatrix.hasColumnHeader(op.objectType) === false) {
+                    workingMatrix.setColumnHeader(op.objectType, op.objectType);
+                } */
                 workingMatrix.addValueToProperty(
                     op.parentId,
                     op.objectType,
                     (op.isCreate?'C':'')+(op.isRead?'R':'')+(op.isEdit?'U':'')+(op.isDelete?'D':'')+(op.isViewAll?'v':'')+(op.isModifyAll?'m':'')
                 );
-                if (workingMatrix.hasRowHeader(op.parentId) === false) {
-                    workingMatrix.setRowHeader(op.parentId, op.parentRef);
-                }
             }
         });
 

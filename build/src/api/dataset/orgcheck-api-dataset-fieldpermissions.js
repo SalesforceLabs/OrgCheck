@@ -38,10 +38,14 @@ export class DatasetFieldPermissions extends Dataset {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
 
+                // Get only the name of the field without the object name (and by the way without dot
+                const indeOfDot = record.Field.indexOf('.');
+                const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
+
                 // Create the instance
                 const fieldPermission = fieldPermissionDataFactory.create({
                     properties: {
-                        fieldApiName: record.Field,
+                        fieldApiName: fieldName,
                         parentId: parentId,
                         isRead: record.PermissionsRead,
                         isEdit: record.PermissionsEdit

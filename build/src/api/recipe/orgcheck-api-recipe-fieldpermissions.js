@@ -66,9 +66,10 @@ export class RecipeFieldPermissions extends Recipe {
                 if (workingMatrix.hasRowHeader(fp.parentId) === false) {
                     workingMatrix.setRowHeader(fp.parentId, fp.parentRef);
                 }
-                if (workingMatrix.hasColumnHeader(fp.fieldApiName) === false) {
+                // Column header: key and value are same so not needed!
+                /* if (workingMatrix.hasColumnHeader(fp.fieldApiName) === false) {
                     workingMatrix.setColumnHeader(fp.fieldApiName, fp.fieldApiName);
-                }
+                }*/
                 workingMatrix.addValueToProperty(
                     fp.parentId,
                     fp.fieldApiName,

@@ -7108,10 +7108,14 @@ class DatasetFieldPermissions extends Dataset {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
 
+                // Get only the name of the field without the object name (and by the way without dot
+                const indeOfDot = record.Field.indexOf('.');
+                const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
+
                 // Create the instance
                 const fieldPermission = fieldPermissionDataFactory.create({
                     properties: {
-                        fieldApiName: record.Field,
+                        fieldApiName: fieldName,
                         parentId: parentId,
                         isRead: record.PermissionsRead,
                         isEdit: record.PermissionsEdit
@@ -8282,14 +8286,18 @@ class RecipeObjectPermissions extends Recipe {
             }
             // Filter data
             if (namespace === '*' || op.parentRef.package === namespace) {
+                if (workingMatrix.hasRowHeader(op.parentId) === false) {
+                    workingMatrix.setRowHeader(op.parentId, op.parentRef);
+                }
+                // Column header: key and value are same so not needed!
+                /* if (workingMatrix.hasColumnHeader(op.objectType) === false) {
+                    workingMatrix.setColumnHeader(op.objectType, op.objectType);
+                } */
                 workingMatrix.addValueToProperty(
                     op.parentId,
                     op.objectType,
                     (op.isCreate?'C':'')+(op.isRead?'R':'')+(op.isEdit?'U':'')+(op.isDelete?'D':'')+(op.isViewAll?'v':'')+(op.isModifyAll?'m':'')
                 );
-                if (workingMatrix.hasRowHeader(op.parentId) === false) {
-                    workingMatrix.setRowHeader(op.parentId, op.parentRef);
-                }
             }
         });
 
@@ -9108,9 +9116,10 @@ class RecipeFieldPermissions extends Recipe {
                 if (workingMatrix.hasRowHeader(fp.parentId) === false) {
                     workingMatrix.setRowHeader(fp.parentId, fp.parentRef);
                 }
-                if (workingMatrix.hasColumnHeader(fp.fieldApiName) === false) {
+                // Column header: key and value are same so not needed!
+                /* if (workingMatrix.hasColumnHeader(fp.fieldApiName) === false) {
                     workingMatrix.setColumnHeader(fp.fieldApiName, fp.fieldApiName);
-                }
+                }*/
                 workingMatrix.addValueToProperty(
                     fp.parentId,
                     fp.fieldApiName,
@@ -11078,7 +11087,7 @@ class API {
      * @async
      * @public
      */
-    async getFieldPermissions(sobject, namespace) {
+    async getFieldPermissionsPerParent(sobject, namespace) {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, sobject, namespace));
     }

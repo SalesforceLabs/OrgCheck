@@ -880,7 +880,7 @@ export class API {
      * @async
      * @public
      */
-    async getFieldPermissions(sobject, namespace) {
+    async getFieldPermissionsPerParent(sobject, namespace) {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, sobject, namespace));
     }
