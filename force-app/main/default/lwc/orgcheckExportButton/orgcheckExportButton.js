@@ -1,6 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
-import { ExportedTable } from './libs/orgcheck-ui';
+import * as ocui from './libs/orgcheck-ui';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
@@ -47,7 +47,7 @@ export default class OrgcheckExportButton extends LightningElement {
     buttonDisabled = true;
 
     /**
-     * @type {Array<ExportedTable>}
+     * @type {Array<ocui.ExportedTable>}
      */
     @api source;
     

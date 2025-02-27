@@ -1,5 +1,5 @@
 import { LightningElement, api, track } from 'lwc';
-import * as ocui from './libs/orgcheck-ui.js';
+import * as ocui from './libs/orgcheck-ui';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -145,7 +145,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Column headers -- tracked so any change in css can be reflected in table
-     * @type {Array<{label: string, index: number, cssClass: string, isIterative: boolean}>}
+     * @type {Array<{label: string, cssClass: string, isIterative: boolean}>}
      * @private
      */
     @track columnHeaders = [];
@@ -251,7 +251,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 this.usesDependencyViewer = true;
             };
             return {
-                index: i,
+                key: i,
                 label: c.label,
                 isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
                 cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
@@ -290,15 +290,23 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
         this._allRows = ocui.RowsFactory.create(
             this.tableDefinition, 
             rows, 
-            (row, isBad) => { 
+            (row, isBad, rowIndex) => { 
                 if (isBad === true) {
                     this.nbBadRows++;
                     row.cssClass = 'bad';
                 }
+                row.key = `${rowIndex}`;
             }, 
-            (cell, isBad) => {
+            (cell, isBad, cellIndex, rowIndex) => {
                 if (isBad === true) {
                     cell.cssClass = 'bad';
+                }
+                cell.key = `${rowIndex}.${cellIndex}`;
+                if (cell.data && cell.data.values) {
+                    cell.data.values = cell.data.values.map((v, i) => {
+                        v.key = `${rowIndex}.${cellIndex}.${i}`;
+                        return v;
+                    });
                 }
             }
         );

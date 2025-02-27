@@ -42,16 +42,20 @@ export class RowsFactory {
                 badReasonIds: record.badReasonIds, // needed to see the score explaination in a modal
                 cells: tableDefinition.columns.map((column, cIndex) => {
                     const cell = CellFactory.create(column, record);
-                    cell.index = `${rIndex}.${cIndex}`;
                     // Potentially alter the cell
-                    onEachCellCallback(cell, column['data'] ? record.badFields?.includes(column['data'].value) : false);
+                    onEachCellCallback(
+                        cell, 
+                        column['data'] ? record.badFields?.includes(column['data'].value) : false,
+                        rIndex,
+                        cIndex
+                    );
                     // Finally return the cell
                     return cell;
                 }),
                 isVisible: true
             }
             // Potentially alter the row
-            if (onEachRowCallback) onEachRowCallback(row, record.score > 0);
+            if (onEachRowCallback) onEachRowCallback(row, record.score > 0, rIndex);
             // Finally return the row
             return row;
         });
@@ -132,7 +136,8 @@ export class RowsFactory {
                 if (cell.typeofscore) return `${row.score} (badField=${JSON.stringify(row.badFields)}, badReasonIds=${JSON.stringify(row.badReasonIds)})`;
                 if (cell.typeofid) return `${cell.data.label} (${cell.data.value})`;
                 if (cell.typeofids) return JSON.stringify(cell.data.values?.map(v => `${v.data.label} (${v.data.value})`));
-                if (cell.data.values) return JSON.stringify(cell.data.values?.map(v => v.data.value));
+                if (cell.typeofobjects) return JSON.stringify(cell.data.values?.map(v => v.data.value));
+                if (cell.typeoftexts) return JSON.stringify(cell.data.values?.map(v => v.data));
                 if (cell.data.value) return cell.data.value;
                 return '';
             }))

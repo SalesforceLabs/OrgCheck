@@ -99,7 +99,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.DataCacheItem>}
      * @public 
      */ 
-    cacheManagerData;
+    cacheManagerData = [];
 
     /**
      * @description Salesforce Id of the current user passed by Visual Force page

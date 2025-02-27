@@ -66,7 +66,7 @@
         <thead>
             <tr>
                 <template for:each={columnHeaders} for:item="column">
-                    <template if:true={column}><th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex="0" class={column.cssClass}>
+                    <template if:true={column}><th key={column.key} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex="0" class={column.cssClass}>
                         {column.label}
                     </th></template>
                 </template>
@@ -74,9 +74,9 @@
         </thead>
         <tbody>
             <template if:true={visibleRows}><template for:each={visibleRows} for:item="row">
-                <template if:true={row}><tr key={row.index} class={row.cssClass}>
+                <template if:true={row}><tr key={row.key} class={row.cssClass}>
                     <template for:each={row.cells} for:item="cell">
-                        <template if:true={cell}><template if:true={cell.data}><td key={cell.index} data-value={cell.data.value} class={cell.cssClass}>                        
+                        <template if:true={cell}><template if:true={cell.data}><td key={cell.key} data-value={cell.data.value} class={cell.cssClass}>                        
 
                             <!-- TYPE INDEX: numeric, auto valued, represent the position of each row in the table -->
                             <template lwc:if={cell.typeofindex}>{row.index}</template>
@@ -107,10 +107,10 @@
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
                                     <template for:each={cell.data.values} for:item="item">
                                         <template lwc:if={item.decoration}>
-                                            - {item.decoration}<br key={item.index} />
+                                            - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - <lightning-formatted-url key={item.index} label={item.data.label} value={item.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.index} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.index} />
+                                            - <lightning-formatted-url key={item.key} label={item.data.label} value={item.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
                                         </template>
                                     </template>
                                 </template></template>
@@ -150,10 +150,10 @@
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
                                     <template for:each={cell.data.values} for:item="item">
                                         <template lwc:if={item.decoration}>
-                                            - {item.decoration}<br key={item.index} />
+                                            - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data}<br key={item.index} />
+                                            - {item.data}<br key={item.key} />
                                         </template>
                                     </template>
                                 </template></template>
@@ -165,10 +165,10 @@
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
                                     <template for:each={cell.data.values} for:item="item">
                                         <template lwc:if={item.decoration}>
-                                            - {item.decoration}<br key={item.index} />
+                                            - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data}<br key={item.index} />
+                                            - {item.data}<br key={item.key} />
                                         </template>
                                     </template>
                                 </template></template>

@@ -109,7 +109,29 @@
                         </lightning-layout-item>
                         <lightning-layout-item size="4">
                             <template if:true={useOrgCheckInThisOrgConfirmed}>
-                                <c-orgcheck-cache-manager onload={handleSubTabContentLoaded} onremovecache={handleRemoveAllCache} cache-manager-data={cacheManagerData}></c-orgcheck-cache-manager>
+                                <lightning-card icon-name="standard:account" title="Metadata Cache">
+                                    <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
+                                    <div class="slds-var-p-horizontal_small">
+                                        List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
+                                        <div class="slds-progress slds-progress_vertical">
+                                            <ol class="slds-progress__list" id="list-loading-items">
+                                                <template for:each={cacheManagerData} for:item="item">
+                                                    <template if:false={item.isEmpty}>
+                                                        <li key={item.name} class="slds-progress__item slds-is-completed">
+                                                            <div class="slds-progress__marker"></div>
+                                                            <div class="slds-progress__item_content">
+                                                                <b>{item.name}</b>: 
+                                                                <template lwc:if={item.isMap}> {item.length} in a map</template>
+                                                                <template lwc:else> 1 in an object</template>
+                                                                <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
+                                                            </div>
+                                                        </li>
+                                                    </template>
+                                                </template>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                </lightning-card>
                             </template>
                             <template if:true={useOrgCheckInThisOrgNeedConfirmation}>
                                 <lightning-card icon-name="utility:signature" title="Usage acceptance">
@@ -146,7 +168,7 @@
                     </lightning-layout>
                     <br /><br />
                     <lightning-layout multiple-rows>
-                        <template for:each={globalViewItems} for:item="item" >
+                        <template for:each={globalViewItems} for:item="item">
                             <lightning-layout-item size="3" padding="around-small" key={item.label}>
                                 <div class="slds-box slds-text-align_center">
                                     <h1 class="slds-text-heading_medium">{item.label}</h1>
