@@ -43,6 +43,10 @@ td.bad {
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
+tr.bad > button {
+    line-height: normal;
+}
+
 table.dontuseallspace {
     width: unset;
 }

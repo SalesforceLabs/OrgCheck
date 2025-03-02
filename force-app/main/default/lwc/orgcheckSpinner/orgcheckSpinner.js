@@ -121,15 +121,13 @@ export default class OrgcheckSpinner extends LightningElement {
       this._cantBeClosed();
       this._init();
       this._openSince = Date.now();
-      this._isOpened = true;
-      this.dialogCssClasses = 'slds-modal slds-fade-in-open slds-modal_medium';
-      this.backdropCssClasses = 'slds-backdrop slds-backdrop_open';
       const updateWaitingTime = () => {
         this.waitingTime = (Date.now() - this._openSince) / 1000;
       };
       clearInterval(this._intervalId);
       // eslint-disable-next-line @lwc/lwc/no-async-operation
       this._intervalId = setInterval(updateWaitingTime, 1000);
+      this._isOpened = true;
     }
   }
 
@@ -185,16 +183,18 @@ export default class OrgcheckSpinner extends LightningElement {
    * @type {string}
    * @public
    */
-  dialogCssClasses;
-//    return `slds-modal slds-fade-in-open slds-modal_medium ${this._isOpened ? '' : 'slds-hide'}`;
+  get dialogCssClasses() {
+    return `slds-modal slds-fade-in-open slds-modal_medium ${this._isOpened ? '' : 'slds-hide'}`;
+  }
 
   /**
    * @description CSS Classes for the backdrop dependengin on the _isOpened property
    * @type {string}
    * @public
    */ 
-  backdropCssClasses;
-//    return `slds-backdrop ${this._isOpened ? 'slds-backdrop_open' : 'slds-backdrop_close'}`;
+  get backdropCssClasses() {
+    return `slds-backdrop ${this._isOpened ? 'slds-backdrop_open' : 'slds-backdrop_close'}`;
+  }
 
   /**
    * @description Switch to show the close button of the spinner or not
@@ -315,8 +315,6 @@ export default class OrgcheckSpinner extends LightningElement {
    */
   _hide() {
     this._isOpened = false;
-    this.dialogCssClasses = 'slds-modal slds-fade-in-open slds-modal_medium slds-hide';
-    this.backdropCssClasses = 'slds-backdrop slds-backdrop_close';    
   }
 
   /**
