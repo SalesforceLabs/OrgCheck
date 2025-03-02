@@ -29,7 +29,6 @@ export default class OrgcheckExportButton extends LightningElement {
             loadScript(this, OrgCheckStaticRessource + '/js/xlsx.js')
                 .then(() => {
                     this._apiInitialized = true;
-                    this.buttonDisabled = false;
                     // @ts-ignore
                     this._api = XLSX; 
                 })
@@ -40,11 +39,31 @@ export default class OrgcheckExportButton extends LightningElement {
     }
     
     /**
+     * @description Flag to know if the data is being exported
+     * @type {boolean}
+     * @public
+     */ 
+    isExporting = false;
+
+    /**
      * @description Flag to disable the button if the XLS api is not yet loaded
      * @type {boolean}
      * @public
      */ 
-    buttonDisabled = true;
+    get buttonDisabled() {
+        return (this._apiInitialized === false || this.isExporting === true);
+    }
+
+    /**
+     * @description Label of the button
+     * @type {string}
+     * @public
+     */ 
+    get buttonLabel() {
+        if (this._apiInitialized === false) return 'Initializing...';
+        if (this.isExporting === true) return 'Exporting...';
+        return this.label;
+    }
 
     /**
      * @type {Array<ocui.ExportedTable>}
@@ -60,7 +79,7 @@ export default class OrgcheckExportButton extends LightningElement {
     @api basename = 'Export';
 
     /**
-     * @description Label of the button
+     * @description Label of the button when not clicked (otherwise it will be "Exporting...")
      * @type {string}
      * @default "Export"
      * @public
@@ -69,23 +88,26 @@ export default class OrgcheckExportButton extends LightningElement {
 
     /**
      * @description Event when user clicks on the export button
+     * @async so that the spinner animation can be shown ;)
      * @public
      */
-    handleClickExportXLS() {
-        try {
-            const workbook = this._createTheWorkBook();
-            const url = this._generateTheFileAsURL(workbook);
+    async handleClickExportXLS() {
+        this.isExporting = true;
+        setTimeout(() => {
+            this._exportAsXls()
+            .catch((error) => console.error(error, JSON.stringify(error), error.stack))
+            .finally(() => this.isExporting = false);
+        }, 1);
+    }
 
-            const a = this.template.querySelector('a');
-            a.href = url;
-            a.download = `${this.basename}.xlsx`; // Filename Here
-            a.click(); // Downloaded file*/
-
-            this._releaseTheURL(url);
-
-        } catch (error) {
-            console.error(error, JSON.stringify(error), error.stack);
-        }
+    async _exportAsXls() {
+        const workbook = this._createTheWorkBook();
+        const url = this._generateTheFileAsURL(workbook);
+        const a = this.template.querySelector('a');
+        a.href = url;
+        a.download = `${this.basename}.xlsx`; // Filename Here
+        a.click(); // Downloaded file*/
+        this._releaseTheURL(url);
     }
 
     /**

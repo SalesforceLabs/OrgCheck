@@ -102,6 +102,13 @@ export default class OrgcheckApp extends LightningElement {
     cacheManagerData = [];
 
     /**
+     * @description Is the export button for Global View is shown or not
+     * @type {boolean}
+     * @public
+     */
+    showGlobalViewExportButton = false;
+
+    /**
      * @description Salesforce Id of the current user passed by Visual Force page
      *                 This value is decorated by "api" so it can be passed by the parent.
      *                 Indeed the value will be set by the parent (a Visual Force page) and will be used by the Org Check API
@@ -647,7 +654,9 @@ export default class OrgcheckApp extends LightningElement {
      */
     async _updateGlobalView() {
         try {
-            await Promise.all(this._globalViewTransformersKeys.map((/** @type {string} */ recipe) => { this._updateData(recipe, false, false); } ));
+            this.showGlobalViewExportButton = false;
+            await Promise.all(this._globalViewTransformersKeys.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, false, false); } ));
+            this.showGlobalViewExportButton = true;
         } catch(e) {
             console.error('Error while _updateGlobalView', e);
         }
@@ -659,37 +668,23 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _updateCurrentTab() {
+        if (this._hasRenderOnce === false) return;
+        const TAB_SECTION = `TAB ${this._currentTab}`;
         try {
-        
-            if (this._hasRenderOnce === false) return;
+            this._spinner.open();
+            this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
             switch (this._currentTab) {
-                case 'welcome': {
-                    this._updateCacheInformation();
-                    break;
-                }
-                case 'global-view': {
-                    await this._updateGlobalView();
-                    break;
-                }
-                default: {
-                    const TAB_SECTION = `TAB ${this._currentTab}`;
-                    try {
-                        this._spinner.open();
-                        this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
-                        await this._updateData(this._currentTab);
-                        this._spinner.sectionEnded(TAB_SECTION, `Done.`);
-                        this._spinner.close(0);
-                    } catch (error) {
-                        this._spinner.sectionFailed(TAB_SECTION, error);
-                        this._spinner.canBeClosed();
-                    }
-                }
+                case 'welcome':     this._updateCacheInformation(); break;
+                case 'global-view': await this._updateGlobalView(); break;
+                default:            await this._updateData(this._currentTab);
             }
-            this._updateLimits();
-
-        } catch(e) {
-            console.error('Error while _updateGlobalView', e);
+            this._spinner.sectionEnded(TAB_SECTION, `Done.`);
+            this._spinner.close(0);
+        } catch (error) {
+            this._spinner.sectionFailed(TAB_SECTION, error);
+            this._spinner.canBeClosed();
         }
+        this._updateLimits();
     }
 
 
@@ -882,22 +877,9 @@ export default class OrgcheckApp extends LightningElement {
     async handleClickRefreshCurrentTab(event) {
         try {
             const recipes = event.target['getAttribute']('data-recipes')?.split(',');
-            return Promise.all(recipes.map((/** @type {string} */ recipe) => { this._updateData(recipe, true); } ));
+            return Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
         } catch (e) {
             console.error('Error while handleClickRefreshCurrentTab', e);
-        }
-    }
-
-    /**
-     * @description When you activate the global view tab it should automatically retrieve all recipes
-     * @async
-     * @public
-     */ 
-    async handleGlobalViewTabActivation() {
-        try {
-            return this._updateGlobalView();
-        } catch (e) {
-            console.error('Error while handleGlobalViewTabActivation', e);
         }
     }
 
@@ -2052,21 +2034,19 @@ export default class OrgcheckApp extends LightningElement {
         ];
     }
 
+    /**
+     * @description Representation of an export for the global view data
+     * @type {Array<ocui.ExportedTable>}
+     */
     get globalViewItemsExport() {
         try {
-            return Object.keys(this._internalTransformers)
-                .filter((/** @type {string} */ recipe) => this._internalTransformers[recipe].isGlobalView)
-                .map((/** @type {string} */ recipe) => { 
-                    const transfomer = this._internalTransformers[recipe]; 
-                    const columnDef = this[transfomer.data.replace(/Data$/, 'Columns')];
-                    return { 
-                        header: transfomer.label, 
-                        columns: columnDef.map((c) => c.label),
-                        rows: ocui.RowsFactory.create(columnDef, this[transfomer.data], (r) => r, (c) => c), 
-                    };
+            return this._globalViewTransformersKeys.map((/** @type {string} */ recipe) => { 
+                const transfomer = this._internalTransformers[recipe]; 
+                const columnDef = this[transfomer.data.replace(/Data$/, 'Definition')];
+                return ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label);
             });
         } catch (error) {
-            return [];
+            console.error('Error while exporting global view items:', JSON.stringify(error), error.stack, error.message);
         }
     }
     

@@ -251,7 +251,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 this.usesDependencyViewer = true;
             };
             return {
-                key: i,
+                index: i,
                 label: c.label,
                 isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
                 cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
@@ -302,10 +302,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                     cell.cssClass = 'bad';
                 }
                 cell.key = `${rowIndex}.${cellIndex}`;
-                if (cell.data && cell.data.values) {
-                    cell.data.values = cell.data.values.map((v, i) => {
+                if (cell.data && cell.data.values && cell.data.values.forEach) {
+                    cell.data.values.forEach((v, i) => {
                         v.key = `${rowIndex}.${cellIndex}.${i}`;
-                        return v;
                     });
                 }
             }

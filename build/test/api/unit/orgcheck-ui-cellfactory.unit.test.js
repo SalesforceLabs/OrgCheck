@@ -462,9 +462,9 @@ describe('tests.api.unit.CellFactory', () => {
 
         /** @type {Array<TableColumnWithModifiers>} */
         const columns = [
-            { label: 'Column 1', type: ColumnType.TXT, data: { value: 'propertyA' }, modifier: { maximumLength: 10, valueIfEmpty: 'N/A' }},
+            { label: 'Column 1', type: ColumnType.TXT, data: { value: 'propertyA' }, modifier: { maximumLength: 10, valueIfEmpty: 'Empty value for A' }},
             { label: 'Column 2', type: ColumnType.TXT, data: { value: 'propertyB' }, modifier: { maximumLength: 8, preformatted: true }},
-            { label: 'Column 3', type: ColumnType.TXT, data: { value: 'propertyC' }, modifier: { valueIfEmpty: 'N/A' }}
+            { label: 'Column 3', type: ColumnType.TXT, data: { value: 'propertyC' }, modifier: { valueIfEmpty: 'Empty value for C' }}
         ];
 
         /** @type {Array<any>} */

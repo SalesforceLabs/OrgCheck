@@ -1,6 +1,6 @@
 <apex:page>
     <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; manifest-src 'self'">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; manifest-src 'self'"></meta>
         <title>Org Check</title>
     </head>
 
@@ -22,10 +22,16 @@
         }
         #loading-text {
         }
+        #additional-waiting-info {
+            display: none;
+            color: rgb(31, 116, 72);
+            align-items: center;
+            width: 50em;
+        }
         #additional-info-issue-454 {
             display: none;
             color: rgb(170, 54, 54);
-            width: 25em;
+            width: 30em;
         }
         .slds-dropdown-trigger_click .slds-dropdown {
             min-width: fit-content;
@@ -42,12 +48,14 @@
                 </object>
             </div>
             <div id="loading-text">
-                Please wait while <b>Org Check</b> is loading...<br />
-                <br />
+                Please wait while <b>Org Check</b> is loading...
+            </div>
+            <div id="additional">
+                <span id="additional-waiting-info"></span>                
                 <span id="additional-info-issue-454">
                     Hello! <br />
                     <br />
-                    You see this message because Org Check is taking more than 15 seconds to load.<br />
+                    You see this message because Org Check is taking more than 20 seconds to load.<br />
                     <br />
                     <br />
                     This may be due to a new version that has been pushed to your org or maybe this is 
@@ -70,9 +78,31 @@
         </div>
     </div>  
     <script>
-        setTimeout(() => {
-            document.getElementById('additional-info-issue-454').style.display = 'block';
-        }, 15000);
+        const additionalWaitingInfo = document.getElementById('additional-waiting-info');
+        const additionalInfoIssue454 = document.getElementById('additional-info-issue-454');
+        const jokes = [
+            { question: `Where can you save your dad-jokes?`, answer: `In a dadda-base` },
+            { question: `Why did the tomato turn red?`, answer: `Because it saw the salad dressing.` },
+            { question: `If you have way too many dad-jokes, where can you store them all?`, answer: `In a dadda-lake` },
+            { question: `Why did the coffee file a police report?`, answer: `It got mugged.` },
+            { question: `What's a runner's favorite subject in school?`, answer: `Jog-graphy.` },
+            { question: `Why did the math book look sad?`, answer: `Because it had too many problems.` },
+            { question: `There are a quantity of artificial butter flavor beyond which people begin to believe it's not butter.`, answer: `This is known as the margarine of error.` },
+            { question: `Why did the tomato turn red?`, answer: `Because it saw the salad dressing.` },
+            { question: `How did Darth Vader know what Luke was getting for his birthday?`, answer: `He felt his presents!` },
+            { question: `What does the Hulk wear to bed?`, answer: `Py-gammas.` }
+        ]
+        const myInterval = setInterval(() => {
+            const i = Math.floor(Math.random() * jokes.length);
+            const joke = jokes.splice(i, 1)[0];
+            additionalWaitingInfo.style.display = 'contents';
+            additionalWaitingInfo.innerHTML = `<br /><br /><b>${joke.question}</b><br />${joke.answer}`;
+        }, 5000);
+        setTimeout(() => { 
+            clearInterval(myInterval);
+            additionalWaitingInfo.style.display = 'none'; 
+            additionalInfoIssue454.style.display = 'block'; 
+        }, 20000);
 
         /* Reset the cache of previous versions */
         try {

@@ -3907,13 +3907,11 @@ class DataCacheManager extends DataCacheManagerIntf {
             .map((key) => {
                 /** @type {MetadataItemInCache} */
                 const entry = this._getEntryFromCache(key);
-                return {
-                    name: GENERATE_LOGICAL_KEY(key),
-                    isEmpty: entry.length === 0,
-                    isMap: entry.type === 'map',
-                    length: entry.length,
-                    created: entry.created
-                };
+                const name = GENERATE_LOGICAL_KEY(key);
+                if (entry) {
+                    return { name: name, isEmpty: entry.length === 0, isMap: entry.type === 'map', length: entry.length, created: entry.created };    
+                }
+                return { name: name, isEmpty: true, isMap: false, length: 0, created: 0 };
             }
         );
     }

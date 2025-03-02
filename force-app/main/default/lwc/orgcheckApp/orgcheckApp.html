@@ -157,27 +157,27 @@
                     <h1 class="slds-text-heading_large">What are the rules you apply for your score?</h1>
                     <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData} show-export-button export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                 </lightning-tab>
-                <lightning-tab value="global-view" label="Global View" onactive={handleGlobalViewTabActivation}>
+                <lightning-tab value="global-view" label="Global View" onactive={handleSubTabActivation}>
                     <lightning-layout>
                         <lightning-layout-item>
                             <h1 class="slds-text-heading_large">Global View of your Salesforce organization <b>{orgName}</b></h1>
                         </lightning-layout-item>
                         <lightning-layout-item alignment-bump="left">
-                            <c-orgcheck-export-button label="Export all details" source={globalViewItemsExport} basename="GlobalView"  ></c-orgcheck-export-button>
+                            <c-orgcheck-export-button if:true={showGlobalViewExportButton} label="Export all details" source={globalViewItemsExport} basename="GlobalView"></c-orgcheck-export-button>
                         </lightning-layout-item>
                     </lightning-layout>
                     <br /><br />
                     <lightning-layout multiple-rows>
                         <template for:each={globalViewItems} for:item="item">
-                            <lightning-layout-item size="3" padding="around-small" key={item.label}>
+                            <lightning-layout-item size="4" padding="around-small" key={item.label}>
                                 <div class="slds-box slds-text-align_center">
                                     <h1 class="slds-text-heading_medium">{item.label}</h1>
                                     <lightning-layout>
                                         <lightning-layout-item size="6">
-                                            <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-legend-in-one-line pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
+                                            <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
                                         </lightning-layout-item>
                                         <lightning-layout-item size="6">
-                                            <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-legend-in-one-line pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
+                                            <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
                                         </lightning-layout-item>
                                     </lightning-layout>
                                 </div>

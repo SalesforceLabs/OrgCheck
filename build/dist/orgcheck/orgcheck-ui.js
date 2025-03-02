@@ -333,9 +333,9 @@ const DECORATE = (cell, modifier) => {
                 // Null (whatever the type)
                 data === null || 
                 // Empty string
-                (data && typeof data === 'string' && data.trim().length === 0) ||
+                (typeof data === 'string' && data.trim().length === 0) ||
                 // Empty array 
-                (data && Array.isArray(data) && data.length === 0)
+                (Array.isArray(data) && data.length === 0)
             ) {
                 cell.decoration =  modifier.valueIfEmpty;
             }
