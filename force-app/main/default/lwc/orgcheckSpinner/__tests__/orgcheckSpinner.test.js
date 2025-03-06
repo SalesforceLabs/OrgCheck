@@ -1,5 +1,6 @@
-import { createElement } from '@lwc/engine-dom';
 import OrgcheckSpinner from '../orgcheckSpinner';
+// @ts-ignore
+import { createElement } from '@lwc/engine-dom';
     
 describe('c-orgcheck-spinner', () => {
 
@@ -12,7 +13,7 @@ describe('c-orgcheck-spinner', () => {
     expect(section.classList.contains('slds-hide')).toBeTruthy();
   });
 
-  it('spinner is shown after calling open(), by default without the closing icon', () => {
+  it('spinner is shown after calling open(), by default without the closing icon', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -27,14 +28,18 @@ describe('c-orgcheck-spinner', () => {
     });
   });
 
-  it('spinner is shown with closing icon after calling canBeClosed(), and click on that icon closes the spinner', () => {
+  it('spinner is shown with closing icon if at least one section failed, and clicking on that icon closes the spinner', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
-    document.body.appendChild(element);   
-    element.open();
-    element.canBeClosed();
-    return Promise.resolve().then(() => {
+    document.body.appendChild(element);
+    element.sectionLog('1', '...');
+    element.sectionLog('2', '...');
+    element.sectionLog('3', '...');
+    element.sectionEnded('1', 'OK');
+    element.sectionFailed('2', 'Failed'); 
+    element.sectionEnded('3', 'OK'); 
+    return Promise.resolve().then(async () => {
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).not.toBeNull();
       closeIcon.dispatchEvent(new CustomEvent('click'));
@@ -45,7 +50,7 @@ describe('c-orgcheck-spinner', () => {
     });
   });
 
-  it('spinner is showing messages by sections and do not mix them', () => {
+  it('spinner is showing messages by sections and do not mix them', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -83,9 +88,11 @@ describe('c-orgcheck-spinner', () => {
         // Setting an error message to an existing section (2)
         element.sectionFailed('2', 'Z');
         return Promise.resolve().then(() => {
+          const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
           const list3 = element.shadowRoot.querySelectorAll('.slds-progress__list > li');
-          // as all the pending sections are either ended or failed, the spiner should close itself and then following should be zero
-          expect(list3).toHaveLength(0);
+          // as all the pending sections are either ended or failed, and we got one error, the spinner should stay open with the close icon
+          expect(closeIcon).not.toBeNull();
+          expect(list3).toHaveLength(2);
         });
       });
     });

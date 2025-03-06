@@ -1,6 +1,6 @@
 // @ts-check
 import { LightningElement, api, track } from 'lwc';
-import OrgCheckStaticRessource from '@salesforce/resourceUrl/OrgCheck_SR';
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 
 /**
  * @description Represents the different statuses of a section
@@ -68,8 +68,8 @@ export default class OrgcheckSpinner extends LightningElement {
    * @description Connected callback function
    */
   connectedCallback() {
-    this._hide();
-    this._cantBeClosed();
+    this._isOpened = false;
+    this.isClosable = false;
     this._init();
   }
 
@@ -118,7 +118,7 @@ export default class OrgcheckSpinner extends LightningElement {
    */
   @api open() {
     if (this._isOpened === false) {
-      this._cantBeClosed();
+      this.isClosable = false;
       this._init();
       this._openSince = Date.now();
       const updateWaitingTime = () => {
@@ -132,32 +132,28 @@ export default class OrgcheckSpinner extends LightningElement {
   }
 
   /**
-   * @description Sets the 'isClosable' property to true and clears the interval timer
-   */
-  @api canBeClosed() {
-    this.isClosable = true;
-    clearInterval(this._intervalId);
-  }
-
-  /**
-   * @description Closes the spinner after a specified wait time.
+   * @description Closes the spinner after a specified wait time if we had no error!
    * @param {number} waitBeforeClosing - The time to wait before closing the API.
    * @async
    */
   @api async close(waitBeforeClosing) {
-    this._cantBeClosed();
-    const shownFor = Date.now() - this._openSince;
-    const realClose = () => {
-      this._hide();
-      this._init();
-      this._openSince = undefined;
-      clearInterval(this._intervalId);
-    };
-    if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
-      // eslint-disable-next-line @lwc/lwc/no-async-operation
-      setTimeout(realClose, waitBeforeClosing);
+    clearInterval(this._intervalId);
+    if (this.hadError === true) {
+      this.isClosable = true;
     } else {
-      realClose();
+      this.isClosable = false;
+      const shownFor = Date.now() - this._openSince;
+      const realClose = () => {
+        this._isOpened = false;
+        this._init();
+        this._openSince = undefined;
+      };
+      if (shownFor > 1000 && waitBeforeClosing && waitBeforeClosing > 0) {
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
+        setTimeout(realClose, waitBeforeClosing);
+      } else {
+        realClose();
+      }
     }
   }
 
@@ -165,7 +161,7 @@ export default class OrgcheckSpinner extends LightningElement {
    * @description Handles the closing of a section by resetting all relevant properties and clearing intervals
    */
   handleClose() {
-    this._hide();
+    this._isOpened = false;
     this._init();
     this._openSince = undefined;
     clearInterval(this._intervalId);
@@ -176,7 +172,7 @@ export default class OrgcheckSpinner extends LightningElement {
    * @type {string}
    * @public
    */
-  spinningURL = OrgCheckStaticRessource + '/img/Mascot+Animated.svg';
+  spinningURL = OrgCheckStaticResource + '/img/Mascot+Animated.svg';
 
   /**
    * @description CSS Classes for the main dialog dependengin on the _isOpened property
@@ -302,27 +298,13 @@ export default class OrgcheckSpinner extends LightningElement {
     // Count the in_progress sections
     const countInProgressSections = this.sections.filter(s => s.status === SectionStatus.IN_PROGRESS).length;
     if (countInProgressSections === 0) {
-      this.inProgressMessage = '';
+      if (this.hadError === true) {
+        this.inProgressMessage = 'Ooops! Something went wrong...';
+      }
       this.close(0);
     } else {
       this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress over a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
     }
-  }
-
-  /**
-   * @description Hide the element by setting the isShown property to false.
-   * @private
-   */
-  _hide() {
-    this._isOpened = false;
-  }
-
-  /**
-   * @description Prevents the object from being closed.
-   * @private
-   */
-  _cantBeClosed() {
-    this.isClosable = false;
   }
 
   /**

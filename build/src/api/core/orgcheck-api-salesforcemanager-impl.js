@@ -26,12 +26,6 @@ const MAX_NOQUERYMORE_BATCH_SIZE = 2000;
 const MAX_STANDARDSOQL_BATCH_SIZE = 2000;
 
 /**
- * @description Maximum size JsForce will query/retrieve data from the Query api.
- * @private
- */
-const MAX_STANDARDSOQL_GLOBAL_SIZE = 1000000000000;
-
-/**
  * @description Maximum number of members we want per type/request 
  * @private
  */
@@ -242,26 +236,48 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
      * @param {Array<string>} byPasses List of error codes to by-pass
+     * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _standardSOQLQuery(useTooling, query, byPasses) {
+    async _standardSOQLQuery(useTooling, query, byPasses, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
-        try {
+        // the records to return
+        const allRecords = [];
+        // If `locator` is undefined, it means we are calling doNextQuery() the first time
+        const doNextQuery = async (/** @type {string} */ locator) => {
             // Let's start to check if we are 'allowed' to use the Salesforce API...
             this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
-            // Run this query
-            const results = await conn.query(query, { 
-                autoFetch: true, 
-                maxFetch: MAX_STANDARDSOQL_GLOBAL_SIZE,
-                headers: { 'Sforce-Query-Options': `batchSize=${MAX_STANDARDSOQL_BATCH_SIZE}` }
-            });
+            let results;
+            if (locator === undefined) {
+                // Calling the query the first time
+                results = await conn.query(query, { 
+                    autoFetch: false,
+                    headers: { 'Sforce-Query-Options': `batchSize=${MAX_STANDARDSOQL_BATCH_SIZE}` }
+                });
+            } else {
+                // Calling the queryMore
+                results = await conn.queryMore(locator);
+            }
+            // Call the callback for information
+            callback(results?.records?.length || 0);
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
-            // Return all the records
-            return results.records;
+            // Adding records to the global array.
+            allRecords.push(... results.records);
+            // Check if this was the last batch?
+            if (results.done === false) { // this was not yet the last batch
+                // call the next Batch
+                await doNextQuery(results.nextRecordsUrl);
+            }
+        }
+        try {
+            // Call the first time
+            await doNextQuery(); // and then the method will chain next calls
+            // return the records
+            return allRecords;
         } catch (error) {
             if (byPasses && byPasses.includes && byPasses.includes(error.errorCode)) {
                 // by pass this error! and return an empty array
@@ -281,11 +297,12 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
      * @param {string} fieldId Unique field name to use for the custom QueryMore (Id by default)
+     * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling, query, fieldId) {
+    async _customSOQLQuery(useTooling, query, fieldId, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -300,6 +317,8 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 autoFetch: false,
                 headers: { 'Sforce-Query-Options': `batchSize=${MAX_NOQUERYMORE_BATCH_SIZE}` }
             });
+            // Call the callback for information
+            callback(results?.records?.length || 0);
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
             // Adding records to the global array.
@@ -337,10 +356,26 @@ export class SalesforceManager extends SalesforceManagerIntf {
     async soqlQuery(queries, logger) {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries.length} SOQL ${queries.length>1?'queries':'query'}...`);
-        let nbRecords = 0;
+        let nbRecords = 0, nbQueryMore = 0;
         const pendingEntities = [], doneEntities = [], errorEntities = [];
-        // We'll run the queries in parallel, each query will be mapped as a promise and ran with Promise.all()
-        const allPromisesResult = await Promise.all(queries.map(async (query) => {
+        const errors = [];
+        const updateLogInformation = () => {
+            logger?.log(
+                `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
+                `Records retrieved: ${nbRecords}, `+
+                `Number of QueryMore calls done: ${nbQueryMore}, `+
+                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
+                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
+                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`
+            );
+        }
+        const updateLogInformationOnQuery = (/** @type {number} */ nbRec) => {
+            nbQueryMore++; 
+            nbRecords += nbRec;
+            updateLogInformation();
+        }
+            // We'll run the queries in parallel, each query will be mapped as a promise and ran with Promise.allSettled() (and not all() to make sure we properly finish all promises)
+        const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
             // Dynamically get the entityName of the Query
             const str = query.string.lastIndexOf('FROM ')+5;
             const end = query.string.indexOf(' ', str);
@@ -351,30 +386,33 @@ export class SalesforceManager extends SalesforceManagerIntf {
             try {
                 if (query.queryMoreField) {
                     // yes!! do the custom one -- In case the query does not support queryMore we have an alternative, based on ids
-                    records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField);
+                    records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField, updateLogInformationOnQuery);
                 } else {
                     // no!!! use the standard one
-                    records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses);
+                    records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses, updateLogInformationOnQuery);
                 }
                 doneEntities.push(entityName)
-                nbRecords += records.length;
+                //nbRecords += records.length;
             } catch (error) {
                 errorEntities.push(entityName);
+                errors.push(error);
                 throw error;
             } finally {
                 const index = pendingEntities.indexOf(entityName);
                 if (index > -1) pendingEntities.splice(index, 1);
+                updateLogInformation();
             }
-            logger?.log(
-                `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
-                `Records retrieved: ${nbRecords}, `+
-                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
-                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
-                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`);
             return records;
         }));
         logger?.log(`Done running ${queries.length} SOQL ${queries.length>1?'queries':'query'}.`);
-        return allPromisesResult;
+        // if errors has at least one item, it means one of the Promises failed
+        if (errors.length > 0) {
+            return Promise.reject(errors[0]);
+        }
+        // at this point all promises have been settled (or 'successful' if you)
+        const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled').map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
+        // return the results
+        return Promise.resolve(results);
     }
 
     /**

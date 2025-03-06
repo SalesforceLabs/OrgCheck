@@ -36,7 +36,7 @@ export class RecipeApexTests extends Recipe {
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses = data.get(DatasetAliases.APEXCLASSES);
 
         // Checking data
-        if (!apexClasses) throw new Error(`Data from dataset alias 'APEXCLASSES' was undefined.`);
+        if (!apexClasses) throw new Error(`RecipeApexTests: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
         const array = [];

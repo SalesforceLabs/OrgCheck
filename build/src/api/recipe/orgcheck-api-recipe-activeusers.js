@@ -41,9 +41,9 @@ export class RecipeActiveUsers extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'USERS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
         await Processor.forEach(users, async (user) => {

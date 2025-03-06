@@ -39,8 +39,8 @@ export class RecipeProfileRestrictions extends Recipe {
         const /** @type {Map<string, SFDC_ProfileRestrictions>} */ profileRestrictions = data.get(DatasetAliases.PROFILERESTRICTIONS);
 
         // Checking data
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!profileRestrictions) throw new Error(`Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!profileRestrictions) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
         // Augment and Filter data
         const array = [];

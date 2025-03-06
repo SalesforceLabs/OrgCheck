@@ -51,11 +51,11 @@ export class RecipeObject extends Recipe {
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!object) throw new Error(`Data from dataset alias 'OBJECT' was undefined.`);
-        if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
-        if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
-        if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
+        if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!object) throw new Error(`RecipeObject: Data from dataset alias 'OBJECT' was undefined.`);
+        if (!apexTriggers) throw new Error(`RecipeObject: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!pages) throw new Error(`RecipeObject: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
+        if (!customFields) throw new Error(`RecipeObject: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
         object.typeRef = types.get(object.typeId);

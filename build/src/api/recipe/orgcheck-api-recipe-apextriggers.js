@@ -39,8 +39,8 @@ export class RecipeApexTriggers extends Recipe {
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
 
         // Checking data
-        if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!apexTriggers) throw new Error(`RecipeApexTriggers: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!objects) throw new Error(`RecipeApexTriggers: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
         const array = [];

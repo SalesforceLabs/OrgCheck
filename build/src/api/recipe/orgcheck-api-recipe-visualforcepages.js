@@ -34,7 +34,7 @@ export class RecipeVisualForcePages extends Recipe {
         const /** @type {Map<string, SFDC_VisualForcePage>} */ pages = data.get(DatasetAliases.VISUALFORCEPAGES);
 
         // Checking data
-        if (!pages) throw new Error(`Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
+        if (!pages) throw new Error(`RecipeVisualForcePages: Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
 
         // Filter data
         const array = [];

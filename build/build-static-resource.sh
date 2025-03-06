@@ -73,6 +73,11 @@ echo ""
 ### --------------------------------------------------------------------------------------------
 ### If everything is OK push the resulting built items into dev org
 ### --------------------------------------------------------------------------------------------
-echo "${Green}Deploying to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
+echo "${Green}Deploying StaticResource to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
 sf project deploy start --metadata StaticResource --ignore-conflicts  1>/dev/null
 
+### --------------------------------------------------------------------------------------------
+### Update the LWC component that have a dependency with Org CHeck libraries
+### --------------------------------------------------------------------------------------------
+echo "${Green}Deploying LWC with Org Check libraries to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
+sf project deploy start --metadata LightningComponentBundle:orgcheckApp --metadata LightningComponentBundle:orgcheckExtendedDatatable --metadata LightningComponentBundle:orgcheckExportButton --ignore-conflicts  1>/dev/null

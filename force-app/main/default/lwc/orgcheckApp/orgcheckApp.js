@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import OrgCheckStaticRessource from '@salesforce/resourceUrl/OrgCheck_SR';
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import * as ocapi from './libs/orgcheck-api.js';
 import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
@@ -18,7 +18,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {string} 
      * @public
      */
-    logoURL = OrgCheckStaticRessource + '/img/Logo.svg';
+    logoURL = OrgCheckStaticResource + '/img/Logo.svg';
 
     /**
      * @description Current user has accepted the usage terms
@@ -172,17 +172,13 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async renderedCallback() {
-        try {
-            if (this._hasRenderOnce === false && this.accessToken) {
-                this._hasRenderOnce = true;
-                this._spinner = this.template.querySelector('c-orgcheck-spinner');
-                this._modal = this.template.querySelector('c-orgcheck-modal');
-                this._filters = this.template.querySelector('c-orgcheck-global-filters');
-                await this._loadAPI();
-                await this._loadBasicInformationIfAccepted();
-            }
-        } catch(e) {
-            console.error('Error while renderedCallback', e);
+        if (this._hasRenderOnce === false && this.accessToken) {
+            this._hasRenderOnce = true;
+            this._spinner = this.template.querySelector('c-orgcheck-spinner');
+            this._modal = this.template.querySelector('c-orgcheck-modal');
+            this._filters = this.template.querySelector('c-orgcheck-global-filters');
+            await this._loadAPI();
+            await this._loadBasicInformationIfAccepted();
         }
     }
 
@@ -292,20 +288,27 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _loadAPI(logger) {
-        try {
-                
-            // Init of the Org Check api (only once!)
-            if (this._api) return;
+        // SHOULD CATCH ERROR with specific error message
 
+        // Init of the Org Check api (only once!)
+        if (this._api) return;
+
+        try {                
             // Load JS dependencies
             logger?.log('Loading JsForce and FFLate libraries...');
             await Promise.all([
-                loadScript(this, OrgCheckStaticRessource + '/js/jsforce.js'),
-                loadScript(this, OrgCheckStaticRessource + '/js/fflate.js')
+                loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
+                loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
             ]);
+        } catch(e) {
+            this._showError('Error while loading third party scripts in <code>_loadAPI</code>', e);
+            return;
+        }
 
+        try {                
             // Create the Org Check API
             logger?.log('Loading Org Check library...')
+
             // @ts-ignore
             this._api = new ocapi.API(
                 // -----------------------
@@ -342,6 +345,16 @@ export default class OrgcheckApp extends LightningElement {
                      * @returns {string | null}
                      */
                     key: (index) => { return localStorage.key(index); },
+                    /**
+                     * @description Get all the keys in the storage
+                     * @returns {Array<string>}
+                     */
+                    keys: () => {  
+                        const keys = []; 
+                        for (let i = 0; i < localStorage.length; i++) {
+                            keys.push(localStorage.key(i)); 
+                        }
+                        return keys; },
                     /**
                      * @description Get the current length of the storage
                      * @returns {number}
@@ -414,9 +427,27 @@ export default class OrgcheckApp extends LightningElement {
             // Set the score rules for information
             this._internalAllScoreRulesDataMatrix = this._api.getAllScoreRulesAsDataMatrix();
 
+            // Set the initial cache just after loading the api ;)
+            this._updateCacheInformation();
+
         } catch(e) {
-            console.error('Error while _loadAPI', e);
+            this._showError('Error while loading Org Check library in <code>_loadAPI</code>', e);
         }
+    }
+
+    /**
+     * @description Show the error in a modal (that can be closed)
+     * @param {string} title
+     * @param {Error} error
+     * @private
+     */ 
+    _showError(title, error) {
+        const htmlContent = `<font color="red">Sorry! An error occured while processing... <br /><br />`+
+                            `Please create an issue on <a href="https://github.com/SalesforceLabs/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
+                            `along with the context, a screenshot and the following error. <br /><br /> `+
+                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
+        this._modal?.open(title, htmlContent);
+        console.error(title, error);
     }
 
     _nt = () => '';
@@ -478,44 +509,41 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _updateData(recipe, forceRefresh=false, lazyRefresh=true) {
-        try {
-            const transformer = this._internalTransformers[recipe]; 
-            if (transformer) {
-                if (forceRefresh === true) {
-                    // Call the remove cache from the API for this recipe
-                    transformer.remove();
-                }
-                // IF we set the lazy refresh to TRUE THEN
-                //     Only update the data if the current tab ("this._currentTab") is the one we are looking for ("recipe")
-                // ELSE
-                //     Update the data whatever the current tab is.
-                // The IF statement could be like: 
-                //     (lazyRefresh === true && recipe === this._currentTab) || lazyRefresh === false
-                // Let's do some Bool logic!!
-                // The previous IF statement is equivalent to:
-                //     NOT(  NOT( (lazyRefresh === true && recipe === this._currentTab)     ||  lazyRefresh === false )  )
-                //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  NOT(lazyRefresh === false)  )
-                //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  lazyRefresh === true  )
-                //     NOT( (NOT(lazyRefresh === true) || NOT(recipe === this._currentTab)) &&  lazyRefresh === true  )
-                //     NOT( (    lazyRefresh === false ||     recipe !== this._currentTab ) &&  lazyRefresh === true  )
-                //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
-                //     NOT( (                    false                      ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
-                //     NOT( (recipe !== this._currentTab && lazyRefresh === true )
-                // This is magic! ;)
-                if (!(recipe !== this._currentTab && lazyRefresh === true)) {
-                    // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
-                    const alias = transformer.getAlias();
-                    // If you forced the refresh the data should be retrieved even if the alias is the same
-                    // OR
-                    // If the alias has changed (like the combinaison of filters value which will pontentially change the returned value from the API
-                    if (forceRefresh === true || transformer.lastAlias !== alias) {
-                        transformer.lastAlias = alias;
-                        this[transformer.data] = await transformer.get();
-                    }
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
+        const transformer = this._internalTransformers[recipe]; 
+        if (transformer) {
+            if (forceRefresh === true) {
+                // Call the remove cache from the API for this recipe
+                transformer.remove();
+            }
+            // IF we set the lazy refresh to TRUE THEN
+            //     Only update the data if the current tab ("this._currentTab") is the one we are looking for ("recipe")
+            // ELSE
+            //     Update the data whatever the current tab is.
+            // The IF statement could be like: 
+            //     (lazyRefresh === true && recipe === this._currentTab) || lazyRefresh === false
+            // Let's do some Bool logic!!
+            // The previous IF statement is equivalent to:
+            //     NOT(  NOT( (lazyRefresh === true && recipe === this._currentTab)     ||  lazyRefresh === false )  )
+            //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  NOT(lazyRefresh === false)  )
+            //     NOT(  NOT(lazyRefresh === true && recipe === this._currentTab)       &&  lazyRefresh === true  )
+            //     NOT( (NOT(lazyRefresh === true) || NOT(recipe === this._currentTab)) &&  lazyRefresh === true  )
+            //     NOT( (    lazyRefresh === false ||     recipe !== this._currentTab ) &&  lazyRefresh === true  )
+            //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
+            //     NOT( (                    false                      ) || (recipe !== this._currentTab &&  lazyRefresh === true ) )
+            //     NOT( (recipe !== this._currentTab && lazyRefresh === true )
+            // This is magic! ;)
+            if (!(recipe !== this._currentTab && lazyRefresh === true)) {
+                // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
+                const alias = transformer.getAlias();
+                // If you forced the refresh the data should be retrieved even if the alias is the same
+                // OR
+                // If the alias has changed (like the combinaison of filters value which will pontentially change the returned value from the API
+                if (forceRefresh === true || transformer.lastAlias !== alias) {
+                    transformer.lastAlias = alias;
+                    this[transformer.data] = await transformer.get();
                 }
             }
-        } catch(e) {
-            console.error('Error while _updateData', e);
         }
     }
 
@@ -524,6 +552,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateLimits() {
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         if (this._api) {
             const dailyApiInformation = this._api.dailyApiRequestLimitInformation;
             if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
@@ -542,6 +571,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateCacheInformation() {
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         this.cacheManagerData = this._api.getCacheInformation();
     }
 
@@ -551,16 +581,13 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _checkTermsAcceptance() {
-        try {
-            if (await this._api.checkUsageTerms()) {
-                this.useOrgCheckInThisOrgNeedConfirmation = false;
-                this.useOrgCheckInThisOrgConfirmed = true;
-            } else {
-                this.useOrgCheckInThisOrgNeedConfirmation = true;
-                this.useOrgCheckInThisOrgConfirmed = false;
-            }
-        } catch(e) {
-            console.error('Error while _checkTermsAcceptance', e);
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
+        if (await this._api.checkUsageTerms()) {
+            this.useOrgCheckInThisOrgNeedConfirmation = false;
+            this.useOrgCheckInThisOrgConfirmed = true;
+        } else {
+            this.useOrgCheckInThisOrgNeedConfirmation = true;
+            this.useOrgCheckInThisOrgConfirmed = false;
         }
     }
 
@@ -572,37 +599,34 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _loadBasicInformationIfAccepted(logger) {
-        try {
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
+        if (this._api === undefined) return;
 
-            // Check for acceptance
-            await this._checkTermsAcceptance();
-            if (this.useOrgCheckInThisOrgConfirmed === false) return;
+        // Check for acceptance
+        await this._checkTermsAcceptance();
+        if (this.useOrgCheckInThisOrgConfirmed === false) return;
 
-            // Check basic permission for the current user
-            logger?.log('Checking if current user has enough permission...')
-            await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
+        // Check basic permission for the current user
+        logger?.log('Checking if current user has enough permission...')
+        await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
 
-            // Information about the org
-            logger?.log('Information about the org...');
-            const orgInfo = await this._api.getOrganizationInformation();
-            this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
-            this.orgType = orgInfo.type;
-            this.isOrgProduction = orgInfo.isProduction;
-            if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
-            else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
-            else this.themeForOrgType = 'slds-theme_success';
-            
-            // Data for the filters
-            logger?.log('Load filters...');
-            await this._loadFilters();
+        // Information about the org
+        logger?.log('Information about the org...');
+        const orgInfo = await this._api.getOrganizationInformation();
+        this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
+        this.orgType = orgInfo.type;
+        this.isOrgProduction = orgInfo.isProduction;
+        if (orgInfo.isProduction === true) this.themeForOrgType = 'slds-theme_error';
+        else if (orgInfo.isSandbox === true) this.themeForOrgType = 'slds-theme_warning';
+        else this.themeForOrgType = 'slds-theme_success';
+        
+        // Data for the filters
+        logger?.log('Load filters...');
+        await this._loadFilters();
 
-            // Update daily API limit information
-            logger?.log('Update the daily API limit informations...');
-            this._updateLimits();
-
-        } catch(e) {
-            console.error('Error while _loadBasicInformationIfAccepted', e);
-        }
+        // Update daily API limit information
+        logger?.log('Update the daily API limit informations...');
+        this._updateLimits();
     }
 
     /**
@@ -613,38 +637,34 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _loadFilters(forceRefresh=false, logger) {
-        try {
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
 
-            logger?.log('Hide the filter panel...');
-            this._filters.hide();
+        logger?.log('Hide the filter panel...');
+        this._filters.hide();
 
-            if (forceRefresh === true) {
-                logger?.log('Clean data from cache (if any)...');
-                this._api.removeAllObjectsFromCache();
-                this._api.removeAllPackagesFromCache();
-            }
-
-            logger?.log('Get packages, types and objects from the org...');
-            const filtersData = await Promise.all([
-                this._api.getPackages(),
-                this._api.getObjectTypes(),
-                this._api.getObjects(this.namespace, this.objectType)
-            ])
-
-            logger?.log('Loading data in the drop boxes...');
-            this._filters.updatePackageOptions(filtersData[0]);
-            this._filters.updateSObjectTypeOptions(filtersData[1]);
-            this._filters.updateSObjectApiNameOptions(filtersData[2]);
-
-            logger?.log('Showing the filter panel...');
-            this._filters.show();
-
-            logger?.log('Update the daily API limit informations...');
-            this._updateLimits();
-
-        } catch(e) {
-            console.error('Error while _loadFilters', e);
+        if (forceRefresh === true) {
+            logger?.log('Clean data from cache (if any)...');
+            this._api.removeAllObjectsFromCache();
+            this._api.removeAllPackagesFromCache();
         }
+
+        logger?.log('Get packages, types and objects from the org...');
+        const filtersData = await Promise.all([
+            this._api.getPackages(),
+            this._api.getObjectTypes(),
+            this._api.getObjects(this.namespace, this.objectType)
+        ])
+
+        logger?.log('Loading data in the drop boxes...');
+        this._filters.updatePackageOptions(filtersData[0]);
+        this._filters.updateSObjectTypeOptions(filtersData[1]);
+        this._filters.updateSObjectApiNameOptions(filtersData[2]);
+
+        logger?.log('Showing the filter panel...');
+        this._filters.show();
+
+        logger?.log('Update the daily API limit informations...');
+        this._updateLimits();
     }
 
     /**
@@ -653,13 +673,10 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _updateGlobalView() {
-        try {
-            this.showGlobalViewExportButton = false;
-            await Promise.all(this._globalViewTransformersKeys.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, false, false); } ));
-            this.showGlobalViewExportButton = true;
-        } catch(e) {
-            console.error('Error while _updateGlobalView', e);
-        }
+        // SHOULD NOT CATCH ERROR, this will be catched by the caller
+        this.showGlobalViewExportButton = false;
+        await Promise.all(this._globalViewTransformersKeys.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, false, false); } ));
+        this.showGlobalViewExportButton = true;
     }
 
     /**
@@ -682,9 +699,9 @@ export default class OrgcheckApp extends LightningElement {
             this._spinner.close(0);
         } catch (error) {
             this._spinner.sectionFailed(TAB_SECTION, error);
-            this._spinner.canBeClosed();
+        } finally {
+            this._updateLimits();
         }
-        this._updateLimits();
     }
 
 
@@ -703,10 +720,11 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersValidated() {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             return this._updateCurrentTab();
         } catch(e) {
-            console.error('Error while handleFiltersValidated', e);
+            this._showError('Error while handleFiltersValidated', e);
         }
     }
 
@@ -716,10 +734,11 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersRefreshed() {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             return this._loadFilters(true);
         } catch(e) {
-            console.error('Error while handleFiltersRefreshed', e);
+            this._showError('Error while handleFiltersRefreshed', e);
         }
     }
 
@@ -731,13 +750,14 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleClickUsageAcceptance(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             if (event.target['checked'] === true) {
                 this._api.acceptUsageTerms();
                 return this._loadBasicInformationIfAccepted();
             }
         } catch(e) {
-            console.error('Error while handleClickUsageAcceptance', e);
+            this._showError('Error while handleClickUsageAcceptance', e);
         }
     }
 
@@ -748,8 +768,8 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleMainTabActivation(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            
             // The source of the event is the main tab
             const mainTab = event.target;
             // In each main tab there is an inner tabset that we want to get
@@ -766,7 +786,7 @@ export default class OrgcheckApp extends LightningElement {
             return this._updateCurrentTab();
 
         } catch (e) {
-            console.error('Error while handleMainTabActivation', e);
+            this._showError('Error while handleMainTabActivation', e);
         }
     }
 
@@ -777,6 +797,7 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleSubTabActivation(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is a sub tab
             const subTab = event.target;
@@ -785,17 +806,8 @@ export default class OrgcheckApp extends LightningElement {
             // Ask to update the current data
             return this._updateCurrentTab();
         } catch (e) {
-            console.error('Error while handleSubTabActivation', e);
+            this._showError('Error while handleSubTabActivation', e);
         }
-    }
-
-    /**
-     * @description Event called when the content of a sub tab is fully loaded
-     * @public
-     * @async
-     */
-    handleSubTabContentLoaded() {
-        this._updateCacheInformation();
     }
 
     /**
@@ -804,13 +816,14 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleRemoveAllCache() {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             if (this._api) {
                 this._api.removeAllFromCache();
                 window.location.reload();
             }
         } catch (e) {
-            console.error('Error while handleRemoveAllCache', e);
+            this._showError('Error while handleRemoveAllCache', e);
         }
     }
 
@@ -821,6 +834,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleViewScore(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             const whatid = event['detail'].whatId;
             const whatname = event['detail'].whatName;
@@ -834,7 +848,7 @@ export default class OrgcheckApp extends LightningElement {
             htmlContent += '</ul>';
             this._modal.open(`Understand the Score of "${whatname}" (${whatid})`, htmlContent);
         } catch (e) {
-            console.error('Error while handleViewScore', e);
+            this._showError('Error while handleViewScore', e);
         }
     }
 
@@ -844,6 +858,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRunAllTests() {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             const LOG_SECTION = 'RUN ALL TESTS';
             this._spinner.open();
@@ -860,11 +875,10 @@ export default class OrgcheckApp extends LightningElement {
                 this._modal.open('Asynchronous Run All Test Asked', htmlContent);
 
             } catch (error) {
-                this._spinner.canBeClosed();
                 this._spinner.sectionFailed(LOG_SECTION, error);
             }
         } catch (e) {
-            console.error('Error while handleClickRunAllTests', e);
+            this._showError('Error while handleClickRunAllTests', e);
         }
     }
 
@@ -875,11 +889,12 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRefreshCurrentTab(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             const recipes = event.target['getAttribute']('data-recipes')?.split(',');
             return Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
         } catch (e) {
-            console.error('Error while handleClickRefreshCurrentTab', e);
+            this._showError('Error while handleClickRefreshCurrentTab', e);
         }
     }
 
@@ -889,6 +904,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRecompile() {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             this._spinner.open();
             const LOG_SECTION = 'RECOMPILE';
@@ -915,9 +931,8 @@ export default class OrgcheckApp extends LightningElement {
                 }
             }));
             this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
-            this._spinner.canBeClosed();
         } catch (e) {
-            console.error('Error while handleClickRecompile', e);
+            this._showError('Error while handleClickRecompile', e);
         }
     }
 
@@ -1294,8 +1309,8 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Name',             type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Is Group?',        type: ocui.ColumnType.CHK,  data: { value: 'isGroup' }},
             { label: 'Custom',           type: ocui.ColumnType.CHK,  data: { value: 'isCustom' }},
-            { label: '#FLSs',            type: ocui.ColumnType.NUM,  data: { value: 'nbFieldPermissions' }, modifier: { maximum: 50, valueAfterMax: '50+' }},
-            { label: '#Object CRUDs',    type: ocui.ColumnType.NUM,  data: { value: 'nbObjectPermissions' }, modifier: { maximum: 50, valueAfterMax: '50+' }},
+            { label: '#FLSs',            type: ocui.ColumnType.NUM,  data: { value: 'nbFieldPermissions' }},
+            { label: '#Object CRUDs',    type: ocui.ColumnType.NUM,  data: { value: 'nbObjectPermissions' }},
             { label: 'Api Enabled',      type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.apiEnabled' }},
             { label: 'View Setup',       type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.viewSetup' }},
             { label: 'Modify All Data',  type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.modifyAllData' }},
@@ -1303,7 +1318,6 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'License',          type: ocui.ColumnType.TXT,  data: { value: 'license' }},
             { label: 'Package',          type: ocui.ColumnType.TXT,  data: { value: 'package' }},
             { label: '#Active users',    type: ocui.ColumnType.NUM,  data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user!', valueIfEmpty: '' }},
-            { label: 'Users\' profiles', type: ocui.ColumnType.URLS, data: { values: 'assigneeProfileRefs', value: 'url', label: 'name' }},
             { label: 'Created date',     type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
             { label: 'Modified date',    type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
             { label: 'Description',      type: ocui.ColumnType.TXT,  data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
@@ -1327,6 +1341,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Remaining',             type: ocui.ColumnType.NUM,  data: { value: 'remainingCount' }},
             { label: 'Users Really Assigned', type: ocui.ColumnType.NUM,  data: { value: 'distinctActiveAssigneeCount' }},
             { label: 'Permission Sets',       type: ocui.ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }},
+            { label: 'Permission Sets (ids)', type: ocui.ColumnType.TXTS, data: { values: 'permissionSetIds' }},
             { label: 'Status',                type: ocui.ColumnType.TXT,  data: { value: 'status' }},
             { label: 'Expiration Date',       type: ocui.ColumnType.DTM,  data: { value: 'expirationDate' }},
             { label: 'For Integration?',      type: ocui.ColumnType.CHK,  data: { value: 'isAvailableForIntegrations' }},
@@ -1347,15 +1362,15 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
             { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Custom',          type: ocui.ColumnType.CHK, data: { value: 'isCustom' }},
-            { label: '#FLSs',           type: ocui.ColumnType.NUM, data: { value: 'nbFieldPermissions' }, modifier: { maximum: 50, valueAfterMax: '50+' }},
-            { label: '#Object CRUDs',   type: ocui.ColumnType.NUM, data: { value: 'nbObjectPermissions' }, modifier: { maximum: 50, valueAfterMax: '50+' }},           
+            { label: '#FLSs',           type: ocui.ColumnType.NUM, data: { value: 'nbFieldPermissions' }},
+            { label: '#Object CRUDs',   type: ocui.ColumnType.NUM, data: { value: 'nbObjectPermissions' }},
             { label: 'Api Enabled',     type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.apiEnabled' }},
             { label: 'View Setup',      type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.viewSetup' }},
             { label: 'Modify All Data', type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.modifyAllData' }},
             { label: 'View All Data',   type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.viewAllData' }},
             { label: 'License',         type: ocui.ColumnType.TXT, data: { value: 'license' }},
             { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: '#Active users',   type: ocui.ColumnType.NUM, data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user!' , maximum: 50, valueAfterMax: '50+' }},
+            { label: '#Active users',   type: ocui.ColumnType.NUM, data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user!', valueIfEmpty: '' }},
             { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
             { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
@@ -2046,7 +2061,7 @@ export default class OrgcheckApp extends LightningElement {
                 return ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label);
             });
         } catch (error) {
-            console.error('Error while exporting global view items:', JSON.stringify(error), error.stack, error.message);
+            this._showError('Error while exporting global view items:', error);
         }
     }
     

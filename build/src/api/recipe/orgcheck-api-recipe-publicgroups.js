@@ -1,11 +1,12 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
 import { Processor } from '../core/orgcheck-api-processing';
-import { Data } from '../core/orgcheck-api-data';
+import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
+import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
 export class RecipePublicGroups extends Recipe {
 
@@ -34,8 +35,8 @@ export class RecipePublicGroups extends Recipe {
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
 
         // Checking data
-        if (!groups) throw new Error(`Data from dataset alias 'GROUPS' was undefined.`);
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
+        if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'GROUPS' was undefined.`);
+        if (!users) throw new Error(`RecipePublicGroups: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment and filter data
         const array = [];

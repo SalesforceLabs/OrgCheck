@@ -32,7 +32,7 @@ export class RecipeProfilePasswordPolicies extends Recipe {
         const /** @type {Map<string, SFDC_ProfilePasswordPolicy>} */ policies = data.get(DatasetAliases.PROFILEPWDPOLICIES);
 
         // Checking data
-        if (!policies) throw new Error(`Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);
+        if (!policies) throw new Error(`RecipeProfilePasswordPolicies: Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);
 
         // Return all data
         return [... policies.values()];

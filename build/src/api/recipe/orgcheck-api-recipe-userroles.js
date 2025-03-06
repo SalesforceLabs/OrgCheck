@@ -39,8 +39,8 @@ export class RecipeUserRoles extends Recipe {
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
 
         // Checking data
-        if (!userRoles) throw new Error(`Data from dataset alias 'USERROLES' was undefined.`);
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
+        if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);
+        if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment and Filter data
         const array = [];

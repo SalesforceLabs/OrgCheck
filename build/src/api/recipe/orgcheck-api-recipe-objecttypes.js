@@ -32,7 +32,7 @@ export class RecipeObjectTypes extends Recipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!types) throw new Error(`RecipeObjectTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);
 
         // Return data
         return [... types.values()];

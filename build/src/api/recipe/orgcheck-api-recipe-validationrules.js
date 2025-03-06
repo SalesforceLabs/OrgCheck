@@ -4,7 +4,6 @@ import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
-import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
@@ -42,9 +41,9 @@ export class RecipeValidationRules extends Recipe {
         const /** @type {Map<string, SFDC_ValidationRule>} */ validationRules = data.get(DatasetAliases.VALIDATIONRULES);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!validationRules) throw new Error(`Data from dataset alias 'VALIDATIONRULES' was undefined.`);
+        if (!types) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
         // Augment data
         await Processor.forEach(validationRules, (validationRule) => {

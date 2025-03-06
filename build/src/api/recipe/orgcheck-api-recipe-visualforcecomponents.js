@@ -34,7 +34,7 @@ export class RecipeVisualForceComponents extends Recipe {
         const /** @type {Map<string, SFDC_VisualForceComponent>} */ components = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeVisualForceComponents: Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];

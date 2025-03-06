@@ -39,8 +39,8 @@ export class RecipeLightningPages extends Recipe {
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
 
         // Checking data
-        if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!pages) throw new Error(`RecipeLightningPages: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
+        if (!objects) throw new Error(`RecipeLightningPages: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
         const array = [];

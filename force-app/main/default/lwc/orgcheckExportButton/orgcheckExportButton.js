@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import OrgCheckStaticRessource from "@salesforce/resourceUrl/OrgCheck_SR";
+import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
 import * as ocui from './libs/orgcheck-ui';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
@@ -26,7 +26,7 @@ export default class OrgcheckExportButton extends LightningElement {
     renderedCallback() {
         // Load only if the api is not already initilized
         if (this._apiInitialized === false) {
-            loadScript(this, OrgCheckStaticRessource + '/js/xlsx.js')
+            loadScript(this, OrgCheckStaticResource + '/js/xlsx.js')
                 .then(() => {
                     this._apiInitialized = true;
                     // @ts-ignore

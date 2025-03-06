@@ -38,8 +38,8 @@ export class RecipePermissionSetLicenses extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!permissionSetLicenses) throw new Error(`Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!permissionSetLicenses) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
         await Processor.forEach(permissionSetLicenses, async (permissionSetLicense) => {

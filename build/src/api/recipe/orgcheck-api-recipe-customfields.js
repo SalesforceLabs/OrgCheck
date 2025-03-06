@@ -44,9 +44,9 @@ export class RecipeCustomFields extends Recipe {
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
+        if (!types) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
         await Processor.forEach(customFields, (customField) => {

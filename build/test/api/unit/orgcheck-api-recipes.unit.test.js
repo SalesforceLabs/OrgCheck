@@ -444,7 +444,7 @@ describe('tests.api.unit.Recipes', () => {
       const datasets = recipe.extract(logger);
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
-      expect(datasets.length).toBe(2);
+      expect(datasets.length).toBe(1);
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());

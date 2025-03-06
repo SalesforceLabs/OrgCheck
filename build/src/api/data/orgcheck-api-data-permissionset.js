@@ -12,6 +12,4 @@ export class SFDC_PermissionSet extends SFDC_Profile {
 
     isGroup;
     groupId;
-    assigneeProfileIds;
-    assigneeProfileRefs;
 }

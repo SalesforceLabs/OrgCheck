@@ -32,7 +32,7 @@ export class RecipeOrganization extends Recipe {
         const /** @type {Map<string, SFDC_Organization>} */ organization = data.get(DatasetAliases.ORGANIZATION);
 
         // Checking data
-        if (!organization) throw new Error(`Data from dataset alias 'ORGANIZATION' was undefined.`);
+        if (!organization) throw new Error(`RecipeOrganization: Data from dataset alias 'ORGANIZATION' was undefined.`);
 
         // Return data
         return organization;

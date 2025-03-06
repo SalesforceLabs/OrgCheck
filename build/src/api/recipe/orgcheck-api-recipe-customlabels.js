@@ -34,7 +34,7 @@ export class RecipeCustomLabels extends Recipe {
         const /** @type {Map<string, SFDC_CustomLabel>} */ customLabels = data.get(DatasetAliases.CUSTOMLABELS);
 
         // Checking data
-        if (!customLabels) throw new Error(`Data from dataset alias 'CUSTOMLABELS' was undefined.`);
+        if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
 
         // Filter data
         const array = [];

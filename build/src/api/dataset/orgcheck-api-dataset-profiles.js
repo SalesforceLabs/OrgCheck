@@ -22,19 +22,44 @@ export class DatasetProfiles extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, ' +
                         'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, ' +
-                        'CreatedDate, LastModifiedDate, ' +
-                        '(SELECT Id FROM FieldPerms LIMIT 51), ' +
-                        '(SELECT Id FROM ObjectPerms LIMIT 51), ' +
-                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) ' +
+                        'CreatedDate, LastModifiedDate ' +
                     'FROM PermissionSet ' + // oh yes we are not mistaken!
-                    'WHERE isOwnedByProfile = TRUE'
+                    'WHERE isOwnedByProfile = TRUE '+
+                    'ORDER BY ProfileId '+
+                    'LIMIT 2000'
+        }, {
+            string: 'SELECT Parent.ProfileId, COUNT(SobjectType) CountObject '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM ObjectPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = TRUE '+
+                    'GROUP BY Parent.ProfileId '+
+                    'ORDER BY Parent.ProfileId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT Parent.ProfileId, COUNT(Field) CountField '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM FieldPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = TRUE '+
+                    'GROUP BY Parent.ProfileId '+
+                    'ORDER BY Parent.ProfileId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM PermissionSetAssignment '+
+                    'WHERE PermissionSet.IsOwnedByProfile = TRUE '+
+                    'GROUP BY PermissionSet.ProfileId '+
+                    'ORDER BY PermissionSet.ProfileId '+
+                    'LIMIT 2000'
         }], logger);
+
+        // All salesforce records
+        const profileRecords = results[0];
+        const objectPermissionRecords = results[1];
+        const fieldPermissionRecords = results[2];
+        const assignmentRecords = results[3];
 
         // Init the factory and records
         const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
 
-        // Create the map
-        const profileRecords = results[0];
+        // Create the map of profiles
         logger?.log(`Parsing ${profileRecords.length} profiles...`);
         const profiles = new Map(await Processor.map(profileRecords, (record) => {
 
@@ -50,11 +75,11 @@ export class DatasetProfiles extends Dataset {
                     license: (record.License ? record.License.Name : ''),
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
-                    memberCounts: record.Assignments?.records.length || 0,
+                    memberCounts: 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    nbFieldPermissions: 0,
+                    nbObjectPermissions: 0,
                     type: 'Profile',
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
@@ -69,6 +94,37 @@ export class DatasetProfiles extends Dataset {
             // Add it to the map  
             return [ profile.id, profile ];
         }));
+
+        logger?.log(`Parsing ${objectPermissionRecords.length} object permissions, ${fieldPermissionRecords.length} field permissions and ${assignmentRecords.length} assignments...`);
+        await Promise.all([
+            Processor.forEach(objectPermissionRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.nbObjectPermissions = record.CountObject;
+                } else {
+                    logger.log(`[objectPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+            Processor.forEach(fieldPermissionRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.nbFieldPermissions = record.CountField;    
+                } else {
+                    logger.log(`[fieldPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+            Processor.forEach(assignmentRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.memberCounts = record.CountAssignment;    
+                } else {
+                    logger.log(`[assignmentRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+        ]);
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${profiles.size} profiles...`);

@@ -21,7 +21,7 @@ export class DatasetGroups extends Dataset {
         logger?.log(`Querying REST API about Group in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, ' +
-                        '(SELECT UserOrGroupId From GroupMembers)' +
+                        '(SELECT UserOrGroupId From GroupMembers)' + // optimisation?
                     'FROM Group '
         }], logger);
 

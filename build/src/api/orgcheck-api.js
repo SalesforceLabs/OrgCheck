@@ -107,7 +107,7 @@ export class API {
      * @description Org Check constructor
      * @param {string} accessToken
      * @param {any} jsConnectionFactory
-     * @param {{setItem: function, getItem: function, removeItem: function, key: function, length: function}} jsLocalStorage
+     * @param {{setItem: function, getItem: function, removeItem: function, key: function, keys: function, length: function}} jsLocalStorage
      * @param {{encode: function, decode: function}} jsEncoding
      * @param {{compress: function, decompress: function}} jsCompressing
      * @param {BasicLoggerIntf} loggerSetup

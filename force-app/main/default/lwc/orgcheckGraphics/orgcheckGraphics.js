@@ -1,13 +1,28 @@
 import { LightningElement, api } from 'lwc';
-import OrgCheckStaticRessource from '@salesforce/resourceUrl/OrgCheck_SR';
+import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
 export default class OrgcheckGraphics extends LightningElement {
 
-  #apiInitialized = false;
-  #api;
-  #data;
+  /**
+   * @description Flag to know if the api was intiated
+   * @type {boolean}
+   * @private
+   */ 
+  _apiInitialized = false;
+
+  /**
+   * @description Excel API used to generate documents
+   * @type {any}
+   * @private
+   */ 
+  _api;
+
+  /**
+   * @type {any}
+   */
+  _data;
 
   /**
    * Called when it's about to render the component
@@ -15,12 +30,12 @@ export default class OrgcheckGraphics extends LightningElement {
   renderedCallback() {
     
     // Load only if the api is not already initilized
-    if (this.#apiInitialized === false) {
-      loadScript(this, OrgCheckStaticRessource + '/js/d3.js')
+    if (this._apiInitialized === false) {
+      loadScript(this, OrgCheckStaticResource + '/js/d3.js')
         .then(() => {
-          this.#apiInitialized = true;
+          this._apiInitialized = true;
           // @ts-ignore
-          this.#api = d3; 
+          this._api = d3; 
 
           // draw graph now
           this.drawGraph();
@@ -37,7 +52,7 @@ export default class OrgcheckGraphics extends LightningElement {
    * @param {any} data
    */
   @api set source(data) {
-    this.#data = data;
+    this._data = data;
     this.hasNoData = data === undefined ;
     this.drawGraph();
   }
@@ -46,7 +61,7 @@ export default class OrgcheckGraphics extends LightningElement {
    * Get the data used in the graphic
    */
   get source() {
-    return this.#data;
+    return this._data;
   }
 
   get containerClass() {
@@ -94,12 +109,12 @@ export default class OrgcheckGraphics extends LightningElement {
   drawGraph() {
 
     // If API not loaded yet, then just skip!
-    if (this.#apiInitialized === false) {
+    if (this._apiInitialized === false) {
       return;
     }
 
     // If no data to show, then just skip!
-    if (this.#data === undefined) {
+    if (this._data === undefined) {
       return;
     }
  
@@ -129,7 +144,7 @@ export default class OrgcheckGraphics extends LightningElement {
     });
 
     // Gives an idea of how big the tree will be
-    const root = this.#api.hierarchy(this.#data);
+    const root = this._api.hierarchy(this._data);
     let mdepth = 0;
     root.each(d => { if (mdepth < d.depth) mdepth = d.depth });
     root.dx = boxHeight + boxVerticalPadding;
@@ -137,7 +152,7 @@ export default class OrgcheckGraphics extends LightningElement {
     const WIDTH = boxWidth * (mdepth+1) + boxHorizontalPadding * mdepth;
 
     // Generate tree
-    this.#api.tree().nodeSize([root.dx, root.dy])(root);
+    this._api.tree().nodeSize([root.dx, root.dy])(root);
 
     // Define x0 and x1
     let x0 = Infinity;
@@ -148,7 +163,7 @@ export default class OrgcheckGraphics extends LightningElement {
     });
 
     // Get the main tag 
-    const mainTag = this.#api.select(this.template.querySelector('.orgcheck-graph'));
+    const mainTag = this._api.select(this.template.querySelector('.orgcheck-graph'));
 
     // Clean previous graph if needed
     mainTag.selectAll('*').remove();
@@ -220,7 +235,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   _drawPie() {
     this.pieTotal = 0;
-    this.pieCategories = this.pieCategoriesDecorator(this.#data).map((c) => { 
+    this.pieCategories = this.pieCategoriesDecorator(this._data).map((c) => { 
       this.pieTotal += c.value;
       return { 
         name: c.name,
@@ -236,7 +251,7 @@ export default class OrgcheckGraphics extends LightningElement {
     const stroke = this.pieStrokeWidth/1; // same for stroke!
 
     // Get the main tag 
-    const mainTag = this.#api.select(this.template.querySelector('.orgcheck-graph'));
+    const mainTag = this._api.select(this.template.querySelector('.orgcheck-graph'));
 
     // Clean previous graph if needed
     mainTag.selectAll('*').remove();
@@ -248,7 +263,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .attr('height', diameter)
       .attr('viewBox', [ 0, -radius-stroke, stroke, diameter+2*stroke ])
       .selectAll('g')
-      .data(() => [this.#api.pie()(values)])
+      .data(() => [this._api.pie()(values)])
       .join('g')
       .append('g')
       .attr('stroke', '#000')
@@ -258,7 +273,7 @@ export default class OrgcheckGraphics extends LightningElement {
       .data(arcs => arcs)
       .join('path')
       .attr('fill', (d, i) => colors[i])
-      .attr('d', this.#api.arc()
+      .attr('d', this._api.arc()
         .innerRadius(radius / 2)
         .outerRadius(radius)
         .cornerRadius(8)

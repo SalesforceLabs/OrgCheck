@@ -32,7 +32,7 @@ export class RecipePackages extends Recipe {
         const /** @type {Map<string, SFDC_Package>} */ packages = data.get(DatasetAliases.PACKAGES);
 
         // Checking data
-        if (!packages) throw new Error(`Data from dataset alias 'PACKAGES' was undefined.`);
+        if (!packages) throw new Error(`RecipePackages: Data from dataset alias 'PACKAGES' was undefined.`);
 
         // Return data
         return [... packages.values()];

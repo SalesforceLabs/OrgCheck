@@ -22,29 +22,44 @@ export class DatasetPermissionSets extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, ' +
                         'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, ' +
-                        'CreatedDate, LastModifiedDate, ' +
-                        '(SELECT Id FROM FieldPerms LIMIT 51), ' +
-                        '(SELECT Id FROM ObjectPerms LIMIT 51)' +
+                        'CreatedDate, LastModifiedDate ' +
                     'FROM PermissionSet ' +
-                    'WHERE IsOwnedByProfile = FALSE'
-        }, {
-            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId ' +
-                    'FROM PermissionSetAssignment ' +
-                    'WHERE Assignee.IsActive = TRUE ' +
-                    'AND PermissionSet.IsOwnedByProfile = FALSE ' +
-                    'ORDER BY PermissionSetId '
+                    'WHERE IsOwnedByProfile = FALSE '+
+                    'ORDER BY Id '+
+                    'LIMIT 2000'
         }, {
             byPasses: ['INVALID_TYPE'], // in some org PermissionSetGroup is not defined!
             string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description ' +
                     'FROM PermissionSet ' +
-                    'WHERE PermissionSetGroupId != null '
+                    'WHERE PermissionSetGroupId != null '+
+                    'ORDER BY Id '+
+                    'LIMIT 2000'
+        }, {
+            string: 'SELECT ParentId, COUNT(SobjectType) CountObject '+
+                    'FROM ObjectPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = FALSE '+
+                    'GROUP BY ParentId '+
+                    'ORDER BY ParentId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT ParentId, COUNT(Field) CountField '+
+                    'FROM FieldPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = FALSE '+
+                    'GROUP BY ParentId '+
+                    'ORDER BY ParentId '+
+                    'LIMIT 2000'
         }], logger);
+
+        // All salesforce records
+        const permissionSetRecords = results[0];
+        const permissionSetGroupRecords = results[1];
+        const objectPermissionRecords = results[2];
+        const fieldPermissionRecords = results[3];
 
         // Init the factory and records
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
 
-        // Create the map
-        const permissionSetRecords = results[0];
+        // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords.length} permission sets...`);
         const permissionSets = new Map(await Processor.map(permissionSetRecords, (record) => {
 
@@ -68,8 +83,8 @@ export class DatasetPermissionSets extends Dataset {
                     type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    nbFieldPermissions: 0,
+                    nbObjectPermissions: 0,
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
                         viewSetup: record.PermissionsViewSetup === true, 
@@ -84,39 +99,33 @@ export class DatasetPermissionSets extends Dataset {
             return [ permissionSet.id, permissionSet ];
         }));
 
-        const permissionSetAssignmentRecords = results[1];
-        logger?.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
-        const assigneeProfileIdsByPermSetId = new Map();
-        await Processor.forEach(permissionSetAssignmentRecords, (record) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
-            const assigneeProfileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
-            if (permissionSets.has(permissionSetId)) {
-                // This permission set is assigned to users with this profile
-                if (assigneeProfileIdsByPermSetId.has(permissionSetId) === false) {
-                    assigneeProfileIdsByPermSetId.set(permissionSetId, new Set());
+        logger?.log(`Parsing ${permissionSetGroupRecords.length} permission set groups, ${objectPermissionRecords.length} object permissions and ${fieldPermissionRecords.length} field permissions...`);
+        await Promise.all([
+            Processor.forEach(permissionSetGroupRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.Id);
+                const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.isGroup = true;
+                    permissionSet.groupId = permissionSetGroupId;
+                    permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
                 }
-                assigneeProfileIdsByPermSetId.get(permissionSetId).add(assigneeProfileId);
-                // Add to the count of member for this permission set
-                permissionSets.get(permissionSetId).memberCounts++;
-            }
-        });
-        await Processor.forEach(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
-            permissionSets.get(permissionSetId).assigneeProfileIds = Array.from(assigneeProfileIds);
-        });
-
-        const permissionSetGroupRecords = results[2];
-        logger?.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
-        await Processor.forEach(permissionSetGroupRecords, (record) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.Id);
-            const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
-            if (permissionSets.has(permissionSetId)) {
-                const permissionSet = permissionSets.get(permissionSetId);
-                permissionSet.isGroup = true;
-                permissionSet.groupId = permissionSetGroupId;
-                permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
-
-            }
-        });
+            }),
+            Processor.forEach(objectPermissionRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.nbObjectPermissions = record.CountObject;
+                }
+            }),
+            Processor.forEach(fieldPermissionRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.nbFieldPermissions = record.CountField;    
+                }
+            })
+        ]);
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);

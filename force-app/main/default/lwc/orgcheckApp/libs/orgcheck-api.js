@@ -2120,8 +2120,6 @@ class SFDC_PermissionSet extends SFDC_Profile {
 
     isGroup;
     groupId;
-    assigneeProfileIds;
-    assigneeProfileRefs;
 }
 
 /**
@@ -3752,6 +3750,13 @@ class DataCacheManager extends DataCacheManagerIntf {
     _storageKey;
 
     /**
+     * @description Function to retrieve all the keys in the storage
+     * @type {function}
+     * @private
+     */
+    _storageKeys;
+
+    /**
      * @description Function to retrieve the number of keys/items stored in the storage
      * @type {function}
      * @private
@@ -3774,6 +3779,7 @@ class DataCacheManager extends DataCacheManagerIntf {
         this._storageRemoveItem = configuration.storage.removeItem;
         this._storageKey = configuration.storage.key;
         this._storageLength = configuration.storage.length;
+        this._storageKeys = configuration.storage.keys;
     }
 
     /**
@@ -3889,10 +3895,13 @@ class DataCacheManager extends DataCacheManagerIntf {
                 content: value, created: now
             };
             try {
+                this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry)); // this is more likely to throw an error if data exceeds the local storage limit, so do it first!
                 this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
-                this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry));
-            } catch(error) {
-                console.warn('Not able to store in local store that amount of data.');
+            } catch(error) { 
+                // Not able to store in local store that amount of data.
+                // Making sure to clean both cache entries to be consistent
+                this._storageRemoveItem(metadataPhysicalKey);
+                this._storageRemoveItem(dataPhysicalKey);
             }
         }
     }
@@ -3902,7 +3911,7 @@ class DataCacheManager extends DataCacheManagerIntf {
      * @returns {Array<DataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     details() {
-        return Object.keys(localStorage)
+        return this._storageKeys()
             .filter((key) => key.startsWith(METADATA_CACHE_PREFIX))
             .map((key) => {
                 /** @type {MetadataItemInCache} */
@@ -3931,7 +3940,7 @@ class DataCacheManager extends DataCacheManagerIntf {
      * @public
      */
     clear() {
-        return Object.keys(localStorage)
+        return this._storageKeys()
             .filter((key) => key.startsWith(CACHE_PREFIX))
             .forEach((key) => this._storageRemoveItem(key));
     }
@@ -3943,16 +3952,24 @@ class DataCacheManager extends DataCacheManagerIntf {
      *   data in the local storage with its key.
      * @param {string} key
      * @param {string} stringValue
+     * @throws {Error} Most likely when trying to save the value in the local storage (_storageSetItem)
      * @private
      */
     _setItemToCache = (key, stringValue) => {
+        let encodedValue, compressedValue, hexValue;
         try {
-            const encodedValue = this._encode(stringValue);
-            const compressedValue = this._compress(encodedValue);
-            const hexValue = FROM_BUFFER_TO_HEX(compressedValue);
+            encodedValue = this._encode(stringValue);
+            compressedValue = this._compress(encodedValue);
+            hexValue = FROM_BUFFER_TO_HEX(compressedValue);
             this._storageSetItem(key, hexValue);
         } catch (error) {
-            console.error(`Error occured when trying to save the value for key ${key} with value ${stringValue}`, error, stringValue, JSON.stringify(stringValue));
+            throw new Error(
+                `Error occured when trying to save the value for key ${key} with: `+
+                    `hexValue.length=${hexValue?.length || 'N/A'}, `+
+                    `compressedValue.length=${compressedValue?.length || 'N/A'}, `+
+                    `encodedValue.length=${encodedValue?.length || 'N/A'}. `+
+                    `Initiale error message was ${error.message}`
+            );
         }
     }
 
@@ -3981,6 +3998,7 @@ class DataCacheManager extends DataCacheManagerIntf {
             if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
             return entry;
         } catch (error) {
+            console.error(`Error occured when trying to parse the string: ${entryFromStorage}`, error);
             return null;
         }
     }
@@ -3990,7 +4008,7 @@ class DataCacheManager extends DataCacheManagerIntf {
  * @description Cache prefix to use for any items stored in the local storage for Org Check
  * @type {string} 
  */
-const CACHE_PREFIX = '';
+const CACHE_PREFIX = 'OrgCheck';
 
 /**
  * @description Cache prefix to use for data stored in the local storage
@@ -4934,29 +4952,44 @@ class DatasetPermissionSets extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, ' +
                         'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, ' +
-                        'CreatedDate, LastModifiedDate, ' +
-                        '(SELECT Id FROM FieldPerms LIMIT 51), ' +
-                        '(SELECT Id FROM ObjectPerms LIMIT 51)' +
+                        'CreatedDate, LastModifiedDate ' +
                     'FROM PermissionSet ' +
-                    'WHERE IsOwnedByProfile = FALSE'
-        }, {
-            string: 'SELECT Id, AssigneeId, Assignee.ProfileId, PermissionSetId ' +
-                    'FROM PermissionSetAssignment ' +
-                    'WHERE Assignee.IsActive = TRUE ' +
-                    'AND PermissionSet.IsOwnedByProfile = FALSE ' +
-                    'ORDER BY PermissionSetId '
+                    'WHERE IsOwnedByProfile = FALSE '+
+                    'ORDER BY Id '+
+                    'LIMIT 2000'
         }, {
             byPasses: ['INVALID_TYPE'], // in some org PermissionSetGroup is not defined!
             string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description ' +
                     'FROM PermissionSet ' +
-                    'WHERE PermissionSetGroupId != null '
+                    'WHERE PermissionSetGroupId != null '+
+                    'ORDER BY Id '+
+                    'LIMIT 2000'
+        }, {
+            string: 'SELECT ParentId, COUNT(SobjectType) CountObject '+
+                    'FROM ObjectPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = FALSE '+
+                    'GROUP BY ParentId '+
+                    'ORDER BY ParentId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT ParentId, COUNT(Field) CountField '+
+                    'FROM FieldPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = FALSE '+
+                    'GROUP BY ParentId '+
+                    'ORDER BY ParentId '+
+                    'LIMIT 2000'
         }], logger);
+
+        // All salesforce records
+        const permissionSetRecords = results[0];
+        const permissionSetGroupRecords = results[1];
+        const objectPermissionRecords = results[2];
+        const fieldPermissionRecords = results[3];
 
         // Init the factory and records
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
 
-        // Create the map
-        const permissionSetRecords = results[0];
+        // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords.length} permission sets...`);
         const permissionSets = new Map(await Processor.map(permissionSetRecords, (record) => {
 
@@ -4980,8 +5013,8 @@ class DatasetPermissionSets extends Dataset {
                     type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    nbFieldPermissions: 0,
+                    nbObjectPermissions: 0,
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
                         viewSetup: record.PermissionsViewSetup === true, 
@@ -4996,39 +5029,33 @@ class DatasetPermissionSets extends Dataset {
             return [ permissionSet.id, permissionSet ];
         }));
 
-        const permissionSetAssignmentRecords = results[1];
-        logger?.log(`Parsing ${permissionSetAssignmentRecords.length} Permission Set Assignments...`);
-        const assigneeProfileIdsByPermSetId = new Map();
-        await Processor.forEach(permissionSetAssignmentRecords, (record) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
-            const assigneeProfileId = sfdcManager.caseSafeId(record.Assignee.ProfileId);
-            if (permissionSets.has(permissionSetId)) {
-                // This permission set is assigned to users with this profile
-                if (assigneeProfileIdsByPermSetId.has(permissionSetId) === false) {
-                    assigneeProfileIdsByPermSetId.set(permissionSetId, new Set());
+        logger?.log(`Parsing ${permissionSetGroupRecords.length} permission set groups, ${objectPermissionRecords.length} object permissions and ${fieldPermissionRecords.length} field permissions...`);
+        await Promise.all([
+            Processor.forEach(permissionSetGroupRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.Id);
+                const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.isGroup = true;
+                    permissionSet.groupId = permissionSetGroupId;
+                    permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
                 }
-                assigneeProfileIdsByPermSetId.get(permissionSetId).add(assigneeProfileId);
-                // Add to the count of member for this permission set
-                permissionSets.get(permissionSetId).memberCounts++;
-            }
-        });
-        await Processor.forEach(assigneeProfileIdsByPermSetId, (assigneeProfileIds, permissionSetId) => {
-            permissionSets.get(permissionSetId).assigneeProfileIds = Array.from(assigneeProfileIds);
-        });
-
-        const permissionSetGroupRecords = results[2];
-        logger?.log(`Parsing ${permissionSetGroupRecords.length} Permission Set Groups...`);
-        await Processor.forEach(permissionSetGroupRecords, (record) => {
-            const permissionSetId = sfdcManager.caseSafeId(record.Id);
-            const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
-            if (permissionSets.has(permissionSetId)) {
-                const permissionSet = permissionSets.get(permissionSetId);
-                permissionSet.isGroup = true;
-                permissionSet.groupId = permissionSetGroupId;
-                permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
-
-            }
-        });
+            }),
+            Processor.forEach(objectPermissionRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.nbObjectPermissions = record.CountObject;
+                }
+            }),
+            Processor.forEach(fieldPermissionRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.nbFieldPermissions = record.CountField;    
+                }
+            })
+        ]);
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
@@ -5058,19 +5085,44 @@ class DatasetProfiles extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, ' +
                         'PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, ' +
-                        'CreatedDate, LastModifiedDate, ' +
-                        '(SELECT Id FROM FieldPerms LIMIT 51), ' +
-                        '(SELECT Id FROM ObjectPerms LIMIT 51), ' +
-                        '(SELECT Id FROM Assignments WHERE Assignee.IsActive = TRUE LIMIT 51) ' +
+                        'CreatedDate, LastModifiedDate ' +
                     'FROM PermissionSet ' + // oh yes we are not mistaken!
-                    'WHERE isOwnedByProfile = TRUE'
+                    'WHERE isOwnedByProfile = TRUE '+
+                    'ORDER BY ProfileId '+
+                    'LIMIT 2000'
+        }, {
+            string: 'SELECT Parent.ProfileId, COUNT(SobjectType) CountObject '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM ObjectPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = TRUE '+
+                    'GROUP BY Parent.ProfileId '+
+                    'ORDER BY Parent.ProfileId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT Parent.ProfileId, COUNT(Field) CountField '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM FieldPermissions '+
+                    'WHERE Parent.IsOwnedByProfile = TRUE '+
+                    'GROUP BY Parent.ProfileId '+
+                    'ORDER BY Parent.ProfileId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+                    'FROM PermissionSetAssignment '+
+                    'WHERE PermissionSet.IsOwnedByProfile = TRUE '+
+                    'GROUP BY PermissionSet.ProfileId '+
+                    'ORDER BY PermissionSet.ProfileId '+
+                    'LIMIT 2000'
         }], logger);
+
+        // All salesforce records
+        const profileRecords = results[0];
+        const objectPermissionRecords = results[1];
+        const fieldPermissionRecords = results[2];
+        const assignmentRecords = results[3];
 
         // Init the factory and records
         const profileDataFactory = dataFactory.getInstance(SFDC_Profile);
 
-        // Create the map
-        const profileRecords = results[0];
+        // Create the map of profiles
         logger?.log(`Parsing ${profileRecords.length} profiles...`);
         const profiles = new Map(await Processor.map(profileRecords, (record) => {
 
@@ -5086,11 +5138,11 @@ class DatasetProfiles extends Dataset {
                     license: (record.License ? record.License.Name : ''),
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
-                    memberCounts: record.Assignments?.records.length || 0,
+                    memberCounts: 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    nbFieldPermissions: record.FieldPerms?.records.length || 0,
-                    nbObjectPermissions: record.ObjectPerms?.records.length || 0,
+                    nbFieldPermissions: 0,
+                    nbObjectPermissions: 0,
                     type: 'Profile',
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
@@ -5105,6 +5157,37 @@ class DatasetProfiles extends Dataset {
             // Add it to the map  
             return [ profile.id, profile ];
         }));
+
+        logger?.log(`Parsing ${objectPermissionRecords.length} object permissions, ${fieldPermissionRecords.length} field permissions and ${assignmentRecords.length} assignments...`);
+        await Promise.all([
+            Processor.forEach(objectPermissionRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.nbObjectPermissions = record.CountObject;
+                } else {
+                    logger.log(`[objectPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+            Processor.forEach(fieldPermissionRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.nbFieldPermissions = record.CountField;    
+                } else {
+                    logger.log(`[fieldPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+            Processor.forEach(assignmentRecords, (record) => {
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                if (profiles.has(profileId)) {
+                    const profile = profiles.get(profileId);
+                    profile.memberCounts = record.CountAssignment;    
+                } else {
+                    logger.log(`[assignmentRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                }
+            }),
+        ]);
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${profiles.size} profiles...`);
@@ -5304,7 +5387,7 @@ class DatasetUsers extends Dataset {
             string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, ' +
                         'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
                         'UserPreferencesLightningExperiencePreferred, ' +
-                        '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' +
+                        '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' + // optimisation?
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
@@ -5372,7 +5455,7 @@ class DatasetVisualForcePages extends Dataset {
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexPage ' +
-                    'WHERE ManageableState IN (\'installedEditable\', \'unmanaged\')'
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged')`
         }], logger);
 
         // Init the factory and records
@@ -5708,7 +5791,7 @@ class DatasetGroups extends Dataset {
         logger?.log(`Querying REST API about Group in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, DeveloperName, DoesIncludeBosses, Type, RelatedId, Related.Name, ' +
-                        '(SELECT UserOrGroupId From GroupMembers)' +
+                        '(SELECT UserOrGroupId From GroupMembers)' + // optimisation?
                     'FROM Group '
         }], logger);
 
@@ -6162,7 +6245,7 @@ class DatasetUserRoles extends Dataset {
         logger?.log(`Querying REST API about UserRole in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
-                        '(SELECT Id, IsActive FROM Users)' +
+                        '(SELECT Id, IsActive FROM Users)' + // optimisation?
                     ' FROM UserRole '
         }], logger);
 
@@ -6860,14 +6943,14 @@ class DataFactory extends DataFactoryIntf {
             }, {
                 id: counter++,
                 description: 'Almost all licenses are used',
-                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.usedPercentage >= 0.80,
+                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.usedPercentage !== undefined && d.usedPercentage >= 0.80,
                 errorMessage: 'The number of seats for this license is almost reached (>80%). Please review this.',
                 badField: 'usedPercentage',
                 applicable: [ SFDC_PermissionSetLicense ]
             }, {
                 id: counter++,
                 description: 'You could have licenses to free up',
-                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.distinctActiveAssigneeCount !==  d.usedCount,
+                formula: (/** @type {SFDC_PermissionSetLicense} */ d) => d.remainingCount > 0 && d.distinctActiveAssigneeCount !==  d.usedCount,
                 errorMessage: 'The Used count from that permission set license does not match the number of disctinct active user assigned to the same license. Please check if you could free up some licenses!',
                 badField: 'distinctActiveAssigneeCount',
                 applicable: [ SFDC_PermissionSetLicense ]
@@ -7238,7 +7321,7 @@ class DatasetPermissionSetLicenses extends Dataset {
                     lastModifiedDate: record.LastModifiedDate, 
                     totalCount: record.TotalLicenses, 
                     usedCount: record.UsedLicenses,
-                    usedPercentage: record.UsedLicenses / record.TotalLicenses,
+                    usedPercentage: record.TotalLicenses !== 0 ? record.UsedLicenses / record.TotalLicenses : undefined,
                     remainingCount: record.TotalLicenses - record.UsedLicenses,
                     permissionSetIds: [],
                     distinctActiveAssigneeCount: 0,
@@ -7629,9 +7712,9 @@ class RecipeActiveUsers extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'USERS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
         await Processor.forEach(users, async (user) => {
@@ -7690,7 +7773,7 @@ class RecipeApexClasses extends Recipe {
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses = data.get(DatasetAliases.APEXCLASSES);
 
         // Checking data
-        if (!apexClasses) throw new Error(`Data from dataset alias 'APEXCLASSES' was undefined.`);
+        if (!apexClasses) throw new Error(`RecipeApexClasses: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -7744,8 +7827,8 @@ class RecipeApexTriggers extends Recipe {
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
 
         // Checking data
-        if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!apexTriggers) throw new Error(`RecipeApexTriggers: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!objects) throw new Error(`RecipeApexTriggers: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -7798,10 +7881,10 @@ class RecipeAppPermissions extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!applications) throw new Error(`Data from dataset alias 'APPLICATIONS' was undefined.`);
-        if (!appPermissions) throw new Error(`Data from dataset alias 'APPPERMISSIONS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!applications) throw new Error(`RecipeAppPermissions: Data from dataset alias 'APPLICATIONS' was undefined.`);
+        if (!appPermissions) throw new Error(`RecipeAppPermissions: Data from dataset alias 'APPPERMISSIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeAppPermissions :Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeAppPermissions: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and filter data
         const workingMatrix = DataMatrixFactory.create();
@@ -7863,7 +7946,7 @@ class RecipeCurrentUserPermissions extends Recipe {
         const /** @type {Map<string, boolean>} */ currentUserPermissions = data.get(DatasetAliases.CURRENTUSERPERMISSIONS);
         
         // Checking data
-        if (!currentUserPermissions) throw new Error(`Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);
+        if (!currentUserPermissions) throw new Error(`RecipeCurrentUserPermissions: Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);
 
         // Return all data
         return currentUserPermissions;
@@ -7905,9 +7988,9 @@ class RecipeCustomFields extends Recipe {
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
+        if (!types) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
         await Processor.forEach(customFields, (customField) => {
@@ -7960,7 +8043,7 @@ class RecipeCustomLabels extends Recipe {
         const /** @type {Map<string, SFDC_CustomLabel>} */ customLabels = data.get(DatasetAliases.CUSTOMLABELS);
 
         // Checking data
-        if (!customLabels) throw new Error(`Data from dataset alias 'CUSTOMLABELS' was undefined.`);
+        if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8001,7 +8084,7 @@ class RecipeFlows extends Recipe {
         const /** @type {Map<string, SFDC_Flow>} */ flows = data.get(DatasetAliases.FLOWS);
 
         // Checking data
-        if (!flows) throw new Error(`Data from dataset alias 'FLOWS' was undefined.`);
+        if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8043,7 +8126,7 @@ class RecipeLightningAuraComponents extends Recipe {
         const /** @type {Map<string, SFDC_LightningAuraComponent>} */ components = data.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeLightningAuraComponents: Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8089,8 +8172,8 @@ class RecipeLightningPages extends Recipe {
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
 
         // Checking data
-        if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!pages) throw new Error(`RecipeLightningPages: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
+        if (!objects) throw new Error(`RecipeLightningPages: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -8138,7 +8221,7 @@ class RecipeLightningWebComponents extends Recipe {
         const  /** @type {Map<string, SFDC_LightningWebComponent>} */ components = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeLightningWebComponents: Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8193,11 +8276,11 @@ class RecipeObject extends Recipe {
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!object) throw new Error(`Data from dataset alias 'OBJECT' was undefined.`);
-        if (!apexTriggers) throw new Error(`Data from dataset alias 'APEXTRIGGERS' was undefined.`);
-        if (!pages) throw new Error(`Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
-        if (!customFields) throw new Error(`Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
+        if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!object) throw new Error(`RecipeObject: Data from dataset alias 'OBJECT' was undefined.`);
+        if (!apexTriggers) throw new Error(`RecipeObject: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!pages) throw new Error(`RecipeObject: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
+        if (!customFields) throw new Error(`RecipeObject: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment data
         object.typeRef = types.get(object.typeId);
@@ -8268,9 +8351,9 @@ class RecipeObjectPermissions extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!objectPermissions) throw new Error(`Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!objectPermissions) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and Filter data
         const workingMatrix = DataMatrixFactory.create();
@@ -8333,8 +8416,8 @@ class RecipeObjects extends Recipe {
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!types) throw new Error(`RecipeObjects: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeObjects: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and Filter data
         const array = [];
@@ -8379,7 +8462,7 @@ class RecipeObjectTypes extends Recipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!types) throw new Error(`RecipeObjectTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);
 
         // Return data
         return [... types.values()];
@@ -8412,7 +8495,7 @@ class RecipeOrganization extends Recipe {
         const /** @type {Map<string, SFDC_Organization>} */ organization = data.get(DatasetAliases.ORGANIZATION);
 
         // Checking data
-        if (!organization) throw new Error(`Data from dataset alias 'ORGANIZATION' was undefined.`);
+        if (!organization) throw new Error(`RecipeOrganization: Data from dataset alias 'ORGANIZATION' was undefined.`);
 
         // Return data
         return organization;
@@ -8445,7 +8528,7 @@ class RecipePackages extends Recipe {
         const /** @type {Map<string, SFDC_Package>} */ packages = data.get(DatasetAliases.PACKAGES);
 
         // Checking data
-        if (!packages) throw new Error(`Data from dataset alias 'PACKAGES' was undefined.`);
+        if (!packages) throw new Error(`RecipePackages: Data from dataset alias 'PACKAGES' was undefined.`);
 
         // Return data
         return [... packages.values()];
@@ -8462,8 +8545,7 @@ class RecipePermissionSets extends Recipe {
      */
     extract(logger) {
         return [
-            DatasetAliases.PERMISSIONSETS, 
-            DatasetAliases.PROFILES
+            DatasetAliases.PERMISSIONSETS
         ];
     }
 
@@ -8480,21 +8562,13 @@ class RecipePermissionSets extends Recipe {
 
         // Get data
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
-        const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
 
         // Checking data
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipePermissionSets: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and Filter data
         const array = [];
         await Processor.forEach(permissionSets, async (permissionSet) => {
-            // Augment data
-            permissionSet.assigneeProfileRefs = await Processor.map(
-                permissionSet.assigneeProfileIds,
-                (id) => profiles.get(id),
-                (id) => profiles.has(id)
-            );
             // Filter data
             if (namespace === '*' || permissionSet.package === namespace) {
                 array.push(permissionSet);
@@ -8532,7 +8606,7 @@ class RecipeProcessBuilders extends Recipe {
         const /** @type {Map<string, SFDC_Flow>} */ flows = data.get(DatasetAliases.FLOWS);
 
         // Checking data
-        if (!flows) throw new Error(`Data from dataset alias 'FLOWS' was undefined.`);
+        if (!flows) throw new Error(`RecipeProcessBuilders: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8573,7 +8647,7 @@ class RecipeProfilePasswordPolicies extends Recipe {
         const /** @type {Map<string, SFDC_ProfilePasswordPolicy>} */ policies = data.get(DatasetAliases.PROFILEPWDPOLICIES);
 
         // Checking data
-        if (!policies) throw new Error(`Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);
+        if (!policies) throw new Error(`RecipeProfilePasswordPolicies: Data from dataset alias 'PROFILEPWDPOLICIES' was undefined.`);
 
         // Return all data
         return [... policies.values()];
@@ -8611,8 +8685,8 @@ class RecipeProfileRestrictions extends Recipe {
         const /** @type {Map<string, SFDC_ProfileRestrictions>} */ profileRestrictions = data.get(DatasetAliases.PROFILERESTRICTIONS);
 
         // Checking data
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!profileRestrictions) throw new Error(`Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!profileRestrictions) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILERESTRICTIONS' was undefined.`);
 
         // Augment and Filter data
         const array = [];
@@ -8657,7 +8731,7 @@ class RecipeProfiles extends Recipe {
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
 
         // Checking data
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
+        if (!profiles) throw new Error(`RecipeProfiles: Data from dataset alias 'PROFILES' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8699,8 +8773,8 @@ class RecipePublicGroups extends Recipe {
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
 
         // Checking data
-        if (!groups) throw new Error(`Data from dataset alias 'GROUPS' was undefined.`);
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
+        if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'GROUPS' was undefined.`);
+        if (!users) throw new Error(`RecipePublicGroups: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -8754,8 +8828,8 @@ class RecipeQueues extends Recipe {
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
 
         // Checking data
-        if (!groups) throw new Error(`Data from dataset alias 'GROUPS' was undefined.`);
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
+        if (!groups) throw new Error(`RecipeQueues: Data from dataset alias 'GROUPS' was undefined.`);
+        if (!users) throw new Error(`RecipeQueues: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -8813,8 +8887,8 @@ class RecipeUserRoles extends Recipe {
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
 
         // Checking data
-        if (!userRoles) throw new Error(`Data from dataset alias 'USERROLES' was undefined.`);
-        if (!users) throw new Error(`Data from dataset alias 'USERS' was undefined.`);
+        if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);
+        if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
         // Augment and Filter data
         const array = [];
@@ -8864,7 +8938,7 @@ class RecipeVisualForceComponents extends Recipe {
         const /** @type {Map<string, SFDC_VisualForceComponent>} */ components = data.get(DatasetAliases.VISUALFORCECOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeVisualForceComponents: Data from dataset alias 'VISUALFORCECOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8906,7 +8980,7 @@ class RecipeVisualForcePages extends Recipe {
         const /** @type {Map<string, SFDC_VisualForcePage>} */ pages = data.get(DatasetAliases.VISUALFORCEPAGES);
 
         // Checking data
-        if (!pages) throw new Error(`Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
+        if (!pages) throw new Error(`RecipeVisualForcePages: Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
 
         // Filter data
         const array = [];
@@ -8947,7 +9021,7 @@ class RecipeWorkflows extends Recipe {
         const /** @type {Map<string, SFDC_Workflow>} */ workflows = data.get(DatasetAliases.WORKFLOWS);
 
         // Checking data
-        if (!workflows) throw new Error(`Data from dataset alias 'WORKFLOWS' was undefined.`);
+        if (!workflows) throw new Error(`RecipeWorkflows: Data from dataset alias 'WORKFLOWS' was undefined.`);
 
         // Return data
         return [... workflows.values()];
@@ -8983,7 +9057,7 @@ class RecipeApexTests extends Recipe {
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses = data.get(DatasetAliases.APEXCLASSES);
 
         // Checking data
-        if (!apexClasses) throw new Error(`Data from dataset alias 'APEXCLASSES' was undefined.`);
+        if (!apexClasses) throw new Error(`RecipeApexTests: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -9035,7 +9109,7 @@ class RecipeApexUncompiled extends Recipe {
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses = data.get(DatasetAliases.APEXCLASSES);
 
         // Checking data
-        if (!apexClasses) throw new Error(`Data from dataset alias 'APEXCLASSES' was undefined.`);
+        if (!apexClasses) throw new Error(`RecipeApexUncompiled: Data from dataset alias 'APEXCLASSES' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -9095,9 +9169,9 @@ class RecipeFieldPermissions extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!fieldPermissions) throw new Error(`Data from dataset alias 'FIELDPERMISSIONS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!fieldPermissions) throw new Error(`RecipeFieldPermissions: Data from dataset alias 'FIELDPERMISSIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeFieldPermissions: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeFieldPermissions: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and filter data
         const workingMatrix = DataMatrixFactory.create();
@@ -9163,9 +9237,9 @@ class RecipeValidationRules extends Recipe {
         const /** @type {Map<string, SFDC_ValidationRule>} */ validationRules = data.get(DatasetAliases.VALIDATIONRULES);
 
         // Checking data
-        if (!types) throw new Error(`Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!validationRules) throw new Error(`Data from dataset alias 'VALIDATIONRULES' was undefined.`);
+        if (!types) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
         // Augment data
         await Processor.forEach(validationRules, (validationRule) => {
@@ -9211,8 +9285,8 @@ class RecipePermissionSetLicenses extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!permissionSetLicenses) throw new Error(`Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!permissionSetLicenses) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETLICENSES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
         await Processor.forEach(permissionSetLicenses, async (permissionSetLicense) => {
@@ -9460,12 +9534,6 @@ const MAX_NOQUERYMORE_BATCH_SIZE = 2000;
 const MAX_STANDARDSOQL_BATCH_SIZE = 2000;
 
 /**
- * @description Maximum size JsForce will query/retrieve data from the Query api.
- * @private
- */
-const MAX_STANDARDSOQL_GLOBAL_SIZE = 1000000000000;
-
-/**
  * @description Maximum number of members we want per type/request 
  * @private
  */
@@ -9676,26 +9744,48 @@ class SalesforceManager extends SalesforceManagerIntf {
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
      * @param {Array<string>} byPasses List of error codes to by-pass
+     * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _standardSOQLQuery(useTooling, query, byPasses) {
+    async _standardSOQLQuery(useTooling, query, byPasses, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
-        try {
+        // the records to return
+        const allRecords = [];
+        // If `locator` is undefined, it means we are calling doNextQuery() the first time
+        const doNextQuery = async (/** @type {string} */ locator) => {
             // Let's start to check if we are 'allowed' to use the Salesforce API...
             this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
-            // Run this query
-            const results = await conn.query(query, { 
-                autoFetch: true, 
-                maxFetch: MAX_STANDARDSOQL_GLOBAL_SIZE,
-                headers: { 'Sforce-Query-Options': `batchSize=${MAX_STANDARDSOQL_BATCH_SIZE}` }
-            });
+            let results;
+            if (locator === undefined) {
+                // Calling the query the first time
+                results = await conn.query(query, { 
+                    autoFetch: false,
+                    headers: { 'Sforce-Query-Options': `batchSize=${MAX_STANDARDSOQL_BATCH_SIZE}` }
+                });
+            } else {
+                // Calling the queryMore
+                results = await conn.queryMore(locator);
+            }
+            // Call the callback for information
+            callback(results?.records?.length || 0);
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
-            // Return all the records
-            return results.records;
+            // Adding records to the global array.
+            allRecords.push(... results.records);
+            // Check if this was the last batch?
+            if (results.done === false) { // this was not yet the last batch
+                // call the next Batch
+                await doNextQuery(results.nextRecordsUrl);
+            }
+        };
+        try {
+            // Call the first time
+            await doNextQuery(); // and then the method will chain next calls
+            // return the records
+            return allRecords;
         } catch (error) {
             if (byPasses && byPasses.includes && byPasses.includes(error.errorCode)) {
                 // by pass this error! and return an empty array
@@ -9715,11 +9805,12 @@ class SalesforceManager extends SalesforceManagerIntf {
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
      * @param {string} fieldId Unique field name to use for the custom QueryMore (Id by default)
+     * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling, query, fieldId) {
+    async _customSOQLQuery(useTooling, query, fieldId, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
@@ -9734,6 +9825,8 @@ class SalesforceManager extends SalesforceManagerIntf {
                 autoFetch: false,
                 headers: { 'Sforce-Query-Options': `batchSize=${MAX_NOQUERYMORE_BATCH_SIZE}` }
             });
+            // Call the callback for information
+            callback(results?.records?.length || 0);
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
             // Adding records to the global array.
@@ -9771,10 +9864,26 @@ class SalesforceManager extends SalesforceManagerIntf {
     async soqlQuery(queries, logger) {
         // Now we can start, log some message
         logger?.log(`Preparing ${queries.length} SOQL ${queries.length>1?'queries':'query'}...`);
-        let nbRecords = 0;
+        let nbRecords = 0, nbQueryMore = 0;
         const pendingEntities = [], doneEntities = [], errorEntities = [];
-        // We'll run the queries in parallel, each query will be mapped as a promise and ran with Promise.all()
-        const allPromisesResult = await Promise.all(queries.map(async (query) => {
+        const errors = [];
+        const updateLogInformation = () => {
+            logger?.log(
+                `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
+                `Records retrieved: ${nbRecords}, `+
+                `Number of QueryMore calls done: ${nbQueryMore}, `+
+                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
+                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
+                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`
+            );
+        };
+        const updateLogInformationOnQuery = (/** @type {number} */ nbRec) => {
+            nbQueryMore++; 
+            nbRecords += nbRec;
+            updateLogInformation();
+        };
+            // We'll run the queries in parallel, each query will be mapped as a promise and ran with Promise.allSettled() (and not all() to make sure we properly finish all promises)
+        const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
             // Dynamically get the entityName of the Query
             const str = query.string.lastIndexOf('FROM ')+5;
             const end = query.string.indexOf(' ', str);
@@ -9785,30 +9894,33 @@ class SalesforceManager extends SalesforceManagerIntf {
             try {
                 if (query.queryMoreField) {
                     // yes!! do the custom one -- In case the query does not support queryMore we have an alternative, based on ids
-                    records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField);
+                    records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField, updateLogInformationOnQuery);
                 } else {
                     // no!!! use the standard one
-                    records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses);
+                    records = await this._standardSOQLQuery(query.tooling, query.string, query.byPasses, updateLogInformationOnQuery);
                 }
                 doneEntities.push(entityName);
-                nbRecords += records.length;
+                //nbRecords += records.length;
             } catch (error) {
                 errorEntities.push(entityName);
+                errors.push(error);
                 throw error;
             } finally {
                 const index = pendingEntities.indexOf(entityName);
                 if (index > -1) pendingEntities.splice(index, 1);
+                updateLogInformation();
             }
-            logger?.log(
-                `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
-                `Records retrieved: ${nbRecords}, `+
-                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
-                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
-                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`);
             return records;
         }));
         logger?.log(`Done running ${queries.length} SOQL ${queries.length>1?'queries':'query'}.`);
-        return allPromisesResult;
+        // if errors has at least one item, it means one of the Promises failed
+        if (errors.length > 0) {
+            return Promise.reject(errors[0]);
+        }
+        // at this point all promises have been settled (or 'successful' if you)
+        const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled').map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
+        // return the results
+        return Promise.resolve(results);
     }
 
     /**
@@ -10312,7 +10424,7 @@ class API {
      * @description Org Check constructor
      * @param {string} accessToken
      * @param {any} jsConnectionFactory
-     * @param {{setItem: function, getItem: function, removeItem: function, key: function, length: function}} jsLocalStorage
+     * @param {{setItem: function, getItem: function, removeItem: function, key: function, keys: function, length: function}} jsLocalStorage
      * @param {{encode: function, decode: function}} jsEncoding
      * @param {{compress: function, decompress: function}} jsCompressing
      * @param {BasicLoggerIntf} loggerSetup

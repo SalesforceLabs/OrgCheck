@@ -5,7 +5,6 @@ import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
-import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 
 export class RecipePermissionSets extends Recipe {
@@ -18,8 +17,7 @@ export class RecipePermissionSets extends Recipe {
      */
     extract(logger) {
         return [
-            DatasetAliases.PERMISSIONSETS, 
-            DatasetAliases.PROFILES
+            DatasetAliases.PERMISSIONSETS
         ];
     }
 
@@ -36,21 +34,13 @@ export class RecipePermissionSets extends Recipe {
 
         // Get data
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
-        const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
 
         // Checking data
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipePermissionSets: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and Filter data
         const array = [];
         await Processor.forEach(permissionSets, async (permissionSet) => {
-            // Augment data
-            permissionSet.assigneeProfileRefs = await Processor.map(
-                permissionSet.assigneeProfileIds,
-                (id) => profiles.get(id),
-                (id) => profiles.has(id)
-            );
             // Filter data
             if (namespace === '*' || permissionSet.package === namespace) {
                 array.push(permissionSet);

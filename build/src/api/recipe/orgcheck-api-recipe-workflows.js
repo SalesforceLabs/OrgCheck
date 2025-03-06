@@ -32,7 +32,7 @@ export class RecipeWorkflows extends Recipe {
         const /** @type {Map<string, SFDC_Workflow>} */ workflows = data.get(DatasetAliases.WORKFLOWS);
 
         // Checking data
-        if (!workflows) throw new Error(`Data from dataset alias 'WORKFLOWS' was undefined.`);
+        if (!workflows) throw new Error(`RecipeWorkflows: Data from dataset alias 'WORKFLOWS' was undefined.`);
 
         // Return data
         return [... workflows.values()];

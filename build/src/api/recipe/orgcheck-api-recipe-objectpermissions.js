@@ -43,9 +43,9 @@ export class RecipeObjectPermissions extends Recipe {
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!objectPermissions) throw new Error(`Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
-        if (!profiles) throw new Error(`Data from dataset alias 'PROFILES' was undefined.`);
-        if (!permissionSets) throw new Error(`Data from dataset alias 'PERMISSIONSETS' was undefined.`);
+        if (!objectPermissions) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'OBJECTPERMISSIONS' was undefined.`);
+        if (!profiles) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'PROFILES' was undefined.`);
+        if (!permissionSets) throw new Error(`RecipeObjectPermissions: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment and Filter data
         const workingMatrix = DataMatrixFactory.create();

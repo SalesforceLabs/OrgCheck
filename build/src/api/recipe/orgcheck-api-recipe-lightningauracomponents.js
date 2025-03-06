@@ -34,7 +34,7 @@ export class RecipeLightningAuraComponents extends Recipe {
         const /** @type {Map<string, SFDC_LightningAuraComponent>} */ components = data.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeLightningAuraComponents: Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];

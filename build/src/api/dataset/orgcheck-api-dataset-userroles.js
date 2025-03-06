@@ -21,7 +21,7 @@ export class DatasetUserRoles extends Dataset {
         logger?.log(`Querying REST API about UserRole in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
-                        '(SELECT Id, IsActive FROM Users)' +
+                        '(SELECT Id, IsActive FROM Users)' + // optimisation?
                     ' FROM UserRole '
         }], logger);
 

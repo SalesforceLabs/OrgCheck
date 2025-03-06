@@ -33,7 +33,7 @@ export class RecipeFlows extends Recipe {
         const /** @type {Map<string, SFDC_Flow>} */ flows = data.get(DatasetAliases.FLOWS);
 
         // Checking data
-        if (!flows) throw new Error(`Data from dataset alias 'FLOWS' was undefined.`);
+        if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data
         const array = [];

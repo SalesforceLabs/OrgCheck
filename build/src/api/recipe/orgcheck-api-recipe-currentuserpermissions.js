@@ -34,7 +34,7 @@ export class RecipeCurrentUserPermissions extends Recipe {
         const /** @type {Map<string, boolean>} */ currentUserPermissions = data.get(DatasetAliases.CURRENTUSERPERMISSIONS);
         
         // Checking data
-        if (!currentUserPermissions) throw new Error(`Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);
+        if (!currentUserPermissions) throw new Error(`RecipeCurrentUserPermissions: Data from dataset alias 'CURRENTUSERPERMISSIONS' was undefined.`);
 
         // Return all data
         return currentUserPermissions;

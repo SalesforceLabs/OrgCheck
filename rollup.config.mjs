@@ -19,7 +19,11 @@ export default [
             }
         ],
         plugins: [
-            del({ targets: [ './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-ui.js' ]}),
+            del({ targets: [ 
+                './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-ui.js',
+                './force-app/main/default/lwc/orgcheckExtendedDatatable/libs/orgcheck-ui.js',
+                './force-app/main/default/lwc/orgcheckExportButton/libs/orgcheck-ui.js'
+        ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-ui.js', 
                 dest: [ 
@@ -45,7 +49,9 @@ export default [
             }
         ],
         plugins: [
-            del({ targets: [ './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-api.js' ]}),
+            del({ targets: [ 
+                './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-api.js' 
+            ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-api.js', 
                 dest: './force-app/main/default/lwc/orgcheckApp/libs' 

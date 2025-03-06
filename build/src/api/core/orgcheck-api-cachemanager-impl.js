@@ -62,6 +62,13 @@ export class DataCacheManager extends DataCacheManagerIntf {
     _storageKey;
 
     /**
+     * @description Function to retrieve all the keys in the storage
+     * @type {function}
+     * @private
+     */
+    _storageKeys;
+
+    /**
      * @description Function to retrieve the number of keys/items stored in the storage
      * @type {function}
      * @private
@@ -84,6 +91,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
         this._storageRemoveItem = configuration.storage.removeItem;
         this._storageKey = configuration.storage.key;
         this._storageLength = configuration.storage.length;
+        this._storageKeys = configuration.storage.keys;
     }
 
     /**
@@ -199,10 +207,13 @@ export class DataCacheManager extends DataCacheManagerIntf {
                 content: value, created: now
             };
             try {
+                this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry)); // this is more likely to throw an error if data exceeds the local storage limit, so do it first!
                 this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
-                this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry));
-            } catch(error) {
-                console.warn('Not able to store in local store that amount of data.')
+            } catch(error) { 
+                // Not able to store in local store that amount of data.
+                // Making sure to clean both cache entries to be consistent
+                this._storageRemoveItem(metadataPhysicalKey);
+                this._storageRemoveItem(dataPhysicalKey);
             }
         }
     }
@@ -212,7 +223,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @returns {Array<DataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     details() {
-        return Object.keys(localStorage)
+        return this._storageKeys()
             .filter((key) => key.startsWith(METADATA_CACHE_PREFIX))
             .map((key) => {
                 /** @type {MetadataItemInCache} */
@@ -241,7 +252,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @public
      */
     clear() {
-        return Object.keys(localStorage)
+        return this._storageKeys()
             .filter((key) => key.startsWith(CACHE_PREFIX))
             .forEach((key) => this._storageRemoveItem(key));
     }
@@ -253,16 +264,24 @@ export class DataCacheManager extends DataCacheManagerIntf {
      *   data in the local storage with its key.
      * @param {string} key
      * @param {string} stringValue
+     * @throws {Error} Most likely when trying to save the value in the local storage (_storageSetItem)
      * @private
      */
     _setItemToCache = (key, stringValue) => {
+        let encodedValue, compressedValue, hexValue;
         try {
-            const encodedValue = this._encode(stringValue);
-            const compressedValue = this._compress(encodedValue);
-            const hexValue = FROM_BUFFER_TO_HEX(compressedValue);
+            encodedValue = this._encode(stringValue);
+            compressedValue = this._compress(encodedValue);
+            hexValue = FROM_BUFFER_TO_HEX(compressedValue);
             this._storageSetItem(key, hexValue);
         } catch (error) {
-            console.error(`Error occured when trying to save the value for key ${key} with value ${stringValue}`, error, stringValue, JSON.stringify(stringValue));
+            throw new Error(
+                `Error occured when trying to save the value for key ${key} with: `+
+                    `hexValue.length=${hexValue?.length || 'N/A'}, `+
+                    `compressedValue.length=${compressedValue?.length || 'N/A'}, `+
+                    `encodedValue.length=${encodedValue?.length || 'N/A'}. `+
+                    `Initiale error message was ${error.message}`
+            );
         }
     }
 
@@ -291,6 +310,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
             if (entry.created && Date.now() - entry.created > NB_MILLISEC_IN_ONE_DAY) return null;
             return entry;
         } catch (error) {
+            console.error(`Error occured when trying to parse the string: ${entryFromStorage}`, error);
             return null;
         }
     }
@@ -300,7 +320,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
  * @description Cache prefix to use for any items stored in the local storage for Org Check
  * @type {string} 
  */
-const CACHE_PREFIX = '';
+const CACHE_PREFIX = 'OrgCheck';
 
 /**
  * @description Cache prefix to use for data stored in the local storage

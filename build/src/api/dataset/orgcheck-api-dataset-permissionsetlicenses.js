@@ -59,7 +59,7 @@ export class DatasetPermissionSetLicenses extends Dataset {
                     lastModifiedDate: record.LastModifiedDate, 
                     totalCount: record.TotalLicenses, 
                     usedCount: record.UsedLicenses,
-                    usedPercentage: record.UsedLicenses / record.TotalLicenses,
+                    usedPercentage: record.TotalLicenses !== 0 ? record.UsedLicenses / record.TotalLicenses : undefined,
                     remainingCount: record.TotalLicenses - record.UsedLicenses,
                     permissionSetIds: [],
                     distinctActiveAssigneeCount: 0,

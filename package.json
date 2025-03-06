@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "npm run lint:lwc",
     "lint:lwc": "eslint force-app/main/default/lwc",
-    "build": "rollup --config; echo; ./build/build-static-resource.sh",
+    "build": "rollup --config; echo; rollup --config; echo; ./build/build-static-resource.sh",
     "sf:open": "sf force org open",
     "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
     "test:unit": "sfdx-lwc-jest",

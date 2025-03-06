@@ -34,7 +34,7 @@ export class RecipeLightningWebComponents extends Recipe {
         const  /** @type {Map<string, SFDC_LightningWebComponent>} */ components = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
 
         // Checking data
-        if (!components) throw new Error(`Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
+        if (!components) throw new Error(`RecipeLightningWebComponents: Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
 
         // Filter data
         const array = [];

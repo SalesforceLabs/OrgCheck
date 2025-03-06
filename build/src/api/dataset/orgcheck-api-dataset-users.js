@@ -23,7 +23,7 @@ export class DatasetUsers extends Dataset {
             string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, ' +
                         'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
                         'UserPreferencesLightningExperiencePreferred, ' +
-                        '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' +
+                        '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' + // optimisation?
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
