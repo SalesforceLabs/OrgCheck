@@ -9,12 +9,15 @@ export class DataDependenciesFactory {
      * @description Create a new instance of DataDependencies
      * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
      * @param {string} whatId 
-     * @returns {DataDependencies | any}
+     * @returns {DataDependencies}
      */
     static create(data, whatId) {
         if (data.errors?.includes(whatId)) {
             return {
-                hadError: true
+                hadError: true,
+                using: [],
+                referenced: [],
+                referencedByTypes: {}
             };
         }
         const using = data.records.filter(e => e.id === whatId).map(n => { 
@@ -40,6 +43,7 @@ export class DataDependenciesFactory {
             };
         })
         return {
+            hadError: false,
             using: using,
             referenced: referenced,
             referencedByTypes: referencedByTypes

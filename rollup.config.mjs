@@ -29,7 +29,8 @@ export default [
                 dest: [ 
                     './force-app/main/default/lwc/orgcheckApp/libs', 
                     './force-app/main/default/lwc/orgcheckExtendedDatatable/libs',
-                    './force-app/main/default/lwc/orgcheckExportButton/libs'
+                    './force-app/main/default/lwc/orgcheckExportButton/libs',
+                    './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
                 ]
             }]})
         ]
@@ -54,7 +55,11 @@ export default [
             ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-api.js', 
-                dest: './force-app/main/default/lwc/orgcheckApp/libs' 
+                dest: [
+                    './force-app/main/default/lwc/orgcheckApp/libs',
+                    './force-app/main/default/lwc/orgcheckDependencyLink/libs',
+                    './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
+                ]
             }]})
         ]
     }
