@@ -999,7 +999,7 @@ export default class OrgcheckApp extends LightningElement {
     validationRulesTableDefinition = {
         columns: [
             { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'In this object',   type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
             { label: 'Object Type',      type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
@@ -1020,7 +1020,7 @@ export default class OrgcheckApp extends LightningElement {
     validationRulesInObjectTableDefinition = {
         columns: [
             { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
@@ -1051,7 +1051,7 @@ export default class OrgcheckApp extends LightningElement {
     recordTypesTableDefinition = {
         columns: [
             { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
             { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
@@ -1088,7 +1088,7 @@ export default class OrgcheckApp extends LightningElement {
     customFieldsTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
             { label: 'In this object',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }},  //filter: 'obj', 
@@ -1125,7 +1125,7 @@ export default class OrgcheckApp extends LightningElement {
     customFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
             { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }}, // filter: 'cus',
@@ -1160,7 +1160,7 @@ export default class OrgcheckApp extends LightningElement {
     standardFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
@@ -1188,7 +1188,7 @@ export default class OrgcheckApp extends LightningElement {
     customLabelsTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',                type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
@@ -1216,7 +1216,7 @@ export default class OrgcheckApp extends LightningElement {
     auraComponentsTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1238,7 +1238,7 @@ export default class OrgcheckApp extends LightningElement {
     flexiPagesTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1261,7 +1261,7 @@ export default class OrgcheckApp extends LightningElement {
     flexiPagesInObjectTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1283,7 +1283,7 @@ export default class OrgcheckApp extends LightningElement {
     lightningWebComponentsTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }}, 
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1305,7 +1305,7 @@ export default class OrgcheckApp extends LightningElement {
     permissionSetsTableDefinition = {
         columns: [
             { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',            type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',             type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Is Group?',        type: ocui.ColumnType.CHK,  data: { value: 'isGroup' }},
             { label: 'Custom',           type: ocui.ColumnType.CHK,  data: { value: 'isCustom' }},
@@ -1333,7 +1333,7 @@ export default class OrgcheckApp extends LightningElement {
     permissionSetLicensesTableDefinition = {
         columns: [
             { label: '#',                     type: ocui.ColumnType.IDX },
-            { label: 'Score',                 type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',                 type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',                  type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Total',                 type: ocui.ColumnType.NUM,  data: { value: 'totalCount' }},
             { label: 'Used',                  type: ocui.ColumnType.NUM,  data: { value: 'usedCount' }},
@@ -1359,7 +1359,7 @@ export default class OrgcheckApp extends LightningElement {
     profilesTableDefinition = {
         columns: [
             { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Custom',          type: ocui.ColumnType.CHK, data: { value: 'isCustom' }},
             { label: '#FLSs',           type: ocui.ColumnType.NUM, data: { value: 'nbFieldPermissions' }},
@@ -1428,7 +1428,7 @@ export default class OrgcheckApp extends LightningElement {
     publicGroupsTableDefinition = {
         columns: [
             { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Developer Name',         type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
             { label: 'With bosses?',           type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
@@ -1447,7 +1447,7 @@ export default class OrgcheckApp extends LightningElement {
     queuesTableDefinition = {
         columns: [
             { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Developer Name',         type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
             { label: 'With bosses?',           type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
@@ -1466,7 +1466,7 @@ export default class OrgcheckApp extends LightningElement {
     usersTableDefinition = {
         columns: [
             { label: '#',                            type: ocui.ColumnType.IDX },
-            { label: 'Score',                        type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',                        type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'User Name',                    type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Under LEX?',                   type: ocui.ColumnType.CHK,  data: { value: 'onLightningExperience' }},
             { label: 'Last login',                   type: ocui.ColumnType.DTM,  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
@@ -1494,7 +1494,7 @@ export default class OrgcheckApp extends LightningElement {
     visualForceComponentsTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1516,7 +1516,7 @@ export default class OrgcheckApp extends LightningElement {
     visualForcePagesTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Mobile',        type: ocui.ColumnType.CHK, data: { value: 'isMobileReady' }},
@@ -1539,7 +1539,7 @@ export default class OrgcheckApp extends LightningElement {
     apexClassesTableDefinition = {
         columns: [
             { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',            type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'API Version',     type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',         type: ocui.ColumnType.TXT,  data: { value: 'package' }},
@@ -1576,7 +1576,7 @@ export default class OrgcheckApp extends LightningElement {
     apexUncompiledTableDefinition = {
         columns: [
             { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',            type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'API Version',     type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',         type: ocui.ColumnType.TXT,  data: { value: 'package' }},
@@ -1600,7 +1600,7 @@ export default class OrgcheckApp extends LightningElement {
     apexTriggersTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1632,7 +1632,7 @@ export default class OrgcheckApp extends LightningElement {
     apexTriggersInObjectTableDefinition =  {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
@@ -1663,7 +1663,7 @@ export default class OrgcheckApp extends LightningElement {
     apexTestsTableDefinition = {
         columns: [
             { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',            type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'API Version',     type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',         type: ocui.ColumnType.TXT,  data: { value: 'package' }},
@@ -1710,7 +1710,7 @@ export default class OrgcheckApp extends LightningElement {
     flowsTableDefinition = {
         columns: [
             { label: '#',                  type: ocui.ColumnType.IDX },
-            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'API Version',        type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
@@ -1752,7 +1752,7 @@ export default class OrgcheckApp extends LightningElement {
     workflowsTableDefinition = {
         columns: [
             { label: '#',                 type: ocui.ColumnType.IDX },
-            { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',              type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
             { label: 'Is Active',         type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
             { label: 'Has Actions',       type: ocui.ColumnType.CHK,  data: { value: 'hasAction' }},
@@ -1774,7 +1774,7 @@ export default class OrgcheckApp extends LightningElement {
     rolesTableDefinition = {
         columns: [
             { label: '#',                           type: ocui.ColumnType.IDX },
-            { label: 'Score',                       type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
+            { label: 'Score',                       type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',                        type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Developer Name',              type: ocui.ColumnType.TXT, data: { value: 'apiname' }},
             { label: 'Number of active members',    type: ocui.ColumnType.NUM, data: { value: 'activeMembersCount' }},
