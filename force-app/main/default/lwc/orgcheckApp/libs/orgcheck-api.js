@@ -117,6 +117,40 @@ class DataCacheManagerIntf {
 }
 
 /**
+ * @description Dependency item using or referencing our dear main item
+ */
+class DataDependencyItem {
+
+    /**
+     * @description Salesforce ID of the item
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name of the item
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Type of the item
+     * @type {string}
+     * @public
+     */
+    type;
+    
+    /**
+     * @description URL of the item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+/**
  * @description Dependencies between data given a main item (identified by the given WhatId)
  */
 class DataDependencies {
@@ -130,14 +164,14 @@ class DataDependencies {
 
     /**
      * @description List of items that the main item (identified by the given WhatId) is using
-     * @type {Array<{ id: string, name: string, type: string, url: string }>}
+     * @type {Array<DataDependencyItem>}
      * @public
      */
     using;
 
     /**
      * @description List of items that are using the main item (identified by the given WhatId)
-     * @type {Array<{ id: string, name: string, type: string, url: string }>}
+     * @type {Array<DataDependencyItem>}
      * @public
      */
     referenced;
@@ -159,12 +193,15 @@ class DataDependenciesFactory {
      * @description Create a new instance of DataDependencies
      * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
      * @param {string} whatId 
-     * @returns {DataDependencies | any}
+     * @returns {DataDependencies}
      */
     static create(data, whatId) {
         if (data.errors?.includes(whatId)) {
             return {
-                hadError: true
+                hadError: true,
+                using: [],
+                referenced: [],
+                referencedByTypes: {}
             };
         }
         const using = data.records.filter(e => e.id === whatId).map(n => { 
@@ -190,6 +227,7 @@ class DataDependenciesFactory {
             };
         });
         return {
+            hadError: false,
             using: using,
             referenced: referenced,
             referencedByTypes: referencedByTypes
@@ -11271,4 +11309,4 @@ class API {
     }
 }
 
-export { API, BasicLoggerIntf, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SimpleLoggerIntf };
+export { API, BasicLoggerIntf, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SimpleLoggerIntf };
