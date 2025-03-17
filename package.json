@@ -9,10 +9,10 @@
   "scripts": {
     "lint": "npm run lint:lwc",
     "lint:lwc": "eslint force-app/main/default/lwc",
-    "build": "rollup --config; echo; rollup --config; echo; ./build/build-static-resource.sh",
+    "build": "for i in 'first run' 'second run'; do echo \"Rollup: ${i}\"; rollup --config; echo; done; echo 'Build SR: '; echo; ./build/build-static-resource.sh",
     "sf:open": "sf force org open",
     "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
-    "test:unit": "sfdx-lwc-jest",
+    "test": "sfdx-lwc-jest",
     "test:debug": "sfdx-lwc-jest --debug",
     "test:watch": "sfdx-lwc-jest --watch",
     "test:coverage": "sfdx-lwc-jest --coverage"

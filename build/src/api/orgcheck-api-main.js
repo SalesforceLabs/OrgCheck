@@ -18,6 +18,7 @@ export * from './core/orgcheck-api-recipes-aliases.js';
 export * from './core/orgcheck-api-salesforce-metadatatypes.js';
 export * from './core/orgcheck-api-salesforce-watchdog.js';
 export * from './core/orgcheck-api-salesforcemanager.js';
+export * from './core/orgcheck-api-secretsauce.js';
 
 // Data classes
 export * from './data/orgcheck-api-data-apexclass.js';

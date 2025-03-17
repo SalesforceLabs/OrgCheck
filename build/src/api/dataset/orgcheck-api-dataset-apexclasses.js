@@ -115,7 +115,7 @@ export class DatasetApexClasses extends Dataset {
                 apexClass.methodsCount = record.SymbolTable.methods?.length || 0;
                 apexClass.extends = record.SymbolTable.parentClass;
                 if (record.SymbolTable.tableDeclaration) {
-                    apexClass.annotations = record.SymbolTable.tableDeclaration.annotations;
+                    apexClass.annotations = record.SymbolTable.tableDeclaration.annotations?.map((a) => a?.name ?? a);
                     await Processor.forEach(record.SymbolTable.tableDeclaration.modifiers, m => {
                         switch (m) {
                             case 'with sharing':      apexClass.specifiedSharing = 'with';      break;

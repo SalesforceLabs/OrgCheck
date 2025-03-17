@@ -1,6 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from "@salesforce/resourceUrl/OrgCheck_SR";
-import * as ocui from './libs/orgcheck-ui';
+import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 

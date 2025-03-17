@@ -4,6 +4,7 @@ import { SimpleLoggerIntf } from "./orgcheck-api-logger";
 import { SalesforceMetadataTypes } from "./orgcheck-api-salesforce-metadatatypes";
 import { SalesforceWatchDog, SalesforceUsageInformation } from "./orgcheck-api-salesforce-watchdog";
 import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from "./orgcheck-api-salesforcemanager";
+import { SecretSauce } from "./orgcheck-api-secretsauce";
 
 /**
  * @description Maximum number of Ids that is contained per DAPI query
@@ -76,16 +77,12 @@ export class SalesforceManager extends SalesforceManagerIntf {
 
         super();
         
-        // Compute the last known Salesforce API Version dynamically
-        const THIS_YEAR = new Date().getFullYear();
-        const THIS_MONTH = new Date().getMonth()+1;
-        const SF_API_VERSION = 3*(THIS_YEAR-2022)+53+(THIS_MONTH<=2?0:(THIS_MONTH<=6?1:(THIS_MONTH<=10?2:3)));
-        this._apiVersion = SF_API_VERSION;
+        this._apiVersion = SecretSauce.CurrentApiVersion;
         
         // Create a JsForce Connection to the current salesforce org
         const jsConnection = new jsConnectionFactory.Connection({
             accessToken: accessToken,
-            version: SF_API_VERSION + '.0',
+            version: this._apiVersion + '.0',
             maxRequest: 15 // making sure we set it to a reasonable value = 15
         });
 
@@ -362,11 +359,11 @@ export class SalesforceManager extends SalesforceManagerIntf {
         const updateLogInformation = () => {
             logger?.log(
                 `Processing ${queries.length} SOQL ${queries.length>1?'queries':'query'}... `+
-                `Records retrieved: ${nbRecords}, `+
-                `Number of QueryMore calls done: ${nbQueryMore}, `+
-                `Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
-                `Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
-                `Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`
+                `🎥 Records retrieved: ${nbRecords}, `+
+                `🙌 Number of QueryMore calls done: ${nbQueryMore}, `+
+                `⏳ Pending: (${pendingEntities.length}) on [${pendingEntities.join(', ')}], `+
+                `✅ Done: (${doneEntities.length}) on [${doneEntities.join(', ')}], `+
+                `❌ Error: (${errorEntities.length}) on [${errorEntities.join(', ')}]`
             );
         }
         const updateLogInformationOnQuery = (/** @type {number} */ nbRec) => {

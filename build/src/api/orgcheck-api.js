@@ -37,6 +37,7 @@ import { SFDC_PermissionSet } from './data/orgcheck-api-data-permissionset';
 import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
+import { SecretSauce } from './core/orgcheck-api-secretsauce';
 
 /**
  * @description Org Check API main class
@@ -151,7 +152,7 @@ export class API {
      * @public
      */
     getScoreRule(id) {
-        return this._datasetManager.getScoreRule(id);
+        return SecretSauce.AllScoreRules[id];
     }
 
     /**
@@ -160,7 +161,7 @@ export class API {
      * @public
      */
     getAllScoreRules() {
-        return this._datasetManager.getAllScoreRules();
+        return SecretSauce.AllScoreRules;
     }
 
     /**
@@ -169,9 +170,8 @@ export class API {
      * @public
      */
     getAllScoreRulesAsDataMatrix() {
-        const allRules = this._datasetManager.getAllScoreRules();
         const workingMatrix = DataMatrixFactory.create();
-        allRules.forEach((rule) => {
+        SecretSauce.AllScoreRules.forEach((rule) => {
             workingMatrix.setRowHeader(`${rule.id}`, rule);
             rule.applicable.forEach((classs) => {
                 workingMatrix.addValueToProperty(

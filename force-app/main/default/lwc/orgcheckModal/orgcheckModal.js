@@ -4,7 +4,8 @@ import { LightningElement, api } from 'lwc';
 export default class OrgcheckModal extends LightningElement {
 
     /**
-     * Connected callback function
+     * @description Connected callback function
+     * @public
      */
     connectedCallback() {
         this.isShown = false;
@@ -12,6 +13,7 @@ export default class OrgcheckModal extends LightningElement {
     }
     
     /**
+     * @description Opens the modal
      * @param {string} title
      * @param {Error | string | object} content
      * @param {boolean} isClosable
@@ -39,34 +41,45 @@ export default class OrgcheckModal extends LightningElement {
     }
 
     /**
-     * Handle a click on the close button to.... close the modal!
+     * @description Handle a click on the close button to.... close the modal!
+     * @public
      */
     handleClose() {
         this.isShown = false;
     }
 
     /**
+     * @description Should we show or hide the modal?
      * @type {boolean}
+     * @public
      */
     isShown;
 
     /**
+     * @description Should we show or hide the close button of the modal?
      * @type {boolean}
+     * @public
      */
     isClosable;
     
     /**
+     * @description Title of that modal
      * @type {string}
+     * @public
      */
     headerTitle;
     
     /**
+     * @description Message of that modal
      * @type {string}
+     * @public
      */
     message;
 
     /**
+     * @description In some case we want to show an error stack below the message
      * @type {string}
+     * @public
      */
     stack;
 }

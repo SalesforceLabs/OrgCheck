@@ -54,22 +54,6 @@ export class ScoreRule {
 export class DataFactoryIntf {
 
     /**
-     * @description Get the Org Check "score rule" given its ID
-     * @param {number} id
-     * @returns {ScoreRule}
-     * @throws if the given id is not found in the validation rules list
-     * @public
-     */
-    getScoreRule(id) { throw new Error('Not implemented'); }
-
-    /**
-     * @description Get the list of all Org Check "score rules"
-     * @returns {Array<ScoreRule>} Information about validation rules
-     * @public
-     */
-    getAllScoreRules() { throw new Error('Not implemented');}
-
-    /**
      * @description Get the instance of the factiry for a given data class
      * @param {any} dataClass 
      * @returns {DataFactoryInstanceIntf}

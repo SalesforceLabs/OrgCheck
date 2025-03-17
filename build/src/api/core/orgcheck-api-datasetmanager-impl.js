@@ -107,7 +107,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._dataCache = cacheManager;
         this._datasets = new Map();
         this._datasetPromisesCache = new Map();
-        this._dataFactory = new DataFactory(sfdcManager);
+        this._dataFactory = new DataFactory();
 
         this._datasets.set(DatasetAliases.APEXCLASSES, new DatasetApexClasses());
         this._datasets.set(DatasetAliases.APEXTRIGGERS, new DatasetApexTriggers());
@@ -211,24 +211,5 @@ export class DatasetManager extends DatasetManagerIntf {
             this._dataCache.remove(cacheKey);
             this._datasetPromisesCache.delete(cacheKey);
         });
-    }
-
-    /**
-     * @description Get the Org Check "score rule" given its id
-     * @param {number} id
-     * @returns {ScoreRule}
-     * @public
-     */
-    getScoreRule(id) {
-        return this._dataFactory.getScoreRule(id);
-    }
-
-    /**
-     * @description Get the list of all Org Check "score rules"
-     * @returns {Array<ScoreRule>} Information about score rules
-     * @public
-     */
-    getAllScoreRules() { 
-        return this._dataFactory.getAllScoreRules();
     }
 }

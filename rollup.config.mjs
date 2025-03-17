@@ -13,16 +13,14 @@ export default [
             },
             {
                 file: './build/dist/orgcheck/orgcheck-ui.min.js',
-                format: 'iife',
+                format: 'cjs',
                 name: 'OrgCheckUI',
                 plugins: [terser()]
             }
         ],
         plugins: [
             del({ targets: [ 
-                './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-ui.js',
-                './force-app/main/default/lwc/orgcheckExtendedDatatable/libs/orgcheck-ui.js',
-                './force-app/main/default/lwc/orgcheckExportButton/libs/orgcheck-ui.js'
+                './force-app/main/default/lwc/**/libs/orgcheck-ui.**js',
         ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-ui.js', 
@@ -31,7 +29,8 @@ export default [
                     './force-app/main/default/lwc/orgcheckExtendedDatatable/libs',
                     './force-app/main/default/lwc/orgcheckExportButton/libs',
                     './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
-                ]
+                ],
+                rename: 'orgcheck-ui.js'
             }]})
         ]
     }, {
@@ -44,22 +43,24 @@ export default [
             },
             {
                 file: './build/dist/orgcheck/orgcheck-api.min.js',
-                format: 'iife',
+                format: 'cjs',
                 name: 'OrgCheckAPI',
                 plugins: [terser()]
             }
         ],
         plugins: [
             del({ targets: [ 
-                './force-app/main/default/lwc/orgcheckApp/libs/orgcheck-api.js' 
+                './force-app/main/default/lwc/**/libs/orgcheck-api.**js' 
             ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-api.js', 
                 dest: [
                     './force-app/main/default/lwc/orgcheckApp/libs',
+                    './force-app/main/default/lwc/orgcheckExtendedDatatable/libs',
                     './force-app/main/default/lwc/orgcheckDependencyLink/libs',
                     './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
-                ]
+                ],
+                rename: 'orgcheck-api.js'
             }]})
         ]
     }
