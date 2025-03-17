@@ -21,19 +21,4 @@ export class DatasetManagerIntf {
      * @public
      */
     clean(datasets) { throw new TypeError(`You need to implement the method "clean()"`); }
-
-    /**
-     * @description Get the Org Check "score rule" given its id
-     * @param {number} id
-     * @returns {ScoreRule}
-     * @public
-     */
-    getScoreRule(id) { throw new TypeError(`You need to implement the method "getScoreRule()"`); }
-
-    /**
-     * @description Get the list of all Org Check "score rules"
-     * @returns {Array<ScoreRule>} Information about validation rules
-     * @public
-     */
-    getAllScoreRules() { throw new TypeError(`You need to implement the method "getAllScoreRules()"`);}
 }

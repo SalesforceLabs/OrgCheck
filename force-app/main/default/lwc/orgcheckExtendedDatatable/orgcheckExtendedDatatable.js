@@ -1,5 +1,6 @@
 import { LightningElement, api, track } from 'lwc';
-import * as ocui from './libs/orgcheck-ui';
+import * as ocui from './libs/orgcheck-ui.js';
+import * as ocapi from './libs/orgcheck-api.js';
 
 export default class OrgcheckExtentedDatatable extends LightningElement {
 
@@ -323,15 +324,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
+     * @description
+     */
+
+
+    /**
      * @description Convert this table into an Excel data
      * @returns {Array<ocui.ExportedTable>}
      */ 
     get exportedRows() {
         if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
-            return [ ocui.RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename) ];
+            return ocui.RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename, ocapi.SecretSauce.GetScoreRuleDescription);
         }
         return [];
     }
+
 
 
 

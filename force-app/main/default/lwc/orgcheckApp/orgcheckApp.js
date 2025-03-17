@@ -2015,38 +2015,38 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocui.ExportedTable>}
      */
     get objectInformationExportSource() {
-        return [
-            { 
-                header: 'General information',
-                columns: [ 'Label', 'Value' ],
-                rows: [
-                    [ 'API Name', this.objectData.apiname ],
-                    [ 'Package', this.objectData.package ],
-                    [ 'Singular Label', this.objectData.label ],
-                    [ 'Plural Label', this.objectData.labelPlural ],
-                    [ 'Description', this.objectData.description ],
-                    [ 'Key Prefix', this.objectData.keyPrefix ],
-                    [ 'Record Count (including deleted ones)', this.objectData.recordCount ],
-                    [ 'Is Custom?', this.objectData.isCustom ],
-                    [ 'Feed Enable?', this.objectData.isFeedEnabled ],
-                    [ 'Most Recent Enabled?', this.objectData.isMostRecentEnabled ],
-                    [ 'Global Search Enabled?', this.objectData.isSearchable ],
-                    [ 'Internal Sharing', this.objectData.internalSharingModel ],
-                    [ 'External Sharing', this.objectData.externalSharingModel ]
-                ]
-            },
-            ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields'),
-            ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields'),
-            ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers'),
-            ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets'),
-            ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts'),
-            ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages'),
-            ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits'),
-            ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules'),
-            ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links'),
-            ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types'),
-            ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships'),
-        ];
+        const sheets = [];
+        sheets.push({ 
+            header: 'General information',
+            columns: [ 'Label', 'Value' ],
+            rows: [
+                [ 'API Name', this.objectData.apiname ],
+                [ 'Package', this.objectData.package ],
+                [ 'Singular Label', this.objectData.label ],
+                [ 'Plural Label', this.objectData.labelPlural ],
+                [ 'Description', this.objectData.description ],
+                [ 'Key Prefix', this.objectData.keyPrefix ],
+                [ 'Record Count (including deleted ones)', this.objectData.recordCount ],
+                [ 'Is Custom?', this.objectData.isCustom ],
+                [ 'Feed Enable?', this.objectData.isFeedEnabled ],
+                [ 'Most Recent Enabled?', this.objectData.isMostRecentEnabled ],
+                [ 'Global Search Enabled?', this.objectData.isSearchable ],
+                [ 'Internal Sharing', this.objectData.internalSharingModel ],
+                [ 'External Sharing', this.objectData.externalSharingModel ]
+            ]
+        });
+        sheets.push(... ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(... ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
+        return sheets;
     }
 
     /**
@@ -2055,11 +2055,13 @@ export default class OrgcheckApp extends LightningElement {
      */
     get globalViewItemsExport() {
         try {
-            return this._globalViewTransformersKeys.map((/** @type {string} */ recipe) => { 
+            const sheets = [];
+            this._globalViewTransformersKeys.forEach((/** @type {string} */ recipe) => { 
                 const transfomer = this._internalTransformers[recipe]; 
                 const columnDef = this[transfomer.data.replace(/Data$/, 'Definition')];
-                return ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label);
+                sheets.push(... ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label, ocapi.SecretSauce.GetScoreRuleDescription));
             });
+            return sheets;
         } catch (error) {
             this._showError('Error while exporting global view items:', error);
         }
