@@ -55,7 +55,7 @@
                 <span id="additional-info-issue-454">
                     Hello! <br />
                     <br />
-                    You see this message because Org Check is taking more than 20 seconds to load.<br />
+                    You see this message because Org Check is taking more than 30 seconds to load.<br />
                     <br />
                     <br />
                     <b>Potential reason #1:</b> This may be due to a new version that has been pushed to your org or maybe this is 
@@ -99,7 +99,9 @@
             { question: `How can you tell a vampire has a cold?`, answer: `They start coffin.` },
             { question: `I was going to get a brain transplant...`, answer: `but I changed my mind` },
             { question: `How do you organize a space party?`, answer: `You planet.`},
-            { question: `What did the scarf say to the hat?`, answer: `You go on ahead, I am going to hang around a bit longer.` }
+            { question: `What did the scarf say to the hat?`, answer: `You go on ahead, I am going to hang around a bit longer.` },
+            { question: `My wife asked me to stop singing I'm a Believer by the Monkees because she found it annoying.`, answer: `At first, I thought she was kidding. But then I saw her face...` },
+            { question: `My wife asked me to stop singing Oasis.`, answer: `So, I said maybe...` },
         ];
         const joke_question = document.getElementById('additional-waiting-info-1');
         const joke_answer = document.getElementById('additional-waiting-info-2');
@@ -126,7 +128,7 @@
         setTimeout(() => { 
             stopJokes();
             ultimate_note.style.display = 'block'; 
-        }, 20000);
+        }, 30000);
 
         /* Reset the cache of previous versions */
         try {
