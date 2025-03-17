@@ -33,12 +33,14 @@ export class DatasetObjects extends Dataset {
                         'FROM EntityDefinition ' +
                         'WHERE keyPrefix <> null ' +
                         'AND DeveloperName <> null ' +
-                        `AND (NOT(keyPrefix IN ('00a', '017', '02c', '0D5', '1CE')))`,
+                        `AND (NOT(keyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
                             // 00a	*Comment for custom objects
                             // 017	*History for custom objects
                             // 02c	*Share for custom objects
                             // 0D5	*Feed for custom objects
                             // 1CE	*Event for custom objects
+                        `AND (NOT(QualifiedApiName like '%_hd')) `,
+                            // We want to filter out trending historical objects
                 tooling: true, // Using Tooling to get the Activity object
                 queryMoreField: 'DurableId' // entityDef does not support calling QueryMore, use the custom instead
             }], logger)
