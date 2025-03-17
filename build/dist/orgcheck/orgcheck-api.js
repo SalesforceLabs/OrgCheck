@@ -2891,21 +2891,68 @@ class SFDC_UserRole extends Data {
      * @public
      */
     parentRef;
+
+    /**
+     * @description Level of this role in the global role hierarchy
+     * @type {number}
+     * @public
+     */
+    level;
     
+    /**
+     * @description Is this role a parent?
+     * @type {boolean}
+     * @public
+     */
     hasParent;
     
+    /**
+     * @description Number of active members in this role
+     * @type {number}
+     * @public
+     */
     activeMembersCount;
     
+    /** 
+     * @description Array of active member user ids
+     * @type {Array<string>}
+     * @public
+     */
     activeMemberIds;
     
+    /**
+     * @description Array of active member user references
+     * @type {Array<SFDC_User>}
+     * @public
+     */
     activeMemberRefs;
     
+    /**
+     * @description Does this role have active members?
+     * @type {boolean}
+     * @public
+     */
     hasActiveMembers;
     
+    /**
+     * @description Number of inactive members in this role
+     * @type {number}
+     * @public
+     */
     inactiveMembersCount;
     
+    /**
+     * @description Does this role have inactive members?
+     * @type {boolean}
+     * @public
+     */
     hasInactiveMembers;
     
+    /**
+     * @description Is this role externam?
+     * @type {boolean}
+     * @public
+     */
     isExternal;
 }
 
@@ -3692,6 +3739,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'The Used count from that permission set license does not match the number of disctinct active user assigned to the same license. Please check if you could free up some licenses!',
         badField: 'distinctActiveAssigneeCount',
         applicable: [ SFDC_PermissionSetLicense ]
+    }, {
+        id: 45,
+        description: 'Role with a level >= 7',
+        formula: (/** @type {SFDC_UserRole} */ d) => d.level >= 7,
+        errorMessage: 'This role has a level in the Role Hierarchy which is seven or greater. Please reduce the maximum depth of the role hierarchy. Having that much levels has an impact on performance...',
+        badField: 'level',
+        applicable: [ SFDC_UserRole ]
     }
 ];
 
@@ -6668,6 +6722,8 @@ class DatasetUserRoles extends Dataset {
         // Create the map
         const userRoleRecords = results[0];
         logger?.log(`Parsing ${userRoleRecords.length} user roles...`);
+        const childrenByParent = new Map();
+        const roots = [];
         const roles = new Map(await Processor.map(userRoleRecords, async (record) => {
 
             // Get the ID15 of this custom label
@@ -6689,7 +6745,17 @@ class DatasetUserRoles extends Dataset {
                     isExternal: (record.PortalType !== 'None') ? true : false,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.ROLE)
                 }
-            });         
+            });
+            // manage kids/parent relationship
+            if (userRole.hasParent === false) {
+                roots.push(userRole);
+            } else {
+                if (childrenByParent.has(userRole.parentId) === false) {
+                    childrenByParent.set(userRole.parentId, []);
+                }
+                childrenByParent.get(userRole.parentId).push(userRole);
+            }
+            // compute the numbers of users
             await Processor.forEach(
                 record?.Users?.records, 
                 (user) => {
@@ -6704,18 +6770,34 @@ class DatasetUserRoles extends Dataset {
             userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
             userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;
 
-            // Compute the score of this item
-            userRoleDataFactory.computeScore(userRole);
-
             // Add it to the map  
             return [ userRole.id, userRole ];
         }));
+
+        // Compute levels 
+        await Processor.forEach(roots, async (root) => {
+            root.level = 0;
+            RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
+        });
+
+        // Then compute the score of roles 
+        await Processor.forEach(roles, async (userRole) => {
+            userRoleDataFactory.computeScore(userRole);
+        });
 
         // Return data as map
         logger?.log(`Done`);
         return roles;
     } 
 }
+
+const RECURSIVE_LEVEL_CALCULUS = (parent, childrenByParent) => {
+    const children = childrenByParent.get(parent.id);
+    children?.forEach((child) => {
+        child.level = parent.level + 1;
+        RECURSIVE_LEVEL_CALCULUS(child, childrenByParent);
+    });
+};
 
 class DatasetFlows extends Dataset {
 

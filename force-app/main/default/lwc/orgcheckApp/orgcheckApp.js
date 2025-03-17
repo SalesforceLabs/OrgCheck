@@ -1779,6 +1779,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Developer Name',              type: ocui.ColumnType.TXT, data: { value: 'apiname' }},
             { label: 'Number of active members',    type: ocui.ColumnType.NUM, data: { value: 'activeMembersCount' }},
             { label: 'Number of inactive members',  type: ocui.ColumnType.NUM, data: { value: 'inactiveMembersCount' }},
+            { label: 'Level',                       type: ocui.ColumnType.NUM, data: { value: 'level' }},
             { label: 'Parent',                      type: ocui.ColumnType.URL, data: { value: 'parentRef.url', label: 'parentRef.name' }}
         ],
         orderIndex: 1,

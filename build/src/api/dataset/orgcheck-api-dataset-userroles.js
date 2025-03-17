@@ -31,6 +31,8 @@ export class DatasetUserRoles extends Dataset {
         // Create the map
         const userRoleRecords = results[0];
         logger?.log(`Parsing ${userRoleRecords.length} user roles...`);
+        const childrenByParent = new Map();
+        const roots = [];
         const roles = new Map(await Processor.map(userRoleRecords, async (record) => {
 
             // Get the ID15 of this custom label
@@ -52,7 +54,17 @@ export class DatasetUserRoles extends Dataset {
                     isExternal: (record.PortalType !== 'None') ? true : false,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.ROLE)
                 }
-            });         
+            });
+            // manage kids/parent relationship
+            if (userRole.hasParent === false) {
+                roots.push(userRole);
+            } else {
+                if (childrenByParent.has(userRole.parentId) === false) {
+                    childrenByParent.set(userRole.parentId, []);
+                }
+                childrenByParent.get(userRole.parentId).push(userRole);
+            }
+            // compute the numbers of users
             await Processor.forEach(
                 record?.Users?.records, 
                 (user) => {
@@ -67,15 +79,31 @@ export class DatasetUserRoles extends Dataset {
             userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
             userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;
 
-            // Compute the score of this item
-            userRoleDataFactory.computeScore(userRole);
-
             // Add it to the map  
             return [ userRole.id, userRole ];
         }));
+
+        // Compute levels 
+        await Processor.forEach(roots, async (root) => {
+            root.level = 0;
+            RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
+        });
+
+        // Then compute the score of roles 
+        await Processor.forEach(roles, async (userRole) => {
+            userRoleDataFactory.computeScore(userRole);
+        });
 
         // Return data as map
         logger?.log(`Done`);
         return roles;
     } 
+}
+
+const RECURSIVE_LEVEL_CALCULUS = (parent, childrenByParent) => {
+    const children = childrenByParent.get(parent.id);
+    children?.forEach((child) => {
+        child.level = parent.level + 1;
+        RECURSIVE_LEVEL_CALCULUS(child, childrenByParent);
+    });
 }

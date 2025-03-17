@@ -395,6 +395,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'The Used count from that permission set license does not match the number of disctinct active user assigned to the same license. Please check if you could free up some licenses!',
         badField: 'distinctActiveAssigneeCount',
         applicable: [ SFDC_PermissionSetLicense ]
+    }, {
+        id: 45,
+        description: 'Role with a level >= 7',
+        formula: (/** @type {SFDC_UserRole} */ d) => d.level >= 7,
+        errorMessage: 'This role has a level in the Role Hierarchy which is seven or greater. Please reduce the maximum depth of the role hierarchy. Having that much levels has an impact on performance...',
+        badField: 'level',
+        applicable: [ SFDC_UserRole ]
     }
 ];
 

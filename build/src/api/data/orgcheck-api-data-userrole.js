@@ -1,4 +1,5 @@
 import { Data } from '../core/orgcheck-api-data';
+import { SFDC_User } from './orgcheck-api-data-user';
 
 export class SFDC_UserRole extends Data {
 
@@ -51,20 +52,67 @@ export class SFDC_UserRole extends Data {
      * @public
      */
     parentRef;
+
+    /**
+     * @description Level of this role in the global role hierarchy
+     * @type {number}
+     * @public
+     */
+    level;
     
+    /**
+     * @description Is this role a parent?
+     * @type {boolean}
+     * @public
+     */
     hasParent;
     
+    /**
+     * @description Number of active members in this role
+     * @type {number}
+     * @public
+     */
     activeMembersCount;
     
+    /** 
+     * @description Array of active member user ids
+     * @type {Array<string>}
+     * @public
+     */
     activeMemberIds;
     
+    /**
+     * @description Array of active member user references
+     * @type {Array<SFDC_User>}
+     * @public
+     */
     activeMemberRefs;
     
+    /**
+     * @description Does this role have active members?
+     * @type {boolean}
+     * @public
+     */
     hasActiveMembers;
     
+    /**
+     * @description Number of inactive members in this role
+     * @type {number}
+     * @public
+     */
     inactiveMembersCount;
     
+    /**
+     * @description Does this role have inactive members?
+     * @type {boolean}
+     * @public
+     */
     hasInactiveMembers;
     
+    /**
+     * @description Is this role externam?
+     * @type {boolean}
+     * @public
+     */
     isExternal;
 }

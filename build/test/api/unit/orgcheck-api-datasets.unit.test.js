@@ -631,7 +631,8 @@ describe('tests.api.unit.Datasets', () => {
 
   describe('Test DatasetUserRoles', () => {
   
-    const dataset = new DatasetUserRoles();      
+    const dataset = new DatasetUserRoles();
+
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
@@ -640,6 +641,48 @@ describe('tests.api.unit.Datasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
+    });
+
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      sfdcManager.addSoqlQueryResponse('FROM UserRole', [
+        { Id: '001', DeveloperName: '001', Name: '001', ParentRoleId: undefined, PortalType: 'None' }, // LEVEL 0
+        { Id: '002', DeveloperName: '002', Name: '002', ParentRoleId: '001', PortalType: 'None' }, // LEVEL 1
+        { Id: '003', DeveloperName: '003', Name: '003', ParentRoleId: '001', PortalType: 'None' }, // LEVEL 1
+        { Id: '004', DeveloperName: '004', Name: '004', ParentRoleId: '002', PortalType: 'None' }, // LEVEL 2
+        { Id: '005', DeveloperName: '005', Name: '005', ParentRoleId: '002', PortalType: 'None' }, // LEVEL 2
+        { Id: '006', DeveloperName: '006', Name: '006', ParentRoleId: '004', PortalType: 'None' }, // LEVEL 3
+        { Id: '007', DeveloperName: '007', Name: '007', ParentRoleId: '004', PortalType: 'None' }, // LEVEL 3
+        { Id: '008', DeveloperName: '008', Name: '008', ParentRoleId: '007', PortalType: 'None' }, // LEVEL 4
+        { Id: '009', DeveloperName: '009', Name: '009', ParentRoleId: '006', PortalType: 'None' }, // LEVEL 4
+        { Id: '010', DeveloperName: '010', Name: '010', ParentRoleId: '001', PortalType: 'None' }  // LEVEL 1
+      ]);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(10);
+      expect(results.get('001')).toBeDefined();
+      expect(results.get('001').level).toBe(0);
+      expect(results.get('002')).toBeDefined();
+      expect(results.get('002').level).toBe(1);
+      expect(results.get('003')).toBeDefined();
+      expect(results.get('003').level).toBe(1);
+      expect(results.get('004')).toBeDefined();
+      expect(results.get('004').level).toBe(2);
+      expect(results.get('005')).toBeDefined();
+      expect(results.get('005').level).toBe(2);
+      expect(results.get('006')).toBeDefined();
+      expect(results.get('006').level).toBe(3);
+      expect(results.get('007')).toBeDefined();
+      expect(results.get('007').level).toBe(3);
+      expect(results.get('008')).toBeDefined();
+      expect(results.get('008').level).toBe(4);
+      expect(results.get('009')).toBeDefined();
+      expect(results.get('009').level).toBe(4);
+      expect(results.get('010')).toBeDefined();
+      expect(results.get('010').level).toBe(1);
     });
   });
 
