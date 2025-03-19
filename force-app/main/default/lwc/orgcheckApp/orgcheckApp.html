@@ -10,7 +10,9 @@
                         <div class="slds-page-header__name">
                             <div class="slds-page-header__name-title">
                                 <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
-                                Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)<br />
+                                Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)
+                                <span if:true={tabLoading}>&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" /> Please wait while loading...</span>
+                                <br />
                             </div>
                         </div>
                     </div>
@@ -35,9 +37,9 @@
         <c-orgcheck-spinner></c-orgcheck-spinner>
         <c-orgcheck-modal></c-orgcheck-modal>
     </div>
-    <lightning-tabset variant="scoped">
-        <lightning-tab label="Home" onactive={handleMainTabActivation}>
-            <lightning-tabset>
+    <lightning-tabset variant="scoped" active-tab-value={selectedMainTab}>
+        <lightning-tab value="home" label="Home" onactive={handleMainTabActivation}>
+            <lightning-tabset active-tab-value={selectedSubTab}>
                 <lightning-tab value="welcome" label="Welcome!" onactive={handleSubTabActivation}>
                     <lightning-layout>
                         <lightning-layout-item size="5">
@@ -170,16 +172,21 @@
                     <lightning-layout multiple-rows>
                         <template for:each={globalViewItems} for:item="item">
                             <lightning-layout-item size="4" padding="around-small" key={item.label}>
-                                <div class="slds-box slds-text-align_center">
-                                    <h1 class="slds-text-heading_medium">{item.label}</h1>
-                                    <lightning-layout>
-                                        <lightning-layout-item size="6">
-                                            <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
-                                        </lightning-layout-item>
-                                        <lightning-layout-item size="6">
-                                            <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
-                                        </lightning-layout-item>
-                                    </lightning-layout>
+                                <div class="slds-box globalViewCard">
+                                    <lightning-card>
+                                        <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
+                                        <lightning-button label="Visit" title="Visit the corresponding tab" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
+                                        <p class="slds-var-p-horizontal_small">
+                                            <lightning-layout>
+                                                <lightning-layout-item size="6">
+                                                    <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
+                                                </lightning-layout-item>
+                                                <lightning-layout-item size="6">
+                                                    <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
+                                                </lightning-layout-item>
+                                            </lightning-layout>
+                                        </p>
+                                    </lightning-card>
                                 </div>
                             </lightning-layout-item>    
                         </template>
@@ -188,13 +195,13 @@
             </lightning-tabset>
         </lightning-tab>
         <template if:true={useOrgCheckInThisOrgConfirmed}>
-            <lightning-tab label="⚽ Objects, OWDs, Fields and Validation Rules" onactive={handleMainTabActivation}>
+            <lightning-tab value="data-model" label="⚽ Objects, OWDs, Fields and Validation Rules" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,validation-rules"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTaDataModel}>
                     <lightning-tab value="summary-01" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">⚽ Welcome in the Data model world!</h1>
                         <ul class="slds-list_dotted">
@@ -419,14 +426,14 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="👮 Users, Profiles, Permission Sets, Licenses and Rights" onactive={handleMainTabActivation}>
+            <lightning-tab value="security" label="👮 Users, Profiles, Permission Sets, Licenses and Rights" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} 
                         data-recipes="active-users,profiles,permission-sets,permission-set-licenses,profile-restrictions,profile-password-policies,object-permissions,field-permissions,app-permissions"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-02" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">👮 Welcome in the Security and Access world!</h1>
                         <ul class="slds-list_dotted">
@@ -489,13 +496,13 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🐇 Roles, Public Groups and Queues" onactive={handleMainTabActivation}>
+            <lightning-tab value="boxes" label="🐇 Roles, Public Groups and Queues" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-03" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🐇 Welcome in the Boxes world!</h1>
                         <ul class="slds-list_dotted">
@@ -519,13 +526,13 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🤖 Automations" onactive={handleMainTabActivation}>
+            <lightning-tab value="automation" label="🤖 Automations" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="flows,process-builders,workflows"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-04" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🤖 Welcome in the Automation world!</h1>
                         <ul class="slds-list_dotted">
@@ -545,13 +552,13 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
+            <lightning-tab value="setting" label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-05" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🎁 Welcome in the Setting world!</h1>
                         <ul class="slds-list_dotted">
@@ -563,13 +570,13 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🥐 Visual Components" onactive={handleMainTabActivation}>
+            <lightning-tab value="visual" label="🥐 Visual Components" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} value="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-06" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🥐 Welcome in the User Interface world!</h1>
                         <ul class="slds-list_dotted">
@@ -597,7 +604,7 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab label="🔥 Apex" onactive={handleMainTabActivation}>
+            <lightning-tab value="code" label="🔥 Apex" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>
@@ -611,7 +618,7 @@
                         </lightning-layout-item>
                     </template>
                 </lightning-layout>
-                <lightning-tabset>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-07" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🔥 Welcome in the Programmatic world!</h1>
                         <ul class="slds-list_dotted">

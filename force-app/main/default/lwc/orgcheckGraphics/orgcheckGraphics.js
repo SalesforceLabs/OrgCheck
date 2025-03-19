@@ -20,12 +20,15 @@ export default class OrgcheckGraphics extends LightningElement {
   _api;
 
   /**
+   * @description Data to use to render the graphic
    * @type {any}
+   * @private
    */
   _data;
 
   /**
-   * Called when it's about to render the component
+   * @description Called when it's about to render the component
+   * @public
    */
   renderedCallback() {
     
@@ -38,7 +41,7 @@ export default class OrgcheckGraphics extends LightningElement {
           this._api = d3; 
 
           // draw graph now
-          this.drawGraph();
+          this._drawGraph();
         })
         .catch((e) => {
           console.error(e);
@@ -47,66 +50,217 @@ export default class OrgcheckGraphics extends LightningElement {
   }
 
   /**
-   * Set the data used in the graphic
-   * 
+   * @description Set the data used in the graphic
    * @param {any} data
+   * @public
    */
   @api set source(data) {
     this._data = data;
     this.hasNoData = data === undefined ;
-    this.drawGraph();
+    this._drawGraph();
   }
 
   /**
-   * Get the data used in the graphic
+   * @description Get the data used in the graphic
+   * @returns {any}
+   * @public
    */
   get source() {
     return this._data;
   }
 
+  /**
+   * @description Is the graphics takes the whole horizontal space or not
+   * @type {boolean}
+   */ 
+  @api isInline = false;
+
+  /**
+   * @description Container class dependends on the isInline property
+   * @type {string}
+   * @public
+   */ 
   get containerClass() {
     return `${this.isInline ? 'inline' : 'slds-var-m-around_medium'} orgcheck-graph`;
   }
 
+  /**
+   * @description Name of the graphic
+   * @type {string}
+   * @public
+   */
   @api name;
+
+  /**
+   * @description Type of the graphic can be 'pie' or 'hierarchy'
+   * @type {string}
+   * @public
+   */
   @api type;
-  @api isInline = false;
-  @api fontFamily = 'Salesforce Sans,Arial,sans-serif';
-  @api fontSize = 10;
 
-  @api hierarchyBoxHeight = 40;
-  @api hierarchyBoxWidth = 200;
-  @api hierarchyBoxTextPadding = 3;
-  @api hierarchyBoxVerticalPadding = 5;
-  @api hierarchyBoxHorizontalPadding = 50;
-  @api hierarchyBoxColorLegend = [];
-  @api hierarchyBoxColorDecorator = (depth, data) => { console.debug('hierarchyBoxColorDecorator', depth, data); return 0; };
-  @api hierarchyBoxInnerHtmlDecorator = (depth, data) => { console.debug('hierarchyBoxInnerHtmlDecorator', depth, data); return ''; };
-  @api hierarchyBoxOnClickDecorator = (depth, data) => { console.debug('hierarchyBoxOnClickDecorator', depth, data); };
-  @api hierarchyEdgeColor = '#2f89a8';
-  @api hierarchyShowLevel = false;
-
-  @api pieSize = 30;
-  @api pieStrokeWidth = 1;
-  @api pieCategoriesDecorator = (data) => { console.debug('pieCategoriesDecorator', data); return []; };
-
-  pieCategories;
-  pieTotal;
-  hierarchyLegend;
-  hasNoData = true;
-
+  /**
+   * @description Returns true if the type is "pie"
+   * @returns {boolean}
+   * @public
+   */
   get isPie() {
     return this.type === 'pie';
   }
 
+  /**
+   * @description Returns true if the type is "hierarchy"
+   * @returns {boolean}
+   * @public
+   */
   get isHierarchy() {
     return this.type === 'hierarchy';
   }
 
   /**
-   * Draw the dependency graph
+   * @description Font to use
+   * @type {string}
+   * @public
    */
-  drawGraph() {
+  @api fontFamily = 'Salesforce Sans,Arial,sans-serif';
+
+  /**
+   * @description Font size to use
+   * @type {string}
+   * @public
+   */
+  @api fontSize = '10';
+
+  /**
+   * @description Box height in pixel (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyBoxHeight = '40';
+
+  /**
+   * @description Box width in pixel (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyBoxWidth = '200';
+
+  /**
+   * @description Box text padding in pixel (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyBoxTextPadding = '3';
+
+  /**
+   * @description Box vertical padding in pixel (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyBoxVerticalPadding = '5';
+
+  /**
+   * @description Box horizontal padding in pixel (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyBoxHorizontalPadding = '50';
+
+  /**
+   * @description List of color to use in the legend (in case the graphic is a hierarchical one)
+   * @type {Array<{name: string, color: string}>}
+   * @public
+   */
+  @api hierarchyBoxColorLegend = [];
+
+  /**
+   * @description Decorator function to get the color of the boxes depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
+   * @type {Function}
+   * @public
+   */
+  @api hierarchyBoxColorDecorator = (depth, data) => { console.debug('hierarchyBoxColorDecorator', depth, data); return 0; };
+
+  /**
+   * @description Decorator function to get the inner HTML content of the boxes depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
+   * @type {Function}
+   * @public
+   */
+  @api hierarchyBoxInnerHtmlDecorator = (depth, data) => { console.debug('hierarchyBoxInnerHtmlDecorator', depth, data); return ''; };
+
+  /**
+   * @description Decorator function to get the onclick function depending on the depth in the hierarchy and data of the node (in case the graphic is a hierarchical one)
+   * @type {Function}
+   * @public
+   */
+  @api hierarchyBoxOnClickDecorator = (depth, data) => { console.debug('hierarchyBoxOnClickDecorator', depth, data); };
+
+  /**
+   * @description Color of the edges (in case the graphic is a hierarchical one)
+   * @type {string}
+   * @public
+   */
+  @api hierarchyEdgeColor = '#2f89a8';
+
+  /**
+   * @description Do we show the level of the hierarchy (in case the graphic is a hierarchical one)
+   * @type {boolean}
+   * @public
+   */
+  @api hierarchyShowLevel = false;
+
+  /**
+   * @description Size of the pie in pixel (in case the graphic is a pie one)
+   * @type {string}
+   * @public
+   */
+  @api pieSize = '30';
+
+  /**
+   * @description Size of the surrounding stroke around the pie in pixel (in case the graphic is a pie one)
+   * @type {string}
+   * @public
+   */
+  @api pieStrokeWidth = '1';
+
+  /**
+   * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one)
+   * @type {Function}
+   * @public
+   */
+  @api pieCategoriesDecorator = (data) => { console.debug('pieCategoriesDecorator', data); return []; };
+
+  /**
+   * @description Pie categories to use in legend
+   * @type {Array<{name: string, value: number, color: string, cssStyle: string}>}
+   * @public
+   */
+  pieCategories = [];
+
+  /**
+   * @description Pie total
+   * @type {number}
+   * @public
+   */
+  pieTotal;
+
+  /**
+   * @description Hierarchy legends to use
+   * @type {Array<{name: string, color: string, cssStyle: string}>}
+   * @public
+   */
+  hierarchyLegend = [];
+
+  /**
+   * @description Does this graphic have data?
+   * @type {boolean}
+   * @public
+   */
+  hasNoData = true;
+
+  /**
+   * @descriptio Draw the graph
+   * @private
+   */
+  _drawGraph() {
 
     // If API not loaded yet, then just skip!
     if (this._apiInitialized === false) {
@@ -125,14 +279,18 @@ export default class OrgcheckGraphics extends LightningElement {
     }
   }
 
+  /**
+   * @descriptio Draw the graph as a hierarchy one
+   * @private
+   */
   _drawHierarchy() {
     // If specified from the parent component (via @api), these properties will be typed as string! 
     // Making sure it is considered as a number whatever the case
-    const boxHeight = this.hierarchyBoxHeight/1; 
-    const boxWidth = this.hierarchyBoxWidth/1;
-    const boxVerticalPadding = this.hierarchyBoxVerticalPadding/1;
-    const boxHorizontalPadding = this.hierarchyBoxHorizontalPadding/1;
-    const boxTextPadding = this.hierarchyBoxTextPadding/1;
+    const boxHeight = Number.parseInt(this.hierarchyBoxHeight); 
+    const boxWidth = Number.parseInt(this.hierarchyBoxWidth);
+    const boxVerticalPadding = Number.parseInt(this.hierarchyBoxVerticalPadding);
+    const boxHorizontalPadding = Number.parseInt(this.hierarchyBoxHorizontalPadding);
+    const boxTextPadding = Number.parseInt(this.hierarchyBoxTextPadding);
 
     // add the css style to the legend
     this.hierarchyLegend = this.hierarchyBoxColorLegend.map((c) => {
@@ -233,6 +391,10 @@ export default class OrgcheckGraphics extends LightningElement {
     }
   }
 
+  /**
+   * @descriptio Draw the graph as a pie one
+   * @private
+   */
   _drawPie() {
     this.pieTotal = 0;
     this.pieCategories = this.pieCategoriesDecorator(this._data).map((c) => { 
@@ -246,9 +408,9 @@ export default class OrgcheckGraphics extends LightningElement {
     });
     const values = this.pieCategories.map((d) => d.value);
     const colors = this.pieCategories.map((d) => d.color);
-    const diameter = this.pieSize / 1; // if size is specified its type will be string! making sure it is considered as a number whatever the case
+    const diameter = Number.parseInt(this.pieSize); // if size is specified its type will be string! making sure it is considered as a number whatever the case
     const radius = diameter / 2;
-    const stroke = this.pieStrokeWidth/1; // same for stroke!
+    const stroke = Number.parseInt(this.pieStrokeWidth); // same for stroke!
 
     // Get the main tag 
     const mainTag = this._api.select(this.template.querySelector('.orgcheck-graph'));

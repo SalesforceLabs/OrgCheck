@@ -85,7 +85,7 @@ export class DatasetUserRoles extends Dataset {
 
         // Compute levels 
         await Processor.forEach(roots, async (root) => {
-            root.level = 0;
+            root.level = 1;
             RECURSIVE_LEVEL_CALCULUS(root, childrenByParent);
         });
 
