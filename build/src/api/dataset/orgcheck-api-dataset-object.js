@@ -13,6 +13,7 @@ import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadat
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 
 export class DatasetObject extends Dataset {
 
@@ -52,7 +53,7 @@ export class DatasetObject extends Dataset {
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
                             '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName FROM ValidationRules), ' +
-                            '(SELECT Id, Name FROM WebLinks) ' +
+                            '(SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, LastModifiedDate, NamespacePrefix FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
                         (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
@@ -190,6 +191,14 @@ export class DatasetObject extends Dataset {
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
+                    nbHardCodedURLs: CodeScanner.CountOfHardCodedURLs(t.Url),
+                    nbHardCodedIDs: CodeScanner.CountOfHardCodedIDs(t.Url),
+                    type: t.LinkType,
+                    behavior: t.OpenType,
+                    package: t.NamespacePrefix,
+                    createdDate: t.CreatedDate,
+                    lastModifiedDate: t.LastModifiedDate,
+                    description: t.Description,                
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.WEB_LINK, entity.DurableId)
                 }
             })

@@ -141,6 +141,20 @@ export class SFDC_ApexTrigger extends Data {
     hasDML;
     
     /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+    /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
      * @type {number}
      * @public

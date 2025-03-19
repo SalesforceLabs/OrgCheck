@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -5,10 +6,6 @@ import { Processor } from '../core/orgcheck-api-processing';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
-
-const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
-const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
-const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
 
 export class DatasetApexTriggers extends Dataset {
 
@@ -88,9 +85,11 @@ export class DatasetApexTriggers extends Dataset {
                 
                 // Get information directly from the source code (if available)
                 if (record.Body) {
-                    const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
-                    apexTrigger.hasSOQL = sourceCode.match(REGEX_HASSOQL) !== null; 
-                    apexTrigger.hasDML = sourceCode.match(REGEX_HASDML) !== null; 
+                    const sourceCode = CodeScanner.RemoveComments(record.Body);
+                    apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
+                    apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
+                    apexTrigger.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                    apexTrigger.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
                 }
 
                 // Compute the score of this item

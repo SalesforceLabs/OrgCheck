@@ -104,4 +104,19 @@ export class SFDC_Field extends DataWithDependencies {
     isRestrictedPicklist;
 
     formula;
+
+    /**
+     * @description Only for foruma field -- Number of hard coded Salesforce URLs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Only for foruma field -- Number of hard coded Salesforce IDs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
 }

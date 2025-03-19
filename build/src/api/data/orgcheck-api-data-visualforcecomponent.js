@@ -30,7 +30,21 @@ export class SFDC_VisualForceComponent extends DataWithDependencies {
      * @public
      */
     apiVersion;
-    
+
+    /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+        
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}

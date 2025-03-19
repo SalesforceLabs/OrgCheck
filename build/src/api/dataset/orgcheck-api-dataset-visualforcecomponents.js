@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -22,7 +23,7 @@ export class DatasetVisualForceComponents extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, ' +
-                        'CreatedDate, LastModifiedDate ' +
+                        'Markup, CreatedDate, LastModifiedDate ' +
                     'FROM ApexComponent ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
@@ -46,7 +47,7 @@ export class DatasetVisualForceComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            const component = componentDataFactory.createWithScore({
+            const component = componentDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -57,16 +58,20 @@ export class DatasetVisualForceComponents extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_COMPONENT)
                 }, 
-                _dependencies: {
+                dependencies: {
                     data: componentsDependencies
-                },
-                get dependencies() {
-                    return this._dependencies;
-                },
-                set dependencies(value) {
-                    this._dependencies = value;
-                },
+                }
             });
+
+            // Get information directly from the source code (if available)
+            if (record.Markup) {
+                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                component.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                component.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+
+            // Compute the score of this item
+            componentDataFactory.computeScore(component);
 
             // Add it to the map  
             return [ component.id, component ];

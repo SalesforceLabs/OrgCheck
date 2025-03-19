@@ -242,6 +242,20 @@ export class SFDC_ApexClass extends DataWithDependencies {
     sourceCode;
 
     /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+    /**
      * @description When we do not have compiler information about this class, it means it needs to be recompiled manually.
      * @type {boolean}
      * @public

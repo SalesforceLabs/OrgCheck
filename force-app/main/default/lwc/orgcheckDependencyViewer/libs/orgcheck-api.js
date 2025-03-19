@@ -116,6 +116,58 @@ class DataCacheManagerIntf {
     clear() { throw new Error('Not implemented'); }
 }
 
+const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
+const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
+const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
+const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
+const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
+const REGEX_HARDCODEDURLS = new RegExp("(\\.salesforce\\.com|\\.force\\.)", 'ig');
+const REGEX_HARDCODEDIDS = new RegExp("[a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?", 'ig');
+const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
+const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
+
+/**
+ * @description Code Scanner class
+ */ 
+class CodeScanner {
+
+    static RemoveComments(sourceCode) {
+        return sourceCode?.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ') || '';
+    }
+
+    static IsInterface(sourceCode) {
+        return sourceCode?.match(REGEX_ISINTERFACE) !== null || false;
+    }
+
+    static IsEnum(sourceCode) {
+        return sourceCode?.match(REGEX_ISENUM) !== null || false;
+    }
+
+    static CountOfHardCodedURLs(sourceCode) {
+        return sourceCode?.match(REGEX_HARDCODEDURLS)?.length || 0;
+    }
+
+    static CountOfHardCodedIDs(sourceCode) {
+        return sourceCode?.match(REGEX_HARDCODEDIDS)?.length || 0;
+    }
+
+    static IsTestSeeAllData(sourceCode) {
+        return sourceCode?.match(REGEX_ISTESTSEEALLDATA) !== null || false;
+    }
+
+    static CountOfAsserts(sourceCode) {
+        return sourceCode?.match(REGEX_TESTNBASSERTS)?.length || 0;
+    }
+
+    static HasSOQL(sourceCode) {
+        return sourceCode?.match(REGEX_HASSOQL) !== null || false; 
+    }
+
+    static HasDML(sourceCode) {
+        return sourceCode?.match(REGEX_HASDML) !== null || false;
+    }
+}
+
 /**
  * @description Dependency item using or referencing our dear main item
  */
@@ -1105,6 +1157,20 @@ class SFDC_ApexClass extends DataWithDependencies {
     sourceCode;
 
     /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+    /**
      * @description When we do not have compiler information about this class, it means it needs to be recompiled manually.
      * @type {boolean}
      * @public
@@ -1992,6 +2058,20 @@ class SFDC_ApexTrigger extends Data {
     hasDML;
     
     /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+    /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
      * @type {number}
      * @public
@@ -2196,6 +2276,63 @@ class SFDC_Field extends DataWithDependencies {
     isRestrictedPicklist;
 
     formula;
+
+    /**
+     * @description Only for foruma field -- Number of hard coded Salesforce URLs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Only for foruma field -- Number of hard coded Salesforce IDs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+}
+
+/**
+ * @description Representation of a Field Set in Org Check
+ */
+class SFDC_FieldSet extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Field Set' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
+    label;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
 }
 
 /**
@@ -2639,6 +2776,49 @@ class SFDC_LightningWebComponent extends DataWithDependencies {
     url;
 }
 
+/**
+ * @description Representation of a SObject Limit in Org Check
+ */
+class SFDC_Limit extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'SObject Limit' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Label of this limit
+     * @type {string}
+     * @public
+     */
+    label;
+
+    remaining;
+
+    max;
+
+    used;
+
+    usedPercentage;
+
+    /**
+     * @description Technical name of that limit
+     * @type {string}
+     * @public
+     */
+    type;
+}
+
 class SFDC_Profile extends Data {
     
     /** 
@@ -2720,6 +2900,33 @@ class SFDC_PermissionSet extends SFDC_Profile {
     groupId;
 }
 
+class SFDC_PermissionSetLicense extends Data {
+
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Permission Set License' };
+
+    id;
+    name;
+    totalCount;
+    usedCount;
+    usedPercentage;
+    remainingCount;
+    permissionSetIds;
+    permissionSetRefs;
+    distinctActiveAssigneeCount;
+    status;
+    expirationDate;
+    isAvailableForIntegrations;
+    createDate;
+    lastModifiedDate;
+    url;
+}
+
 class SFDC_ProfilePasswordPolicy extends Data {
 
     /** 
@@ -2795,6 +3002,50 @@ class SFDC_ProfileLoginHourRestriction extends DataWithoutScoring {
     toTime;
     day;
     difference;
+}
+
+class SFDC_RecordType extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Record Type' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    developerName;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
+    isActive;
+    isAvailable;
+    isDefaultRecordTypeMapping;
+    isMaster;
 }
 
 class SFDC_User extends Data {
@@ -2956,6 +3207,63 @@ class SFDC_UserRole extends Data {
     isExternal;
 }
 
+class SFDC_ValidationRule extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Validation Rule' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
+    isActive;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+    errorDisplayField;
+    errorMessage;
+    
+    /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
+    objectId; 
+
+    objectRef;
+
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
 class SFDC_VisualForceComponent extends DataWithDependencies {
     
     /** 
@@ -2986,7 +3294,21 @@ class SFDC_VisualForceComponent extends DataWithDependencies {
      * @public
      */
     apiVersion;
-    
+
+    /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+        
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
      * @type {string}
@@ -3053,6 +3375,26 @@ class SFDC_VisualForcePage extends DataWithDependencies {
      * @public
      */
     apiVersion;
+
+    /**
+     * @description Number of hard coded Salesforce URLs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+
+    /**
+     * @description Is this page ready for mobile?
+     * @type {boolean}
+     * @public
+     */ 
     isMobileReady;
     
     /**
@@ -3083,6 +3425,94 @@ class SFDC_VisualForcePage extends DataWithDependencies {
      */
     description;
     
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+class SFDC_WebLink extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Web Link' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+
+    /**
+     * @description Number of hard coded Salesforce URLs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedURLs;
+
+    /**
+     * @description Number of hard coded Salesforce IDs in the formula
+     * @type {number}
+     * @public
+     */
+    nbHardCodedIDs;
+    
+    /**
+     * @description Type of the link
+     * @type {string}
+     * @public
+     */
+    type;
+    
+    /**
+     * @description Behavior of the link
+     * @type {string}
+     * @public
+     */
+    behavior;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+
     /**
      * @description Setup URL of this item
      * @type {string}
@@ -3153,219 +3583,6 @@ class SFDC_Workflow extends Data {
      */
     lastModifiedDate;
     hasAction;
-}
-
-class SFDC_ValidationRule extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Validation Rule' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    /**
-     * @description Is this item active or not?
-     * @type {boolean}
-     * @public
-     */
-    isActive;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    errorDisplayField;
-    errorMessage;
-    
-    /**
-     * @description Salesforce Id of the sObject where this field is defined
-     * @type {string}
-     * @public
-     */
-    objectId; 
-
-    objectRef;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
-class SFDC_RecordType extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Record Type' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    developerName;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-
-    /**
-     * @description Is this item active or not?
-     * @type {boolean}
-     * @public
-     */
-    isActive;
-    isAvailable;
-    isDefaultRecordTypeMapping;
-    isMaster;
-}
-
-/**
- * @description Representation of a SObject Limit in Org Check
- */
-class SFDC_Limit extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'SObject Limit' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Label of this limit
-     * @type {string}
-     * @public
-     */
-    label;
-
-    remaining;
-
-    max;
-
-    used;
-
-    usedPercentage;
-
-    /**
-     * @description Technical name of that limit
-     * @type {string}
-     * @public
-     */
-    type;
-}
-
-/**
- * @description Representation of a Field Set in Org Check
- */
-class SFDC_FieldSet extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Field Set' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Label
-     * @type {string}
-     * @public
-     */
-    label;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
-class SFDC_PermissionSetLicense extends Data {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Permission Set License' };
-
-    id;
-    name;
-    totalCount;
-    usedCount;
-    usedPercentage;
-    remainingCount;
-    permissionSetIds;
-    permissionSetRefs;
-    distinctActiveAssigneeCount;
-    status;
-    expirationDate;
-    isAvailableForIntegrations;
-    createDate;
-    lastModifiedDate;
-    url;
 }
 
 /**
@@ -3469,10 +3686,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_FieldSet, SFDC_ValidationRule ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -3746,6 +3963,20 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This role has a level in the Role Hierarchy which is seven or greater. Please reduce the maximum depth of the role hierarchy. Having that much levels has an impact on performance...',
         badField: 'level',
         applicable: [ SFDC_UserRole ]
+    }, {
+        id: 46,
+        description: 'Hard-coded URL suspicion in this item',
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedURLs > 0,
+        errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
+        badField: 'nbHardCodedURLs',
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+    }, {
+        id: 47,
+        description: 'Hard-coded Salesforce IDs suspicion in this item',
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedIDs > 0,
+        errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
+        badField: 'nbHardCodedIDs',
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }
 ];
 
@@ -4104,38 +4335,6 @@ class SFDC_PageLayout extends Data {
     name;
     
     type;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
-class SFDC_WebLink extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Web Link' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
     
     /**
      * @description Setup URL of this item
@@ -4638,7 +4837,7 @@ class DatasetCustomFields extends Dataset {
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
             // Create the instance (with score)
-            const customField = fieldDataFactory.createWithScore({
+            const customField = fieldDataFactory.create({
                 properties: {
                     id: id,
                     name: record.DeveloperName,
@@ -4665,6 +4864,16 @@ class DatasetCustomFields extends Dataset {
                     data: customFieldsDependencies
                 }
             });
+
+            // Get information directly from the source code (if available)
+            if (customField.formula) {
+                const sourceCode = CodeScanner.RemoveComments(customField.formula);
+                customField.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                customField.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+            
+            // Compute the score of this item
+            fieldDataFactory.computeScore(customField);
 
             // Add it to the map  
             return [ customField.id, customField ];
@@ -4783,7 +4992,7 @@ class DatasetObject extends Dataset {
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
                             '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName FROM ValidationRules), ' +
-                            '(SELECT Id, Name FROM WebLinks) ' +
+                            '(SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, LastModifiedDate, NamespacePrefix FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
                         (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
@@ -4921,6 +5130,14 @@ class DatasetObject extends Dataset {
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
+                    nbHardCodedURLs: CodeScanner.CountOfHardCodedURLs(t.Url),
+                    nbHardCodedIDs: CodeScanner.CountOfHardCodedIDs(t.Url),
+                    type: t.LinkType,
+                    behavior: t.OpenType,
+                    package: t.NamespacePrefix,
+                    createdDate: t.CreatedDate,
+                    lastModifiedDate: t.LastModifiedDate,
+                    description: t.Description,                
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.WEB_LINK, entity.DurableId)
                 }
             })
@@ -5935,7 +6152,7 @@ class DatasetVisualForcePages extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, ' +
-                        'CreatedDate, LastModifiedDate ' +
+                        'Markup, CreatedDate, LastModifiedDate ' +
                     'FROM ApexPage ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged')`
         }], logger);
@@ -5959,7 +6176,7 @@ class DatasetVisualForcePages extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            const page = pageDataFactory.createWithScore({
+            const page = pageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -5975,6 +6192,16 @@ class DatasetVisualForcePages extends Dataset {
                     data: pagesDependencies
                 }
             });
+
+            // Get information directly from the source code (if available)
+            if (record.Markup) {
+                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                page.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                page.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+            
+            // Compute the score of this item
+            pageDataFactory.computeScore(page);
 
             // Add it to the map  
             return [ page.id, page ];
@@ -6002,7 +6229,7 @@ class DatasetVisualForceComponents extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, ' +
-                        'CreatedDate, LastModifiedDate ' +
+                        'Markup, CreatedDate, LastModifiedDate ' +
                     'FROM ApexComponent ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') `
         }], logger);
@@ -6026,7 +6253,7 @@ class DatasetVisualForceComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            const component = componentDataFactory.createWithScore({
+            const component = componentDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -6037,16 +6264,20 @@ class DatasetVisualForceComponents extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_COMPONENT)
                 }, 
-                _dependencies: {
+                dependencies: {
                     data: componentsDependencies
-                },
-                get dependencies() {
-                    return this._dependencies;
-                },
-                set dependencies(value) {
-                    this._dependencies = value;
-                },
+                }
             });
+
+            // Get information directly from the source code (if available)
+            if (record.Markup) {
+                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                component.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                component.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+
+            // Compute the score of this item
+            componentDataFactory.computeScore(component);
 
             // Add it to the map  
             return [ component.id, component ];
@@ -6360,12 +6591,6 @@ class DatasetGroups extends Dataset {
     } 
 }
 
-const REGEX_COMMENTS_AND_NEWLINES$1 = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
-const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
-const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
-const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
-const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
-
 class DatasetApexClasses extends Dataset {
 
     /**
@@ -6489,15 +6714,17 @@ class DatasetApexClasses extends Dataset {
             
             // Get information directly from the source code (if available)
             if (record.Body) {
-                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES$1, ' ');
-                apexClass.isInterface = sourceCode.match(REGEX_ISINTERFACE) !== null;
-                apexClass.isEnum = sourceCode.match(REGEX_ISENUM) !== null;
+                const sourceCode = CodeScanner.RemoveComments(record.Body);
+                apexClass.isInterface = CodeScanner.IsInterface(sourceCode);
+                apexClass.isEnum = CodeScanner.IsEnum(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
+                apexClass.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                apexClass.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
                 
                 // Specific scanning for Test Classes
                 if (apexClass.isTest === true) { // this is defined only from the SymbolTable!
-                    apexClass.isTestSeeAllData = sourceCode.match(REGEX_ISTESTSEEALLDATA) !== null;
-                    apexClass.nbSystemAsserts = sourceCode.match(REGEX_TESTNBASSERTS)?.length || 0;
+                    apexClass.isTestSeeAllData = CodeScanner.IsTestSeeAllData(sourceCode);
+                    apexClass.nbSystemAsserts = CodeScanner.CountOfAsserts(sourceCode);
                 }
             }
 
@@ -6610,10 +6837,6 @@ class DatasetApexClasses extends Dataset {
     } 
 }
 
-const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
-const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
-const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
-
 class DatasetApexTriggers extends Dataset {
 
     /**
@@ -6692,9 +6915,11 @@ class DatasetApexTriggers extends Dataset {
                 
                 // Get information directly from the source code (if available)
                 if (record.Body) {
-                    const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
-                    apexTrigger.hasSOQL = sourceCode.match(REGEX_HASSOQL) !== null; 
-                    apexTrigger.hasDML = sourceCode.match(REGEX_HASDML) !== null; 
+                    const sourceCode = CodeScanner.RemoveComments(record.Body);
+                    apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
+                    apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
+                    apexTrigger.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                    apexTrigger.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
                 }
 
                 // Compute the score of this item
@@ -11376,4 +11601,4 @@ class API {
     }
 }
 
-export { API, BasicLoggerIntf, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SecretSauce, SimpleLoggerIntf };
+export { API, BasicLoggerIntf, CodeScanner, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SecretSauce, SimpleLoggerIntf };

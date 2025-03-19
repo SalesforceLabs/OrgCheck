@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -78,7 +79,7 @@ export class DatasetCustomFields extends Dataset {
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
             // Create the instance (with score)
-            const customField = fieldDataFactory.createWithScore({
+            const customField = fieldDataFactory.create({
                 properties: {
                     id: id,
                     name: record.DeveloperName,
@@ -105,6 +106,16 @@ export class DatasetCustomFields extends Dataset {
                     data: customFieldsDependencies
                 }
             });
+
+            // Get information directly from the source code (if available)
+            if (customField.formula) {
+                const sourceCode = CodeScanner.RemoveComments(customField.formula);
+                customField.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                customField.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+            
+            // Compute the score of this item
+            fieldDataFactory.computeScore(customField);
 
             // Add it to the map  
             return [ customField.id, customField ];

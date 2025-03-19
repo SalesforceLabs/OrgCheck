@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -22,7 +23,7 @@ export class DatasetVisualForcePages extends Dataset {
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
             string: 'SELECT Id, Name, ApiVersion, NamespacePrefix, Description, IsAvailableInTouch, ' +
-                        'CreatedDate, LastModifiedDate ' +
+                        'Markup, CreatedDate, LastModifiedDate ' +
                     'FROM ApexPage ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged')`
         }], logger);
@@ -46,7 +47,7 @@ export class DatasetVisualForcePages extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            const page = pageDataFactory.createWithScore({
+            const page = pageDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -62,6 +63,16 @@ export class DatasetVisualForcePages extends Dataset {
                     data: pagesDependencies
                 }
             });
+
+            // Get information directly from the source code (if available)
+            if (record.Markup) {
+                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                page.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                page.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+            }
+            
+            // Compute the score of this item
+            pageDataFactory.computeScore(page);
 
             // Add it to the map  
             return [ page.id, page ];

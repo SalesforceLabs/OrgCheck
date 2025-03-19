@@ -3,25 +3,26 @@ import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
+import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { SFDC_Flow } from '../data/orgcheck-api-data-flow';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
+import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
+import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_ProfilePasswordPolicy } from '../data/orgcheck-api-data-profilepasswordpolicy';
 import { SFDC_ProfileRestrictions } from '../data/orgcheck-api-data-profilerestrictions';
+import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
+import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
 import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
+import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
-import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
-import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
-import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
-import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
-import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 import { ScoreRule } from './orgcheck-api-datafactory';
 
 /**
@@ -125,10 +126,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_FieldSet, SFDC_ValidationRule ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -402,6 +403,20 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This role has a level in the Role Hierarchy which is seven or greater. Please reduce the maximum depth of the role hierarchy. Having that much levels has an impact on performance...',
         badField: 'level',
         applicable: [ SFDC_UserRole ]
+    }, {
+        id: 46,
+        description: 'Hard-coded URL suspicion in this item',
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedURLs > 0,
+        errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
+        badField: 'nbHardCodedURLs',
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+    }, {
+        id: 47,
+        description: 'Hard-coded Salesforce IDs suspicion in this item',
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedIDs > 0,
+        errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
+        badField: 'nbHardCodedIDs',
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }
 ];
 

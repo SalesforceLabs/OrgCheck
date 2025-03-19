@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -5,12 +6,6 @@ import { Processor } from '../core/orgcheck-api-processing';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ApexClass, SFDC_ApexTestMethodResult } from '../data/orgcheck-api-data-apexclass';
-
-const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
-const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
-const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
-const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
-const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
 
 export class DatasetApexClasses extends Dataset {
 
@@ -135,15 +130,17 @@ export class DatasetApexClasses extends Dataset {
             
             // Get information directly from the source code (if available)
             if (record.Body) {
-                const sourceCode = record.Body.replaceAll(REGEX_COMMENTS_AND_NEWLINES, ' ');
-                apexClass.isInterface = sourceCode.match(REGEX_ISINTERFACE) !== null;
-                apexClass.isEnum = sourceCode.match(REGEX_ISENUM) !== null;
+                const sourceCode = CodeScanner.RemoveComments(record.Body);
+                apexClass.isInterface = CodeScanner.IsInterface(sourceCode);
+                apexClass.isEnum = CodeScanner.IsEnum(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
+                apexClass.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
+                apexClass.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
                 
                 // Specific scanning for Test Classes
                 if (apexClass.isTest === true) { // this is defined only from the SymbolTable!
-                    apexClass.isTestSeeAllData = sourceCode.match(REGEX_ISTESTSEEALLDATA) !== null;
-                    apexClass.nbSystemAsserts = sourceCode.match(REGEX_TESTNBASSERTS)?.length || 0;
+                    apexClass.isTestSeeAllData = CodeScanner.IsTestSeeAllData(sourceCode);
+                    apexClass.nbSystemAsserts = CodeScanner.CountOfAsserts(sourceCode);
                 }
             }
 

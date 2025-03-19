@@ -1,5 +1,6 @@
-// Core classes
+// Core classes (everything expect the IMPLementations)
 export * from './core/orgcheck-api-cachemanager.js';
+export * from './core/orgcheck-api-codescanner.js';
 export * from './core/orgcheck-api-data-dependencies-factory.js';
 export * from './core/orgcheck-api-data-dependencies.js';
 export * from './core/orgcheck-api-data-matrix-factory.js';
