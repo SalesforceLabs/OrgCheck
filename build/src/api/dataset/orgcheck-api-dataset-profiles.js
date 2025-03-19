@@ -42,7 +42,7 @@ export class DatasetProfiles extends Dataset {
                     'ORDER BY Parent.ProfileId '+
                     'LIMIT 2000'
         },{
-            string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'Parent.ProfileId' (bc aggregate query)
+            string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'PermissionSet.ProfileId' (bc aggregate query)
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = TRUE '+
                     'GROUP BY PermissionSet.ProfileId '+
@@ -98,7 +98,7 @@ export class DatasetProfiles extends Dataset {
         logger?.log(`Parsing ${objectPermissionRecords.length} object permissions, ${fieldPermissionRecords.length} field permissions and ${assignmentRecords.length} assignments...`);
         await Promise.all([
             Processor.forEach(objectPermissionRecords, (record) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.nbObjectPermissions = record.CountObject;
@@ -107,7 +107,7 @@ export class DatasetProfiles extends Dataset {
                 }
             }),
             Processor.forEach(fieldPermissionRecords, (record) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.nbFieldPermissions = record.CountField;    
@@ -116,14 +116,14 @@ export class DatasetProfiles extends Dataset {
                 }
             }),
             Processor.forEach(assignmentRecords, (record) => {
-                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query
+                const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.memberCounts = record.CountAssignment;    
                 } else {
                     logger.log(`[assignmentRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
                 }
-            }),
+            })
         ]);
 
         // Compute scores for all permission sets

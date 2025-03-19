@@ -35,18 +35,25 @@ export class DatasetPermissionSets extends Dataset {
                     'ORDER BY Id '+
                     'LIMIT 2000'
         }, {
-            string: 'SELECT ParentId, COUNT(SobjectType) CountObject '+
+            string: 'SELECT ParentId, COUNT(SobjectType) CountObject '+ 
                     'FROM ObjectPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
                     'GROUP BY ParentId '+
                     'ORDER BY ParentId '+
                     'LIMIT 2000'
         },{
-            string: 'SELECT ParentId, COUNT(Field) CountField '+
+            string: 'SELECT ParentId, COUNT(Field) CountField '+ 
                     'FROM FieldPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
                     'GROUP BY ParentId '+
                     'ORDER BY ParentId '+
+                    'LIMIT 2000'
+        },{
+            string: 'SELECT PermissionSetId, COUNT(Id) CountAssignment '+ 
+                    'FROM PermissionSetAssignment '+
+                    'WHERE PermissionSet.IsOwnedByProfile = FALSE '+
+                    'GROUP BY PermissionSetId '+
+                    'ORDER BY PermissionSetId '+
                     'LIMIT 2000'
         }], logger);
 
@@ -55,6 +62,7 @@ export class DatasetPermissionSets extends Dataset {
         const permissionSetGroupRecords = results[1];
         const objectPermissionRecords = results[2];
         const fieldPermissionRecords = results[3];
+        const assignmentRecords = results[4];
 
         // Init the factory and records
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
@@ -123,6 +131,13 @@ export class DatasetPermissionSets extends Dataset {
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
                     permissionSet.nbFieldPermissions = record.CountField;    
+                }
+            }),
+            Processor.forEach(assignmentRecords, (record) => {
+                const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
+                if (permissionSets.has(permissionSetId)) {
+                    const permissionSet = permissionSets.get(permissionSetId);
+                    permissionSet.memberCounts = record.CountAssignment;    
                 }
             })
         ]);
