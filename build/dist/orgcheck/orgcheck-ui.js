@@ -452,7 +452,7 @@ class RowsFactory {
                     // Potentially alter the cell
                     onEachCellCallback(
                         cell, 
-                        column['data'] ? record.badFields?.includes(column['data'].value) : false,
+                        (column['data'] && record.badFields) ? ( record.badFields.includes(column['data'].value) || record.badFields.includes(column['data'].values)) : false,
                         rIndex,
                         cIndex
                     );

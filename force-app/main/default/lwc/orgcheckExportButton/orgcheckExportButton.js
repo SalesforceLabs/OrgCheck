@@ -4,6 +4,9 @@ import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
+const TITLE_MAX_SIZE = 31;
+const CELL_MAX_SIZE = 32767;
+
 export default class OrgcheckExportButton extends LightningElement {
 
     /**
@@ -118,7 +121,7 @@ export default class OrgcheckExportButton extends LightningElement {
     _createTheWorkBook() {
         const workbook = this._api.utils.book_new();
         this.source.forEach(item => {
-            const datasheet = [ item.columns ].concat(item.rows);
+            const datasheet = [ item.columns ].concat(item.rows.map(row => row.map(cell => typeof cell === 'string' && cell.length > CELL_MAX_SIZE ? cell?.substring(0, CELL_MAX_SIZE) : cell)));
             const worksheet = this._api.utils.aoa_to_sheet(datasheet);
             worksheet['!cols'] = item.columns.map((c, i) => { 
                 const maxWidth = datasheet.reduce((prev, curr) => {
@@ -127,7 +130,7 @@ export default class OrgcheckExportButton extends LightningElement {
                 }, 10);
                 return maxWidth ? { wch: maxWidth } : {};
             });
-            const sheetName = `${item.header} (${item.rows.length})`.substring(0, 31); // Cannot exceed 31 characters!
+            const sheetName = `${item.header} (${item.rows.length})`.substring(0, TITLE_MAX_SIZE); // Cannot exceed 31 characters!
             this._api.utils.book_append_sheet(workbook, worksheet, sheetName);
         });
         return workbook;

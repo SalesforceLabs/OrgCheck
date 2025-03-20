@@ -191,8 +191,8 @@ export class DatasetObject extends Dataset {
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
-                    nbHardCodedURLs: CodeScanner.CountOfHardCodedURLs(t.Url),
-                    nbHardCodedIDs: CodeScanner.CountOfHardCodedIDs(t.Url),
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(t.Url),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
                     type: t.LinkType,
                     behavior: t.OpenType,
                     package: t.NamespacePrefix,

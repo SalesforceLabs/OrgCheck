@@ -106,17 +106,17 @@ export class SFDC_Field extends DataWithDependencies {
     formula;
 
     /**
-     * @description Only for foruma field -- Number of hard coded Salesforce URLs in the formula
-     * @type {number}
+     * @description Only for formula field -- List of unique hard coded Salesforce URLs in the formula
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Only for foruma field -- Number of hard coded Salesforce IDs in the formula
-     * @type {number}
+     * @description Only for formula field -- List of unique hard coded Salesforce IDs in the formula
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
 }

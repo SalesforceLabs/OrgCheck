@@ -134,8 +134,8 @@ export class DatasetApexClasses extends Dataset {
                 apexClass.isInterface = CodeScanner.IsInterface(sourceCode);
                 apexClass.isEnum = CodeScanner.IsEnum(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
-                apexClass.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                apexClass.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                apexClass.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                apexClass.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 
                 // Specific scanning for Test Classes
                 if (apexClass.isTest === true) { // this is defined only from the SymbolTable!

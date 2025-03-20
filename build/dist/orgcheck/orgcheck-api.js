@@ -121,10 +121,11 @@ const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+
 const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
 const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
 const REGEX_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
-const REGEX_HARDCODEDURLS = new RegExp("(\\.salesforce\\.com|\\.force\\.)", 'ig');
-const REGEX_HARDCODEDIDS = new RegExp("[a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?", 'ig');
+const REGEX_HARDCODEDURLS = new RegExp("([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}", 'ig');
+const REGEX_HARDCODEDIDS = new RegExp("[,\"'\\s][a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?[,\"'\\s]", 'ig');
 const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
 const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
+const SALESFORCE_DOMAINS = ['salesforce.com', '.force.'];
 
 /**
  * @description Code Scanner class
@@ -143,12 +144,17 @@ class CodeScanner {
         return sourceCode?.match(REGEX_ISENUM) !== null || false;
     }
 
-    static CountOfHardCodedURLs(sourceCode) {
-        return sourceCode?.match(REGEX_HARDCODEDURLS)?.length || 0;
+    static FindHardCodedURLs(sourceCode) {
+        return sourceCode?.match(REGEX_HARDCODEDURLS) // extract the domains
+            ?.filter((domain) => SALESFORCE_DOMAINS.findIndex((sfdomain) => domain.indexOf(sfdomain) >= 0) >= 0)  // filter only the salesforce domains
+            .sort() // sorting the domains (if any)
+            .filter((e, i, s) => i === s.indexOf(e)); // unique domains
     }
 
-    static CountOfHardCodedIDs(sourceCode) {
-        return sourceCode?.match(REGEX_HARDCODEDIDS)?.length || 0;
+    static FindHardCodedIDs(sourceCode) {
+        return sourceCode?.match(REGEX_HARDCODEDIDS) // extract the salesforce ids
+            ?.sort() // sorting the domains (if any)
+            .filter((e, i, s) => i === s.indexOf(e)); // unique domains
     }
 
     static IsTestSeeAllData(sourceCode) {
@@ -1157,18 +1163,18 @@ class SFDC_ApexClass extends DataWithDependencies {
     sourceCode;
 
     /**
-     * @description Number of hard coded Salesforce URLs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
     /**
      * @description When we do not have compiler information about this class, it means it needs to be recompiled manually.
@@ -2058,18 +2064,18 @@ class SFDC_ApexTrigger extends Data {
     hasDML;
     
     /**
-     * @description Number of hard coded Salesforce URLs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
     /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
@@ -2278,18 +2284,18 @@ class SFDC_Field extends DataWithDependencies {
     formula;
 
     /**
-     * @description Only for foruma field -- Number of hard coded Salesforce URLs in the formula
-     * @type {number}
+     * @description Only for formula field -- List of unique hard coded Salesforce URLs in the formula
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Only for foruma field -- Number of hard coded Salesforce IDs in the formula
-     * @type {number}
+     * @description Only for formula field -- List of unique hard coded Salesforce IDs in the formula
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
 }
 
@@ -3275,18 +3281,18 @@ class SFDC_VisualForceComponent extends DataWithDependencies {
     apiVersion;
 
     /**
-     * @description Number of hard coded Salesforce URLs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
         
     /**
      * @description Name of the potential namespace/package where this item comes from. Empty string if none.
@@ -3356,18 +3362,18 @@ class SFDC_VisualForcePage extends DataWithDependencies {
     apiVersion;
 
     /**
-     * @description Number of hard coded Salesforce URLs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
     /**
      * @description Is this page ready for mobile?
@@ -3437,18 +3443,18 @@ class SFDC_WebLink extends Data {
     name;
 
     /**
-     * @description Number of hard coded Salesforce URLs in the formula
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs in the formula
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
     
     /**
      * @description Type of the link
@@ -3945,16 +3951,16 @@ const ALL_SCORE_RULES = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedURLs > 0,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedURLs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
-        badField: 'nbHardCodedURLs',
+        badField: 'hardCodedURLs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedIDs > 0,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedIDs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
-        badField: 'nbHardCodedIDs',
+        badField: 'hardCodedIDs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }
 ];
@@ -4744,6 +4750,14 @@ const FROM_HEX_TO_BUFFER = (hex) => {
     return new Uint8Array(arr);
 };
 
+const EXCLUDED_OBJECT_PREFIXES = [ 
+    '00a', // Comment for custom objects
+    '017', // History for custom objects
+    '02c', // Share for custom objects
+    '0D5', // Feed for custom objects
+    '1CE', // Event for custom objects
+];
+
 class DatasetCustomFields extends Dataset {
 
     /**
@@ -4762,17 +4776,9 @@ class DatasetCustomFields extends Dataset {
         logger?.log(`Querying Tooling API about CustomField in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting ' +
+            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix ' +
                     'FROM CustomField ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
-                    `AND (NOT(EntityDefinition.keyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
-                        // 00a	*Comment for custom objects
-                        // 017	*History for custom objects
-                        // 02c	*Share for custom objects
-                        // 0D5	*Feed for custom objects
-                        // 1CE	*Event for custom objects
-                    `AND (NOT(EntityDefinition.QualifiedApiName like '%_hd')) `+
-                        // We want to filter out trending historical objects
                     (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
         }], logger);
 
@@ -4791,7 +4797,12 @@ class DatasetCustomFields extends Dataset {
                     isCustomSetting: record.EntityDefinition.IsCustomSetting 
                 }
             ],
-            (record) => (record.EntityDefinition ? true : false) // remove the fields that were in a deleted entity!
+            (record) => {
+                if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
+                if (EXCLUDED_OBJECT_PREFIXES.includes(record.EntityDefinition.KeyPrefix)) return false; // ignore these objects
+                if (record.EntityDefinition.QualifiedApiName?.endsWith('_hd')) return false; // ignore the trending historical objects
+                return true;
+            }
         ));
 
         // Then retreive dependencies
@@ -4847,8 +4858,8 @@ class DatasetCustomFields extends Dataset {
             // Get information directly from the source code (if available)
             if (customField.formula) {
                 const sourceCode = CodeScanner.RemoveComments(customField.formula);
-                customField.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                customField.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                customField.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                customField.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }
             
             // Compute the score of this item
@@ -5109,8 +5120,8 @@ class DatasetObject extends Dataset {
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
-                    nbHardCodedURLs: CodeScanner.CountOfHardCodedURLs(t.Url),
-                    nbHardCodedIDs: CodeScanner.CountOfHardCodedIDs(t.Url),
+                    hardCodedURLs: CodeScanner.FindHardCodedURLs(t.Url),
+                    hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
                     type: t.LinkType,
                     behavior: t.OpenType,
                     package: t.NamespacePrefix,
@@ -6175,8 +6186,8 @@ class DatasetVisualForcePages extends Dataset {
             // Get information directly from the source code (if available)
             if (record.Markup) {
                 const sourceCode = CodeScanner.RemoveComments(record.Markup);
-                page.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                page.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                page.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                page.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }
             
             // Compute the score of this item
@@ -6251,8 +6262,8 @@ class DatasetVisualForceComponents extends Dataset {
             // Get information directly from the source code (if available)
             if (record.Markup) {
                 const sourceCode = CodeScanner.RemoveComments(record.Markup);
-                component.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                component.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                component.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                component.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }
 
             // Compute the score of this item
@@ -6697,8 +6708,8 @@ class DatasetApexClasses extends Dataset {
                 apexClass.isInterface = CodeScanner.IsInterface(sourceCode);
                 apexClass.isEnum = CodeScanner.IsEnum(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
-                apexClass.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                apexClass.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                apexClass.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                apexClass.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 
                 // Specific scanning for Test Classes
                 if (apexClass.isTest === true) { // this is defined only from the SymbolTable!
@@ -6897,8 +6908,8 @@ class DatasetApexTriggers extends Dataset {
                     const sourceCode = CodeScanner.RemoveComments(record.Body);
                     apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
                     apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
-                    apexTrigger.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                    apexTrigger.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                    apexTrigger.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                    apexTrigger.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 }
 
                 // Compute the score of this item

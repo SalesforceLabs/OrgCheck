@@ -88,8 +88,8 @@ export class DatasetApexTriggers extends Dataset {
                     const sourceCode = CodeScanner.RemoveComments(record.Body);
                     apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
                     apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
-                    apexTrigger.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                    apexTrigger.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                    apexTrigger.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                    apexTrigger.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 }
 
                 // Compute the score of this item

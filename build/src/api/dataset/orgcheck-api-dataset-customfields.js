@@ -7,6 +7,14 @@ import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadat
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 
+const EXCLUDED_OBJECT_PREFIXES = [ 
+    '00a', // Comment for custom objects
+    '017', // History for custom objects
+    '02c', // Share for custom objects
+    '0D5', // Feed for custom objects
+    '1CE', // Event for custom objects
+];
+
 export class DatasetCustomFields extends Dataset {
 
     /**
@@ -25,17 +33,9 @@ export class DatasetCustomFields extends Dataset {
         logger?.log(`Querying Tooling API about CustomField in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting ' +
+            string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix ' +
                     'FROM CustomField ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
-                    `AND (NOT(EntityDefinition.keyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
-                        // 00a	*Comment for custom objects
-                        // 017	*History for custom objects
-                        // 02c	*Share for custom objects
-                        // 0D5	*Feed for custom objects
-                        // 1CE	*Event for custom objects
-                    `AND (NOT(EntityDefinition.QualifiedApiName like '%_hd')) `+
-                        // We want to filter out trending historical objects
                     (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
         }], logger);
 
@@ -54,7 +54,12 @@ export class DatasetCustomFields extends Dataset {
                     isCustomSetting: record.EntityDefinition.IsCustomSetting 
                 }
             ],
-            (record) => (record.EntityDefinition ? true : false) // remove the fields that were in a deleted entity!
+            (record) => {
+                if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
+                if (EXCLUDED_OBJECT_PREFIXES.includes(record.EntityDefinition.KeyPrefix)) return false; // ignore these objects
+                if (record.EntityDefinition.QualifiedApiName?.endsWith('_hd')) return false; // ignore the trending historical objects
+                return true;
+            }
         ));
 
         // Then retreive dependencies
@@ -110,8 +115,8 @@ export class DatasetCustomFields extends Dataset {
             // Get information directly from the source code (if available)
             if (customField.formula) {
                 const sourceCode = CodeScanner.RemoveComments(customField.formula);
-                customField.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                customField.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                customField.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                customField.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }
             
             // Compute the score of this item

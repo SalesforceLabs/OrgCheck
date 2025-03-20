@@ -25,18 +25,18 @@ export class SFDC_WebLink extends Data {
     name;
 
     /**
-     * @description Number of hard coded Salesforce URLs in the formula
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs in the formula
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
     
     /**
      * @description Type of the link

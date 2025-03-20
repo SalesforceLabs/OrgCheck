@@ -406,16 +406,16 @@ const ALL_SCORE_RULES = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedURLs > 0,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedURLs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
-        badField: 'nbHardCodedURLs',
+        badField: 'hardCodedURLs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.nbHardCodedIDs > 0,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedIDs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
-        badField: 'nbHardCodedIDs',
+        badField: 'hardCodedIDs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }
 ];

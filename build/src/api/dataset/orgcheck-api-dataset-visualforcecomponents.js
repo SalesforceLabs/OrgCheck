@@ -66,8 +66,8 @@ export class DatasetVisualForceComponents extends Dataset {
             // Get information directly from the source code (if available)
             if (record.Markup) {
                 const sourceCode = CodeScanner.RemoveComments(record.Markup);
-                component.nbHardCodedURLs = CodeScanner.CountOfHardCodedURLs(sourceCode);
-                component.nbHardCodedIDs = CodeScanner.CountOfHardCodedIDs(sourceCode);
+                component.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
+                component.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }
 
             // Compute the score of this item

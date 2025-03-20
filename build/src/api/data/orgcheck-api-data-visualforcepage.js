@@ -32,18 +32,18 @@ export class SFDC_VisualForcePage extends DataWithDependencies {
     apiVersion;
 
     /**
-     * @description Number of hard coded Salesforce URLs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedURLs;
+    hardCodedURLs;
 
     /**
-     * @description Number of hard coded Salesforce IDs
-     * @type {number}
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
      * @public
      */
-    nbHardCodedIDs;
+    hardCodedIDs;
 
     /**
      * @description Is this page ready for mobile?
