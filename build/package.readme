@@ -24,3 +24,9 @@ sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query
 ## List all error you had during the previous push
 sfdx force:data:soql:query --targetusername=vfinet.devhub@salesforce.com --query "SELECT Id, PackagePushJobId, ErrorMessage, ErrorDetails, ErrorTitle, ErrorSeverity, ErrorType, SystemModstamp FROM PackagePushError WHERE SystemModstamp = TODAY" --resultformat=csv
 
+
+============================================================
+Remove
+============================================================
+
+sf project deploy start --metadata-dir manifest/destructive

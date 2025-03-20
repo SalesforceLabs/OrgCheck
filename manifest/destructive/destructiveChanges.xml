@@ -37,10 +37,10 @@
         <members>OrgCheck_Users_PS</members>
         <name>PermissionSet</name>
     </types>
-    <types>
+<!--    <types>
         <members>OrgCheck_App_IAG</members>
         <name>Prompt</name>
-    </types>
+    </types>-->
     <types>
         <members>OrgCheck_SR</members>
         <name>StaticResource</name>
