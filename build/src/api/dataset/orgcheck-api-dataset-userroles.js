@@ -20,9 +20,10 @@ export class DatasetUserRoles extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about UserRole in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
-                        '(SELECT Id, IsActive FROM Users)' + // optimisation?
-                    ' FROM UserRole '
+            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, ' +
+                        '(SELECT Id FROM Users WHERE IsActive = true AND ContactId = NULL AND Profile.Id != NULL) ' + // only active internal users
+                    'FROM UserRole '+
+                    `WHERE PortalType = 'None' ` // only internal roles
         }], logger);
 
         // Init the factory and records
@@ -49,9 +50,6 @@ export class DatasetUserRoles extends Dataset {
                     activeMembersCount: 0,
                     activeMemberIds: [],
                     hasActiveMembers: false,
-                    inactiveMembersCount: 0,
-                    hasInactiveMembers: false,
-                    isExternal: (record.PortalType !== 'None') ? true : false,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.ROLE)
                 }
             });
@@ -68,16 +66,11 @@ export class DatasetUserRoles extends Dataset {
             await Processor.forEach(
                 record?.Users?.records, 
                 (user) => {
-                    if (user.IsActive === true) {
-                        userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
-                    } else {
-                        userRole.inactiveMembersCount++;
-                    }
+                    userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
                 }
             );
             userRole.activeMembersCount = userRole.activeMemberIds.length;
             userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
-            userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;
 
             // Add it to the map  
             return [ userRole.id, userRole ];

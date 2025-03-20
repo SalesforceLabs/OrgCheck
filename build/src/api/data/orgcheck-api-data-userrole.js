@@ -94,25 +94,4 @@ export class SFDC_UserRole extends Data {
      * @public
      */
     hasActiveMembers;
-    
-    /**
-     * @description Number of inactive members in this role
-     * @type {number}
-     * @public
-     */
-    inactiveMembersCount;
-    
-    /**
-     * @description Does this role have inactive members?
-     * @type {boolean}
-     * @public
-     */
-    hasInactiveMembers;
-    
-    /**
-     * @description Is this role externam?
-     * @type {boolean}
-     * @public
-     */
-    isExternal;
 }

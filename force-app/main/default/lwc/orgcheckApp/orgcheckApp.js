@@ -500,8 +500,8 @@ export default class OrgcheckApp extends LightningElement {
         'profiles':                  { label: '🚓 Profiles',                   tab: 'security',    isGlobalView: true,      data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getProfiles(this.namespace); }},
         'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',       isGlobalView: true,      data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._nt,   get: async () => { return this._api?.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',       isGlobalView: true,      data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._nt,   get: async () => { return this._api?.getQueues(); }},
-        'roles-listing':             { label: '🦓 Role Listing',               tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
-        'roles-explorer':            { label: '🐙 Role Explorer',              tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
+        'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
+        'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getValidationRules(); }},
         'visual-force-components':   { label: '🍞 Visual Force Components',    tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
         'visual-force-pages':        { label: '🥖 Visual Force Pages',         tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
@@ -1855,7 +1855,6 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Name',                        type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Developer Name',              type: ocui.ColumnType.TXT, data: { value: 'apiname' }},
             { label: 'Number of active members',    type: ocui.ColumnType.NUM, data: { value: 'activeMembersCount' }},
-            { label: 'Number of inactive members',  type: ocui.ColumnType.NUM, data: { value: 'inactiveMembersCount' }},
             { label: 'Level',                       type: ocui.ColumnType.NUM, data: { value: 'level' }},
             { label: 'Parent',                      type: ocui.ColumnType.URL, data: { value: 'parentRef.url', label: 'parentRef.name' }}
         ],
@@ -2028,8 +2027,6 @@ export default class OrgcheckApp extends LightningElement {
         htmlContent += `This role has ${data.record.activeMembersCount} active user(s)<br /><ul>`;
         data.record.activeMemberRefs?.forEach(activeMember => { htmlContent += `<li>${activeMember.name}</li>`; });
         htmlContent += '</ul><br />';
-        htmlContent += `This role has ${data.record.inactiveMembersCount} inactive user(s)<br />`;
-        htmlContent += '<br />';
         if (data.record.parentRef) {
             htmlContent += `Parent Role Name: <b>${data.record.parentRef.name}</b><br />`;
             htmlContent += `Parent Salesforce Id: <b>${data.record.parentRef.id}</b><br />`;

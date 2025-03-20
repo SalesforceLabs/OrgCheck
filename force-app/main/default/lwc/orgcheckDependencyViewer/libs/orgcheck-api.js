@@ -3184,27 +3184,6 @@ class SFDC_UserRole extends Data {
      * @public
      */
     hasActiveMembers;
-    
-    /**
-     * @description Number of inactive members in this role
-     * @type {number}
-     * @public
-     */
-    inactiveMembersCount;
-    
-    /**
-     * @description Does this role have inactive members?
-     * @type {boolean}
-     * @public
-     */
-    hasInactiveMembers;
-    
-    /**
-     * @description Is this role externam?
-     * @type {boolean}
-     * @public
-     */
-    isExternal;
 }
 
 class SFDC_ValidationRule extends Data {
@@ -6951,9 +6930,10 @@ class DatasetUserRoles extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about UserRole in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, PortalType, ' +
-                        '(SELECT Id, IsActive FROM Users)' + // optimisation?
-                    ' FROM UserRole '
+            string: 'SELECT Id, DeveloperName, Name, ParentRoleId, ' +
+                        '(SELECT Id FROM Users WHERE IsActive = true AND ContactId = NULL AND Profile.Id != NULL) ' + // only active internal users
+                    'FROM UserRole '+
+                    `WHERE PortalType = 'None' ` // only internal roles
         }], logger);
 
         // Init the factory and records
@@ -6980,9 +6960,6 @@ class DatasetUserRoles extends Dataset {
                     activeMembersCount: 0,
                     activeMemberIds: [],
                     hasActiveMembers: false,
-                    inactiveMembersCount: 0,
-                    hasInactiveMembers: false,
-                    isExternal: (record.PortalType !== 'None') ? true : false,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.ROLE)
                 }
             });
@@ -6999,16 +6976,11 @@ class DatasetUserRoles extends Dataset {
             await Processor.forEach(
                 record?.Users?.records, 
                 (user) => {
-                    if (user.IsActive === true) {
-                        userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
-                    } else {
-                        userRole.inactiveMembersCount++;
-                    }
+                    userRole.activeMemberIds.push(sfdcManager.caseSafeId(user.Id));
                 }
             );
             userRole.activeMembersCount = userRole.activeMemberIds.length;
             userRole.hasActiveMembers = userRole.activeMemberIds.length > 0;
-            userRole.hasInactiveMembers = userRole.inactiveMembersCount > 0;
 
             // Add it to the map  
             return [ userRole.id, userRole ];
@@ -9210,12 +9182,11 @@ class RecipeUserRoles extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
-     * @param {boolean} [includesExternalRoles=false] do you want to include the external roles? (false by default)
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger, includesExternalRoles=false) {
+    async transform(data, logger) {
 
         // Get data
         const /** @type {Map<string, SFDC_UserRole>} */ userRoles = data.get(DatasetAliases.USERROLES);
@@ -9225,8 +9196,7 @@ class RecipeUserRoles extends Recipe {
         if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);
         if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
-        // Augment and Filter data
-        const array = [];
+        // Augment data
         await Processor.forEach(userRoles, async (userRole) => {
             // Augment data
             if (userRole.hasActiveMembers === true) {
@@ -9235,14 +9205,10 @@ class RecipeUserRoles extends Recipe {
             if (userRole.hasParent === true) {
                 userRole.parentRef = userRoles.get(userRole.parentId);
             }
-            // Filter data
-            if (includesExternalRoles === true || userRole.isExternal === false) {
-                array.push(userRole);
-            }
         });
 
         // Return data
-        return array;
+        return [... userRoles.values()];
     }
 }
 

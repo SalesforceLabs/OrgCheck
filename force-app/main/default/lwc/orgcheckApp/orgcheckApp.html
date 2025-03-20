@@ -506,16 +506,16 @@
                     <lightning-tab value="summary-03" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🐇 Welcome in the Boxes world!</h1>
                         <ul class="slds-list_dotted">
-                            <li><b>🐙 Role Explorer</b>: All the internal roles of your org as a hierarchical graph and see which role is empty or not</li>
-                            <li><b>🦓 Role Listing</b>: All the internal roles of your org as a tabular table</li>
+                            <li><b>🐙 Internal Role Explorer</b>: All the internal roles of your org as a hierarchical graph and see which role is empty or not</li>
+                            <li><b>🦓 Internal Role Listing</b>: All the internal roles of your org as a tabular table</li>
                             <li><b>🐘 Public Groups</b>: Get the list of public groups in your org</li>
                             <li><b>🦒 Queues</b>: Get the list of queues in your org</li>
                         </ul>
                     </lightning-tab>
-                    <lightning-tab value="roles-explorer" label="🐙 Role Explorer" onactive={handleSubTabActivation}>
-                        <c-orgcheck-graphics type="hierarchy" name="Role Hierarchy" hierarchy-box-color-legend={roleBoxColorsLegend} hierarchy-box-color-decorator={roleBoxColorsDecorator} hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} hierarchy-show-level source={rolesTree}></c-orgcheck-graphics>
+                    <lightning-tab value="roles-explorer" label="🐙 Internal Role Explorer" onactive={handleSubTabActivation}>
+                        <c-orgcheck-graphics type="hierarchy" name="Internal Role Hierarchy" hierarchy-box-color-legend={roleBoxColorsLegend} hierarchy-box-color-decorator={roleBoxColorsDecorator} hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} hierarchy-show-level source={rolesTree}></c-orgcheck-graphics>
                     </lightning-tab>
-                    <lightning-tab value="roles-listing" label="🦓 Role Listing" onactive={handleSubTabActivation}>
+                    <lightning-tab value="roles-listing" label="🦓 Internal Role Listing" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no role to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={rolesTableDefinition} rows={rolesTableData} show-export-button export-basename="Roles"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="public-groups" label="🐘 Public Groups" onactive={handleSubTabActivation}>

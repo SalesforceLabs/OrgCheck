@@ -5,7 +5,7 @@
       "default": true,
       "package": "OrgCheck",
       "versionName": "Boron",
-      "versionNumber": "5.0.0.NEXT",
+      "versionNumber": "5.1.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
@@ -23,6 +23,7 @@
     "OrgCheck@4.10.0-2": "04tKB000000DA38YAG",
     "OrgCheck@4.11.0-1": "04tKB000000DAOGYA4",
     "OrgCheck@5.0.0-1": "04tKB000000DGKSYA4",
-    "OrgCheck@5.0.0-2": "04tKB000000DGsDYAW"
+    "OrgCheck@5.0.0-2": "04tKB000000DGsDYAW",
+    "OrgCheck@5.1.0-1": "04tKB000000DHlaYAG"
   }
 }

@@ -27,12 +27,11 @@ export class RecipeUserRoles extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
-     * @param {boolean} [includesExternalRoles=false] do you want to include the external roles? (false by default)
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger, includesExternalRoles=false) {
+    async transform(data, logger) {
 
         // Get data
         const /** @type {Map<string, SFDC_UserRole>} */ userRoles = data.get(DatasetAliases.USERROLES);
@@ -42,8 +41,7 @@ export class RecipeUserRoles extends Recipe {
         if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);
         if (!users) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERS' was undefined.`);
 
-        // Augment and Filter data
-        const array = [];
+        // Augment data
         await Processor.forEach(userRoles, async (userRole) => {
             // Augment data
             if (userRole.hasActiveMembers === true) {
@@ -52,13 +50,9 @@ export class RecipeUserRoles extends Recipe {
             if (userRole.hasParent === true) {
                 userRole.parentRef = userRoles.get(userRole.parentId);
             }
-            // Filter data
-            if (includesExternalRoles === true || userRole.isExternal === false) {
-                array.push(userRole);
-            }
         });
 
         // Return data
-        return array;
+        return [... userRoles.values()];
     }
 }
