@@ -103,6 +103,9 @@
             { question: `My wife asked me to stop singing I'm a Believer by the Monkees because she found it annoying.`, answer: `At first, I thought she was kidding. But then I saw her face...` },
             { question: `My wife asked me to stop singing Oasis.`, answer: `So, I said maybe...` },
             { question: `People always talk about the "Eye of the Tiger".`, answer: `Yeah. No one talks about the other four letters...` },
+            { question: `Did you hear about the artist that was baroque?`, answer: `He stole the Monet, to buy Degas, to make the Van Gogh.` },
+            { question: `I just crashed my new kia`, answer: `Now I have Nokia` },
+            { question: `I just downloaded the Titanic soundtrack...`, answer: `It's syncing right now.` }
         ];
         const joke_question = document.getElementById('additional-waiting-info-1');
         const joke_answer = document.getElementById('additional-waiting-info-2');
