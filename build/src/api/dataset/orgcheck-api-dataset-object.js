@@ -47,7 +47,6 @@ export class DatasetObject extends Dataset {
             sfdcManager.soqlQuery([{
                 tooling: true, // We need the tooling to get the Description, ApexTriggers, FieldSets, ... which are not accessible from REST API)
                 string: 'SELECT Id, DurableId, DeveloperName, Description, NamespacePrefix, ExternalSharingModel, InternalSharingModel, ' +
-                            '(SELECT DurableId, QualifiedApiName, Description, IsIndexed FROM Fields), ' +
                             '(SELECT Id FROM ApexTriggers), ' +
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
@@ -58,6 +57,13 @@ export class DatasetObject extends Dataset {
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
                         (packageName ? `AND NamespacePrefix = '${packageName}' ` : '') +
                         'LIMIT 1' // We should get zero or one record, not more!
+            }, {
+                tooling: true,
+                string: 'SELECT DurableId, QualifiedApiName, Description, IsIndexed ' +
+                        'FROM FieldDefinition '+
+                        `WHERE EntityDefinition.QualifiedApiName = '${fullObjectApiName}' ` +
+                        (packageName ? `AND EntityDefinition.NamespacePrefix = '${packageName}' ` : ''),
+                queryMoreField: 'DurableId' // FieldDefinition does not support calling QueryMore, use the custom instead
             }], logger),
             sfdcManager.recordCount(fullObjectApiName, logger)
         ]);
@@ -67,12 +73,14 @@ export class DatasetObject extends Dataset {
         const sobjectDescribed = results[0]; 
         const sobjectType = sfdcManager.getObjectType(sobjectDescribed.name, sobjectDescribed.customSetting);
 
-        // the second promise was the soql query on EntityDefinition
-        // so we get the record of that query and map it to the previous object.
+        // the second promise was two soql queries on EntityDefinition and on FieldDefinition
+        // so the first query response should be an EntityDefinition record corresponding to the object we want.
         const entity = results[1][0][0];
         if (!entity) { // If that entity was not found in the tooling API
             throw new TypeError(`No entity definition record found for: ${fullObjectApiName}`)
         }
+        // and the second query response should be a list of FieldDefinition records corresponding to the fields of the object
+        const fields = results[1][1]; 
                 
         // the third promise is the number of records!!
         const recordCount = results[2]; 
@@ -80,7 +88,7 @@ export class DatasetObject extends Dataset {
         // fields (standard and custom)
         const customFieldIds = []; 
         const standardFieldsMapper = new Map();
-        await Processor.forEach(entity.Fields?.records, (f) => {
+        await Processor.forEach(fields, (f) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
                 if (f.DurableId?.includes('.00N')) {
