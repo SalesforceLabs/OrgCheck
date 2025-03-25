@@ -34,6 +34,8 @@ export default class OrgcheckApp extends LightningElement {
      */
     useOrgCheckInThisOrgNeedConfirmation = false;
 
+    useOrgCheckManuallyAccepted = false;
+
     /**
      * @description True if the content of the next tab is being loaded
      * @type {boolean}
@@ -502,7 +504,7 @@ export default class OrgcheckApp extends LightningElement {
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',       isGlobalView: true,      data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._nt,   get: async () => { return this._api?.getQueues(); }},
         'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
         'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
-        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getValidationRules(); }},
+        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
         'visual-force-components':   { label: '🍞 Visual Force Components',    tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
         'visual-force-pages':        { label: '🥖 Visual Force Pages',         tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
         'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',  isGlobalView: true,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getWorkflows(); }}
@@ -603,6 +605,7 @@ export default class OrgcheckApp extends LightningElement {
             this.useOrgCheckInThisOrgNeedConfirmation = true;
             this.useOrgCheckInThisOrgConfirmed = false;
         }
+        this.useOrgCheckManuallyAccepted = this._api.wereUsageTermsAcceptedManually();
     }
 
     /**
@@ -773,7 +776,7 @@ export default class OrgcheckApp extends LightningElement {
             // is it checked?
             if (checkbox['checked'] === true) {
                 // yes it is!
-                this._api.acceptUsageTerms();
+                this._api.acceptUsageTermsManually();
                 return this._loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
@@ -1060,13 +1063,16 @@ export default class OrgcheckApp extends LightningElement {
             { label: '#',                type: ocui.ColumnType.IDX },
             { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'In this object',   type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
             { label: 'Object Type',      type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
             { label: 'ObjectID',         type: ocui.ColumnType.TXT, data: { value: 'objectId' }},
             { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
             { label: 'Error Message',    type: ocui.ColumnType.TXT, data: { value: 'errorMessage' }},
-            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1081,10 +1087,13 @@ export default class OrgcheckApp extends LightningElement {
             { label: '#',                type: ocui.ColumnType.IDX },
             { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
             { label: 'Error Message',    type: ocui.ColumnType.TXT, data: { value: 'errorMessage' }},
-            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1409,7 +1418,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Status',                type: ocui.ColumnType.TXT,  data: { value: 'status' }},
             { label: 'Expiration Date',       type: ocui.ColumnType.DTM,  data: { value: 'expirationDate' }},
             { label: 'For Integration?',      type: ocui.ColumnType.CHK,  data: { value: 'isAvailableForIntegrations' }},
-            { label: 'Created date',          type: ocui.ColumnType.DTM,  data: { value: 'createDate' }},
+            { label: 'Created date',          type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
             { label: 'Modified date',         type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
         ],
         orderIndex: 1,
@@ -1736,27 +1745,37 @@ export default class OrgcheckApp extends LightningElement {
      */
     apexTestsTableDefinition = {
         columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'API Version',     type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT,  data: { value: 'package' }},
-            { label: 'Size',            type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'URLs',            type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',             type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Nb Asserts',      type: ocui.ColumnType.NUM,  data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
-            { label: 'Methods',         type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
-            { label: 'Latest Run Date', type: ocui.ColumnType.DTM,  data: { value: 'lastTestRunDate' }},
-            { label: 'Runtime',         type: ocui.ColumnType.NUM,  data: { value: 'testMethodsRunTime' }},
-            { label: 'Passed methods',  type: ocui.ColumnType.OBJS, data: { values: 'testPassedMethods', template: (r) => `${r.methodName} (${r.runtime*1} ms)` }},
-            { label: 'Failed methods',  type: ocui.ColumnType.OBJS, data: { values: 'testFailedMethods', template: (r) => `${r.methodName} (${r.stacktrace})` }},
-            { label: 'Inner Classes',   type: ocui.ColumnType.NUM,  data: { value: 'innerClassesCount' }},
-            { label: 'Sharing',         type: ocui.ColumnType.TXT,  data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
-            { label: 'Covering',        type: ocui.ColumnType.URLS, data: { values: 'relatedClassRefs', value: 'url', label: 'name' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM,  data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP,  data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }}
+            { label: '#',                          type: ocui.ColumnType.IDX },
+            { label: 'Score',                      type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                       type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
+            { label: 'API Version',                type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Package',                    type: ocui.ColumnType.TXT,  data: { value: 'package' }},
+            { label: 'Size',                       type: ocui.ColumnType.NUM,  data: { value: 'length' }},
+            { label: 'URLs',                       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',                        type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Nb Asserts',                 type: ocui.ColumnType.NUM,  data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
+            { label: 'Methods',                    type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
+            { label: 'Latest Run Date',            type: ocui.ColumnType.DTM,  data: { value: 'lastTestRunDate' }},
+            { label: 'Runtime',                    type: ocui.ColumnType.NUM,  data: { value: 'testMethodsRunTime' }},
+            { label: 'Passed (but long) methods',  type: ocui.ColumnType.OBJS, data: { values: 'testPassedButLongMethods', template: (r) => 
+                `${r.methodName} (Runtime: ${r.runtime*1} ms`+
+                // see https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_apextestresultlimits.htm
+                (r.cpuConsumption > 0 ? `, CPU: ${r.cpuConsumption*1} ms`: '') +  // The amount of CPU used during the test run, in milliseconds.
+                (r.asyncCallsConsumption > 0 ? `, Async Calls: ${r.asyncCallsConsumption}`: '') + // The number of asynchronous calls made during the test run.
+                (r.soslConsumption > 0 ? `, SOSL: ${r.soslConsumption}`: '') + // The number of SOSL queries made during the test run.
+                (r.soqlConsumption > 0 ? `, SOQL: ${r.soqlConsumption}`: '') + // The number of SOQL queries made during the test run.
+                (r.queryRowsConsumption > 0 ? `, Query Rows: ${r.queryRowsConsumption}`: '') + // The number of rows queried during the test run.
+                (r.dmlRowsConsumption > 0 ? `, Dml Rows: ${r.dmlRowsConsumption}`: '') + // The number of rows accessed by DML statements during the test run.
+                (r.dmlConsumption > 0 ? `, Dml: ${r.dmlConsumption}`:'') + // The number of DML statements made during the test run.
+            ')' }},
+            { label: 'Failed methods',             type: ocui.ColumnType.OBJS, data: { values: 'testFailedMethods', template: (r) => `${r.methodName} (${r.stacktrace})` }},
+            { label: 'Inner Classes',              type: ocui.ColumnType.NUM,  data: { value: 'innerClassesCount' }},
+            { label: 'Sharing',                    type: ocui.ColumnType.TXT,  data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
+            { label: 'Covering',                   type: ocui.ColumnType.URLS, data: { values: 'relatedClassRefs', value: 'url', label: 'name' }},
+            { label: 'Using',                      type: ocui.ColumnType.NUM,  data: { value: 'dependencies.using.length' }},
+            { label: 'Dependencies',               type: ocui.ColumnType.DEP,  data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',               type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
+            { label: 'Modified date',              type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC

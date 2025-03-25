@@ -582,20 +582,20 @@ class RowsFactory {
             // Add the row in the first table
             const exportRow = [];
             row.cells?.forEach((cell) => {
-                if (cell.typeofindex) { // for INDEX typed cell, we set the row's index
+                if (cell.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(row.index);
-                } else if (cell.typeofscore) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
+                } else if (cell.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
                     exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => id)));
-                } else if (cell.typeofid) { // for URL typed cell, we set the label and then the URL
+                } else if (cell.typeofid === true) { // for URL typed cell, we set the label and then the URL
                     exportRow.push(cell.data.label, cell.data.value);
-                } else if (cell.typeofids) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
+                } else if (cell.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
                     exportRow.push(
                         ARRAY_TO_STRING(cell.data.values?.map(v => v.data.label)), 
                         ARRAY_TO_STRING(cell.data.values?.map(v => v.data.value))
                     );
-                } else if (cell.typeofobjects) { // for multiple Objects typed cell, we set a JSON representation of the objects (stored in data.value)
-                    exportRow.push(ARRAY_TO_STRING(cell.data.values?.map(v => v.data.value)));
-                } else if (cell.typeoftexts) { // for multiple Texts typed cell, we set a JSON representation of the texts (stored in data)
+                } else if (cell.typeofobjects === true || cell.typeofobjects === true) { 
+                    // for multiple Objects typed cell, we previously used a template function to decorate the object into an array of strings
+                    // for multiple Texts typed cell, we have already an array of strings
                     exportRow.push(ARRAY_TO_STRING(cell.data.values?.map(v => v.data)));
                 } else { // for any other type use data.value
                     exportRow.push(cell.data.value ?? '');

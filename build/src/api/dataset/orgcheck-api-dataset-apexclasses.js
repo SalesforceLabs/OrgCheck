@@ -29,7 +29,9 @@ export class DatasetApexClasses extends Dataset {
             tooling: true
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
-                    'FROM ApexCodeCoverage',
+                    'FROM ApexCodeCoverage ' +
+                    'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
+            queryMoreField: 'CreatedDate',
             tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
@@ -42,12 +44,13 @@ export class DatasetApexClasses extends Dataset {
                     `WHERE JobType = 'ScheduledApex' `
         }, {
             string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
-                        'RunTime, Outcome, StackTrace '+
+                        'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
                     'FROM ApexTestResult '+
                     `WHERE ApexTestRunResult.Status = 'Completed' `+
+                    `AND (Outcome != 'Pass' OR RunTime > 20000) `+
                     `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `+
                     'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
-                tooling: true
+            tooling: true
         }], logger);
 
         // Init the factory and records and records
@@ -222,7 +225,7 @@ export class DatasetApexClasses extends Dataset {
                         if (!tc.lastTestRunDate) {
                             tc.lastTestRunDate = record.ApexTestRunResult?.CreatedDate;
                             tc.testMethodsRunTime = 0;
-                            tc.testPassedMethods = [];
+                            tc.testPassedButLongMethods = [];
                             tc.testFailedMethods = [];
                         }
                         if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
@@ -231,11 +234,21 @@ export class DatasetApexClasses extends Dataset {
                                     methodName: record.MethodName,
                                     isSuccessful: record.Outcome === 'Pass',
                                     runtime: record.RunTime,
-                                    stacktrace: record.StackTrace
+                                    stacktrace: record.StackTrace,
                                 }
                             });
+                            if (record.ApexTestResults?.records && record.ApexTestResults.records.length > 0) {
+                                const limit = record.ApexTestResults.records[0];
+                                if (limit.Cpu > 0) result.cpuConsumption = limit.Cpu; 
+                                if (limit.AsyncCalls > 0) result.asyncCallsConsumption = limit.AsyncCalls;
+                                if (limit.Sosl > 0) result.soslConsumption = limit.Sosl;
+                                if (limit.Soql > 0) result.soqlConsumption = limit.Soql;
+                                if (limit.QueryRows > 0) result.queryRowsConsumption = limit.QueryRows;
+                                if (limit.DmlRows > 0) result.dmlRowsConsumption = limit.DmlRows;
+                                if (limit.Dml > 0) result.dmlConsumption = limit.Dml;
+                            }
                             tc.testMethodsRunTime += result.runtime;
-                            (result.isSuccessful ? tc.testPassedMethods : tc.testFailedMethods).push(result);
+                            (result.isSuccessful ? tc.testPassedButLongMethods : tc.testFailedMethods).push(result);
                         }
                     }
                 }

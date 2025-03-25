@@ -1,4 +1,5 @@
 import { DataWithDependencies } from '../core/orgcheck-api-data';
+import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of a Standard Field or a Custom Field in Org Check
@@ -34,6 +35,11 @@ export class SFDC_Field extends DataWithDependencies {
      */
     name;
     
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
     label;
     
     /**
@@ -71,8 +77,18 @@ export class SFDC_Field extends DataWithDependencies {
      */
     objectId; 
 
+    /**
+     * @description Reference of the object for this field
+     * @type {SFDC_Object}
+     * @public
+     */
     objectRef;
 
+    /**
+     * @description Is tgis field custom or standard
+     * @type {boolean}
+     * @public
+     */
     isCustom;
 
     /**
@@ -82,16 +98,46 @@ export class SFDC_Field extends DataWithDependencies {
      */
     tooltip;
 
+    /**
+     * @description Type of this field
+     * @type {string}
+     * @public
+     */
     type;
 
+    /**
+     * @description Length of this field in addition to its type
+     * @type {number}
+     * @public
+     */
     length;
 
+    /**
+     * @description Is this field unique?
+     * @type {boolean}
+     * @public
+     */
     isUnique;
 
+    /**
+     * @description Is this field encrypted?
+     * @type {boolean}
+     * @public
+     */
     isEncrypted;
 
+    /**
+     * @description Is this field set as an external id?
+     * @type {boolean}
+     * @public
+     */
     isExternalId;
 
+    /**
+     * @description Is this field uses an index in the table?
+     * @type {boolean}
+     * @public
+     */
     isIndexed;
 
     /**
@@ -101,8 +147,18 @@ export class SFDC_Field extends DataWithDependencies {
      */
     defaultValue;
 
+    /**
+     * @description If this is a picklist, is it restricted to a list of values?
+     * @type {boolean}
+     * @public
+     */
     isRestrictedPicklist;
 
+    /**
+     * @description What is the formula of that field? (obviously only for formula field!)
+     * @type {string}
+     * @public
+     */
     formula;
 
     /**

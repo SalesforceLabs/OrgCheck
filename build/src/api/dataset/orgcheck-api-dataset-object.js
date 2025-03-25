@@ -52,7 +52,7 @@ export class DatasetObject extends Dataset {
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
-                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName FROM ValidationRules), ' +
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, NamespacePrefix, CreatedDate, LastModifiedDate FROM ValidationRules), ' +
                             '(SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, LastModifiedDate, NamespacePrefix FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
@@ -179,6 +179,9 @@ export class DatasetObject extends Dataset {
                     description: t.Description,
                     errorDisplayField: t.ErrorDisplayField,
                     errorMessage: t.ErrorMessage,
+                    package: (t.NamespacePrefix || ''),
+                    createdDate: t.CreatedDate, 
+                    lastModifiedDate: t.LastModifiedDate,
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.VALIDATION_RULE)
                 }
             })

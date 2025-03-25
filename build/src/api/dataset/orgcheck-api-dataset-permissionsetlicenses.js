@@ -55,7 +55,7 @@ export class DatasetPermissionSetLicenses extends Dataset {
                 properties: {
                     id: id,
                     name: record.MasterLabel,
-                    createDate: record.CreatedDate, 
+                    createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate, 
                     totalCount: record.TotalLicenses, 
                     usedCount: record.UsedLicenses,

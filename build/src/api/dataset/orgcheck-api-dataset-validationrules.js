@@ -20,7 +20,9 @@ export class DatasetValidationRules extends Dataset {
         // First SOQL query
         logger?.log(`Querying Tooling API about Validaiton Rules in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, EntityDefinition.QualifiedApiName '+
+            string: 'SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                        'ValidationName, EntityDefinition.QualifiedApiName, NamespacePrefix, '+
+                        'CreatedDate, LastModifiedDate '+
                     'FROM ValidationRule',
             tooling: true
         }], logger);
@@ -42,10 +44,13 @@ export class DatasetValidationRules extends Dataset {
                     id: sfdcManager.caseSafeId(id), 
                     name: record.ValidationName, 
                     isActive: record.Active,
+                    package: (record.NamespacePrefix || ''),
                     description: record.Description,
                     errorDisplayField: record.ErrorDisplayField,
                     errorMessage: record.ErrorMessage,
                     objectId: record.EntityDefinition?.QualifiedApiName,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate, 
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VALIDATION_RULE)
                 }
             });

@@ -293,20 +293,37 @@ export class SalesforceManager extends SalesforceManagerIntf {
     /**
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
-     * @param {string} fieldId Unique field name to use for the custom QueryMore (Id by default)
+     * @param {string} field Field name to use for the custom QueryMore
      * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling, query, fieldId, callback) {
+    async _customSOQLQuery(useTooling, query, field, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
         const allRecords = [];
+        const indexOfFromStatment = query.indexOf(' FROM ');
+        const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
+        const isAggregateQuery = indexOfGroupByStatment !== -1;
+let count = 0;
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
-        const doNextQuery = async (/** @type {string} */ startingId) => {
-            const realQuery = `${query} AND ${fieldId}>'${startingId}' ORDER BY ${fieldId} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+        const doNextQuery = async (/** @type {string} */ startingValue) => {
+            if (!startingValue && isAggregateQuery === false) {
+                startingValue = '000000000000000000';
+            }
+            let realQuery;
+            if (isAggregateQuery === false) {
+                realQuery = `${query} AND ${field} > '${startingValue}' ORDER BY ${field} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+            } else {
+                realQuery = `${query.substring(0, indexOfFromStatment)}, MAX(${field}) `+
+                            `${query.substring(indexOfFromStatment, indexOfGroupByStatment)} `+
+                            (startingValue ? `WHERE ${field} > ${startingValue} ` : '')+
+                            `${query.substring(indexOfGroupByStatment)} `+
+                            `ORDER BY MAX(${field}) `+
+                            `LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+            }
             // Let's start to check if we are 'allowed' to use the Salesforce API...
             this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
             // Deactivate AutoFetch to avoid the automatic call to queryMore by JsForce!
@@ -321,16 +338,17 @@ export class SalesforceManager extends SalesforceManagerIntf {
             // Adding records to the global array.
             allRecords.push(... results.records);
             // Check if this was the last batch?
+if (count++ > 10) return;
             if (results.records.length >= MAX_NOQUERYMORE_BATCH_SIZE) { // this was not yet the last batch
                 // Update the last ID to start the next batch
-                const newStartingId = allRecords[allRecords.length-1][fieldId];
+                const newStartingValue = allRecords[allRecords.length-1][isAggregateQuery ? `MAX(${field})`: field];
                 // call the next Batch
-                await doNextQuery(newStartingId);
+                await doNextQuery(newStartingValue);
             }
         }
         try {
             // Call the first time with a fake Id that will always be first
-            await doNextQuery('000000000000000000'); // and then the method will chain next calls
+            await doNextQuery(); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
@@ -382,7 +400,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
             let records;
             try {
                 if (query.queryMoreField) {
-                    // yes!! do the custom one -- In case the query does not support queryMore we have an alternative, based on ids
+                    // yes!! do the custom one based on Ids (for non aggregate queries) -- In case the query does not support queryMore we have an alternative, based on ids
                     records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField, updateLogInformationOnQuery);
                 } else {
                     // no!!! use the standard one

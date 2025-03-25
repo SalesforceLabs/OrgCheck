@@ -35,7 +35,8 @@ export class CodeScanner {
 
     static FindHardCodedIDs(sourceCode) {
         return sourceCode?.match(REGEX_HARDCODEDIDS) // extract the salesforce ids
-            ?.sort() // sorting the domains (if any)
+            ?.map(id => id?.substring(1, id?.length-1)) // remove the surrounding quotes or so
+            .sort() // sorting the domains (if any)
             .filter((e, i, s) => i === s.indexOf(e)); // unique domains
     }
 

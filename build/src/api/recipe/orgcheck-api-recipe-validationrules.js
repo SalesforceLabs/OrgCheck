@@ -29,11 +29,14 @@ export class RecipeValidationRules extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
+     * @param {string} objecttype Name of the type (if all use '*')
+     * @param {string} object API name of the object (if all use '*')
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, logger, namespace, objecttype, object) {
 
         // Get data
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
@@ -45,16 +48,24 @@ export class RecipeValidationRules extends Recipe {
         if (!objects) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTS' was undefined.`);
         if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
-        // Augment data
-        await Processor.forEach(validationRules, (validationRule) => {
-            const object = objects.get(validationRule.objectId);
-            if (object && !object.typeRef) {
-                object.typeRef = types.get(object.typeId);
+        // Augment and filter data
+        const array = [];
+        await Processor.forEach(validationRules, (/** @type {SFDC_ValidationRule} */ validationRule) => {
+            // Augment
+            const objectRef = objects.get(validationRule.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
             }
-            validationRule.objectRef = object;
+            validationRule.objectRef = objectRef;
+            // Filter
+            if ((namespace === '*' || validationRule.package === namespace) &&
+                (objecttype === '*' || validationRule.objectRef?.typeRef?.id === objecttype) &&
+                (object === '*' || validationRule.objectRef?.apiname === object)) {
+                array.push(validationRule);
+            }
         });
 
         // Return data
-        return [... validationRules.values()];
+        return array;
     }
 }

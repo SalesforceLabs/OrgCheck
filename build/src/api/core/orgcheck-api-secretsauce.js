@@ -417,6 +417,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
         badField: 'hardCodedIDs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+    }, {
+        id: 48,
+        description: 'At least one successful testing method was very long',
+        formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === true && d.testPassedButLongMethods && d.testPassedButLongMethods.length > 0,
+        errorMessage: 'This Apex Test Class has at least one successful method which took more than 20 secondes to execute',
+        badField: 'testPassedButLongMethods',
+        applicable: [ SFDC_ApexClass ]
     }
 ];
 

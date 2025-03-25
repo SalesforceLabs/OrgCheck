@@ -1,4 +1,11 @@
 <template>
+    <span if:true={useOrgCheckManuallyAccepted}>
+        <div class="slds-color__background_gray-1 slds-text-align_center slds-size_full slds-text-body_regular oneSystemMessage">
+            <div aria-live="polite" class="slds-notify_alert system-message level-info slds-theme_info">
+                Using Org Check in this Salesforce organization has been confirmed by you.
+            </div>
+        </div>
+    </span>
     <div style="padding-bottom: 12px;">
         <lightning-layout>
             <lightning-layout-item padding="around-small">

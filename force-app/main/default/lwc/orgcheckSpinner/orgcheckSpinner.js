@@ -53,10 +53,16 @@ class Section {
   stack;
 
   /** 
-   * @description The context information of the section (mostly when an error occured)
+   * @description Some context about WHEN the error occured
    * @type {string} 
    */
-  context;
+  when;
+
+  /** 
+   * @description Some context about WHAT the error is about
+   * @type {string} 
+   */
+  what;
 }
 
 /**
@@ -266,13 +272,18 @@ export default class OrgcheckSpinner extends LightningElement {
     // make sure the spinner is open (if not already)
     this.open();
 
+   /** @type {boolean} */ 
+   const isMessageAnError = message instanceof Error;
+   const contextIfError = message ? message['context'] : undefined;
+
     /** @type {Section} */
     let section = {
       id: sectionName,
       status: status,
-      label: (message instanceof Error ? `${message.name}: ${message.message}` : message),
-      stack: (message instanceof Error ? message?.stack : ''),
-      context: (message instanceof Error ? JSON.stringify(message['context']) : ''),
+      label: (isMessageAnError ? `${message.name}: ${message.message}` : message),
+      stack: (isMessageAnError ? message?.stack : ''),
+      when: (contextIfError ? JSON.stringify(contextIfError['when']) : ''),
+      what: (contextIfError ? JSON.stringify(contextIfError['what']) : ''),
       liClasses: 'slds-progress__item',
       markerClasses: 'slds-progress__marker'
     };

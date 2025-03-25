@@ -49,7 +49,9 @@ export class RecipeApexTests extends Recipe {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === '*' || apexClass.package === namespace) && apexClass.isTest === true && apexClass.needsRecompilation === false) {
+            if ((namespace === '*' || apexClass.package === namespace) && 
+                apexClass.isTest === true && 
+                apexClass.needsRecompilation === false) {
                 array.push(apexClass);
             }
         });

@@ -22,7 +22,7 @@ export class SFDC_PermissionSetLicense extends Data {
     status;
     expirationDate;
     isAvailableForIntegrations;
-    createDate;
+    createdDate;
     lastModifiedDate;
     url;
 }

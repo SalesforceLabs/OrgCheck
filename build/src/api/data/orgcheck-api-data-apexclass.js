@@ -37,6 +37,55 @@ export class SFDC_ApexTestMethodResult extends DataWithoutScoring {
      * @public
      */
     stacktrace;
+
+    /**
+     * @description CPU consumption during the test
+     * @type {number}
+     * @public
+     */
+    cpuConsumption;
+
+    /**
+     * @description Async Calls consumption during the test
+     * @type {number}
+     * @public
+     */
+    asyncCallsConsumption;
+
+    /**
+     * @description SOSL consumption during the test
+     * @type {number}
+     * @public
+     */
+    soslConsumption;
+
+    /**
+     * @description SOQL consumption during the test
+     * @type {number}
+     * @public
+     */
+    soqlConsumption;
+
+    /**
+     * @description Query Rows consumption during the test
+     * @type {number}
+     * @public
+     */
+    queryRowsConsumption;
+
+    /**
+     * @description DML Rows consumption during the test
+     * @type {number}
+     * @public
+     */
+    dmlRowsConsumption;
+
+    /**
+     * @description DML consumption during the test
+     * @type {number}
+     * @public
+     */
+    dmlConsumption;
 }
 
 /**
@@ -179,11 +228,11 @@ export class SFDC_ApexClass extends DataWithDependencies {
     methodsCount;
 
     /**
-     * @description List of test methods that were OK in the last run results
+     * @description List of test methods that were OK in the last run results but took more than 20 seconds
      * @type {Array<SFDC_ApexTestMethodResult>}
      * @public
      */
-    testPassedMethods;
+    testPassedButLongMethods;
 
     /**
      * @description List of test methods that were OK in the last run results

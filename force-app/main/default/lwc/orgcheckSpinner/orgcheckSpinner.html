@@ -34,17 +34,17 @@
                                         <div class={section.markerClasses}></div>
                                         <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
                                     </li>
-                                    <template lwc:if={section.stack}>
-                                        <li key={section.id}>
-                                            <pre>{section.stack}</pre>
-                                        </li>
-                                    </template>
-                                    <template lwc:if={section.context}>
-                                        <li key={section.id}>
-                                            WHEN: <pre>{section.context.when}</pre>
-                                            WHAT: <pre>{section.context.what}</pre>
-                                        </li>
-                                    </template>
+                                    <li lwc:if={section.stack} key={section.id}>
+                                        <pre>{section.stack}</pre>
+                                    </li>
+                                    <li lwc:if={section.when} key={section.id}>
+                                        <b>When did this error occur?</b><br />
+                                        <pre>{section.when}</pre>
+                                    </li>
+                                    <li lwc:if={section.what} key={section.id}>
+                                        <b>What is this error about?</b><br />
+                                        <pre>{section.what}</pre>
+                                    </li>
                                 </template>
                             </ol>
                         </div>

@@ -28,6 +28,11 @@ export class SFDC_LightningPage extends DataWithDependencies {
      */
     name;
     
+    /**
+     * @description Type of the Lightning Page
+     * @type {string}
+     * @public
+     */
     type;
     
     /**

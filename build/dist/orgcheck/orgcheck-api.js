@@ -153,7 +153,8 @@ class CodeScanner {
 
     static FindHardCodedIDs(sourceCode) {
         return sourceCode?.match(REGEX_HARDCODEDIDS) // extract the salesforce ids
-            ?.sort() // sorting the domains (if any)
+            ?.map(id => id?.substring(1, id?.length-1)) // remove the surrounding quotes or so
+            .sort() // sorting the domains (if any)
             .filter((e, i, s) => i === s.indexOf(e)); // unique domains
     }
 
@@ -958,6 +959,55 @@ class SFDC_ApexTestMethodResult extends DataWithoutScoring {
      * @public
      */
     stacktrace;
+
+    /**
+     * @description CPU consumption during the test
+     * @type {number}
+     * @public
+     */
+    cpuConsumption;
+
+    /**
+     * @description Async Calls consumption during the test
+     * @type {number}
+     * @public
+     */
+    asyncCallsConsumption;
+
+    /**
+     * @description SOSL consumption during the test
+     * @type {number}
+     * @public
+     */
+    soslConsumption;
+
+    /**
+     * @description SOQL consumption during the test
+     * @type {number}
+     * @public
+     */
+    soqlConsumption;
+
+    /**
+     * @description Query Rows consumption during the test
+     * @type {number}
+     * @public
+     */
+    queryRowsConsumption;
+
+    /**
+     * @description DML Rows consumption during the test
+     * @type {number}
+     * @public
+     */
+    dmlRowsConsumption;
+
+    /**
+     * @description DML consumption during the test
+     * @type {number}
+     * @public
+     */
+    dmlConsumption;
 }
 
 /**
@@ -1100,11 +1150,11 @@ class SFDC_ApexClass extends DataWithDependencies {
     methodsCount;
 
     /**
-     * @description List of test methods that were OK in the last run results
+     * @description List of test methods that were OK in the last run results but took more than 20 seconds
      * @type {Array<SFDC_ApexTestMethodResult>}
      * @public
      */
-    testPassedMethods;
+    testPassedButLongMethods;
 
     /**
      * @description List of test methods that were OK in the last run results
@@ -2212,6 +2262,11 @@ class SFDC_Field extends DataWithDependencies {
      */
     name;
     
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
     label;
     
     /**
@@ -2249,8 +2304,18 @@ class SFDC_Field extends DataWithDependencies {
      */
     objectId; 
 
+    /**
+     * @description Reference of the object for this field
+     * @type {SFDC_Object}
+     * @public
+     */
     objectRef;
 
+    /**
+     * @description Is tgis field custom or standard
+     * @type {boolean}
+     * @public
+     */
     isCustom;
 
     /**
@@ -2260,16 +2325,46 @@ class SFDC_Field extends DataWithDependencies {
      */
     tooltip;
 
+    /**
+     * @description Type of this field
+     * @type {string}
+     * @public
+     */
     type;
 
+    /**
+     * @description Length of this field in addition to its type
+     * @type {number}
+     * @public
+     */
     length;
 
+    /**
+     * @description Is this field unique?
+     * @type {boolean}
+     * @public
+     */
     isUnique;
 
+    /**
+     * @description Is this field encrypted?
+     * @type {boolean}
+     * @public
+     */
     isEncrypted;
 
+    /**
+     * @description Is this field set as an external id?
+     * @type {boolean}
+     * @public
+     */
     isExternalId;
 
+    /**
+     * @description Is this field uses an index in the table?
+     * @type {boolean}
+     * @public
+     */
     isIndexed;
 
     /**
@@ -2279,8 +2374,18 @@ class SFDC_Field extends DataWithDependencies {
      */
     defaultValue;
 
+    /**
+     * @description If this is a picklist, is it restricted to a list of values?
+     * @type {boolean}
+     * @public
+     */
     isRestrictedPicklist;
 
+    /**
+     * @description What is the formula of that field? (obviously only for formula field!)
+     * @type {string}
+     * @public
+     */
     formula;
 
     /**
@@ -2660,6 +2765,11 @@ class SFDC_LightningPage extends DataWithDependencies {
      */
     name;
     
+    /**
+     * @description Type of the Lightning Page
+     * @type {string}
+     * @public
+     */
     type;
     
     /**
@@ -2928,7 +3038,7 @@ class SFDC_PermissionSetLicense extends Data {
     status;
     expirationDate;
     isAvailableForIntegrations;
-    createDate;
+    createdDate;
     lastModifiedDate;
     url;
 }
@@ -3229,7 +3339,19 @@ class SFDC_ValidationRule extends Data {
      * @public
      */
     description;
+
+    /**
+     * @description Field where to show the error message if any
+     * @type {string}
+     * @public
+     */
     errorDisplayField;
+
+    /**
+     * @description Error message
+     * @type {string}
+     * @public
+     */
     errorMessage;
     
     /**
@@ -3239,7 +3361,33 @@ class SFDC_ValidationRule extends Data {
      */
     objectId; 
 
+    /**
+     * @description Reference of the object for this rule
+     * @type {SFDC_Object}
+     * @public
+     */
     objectRef;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
 
     /**
      * @description Setup URL of this item
@@ -3962,6 +4110,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
         badField: 'hardCodedIDs',
         applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+    }, {
+        id: 48,
+        description: 'At least one successful testing method was very long',
+        formula: (/** @type {SFDC_ApexClass} */ d) => d.isTest === true && d.testPassedButLongMethods && d.testPassedButLongMethods.length > 0,
+        errorMessage: 'This Apex Test Class has at least one successful method which took more than 20 secondes to execute',
+        badField: 'testPassedButLongMethods',
+        applicable: [ SFDC_ApexClass ]
     }
 ];
 
@@ -4981,7 +5136,7 @@ class DatasetObject extends Dataset {
                             '(SELECT Id, MasterLabel, Description FROM FieldSets), ' +
                             '(SELECT Id, Name, LayoutType FROM Layouts), ' +
                             '(SELECT DurableId, Label, Max, Remaining, Type FROM Limits), ' +
-                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName FROM ValidationRules), ' +
+                            '(SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, NamespacePrefix, CreatedDate, LastModifiedDate FROM ValidationRules), ' +
                             '(SELECT Id, Name, Url, LinkType, OpenType, Description, CreatedDate, LastModifiedDate, NamespacePrefix FROM WebLinks) ' +
                         'FROM EntityDefinition ' +
                         `WHERE QualifiedApiName = '${fullObjectApiName}' ` +
@@ -5108,6 +5263,9 @@ class DatasetObject extends Dataset {
                     description: t.Description,
                     errorDisplayField: t.ErrorDisplayField,
                     errorMessage: t.ErrorMessage,
+                    package: (t.NamespacePrefix || ''),
+                    createdDate: t.CreatedDate, 
+                    lastModifiedDate: t.LastModifiedDate,
                     url: sfdcManager.setupUrl(t.Id, SalesforceMetadataTypes.VALIDATION_RULE)
                 }
             })
@@ -6603,7 +6761,9 @@ class DatasetApexClasses extends Dataset {
             tooling: true
         }, {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
-                    'FROM ApexCodeCoverage',
+                    'FROM ApexCodeCoverage ' +
+                    'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
+            queryMoreField: 'CreatedDate',
             tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
@@ -6616,12 +6776,13 @@ class DatasetApexClasses extends Dataset {
                     `WHERE JobType = 'ScheduledApex' `
         }, {
             string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
-                        'RunTime, Outcome, StackTrace '+
+                        'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
                     'FROM ApexTestResult '+
                     `WHERE ApexTestRunResult.Status = 'Completed' `+
+                    `AND (Outcome != 'Pass' OR RunTime > 20000) `+
                     `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `+
                     'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
-                tooling: true
+            tooling: true
         }], logger);
 
         // Init the factory and records and records
@@ -6796,7 +6957,7 @@ class DatasetApexClasses extends Dataset {
                         if (!tc.lastTestRunDate) {
                             tc.lastTestRunDate = record.ApexTestRunResult?.CreatedDate;
                             tc.testMethodsRunTime = 0;
-                            tc.testPassedMethods = [];
+                            tc.testPassedButLongMethods = [];
                             tc.testFailedMethods = [];
                         }
                         if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
@@ -6805,11 +6966,21 @@ class DatasetApexClasses extends Dataset {
                                     methodName: record.MethodName,
                                     isSuccessful: record.Outcome === 'Pass',
                                     runtime: record.RunTime,
-                                    stacktrace: record.StackTrace
+                                    stacktrace: record.StackTrace,
                                 }
                             });
+                            if (record.ApexTestResults?.records && record.ApexTestResults.records.length > 0) {
+                                const limit = record.ApexTestResults.records[0];
+                                if (limit.Cpu > 0) result.cpuConsumption = limit.Cpu; 
+                                if (limit.AsyncCalls > 0) result.asyncCallsConsumption = limit.AsyncCalls;
+                                if (limit.Sosl > 0) result.soslConsumption = limit.Sosl;
+                                if (limit.Soql > 0) result.soqlConsumption = limit.Soql;
+                                if (limit.QueryRows > 0) result.queryRowsConsumption = limit.QueryRows;
+                                if (limit.DmlRows > 0) result.dmlRowsConsumption = limit.DmlRows;
+                                if (limit.Dml > 0) result.dmlConsumption = limit.Dml;
+                            }
                             tc.testMethodsRunTime += result.runtime;
-                            (result.isSuccessful ? tc.testPassedMethods : tc.testFailedMethods).push(result);
+                            (result.isSuccessful ? tc.testPassedButLongMethods : tc.testFailedMethods).push(result);
                         }
                     }
                 }
@@ -7565,7 +7736,9 @@ class DatasetValidationRules extends Dataset {
         // First SOQL query
         logger?.log(`Querying Tooling API about Validaiton Rules in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, EntityDefinition.QualifiedApiName '+
+            string: 'SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, '+
+                        'ValidationName, EntityDefinition.QualifiedApiName, NamespacePrefix, '+
+                        'CreatedDate, LastModifiedDate '+
                     'FROM ValidationRule',
             tooling: true
         }], logger);
@@ -7587,10 +7760,13 @@ class DatasetValidationRules extends Dataset {
                     id: sfdcManager.caseSafeId(id), 
                     name: record.ValidationName, 
                     isActive: record.Active,
+                    package: (record.NamespacePrefix || ''),
                     description: record.Description,
                     errorDisplayField: record.ErrorDisplayField,
                     errorMessage: record.ErrorMessage,
                     objectId: record.EntityDefinition?.QualifiedApiName,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate, 
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VALIDATION_RULE)
                 }
             });
@@ -7654,7 +7830,7 @@ class DatasetPermissionSetLicenses extends Dataset {
                 properties: {
                     id: id,
                     name: record.MasterLabel,
-                    createDate: record.CreatedDate, 
+                    createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate, 
                     totalCount: record.TotalLicenses, 
                     usedCount: record.UsedLicenses,
@@ -8310,18 +8486,16 @@ class RecipeCustomFields extends Recipe {
         if (!objects) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTS' was undefined.`);
         if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
-        // Augment data
-        await Processor.forEach(customFields, (customField) => {
-            const object = objects.get(customField.objectId);
-            if (object && !object.typeRef) {
-                object.typeRef = types.get(object.typeId);
-            }
-            customField.objectRef = object;
-        });
-
-        // Filter data
+        // Augment and filter data
         const array = [];
-        await Processor.forEach(customFields, (customField) => {
+        await Processor.forEach(customFields, (/** @type {SFDC_Field} */customField) => {
+            // Augment data
+            const objectRef = objects.get(customField.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
+            }
+            customField.objectRef = objectRef;
+            // Filter data
             if ((namespace === '*' || customField.package === namespace) &&
                 (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || customField.objectRef?.apiname === object)) {
@@ -9382,7 +9556,9 @@ class RecipeApexTests extends Recipe {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === '*' || apexClass.package === namespace) && apexClass.isTest === true && apexClass.needsRecompilation === false) {
+            if ((namespace === '*' || apexClass.package === namespace) && 
+                apexClass.isTest === true && 
+                apexClass.needsRecompilation === false) {
                 array.push(apexClass);
             }
         });
@@ -9537,11 +9713,14 @@ class RecipeValidationRules extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
+     * @param {string} objecttype Name of the type (if all use '*')
+     * @param {string} object API name of the object (if all use '*')
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, logger, namespace, objecttype, object) {
 
         // Get data
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
@@ -9553,17 +9732,25 @@ class RecipeValidationRules extends Recipe {
         if (!objects) throw new Error(`RecipeValidationRules: Data from dataset alias 'OBJECTS' was undefined.`);
         if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
-        // Augment data
-        await Processor.forEach(validationRules, (validationRule) => {
-            const object = objects.get(validationRule.objectId);
-            if (object && !object.typeRef) {
-                object.typeRef = types.get(object.typeId);
+        // Augment and filter data
+        const array = [];
+        await Processor.forEach(validationRules, (/** @type {SFDC_ValidationRule} */ validationRule) => {
+            // Augment
+            const objectRef = objects.get(validationRule.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
             }
-            validationRule.objectRef = object;
+            validationRule.objectRef = objectRef;
+            // Filter
+            if ((namespace === '*' || validationRule.package === namespace) &&
+                (objecttype === '*' || validationRule.objectRef?.typeRef?.id === objecttype) &&
+                (object === '*' || validationRule.objectRef?.apiname === object)) {
+                array.push(validationRule);
+            }
         });
 
         // Return data
-        return [... validationRules.values()];
+        return array;
     }
 }
 
@@ -10112,20 +10299,37 @@ class SalesforceManager extends SalesforceManagerIntf {
     /**
      * @param {boolean} useTooling Use the tooling or not
      * @param {string} query SOQL query string
-     * @param {string} fieldId Unique field name to use for the custom QueryMore (Id by default)
+     * @param {string} field Field name to use for the custom QueryMore
      * @param {Function} callback
      * @returns {Promise<Array<any>>}
      * @async
      * @private
      */
-    async _customSOQLQuery(useTooling, query, fieldId, callback) {
+    async _customSOQLQuery(useTooling, query, field, callback) {
         // Each query can use the tooling or not, se based on that flag we'll use the right JsForce connection
         const conn = useTooling === true ? this._connection.tooling : this._connection;
         // the records to return
         const allRecords = [];
+        const indexOfFromStatment = query.indexOf(' FROM ');
+        const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
+        const isAggregateQuery = indexOfGroupByStatment !== -1;
+let count = 0;
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
-        const doNextQuery = async (/** @type {string} */ startingId) => {
-            const realQuery = `${query} AND ${fieldId}>'${startingId}' ORDER BY ${fieldId} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+        const doNextQuery = async (/** @type {string} */ startingValue) => {
+            if (!startingValue && isAggregateQuery === false) {
+                startingValue = '000000000000000000';
+            }
+            let realQuery;
+            if (isAggregateQuery === false) {
+                realQuery = `${query} AND ${field} > '${startingValue}' ORDER BY ${field} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+            } else {
+                realQuery = `${query.substring(0, indexOfFromStatment)}, MAX(${field}) `+
+                            `${query.substring(indexOfFromStatment, indexOfGroupByStatment)} `+
+                            (startingValue ? `WHERE ${field} > ${startingValue} ` : '')+
+                            `${query.substring(indexOfGroupByStatment)} `+
+                            `ORDER BY MAX(${field}) `+
+                            `LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+            }
             // Let's start to check if we are 'allowed' to use the Salesforce API...
             this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
             // Deactivate AutoFetch to avoid the automatic call to queryMore by JsForce!
@@ -10140,16 +10344,17 @@ class SalesforceManager extends SalesforceManagerIntf {
             // Adding records to the global array.
             allRecords.push(... results.records);
             // Check if this was the last batch?
+if (count++ > 10) return;
             if (results.records.length >= MAX_NOQUERYMORE_BATCH_SIZE) { // this was not yet the last batch
                 // Update the last ID to start the next batch
-                const newStartingId = allRecords[allRecords.length-1][fieldId];
+                const newStartingValue = allRecords[allRecords.length-1][isAggregateQuery ? `MAX(${field})`: field];
                 // call the next Batch
-                await doNextQuery(newStartingId);
+                await doNextQuery(newStartingValue);
             }
         };
         try {
             // Call the first time with a fake Id that will always be first
-            await doNextQuery('000000000000000000'); // and then the method will chain next calls
+            await doNextQuery(); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
@@ -10201,7 +10406,7 @@ class SalesforceManager extends SalesforceManagerIntf {
             let records;
             try {
                 if (query.queryMoreField) {
-                    // yes!! do the custom one -- In case the query does not support queryMore we have an alternative, based on ids
+                    // yes!! do the custom one based on Ids (for non aggregate queries) -- In case the query does not support queryMore we have an alternative, based on ids
                     records = await this._customSOQLQuery(query.tooling, query.string, query.queryMoreField, updateLogInformationOnQuery);
                 } else {
                     // no!!! use the standard one
@@ -10722,11 +10927,11 @@ class API {
     _logger;
 
     /**
-     * @description Is the current user accepted the terms to use Org Check in this org?
+     * @description Is the current user accepted the terms manually to use Org Check in this org?
      * @type {boolean}
      * @private
      */
-    _usageTermsAccepted;
+    _usageTermsAcceptedManually;
 
     /**
      * @description Org Check constructor
@@ -10749,7 +10954,7 @@ class API {
         });
         this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
         this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
-        this._usageTermsAccepted = false;
+        this._usageTermsAcceptedManually = false;
     }
     
     /**
@@ -10860,18 +11065,26 @@ class API {
      */
     async checkUsageTerms() {
         const orgInfo = (await this.getOrganizationInformation());
-        if (orgInfo.isProduction === true && this._usageTermsAccepted === false) {
+        if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
             return false;
         }
         return true;
     }
 
     /**
-     * @description Set the acceptance of the terms to TRUE
+     * @description Returns if the usage terms were accepted manually
      * @public
      */
-    acceptUsageTerms() {
-        this._usageTermsAccepted = true;
+    wereUsageTermsAcceptedManually() {
+        return this._usageTermsAcceptedManually;
+    }
+
+    /**
+     * @description Accept manually the usage terms
+     * @public
+     */
+    acceptUsageTermsManually() {
+        this._usageTermsAcceptedManually = true;
     }
 
     /**
@@ -11559,14 +11772,17 @@ class API {
     
     /**
      * @description Get information about Validation rules
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
      * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getValidationRules() {
+    async getValidationRules(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES));
+        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, namespace, sobjectType, sobject));
     }
     
     /**

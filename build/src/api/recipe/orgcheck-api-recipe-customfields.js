@@ -48,18 +48,16 @@ export class RecipeCustomFields extends Recipe {
         if (!objects) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTS' was undefined.`);
         if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
-        // Augment data
-        await Processor.forEach(customFields, (customField) => {
-            const object = objects.get(customField.objectId);
-            if (object && !object.typeRef) {
-                object.typeRef = types.get(object.typeId);
-            }
-            customField.objectRef = object;
-        });
-
-        // Filter data
+        // Augment and filter data
         const array = [];
-        await Processor.forEach(customFields, (customField) => {
+        await Processor.forEach(customFields, (/** @type {SFDC_Field} */customField) => {
+            // Augment data
+            const objectRef = objects.get(customField.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
+            }
+            customField.objectRef = objectRef;
+            // Filter data
             if ((namespace === '*' || customField.package === namespace) &&
                 (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || customField.objectRef?.apiname === object)) {

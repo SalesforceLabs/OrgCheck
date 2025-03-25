@@ -98,11 +98,11 @@ export class API {
     _logger;
 
     /**
-     * @description Is the current user accepted the terms to use Org Check in this org?
+     * @description Is the current user accepted the terms manually to use Org Check in this org?
      * @type {boolean}
      * @private
      */
-    _usageTermsAccepted;
+    _usageTermsAcceptedManually;
 
     /**
      * @description Org Check constructor
@@ -125,7 +125,7 @@ export class API {
         });
         this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
         this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
-        this._usageTermsAccepted = false;
+        this._usageTermsAcceptedManually = false;
     }
     
     /**
@@ -236,18 +236,26 @@ export class API {
      */
     async checkUsageTerms() {
         const orgInfo = (await this.getOrganizationInformation());
-        if (orgInfo.isProduction === true && this._usageTermsAccepted === false) {
+        if (orgInfo.isProduction === true && this._usageTermsAcceptedManually === false) {
             return false;
         }
         return true;
     }
 
     /**
-     * @description Set the acceptance of the terms to TRUE
+     * @description Returns if the usage terms were accepted manually
      * @public
      */
-    acceptUsageTerms() {
-        this._usageTermsAccepted = true;
+    wereUsageTermsAcceptedManually() {
+        return this._usageTermsAcceptedManually;
+    }
+
+    /**
+     * @description Accept manually the usage terms
+     * @public
+     */
+    acceptUsageTermsManually() {
+        this._usageTermsAcceptedManually = true;
     }
 
     /**
@@ -935,14 +943,17 @@ export class API {
     
     /**
      * @description Get information about Validation rules
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
      * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getValidationRules() {
+    async getValidationRules(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES));
+        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, namespace, sobjectType, sobject));
     }
     
     /**
