@@ -1,6 +1,6 @@
-import OrgcheckSpinner from '../orgcheckSpinner';
 // @ts-ignore
 import { createElement } from '@lwc/engine-dom';
+import OrgcheckSpinner from '../orgcheckSpinner';
     
 describe('c-orgcheck-spinner', () => {
 

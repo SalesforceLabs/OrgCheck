@@ -1,5 +1,6 @@
+// @ts-ignore
 import { createElement } from '@lwc/engine-dom';
-import OrgcheckScoreLink from 'c/orgcheckScoreLink';
+import OrgcheckScoreLink from '../orgcheckScoreLink';
     
 describe('c-orgcheck-score-link', () => {
 
