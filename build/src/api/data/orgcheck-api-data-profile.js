@@ -37,7 +37,19 @@ export class SFDC_Profile extends Data {
      * @public
      */
     description;
+
+    /**
+     * @description License type of this item
+     * @type {string}
+     * @public
+     */
     license;
+
+    /**
+     * @description Whether this item is a custom item
+     * @type {boolean}
+     * @public
+     */
     isCustom;
     
     /**
@@ -46,6 +58,12 @@ export class SFDC_Profile extends Data {
      * @public
      */
     package;
+
+    /**
+     * @description Number of users assigned to this profile
+     * @type {number}
+     * @public
+     */
     memberCounts;
     
     /**
@@ -61,8 +79,32 @@ export class SFDC_Profile extends Data {
      * @public
      */
     lastModifiedDate;
+
+    /**
+     * @description Number of field permissions
+     * @type {number}
+     * @public
+     */
     nbFieldPermissions;
+
+    /**
+     * @description Number of object permissions
+     * @type {number}
+     * @public
+     */
     nbObjectPermissions;
+
+    /**
+     * @description Type of this item
+     * @type {number}
+     * @public
+     */
     type;
+
+    /**
+     * @description Number of sensitive system permissions in this profile (like view all data etc..)
+     * @type {any}
+     * @public
+     */
     importantPermissions;
 }

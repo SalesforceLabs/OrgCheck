@@ -24,6 +24,11 @@ export class SFDC_RecordType extends Data {
      */
     name;
     
+    /**
+     * @description Developer Name
+     * @type {string}
+     * @public
+     */
     developerName;
     
     /**
@@ -39,7 +44,25 @@ export class SFDC_RecordType extends Data {
      * @public
      */
     isActive;
+
+    /**
+     * @description Is this RT available?
+     * @type {boolean}
+     * @public
+     */
     isAvailable;
+
+    /**
+     * @description Is this the default RT mapping?
+     * @type {boolean}
+     * @public
+     */
     isDefaultRecordTypeMapping;
+
+    /**
+     * @description Is this the master record type?
+     * @type {boolean}
+     * @public
+     */
     isMaster;
 }

@@ -1,10 +1,10 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataWithDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
 /**
  * @description Representation of an Apex Trigger in Org Check
  */
-export class SFDC_ApexTrigger extends Data {
+export class SFDC_ApexTrigger extends DataWithDependencies {
     
     /** 
      * @description Logical name of what this class represents

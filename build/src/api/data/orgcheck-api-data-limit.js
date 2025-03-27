@@ -27,12 +27,32 @@ export class SFDC_Limit extends Data {
      */
     label;
 
+    /**
+     * @description Remaining count for this limit
+     * @type {number}
+     * @public
+     */
     remaining;
 
+    /**
+     * @description Maximum count allowed for this limit
+     * @type {number}
+     * @public
+     */
     max;
 
+    /**
+     * @description Currently used count for this limit
+     * @type {number}
+     * @public
+     */
     used;
 
+    /**
+     * @description Percentage of used limit
+     * @type {number}
+     * @public
+     */
     usedPercentage;
 
     /**

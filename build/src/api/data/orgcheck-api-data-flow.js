@@ -41,14 +41,39 @@ export class SFDC_Flow extends DataWithDependencies {
      */
     apiVersion;
 
+    /**
+     * @description Salesforce Id of the current flow version being used by this flow
+     * @type {string}
+     * @public
+     */
     currentVersionId;
     
+    /**
+     * @description Reference of the current flow version being used by this flow
+     * @type {SFDC_FlowVersion}
+     * @public
+     */
     currentVersionRef;
     
+    /**
+     * @description Is the current flow version of this flow is the latest version of this flow?
+     * @type {boolean}
+     * @public
+     */
     isLatestCurrentVersion;
     
+    /**
+     * @description Is the version active?
+     * @type {boolean}
+     * @public
+     */
     isVersionActive;
     
+    /**
+     * @description Count of versions for this flow
+     * @type {number}
+     * @public
+     */
     versionsCount;
     
     /**
@@ -58,8 +83,18 @@ export class SFDC_Flow extends DataWithDependencies {
      */
     description;
     
+    /**
+     * @description Type of this flow
+     * @type {string}
+     * @public
+     */
     type;
     
+    /**
+     * @description Is this a PB or not?
+     * @type {boolean}
+     * @public
+     */
     isProcessBuilder;
     
     /**
@@ -111,14 +146,39 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      */
     apiVersion;
 
+    /**
+     * @description Number of nodes in this flow version
+     * @type {number}
+     * @public
+     */
     totalNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Create type
+     * @type {number}
+     * @public
+     */
     dmlCreateNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Delete type
+     * @type {number}
+     * @public
+     */
     dmlDeleteNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Update type
+     * @type {number}
+     * @public
+     */
     dmlUpdateNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of Screen type
+     * @type {number}
+     * @public
+     */
     screenNodeCount;
     
     /**
@@ -135,8 +195,18 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      */
     description;
 
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
     
+    /**
+     * @description Running mode of this flow version
+     * @type {string}
+     * @public
+     */
     runningMode;
     
     /**
@@ -153,7 +223,17 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      */
     lastModifiedDate;
     
+    /**
+     * @description Name of the optional sobject this flow version is related to
+     * @type {string}
+     * @public
+     */
     sobject;
     
+    /**
+     * @description Trigger type of this flow version (optional)
+     * @type {string}
+     * @public
+     */
     triggerType;
 }

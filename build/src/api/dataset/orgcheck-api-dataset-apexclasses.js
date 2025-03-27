@@ -31,12 +31,12 @@ export class DatasetApexClasses extends Dataset {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
                     'FROM ApexCodeCoverage ' +
                     'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
-            queryMoreField: 'CreatedDate',
+            //queryMoreField: 'CreatedDate',
             tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
                         'NumLinesUncovered, Coverage ' +
-                    'FROM ApexCodeCoverageAggregate',
+                    'FROM ApexCodeCoverageAggregate ',
             tooling: true
         }, {
             string: 'SELECT ApexClassId ' +
@@ -46,8 +46,8 @@ export class DatasetApexClasses extends Dataset {
             string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
                         'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
                     'FROM ApexTestResult '+
-                    `WHERE ApexTestRunResult.Status = 'Completed' `+
-                    `AND (Outcome != 'Pass' OR RunTime > 20000) `+
+                    `WHERE (Outcome != 'Pass' OR RunTime > 20000) `+
+                    `AND ApexTestRunResult.Status = 'Completed' `+
                     `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `+
                     'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
             tooling: true
@@ -91,7 +91,6 @@ export class DatasetApexClasses extends Dataset {
                     isSchedulable: false,
                     isScheduled: false,
                     length: record.LengthWithoutComments,
-                    sourceCode: record.Body,
                     needsRecompilation: (!record.SymbolTable ? true : false),
                     coverage: 0, // by default no coverage!
                     relatedTestClasses: [],

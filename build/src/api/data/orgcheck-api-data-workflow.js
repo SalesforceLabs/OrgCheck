@@ -37,8 +37,26 @@ export class SFDC_Workflow extends Data {
      * @public
      */
     description;
+
+    /**
+     * @description Direct actions associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     actions;
+
+    /**
+     * @description Future actions associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     futureActions;
+
+    /**
+     * @description Empty time triggers associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     emptyTimeTriggers;
 
     /**
@@ -61,5 +79,11 @@ export class SFDC_Workflow extends Data {
      * @public
      */
     lastModifiedDate;
+
+    /**
+     * @description True if this item has at least one action associated with it
+     * @type {boolean}
+     * @public
+     */
     hasAction;
 }

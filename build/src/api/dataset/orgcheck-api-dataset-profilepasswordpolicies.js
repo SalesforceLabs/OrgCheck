@@ -39,7 +39,6 @@ export class DatasetProfilePasswordPolicies extends Dataset {
                     // Create the instance
                     const policy = policyDataFactory.createWithScore({
                         properties: {
-                            forgotPasswordRedirect: (ppp.forgotPasswordRedirect === 'true'),
                             lockoutInterval: parseInt(ppp.lockoutInterval, 10),
                             maxLoginAttempts: parseInt(ppp.maxLoginAttempts, 10),
                             minimumPasswordLength: parseInt(ppp.minimumPasswordLength, 10),

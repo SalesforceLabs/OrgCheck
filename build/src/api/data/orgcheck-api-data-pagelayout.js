@@ -24,6 +24,11 @@ export class SFDC_PageLayout extends Data {
      */
     name;
     
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
     
     /**

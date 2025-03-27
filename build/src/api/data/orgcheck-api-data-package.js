@@ -24,6 +24,17 @@ export class SFDC_Package extends Data {
      */
     name;
     
+    /**
+     * @description Namespace
+     * @type {string}
+     * @public
+     */
     namespace;
+    
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
 }
