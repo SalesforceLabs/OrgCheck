@@ -284,13 +284,6 @@ export class SFDC_ApexClass extends DataWithDependencies {
     length;
 
     /**
-     * @description Source code of the apex class when it's available
-     * @type {string}
-     * @public
-     */
-    sourceCode;
-
-    /**
      * @description Unique list of hard coded Salesforce URLs in this item
      * @type {Array<string>}
      * @public

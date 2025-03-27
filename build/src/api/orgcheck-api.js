@@ -206,13 +206,13 @@ export class API {
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @returns {Promise}
      * @async
      * @public
      */
-    async compileClasses(classes) {
-        return this._sfdcManager.compileClasses(classes, this._logger.toSimpleLogger(`Compile ${classes.length} classe(s)`));
+    async compileClasses(apexClassIds) {
+        return this._sfdcManager.compileClasses(apexClassIds, this._logger.toSimpleLogger(`Compile ${apexClassIds.length} class(es)`));
     }
 
     /**

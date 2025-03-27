@@ -188,11 +188,11 @@ export class SalesforceManagerIntf {
 
     /**
      * @description Method to run compile given apex classes
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @param {SimpleLoggerIntf} logger
      * @async
      * @returns {Promise<Array<any>>}
      * @public
      */
-    async compileClasses(classes, logger) { throw new Error('Not implemented'); }
+    async compileClasses(apexClassIds, logger) { throw new Error('Not implemented'); }
 }

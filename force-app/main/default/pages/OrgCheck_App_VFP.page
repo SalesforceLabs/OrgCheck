@@ -105,7 +105,11 @@
             { question: `People always talk about the "Eye of the Tiger".`, answer: `Yeah. No one talks about the other four letters...` },
             { question: `Did you hear about the artist that was baroque?`, answer: `He stole the Monet, to buy Degas, to make the Van Gogh.` },
             { question: `I just crashed my new kia`, answer: `Now I have Nokia` },
-            { question: `I just downloaded the Titanic soundtrack...`, answer: `It's syncing right now.` }
+            { question: `I just downloaded the Titanic soundtrack...`, answer: `It's syncing right now.` },
+            { question: `Did you know Stephen King has a son named Joe?`, answer: `I am not joking, but he is.` },
+            { question: `What do you call a French man wearing sandals?`, answer: `Philippe Philoppe` },
+            { question: `I tried to climb a really tall tower in France...`, answer: `but Eiffel off` },
+            { question: `What do you call a magician who loses his magic?`, answer: `Ian` },
         ];
         const joke_question = document.getElementById('additional-waiting-info-1');
         const joke_answer = document.getElementById('additional-waiting-info-2');
@@ -156,7 +160,10 @@
                 component, 
                 { 
                     accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                    userId: '{! JSENCODE($User.Id) }' 
+                    userId: '{! JSENCODE($User.Id) }',
+                    textEncoder: new TextEncoder(),
+                    textDecoder: new TextDecoder(),
+                    localStorage: window.localStorage
                 },
                 'app',
                 () => {

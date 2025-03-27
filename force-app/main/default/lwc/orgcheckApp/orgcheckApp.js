@@ -8,10 +8,23 @@ import { loadScript } from 'lightning/platformResourceLoader';
 const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
-const TEXTENCODER = new TextEncoder();
-const TEXTDECODER = new TextDecoder();
 
 export default class OrgcheckApp extends LightningElement {
+
+    /**
+     * @description Text encoder
+     */ 
+    @api textEncoder;
+
+    /**
+     * @description Text decoder
+     */ 
+    @api textDecoder;
+
+    /**
+     * @description Local storage
+     */ 
+    @api localStorage;
 
     /**
      * @description URL for the logo in the header
@@ -34,6 +47,11 @@ export default class OrgcheckApp extends LightningElement {
      */
     useOrgCheckInThisOrgNeedConfirmation = false;
 
+    /**
+     * @description True if the current accepted manually the terms (mostly for Production orgs)
+     * @type {boolean} 
+     * @public
+     */
     useOrgCheckManuallyAccepted = false;
 
     /**
@@ -343,39 +361,39 @@ export default class OrgcheckApp extends LightningElement {
                      * @param {string} key
                      * @param {string} value 
                      */
-                    setItem: (key, value) => { localStorage.setItem(key, value); },
+                    setItem: (key, value) => { this.localStorage.setItem(key, value); },
                     /**
                      * @description Get an item from the local storage
                      * @param {string} key
                      * @returns {string}
                      */
-                    getItem: (key) => { return localStorage.getItem(key); },
+                    getItem: (key) => { return this.localStorage.getItem(key); },
                     /**
                      * @description Removes an item from the local storage
                      * @param {string} key
                      */
-                    removeItem: (key) => { localStorage.removeItem(key); },
+                    removeItem: (key) => { this.localStorage.removeItem(key); },
                     /**
                      * @description Get the nth key in the storage, returns null if out of range
                      * @param {number} index
                      * @returns {string | null}
                      */
-                    key: (index) => { return localStorage.key(index); },
+                    key: (index) => { return this.localStorage.key(index); },
                     /**
                      * @description Get all the keys in the storage
                      * @returns {Array<string>}
                      */
                     keys: () => {  
                         const keys = []; 
-                        for (let i = 0; i < localStorage.length; i++) {
-                            keys.push(localStorage.key(i)); 
+                        for (let i = 0; i < this.localStorage.length; i++) {
+                            keys.push(this.localStorage.key(i)); 
                         }
                         return keys; },
                     /**
                      * @description Get the current length of the storage
                      * @returns {number}
                      */
-                    length: () => { return localStorage.length; }
+                    length: () => { return this.localStorage.length; }
                 },
                 // -----------------------
                 // Encoding methods
@@ -385,13 +403,13 @@ export default class OrgcheckApp extends LightningElement {
                      * @param data {string}
                      * @returns {Uint8Array} 
                      */ 
-                    encode: (data) => { return TEXTENCODER.encode(data); }, 
+                    encode: (data) => { return this.textEncoder.encode(data); }, 
                     /** 
                      * @description Decoding method
                      * @param data {Uint8Array}
                      * @returns {string} 
                      */ 
-                    decode: (data) => { return TEXTDECODER.decode(data); }
+                    decode: (data) => { return this.textDecoder.decode(data); }
                 },            
                 // -----------------------
                 // Compression methods
@@ -954,18 +972,19 @@ export default class OrgcheckApp extends LightningElement {
         try {
             this._spinner.open();
             const LOG_SECTION = 'RECOMPILE';
-            const classes = new Map();
+            const apexClassNamesById = new Map();
             this._spinner.sectionLog(LOG_SECTION, 'Processing...');
-            this.apexUncompiledTableData.forEach(c => {
+            this.apexUncompiledTableData.slice(0, 25).forEach(c => {
                 this._spinner.sectionLog(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
-                classes.set(c.id, c);
+                apexClassNamesById.set(c.id, c.name);
             });
-            const responses = await this._api.compileClasses(this.apexUncompiledTableData);
+            const responses = await this._api.compileClasses(Array.from(apexClassNamesById.keys()));
             this._spinner.sectionLog(LOG_SECTION, 'Done');
             responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
-                const c = classes.get(cr.referenceId);
+                const classId = cr.referenceId.substring(0, 15);
+                const className = apexClassNamesById.get(cr.referenceId);
                 if (cr.body.success === true) {
-                    this._spinner.sectionEnded(`${LOG_SECTION}-${c.id}`, `Recompilation requested for class: ${c.name}`);
+                    this._spinner.sectionEnded(`${LOG_SECTION}-${classId}`, `Recompilation requested for class: ${className}`);
                 } else {
                     let reasons = [];
                     if (cr.body && Array.isArray(cr.body)) {
@@ -973,7 +992,7 @@ export default class OrgcheckApp extends LightningElement {
                     } else if (cr.errors && Array.isArray(cr.errors)) {
                         reasons = cr.errors;
                     }
-                    this._spinner.sectionFailed(`${LOG_SECTION}-${c.id}`, `Errors for class ${c.name}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
+                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
                 }
             }));
             this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
@@ -1066,7 +1085,6 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'In this object',   type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
             { label: 'Object Type',      type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
-            { label: 'ObjectID',         type: ocui.ColumnType.TXT, data: { value: 'objectId' }},
             { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
             { label: 'Error Message',    type: ocui.ColumnType.TXT, data: { value: 'errorMessage' }},
@@ -1105,10 +1123,17 @@ export default class OrgcheckApp extends LightningElement {
      */
     webLinksTableDefinition = {
         columns: [
-            { label: '#',    type: ocui.ColumnType.IDX },
-            { label: 'Name', type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }}
+            { label: '#',             type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Behavior',      type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
+            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.ASC
@@ -1127,8 +1152,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
             { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefaultRecordTypeMapping' }},
-            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }},
-            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1500,14 +1524,15 @@ export default class OrgcheckApp extends LightningElement {
      */
     publicGroupsTableDefinition = {
         columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',         type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
-            { label: 'With bosses?',           type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
-            { label: '#Explicit members',      type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
-            { label: 'Explicit groups',        type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }}, //label: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses ':''}${g.includeSubordinates?' with subordinates':''})` }},
-            { label: 'Explicit users',         type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
+            { label: '#',                       type: ocui.ColumnType.IDX },
+            { label: 'Score',                   type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                    type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
+            { label: 'Developer Name',          type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
+            { label: 'With bosses?',            type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
+            { label: '#Explicit members',       type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
+            { label: 'Explicit groups (links)', type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }},
+            { label: 'Explicit groups (info)',  type: ocui.ColumnType.OBJS, data: { values: 'directGroupRefs', template: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses':''}${g.includeSubordinates?' with subordinates':''})` }},
+            { label: 'Explicit users',          type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1519,14 +1544,15 @@ export default class OrgcheckApp extends LightningElement {
      */
     queuesTableDefinition = {
         columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',         type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
-            { label: 'With bosses?',           type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
-            { label: '#Explicit members',      type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
-            { label: 'Explicit groups',        type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }}, //label: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses ':''}${g.includeSubordinates?' with subordinates':''})` }},
-            { label: 'Explicit users',         type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
+            { label: '#',                       type: ocui.ColumnType.IDX },
+            { label: 'Score',                   type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                    type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
+            { label: 'Developer Name',          type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
+            { label: 'With bosses?',            type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
+            { label: '#Explicit members',       type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
+            { label: 'Explicit groups (links)', type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }},
+            { label: 'Explicit groups (info)',  type: ocui.ColumnType.OBJS, data: { values: 'directGroupRefs', template: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses':''}${g.includeSubordinates?' with subordinates':''})` }},
+            { label: 'Explicit users',          type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1545,13 +1571,13 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Last login',                   type: ocui.ColumnType.DTM,  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
             { label: 'Failed logins',                type: ocui.ColumnType.NUM,  data: { value: 'numberFailedLogins' }},
             { label: 'Password change',              type: ocui.ColumnType.DTM,  data: { value: 'lastPasswordChange' }},
-            { label: 'Api Enabled',                  type: ocui.ColumnType.CHK,  data: { value: 'apiEnabled' }},
+            { label: 'Api Enabled',                  type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.apiEnabled' }},
             { label: 'Api Enabled granted from',     type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.apiEnabled', value: 'url', label: 'name' }},
-            { label: 'View Setup',                   type: ocui.ColumnType.CHK,  data: { value: 'viewSetup' }},
+            { label: 'View Setup',                   type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.viewSetup' }},
             { label: 'View Setup granted from',      type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.viewSetup', value: 'url', label: 'name' }},
-            { label: 'Modify All Data',              type: ocui.ColumnType.CHK,  data: { value: 'modifyAllData' }},
+            { label: 'Modify All Data',              type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.modifyAllData' }},
             { label: 'Modify All Data granted from', type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.modifyAllData', value: 'url', label: 'name' }},
-            { label: 'View All Data',                type: ocui.ColumnType.CHK,  data: { value: 'viewAllData' }},
+            { label: 'View All Data',                type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.viewAllData' }},
             { label: 'View All Data granted from',   type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.viewAllData', value: 'url', label: 'name' }},
             { label: 'Profile',                      type: ocui.ColumnType.URL,  data: { value: 'profileRef.url', label: 'profileRef.name' }},
             { label: 'Permission Sets',              type: ocui.ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }}
@@ -1753,6 +1779,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Size',                       type: ocui.ColumnType.NUM,  data: { value: 'length' }},
             { label: 'URLs',                       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',                        type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'See All Data',               type: ocui.ColumnType.CHK,  data: { value: 'isTestSeeAllData' }},
             { label: 'Nb Asserts',                 type: ocui.ColumnType.NUM,  data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
             { label: 'Methods',                    type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
             { label: 'Latest Run Date',            type: ocui.ColumnType.DTM,  data: { value: 'lastTestRunDate' }},
@@ -2108,6 +2135,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocui.ExportedTable>}
      */
     get objectInformationExportSource() {
+        /** @type {Array<ocui.ExportedTable>} */
         const sheets = [];
         sheets.push({ 
             header: 'General information',
@@ -2119,11 +2147,11 @@ export default class OrgcheckApp extends LightningElement {
                 [ 'Plural Label', this.objectData.labelPlural ],
                 [ 'Description', this.objectData.description ],
                 [ 'Key Prefix', this.objectData.keyPrefix ],
-                [ 'Record Count (including deleted ones)', this.objectData.recordCount ],
-                [ 'Is Custom?', this.objectData.isCustom ],
-                [ 'Feed Enable?', this.objectData.isFeedEnabled ],
-                [ 'Most Recent Enabled?', this.objectData.isMostRecentEnabled ],
-                [ 'Global Search Enabled?', this.objectData.isSearchable ],
+                [ 'Record Count (including deleted ones)', `${this.objectData.recordCount}` ],
+                [ 'Is Custom?', `${this.objectData.isCustom?'true':'false'}` ],
+                [ 'Feed Enable?', `${this.objectData.isFeedEnabled?'true':'false'}` ],
+                [ 'Most Recent Enabled?', `${this.objectData.isMostRecentEnabled?'true':'false'}` ],
+                [ 'Global Search Enabled?', `${this.objectData.isSearchable?'true':'false'}` ],
                 [ 'Internal Sharing', this.objectData.internalSharingModel ],
                 [ 'External Sharing', this.objectData.externalSharingModel ]
             ]

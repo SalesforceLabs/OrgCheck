@@ -1206,13 +1206,6 @@ class SFDC_ApexClass extends DataWithDependencies {
     length;
 
     /**
-     * @description Source code of the apex class when it's available
-     * @type {string}
-     * @public
-     */
-    sourceCode;
-
-    /**
      * @description Unique list of hard coded Salesforce URLs in this item
      * @type {Array<string>}
      * @public
@@ -1469,13 +1462,13 @@ class SalesforceManagerIntf {
 
     /**
      * @description Method to run compile given apex classes
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @param {SimpleLoggerIntf} logger
      * @async
      * @returns {Promise<Array<any>>}
      * @public
      */
-    async compileClasses(classes, logger) { throw new Error('Not implemented'); }
+    async compileClasses(apexClassIds, logger) { throw new Error('Not implemented'); }
 }
 
 /**
@@ -1799,6 +1792,417 @@ const SalesforceMetadataTypes = {
 };
 Object.seal(SalesforceMetadataTypes);
 
+/**
+ * @description Representation of a Standard Field or a Custom Field in Org Check
+ */
+class SFDC_Field extends DataWithDependencies {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Standard or Custom Field' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
+    label;
+    
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+    
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+
+    /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
+    objectId; 
+
+    /**
+     * @description Reference of the object for this field
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
+
+    /**
+     * @description Is tgis field custom or standard
+     * @type {boolean}
+     * @public
+     */
+    isCustom;
+
+    /**
+     * @description Tooltip
+     * @type {string}
+     * @public
+     */
+    tooltip;
+
+    /**
+     * @description Type of this field
+     * @type {string}
+     * @public
+     */
+    type;
+
+    /**
+     * @description Length of this field in addition to its type
+     * @type {number}
+     * @public
+     */
+    length;
+
+    /**
+     * @description Is this field unique?
+     * @type {boolean}
+     * @public
+     */
+    isUnique;
+
+    /**
+     * @description Is this field encrypted?
+     * @type {boolean}
+     * @public
+     */
+    isEncrypted;
+
+    /**
+     * @description Is this field set as an external id?
+     * @type {boolean}
+     * @public
+     */
+    isExternalId;
+
+    /**
+     * @description Is this field uses an index in the table?
+     * @type {boolean}
+     * @public
+     */
+    isIndexed;
+
+    /**
+     * @description Default value
+     * @type {string}
+     * @public
+     */
+    defaultValue;
+
+    /**
+     * @description If this is a picklist, is it restricted to a list of values?
+     * @type {boolean}
+     * @public
+     */
+    isRestrictedPicklist;
+
+    /**
+     * @description What is the formula of that field? (obviously only for formula field!)
+     * @type {string}
+     * @public
+     */
+    formula;
+
+    /**
+     * @description Only for formula field -- List of unique hard coded Salesforce URLs in the formula
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedURLs;
+
+    /**
+     * @description Only for formula field -- List of unique hard coded Salesforce IDs in the formula
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedIDs;
+
+}
+
+/**
+ * @description Representation of a Field Set in Org Check
+ */
+class SFDC_FieldSet extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Field Set' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Label
+     * @type {string}
+     * @public
+     */
+    label;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+/**
+ * @description Representation of a Lightning Page in Org Check
+ */
+class SFDC_LightningPage extends DataWithDependencies {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Lightning Page' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Type of the Lightning Page
+     * @type {string}
+     * @public
+     */
+    type;
+    
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+    
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+
+    /**
+     * @description Identifier of the related object for this page (if any)
+     * @type {string}
+     * @public
+     */
+    objectId; 
+    
+    /**
+     * @description Reference of the related object for this page (if any)
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
+
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+/**
+ * @description Representation of a SObject Limit in Org Check
+ */
+class SFDC_Limit extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'SObject Limit' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Label of this limit
+     * @type {string}
+     * @public
+     */
+    label;
+
+    /**
+     * @description Remaining count for this limit
+     * @type {number}
+     * @public
+     */
+    remaining;
+
+    /**
+     * @description Maximum count allowed for this limit
+     * @type {number}
+     * @public
+     */
+    max;
+
+    /**
+     * @description Currently used count for this limit
+     * @type {number}
+     * @public
+     */
+    used;
+
+    /**
+     * @description Percentage of used limit
+     * @type {number}
+     * @public
+     */
+    usedPercentage;
+
+    /**
+     * @description Technical name of that limit
+     * @type {string}
+     * @public
+     */
+    type;
+}
+
+class SFDC_ObjectRelationShip extends DataWithoutScoring {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'SObject Releationship' };
+
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Child object
+     * @type {string}
+     * @public
+     */
+    childObject;
+
+    /**
+     * @description Field that support the lookup in the parent object
+     * @type {string}
+     * @public
+     */
+    fieldName;
+
+    /**
+     * @description Is cascade delete enabled?
+     * @type {boolean}
+     * @public
+     */
+    isCascadeDelete;
+
+    /**
+     * @description Is restricted delete enabled?
+     * @type {boolean}
+     * @public
+     */
+    isRestrictedDelete;
+}
+
 class SFDC_ObjectType extends DataWithoutScoring {
     
     /** 
@@ -1832,6 +2236,295 @@ const OBJECTTYPE_ID_CUSTOM_METADATA_TYPE = 'CustomMetadataType';
 const OBJECTTYPE_ID_CUSTOM_EVENT = 'CustomEvent';
 const OBJECTTYPE_ID_KNOWLEDGE_ARTICLE = 'KnowledgeArticle';
 const OBJECTTYPE_ID_CUSTOM_BIG_OBJECT = 'CustomBigObject';
+
+class SFDC_PageLayout extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Page Layout' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
+    type;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+class SFDC_RecordType extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Record Type' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Developer Name
+     * @type {string}
+     * @public
+     */
+    developerName;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
+    isActive;
+
+    /**
+     * @description Is this RT available?
+     * @type {boolean}
+     * @public
+     */
+    isAvailable;
+
+    /**
+     * @description Is this the default RT mapping?
+     * @type {boolean}
+     * @public
+     */
+    isDefaultRecordTypeMapping;
+
+    /**
+     * @description Is this the master record type?
+     * @type {boolean}
+     * @public
+     */
+    isMaster;
+}
+
+class SFDC_ValidationRule extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Validation Rule' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Is this item active or not?
+     * @type {boolean}
+     * @public
+     */
+    isActive;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+
+    /**
+     * @description Field where to show the error message if any
+     * @type {string}
+     * @public
+     */
+    errorDisplayField;
+
+    /**
+     * @description Error message
+     * @type {string}
+     * @public
+     */
+    errorMessage;
+    
+    /**
+     * @description Salesforce Id of the sObject where this field is defined
+     * @type {string}
+     * @public
+     */
+    objectId; 
+
+    /**
+     * @description Reference of the object for this rule
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
+
+class SFDC_WebLink extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Web Link' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+
+    /**
+     * @description Unique list of hard coded Salesforce URLs in this item
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedURLs;
+
+    /**
+     * @description Unique list of hard coded Salesforce IDs in this item
+     * @type {Array<string>}
+     * @public
+     */
+    hardCodedIDs;
+    
+    /**
+     * @description Type of the link
+     * @type {string}
+     * @public
+     */
+    type;
+    
+    /**
+     * @description Behavior of the link
+     * @type {string}
+     * @public
+     */
+    behavior;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+}
 
 /**
  * @description Representation of as SObject in Org Check
@@ -1867,12 +2560,32 @@ class SFDC_Object extends DataWithoutScoring {
      */
     labelPlural;
 
+    /**
+     * @description Whether this object is custom or not
+     * @type {boolean}
+     * @public
+     */
     isCustom;
     
+    /**
+     * @description Whether this object has feed enabled or not
+     * @type {boolean}
+     * @public
+     */
     isFeedEnabled;
     
+    /**
+     * @description Whether this object has MRU enabled or not
+     * @type {boolean}
+     * @public
+     */
     isMostRecentEnabled;
     
+    /**
+     * @description Whether this object has search enabled or not
+     * @type {boolean}
+     * @public
+     */
     isSearchable;
     
     /**
@@ -1945,39 +2658,109 @@ class SFDC_Object extends DataWithoutScoring {
      */
     internalSharingModel;
     
+    /**
+     * @description List of Apex Triggers ids for this object
+     * @type {Array<string>}
+     * @public
+     */
     apexTriggerIds;
     
+    /**
+     * @description Corresponding Apex Trigger references fot this object
+     * @type {Array<SFDC_ApexTrigger>}
+     * @public
+     */
     apexTriggerRefs;
     
+    /**
+     * @description List of field Sets for this object
+     * @type {Array<SFDC_FieldSet>}
+     * @public
+     */
     fieldSets;
     
+    /**
+     * @description List of layouts for this object
+     * @type {Array<SFDC_PageLayout>}
+     * @public
+     */
     layouts;
 
+    /**
+     * @description List of Ligthning Pages for this object
+     * @type {Array<SFDC_LightningPage>}
+     * @public
+     */
     flexiPages;
     
+    /**
+     * @description Limits for this object
+     * @type {Array<SFDC_Limit>}
+     * @public
+     */
     limits;
     
+    /**
+     * @description List of validation rules for this object
+     * @type {Array<SFDC_ValidationRule>}
+     * @public
+     */
     validationRules;
     
+    /**
+     * @description List of web links for this object
+     * @type {Array<SFDC_WebLink>}
+     * @public
+     */
     webLinks;
     
+    /**
+     * @description List of standard fields for this object
+     * @type {Array<SFDC_Field>}
+     * @public
+     */
     standardFields;
     
+    /**
+     * @description List of custom field Ids for this object
+     * @type {Array<string>}
+     * @public
+     */
     customFieldIds;
     
+    /**
+     * @description List of custom field references for this object
+     * @type {Array<SFDC_Field>}
+     * @public
+     */
     customFieldRefs;
     
+    /**
+     * @description List of record types for this object
+     * @type {Array<SFDC_RecordType>}
+     * @public
+     */
     recordTypes;
     
+    /**
+     * @description List of relationships for this object
+     * @type {Array<SFDC_ObjectRelationShip>}
+     * @public
+     */
     relationships;
     
+    /**
+     * @description Number of records for this object (including deleted ones)
+     * @type {number}
+     * @public
+     */
     recordCount;
 }
 
 /**
  * @description Representation of an Apex Trigger in Org Check
  */
-class SFDC_ApexTrigger extends Data {
+class SFDC_ApexTrigger extends DataWithDependencies {
     
     /** 
      * @description Logical name of what this class represents
@@ -2229,224 +3012,6 @@ class SFDC_CustomLabel extends DataWithDependencies {
 }
 
 /**
- * @description Representation of a Standard Field or a Custom Field in Org Check
- */
-class SFDC_Field extends DataWithDependencies {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Standard or Custom Field' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    /**
-     * @description Label
-     * @type {string}
-     * @public
-     */
-    label;
-    
-    /**
-     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    package;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate;
-    
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate;
-
-    /**
-     * @description Salesforce Id of the sObject where this field is defined
-     * @type {string}
-     * @public
-     */
-    objectId; 
-
-    /**
-     * @description Reference of the object for this field
-     * @type {SFDC_Object}
-     * @public
-     */
-    objectRef;
-
-    /**
-     * @description Is tgis field custom or standard
-     * @type {boolean}
-     * @public
-     */
-    isCustom;
-
-    /**
-     * @description Tooltip
-     * @type {string}
-     * @public
-     */
-    tooltip;
-
-    /**
-     * @description Type of this field
-     * @type {string}
-     * @public
-     */
-    type;
-
-    /**
-     * @description Length of this field in addition to its type
-     * @type {number}
-     * @public
-     */
-    length;
-
-    /**
-     * @description Is this field unique?
-     * @type {boolean}
-     * @public
-     */
-    isUnique;
-
-    /**
-     * @description Is this field encrypted?
-     * @type {boolean}
-     * @public
-     */
-    isEncrypted;
-
-    /**
-     * @description Is this field set as an external id?
-     * @type {boolean}
-     * @public
-     */
-    isExternalId;
-
-    /**
-     * @description Is this field uses an index in the table?
-     * @type {boolean}
-     * @public
-     */
-    isIndexed;
-
-    /**
-     * @description Default value
-     * @type {string}
-     * @public
-     */
-    defaultValue;
-
-    /**
-     * @description If this is a picklist, is it restricted to a list of values?
-     * @type {boolean}
-     * @public
-     */
-    isRestrictedPicklist;
-
-    /**
-     * @description What is the formula of that field? (obviously only for formula field!)
-     * @type {string}
-     * @public
-     */
-    formula;
-
-    /**
-     * @description Only for formula field -- List of unique hard coded Salesforce URLs in the formula
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedURLs;
-
-    /**
-     * @description Only for formula field -- List of unique hard coded Salesforce IDs in the formula
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedIDs;
-
-}
-
-/**
- * @description Representation of a Field Set in Org Check
- */
-class SFDC_FieldSet extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Field Set' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Label
-     * @type {string}
-     * @public
-     */
-    label;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
-/**
  * Represents a Flow Definition and its Flow Version children
  */
 class SFDC_Flow extends DataWithDependencies {
@@ -2487,14 +3052,39 @@ class SFDC_Flow extends DataWithDependencies {
      */
     apiVersion;
 
+    /**
+     * @description Salesforce Id of the current flow version being used by this flow
+     * @type {string}
+     * @public
+     */
     currentVersionId;
     
+    /**
+     * @description Reference of the current flow version being used by this flow
+     * @type {SFDC_FlowVersion}
+     * @public
+     */
     currentVersionRef;
     
+    /**
+     * @description Is the current flow version of this flow is the latest version of this flow?
+     * @type {boolean}
+     * @public
+     */
     isLatestCurrentVersion;
     
+    /**
+     * @description Is the version active?
+     * @type {boolean}
+     * @public
+     */
     isVersionActive;
     
+    /**
+     * @description Count of versions for this flow
+     * @type {number}
+     * @public
+     */
     versionsCount;
     
     /**
@@ -2504,8 +3094,18 @@ class SFDC_Flow extends DataWithDependencies {
      */
     description;
     
+    /**
+     * @description Type of this flow
+     * @type {string}
+     * @public
+     */
     type;
     
+    /**
+     * @description Is this a PB or not?
+     * @type {boolean}
+     * @public
+     */
     isProcessBuilder;
     
     /**
@@ -2557,14 +3157,39 @@ class SFDC_FlowVersion extends DataWithoutScoring {
      */
     apiVersion;
 
+    /**
+     * @description Number of nodes in this flow version
+     * @type {number}
+     * @public
+     */
     totalNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Create type
+     * @type {number}
+     * @public
+     */
     dmlCreateNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Delete type
+     * @type {number}
+     * @public
+     */
     dmlDeleteNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of DML Update type
+     * @type {number}
+     * @public
+     */
     dmlUpdateNodeCount;
     
+    /**
+     * @description Number of nodes in this flow version of Screen type
+     * @type {number}
+     * @public
+     */
     screenNodeCount;
     
     /**
@@ -2581,8 +3206,18 @@ class SFDC_FlowVersion extends DataWithoutScoring {
      */
     description;
 
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
     
+    /**
+     * @description Running mode of this flow version
+     * @type {string}
+     * @public
+     */
     runningMode;
     
     /**
@@ -2599,9 +3234,246 @@ class SFDC_FlowVersion extends DataWithoutScoring {
      */
     lastModifiedDate;
     
+    /**
+     * @description Name of the optional sobject this flow version is related to
+     * @type {string}
+     * @public
+     */
     sobject;
     
+    /**
+     * @description Trigger type of this flow version (optional)
+     * @type {string}
+     * @public
+     */
     triggerType;
+}
+
+class SFDC_Profile extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Profile' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Full description of that item
+     * @type {string}
+     * @public
+     */
+    description;
+
+    /**
+     * @description License type of this item
+     * @type {string}
+     * @public
+     */
+    license;
+
+    /**
+     * @description Whether this item is a custom item
+     * @type {boolean}
+     * @public
+     */
+    isCustom;
+    
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Number of users assigned to this profile
+     * @type {number}
+     * @public
+     */
+    memberCounts;
+    
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+
+    /**
+     * @description Number of field permissions
+     * @type {number}
+     * @public
+     */
+    nbFieldPermissions;
+
+    /**
+     * @description Number of object permissions
+     * @type {number}
+     * @public
+     */
+    nbObjectPermissions;
+
+    /**
+     * @description Type of this item
+     * @type {number}
+     * @public
+     */
+    type;
+
+    /**
+     * @description Number of sensitive system permissions in this profile (like view all data etc..)
+     * @type {any}
+     * @public
+     */
+    importantPermissions;
+}
+
+class SFDC_PermissionSet extends SFDC_Profile {
+
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Permission Set or Permission Set Group' };
+
+    /**
+     * @description Is this a Permission Set Group
+     * @type {boolean}
+     * @public
+     */
+    isGroup;
+
+    /**
+     * @description Corresponding Permission Set Group Salesforce Id, if this item is a Permission Set Group
+     */
+    groupId;
+}
+
+class SFDC_User extends Data {
+    
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'User' };
+
+    /**
+     * @description Salesforce Id
+     * @type {string}
+     * @public
+     */
+    id;
+    
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
+    url;
+    
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
+    name;
+    
+    /**
+     * @description Datetime of the last login of that user. Undefined if never logged in.
+     * @type {number}
+     * @public
+     */
+    lastLogin;
+
+    /**
+     * @description Number of failed logins
+     * @type {number}
+     * @public
+     */
+    numberFailedLogins;
+    
+    /**
+     * @description Is this user on the Lightning Experience?
+     * @type {boolean}
+     * @public
+     */
+    onLightningExperience;
+
+    /**
+     * @description When this user changed its password for the last time. Undefined if never changed.
+     * @type {number}
+     * @public
+     */
+    lastPasswordChange;
+
+    /**
+     * @description Profile salesforce id of this user
+     * @type {string}
+     * @public
+     */
+    profileId;
+
+    /**
+     * @description Crresponding Profile reference used by this user
+     * @type {SFDC_Profile}
+     * @public
+     */
+    profileRef;
+
+    /**
+     * @description List of sensible system permissions for this users (like view all etc.)
+     * @type {any}
+     * @public
+     */
+    aggregateImportantPermissions;
+
+    /**
+     * @description List of permission set ids assigned to this user
+     * @type {Array<string>}
+     * @public
+     */
+    permissionSetIds;
+
+    /**
+     * @description List of permission set references assigned to this user
+     * @type {Array<SFDC_PermissionSet>}
+     * @public
+     */
+    permissionSetRefs;
 }
 
 /**
@@ -2645,26 +3517,80 @@ class SFDC_Group extends Data {
      */
     developerName;
 
+    /**
+     * @description Does it include bosses?
+     * @type {boolean}
+     * @public
+     */
     includeBosses;
 
+    /**
+     * @description Does it include subordinates?
+     * @type {boolean}
+     * @public
+     */
     includeSubordinates;
 
+    /**
+     * @description Salesfiorce Id of the related entity for this "box"
+     * @public
+     */
     relatedId;
 
+    /**
+     * @description Count of direct members (regardless if there are users or groups or roles etc.)
+     * @type {number}
+     * @public
+     */
     nbDirectMembers;
 
+    /**
+     * @description List of direct user ids
+     * @type {Array<string>}
+     * @public
+     */
     directUserIds;
 
+    /**
+     * @description List of direct user references
+     * @type {Array<SFDC_User>}
+     * @public
+     */
     directUserRefs;
 
+    /**
+     * @description List of direct group ids
+     * @type {Array<string>}
+     * @public
+     */
     directGroupIds;
 
+    /**
+     * @description List of direct group references
+     * @type {Array<SFDC_Group>}
+     * @public
+     */
     directGroupRefs;
 
+    /**
+     * @description Is this a public group?
+     * @type {boolean}
+     * @public
+     */
     isPublicGroup;
 
+    /**
+     * @description Is this a queue?
+     * @type {boolean}
+     * @public
+     */
     isQueue;
 
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
 }
 
@@ -2723,90 +3649,6 @@ class SFDC_LightningAuraComponent extends DataWithDependencies {
      */
     lastModifiedDate;
     
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
-/**
- * @description Representation of a Lightning Page in Org Check
- */
-class SFDC_LightningPage extends DataWithDependencies {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Lightning Page' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    /**
-     * @description Type of the Lightning Page
-     * @type {string}
-     * @public
-     */
-    type;
-    
-    /**
-     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    package;
-    
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate;
-    
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate;
-
-    /**
-     * @description Identifier of the related object for this page (if any)
-     * @type {string}
-     * @public
-     */
-    objectId; 
-    
-    /**
-     * @description Reference of the related object for this page (if any)
-     * @type {SFDC_Object}
-     * @public
-     */
-    objectRef;
-
     /**
      * @description Full description of that item
      * @type {string}
@@ -2892,130 +3734,6 @@ class SFDC_LightningWebComponent extends DataWithDependencies {
     url;
 }
 
-/**
- * @description Representation of a SObject Limit in Org Check
- */
-class SFDC_Limit extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'SObject Limit' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Label of this limit
-     * @type {string}
-     * @public
-     */
-    label;
-
-    remaining;
-
-    max;
-
-    used;
-
-    usedPercentage;
-
-    /**
-     * @description Technical name of that limit
-     * @type {string}
-     * @public
-     */
-    type;
-}
-
-class SFDC_Profile extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Profile' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-    license;
-    isCustom;
-    
-    /**
-     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    package;
-    memberCounts;
-    
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate;
-    
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate;
-    nbFieldPermissions;
-    nbObjectPermissions;
-    type;
-    importantPermissions;
-}
-
-class SFDC_PermissionSet extends SFDC_Profile {
-
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Permission Set or Permission Set Group' };
-
-    isGroup;
-    groupId;
-}
-
 class SFDC_PermissionSetLicense extends Data {
 
     /** 
@@ -3026,20 +3744,109 @@ class SFDC_PermissionSetLicense extends Data {
      */
     static get label() { return 'Permission Set License' };
 
+    /**
+     * @description Salesforce Id of this item
+     * @type {string}
+     * @public
+     */ 
     id;
+
+    /**
+     * @description Name
+     * @type {string}
+     * @public
+     */
     name;
+
+    /**
+     * @description Total count of licenses
+     * @type {number}
+     * @public
+     */
     totalCount;
+
+    /**
+     * @description Used count of licenses
+     * @type {number}
+     * @public
+     */
     usedCount;
+
+    /**
+     * @description Percentage of used licenses
+     * @type {number}
+     * @public
+     */
     usedPercentage;
+
+    /**
+     * @description Remaining count of licenses
+     * @type {number}
+     * @public
+     */
     remainingCount;
+
+    /**
+     * @description Salesforce Id of the permission set associated with the current license
+     * @type {Array<string>}
+     * @public
+     */
     permissionSetIds;
+
+    /**
+     * @description Corresponding references of the permission set associated with the current license
+     * @type {Array<SFDC_PermissionSet>}
+     * @public
+     */
     permissionSetRefs;
+
+    /**
+     * @description Number of distinct users assigned to the permission set license
+     * @type {number}
+     * @public
+     */
     distinctActiveAssigneeCount;
+
+    /**
+     * @description Status of the permission set license
+     * @type {string}
+     * @public
+     */
     status;
+
+    /**
+     * @description Expiration date of the permission set license
+     * @type {number}
+     * @public
+     */
     expirationDate;
+
+    /**
+     * @description Is the permission set license available for integrations
+     * @type {boolean}
+     * @public
+     */
     isAvailableForIntegrations;
+
+    /**
+     * @description Created date of the permission set license
+     * @type {number}
+     * @public
+     */
     createdDate;
+
+    /**
+     * @description Last modified date of the permission set license
+     * @type {number}
+     * @public
+     */
     lastModifiedDate;
+
+    /**
+     * @description Setup URL of this item
+     * @type {string}
+     * @public
+     */
     url;
 }
 
@@ -3053,16 +3860,90 @@ class SFDC_ProfilePasswordPolicy extends Data {
      */
     static get label() { return 'Password Policy from a Profile' };
 
-    forgotPasswordRedirect;
+    /** 
+     * @description The duration of the login lockout, in minutes. If users are locked out, they 
+     *                  must wait until the lockout period expires. Valid values: 0, 15, 30, 60
+     * @type {number}
+     * @public
+     */ 
     lockoutInterval;
+
+    /**
+     * @description The number of times a user can enter a wrong password before getting locked 
+     *                  out. Valid values: 0, 3, 5, 10.
+     * @type {number}
+     * @public 
+     */
     maxLoginAttempts;
+
+    /**
+     * @description Minimum number of characters required for a password. Valid values: 5–50.
+     * @type {number}
+     * @public 
+     */
     minimumPasswordLength;
+
+    /**
+     * @description If true, a user cannot change a password more than once in a 24-hour period.
+     * @type {boolean}
+     * @public 
+     */
     minimumPasswordLifetime;
+
+    /**
+     * @description If true, answers to security questions are hidden as the user types.
+     * @type {boolean}
+     * @public 
+     */
     obscure;
+
+    /**
+     * @description Level of complexity required for the character types in a user’s password.
+     *                  If 0, the password can contain any type of character.
+     *                  If 1, the password must contain at least one alphabetic character and 1 number.
+     *                  If 2, the password must contain at least one alphabetic character, one number, 
+     *                      and one of the following special characters: ! # $ % - _ = + < >.
+     *                  If 3, the password must contain at least one number, one uppercase letter, and 
+     *                      one lowercase letter.
+     *                  If 4, the password must contain at least one number, one uppercase letter, one 
+     *                      lowercase letter, and one of the following special 
+     *                      characters: ! # $ % - _ = + < >.
+     * @type {number}
+     * @public 
+     */
     passwordComplexity;
+
+    /**
+     * @description Number of days until user passwords expire and must be changed. Valid values:
+     *                  0 (If set to 0, the password never expires), 30, 60, 90, 180 or 365
+     * @type {number}
+     * @public 
+     */
     passwordExpiration;
+
+    /**
+     * @description Number of previous passwords to save. Saving passwords is required to ensure 
+     *                  that users reset their password to a new, unique password. This value must 
+     *                  be set before a password reset succeeds. If 0, passwordExpiration must
+     *                  be set to 0.
+     * @type {number}
+     * @public 
+     */
     passwordHistory;
+
+    /**
+     * @description If set to true, the answer to the password hint cannot contain the password itself.
+     *                  If false, the answer has no restrictions.
+     * @type {boolean}
+     * @public 
+     */
     passwordQuestion;
+
+    /**
+     * @description Name of the associated user profile.
+     * @type {string}
+     * @public 
+     */
     profileName;
 }
 
@@ -3076,9 +3957,32 @@ class SFDC_ProfileRestrictions extends Data {
      */
     static get label() { return 'Restrictions from Profile' };
 
+    /**
+     * @description Salesforce Id of the corresponding Profile
+     * @type {string}
+     * @public
+     */
     profileId;
+
+    /**
+     * @description Reference to the corresponding Profile
+     * @type {SFDC_Profile}
+     * @public
+     */
     profileRef;
+
+    /**
+     * @description IP Range Restriction list for this profile
+     * @type {Array<SFDC_ProfileIpRangeRestriction>}
+     * @public
+     */
     ipRanges;
+
+    /**
+     * @description Login Hour Restriction list for this profile
+     * @type {Array<SFDC_ProfileLoginHourRestriction>}
+     * @public
+     */
     loginHours;
 }
 
@@ -3092,7 +3996,18 @@ class SFDC_ProfileIpRangeRestriction extends DataWithoutScoring {
      */
     static get label() { return 'IP Range Restriction from Profile' };
 
+    /**
+     * @description Start IP address
+     * @type {string}
+     * @public
+     */
     startAddress;
+
+    /**
+     * @description End IP address
+     * @type {string}
+     * @public
+     */
     endAddress;
     
     /**
@@ -3101,6 +4016,12 @@ class SFDC_ProfileIpRangeRestriction extends DataWithoutScoring {
      * @public
      */
     description;
+
+    /**
+     * @description Number of IP addresses in this range (= end - start)
+     * @type {number}
+     * @public
+     */
     difference;
 }
 
@@ -3114,97 +4035,33 @@ class SFDC_ProfileLoginHourRestriction extends DataWithoutScoring {
      */
     static get label() { return 'Login Hour Restriction from Profile' };
 
+    /**
+     * @description Starting hour of the restriction (HH:MM format)
+     * @type {string}
+     * @public
+     */
     fromTime;
+
+    /**
+     * @description Ending hour of the restriction (HH:MM format)
+     * @type {string}
+     * @public
+     */
     toTime;
+
+    /**
+     * @description Label of the week day
+     * @type {string}
+     * @public
+     */
     day;
+
+    /**
+     * @description Number of hours in this range (= toTime - fromTime)
+     * @type {number}
+     * @public
+     */
     difference;
-}
-
-class SFDC_RecordType extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Record Type' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    developerName;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-
-    /**
-     * @description Is this item active or not?
-     * @type {boolean}
-     * @public
-     */
-    isActive;
-    isAvailable;
-    isDefaultRecordTypeMapping;
-    isMaster;
-}
-
-class SFDC_User extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'User' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-    photoUrl;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    lastLogin;
-    numberFailedLogins;
-    onLightningExperience;
-    lastPasswordChange;
-    profileId;
-    profileRef;
-    aggregateImportantPermissions;
-    permissionSetIds;
-    permissionSetRefs;
 }
 
 class SFDC_UserRole extends Data {
@@ -3300,101 +4157,6 @@ class SFDC_UserRole extends Data {
      * @public
      */
     hasActiveMembers;
-}
-
-class SFDC_ValidationRule extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Validation Rule' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    /**
-     * @description Is this item active or not?
-     * @type {boolean}
-     * @public
-     */
-    isActive;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-
-    /**
-     * @description Field where to show the error message if any
-     * @type {string}
-     * @public
-     */
-    errorDisplayField;
-
-    /**
-     * @description Error message
-     * @type {string}
-     * @public
-     */
-    errorMessage;
-    
-    /**
-     * @description Salesforce Id of the sObject where this field is defined
-     * @type {string}
-     * @public
-     */
-    objectId; 
-
-    /**
-     * @description Reference of the object for this rule
-     * @type {SFDC_Object}
-     * @public
-     */
-    objectRef;
-
-    /**
-     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    package;
-
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate;
-    
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
 }
 
 class SFDC_VisualForceComponent extends DataWithDependencies {
@@ -3566,94 +4328,6 @@ class SFDC_VisualForcePage extends DataWithDependencies {
     url;
 }
 
-class SFDC_WebLink extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Web Link' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-
-    /**
-     * @description Unique list of hard coded Salesforce URLs in this item
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedURLs;
-
-    /**
-     * @description Unique list of hard coded Salesforce IDs in this item
-     * @type {Array<string>}
-     * @public
-     */
-    hardCodedIDs;
-    
-    /**
-     * @description Type of the link
-     * @type {string}
-     * @public
-     */
-    type;
-    
-    /**
-     * @description Behavior of the link
-     * @type {string}
-     * @public
-     */
-    behavior;
-
-    /**
-     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
-     * @type {string}
-     * @public
-     */
-    package;
-
-    /**
-     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    createdDate;
-    
-    /**
-     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
-     * @type {number}
-     * @public
-     */
-    lastModifiedDate;
-    
-    /**
-     * @description Full description of that item
-     * @type {string}
-     * @public
-     */
-    description;
-
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
-}
-
 class SFDC_Workflow extends Data {
     
     /** 
@@ -3691,8 +4365,26 @@ class SFDC_Workflow extends Data {
      * @public
      */
     description;
+
+    /**
+     * @description Direct actions associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     actions;
+
+    /**
+     * @description Future actions associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     futureActions;
+
+    /**
+     * @description Empty time triggers associated with this item
+     * @type {Array<any>}
+     * @public
+     */
     emptyTimeTriggers;
 
     /**
@@ -3715,6 +4407,12 @@ class SFDC_Workflow extends Data {
      * @public
      */
     lastModifiedDate;
+
+    /**
+     * @description True if this item has at least one action associated with it
+     * @type {boolean}
+     * @public
+     */
     hasAction;
 }
 
@@ -4366,29 +5064,6 @@ class SFDC_ObjectPermission extends Data {
     isModifyAll;
 }
 
-class SFDC_ObjectRelationShip extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'SObject Releationship' };
-
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    childObject;
-    fieldName;
-    isCascadeDelete;
-    isRestrictedDelete;
-}
-
 class SFDC_Organization extends DataWithoutScoring {
     
     /** 
@@ -4413,13 +5088,47 @@ class SFDC_Organization extends DataWithoutScoring {
      */
     name;
     
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
+
+    /**
+     * @description Is this organization a Developer Edition enviroment?
+     * @type {boolean}
+     * @public
+     */
     isDeveloperEdition;
+
+    /**
+     * @description Is this organization a Sandbox environment?
+     * @type {boolean}
+     * @public
+     */
     isSandbox;
+
+    /**
+     * @description Is this organization a Trial environment?
+     * @type {boolean}
+     * @public
+     */
     isTrial;
+
+    /**
+     * @description Is this organization a Production environment?
+     * @type {boolean}
+     * @public
+     */
     isProduction;
+
+    /**
+     * @description Local namespace of this organization
+     * @type {string}
+     * @public
+     */
     localNamespace;
-    
 }
 
 class SFDC_Package extends Data {
@@ -4446,42 +5155,19 @@ class SFDC_Package extends Data {
      */
     name;
     
+    /**
+     * @description Namespace
+     * @type {string}
+     * @public
+     */
     namespace;
+    
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
     type;
-}
-
-class SFDC_PageLayout extends Data {
-    
-    /** 
-     * @description Logical name of what this class represents
-     * @type {string}
-     * @static
-     * @public
-     */
-    static get label() { return 'Page Layout' };
-
-    /**
-     * @description Salesforce Id
-     * @type {string}
-     * @public
-     */
-    id;
-    
-    /**
-     * @description Name
-     * @type {string}
-     * @public
-     */
-    name;
-    
-    type;
-    
-    /**
-     * @description Setup URL of this item
-     * @type {string}
-     * @public
-     */
-    url;
 }
 
 /** 
@@ -6196,7 +6882,6 @@ class DatasetProfilePasswordPolicies extends Dataset {
                     // Create the instance
                     const policy = policyDataFactory.createWithScore({
                         properties: {
-                            forgotPasswordRedirect: (ppp.forgotPasswordRedirect === 'true'),
                             lockoutInterval: parseInt(ppp.lockoutInterval, 10),
                             maxLoginAttempts: parseInt(ppp.maxLoginAttempts, 10),
                             minimumPasswordLength: parseInt(ppp.minimumPasswordLength, 10),
@@ -6239,7 +6924,7 @@ class DatasetUsers extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about internal active User in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, ' +
+            string: 'SELECT Id, Name, ProfileId, ' +
                         'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
                         'UserPreferencesLightningExperiencePreferred, ' +
                         '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' + // optimisation?
@@ -6270,7 +6955,6 @@ class DatasetUsers extends Dataset {
             const user = userDataFactory.createWithScore({
                 properties: {
                     id: id,
-                    photoUrl: record.SmallPhotoUrl,
                     name: record.Name,
                     lastLogin: record.LastLoginDate,
                     numberFailedLogins: record.NumberOfFailedLogins,
@@ -6771,12 +7455,12 @@ class DatasetApexClasses extends Dataset {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
                     'FROM ApexCodeCoverage ' +
                     'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
-            queryMoreField: 'CreatedDate',
+            //queryMoreField: 'CreatedDate',
             tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
                         'NumLinesUncovered, Coverage ' +
-                    'FROM ApexCodeCoverageAggregate',
+                    'FROM ApexCodeCoverageAggregate ',
             tooling: true
         }, {
             string: 'SELECT ApexClassId ' +
@@ -6786,8 +7470,8 @@ class DatasetApexClasses extends Dataset {
             string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
                         'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
                     'FROM ApexTestResult '+
-                    `WHERE ApexTestRunResult.Status = 'Completed' `+
-                    `AND (Outcome != 'Pass' OR RunTime > 20000) `+
+                    `WHERE (Outcome != 'Pass' OR RunTime > 20000) `+
+                    `AND ApexTestRunResult.Status = 'Completed' `+
                     `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `+
                     'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
             tooling: true
@@ -6831,7 +7515,6 @@ class DatasetApexClasses extends Dataset {
                     isSchedulable: false,
                     isScheduled: false,
                     length: record.LengthWithoutComments,
-                    sourceCode: record.Body,
                     needsRecompilation: (!record.SymbolTable ? true : false),
                     coverage: 0, // by default no coverage!
                     relatedTestClasses: [],
@@ -10793,20 +11476,24 @@ if (count++ > 10) return;
 
     /**
      * @see SalesforceManagerIntf.compileClasses
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @param {SimpleLoggerIntf} logger
      * @returns {Promise<Array<any>>}
      * @public
      * @async
      */ 
-    async compileClasses(classes, logger) {
+    async compileClasses(apexClassIds, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
+        this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
+        // Get the source code of the given classes
+        const apexClasses = await this.readMetadataAtScale(SalesforceMetadataTypes.APEX_CLASS, apexClassIds, [], logger);
+        // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
         const bodies = [];
         let currentBody;
         let countBatches = 0;
-        classes.forEach((c) => {
+        apexClasses.filter(apexClass => apexClass.Body).forEach((apexClass) => {
             if (!currentBody || currentBody.compositeRequest.length === MAX_COMPOSITE_REQUEST_SIZE) {
                 countBatches++;
                 currentBody = {
@@ -10831,8 +11518,8 @@ if (count++ > 10) return;
             currentBody.compositeRequest.push({ 
                 method: 'POST',
                 url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/ApexClassMember`, 
-                referenceId: c.id,
-                body: { MetadataContainerId: '@{container.id}', ContentEntityId: c.id, Body: c.sourceCode }
+                referenceId: apexClass.Id,
+                body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });
         });
         const promises = bodies.map((body) => {
@@ -11043,13 +11730,13 @@ class API {
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @returns {Promise}
      * @async
      * @public
      */
-    async compileClasses(classes) {
-        return this._sfdcManager.compileClasses(classes, this._logger.toSimpleLogger(`Compile ${classes.length} classe(s)`));
+    async compileClasses(apexClassIds) {
+        return this._sfdcManager.compileClasses(apexClassIds, this._logger.toSimpleLogger(`Compile ${apexClassIds.length} class(es)`));
     }
 
     /**

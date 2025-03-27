@@ -616,7 +616,7 @@ class RowsFactory {
     /**
      * @description Export table
      * @param {Table} tableDefintion
-     * @param {Array<Row>} records
+     * @param {Array<any>} records
      * @param {string} title 
      * @param {Function} badScoreLabelById
      * @returns {Array<ExportedTable>}

@@ -782,20 +782,24 @@ if (count++ > 10) return;
 
     /**
      * @see SalesforceManagerIntf.compileClasses
-     * @param {Array<SFDC_ApexClass>} classes
+     * @param {Array<string>} apexClassIds
      * @param {SimpleLoggerIntf} logger
      * @returns {Promise<Array<any>>}
      * @public
      * @async
      */ 
-    async compileClasses(classes, logger) {
+    async compileClasses(apexClassIds, logger) {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
+        this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
+        // Get the source code of the given classes
+        const apexClasses = await this.readMetadataAtScale(SalesforceMetadataTypes.APEX_CLASS, apexClassIds, [], logger);
+        // Check another time the limit
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         const timestamp = Date.now();
         const bodies = [];
         let currentBody;
         let countBatches = 0;
-        classes.forEach((c) => {
+        apexClasses.filter(apexClass => apexClass.Body).forEach((apexClass) => {
             if (!currentBody || currentBody.compositeRequest.length === MAX_COMPOSITE_REQUEST_SIZE) {
                 countBatches++;
                 currentBody = {
@@ -820,8 +824,8 @@ if (count++ > 10) return;
             currentBody.compositeRequest.push({ 
                 method: 'POST',
                 url: `/services/data/v${this._apiVersion}.0/tooling/sobjects/ApexClassMember`, 
-                referenceId: c.id,
-                body: { MetadataContainerId: '@{container.id}', ContentEntityId: c.id, Body: c.sourceCode }
+                referenceId: apexClass.Id,
+                body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });
         });
         const promises = bodies.map((body) => {
