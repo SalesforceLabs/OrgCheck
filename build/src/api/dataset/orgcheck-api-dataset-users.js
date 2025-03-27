@@ -20,7 +20,7 @@ export class DatasetUsers extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about internal active User in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Name, SmallPhotoUrl, ProfileId, ' +
+            string: 'SELECT Id, Name, ProfileId, ' +
                         'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
                         'UserPreferencesLightningExperiencePreferred, ' +
                         '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' + // optimisation?
@@ -51,7 +51,6 @@ export class DatasetUsers extends Dataset {
             const user = userDataFactory.createWithScore({
                 properties: {
                     id: id,
-                    photoUrl: record.SmallPhotoUrl,
                     name: record.Name,
                     lastLogin: record.LastLoginDate,
                     numberFailedLogins: record.NumberOfFailedLogins,
