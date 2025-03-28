@@ -7455,7 +7455,7 @@ class DatasetApexClasses extends Dataset {
             string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
                     'FROM ApexCodeCoverage ' +
                     'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
-            //queryMoreField: 'CreatedDate',
+            queryMoreField: 'CreatedDate',
             tooling: true
         }, {
             string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
