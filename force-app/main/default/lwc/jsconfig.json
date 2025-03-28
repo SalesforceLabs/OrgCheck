@@ -3,7 +3,10 @@
         "experimentalDecorators": true,
         "checkJs": true,
         "target": "ESNext",
+        "noEmit": true,
+        "noImplicitAny": false,
         "baseUrl": ".",
+        "pretty": true,
         "paths": {
             "c/*": [
                 "*"

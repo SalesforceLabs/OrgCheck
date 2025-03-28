@@ -4,35 +4,19 @@
     </template>
     <lightning-layout>
         <lightning-layout-item>
-            <template if:true={showStatistics}>
-                <div>
-                    <template if:false={nbBadRows}>
-                        <span class="slds-badge slds-theme_success">There are {nbAllRows} rows.</span>
-                    </template>
-                    <template if:true={nbBadRows}>
-                        <span class="slds-badge slds-theme_warning">There are {nbAllRows} rows including {nbBadRows} bad rows.</span>
-                    </template>
-                    <template if:true={isFilterOn}>
-                        <template if:false={nbFilteredRows}>
-                            <span class="slds-badge slds-theme_warning">There is no row matching your filter.</span>
-                        </template>
-                        <template if:true={nbFilteredRows}>
-                            <span class="slds-badge slds-theme_success">There are {nbFilteredRows} rows matching your filter.</span>
-                        </template>
-                    </template>
-                    <template if:true={isInfiniteScrolling}>
-                        <template if:true={isInfiniteScrollingMoreData}>
-                            <span class="slds-badge slds-badge_inverse">For performance, we are showing only the first {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
-                        </template>
-                    </template>
-                    <template if:true={isSorted}>
-                        <span class="slds-badge">Table is sorted by field "{sortingField}" in {sortingOrder} order.</span>
-                    </template>
-                    <template if:false={isSorted}>
-                        <span class="slds-badge">Table is not sorted yet.</span>
-                    </template>
-                </div>
-            </template>
+            <div if:true={showStatistics}>
+                <span if:false={nbBadRows} class="slds-badge slds-theme_success">There are {nbAllRows} rows.</span>
+                <span if:true={nbBadRows} class="slds-badge slds-theme_warning">There are {nbAllRows} rows including {nbBadRows} bad rows.</span>
+                <template if:true={isFilterOn}>
+                    <span if:false={nbFilteredRows} class="slds-badge slds-theme_warning">There is no row matching your filter.</span>
+                    <span if:true={nbFilteredRows} class="slds-badge slds-theme_success">There are {nbFilteredRows} rows matching your filter.</span>
+                </template>
+                <template if:true={isInfiniteScrolling}>
+                    <span if:true={isInfiniteScrollingMoreData} class="slds-badge slds-badge_inverse">For performance, we are showing only the first {infiniteScrollingCurrentNbRows} rows. But you can ask for more!</span>
+                </template>
+                <span if:true={isSorted} class="slds-badge">Table is sorted by field "{sortingField}" in {sortingOrder} order.</span>
+                <span if:false={isSorted} class="slds-badge">Table is not sorted yet.</span>
+            </div>
         </lightning-layout-item>
         <lightning-layout-item alignment-bump="left">&nbsp;</lightning-layout-item>
         <template if:true={isInfiniteScrolling}>
@@ -45,11 +29,7 @@
                 </lightning-layout-item>
             </template>
         </template>
-        <template if:true={showExportButton}>
-            <lightning-layout-item>
-                <c-orgcheck-export-button source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
-            </lightning-layout-item>
-        </template>
+        <c-orgcheck-export-button if:true={showExportButton} source={exportedRows} basename={exportBasename}></c-orgcheck-export-button>
     </lightning-layout>
     <template if:true={showSearch}>
         <div>
@@ -65,78 +45,69 @@
     <table class={tableClasses}>
         <thead>
             <tr>
-                <template for:each={columns} for:item="column">
-                    <th key={column.label} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex="0" class={column.cssClass}>
+                <template for:each={columnHeaders} for:item="column">
+                    <template if:true={column}><th key={column.index} onclick={handleSortColumnClick} aria-colindex={column.index} aria-label={column.label} tabindex="0" class={column.cssClass}>
                         {column.label}
-                    </th>
+                    </th></template>
                 </template>
             </tr>
         </thead>
         <tbody>
             <template if:true={visibleRows}><template for:each={visibleRows} for:item="row">
-                <tr key={row.key} class={row.cssClass}>
+                <template if:true={row}><tr key={row.key} class={row.cssClass}>
                     <template for:each={row.cells} for:item="cell">
-                        <td key={cell.key} data-value={cell.data.value} class={cell.cssClass}>
-                            
+                        <template if:true={cell}><template if:true={cell.data}><td key={cell.key} data-value={cell.data.value} class={cell.cssClass}>                        
+
                             <!-- TYPE INDEX: numeric, auto valued, represent the position of each row in the table -->
-                            <template lwc:if={cell.isIndex}>{row.index}</template>
+                            <template lwc:if={cell.typeofindex}>{row.index}</template>
                             
                             <!-- TYPE SCORE: numeric, auto valued, represent the badness score of each row in the table -->
-                            <template lwc:elseif={cell.isScore}>
+                            <template lwc:elseif={cell.typeofscore}>
                                 <c-orgcheck-score-link onview={handleViewScore} what-id={cell.data.id} what-name={cell.data.name} score={row.score} fields={row.badFields} reason-ids={row.badReasonIds}></c-orgcheck-score-link>
                             </template>
 
-                            <!-- TYPE EMPTY: string, if the value is empty then it can be decorated by the 'decoratedValue' -->
-                            <template lwc:elseif={cell.isEmpty}>{cell.data.decoratedValue}</template>
-
                             <!-- TYPE DEPENDENCY: link, opens the depdency modal with dependencies information about the current row -->
-                            <template lwc:elseif={cell.isDependencyViewer}>
+                            <template lwc:elseif={cell.typeofdependencies}>
                                 <c-orgcheck-dependency-link onview={handleViewDependency} what-id={cell.data.id} what-name={cell.data.name} dependencies={cell.data.value}></c-orgcheck-dependency-link>
                             </template>
 
+                            <!-- NON-LIST TYPE with decoration -->
+                            <template lwc:elseif={cell.decoration}>
+                                {cell.decoration}
+                            </template>
+
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
-                            <template lwc:elseif={cell.isId}>
-                                <template lwc:if={cell.data.url}>
-                                    <lightning-formatted-url label={cell.data.value} value={cell.data.url} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon>
-                                </template>
-                                <template lwc:else>
-                                    {cell.data.value}
-                                </template>
+                            <template lwc:elseif={cell.typeofid}>
+                                <lightning-formatted-url label={cell.data.label} value={cell.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon>
                             </template>
 
                             <!-- TYPE IDS: array of links (see ID for each element) -->
-                            <template lwc:elseif={cell.isIds}>
-                                <template lwc:if={cell.data.values.length}>
+                            <template lwc:elseif={cell.typeofids}>
+                                <template if:true={cell.data.values}><template lwc:if={cell.data.values.length}>
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
-                                </template>
-                                <template for:each={cell.data.values} for:item="item">
-                                    <template lwc:if={item}>
-                                        <template lwc:if={item.data.url}>
-                                            - <lightning-formatted-url key={item.key} label={item.data.value} value={item.data.url} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
+                                    <template for:each={cell.data.values} for:item="item">
+                                        <template lwc:if={item.decoration}>
+                                            - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - {item.data.value}<br key={item.key} />
+                                            - <lightning-formatted-url key={item.key} label={item.data.label} value={item.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
                                         </template>
                                     </template>
-                                </template>
+                                </template></template>
                             </template>
 
                             <!-- TYPE PERCENTAGE: float with two digits after the comma and an additional percent sign, decorated with decimal default format from the current user -->
-                            <template lwc:elseif={cell.isPercentage}>
+                            <template lwc:elseif={cell.typeofpercentage}>
                                 <lightning-formatted-number value={cell.data.value} maximum-fraction-digits="2" format-style="percent"></lightning-formatted-number>
                             </template>
 
                             <!-- TYPE NUMERIC: numeric, decorated with decimal default format from the current user, decorated string value (optional) if value is great or less than a max or a min -->
-                            <template lwc:elseif={cell.isNumeric}>
-                                <template lwc:if={cell.isMaxReached}>{cell.data.decoratedValue}</template>
-                                <template lwc:elseif={cell.isMinReached}>{cell.data.decoratedValue}</template>
-                                <template lwc:else>
-                                    <lightning-formatted-number value={cell.data.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
-                                </template>
+                            <template lwc:elseif={cell.typeofnumeric}>
+                                <lightning-formatted-number value={cell.data.value} maximum-fraction-digits="0" format-style="decimal"></lightning-formatted-number>
                             </template>
 
                             <!-- TYPE BOOLEAN: boolean, decorated an icon for true and an icon for false -->
-                            <template lwc:elseif={cell.isBoolean}>
+                            <template lwc:elseif={cell.typeofboolean}>
                                 <div class="slds-text-align_center">
                                     <template lwc:if={cell.data.value}><lightning-icon icon-name="utility:toggle_on" alternative-text="True" title="True" size="x-small"></lightning-icon></template>
                                     <template lwc:else><lightning-icon icon-name="utility:toggle_off" alternative-text="False" title="False" size="x-small"></lightning-icon></template>
@@ -144,71 +115,52 @@
                             </template>
 
                             <!-- TYPE DATETIME: datetime, decorated with datetime default format from the current user -->
-                            <template lwc:elseif={cell.isDateTime}>
+                            <template lwc:elseif={cell.typeofdatetime}>
                                 <template lwc:if={cell.data.value}><lightning-formatted-date-time value={cell.data.value}></lightning-formatted-date-time></template>
                             </template>
 
                             <!-- TYPE TEXT: string, potentially decorated with a another text if the length of the text is exceeding a certain amount of characters (optional) -->
-                            <template lwc:elseif={cell.isText}>
-                                <template lwc:if={cell.isValueTruncated}>
-                                    {cell.data.decoratedValue}&nbsp;<lightning-icon icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon>
-                                </template>
-                                <template lwc:else>
-                                    <template lwc:if={cell.isPreformatted}>
-                                        <pre>{cell.data.value}</pre>
-                                    </template>
-                                    <template lwc:else>
-                                        {cell.data.value}
-                                    </template>
-                                </template>
+                            <template lwc:elseif={cell.typeoftext}>
+                                {cell.data.value}
                             </template>
 
                             <!-- TYPE TEXTS: array of string (see TEXT for each element) -->
-                            <template lwc:elseif={cell.isTexts}>
-                                <template lwc:if={cell.data.values.length}>
+                            <template lwc:elseif={cell.typeoftexts}>
+                                <template if:true={cell.data.values}><template lwc:if={cell.data.values.length}>
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
-                                </template>
-                                <template for:each={cell.data.values} for:item="item">
-                                    <template lwc:if={item}>
-                                        <template lwc:if={item.isValueTruncated}>
-                                            - {item.data.decoratedValue}&nbsp;<lightning-icon key={cell.key} icon-name="utility:more" alternative-text="..." title="..." size="x-small"></lightning-icon><br key={cell.key} />
+                                    <template for:each={cell.data.values} for:item="item">
+                                        <template lwc:if={item.decoration}>
+                                            - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            <template lwc:if={item.isPreformatted}>
-                                                - <pre key={cell.key}>{cell.data.value}</pre>
-                                            </template>
-                                            <template lwc:else>
-                                                - {item.data.value}<br key={cell.key} />
-                                            </template>
+                                            - {item.data}<br key={item.key} />
                                         </template>
                                     </template>
-                                </template>
+                                </template></template>
                             </template>
 
-                            <!-- TYPE OBJECT: string representation of an object -->
-                            <template lwc:elseif={cell.isObject}>
-                                <code>{cell.data.decoratedValue}</code>
-                            </template>
-
-                            <!-- TYPE OBJECTS: array of string representation of object (see Object for each element) -->
-                            <template lwc:elseif={cell.isObjects}>
-                                <template lwc:if={cell.data.values.length}>
+                            <!-- TYPE OBJECTS: array of string representation of object -->
+                            <template lwc:elseif={cell.typeofobjects}>
+                                <template if:true={cell.data.values}><template lwc:if={cell.data.values.length}>
                                     <small><i>{cell.data.values.length} item(s)</i></small><br />
-                                </template>
-                                <template for:each={cell.data.values} for:item="item">
-                                    <template lwc:if={item}>
-                                        - {item.data.decoratedValue}<br key={cell.key} />
+                                    <template for:each={cell.data.values} for:item="item">
+                                        <template lwc:if={item.decoration}>
+                                            - {item.decoration}<br key={item.key} />
+                                        </template>
+                                        <template lwc:else>
+                                            - {item.data}<br key={item.key} />
+                                        </template>
                                     </template>
-                                </template>
+                                </template></template>
                             </template>
 
                             <!-- DEFAULT TYPE WE HAVE NO CLUE ABOUT -->
                             <template lwc:else>
-                                Type we don't have yet for {cell.data.value}
+                                Type we don't have yet for {cell.tostring}
                             </template>
-                        </td>
+                        </td></template></template>
                     </template>
-                </tr>
+                </tr></template>
             </template></template>
         </tbody>
     </table>

@@ -1,52 +1,66 @@
 <template>
-    <template if:true={showFilter}>
-        <ul class="slds-button-group-row">
-            <li class="slds-button-group-item">
-                <lightning-combobox
-                    data-id="package"
-                    label="Package"
-                    value={package}
-                    options={packageOptions}
-                    onchange={filterChanged} ></lightning-combobox>
-            </li>
-            <li class="slds-button-group-item">
-                <lightning-combobox
-                    data-id="sobjectType"
-                    label="SObject Type"
-                    value={sobjectType}
-                    options={sobjectTypeOptions}
-                    onchange={filterChanged} ></lightning-combobox>
-            </li>
-            <li class="slds-button-group-item">
-                <lightning-combobox 
-                    data-id="sobjectApiName"
-                    label="SObject"
-                    value={sobjectApiName}
-                    options={sobjectApiNameOptions}
-                    onchange={filterChanged}></lightning-combobox>
-            </li>
+    <ul class="slds-button-group-row">
+        <li class="slds-button-group-item">
+            <lightning-combobox
+                data-id="package"
+                label="Package"
+                value={package}
+                options={packageOptions}
+                disabled={unavailable}
+                onchange={handleChangeValue} ></lightning-combobox>
+        </li>
+        <li class="slds-button-group-item">
+            <lightning-combobox
+                data-id="sobjectType"
+                label="SObject Type"
+                value={sobjectType}
+                disabled={unavailable}
+                options={sobjectTypeOptions}
+                onchange={handleChangeValue} ></lightning-combobox>
+        </li>
+        <li class="slds-button-group-item">
+            <lightning-combobox 
+                data-id="sobjectApiName"
+                label="SObject"
+                value={sobjectApiName}
+                disabled={unavailable}
+                options={sobjectApiNameOptions}
+                onchange={handleChangeValue}></lightning-combobox>
+        </li>
+        <li class="slds-button-group-item">
+            <label class="slds-form-element__label">Actions</label><br />
             <template lwc:if={filtersChanged}>
-                <li class="slds-button-group-item">
-                    <label class="slds-form-element__label">{whichFiltersChanged.length} filter(s) changed</label><br />
-                    <lightning-button 
-                        variant="brand" 
-                        label="Apply" 
-                        icon-name="utility:download" 
-                        title="You are ready to apply these filters in the app..." 
-                        onclick={propagateValues}></lightning-button>
-                </li>
+                <lightning-button 
+                    variant="brand" 
+                    icon-name="utility:play"
+                    label={applyButtonLabel}
+                    disabled={unavailable}
+                    title="You are ready to apply these filters in the app..."
+                    onclick={handleClickValidate}></lightning-button>
+                &nbsp;
             </template>
             <template lwc:if={filtersOriginallyChanged}>
-                <li class="slds-button-group-item">
-                    <label class="slds-form-element__label">Go back to the initial values</label><br />
-                    <lightning-button 
-                        variant="destructive" 
-                        label="Reset" 
-                        icon-name="utility:delete" 
-                        title="Reset the filters and go back to the initial values..." 
-                        onclick={resetValues}></lightning-button>
-                </li>
+                <lightning-button 
+                    variant="destructive" 
+                    icon-name="utility:reply_all" 
+                    label="Remove all filters" 
+                    disabled={unavailable}
+                    title="Remove all filters..." 
+                    onclick={handleClickReset}></lightning-button>
+                &nbsp;
             </template>
-        </ul>
-    </template>
+            <lightning-button 
+                variant="brand-outline" 
+                icon-name="utility:refresh"
+                label="Refresh" 
+                disabled={unavailable}
+                title="Refresh the list of objects and packages..."
+                onclick={handleClickRefresh}></lightning-button>
+        </li>
+        <li>
+            <template if:true={unavailable}>
+                Please wait while we initialize the global filters... 
+            </template>
+        </li>
+    </ul>
 </template>

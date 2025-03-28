@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "checkJs": true,
+        "target": "ESNext",
+        "noEmit": true,
+        "noImplicitAny": false,
+        "baseUrl": ".",
+        "pretty": true,
+        "paths": {
+            "c/*": [
+                "*"
+            ]
+        }
+    },
+    "include": [
+        "**/*"
+    ],
+    "paths": {
+        "c/*": [
+            "*"
+        ]
+    },
+    "typeAcquisition": {
+        "include": [
+            "jest"
+        ]
+    }
+}

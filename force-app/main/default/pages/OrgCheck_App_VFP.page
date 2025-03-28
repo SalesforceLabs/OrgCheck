@@ -1,4 +1,8 @@
-<apex:page >
+<apex:page>
+    <head>
+        <title>Org Check</title>
+    </head>
+
     <apex:includeLightning />
     <style>
         #app {
@@ -17,10 +21,15 @@
         }
         #loading-text {
         }
+        #additional-waiting-info {
+            color: rgb(31, 116, 72);
+            align-items: center;
+            width: 50em;
+        }
         #additional-info-issue-454 {
             display: none;
             color: rgb(170, 54, 54);
-            width: 25em;
+            width: 45em;
         }
         .slds-dropdown-trigger_click .slds-dropdown {
             min-width: fit-content;
@@ -37,28 +46,97 @@
                 </object>
             </div>
             <div id="loading-text">
-                Please wait while <b>Org Check</b> is loading...<br />
-                <br />
+                Please wait while <b>Org Check</b> is loading...
+            </div>
+            <div id="additional">
+                <span id="additional-waiting-info">
+                    <br /><br /><font color='green'><b><span id="additional-waiting-info-1" /></b><br /><span id="additional-waiting-info-2" /></font>
+                </span>                
                 <span id="additional-info-issue-454">
                     Hello! <br />
                     <br />
-                    You see this message because <b>two settings</b> (under the section <code>Session</code>) 
-                       are <b>both enabled at the same time</b> in your org, and these two together are preventing Org Check to 
-                       load successfuly.<br />
+                    You see this message because Org Check is taking more than 30 seconds to load.<br />
                     <br />
-                    The settings are :<br />
+                    <br />
+                    <b>Potential reason #1:</b> This may be due to a new version that has been pushed to your org or maybe this is 
+                      the first time you run Org Check.<br />                    
+                    <br />
+                    <b><u>Solution:</u> In that case, just wait a little longer, as the application will come shortly.</b><br />
+                    <br />
+                    <br />
+                    <b>Potential reason #2:</b> There might be another explanation that is preventing Org Check to load successfuly.<br />
+                    Under the section <code>Session</code> in the setup menu of this org, there must be 
+                       two specific settings <b>both enabled at the same time</b> that are causing this 
+                       issue.<br />
+                    These settings are :<br />
                     1. Option <b><code>Enable Content Delivery Network (CDN) for Lightning Component framework</code></b><br />
                     2. Option <b><code>Cross-Origin Embedder Policy (COEP)</code></b><br />
                     <br />
-                    <b><u>Solution:</u> This issue is corrected if you disable either one of the two options previously mentioned in the <a href="/lightning/setup/SecuritySession/home" target="_blank">setup menu</a>.</b>
+                    <b><u>Solution:</u> This issue is corrected if you disable either one of the two options previously mentioned in the <a href="/lightning/setup/SecuritySession/home" target="_blank">setup menu</a>.</b><br />
                 </span>
             </div>
         </div>
     </div>  
     <script>
+        const jokes = [
+            { question: `Where can you save your dad-jokes?`, answer: `In a dadda-base` },
+            { question: `Why did the tomato turn red?`, answer: `Because it saw the salad dressing.` },
+            { question: `If you have way too many dad-jokes, where can you store them all?`, answer: `In a dadda-lake` },
+            { question: `Why did the coffee file a police report?`, answer: `It got mugged.` },
+            { question: `What's a runner's favorite subject in school?`, answer: `Jog-graphy.` },
+            { question: `Why did the math book look sad?`, answer: `Because it had too many problems.` },
+            { question: `There are a quantity of artificial butter flavor beyond which people begin to believe it's not butter.`, answer: `This is known as the margarine of error.` },
+            { question: `People say Excel is terrible, but I use it every day and think it is pretty good.`, answer: `I'd rate it October 10th.` },
+            { question: `How did Darth Vader know what Luke was getting for his birthday?`, answer: `He felt his presents!` },
+            { question: `What does the Hulk wear to bed?`, answer: `Py-gammas.` },
+            { question: `What kind of fish is made up of only two sodium atoms?`, answer: `2 Na` },
+            { question: `Chances are if you've seen one shopping center...`, answer: `You've seen a mall`},
+            { question: `What do you call a fashionable lawn statue with an excellent sense of rhythmn?`, answer: `A metro-gnome`},
+            { question: `Why do cows not have toes?`, answer: `They lactose!` },
+            { question: `What do you call a pig with three eyes?`, answer: `Piiig` },
+            { question: `What do you call a fish wearing a bowtie?`, answer: `Sofishticated` },
+            { question: `Why are ghosts bad liars?`, answer: `Because you can see right through them!` },
+            { question: `How can you tell a vampire has a cold?`, answer: `They start coffin.` },
+            { question: `I was going to get a brain transplant...`, answer: `but I changed my mind` },
+            { question: `How do you organize a space party?`, answer: `You planet.`},
+            { question: `What did the scarf say to the hat?`, answer: `You go on ahead, I am going to hang around a bit longer.` },
+            { question: `My wife asked me to stop singing I'm a Believer by the Monkees because she found it annoying.`, answer: `At first, I thought she was kidding. But then I saw her face...` },
+            { question: `My wife asked me to stop singing Oasis.`, answer: `So, I said maybe...` },
+            { question: `People always talk about the "Eye of the Tiger".`, answer: `Yeah. No one talks about the other four letters...` },
+            { question: `Did you hear about the artist that was baroque?`, answer: `He stole the Monet, to buy Degas, to make the Van Gogh.` },
+            { question: `I just crashed my new kia`, answer: `Now I have Nokia` },
+            { question: `I just downloaded the Titanic soundtrack...`, answer: `It's syncing right now.` },
+            { question: `Did you know Stephen King has a son named Joe?`, answer: `I am not joking, but he is.` },
+            { question: `What do you call a French man wearing sandals?`, answer: `Philippe Philoppe` },
+            { question: `I tried to climb a really tall tower in France...`, answer: `but Eiffel off` },
+            { question: `What do you call a magician who loses his magic?`, answer: `Ian` },
+        ];
+        const joke_question = document.getElementById('additional-waiting-info-1');
+        const joke_answer = document.getElementById('additional-waiting-info-2');
+        const ultimate_note = document.getElementById('additional-info-issue-454');
+        const setJoke = () => {
+            const i = Math.floor(Math.random() * jokes.length);
+            const joke = jokes.splice(i, 1)[0];
+            joke_question.textContent = joke.question;
+            joke_answer.textContent = joke.answer;
+        }
+        let jokeInterval = undefined;
+        const stopJokes = () => {
+            joke_question.textContent = '';
+            joke_answer.textContent = '';
+            if (jokeInterval) clearInterval(jokeInterval);
+        }
+        // set first joke after 1 second
         setTimeout(() => {
-            document.getElementById('additional-info-issue-454').style.display = 'block';
-        }, 15000);
+            setJoke();
+            // and then set the next jokes every 5 seconds
+            jokeInterval = setInterval(setJoke, 5000);
+        }, 1000);
+        // set next jokes every 4 seconds
+        setTimeout(() => { 
+            stopJokes();
+            ultimate_note.style.display = 'block'; 
+        }, 30000);
 
         /* Reset the cache of previous versions */
         try {
@@ -82,11 +160,15 @@
                 component, 
                 { 
                     accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                    userId: '{! JSENCODE($User.Id) }' 
+                    userId: '{! JSENCODE($User.Id) }',
+                    textEncoder: new TextEncoder(),
+                    textDecoder: new TextDecoder(),
+                    localStorage: window.localStorage
                 },
                 'app',
                 () => {
                     document.getElementById('loading').style.display = 'none';
+                    stopJokes();
                 }
             );
         });

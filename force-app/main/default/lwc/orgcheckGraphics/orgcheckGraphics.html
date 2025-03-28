@@ -1,5 +1,31 @@
 <template>
-    <div class="slds-var-m-around_medium">
-        <div class="orgcheck-graph" lwc:dom="manual"></div>
-    </div>
+    <lightning-card title={name}>
+        <div id="orgcheck-graph" class={containerClass} lwc:dom="manual"></div>
+        <template lwc:if={hasNoData}>
+            No data...
+        </template>
+        <template lwc:else>
+            <p slot="footer" style="text-align: left;">
+                <template if:true={isPie}>
+                    <b>Total: <lightning-formatted-number value={pieTotal}></lightning-formatted-number></b><br />
+                    <table style="width:unset">
+                    <template if:true={pieCategories} for:each={pieCategories} for:item="category">
+                        <tr key={category.name}>
+                            <td width="1em"><span class="slds-show_inline-block legend-square" style={category.cssStyle}></span></td>
+                            <td style="padding-left: 5px; padding-right: 10px;">{category.name}</td>
+                            <td style="text-align: right;"><lightning-formatted-number value={category.value}></lightning-formatted-number></td>
+                        </tr>
+                    </template>
+                    </table>
+                </template>
+                <template if:true={isHierarchy}>
+                    <template if:true={hierarchyLegend} for:each={hierarchyLegend} for:item="legend">
+                        <span class="slds-show_inline-block legend-square" key={legend.name} style={legend.cssStyle}></span>
+                        &nbsp;{legend.name}
+                        &nbsp;&nbsp;&nbsp;
+                    </template>
+                </template>
+            </p>
+        </template>
+    </lightning-card>
 </template>

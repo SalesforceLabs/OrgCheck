@@ -21,6 +21,7 @@ th.sorted-desc {
 }
 
 th.vertical {
+    align-content: center;
     writing-mode: vertical-lr;
     background-position-x: left;
     transform: rotate(180deg);
@@ -42,13 +43,17 @@ td.bad {
     padding-left: var(--lwc-squareIconMediumContent, 1rem)!important;
 }
 
+tr.bad > button {
+    line-height: normal;
+}
+
 table.dontuseallspace {
     width: unset;
 }
 
 th.sticky {
     position: sticky;
-    top: 0; /* Don't forget this, required for the stickiness */
+    top: var(--lwc-spacingXxxSmall, 0); /* Don't forget this, required for the stickiness */
     z-index: 1000; /* when scrolling the header should stay on top */
     vertical-align: bottom;
 }

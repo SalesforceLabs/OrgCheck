@@ -1,0 +1,6 @@
+Name: Javascript Force framework
+Website: https://jsforce.github.io/
+Version: v1.11.1 minimized
+Release: https://github.com/jsforce/jsforce/releases/tag/1.11.1
+Source: https://cdn.jsdelivr.net/npm/jsforce@1.11.1/build/jsforce.min.js
+Comment: main version 2 or 3 have issues when loading in LWC, so we will keep on using v1!

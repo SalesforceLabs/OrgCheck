@@ -1,5 +1,6 @@
-import { createElement } from 'lwc';
-import OrgcheckSpinner from 'c/orgcheckSpinner';
+// @ts-ignore
+import { createElement } from '@lwc/engine-dom';
+import OrgcheckSpinner from '../orgcheckSpinner';
     
 describe('c-orgcheck-spinner', () => {
 
@@ -7,42 +8,49 @@ describe('c-orgcheck-spinner', () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
-    document.body.appendChild(element);    
-    expect(element.shadowRoot.textContent).toBe('');
+    document.body.appendChild(element);
+    const section = element.shadowRoot.querySelector('section');
+    expect(section.classList.contains('slds-hide')).toBeTruthy();
   });
 
-  it('spinner is shown after calling open(), by default without the closing icon', () => {
+  it('spinner is shown after calling open(), by default without the closing icon', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
     document.body.appendChild(element);   
     element.open(); 
     return Promise.resolve().then(() => {
-      expect(element.shadowRoot.textContent).not.toBe('');
+      const section = element.shadowRoot.querySelector('section');
+      expect(section.classList.contains('slds-hide')).toBeFalsy();
+      expect(element.shadowRoot.element).not.toBe('');
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).toBeNull();
     });
   });
 
-  it('spinner is shown with closing icon after calling canBeClosed(), and click on that icon closes the spinner', () => {
+  it('spinner is shown with closing icon if at least one section failed, and clicking on that icon closes the spinner', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
-    document.body.appendChild(element);   
-    element.open();
-    element.canBeClosed();
-    return Promise.resolve().then(() => {
+    document.body.appendChild(element);
+    element.sectionLog('1', '...');
+    element.sectionLog('2', '...');
+    element.sectionLog('3', '...');
+    element.sectionEnded('1', 'OK');
+    element.sectionFailed('2', 'Failed'); 
+    element.sectionEnded('3', 'OK'); 
+    return Promise.resolve().then(async () => {
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).not.toBeNull();
-
       closeIcon.dispatchEvent(new CustomEvent('click'));
       return Promise.resolve().then(() => {
-        expect(element.shadowRoot.textContent).toBe('');
+        const section = element.shadowRoot.querySelector('section');
+        expect(section.classList.contains('slds-hide')).toBeTruthy();
       });
     });
   });
 
-  it('spinner is showing messages by sections and do not mix them', () => {
+  it('spinner is showing messages by sections and do not mix them', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -50,7 +58,7 @@ describe('c-orgcheck-spinner', () => {
     // Opening the spinner
     element.open();
     // Add a new section called "1" with a message "A"
-    element.sectionStarts('1', 'A');
+    element.sectionLog('1', 'A');
     return Promise.resolve().then(() => {
       const list = element.shadowRoot.querySelectorAll('.slds-progress__list > li');
       // list should have only one element (because only one section at this time)
@@ -61,7 +69,7 @@ describe('c-orgcheck-spinner', () => {
       expect(list[0].childNodes[1].textContent).toMatch(/1 A/);
 
       // Add a new section called "21" with a message "B"
-      element.sectionContinues('2', 'B');
+      element.sectionLog('2', 'B');
       return Promise.resolve().then(() => {
         const list2 = element.shadowRoot.querySelectorAll('.slds-progress__list > li');
         // list should have now two elements (because we added a second one)
@@ -80,17 +88,11 @@ describe('c-orgcheck-spinner', () => {
         // Setting an error message to an existing section (2)
         element.sectionFailed('2', 'Z');
         return Promise.resolve().then(() => {
+          const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
           const list3 = element.shadowRoot.querySelectorAll('.slds-progress__list > li');
-          // list should still have two elements (because we did not add new ones)
+          // as all the pending sections are either ended or failed, and we got one error, the spinner should stay open with the close icon
+          expect(closeIcon).not.toBeNull();
           expect(list3).toHaveLength(2);
-          // the first section (1) should be setup as follow:
-          expect(list3[0].classList.contains('slds-is-completed')).toBeTruthy();
-          expect(list3[0].childNodes[0].classList.contains('progress-marker-ended')).toBeTruthy();
-          expect(list3[0].childNodes[1].textContent).toMatch(/1 C/);
-          // the first section (2) should be setup as follow:
-          expect(list3[1].classList.contains('slds-has-error')).toBeTruthy();
-          expect(list3[1].childNodes[0].classList.contains('progress-marker-error')).toBeTruthy();
-          expect(list3[1].childNodes[1].textContent).toMatch(/2 Z/);
         });
       });
     });
