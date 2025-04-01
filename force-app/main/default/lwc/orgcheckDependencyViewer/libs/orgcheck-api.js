@@ -11004,7 +11004,6 @@ class SalesforceManager extends SalesforceManagerIntf {
         const indexOfFromStatment = query.indexOf(' FROM ');
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
         const isAggregateQuery = indexOfGroupByStatment !== -1;
-let count = 0;
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
         const doNextQuery = async (/** @type {string} */ startingValue) => {
             if (!startingValue && isAggregateQuery === false) {
@@ -11035,7 +11034,6 @@ let count = 0;
             // Adding records to the global array.
             allRecords.push(... results.records);
             // Check if this was the last batch?
-if (count++ > 10) return;
             if (results.records.length >= MAX_NOQUERYMORE_BATCH_SIZE) { // this was not yet the last batch
                 // Update the last ID to start the next batch
                 const newStartingValue = allRecords[allRecords.length-1][isAggregateQuery ? `MAX(${field})`: field];
@@ -12167,7 +12165,7 @@ class API {
     }
     
     /**
-     * @description Remove all the cached information about visual force components
+     * @description Remove all the cached information about Visualforce Components
      * @public
      */
     removeAllVisualForceComponentsFromCache() {
@@ -12188,7 +12186,7 @@ class API {
     }
 
     /**
-     * @description Remove all the cached information about visual force pages
+     * @description Remove all the cached information about Visualforce Pages
      * @public
      */
     removeAllVisualForcePagesFromCache() {

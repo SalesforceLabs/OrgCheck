@@ -476,10 +476,11 @@ class RowsFactory {
      * @param {string} order
      */ 
     static sort(tableDefintion, rows,  columnIndex, order) {
+        const column = tableDefintion.columns[columnIndex];
+        if (! column) return;
         const iOrder = order === SortOrder.ASC ? 1 : -1;
-        const columnType = tableDefintion.columns[columnIndex].type;
-        const isIterative = columnType == ColumnType.OBJS || columnType == ColumnType.TXTS || columnType == ColumnType.URLS;
-        const property = columnType == ColumnType.URL ? 'label' : 'value';
+        const isIterative = column.type == ColumnType.OBJS || column.type == ColumnType.TXTS || column.type == ColumnType.URLS;
+        const property = column.type == ColumnType.URL ? 'label' : 'value';
         let index = 0;
         let value1, value2;
         return rows.sort((row1, row2) => {

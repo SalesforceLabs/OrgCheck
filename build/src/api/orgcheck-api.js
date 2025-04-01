@@ -643,7 +643,7 @@ export class API {
     }
     
     /**
-     * @description Remove all the cached information about visual force components
+     * @description Remove all the cached information about Visualforce Components
      * @public
      */
     removeAllVisualForceComponentsFromCache() {
@@ -664,7 +664,7 @@ export class API {
     }
 
     /**
-     * @description Remove all the cached information about visual force pages
+     * @description Remove all the cached information about Visualforce Pages
      * @public
      */
     removeAllVisualForcePagesFromCache() {

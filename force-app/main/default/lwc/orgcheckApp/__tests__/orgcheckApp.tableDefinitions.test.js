@@ -266,7 +266,7 @@ describe('c-orgcheck-app', () => {
                 'profileId', 'permissionSetIds' ].sort());
         });
 
-        it('Should have correct table definition for visual force pages', () => {
+        it('Should have correct table definition for Visualforce Pages', () => {
             // Properties defined for each row of the Table
             const objectProperties = Object.keys(new SFDC_VisualForcePage);
             // Properties used in the app in the corresponding TableDefintion
@@ -278,7 +278,7 @@ describe('c-orgcheck-app', () => {
             expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds' ].sort());
         });
 
-        it('Should have correct table definition for visual force components', () => {
+        it('Should have correct table definition for Visualforce Components', () => {
             // Properties defined for each row of the Table
             const objectProperties = Object.keys(new SFDC_VisualForceComponent);
             // Properties used in the app in the corresponding TableDefintion
