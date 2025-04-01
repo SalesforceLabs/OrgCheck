@@ -316,7 +316,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
             if (isAggregateQuery === false) {
                 realQuery = `${query} AND ${field} > '${startingValue}' ORDER BY ${field} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
             } else {
-                realQuery = `${query.substring(0, indexOfFromStatment)}, MAX(${field}) `+
+                realQuery = `${query.substring(0, indexOfFromStatment)}, MAX(${field}) qmField `+ // Note that the max field is aliased to "qmField"
                             `${query.substring(indexOfFromStatment, indexOfGroupByStatment)} `+
                             (startingValue ? `WHERE ${field} > ${startingValue} ` : '')+
                             `${query.substring(indexOfGroupByStatment)} `+
@@ -338,10 +338,14 @@ export class SalesforceManager extends SalesforceManagerIntf {
             allRecords.push(... results.records);
             // Check if this was the last batch?
             if (results.records.length >= MAX_NOQUERYMORE_BATCH_SIZE) { // this was not yet the last batch
-                // Update the last ID to start the next batch
-                const newStartingValue = allRecords[allRecords.length-1][isAggregateQuery ? `MAX(${field})`: field];
-                // call the next Batch
-                await doNextQuery(newStartingValue);
+                const lastRecord = allRecords[allRecords.length-1];
+                if (isAggregateQuery === false) {
+                    // call the next Batch with lastRecord field
+                    await doNextQuery(lastRecord[field]);
+                } else {
+                    // if aggregate query, call the next Batch with lastRecord 'qmField' (the alias of "MAX(field)" )'
+                    await doNextQuery(lastRecord['qmField']);
+                }
             }
         }
         try {
