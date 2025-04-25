@@ -62,21 +62,83 @@ class JsForceConnectionMock {
     this.metadata = new JsForceMetadataMock();
   }
 
-  async query(string, options) { 
-    if (string.includes('#Wait500ms#')) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    } else if (string.includes('#Wait900ms#')) {
-      await new Promise((resolve) => setTimeout(resolve, 900));
+  queryMore(url, options) {
+    const matchRemaining = url.match(/#Remaining=(?<remaining>[0-9]*)#/);
+    const remaining = Number.parseInt(matchRemaining.groups.remaining);
+    const matchFields = url.match(/#Fields=(?<fields>.*)#/);
+    const fields = matchFields.groups.fields.split(',').map((f) => f.trim());
+    const records = [];
+    for (let i = 0; i < remaining; i++) {
+      const record = {};
+      fields.forEach(field => record[field] = `${field}-${i}`);
+      records.push(record);
     }
-    if (string.includes('#RaiseError#')) {
-      throw new Error('Error raised by the query');
-    }
-    const nbRecords = string.includes('TableWith10Records') ? 10 : 
-                      string.includes('TableWith100Records') ? 100 : 
-                      string.includes('TableWith1000Records') ? 1000 : 5;
     return {
-      records: new Array(nbRecords).map((r, i) => { return { Id: `abc${i}`, Name: `Test${i}` }; }) 
-    };
+      records: records,
+      done: true
+    }
+  }
+
+  /** @type {number} */
+  nbRecordsSoFarForCustomQueryMore = 0;
+
+  async query(string, options) { 
+
+    const matchWait = string.match(/#Wait=(?<wait>[0-9]*)#/);
+    if (matchWait) {
+      await new Promise((resolve) => setTimeout(resolve, matchWait.groups.wait));
+    }
+    const matchError = string.match(/#Error=(?<message>.*)#/);
+    if (matchError) {
+      throw new Error(matchError.groups.message);
+    }
+    const matchNbRecords = string.match(/#Records=(?<nb>[0-9]*)#/);
+    const nbTotalRecords = Number.parseInt(matchNbRecords.groups.nb);
+    const fields = string.match(/SELECT (?<fields>.*) FROM /).groups.fields.split(',').map((f) => f.trim());
+
+    const matchNoSupportQueryMore = string.match(/#NoSupportQueryMore,max=(?<nb>[0-9]*)#/); 
+    if (matchNoSupportQueryMore) {
+      const matchLimit = string.match(/ LIMIT (?<size>[0-9]*)/);
+      const maxBeforeError = Number.parseInt(matchNoSupportQueryMore.groups.max);
+      const maxNbRecords = Number.parseInt(matchLimit.groups.size);
+      if (maxNbRecords > maxBeforeError) {
+        throw new Error('This entity does not support query more');
+      }
+      let realSize;
+      if (this.nbRecordsSoFarForCustomQueryMore + maxNbRecords > nbTotalRecords) {
+        realSize = nbTotalRecords - this.nbRecordsSoFarForCustomQueryMore;
+        this.nbRecordsSoFarForCustomQueryMore = 0;
+      } else {
+        realSize = maxNbRecords;
+        this.nbRecordsSoFarForCustomQueryMore += maxNbRecords;
+      }
+      const records = [];
+      for (let i = 0; i < realSize; i++) {
+        const record = {};
+        fields.forEach(field => record[field] = `${field}-${i}`);
+        records.push(record);
+      }
+      return {
+        records: records,
+        done: true
+      }
+    }
+
+    const matchSupportQueryMore = string.match(/#SupportQueryMore,batchSize=(?<size>[0-9]*)#/);
+    const batchSize = Number.parseInt(matchSupportQueryMore ? matchSupportQueryMore.groups.size : 2000);
+    const currentBatchSize = nbTotalRecords > batchSize ? batchSize : nbTotalRecords;
+    const remaining = nbTotalRecords - currentBatchSize;
+    const records = [];
+    for (let i = 0; i < currentBatchSize; i++) {
+      const record = {};
+      fields.forEach(field => record[field] = `${field}-${i}`);
+      records.push(record);
+    }
+    return {
+      records: records,
+      done: remaining <= 0,
+      nextRecordsUrl: `/next #Remaining=${remaining}# #SupportQueryMore,batchSize=${batchSize}# #Fields=${fields.join(',')}#`
+    }
   }
 }
 
@@ -195,7 +257,7 @@ describe('tests.api.unit.Managers', () => {
     const logger = new LoggerMock();
 
     it('checks if the salesforce manager implementation runs soqlQuery correctly with a good query', async () => {
-      const results = await manager.soqlQuery([{ string: 'SELECT Id FROM TableWith10Records #Wait900ms#' }]);
+      const results = await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=10# #Wait900ms#' }]);
       expect(results).toBeDefined();
       expect(results.length).toBe(1);
       expect(results[0].length).toBe(10);
@@ -203,7 +265,7 @@ describe('tests.api.unit.Managers', () => {
 
     it('checks if the salesforce manager implementation runs soqlQuery correctly with a wrong query', async () => {
       try {
-        const results = await manager.soqlQuery([{ string: 'SELECT Id FROM TableWith1000Records #Wait900ms# #RaiseError#' }]);
+        const results = await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=100# #Wait900ms# #RaiseError#' }]);
       } catch (error) {
         expect(error).toBeDefined();
         expect(error.message).toBe('Error raised by the query');
@@ -212,9 +274,9 @@ describe('tests.api.unit.Managers', () => {
 
     it('checks if the salesforce manager implementation runs soqlQuery correctly with multiple good queries', async () => {
       const results = await manager.soqlQuery([
-        { string: 'SELECT Id FROM TableWith10Records' },
-        { string: 'SELECT Id FROM TableWith100Records #Wait500ms#' },
-        { string: 'SELECT Id FROM TableWith1000Records #Wait900ms#' }
+        { string: 'SELECT Id FROM Account #Records=10#' },
+        { string: 'SELECT Id FROM Account #Records=100# #Wait500ms#' },
+        { string: 'SELECT Id FROM Account #Records=1000# #Wait900ms#' }
       ]);
       expect(results).toBeDefined();
       expect(results.length).toBe(3);
@@ -226,14 +288,43 @@ describe('tests.api.unit.Managers', () => {
     it('checks if the salesforce manager implementation runs soqlQuery correctly with multiple good queries and one wrong query', async () => {
       try {
         const results = await manager.soqlQuery([
-          { string: 'SELECT Id FROM TableWith10Records #Wait500ms#' },
-          { string: 'SELECT Id FROM TableWith100Records #Wait900ms#  #RaiseError#' },
-          { string: 'SELECT Id FROM TableWith1000Records #Wait900ms#' }
+          { string: 'SELECT Id FROM Account #Records=10# #Wait500ms#' },
+          { string: 'SELECT Id FROM Account #Records=100# #Wait900ms#  #RaiseError#' },
+          { string: 'SELECT Id FROM Account #Records=1000# #Wait900ms#' }
         ]);
       } catch (error) {
         expect(error).toBeDefined();
         expect(error.message).toBe('Error raised by the query');
       }
+    });
+
+    it('checks if the salesforce manager implementation runs soqlQuery correctly with queryMore standard retrieval', async () => {
+      const results = await manager.soqlQuery([{ 
+        string: 'SELECT Id, Name FROM Account #Records=10012# #SupportQueryMore,size=200#'
+      }]);
+      expect(results).toBeDefined();
+      expect(results.length).toBe(1);
+      expect(results[0].length).toBe(10012);
+    });
+
+    it('checks if the salesforce manager implementation runs soqlQuery correctly with queryMore custom retrieval without aggregate', async () => {
+      const results = await manager.soqlQuery([{ 
+        string: 'SELECT Id, Name FROM Account #Records=10012# #NoSupportQueryMore,max=2000#',
+        queryMoreField: 'Id'
+      }]);
+      expect(results).toBeDefined();
+      expect(results.length).toBe(1);
+      expect(results[0].length).toBe(10012);
+    });
+
+    it('checks if the salesforce manager implementation runs soqlQuery correctly with queryMore custom retrieval withv aggregate', async () => {
+      const results = await manager.soqlQuery([{ 
+        string: 'SELECT Name FROM Account #Records=10012# #NoSupportQueryMore,max=2000# GROUP BY Name',
+        queryMoreField: 'CreatedDate'
+      }]);
+      expect(results).toBeDefined();
+      expect(results.length).toBe(1);
+      expect(results[0].length).toBe(10012);
     });
 
     it('checks if the salesforce manager implementation runs readMetadata correctly', async () => {
