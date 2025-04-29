@@ -40,10 +40,14 @@ export class DatasetFlows extends Dataset {
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
-        const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
-            logger
-        );
+        const flowDependenciesIds = [];
+        await Processor.forEach(flowDefRecords, (record) => {
+            // Add the ID15 of the most interesting flow version
+            flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
+            // Add the ID15 of the flow definition
+            flowDependenciesIds.push(sfdcManager.caseSafeId(record.Id));
+        });
+        const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(flowDependenciesIds, logger);
         
         // List of active flows that we need to get information later (with Metadata API)
         const activeFlowIds = [];
@@ -74,7 +78,7 @@ export class DatasetFlows extends Dataset {
                 }, 
                 dependencies: {
                     data: flowDefinitionsDependencies,
-                    idField: 'currentVersionId'
+                    idFields: [ 'id', 'currentVersionId' ]
                 }
             });
                 

@@ -251,11 +251,12 @@ class DataDependenciesFactory {
     /**
      * @description Create a new instance of DataDependencies
      * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
-     * @param {string} whatId 
+     * @param {Array<string>} whatIds 
      * @returns {DataDependencies}
      */
-    static create(data, whatId) {
-        if (data.errors?.includes(whatId)) {
+    static create(data, whatIds) {
+        // Check if at least one of the whatIds is present in the data errors list
+        if (data.errors?.some(errorId => whatIds.includes(errorId))) {
             return {
                 hadError: true,
                 using: [],
@@ -263,7 +264,9 @@ class DataDependenciesFactory {
                 referencedByTypes: {}
             };
         }
-        const using = data.records.filter(e => e.id === whatId).map(n => { 
+        // Data can contain a lot of dependencies from other ids, we just want to get the dependencies for the given whatIds
+        // WhatID is using what? -- Here we are getting the dependencies where the ID is in the whatIds list
+        const using = data.records.filter(e => whatIds.includes(e.id)).map(n => { 
             return { 
                 id: n.refId, 
                 name: n.refName, 
@@ -272,7 +275,8 @@ class DataDependenciesFactory {
             }; 
         });
         const referencedByTypes = {};
-        const referenced = data.records.filter(e => e.refId === whatId).map(n => {
+        // WhatID is referenced where? -- Here we are getting the dependencies where the REFID is in the whatIds list
+        const referenced = data.records.filter(e => whatIds.includes(e.refId)).map(n => {
             if (referencedByTypes[n.type] === undefined) {
                 referencedByTypes[n.type] = 1;
             } else {
@@ -7918,10 +7922,14 @@ class DatasetFlows extends Dataset {
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
-        const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(flowDefRecords, (record) => sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId)), 
-            logger
-        );
+        const flowDependenciesIds = [];
+        await Processor.forEach(flowDefRecords, (record) => {
+            // Add the ID15 of the most interesting flow version
+            flowDependenciesIds.push(sfdcManager.caseSafeId(record.ActiveVersionId ?? record.LatestVersionId));
+            // Add the ID15 of the flow definition
+            flowDependenciesIds.push(sfdcManager.caseSafeId(record.Id));
+        });
+        const flowDefinitionsDependencies = await sfdcManager.dependenciesQuery(flowDependenciesIds, logger);
         
         // List of active flows that we need to get information later (with Metadata API)
         const activeFlowIds = [];
@@ -7952,7 +7960,7 @@ class DatasetFlows extends Dataset {
                 }, 
                 dependencies: {
                     data: flowDefinitionsDependencies,
-                    idField: 'currentVersionId'
+                    idFields: [ 'id', 'currentVersionId' ]
                 }
             });
                 
@@ -8265,7 +8273,7 @@ class DataFactoryInstance extends DataFactoryInstanceIntf {
         }
         // If dependencies are needed...
         if (this._isDependenciesNeeded === true && configuration.dependencies) {
-            row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, row[configuration.dependencies.idField || 'id']);
+            row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, (configuration.dependencies.idFields || ['id']).map(f => row[f]));
         }
         // Return the row finally
         return row;
