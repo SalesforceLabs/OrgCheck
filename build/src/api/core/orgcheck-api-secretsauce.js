@@ -24,6 +24,7 @@ import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage'
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { ScoreRule } from './orgcheck-api-datafactory';
+import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -424,6 +425,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This Apex Test Class has at least one successful method which took more than 20 secondes to execute',
         badField: 'testPassedButLongMethods',
         applicable: [ SFDC_ApexClass ]
+    }, {
+        id: 49,
+        description: 'Page layout should be assigned to at least one Profile',
+        formula: (/** @type {SFDC_PageLayout} */ d) => d.profileAssignmentCount === 0,
+        errorMessage: 'This Page Layout is not assigned to any Profile. Please review this page layout and assign it to at least one profile.',
+        badField: 'profileAssignmentCount',
+        applicable: [ SFDC_PageLayout ]
     }
 ];
 

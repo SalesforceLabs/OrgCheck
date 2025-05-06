@@ -512,6 +512,7 @@ export default class OrgcheckApp extends LightningElement {
         'object':                    { label: '🎳 Object Documentation',       tab: 'data-model',  isGlobalView: false,     data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._ob,   get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
         'object-permissions':        { label: '🚦 Object Permissions',         tab: 'security',    isGlobalView: false,     data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._nm,   get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
         'objects':                   { label: '🏉 Org Wide Defaults',          tab: 'data-model',  isGlobalView: false,     data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._no,   get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
+        'page-layouts':              { label: '🏓 Page Layouts',               tab: 'security',    isGlobalView: true,      data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._al,   get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
         'permission-sets':           { label: '🚔 Permission Sets',            tab: 'security',    isGlobalView: true,      data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getPermissionSets(this.namespace); }},
         'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: 'security',    isGlobalView: true,      data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getPermissionSetLicenses(); }},
         'process-builders':          { label: '🛺 Process Builders',           tab: 'automation',  isGlobalView: true,      data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getProcessBuilders(); }},
@@ -1027,7 +1028,7 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description Table for field sets (specific to the current selected object)
+     * @description Table definition for field sets (specific to the current selected object)
      * @type {ocui.Table}
      */ 
     fieldSetsTableDefinition = {
@@ -1041,7 +1042,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for page layouts (specific to the current selected object)
+     * @description Table definition for page layouts (specific to the current selected object)
      * @type {ocui.Table}
      */
     layoutsTableDefinition = {
@@ -1055,7 +1056,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for object limits (specific to the current selected object)
+     * @description Table definition for object limits (specific to the current selected object)
      * @type {ocui.Table}
      */
     limitsTableDefinition = {
@@ -1074,7 +1075,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for validation rules
+     * @description Table definition for validation rules
      * @type {ocui.Table}
      */
     validationRulesTableDefinition = {
@@ -1097,7 +1098,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for validation rules (specific to the current selected object)
+     * @description Table definition for validation rules (specific to the current selected object)
      * @type {ocui.Table}
      */
     validationRulesInObjectTableDefinition = {
@@ -1118,7 +1119,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for web links (specific to the current selected object)
+     * @description Table definition for web links (specific to the current selected object)
      * @type {ocui.Table}
      */
     webLinksTableDefinition = {
@@ -1140,7 +1141,7 @@ export default class OrgcheckApp extends LightningElement {
     };
     
     /**
-     * @description Table for record types (specific to the current selected object)
+     * @description Table definition for record types (specific to the current selected object)
      * @type {ocui.Table}
      */
     recordTypesTableDefinition = {
@@ -1159,7 +1160,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for sobject relationships (specific to the current selected object)
+     * @description Table definition for sobject relationships (specific to the current selected object)
      * @type {ocui.Table}
      */
     relationshipsTableDefinition = {
@@ -1176,18 +1177,18 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom fields
+     * @description Table definition for custom fields
      * @type {ocui.Table}
      */
     customFieldsTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'In this object',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }},  //filter: 'obj', 
-            { label: 'Object Type',         type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }}, //filter: 'obj', 
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }}, // filter: 'cus',
+            { label: 'In this object',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',         type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
             { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
@@ -1200,14 +1201,14 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }}, // filter: 'dep', 
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, // filter: 'dep', 
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, // filter: 'dep', 
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, // filter: 'dep', 
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, // filter: 'dep', 
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},// filter: 'dep', 
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
+            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }},
+            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }},
+            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1215,16 +1216,16 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom fields (specific to the current selected object)
+     * @description Table definition for custom fields (specific to the current selected object)
      * @type {ocui.Table}
      */
     customFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }}, // filter: 'cus',
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
             { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
@@ -1237,14 +1238,14 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }}, // filter: 'dep', 
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, // filter: 'dep', 
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, // filter: 'dep', 
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, // filter: 'dep', 
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, // filter: 'dep', 
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},// filter: 'dep', 
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, 
+            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, 
+            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, 
+            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1252,13 +1253,13 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for standard fields (specific to the current selected object)
+     * @description Table definition for standard fields (specific to the current selected object)
      * @type {ocui.Table}
      */
     standardFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, 
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
@@ -1271,8 +1272,8 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
             { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1280,7 +1281,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom labels
+     * @description Table definition for custom labels
      * @type {ocui.Table}
      */
     customLabelsTableDefinition = {
@@ -1308,7 +1309,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning aura components
+     * @description Table definition for lightning aura components
      * @type {ocui.Table}
      */
     auraComponentsTableDefinition = {
@@ -1330,7 +1331,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning pages
+     * @description Table definition for lightning pages
      * @type {ocui.Table}
      */
     flexiPagesTableDefinition = {
@@ -1340,7 +1341,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }}, // filter: 'obj',
+            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
             { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
             { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
             { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
@@ -1353,7 +1354,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning pages within an SObject
+     * @description Table definition for lightning pages within an SObject
      * @type {ocui.Table}
      */
     flexiPagesInObjectTableDefinition = {
@@ -1375,7 +1376,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning web components
+     * @description Table definition for lightning web components
      * @type {ocui.Table}
      */
     lightningWebComponentsTableDefinition = {
@@ -1396,8 +1397,29 @@ export default class OrgcheckApp extends LightningElement {
         orderSort: ocui.SortOrder.DESC
     };
 
+
     /**
-     * @description Table for permission sets
+     * @description Table definition for page layouts
+     * @type {ocui.Table}
+     */
+    pageLayoutsTableDefinition = {
+        columns: [
+            { label: '#',                type: ocui.ColumnType.IDX },
+            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Type',             type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Object',           type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
+            { label: 'Assignment Count', type: ocui.ColumnType.NUM, data: { value: 'profileAssignmentCount' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
+     * @description Table definition for permission sets
      * @type {ocui.Table}
      */
     permissionSetsTableDefinition = {
@@ -1425,7 +1447,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for permission set licenses
+     * @description Table definition for permission set licenses
      * @type {ocui.Table}
      */
     permissionSetLicensesTableDefinition = {
@@ -1450,7 +1472,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profiles
+     * @description Table definition for profiles
      * @type {ocui.Table}
      */
     profilesTableDefinition = {
@@ -1477,7 +1499,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profile restrictions
+     * @description Table definition for profile restrictions
      * @type {ocui.Table}
      */
     profileRestrictionsTableDefinition = {
@@ -1496,7 +1518,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profiles password policies
+     * @description Table definition for profiles password policies
      * @type {ocui.Table}
      */
     profilePasswordPoliciesTableDefinition = {
@@ -1519,7 +1541,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for public groups
+     * @description Table definition for public groups
      * @type {ocui.Table}
      */
     publicGroupsTableDefinition = {
@@ -1539,7 +1561,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for queues
+     * @description Table definition for queues
      * @type {ocui.Table}
      */
     queuesTableDefinition = {
@@ -1559,7 +1581,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for active internal users
+     * @description Table definition for active internal users
      * @type {ocui.Table}
      */
     usersTableDefinition = {
@@ -1587,7 +1609,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for visualforce components
+     * @description Table definition for visualforce components
      * @type {ocui.Table}
      */
     visualForceComponentsTableDefinition = {
@@ -1611,7 +1633,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for visualforce pages
+     * @description Table definition for visualforce pages
      * @type {ocui.Table}
      */
     visualForcePagesTableDefinition = {
@@ -1636,7 +1658,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for apex classes (compiled and not tests)
+     * @description Table definition for apex classes (compiled and not tests)
      * @type {ocui.Table}
      */
     apexClassesTableDefinition = {
@@ -1675,7 +1697,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for uncompiled apex classes
+     * @description Table definition for uncompiled apex classes
      * @type {ocui.Table}
      */    
     apexUncompiledTableDefinition = {
@@ -1699,7 +1721,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for apex triggers
+     * @description Table definition for apex triggers
      * @type {ocui.Table}
      */
     apexTriggersTableDefinition = {
@@ -1712,7 +1734,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Size',          type: ocui.ColumnType.NUM, data: { value: 'length' }},
             { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, // filter: 'nob'
+            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }},
             { label: 'Active?',       type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Has SOQL?',     type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
             { label: 'Has DML?',      type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
@@ -1733,7 +1755,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for apex triggers within SObject
+     * @description Table definition for apex triggers within SObject
      * @type {ocui.Table}
      */
     apexTriggersInObjectTableDefinition =  {
@@ -1766,7 +1788,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for apex classes that are tests
+     * @description Table definition for apex classes that are tests
      * @type {ocui.Table}
      */
     apexTestsTableDefinition = {
@@ -1809,7 +1831,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for SObject Org Wide Default
+     * @description Table definition for SObject Org Wide Default
      * @type {ocui.Table}
      */
     owdTableDefinition = {
@@ -1826,7 +1848,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for flows
+     * @description Table definition for flows
      * @type {ocui.Table}
      */
     flowsTableDefinition = {
@@ -1862,13 +1884,13 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for process builders
+     * @description Table definition for process builders
      * @type {ocui.Table}
      */
     processBuildersTableDefinition = this.flowsTableDefinition;
     
     /**
-     * @description Table for workflows
+     * @description Table definition for workflows
      * @type {ocui.Table}
      */
     workflowsTableDefinition = {
@@ -1890,7 +1912,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for roles
+     * @description Table definition for roles
      * @type {ocui.Table}
      */
     rolesTableDefinition = {
@@ -1908,7 +1930,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for object permissions
+     * @description Table definition for object permissions
      * @type {ocui.Table}
      */
     get objectPermissionsTableDefinition() {
@@ -1934,7 +1956,7 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Table for application permissions
+     * @description Table definition for application permissions
      * @type {ocui.Table}
      */
     get appPermissionsTableDefinition() {
@@ -1962,7 +1984,7 @@ export default class OrgcheckApp extends LightningElement {
     }
     
     /**
-     * @description Table for field permissions
+     * @description Table definition for field permissions
      * @type {ocui.Table}
      */
     get fieldPermissionsTableDefinition() {
@@ -1988,7 +2010,7 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Table for score rules
+     * @description Table definition for score rules
      * @type {ocui.Table}
      */
     get scoreRulesTableDefinition() {
@@ -2242,6 +2264,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_LightningWebComponent>}
      */
     lightningWebComponentsTableData;
+
+    /** 
+     * @description Data table for page layouts
+     * @type {Array<ocapi.SFDC_PageLayout>}
+     */
+    pageLayoutsTableData;
 
     /** 
      * @description Data table for permission sets

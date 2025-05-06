@@ -37,6 +37,7 @@ import { DatasetApplications } from '../dataset/orgcheck-api-dataset-application
 import { DatasetFieldPermissions } from '../dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetValidationRules } from '../dataset/orgcheck-api-dataset-validationrules';
 import { DatasetPermissionSetLicenses } from '../dataset/orgcheck-api-dataset-permissionsetlicenses';
+import { DatasetPageLayouts } from '../dataset/orgcheck-api-dataset-pagelayouts';
 
 /**
  * @description Dataset manager
@@ -128,6 +129,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.OBJECTTYPES, new DatasetObjectTypes());
         this._datasets.set(DatasetAliases.ORGANIZATION, new DatasetOrganization());
         this._datasets.set(DatasetAliases.PACKAGES, new DatasetPackages());
+        this._datasets.set(DatasetAliases.PAGELAYOUTS, new DatasetPageLayouts());
         this._datasets.set(DatasetAliases.PERMISSIONSETS, new DatasetPermissionSets());
         this._datasets.set(DatasetAliases.PERMISSIONSETLICENSES, new DatasetPermissionSetLicenses());
         this._datasets.set(DatasetAliases.PROFILEPWDPOLICIES, new DatasetProfilePasswordPolicies());

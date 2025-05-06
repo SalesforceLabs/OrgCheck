@@ -20,6 +20,7 @@
  * @property {string} OBJECTS
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
+ * @property {string} PAGE_LAYOUTS
  * @property {string} PERMISSION_SETS
  * @property {string} PERMISSION_SET_LICENSES
  * @property {string} PROCESS_BUILDERS
@@ -55,6 +56,7 @@ export const RecipeAliases = {
     OBJECT_TYPES: 'object-types',
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
+    PAGE_LAYOUTS: 'page-layouts',
     PERMISSION_SETS: 'permission-sets',
     PERMISSION_SET_LICENSES: 'permission-set-licenses',
     PROCESS_BUILDERS: 'process-builders',

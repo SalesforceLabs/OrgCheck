@@ -39,6 +39,7 @@ import { RecipeApexUncompiled } from '../recipe/orgcheck-api-recipe-apexuncompli
 import { RecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermissions';
 import { RecipeValidationRules } from '../recipe/orgcheck-api-recipe-validationrules';
 import { RecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permissionsetlicenses';
+import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
 
 /**
  * @description Recipe Manager
@@ -105,6 +106,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.OBJECT_TYPES, new RecipeObjectTypes());
         this._recipes.set(RecipeAliases.ORGANIZATION, new RecipeOrganization());
         this._recipes.set(RecipeAliases.PACKAGES, new RecipePackages());
+        this._recipes.set(RecipeAliases.PAGE_LAYOUTS, new RecipePageLayouts());
         this._recipes.set(RecipeAliases.PERMISSION_SETS, new RecipePermissionSets());
         this._recipes.set(RecipeAliases.PERMISSION_SET_LICENSES, new RecipePermissionSetLicenses());
         this._recipes.set(RecipeAliases.PROCESS_BUILDERS, new RecipeProcessBuilders());

@@ -38,6 +38,7 @@ import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
+import { SFDC_PageLayout } from './data/orgcheck-api-data-pagelayout';
 
 /**
  * @description Org Check API main class
@@ -299,6 +300,29 @@ export class API {
      */
     removeAllPackagesFromCache() {
         this._recipeManager.clean(RecipeAliases.PACKAGES);
+    }
+
+    /**
+     * @description Get information about the page layouts
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
+     * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getPageLayouts(namespace, sobjectType, sobject) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, namespace, sobjectType, sobject));
+    }
+
+    /**
+     * @description Remove all the cached information about page layouts
+     * @public
+     */
+    removeAllPageLayoutsFromCache() {
+        this._recipeManager.clean(RecipeAliases.PAGE_LAYOUTS);
     }
 
     /**

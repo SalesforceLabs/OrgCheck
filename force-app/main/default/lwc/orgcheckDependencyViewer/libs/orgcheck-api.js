@@ -1535,6 +1535,7 @@ class DatasetManagerIntf {
  * @property {string} OBJECTTYPES
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
+ * @property {string} PAGELAYOUTS
  * @property {string} PERMISSIONSETS
  * @property {string} PERMISSIONSETLICENSES
  * @property {string} PROFILEPWDPOLICIES
@@ -1567,6 +1568,7 @@ const DatasetAliases = {
     OBJECTTYPES: 'object-types',
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
+    PAGELAYOUTS: 'page-layouts',
     PERMISSIONSETS: 'permission-sets',
     PERMISSIONSETLICENSES: 'permission-set-licenses',
     PROFILEPWDPOLICIES: 'profile-password-policies',
@@ -1699,6 +1701,7 @@ class RecipeManagerIntf {
  * @property {string} OBJECTS
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
+ * @property {string} PAGE_LAYOUTS
  * @property {string} PERMISSION_SETS
  * @property {string} PERMISSION_SET_LICENSES
  * @property {string} PROCESS_BUILDERS
@@ -1734,6 +1737,7 @@ const RecipeAliases = {
     OBJECT_TYPES: 'object-types',
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
+    PAGE_LAYOUTS: 'page-layouts',
     PERMISSION_SETS: 'permission-sets',
     PERMISSION_SET_LICENSES: 'permission-set-licenses',
     PROCESS_BUILDERS: 'process-builders',
@@ -2271,6 +2275,34 @@ class SFDC_PageLayout extends Data {
      * @public
      */
     type;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
+     * @description Object Id of this page layout 
+     * @type {string}
+     * @public
+     */
+    objectId;
+
+    /**
+     * @description Object reference of this page layout 
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
+
+    /**
+     * @description Number of profiles assigned to this page layout
+     * @type {number}
+     * @public
+     */
+    profileAssignmentCount;
     
     /**
      * @description Setup URL of this item
@@ -2278,6 +2310,20 @@ class SFDC_PageLayout extends Data {
      * @public
      */
     url;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
 }
 
 class SFDC_RecordType extends Data {
@@ -4819,6 +4865,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This Apex Test Class has at least one successful method which took more than 20 secondes to execute',
         badField: 'testPassedButLongMethods',
         applicable: [ SFDC_ApexClass ]
+    }, {
+        id: 49,
+        description: 'Page layout should be assigned to at least one Profile',
+        formula: (/** @type {SFDC_PageLayout} */ d) => d.profileAssignmentCount === 0,
+        errorMessage: 'This Page Layout is not assigned to any Profile. Please review this page layout and assign it to at least one profile.',
+        badField: 'profileAssignmentCount',
+        applicable: [ SFDC_PageLayout ]
     }
 ];
 
@@ -5980,7 +6033,7 @@ class DatasetObject extends Dataset {
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
                     type: t.LinkType,
                     behavior: t.OpenType,
-                    package: t.NamespacePrefix,
+                    package: (t.NamespacePrefix || ''),
                     createdDate: t.CreatedDate,
                     lastModifiedDate: t.LastModifiedDate,
                     description: t.Description,                
@@ -8583,6 +8636,95 @@ class DatasetPermissionSetLicenses extends Dataset {
     } 
 }
 
+class DatasetPageLayouts extends Dataset {
+
+    /**
+     * @description Run the dataset and return the result
+     * @param {SalesforceManagerIntf} sfdcManager
+     * @param {DataFactoryIntf} dataFactory
+     * @param {SimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_PageLayout>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
+
+        // First SOQL queries
+        logger?.log(`Querying Tooling API about Layout and ProfileLayout in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            tooling: true,
+            string: 'SELECT Id, Name, NamespacePrefix, LayoutType, EntityDefinition.QualifiedApiName, '+
+                        'CreatedDate, LastModifiedDate ' +
+                    'FROM Layout '
+        }, {
+            tooling: true,
+            string: 'SELECT LayoutId, COUNT(ProfileId) CountAssignment '+
+                    'FROM ProfileLayout '+
+                    'WHERE Profile.Name != null ' +
+                    'GROUP BY LayoutId ',
+            queryMoreField: 'CreatedDate'
+        }], logger);
+
+        // Init the factory and records
+        const pageLayoutDataFactory = dataFactory.getInstance(SFDC_PageLayout);
+
+        // Create the map
+        const pageLayoutRecords = results[0];
+        const pageLayoutProfileAssignRecords = results[1];
+
+        logger?.log(`Parsing ${pageLayoutRecords.length} page layouts...`);
+        const pageLayouts = new Map(await Processor.map(pageLayoutRecords, (record) => {
+
+            // Get the ID15 of this page layout
+            const id = sfdcManager.caseSafeId(record.Id);
+
+            // Create the instance
+            const pageLayout = pageLayoutDataFactory.create({
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    package: (record.NamespacePrefix || ''),
+                    objectId: record.EntityDefinition?.QualifiedApiName,
+                    type: record.LayoutType,
+                    profileAssignmentCount: 0,
+                    createdDate: record.CreatedDate, 
+                    lastModifiedDate: record.LastModifiedDate,
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGELAYOUT)
+                }
+            });
+
+            // Add it to the map  
+            return [ pageLayout.id, pageLayout ];
+
+        }, (record) => { 
+            if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
+            return true;
+        }));
+
+        logger?.log(`Parsing ${pageLayoutProfileAssignRecords.length} page layout assignment counts...`);
+        await Processor.forEach(pageLayoutProfileAssignRecords, (record) => {
+
+            // Get the ID15 of this page layout
+            const id = sfdcManager.caseSafeId(record.LayoutId);
+
+            if (pageLayouts.has(id)) {
+                // Get the page layout
+                const pageLayout = pageLayouts.get(id);
+
+                // Set the assignment count
+                pageLayout.profileAssignmentCount += record.CountAssignment;
+            }
+        });
+
+        // Compute the score of all items
+        await Processor.forEach(pageLayouts, (pageLayout) => {
+            pageLayoutDataFactory.computeScore(pageLayout);
+        });
+
+        // Return data as map
+        logger?.log(`Done`);
+        return pageLayouts;
+    } 
+}
+
 /**
  * @description Dataset manager
  */
@@ -8673,6 +8815,7 @@ class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.OBJECTTYPES, new DatasetObjectTypes());
         this._datasets.set(DatasetAliases.ORGANIZATION, new DatasetOrganization());
         this._datasets.set(DatasetAliases.PACKAGES, new DatasetPackages());
+        this._datasets.set(DatasetAliases.PAGELAYOUTS, new DatasetPageLayouts());
         this._datasets.set(DatasetAliases.PERMISSIONSETS, new DatasetPermissionSets());
         this._datasets.set(DatasetAliases.PERMISSIONSETLICENSES, new DatasetPermissionSetLicenses());
         this._datasets.set(DatasetAliases.PROFILEPWDPOLICIES, new DatasetProfilePasswordPolicies());
@@ -10500,6 +10643,67 @@ class RecipePermissionSetLicenses extends Recipe {
     }
 }
 
+class RecipePageLayouts extends Recipe {
+
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @param {SimpleLoggerIntf} logger
+     * @returns {Array<string | DatasetRunInformation>}
+     * @public
+     */
+    extract(logger) {
+        return [
+            DatasetAliases.PAGELAYOUTS,
+            DatasetAliases.OBJECTTYPES, 
+            DatasetAliases.OBJECTS
+        ];
+    }
+
+    /**
+     * @description transform the data from the datasets and return the final result as a Map
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
+     * @param {string} objecttype Name of the type (if all use '*')
+     * @param {string} object API name of the object (if all use '*')
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @async
+     * @public
+     */
+    async transform(data, logger, namespace, objecttype, object) {
+
+        // Get data
+        const /** @type {Map<string, SFDC_PageLayout>} */ pageLayouts = data.get(DatasetAliases.PAGELAYOUTS);
+        const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
+
+        // Checking data
+        if (!types) throw new Error(`RecipePageLayouts: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipePageLayouts: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!pageLayouts) throw new Error(`RecipePageLayouts: Data from dataset alias 'PAGELAYOUTS' was undefined.`);
+
+        // Augment and filter data
+        const array = [];
+        await Processor.forEach(pageLayouts, (pageLayout) => {
+            // Augment data
+            const objectRef = objects.get(pageLayout.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
+            }
+            pageLayout.objectRef = objectRef;
+            // Filter data
+            if ((namespace === '*' || pageLayout.package === namespace) &&
+                (objecttype === '*' || pageLayout.objectRef?.typeRef?.id === objecttype) &&
+                (object === '*' || pageLayout.objectRef?.apiname === object)) {
+                array.push(pageLayout);
+            }
+        });
+
+        // Return data
+        return array;
+    }
+}
+
 /**
  * @description Recipe Manager
  */ 
@@ -10565,6 +10769,7 @@ class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.OBJECT_TYPES, new RecipeObjectTypes());
         this._recipes.set(RecipeAliases.ORGANIZATION, new RecipeOrganization());
         this._recipes.set(RecipeAliases.PACKAGES, new RecipePackages());
+        this._recipes.set(RecipeAliases.PAGE_LAYOUTS, new RecipePageLayouts());
         this._recipes.set(RecipeAliases.PERMISSION_SETS, new RecipePermissionSets());
         this._recipes.set(RecipeAliases.PERMISSION_SET_LICENSES, new RecipePermissionSetLicenses());
         this._recipes.set(RecipeAliases.PROCESS_BUILDERS, new RecipeProcessBuilders());
@@ -11833,6 +12038,29 @@ class API {
      */
     removeAllPackagesFromCache() {
         this._recipeManager.clean(RecipeAliases.PACKAGES);
+    }
+
+    /**
+     * @description Get information about the page layouts
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
+     * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getPageLayouts(namespace, sobjectType, sobject) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, namespace, sobjectType, sobject));
+    }
+
+    /**
+     * @description Remove all the cached information about page layouts
+     * @public
+     */
+    removeAllPageLayoutsFromCache() {
+        this._recipeManager.clean(RecipeAliases.PAGE_LAYOUTS);
     }
 
     /**

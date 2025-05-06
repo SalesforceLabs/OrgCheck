@@ -19,6 +19,7 @@ import { DatasetObjects } from '../../../src/api/dataset/orgcheck-api-dataset-ob
 import { DatasetObjectTypes } from '../../../src/api/dataset/orgcheck-api-dataset-objecttypes';
 import { DatasetOrganization } from '../../../src/api/dataset/orgcheck-api-dataset-organization';
 import { DatasetPackages } from '../../../src/api/dataset/orgcheck-api-dataset-packages';
+import { DatasetPageLayouts } from '../../../src/api/dataset/orgcheck-api-dataset-pagelayouts';
 import { DatasetPermissionSetLicenses } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsetlicenses';
 import { DatasetPermissionSets } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsets';
 import { DatasetProfilePasswordPolicies } from '../../../src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
@@ -556,6 +557,20 @@ describe('tests.api.unit.Datasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(3);
+    });
+  });
+
+  describe('Test DatasetPageLayouts', () => {
+  
+    const dataset = new DatasetPageLayouts();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
     });
   });
 

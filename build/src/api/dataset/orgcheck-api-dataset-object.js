@@ -206,7 +206,7 @@ export class DatasetObject extends Dataset {
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
                     type: t.LinkType,
                     behavior: t.OpenType,
-                    package: t.NamespacePrefix,
+                    package: (t.NamespacePrefix || ''),
                     createdDate: t.CreatedDate,
                     lastModifiedDate: t.LastModifiedDate,
                     description: t.Description,                

@@ -17,6 +17,7 @@ import { RecipeObjects } from "../../../src/api/recipe/orgcheck-api-recipe-objec
 import { RecipeObjectTypes } from "../../../src/api/recipe/orgcheck-api-recipe-objecttypes";
 import { RecipeOrganization } from "../../../src/api/recipe/orgcheck-api-recipe-organization";
 import { RecipePackages } from "../../../src/api/recipe/orgcheck-api-recipe-packages";
+import { RecipePageLayouts } from "../../../src/api/recipe/orgcheck-api-recipe-pagelayouts";
 import { RecipePermissionSetLicenses } from "../../../src/api/recipe/orgcheck-api-recipe-permissionsetlicenses";
 import { RecipePermissionSets } from "../../../src/api/recipe/orgcheck-api-recipe-permissionsets";
 import { RecipeProcessBuilders } from "../../../src/api/recipe/orgcheck-api-recipe-processbuilders";
@@ -425,6 +426,26 @@ describe('tests.api.unit.Recipes', () => {
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
       expect(datasets.length).toBe(1);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipePageLayouts', () => {
+  
+    const recipe = new RecipePageLayouts();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(3);
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
