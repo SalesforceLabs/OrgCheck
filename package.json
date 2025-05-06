@@ -12,10 +12,10 @@
     "build": "for i in 'first run' 'second run'; do echo \"Rollup: ${i}\"; rollup --config; echo; done; echo 'Build SR: '; echo; ./build/build-static-resource.sh",
     "sf:open": "sf force org open",
     "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
-    "test": "sfdx-lwc-jest",
-    "test:debug": "sfdx-lwc-jest --debug",
-    "test:watch": "sfdx-lwc-jest --watch",
-    "test:coverage": "sfdx-lwc-jest --coverage"
+    "test:coverage": "sfdx-lwc-jest --coverage",
+    "test:unit": "sfdx-lwc-jest",
+    "test:unit:debug": "sfdx-lwc-jest --debug",
+    "test:unit:watch": "sfdx-lwc-jest --watch"
   },
   "repository": {
     "type": "git",
@@ -29,7 +29,7 @@
   "homepage": "https://sfdc.co/OrgCheck",
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
-    "@salesforce/sfdx-lwc-jest": "^3.1.2",
+    "@salesforce/sfdx-lwc-jest": "^7.0.1",
     "rollup": "^4.34.6",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^2.1.0"
