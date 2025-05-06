@@ -448,6 +448,9 @@
                     <lightning-tab value="validation-rules" label="🎾 Validation Rules" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no validation rule to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={validationRulesTableDefinition} rows={validationRulesTableData} show-export-button export-basename="ValidationRules"></c-orgcheck-extended-datatable>
                     </lightning-tab>
+                    <lightning-tab value="Record-Types" label="Record Types" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="Hello world" rows = {recordTypesTableData}></c-orgcheck-extended-datatable>
+                    </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
             <lightning-tab value="security" label="👮 Users, Profiles, Permission Sets, Licenses and Rights" onactive={handleMainTabActivation}>

@@ -38,6 +38,7 @@ import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
+import { SFDC_RecordType } from './orgcheck-api-main';
 
 /**
  * @description Org Check API main class
@@ -962,5 +963,27 @@ export class API {
      */
     removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
+    }
+    /**
+     * @description Get information about Validation rules
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
+     * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getRecordTypes(namespace, sobjectType, sobject) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPE, namespace, sobjectType, sobject));
+    }
+    
+    /**
+     * @description Remove all the cached information about validation rules
+     * @public
+     */
+    removeAllRecordTypes() {
+        this._recipeManager.clean(RecipeAliases.RECORD_TYPE);
     }
 }

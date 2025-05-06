@@ -1708,6 +1708,7 @@ class RecipeManagerIntf {
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORD_TYPE
  */
 const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -8575,6 +8576,66 @@ class DatasetPermissionSetLicenses extends Dataset {
     } 
 }
 
+class DatasetRecordTypes extends Dataset {
+
+    /**
+     * @description Run the dataset and return the result
+     * @param {SalesforceManagerIntf} sfdcManager
+     * @param {DataFactoryIntf} dataFactory
+     * @param {SimpleLoggerIntf} logger List of optional argument to pass
+     * @returns {Promise<Map<string, SFDC_RecordType>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
+
+        // First SOQL query
+        logger?.log(`Querying Tooling API about Record Types in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT DeveloperName, Id, Name, SobjectType ' +
+                    'FROM RecordType ' +
+                    'Where IsActive = true ' +
+                    'AND (NamespacePrefix = \'\' OR NamespacePrefix = \'' + '<org_Prefix>' + '\')',
+            tooling: true
+        }], logger);
+
+        const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
+
+        const recordTypeRecords = results[0];
+        logger?.log(`Parsing ${recordTypeRecords.length} record type...`);
+        const recordTypes = new Map(await Processor.map(recordTypeRecords, async (record) => {
+        
+            // Get the ID15 of this record type
+            const id = sfdcManager.caseSafeId(record.Id);
+
+            // Create the instance
+            const recordType = recordTypeDataFactory.createWithScore({
+                properties: {
+                    //DevelopperName
+                    name: record.DeveloperName,
+                    id: sfdcManager.caseSafeId(id), 
+                    //name: record.RecordType, 
+                    //isActive: record.Active,
+                    //sObjectType
+                    package: (record.NamespacePrefix || ''),
+                    //description: record.Description,
+                    //errorDisplayField: record.ErrorDisplayField,
+                    //errorMessage: record.ErrorMessage,
+                    objectId: record.EntityDefinition?.QualifiedApiName,
+                    //createdDate: record.CreatedDate,
+                    //lastModifiedDate: record.LastModifiedDate, 
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE)
+                }
+            });
+
+            // Add it to the map  
+            return [ recordType.id, recordType ];
+        }));
+
+        // Return data as map
+        logger?.log(`Done`);
+        return recordTypes;
+    } 
+}
+
 /**
  * @description Dataset manager
  */
@@ -8676,6 +8737,7 @@ class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
+        this._datasets.set(DatasetAliases.RECORDTYPE, new DatasetRecordTypes());
     }
 
     /**
@@ -12489,6 +12551,16 @@ class API {
     removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
     }
+    //METTRE DESCRIPTION pour les deux méthodes suivantes !!
+    async getRecordTypes() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, namespace, sobjectType, sobject));
+    }
+    //Mettre description !!
+    removeAllRecordTypesFromCache() {
+        this._recipeManager.clean(RecipeAliases.RECORD_TYPES);
+    }
+
 }
 
 export { API, BasicLoggerIntf, CodeScanner, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SecretSauce, SimpleLoggerIntf };

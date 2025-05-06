@@ -33,6 +33,7 @@
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORD_TYPE
  */
 export const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -67,6 +68,7 @@ export const RecipeAliases = {
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
-    WORKFLOWS: 'workflows'
+    WORKFLOWS: 'workflows',
+    RECORD_TYPE: 'record-type'
 }
 Object.seal(RecipeAliases);

@@ -525,7 +525,9 @@ export default class OrgcheckApp extends LightningElement {
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
         'visual-force-components':   { label: '🍞 Visualforce Components',    tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
         'visual-force-pages':        { label: '🥖 Visualforce Pages',         tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
-        'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',  isGlobalView: true,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getWorkflows(); }}
+        'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',  isGlobalView: true,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getWorkflows(); }},
+        //'Record-Types':              { label: '🚗 Record Types',               tab: 'automation',  isGlobalView: true,      data: 'recordTypesTableData',                    remove: () => { this._api?.removeAllRecordTypesFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getRecordTypes(); }}
+        'record-types':              { label: '🚗 Record Types',               tab: 'automation',  isGlobalView: true,      data: 'recordTypesTableData',                    remove: () => { this._api?.removeAllRecordTypesFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getRecordTypes(); }}
     }
 
     /**
@@ -2362,6 +2364,11 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_Workflow>}
      */
     workflowsTableData;
+    /** 
+     * @description Table data for record types 
+     * @type {Array<ocapi.SFDC_RecordType>}
+     */
+    recordTypesTableData;
 
     /**
      * @description Data matrix for object permissions

@@ -178,7 +178,30 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.get('05').nbSystemAsserts).toBe(0);
     });
   });
-
+  describe('Test DatasetRecordTypes', () => {
+    const dataset = new DatasetrecordTypes();
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+    it('checks if regex are correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM RecordType ', [
+        {
+          Id: '01',
+          Name: 'TestA',
+          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
+          Body: "@isTest \nprivate class TestA {\n public static void test() {\n assert.fail ();\n //Assert.fail();\n /*Assert.areEqual(true, '', 'ii'); aSSert.isFalse(1 == 1, 'false');*/\n}\n}"
+        },
+      ])
+    });
+  });
   describe('Test DatasetApexTriggers', () => {
   
     const dataset = new DatasetApexTriggers();      

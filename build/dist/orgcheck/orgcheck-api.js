@@ -1708,6 +1708,7 @@ class RecipeManagerIntf {
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORD_TYPE
  */
 const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -8575,6 +8576,66 @@ class DatasetPermissionSetLicenses extends Dataset {
     } 
 }
 
+class DatasetRecordTypes extends Dataset {
+
+    /**
+     * @description Run the dataset and return the result
+     * @param {SalesforceManagerIntf} sfdcManager
+     * @param {DataFactoryIntf} dataFactory
+     * @param {SimpleLoggerIntf} logger List of optional argument to pass
+     * @returns {Promise<Map<string, SFDC_RecordType>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
+
+        // First SOQL query
+        logger?.log(`Querying Tooling API about Record Types in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            string: 'SELECT DeveloperName, Id, Name, SobjectType ' +
+                    'FROM RecordType ' +
+                    'Where IsActive = true ' +
+                    'AND (NamespacePrefix = \'\' OR NamespacePrefix = \'' + '<org_Prefix>' + '\')',
+            tooling: true
+        }], logger);
+
+        const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
+
+        const recordTypeRecords = results[0];
+        logger?.log(`Parsing ${recordTypeRecords.length} record type...`);
+        const recordTypes = new Map(await Processor.map(recordTypeRecords, async (record) => {
+        
+            // Get the ID15 of this record type
+            const id = sfdcManager.caseSafeId(record.Id);
+
+            // Create the instance
+            const recordType = recordTypeDataFactory.createWithScore({
+                properties: {
+                    //DevelopperName
+                    name: record.DeveloperName,
+                    id: sfdcManager.caseSafeId(id), 
+                    //name: record.RecordType, 
+                    //isActive: record.Active,
+                    //sObjectType
+                    package: (record.NamespacePrefix || ''),
+                    //description: record.Description,
+                    //errorDisplayField: record.ErrorDisplayField,
+                    //errorMessage: record.ErrorMessage,
+                    objectId: record.EntityDefinition?.QualifiedApiName,
+                    //createdDate: record.CreatedDate,
+                    //lastModifiedDate: record.LastModifiedDate, 
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE)
+                }
+            });
+
+            // Add it to the map  
+            return [ recordType.id, recordType ];
+        }));
+
+        // Return data as map
+        logger?.log(`Done`);
+        return recordTypes;
+    } 
+}
+
 /**
  * @description Dataset manager
  */
@@ -8676,6 +8737,7 @@ class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
+        this._datasets.set(DatasetAliases.RECORDTYPE, new DatasetRecordTypes());
     }
 
     /**
