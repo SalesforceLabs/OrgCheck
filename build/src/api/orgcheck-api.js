@@ -38,7 +38,7 @@ import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionsetlicense';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
-import { SFDC_RecordType } from './orgcheck-api-main';
+import { SFDC_RecordType } from './data/orgcheck-api-data-recordtype';
 
 /**
  * @description Org Check API main class
@@ -983,7 +983,7 @@ export class API {
      * @description Remove all the cached information about validation rules
      * @public
      */
-    removeAllRecordTypes() {
+    removeAllRecordTypesFromCache() {
         this._recipeManager.clean(RecipeAliases.RECORD_TYPE);
     }
 }

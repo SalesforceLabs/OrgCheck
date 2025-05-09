@@ -1542,6 +1542,7 @@ class DatasetManagerIntf {
  * @property {string} VISUALFORCECOMPONENTS
  * @property {string} VISUALFORCEPAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORDTYPES
  */
 const DatasetAliases = {
     APEXCLASSES: 'apex-classes',
@@ -1573,7 +1574,8 @@ const DatasetAliases = {
     VALIDATIONRULES: 'validation-rules',
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
-    WORKFLOWS: 'workflows'
+    WORKFLOWS: 'workflows',
+    RECORDTYPES : 'record-typeS'
 };
 Object.seal(DatasetAliases);
 
@@ -1743,7 +1745,8 @@ const RecipeAliases = {
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
-    WORKFLOWS: 'workflows'
+    WORKFLOWS: 'workflows',
+    RECORD_TYPE: 'record-type'
 };
 Object.seal(RecipeAliases);
 
@@ -2342,6 +2345,20 @@ class SFDC_RecordType extends Data {
      * @public
      */
     isMaster;
+
+    /**
+     * @description Object Id of thid record type
+     * @type {string}
+     * @public
+     */
+    objectId;
+
+    /**
+     * @description Object reference of this record type
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
 }
 
 class SFDC_ValidationRule extends Data {
@@ -8609,20 +8626,15 @@ class DatasetRecordTypes extends Dataset {
             // Create the instance
             const recordType = recordTypeDataFactory.createWithScore({
                 properties: {
-                    //DevelopperName
-                    name: record.DeveloperName,
                     id: sfdcManager.caseSafeId(id), 
-                    //name: record.RecordType, 
-                    //isActive: record.Active,
-                    //sObjectType
-                    package: (record.NamespacePrefix || ''),
-                    //description: record.Description,
-                    //errorDisplayField: record.ErrorDisplayField,
-                    //errorMessage: record.ErrorMessage,
-                    objectId: record.EntityDefinition?.QualifiedApiName,
-                    //createdDate: record.CreatedDate,
-                    //lastModifiedDate: record.LastModifiedDate, 
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE)
+                    name: record.RecordType, 
+                    developerName: record.DeveloperName,
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE),
+                    isActive: record.Active,
+                    isAvailable: record.Available,
+                    isDefaultRecordTypeMapping: record.defaultRecordTypeMapping,
+                    isMaster: record.Master,
+                    objectId: record.EntityDefinition?.QualifiedApiName
                 }
             });
 
@@ -10554,6 +10566,67 @@ class RecipePermissionSetLicenses extends Recipe {
     }
 }
 
+class RecipeRecordType extends Recipe {
+
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @param {SimpleLoggerIntf} logger
+     * @returns {Array<string | DatasetRunInformation>}
+     * @public
+     */
+    extract(logger) {
+        return [ 
+            DatasetAliases.RECORDTYPE,
+            DatasetAliases.OBJECTTYPES, 
+            DatasetAliases.OBJECTS
+         ];
+    }
+    /**
+     * @description transform the data from the datasets and return the final result as a Map
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
+     * @param {string} objecttype Name of the type (if all use '*')
+     * @param {string} object API name of the object (if all use '*')
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @async
+     * @public
+     */
+    async transform(data, logger, namespace, objecttype, object) {
+
+        // Get data
+        const /** @type {Map<string, SFDC_RecordType>} */ recordTypes = data.get(DatasetAliases.RECORDTYPES);
+        const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
+        const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
+
+        // Checking data
+        if (!recordTypes) throw new Error(`RecipeRecordTypes: Data from dataset alias 'RECORDTYPES' was undefined.`);
+        if (!types) throw new Error(`RecipeRecordTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeRecordTypes: Data from dataset alias 'OBJECTS' was undefined.`);
+        
+
+        // Augment and filter data
+        const array = [];
+        await Processor.forEach(recordTypes, (recordType) => {
+            // Augment data
+            const objectRef = objects.get(recordType.objectId);
+            if (objectRef && !objectRef.typeRef) {
+                objectRef.typeRef = types.get(objectRef.typeId);
+            }
+            recordType.objectRef = objectRef;
+            // Filter data
+            if ((namespace === '*' || recordType.package === namespace) &&
+                (objecttype === '*' || recordType.objectRef?.typeRef?.id === objecttype) &&
+                (object === '*' || recordType.objectRef?.apiname === object)) {
+                array.push(recordType);
+            }
+        });
+
+        // Return data
+        return array;
+    }
+}
+
 /**
  * @description Recipe Manager
  */ 
@@ -10632,6 +10705,8 @@ class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
         this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());
+        this._recipes.set(RecipeAliases.RECORD_TYPE, new RecipeRecordType());
+        
     }
 
     /**
@@ -12550,6 +12625,28 @@ class API {
      */
     removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
+    }
+    /**
+     * @description Get information about Validation rules
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
+     * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getRecordTypes(namespace, sobjectType, sobject) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPE, namespace, sobjectType, sobject));
+    }
+    
+    /**
+     * @description Remove all the cached information about validation rules
+     * @public
+     */
+    removeAllRecordTypes() {
+        this._recipeManager.clean(RecipeAliases.RECORD_TYPE);
     }
 }
 

@@ -64,11 +64,11 @@ export const RecipeAliases = {
     PROFILES: 'profiles',
     PUBLIC_GROUPS: 'public-groups',
     QUEUES: 'queues',
+    RECORD_TYPE: 'record-type',
     USER_ROLES: 'user-roles',
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
-    WORKFLOWS: 'workflows',
-    RECORD_TYPE: 'record-type'
+    WORKFLOWS: 'workflows'
 }
 Object.seal(RecipeAliases);
