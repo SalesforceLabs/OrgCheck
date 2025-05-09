@@ -30,6 +30,7 @@ import { DatasetValidationRules } from '../../../src/api/dataset/orgcheck-api-da
 import { DatasetVisualForceComponents } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetVisualForcePages } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWorkflows } from '../../../src/api/dataset/orgcheck-api-dataset-workflows';
+import { DatasetRecordTypes } from '../../../src/api/dataset/orgcheck-api-dataset-recordtypes';
 
 class SfdcManagerMock extends SalesforceManagerIntf { 
 
@@ -178,8 +179,8 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.get('05').nbSystemAsserts).toBe(0);
     });
   });
-  describe('Test DatasetRecordTypes', () => {
-    const dataset = new DatasetrecordTypes();
+  describe('Test DatasetRecordTypes', () => { 
+    const dataset = new DatasetRecordTypes();
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
@@ -192,14 +193,54 @@ describe('tests.api.unit.Datasets', () => {
     it('checks if regex are correct', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
-      sfdcManager.addSoqlQueryResponse('FROM RecordType ', [
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+    it('checks if regex are correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM ApexClass ', [
         {
           Id: '01',
           Name: 'TestA',
-          SymbolTable: { tableDeclaration: { modifiers: [ 'testMethod' ] }},
-          Body: "@isTest \nprivate class TestA {\n public static void test() {\n assert.fail ();\n //Assert.fail();\n /*Assert.areEqual(true, '', 'ii'); aSSert.isFalse(1 == 1, 'false');*/\n}\n}"
+          DeveloperName: 'NameDevA',
+          objectId: 'Contact',
+          IsActive: true
         },
-      ])
+        {
+          Id: '02',
+          Name: 'TestB',
+          DeveloperName: 'NameDevB',
+          objectId: 'Account',
+          IsActive: true
+        },
+        {
+          Id: '03',
+          Name: 'TestC',
+          DeveloperName: 'NameDevC',
+          objectId: 'Sales',
+          IsActive: false
+        },
+      ]);
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(3);
+      expect(results.get('01')).toBeDefined();
+      expect(results.get('01').name).toBe('TestA');
+      expect(results.get('01').developerName).toBe('NameDevA');
+      expect(results.get('01').objectId).toBe('Contact');
+      expect(results.get('03').isActive).toBeTruthy();  
+      expect(results.get('02')).toBeDefined();
+      expect(results.get('02').name).toBe('TestB');
+      expect(results.get('02').developerName).toBe('NameDevB');
+      expect(results.get('02').objectId).toBe('Account');
+      expect(results.get('03').isActive).toBeTruthy();  
+      expect(results.get('03')).toBeUndefined();   
     });
   });
   describe('Test DatasetApexTriggers', () => {

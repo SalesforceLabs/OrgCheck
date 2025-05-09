@@ -9,7 +9,7 @@ import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 
-export class RecordType extends Recipe {
+export class RecipeRecordType extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -18,11 +18,11 @@ export class RecordType extends Recipe {
      * @public
      */
     extract(logger) {
-        return [
-            DatasetAliases.RECORDTYPES,
+        return [ 
+            DatasetAliases.RECORDTYPE,
             DatasetAliases.OBJECTTYPES, 
             DatasetAliases.OBJECTS
-        ];
+         ];
     }
     /**
      * @description transform the data from the datasets and return the final result as a Map
@@ -38,24 +38,26 @@ export class RecordType extends Recipe {
     async transform(data, logger, namespace, objecttype, object) {
 
         // Get data
+        const /** @type {Map<string, SFDC_RecordType>} */ recordTypes = data.get(DatasetAliases.RECORDTYPES);
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
-        const /** @type {Map<string, SFDC_RecordType>} */ recordTypes = data.get(DatasetAliases.RECORDTYPES);
+
         // Checking data
+        if (!recordTypes) throw new Error(`RecipeRecordTypes: Data from dataset alias 'RECORDTYPES' was undefined.`);
         if (!types) throw new Error(`RecipeRecordTypes: Data from dataset alias 'OBJECTTYPES' was undefined.`);
         if (!objects) throw new Error(`RecipeRecordTypes: Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!recordTypes) throw new Error(`RecipeRecordTypes: Data from dataset alias 'RECORDTYPES' was undefined.`);
+        
 
         // Augment and filter data
         const array = [];
-        await Processor.forEach(recordTypes, (/** @type {SFDC_RecordType} */ recordType) => {
-            // Augment
+        await Processor.forEach(recordTypes, (recordType) => {
+            // Augment data
             const objectRef = objects.get(recordType.objectId);
             if (objectRef && !objectRef.typeRef) {
                 objectRef.typeRef = types.get(objectRef.typeId);
             }
             recordType.objectRef = objectRef;
-            // Filter
+            // Filter data
             if ((namespace === '*' || recordType.package === namespace) &&
                 (objecttype === '*' || recordType.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || recordType.objectRef?.apiname === object)) {

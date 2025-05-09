@@ -1,5 +1,3 @@
-import { RecordType } from "../recipe/orgcheck-api-recipe-recordtypes";
-
 /**
  * @description Dataset aliases
  * @property {string} APEXCLASSES
@@ -31,7 +29,7 @@ import { RecordType } from "../recipe/orgcheck-api-recipe-recordtypes";
  * @property {string} VISUALFORCECOMPONENTS
  * @property {string} VISUALFORCEPAGES
  * @property {string} WORKFLOWS
- * @property {string} RECORDTYPE
+ * @property {string} RECORDTYPES
  */
 export const DatasetAliases = {
     APEXCLASSES: 'apex-classes',
@@ -64,6 +62,6 @@ export const DatasetAliases = {
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
     WORKFLOWS: 'workflows',
-    RECORDTYPE : 'record-type'
+    RECORDTYPES : 'record-typeS'
 }
 Object.seal(DatasetAliases);

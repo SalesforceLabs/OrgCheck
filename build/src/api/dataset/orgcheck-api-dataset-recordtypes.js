@@ -39,20 +39,15 @@ export class DatasetRecordTypes extends Dataset {
             // Create the instance
             const recordType = recordTypeDataFactory.createWithScore({
                 properties: {
-                    //DevelopperName
-                    name: record.DeveloperName,
                     id: sfdcManager.caseSafeId(id), 
-                    //name: record.RecordType, 
+                    name: record.RecordType, 
+                    developerName: record.DeveloperName,
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE),
                     isActive: record.Active,
-                    //sObjectType
-                    package: (record.NamespacePrefix || ''),
-                    //description: record.Description,
-                    errorDisplayField: record.ErrorDisplayField,
-                    errorMessage: record.ErrorMessage,
-                    objectId: record.EntityDefinition?.QualifiedApiName,
-                    //createdDate: record.CreatedDate,
-                    //lastModifiedDate: record.LastModifiedDate, 
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE)
+                    isAvailable: record.Available,
+                    isDefaultRecordTypeMapping: record.defaultRecordTypeMapping,
+                    isMaster: record.Master,
+                    objectId: record.EntityDefinition?.QualifiedApiName
                 }
             });
 
