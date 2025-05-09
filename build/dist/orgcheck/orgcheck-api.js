@@ -1741,12 +1741,12 @@ const RecipeAliases = {
     PROFILES: 'profiles',
     PUBLIC_GROUPS: 'public-groups',
     QUEUES: 'queues',
+    RECORD_TYPE: 'record-type',
     USER_ROLES: 'user-roles',
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
-    WORKFLOWS: 'workflows',
-    RECORD_TYPE: 'record-type'
+    WORKFLOWS: 'workflows'
 };
 Object.seal(RecipeAliases);
 
@@ -8607,10 +8607,8 @@ class DatasetRecordTypes extends Dataset {
         // First SOQL query
         logger?.log(`Querying Tooling API about Record Types in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT DeveloperName, Id, Name, SobjectType ' +
-                    'FROM RecordType ' +
-                    'Where IsActive = true ' +
-                    'AND (NamespacePrefix = \'\' OR NamespacePrefix = \'' + '<org_Prefix>' + '\')',
+            string: 'SELECT DeveloperName, Id, Name, SobjectType, IsActive ' +
+                    'FROM RecordType ',
             tooling: true
         }], logger);
 
@@ -8627,14 +8625,11 @@ class DatasetRecordTypes extends Dataset {
             const recordType = recordTypeDataFactory.createWithScore({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 
-                    name: record.RecordType, 
+                    name: record.Name, 
                     developerName: record.DeveloperName,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE),
-                    isActive: record.Active,
-                    isAvailable: record.Available,
-                    isDefaultRecordTypeMapping: record.defaultRecordTypeMapping,
-                    isMaster: record.Master,
-                    objectId: record.EntityDefinition?.QualifiedApiName
+                    isActive: record.IsActive,
+                    objectId: record.SobjectType
                 }
             });
 

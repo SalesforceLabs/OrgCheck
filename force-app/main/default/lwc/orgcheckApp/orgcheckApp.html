@@ -199,7 +199,7 @@
             <lightning-tab value="data-model" label="⚽ Objects, OWDs, Fields and Validation Rules" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,validation-rules"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,validation-rules,record-types"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTaDataModel}>
@@ -449,7 +449,7 @@
                         <c-orgcheck-extended-datatable empty-message="There is no validation rule to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={validationRulesTableDefinition} rows={validationRulesTableData} show-export-button export-basename="ValidationRules"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="Record-Types" label="Record Types" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable empty-message="Hello world" rows = {recordTypesTableData}></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no record type to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={recordTypesTableDefinition} rows={recordTypesTableData} show-export-button export-basename="RecordTypes"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

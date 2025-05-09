@@ -202,45 +202,23 @@ describe('tests.api.unit.Datasets', () => {
     it('checks if regex are correct', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
-      sfdcManager.addSoqlQueryResponse('FROM ApexClass ', [
+      sfdcManager.addSoqlQueryResponse('FROM RecordType ', [
         {
-          Id: '01',
-          Name: 'TestA',
-          DeveloperName: 'NameDevA',
-          objectId: 'Contact',
-          IsActive: true
-        },
-        {
-          Id: '02',
-          Name: 'TestB',
-          DeveloperName: 'NameDevB',
-          objectId: 'Account',
-          IsActive: true
-        },
-        {
-          Id: '03',
-          Name: 'TestC',
-          DeveloperName: 'NameDevC',
-          objectId: 'Sales',
-          IsActive: false
-        },
+          DeveloperName: 'RecordType1', 
+          Id: '01', 
+          Name: 'Name1', 
+          SobjectType: 'Account'
+        }
       ]);
       const logger = new SimpleLoggerMock();
       const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(3);
+      expect(results.size).toBe(1);
       expect(results.get('01')).toBeDefined();
-      expect(results.get('01').name).toBe('TestA');
-      expect(results.get('01').developerName).toBe('NameDevA');
-      expect(results.get('01').objectId).toBe('Contact');
-      expect(results.get('03').isActive).toBeTruthy();  
-      expect(results.get('02')).toBeDefined();
-      expect(results.get('02').name).toBe('TestB');
-      expect(results.get('02').developerName).toBe('NameDevB');
-      expect(results.get('02').objectId).toBe('Account');
-      expect(results.get('03').isActive).toBeTruthy();  
-      expect(results.get('03')).toBeUndefined();   
+      expect(results.get('01').name).toBe('Name1');
+      expect(results.get('01').developerName).toBe('RecordType1');
+      expect(results.get('01').objectId).toBe('Account'); 
     });
   });
   describe('Test DatasetApexTriggers', () => {
