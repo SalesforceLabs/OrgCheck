@@ -56,12 +56,12 @@ export const DatasetAliases = {
     PROFILEPWDPOLICIES: 'profile-password-policies',
     PROFILERESTRICTIONS: 'profile-restrictions',
     PROFILES: 'profiles',
+    RECORDTYPES : 'record-types',
     USERROLES: 'user-roles',
     USERS: 'users',
     VALIDATIONRULES: 'validation-rules',
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
-    WORKFLOWS: 'workflows',
-    RECORDTYPES : 'record-typeS'
+    WORKFLOWS: 'workflows'
 }
 Object.seal(DatasetAliases);

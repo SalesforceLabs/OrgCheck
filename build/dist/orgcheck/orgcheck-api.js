@@ -1569,13 +1569,13 @@ const DatasetAliases = {
     PROFILEPWDPOLICIES: 'profile-password-policies',
     PROFILERESTRICTIONS: 'profile-restrictions',
     PROFILES: 'profiles',
+    RECORDTYPES : 'record-types',
     USERROLES: 'user-roles',
     USERS: 'users',
     VALIDATIONRULES: 'validation-rules',
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
-    WORKFLOWS: 'workflows',
-    RECORDTYPES : 'record-typeS'
+    WORKFLOWS: 'workflows'
 };
 Object.seal(DatasetAliases);
 
@@ -1710,7 +1710,7 @@ class RecipeManagerIntf {
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
- * @property {string} RECORD_TYPE
+ * @property {string} RECORD_TYPES
  */
 const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -1741,7 +1741,7 @@ const RecipeAliases = {
     PROFILES: 'profiles',
     PUBLIC_GROUPS: 'public-groups',
     QUEUES: 'queues',
-    RECORD_TYPE: 'record-type',
+    RECORD_TYPES: 'record-types',
     USER_ROLES: 'user-roles',
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
@@ -8608,8 +8608,7 @@ class DatasetRecordTypes extends Dataset {
         logger?.log(`Querying Tooling API about Record Types in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT DeveloperName, Id, Name, SobjectType, IsActive ' +
-                    'FROM RecordType ',
-            tooling: true
+                    'FROM RecordType '
         }], logger);
 
         const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
@@ -8744,7 +8743,7 @@ class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
-        this._datasets.set(DatasetAliases.RECORDTYPE, new DatasetRecordTypes());
+        this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
     }
 
     /**
@@ -10571,7 +10570,7 @@ class RecipeRecordType extends Recipe {
      */
     extract(logger) {
         return [ 
-            DatasetAliases.RECORDTYPE,
+            DatasetAliases.RECORDTYPES,
             DatasetAliases.OBJECTTYPES, 
             DatasetAliases.OBJECTS
          ];
@@ -10605,6 +10604,7 @@ class RecipeRecordType extends Recipe {
         await Processor.forEach(recordTypes, (recordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
+            logger.log(`ObjectId: ${recordType.objectId}`);
             if (objectRef && !objectRef.typeRef) {
                 objectRef.typeRef = types.get(objectRef.typeId);
             }
@@ -10614,10 +10614,12 @@ class RecipeRecordType extends Recipe {
                 (objecttype === '*' || recordType.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || recordType.objectRef?.apiname === object)) {
                 array.push(recordType);
+                logger.log(`Pushing a record type in the array: ${recordType}`);
             }
         });
 
         // Return data
+        logger.log(`Array has ${array.length} items.`);
         return array;
     }
 }

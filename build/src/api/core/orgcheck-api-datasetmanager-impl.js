@@ -140,7 +140,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
-        this._datasets.set(DatasetAliases.RECORDTYPE, new DatasetRecordTypes());
+        this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
     }
 
     /**

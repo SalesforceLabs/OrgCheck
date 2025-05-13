@@ -19,7 +19,7 @@ export class RecipeRecordType extends Recipe {
      */
     extract(logger) {
         return [ 
-            DatasetAliases.RECORDTYPE,
+            DatasetAliases.RECORDTYPES,
             DatasetAliases.OBJECTTYPES, 
             DatasetAliases.OBJECTS
          ];
@@ -53,6 +53,7 @@ export class RecipeRecordType extends Recipe {
         await Processor.forEach(recordTypes, (recordType) => {
             // Augment data
             const objectRef = objects.get(recordType.objectId);
+            logger.log(`ObjectId: ${recordType.objectId}`);
             if (objectRef && !objectRef.typeRef) {
                 objectRef.typeRef = types.get(objectRef.typeId);
             }
@@ -62,10 +63,12 @@ export class RecipeRecordType extends Recipe {
                 (objecttype === '*' || recordType.objectRef?.typeRef?.id === objecttype) &&
                 (object === '*' || recordType.objectRef?.apiname === object)) {
                 array.push(recordType);
+                logger.log(`Pushing a record type in the array: ${recordType}`);
             }
         });
 
         // Return data
+        logger.log(`Array has ${array.length} items.`);
         return array;
     }
 }

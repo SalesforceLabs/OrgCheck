@@ -21,8 +21,7 @@ export class DatasetRecordTypes extends Dataset {
         logger?.log(`Querying Tooling API about Record Types in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT DeveloperName, Id, Name, SobjectType, IsActive ' +
-                    'FROM RecordType ',
-            tooling: true
+                    'FROM RecordType '
         }], logger);
 
         const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
