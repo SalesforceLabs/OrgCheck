@@ -7,6 +7,7 @@
  * @property {string} CURRENTUSERPERMISSIONS
  * @property {string} CUSTOMFIELDS
  * @property {string} CUSTOMLABELS
+ * @property {string} DOCUMENTS
  * @property {string} FLOWS
  * @property {string} GROUPS
  * @property {string} LIGHTNINGAURACOMPONENTS
@@ -39,6 +40,7 @@ export const DatasetAliases = {
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',
     CUSTOMLABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELDPERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     GROUPS: 'groups',

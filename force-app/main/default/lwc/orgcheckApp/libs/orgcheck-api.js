@@ -116,7 +116,7 @@ class DataCacheManagerIntf {
     clear() { throw new Error('Not implemented'); }
 }
 
-const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\n)', 'gi');
+const REGEX_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\/\\/[^\\n]*|\\n)', 'gi');
 const REGEX_ISINTERFACE = new RegExp("(?:public|global)\\s+(?:interface)\\s+\\w+(\\s+(?:extends)\\s+\\w+)?\\s*\\{", 'i');
 const REGEX_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\\s*\\{", 'i');
 const REGEX_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
@@ -125,7 +125,8 @@ const REGEX_HARDCODEDURLS = new RegExp("([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}", 
 const REGEX_HARDCODEDIDS = new RegExp("[,\"'\\s][a-zA-Z0-9]{5}0[a-zA-Z0-9]{9}([a-zA-Z0-9]{3})?[,\"'\\s]", 'ig');
 const REGEX_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
 const REGEX_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
-const SALESFORCE_DOMAINS = ['salesforce.com', '.force.'];
+const SALESFORCE_DOMAINS = [ 'salesforce.com', '.force.' ];
+const SALESFORCE_MY_DOMAIN = '.my.salesforce.com';
 
 /**
  * @description Code Scanner class
@@ -148,14 +149,16 @@ class CodeScanner {
         return sourceCode?.match(REGEX_HARDCODEDURLS) // extract the domains
             ?.filter((domain) => SALESFORCE_DOMAINS.findIndex((sfdomain) => domain.indexOf(sfdomain) >= 0) >= 0)  // filter only the salesforce domains
             .sort() // sorting the domains (if any)
-            .filter((e, i, s) => i === s.indexOf(e)); // unique domains
+            .filter((e, i, s) => i === s.indexOf(e)) // unique domains
+            .filter((domain) => domain.indexOf(SALESFORCE_MY_DOMAIN) < 0); // remove the my.salesforce.com domains
     }
 
     static FindHardCodedIDs(sourceCode) {
         return sourceCode?.match(REGEX_HARDCODEDIDS) // extract the salesforce ids
             ?.map(id => id?.substring(1, id?.length-1)) // remove the surrounding quotes or so
             .sort() // sorting the domains (if any)
-            .filter((e, i, s) => i === s.indexOf(e)); // unique domains
+            .filter((e, i, s) => i === s.indexOf(e)) // unique domains
+            || []; // empty array if no ids found
     }
 
     static IsTestSeeAllData(sourceCode) {
@@ -1524,6 +1527,7 @@ class DatasetManagerIntf {
  * @property {string} CURRENTUSERPERMISSIONS
  * @property {string} CUSTOMFIELDS
  * @property {string} CUSTOMLABELS
+ * @property {string} DOCUMENTS
  * @property {string} FLOWS
  * @property {string} GROUPS
  * @property {string} LIGHTNINGAURACOMPONENTS
@@ -1556,6 +1560,7 @@ const DatasetAliases = {
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',
     CUSTOMLABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELDPERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     GROUPS: 'groups',
@@ -1690,6 +1695,7 @@ class RecipeManagerIntf {
  * @property {string} CURRENT_USER_PERMISSIONS
  * @property {string} CUSTOM_FIELDS
  * @property {string} CUSTOM_LABELS
+ * @property {string} DOCUMENTS
  * @property {string} FIELD_PERMISSIONS
  * @property {string} FLOWS
  * @property {string} LIGHTNING_AURA_COMPONENTS
@@ -1726,6 +1732,7 @@ const RecipeAliases = {
     CURRENT_USER_PERMISSIONS: 'current-user-permissions',
     CUSTOM_FIELDS: 'custom-fields',
     CUSTOM_LABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELD_PERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     LIGHTNING_AURA_COMPONENTS: 'lightning-aura-components',
@@ -1771,6 +1778,7 @@ const SalesforceMetadataTypes = {
     CUSTOM_SETTING: 'CustomSetting',
     CUSTOM_SITE: 'CustomSite',
     CUSTOM_TAB: 'CustomTab',
+    DOCUMENT: 'Document',
     EXTERNAL_OBJECT: 'ExternalObject',
     FIELD_SET: 'FieldSet',
     FLOW_DEFINITION: 'FlowDefinition',
@@ -4466,6 +4474,108 @@ class SFDC_Workflow extends Data {
     hasAction;
 }
 
+class SFDC_Document extends Data {
+
+    /** 
+     * @description Logical name of what this class represents
+     * @type {string}
+     * @static
+     * @public
+     */
+    static get label() { return 'Document' };
+
+    /**
+     * @description Unique identifier of this document in the org.
+     * @type {string}
+     * @public
+     */
+    id;
+
+    /**
+     * @description Unique identifier of this document in the org.
+     * @type {string}
+     * @public
+     */
+    name;
+
+    /**
+     * @description URL to the document in the org.
+     * @type {string}
+     * @public
+     */
+    documentUrl;
+
+    /**
+     * @description Is the url of this document is a hard coded value
+     * @type {boolean}
+     * @public
+     */
+    isHardCodedURL;
+
+    /**
+     * @description Size of the document in bytes.
+     * @type {number}
+     * @public
+     */
+    size;
+
+    /**
+     * @description Type of the document (e.g. PDF, Word, etc.).
+     * @type {string}
+     * @public
+     */
+    type;
+
+    /**
+     * @description Description of the document.
+     * @type {string}
+     * @public
+     */
+    description;
+
+    /**
+     * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    createdDate;
+    
+    /**
+     * @description Date/Time when this item was last modified in the org. Information stored as a Unix timestamp.
+     * @type {number}
+     * @public
+     */
+    lastModifiedDate;
+
+    /**
+     * @description Name of the folder where this document is stored.
+     * @type {string}
+     * @public
+     */
+    folderName;
+
+    /**
+     * @description Unique identifier of the folder where this document is stored.
+     * @type {string}
+     * @public
+     */
+    folderId;
+
+    /**
+     * @description Url to the document in the setup of the org.
+     * @type {string}
+     * @public
+     */
+    url;
+
+    /**
+     * @description Name of the package where this document is stored.
+     * @type {string}
+     * @public
+     */
+    package;
+}
+
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
  * @param {any} currentVersion set for a specific item like VFP, apex class, etc.
@@ -4567,10 +4677,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document} */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -4872,6 +4982,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This Page Layout is not assigned to any Profile. Please review this page layout and assign it to at least one profile.',
         badField: 'profileAssignmentCount',
         applicable: [ SFDC_PageLayout ]
+    }, {
+        id: 50,
+        description: 'Hard-coded URL suspicion in this document',
+        formula: (/** @type {SFDC_Document} */ d) => d.isHardCodedURL === true,
+        errorMessage: 'The URL of this document contains a hard coded URL pointing to domains like salesforce.com or force.*',
+        badField: 'documentUrl',
+        applicable: [ SFDC_Document ]
     }
 ];
 
@@ -8725,6 +8842,66 @@ class DatasetPageLayouts extends Dataset {
     } 
 }
 
+class DatasetDocuments extends Dataset {
+
+    /**
+     * @description Run the dataset and return the result
+     * @param {SalesforceManagerIntf} sfdcManager
+     * @param {DataFactoryIntf} dataFactory
+     * @param {SimpleLoggerIntf} logger
+     * @returns {Promise<Map<string, SFDC_Document>>} The result of the dataset
+     */
+    async run(sfdcManager, dataFactory, logger) {
+
+        // First SOQL query
+        logger?.log(`Querying REST API about Document in the org...`);            
+        const results = await sfdcManager.soqlQuery([{
+            tooling: true,
+            string: 'SELECT Id, Name, Url, BodyLength, ContentType, CreatedDate, Description, ' +
+                        'DeveloperName, Folder.Name, Folder.Id, LastModifiedDate, NamespacePrefix ' +
+                    'FROM Document '
+        }], logger);
+
+        // Init the factory and records
+        const documentDataFactory = dataFactory.getInstance(SFDC_Document);
+        const documentRecords = results[0];
+
+        // Create the map
+        logger?.log(`Parsing ${documentRecords.length} documents...`);
+        const documents = new Map(await Processor.map(documentRecords, (record) => {
+
+            // Get the ID15 of this custom label
+            const id = sfdcManager.caseSafeId(record.Id);
+
+            // Create the instance
+            const document = documentDataFactory.createWithScore({
+                properties: {
+                    id: id,
+                    name: record.Name,
+                    documentUrl: record.Url,
+                    isHardCodedURL: CodeScanner.FindHardCodedURLs(record.Url)?.length > 0 || false,
+                    size: record.BodyLength,
+                    type: record.ContentType,
+                    description: record.Description,
+                    createdDate: record.CreatedDate,
+                    lastModifiedDate: record.LastModifiedDate,
+                    folderId: record.Folder?.Id,
+                    folderName: record.Folder?.Name,
+                    package: (record.NamespacePrefix || ''),
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.DOCUMENT)
+                }
+            });
+
+            // Add it to the map  
+            return [ document.id, document ];
+        }));
+
+        // Return data as map
+        logger?.log(`Done`);
+        return documents;
+    } 
+}
+
 /**
  * @description Dataset manager
  */
@@ -8803,6 +8980,7 @@ class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.CURRENTUSERPERMISSIONS, new DatasetCurrentUserPermissions());
         this._datasets.set(DatasetAliases.CUSTOMFIELDS, new DatasetCustomFields());
         this._datasets.set(DatasetAliases.CUSTOMLABELS, new DatasetCustomLabels());
+        this._datasets.set(DatasetAliases.DOCUMENTS, new DatasetDocuments());
         this._datasets.set(DatasetAliases.FIELDPERMISSIONS, new DatasetFieldPermissions());
         this._datasets.set(DatasetAliases.FLOWS, new DatasetFlows());
         this._datasets.set(DatasetAliases.GROUPS, new DatasetGroups());
@@ -10704,6 +10882,48 @@ class RecipePageLayouts extends Recipe {
     }
 }
 
+class RecipeDocuments extends Recipe {
+
+    /**
+     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @param {SimpleLoggerIntf} logger
+     * @returns {Array<string | DatasetRunInformation>}
+     * @public
+     */
+    extract(logger) {
+        return [DatasetAliases.DOCUMENTS];
+    }
+
+    /**
+     * @description transform the data from the datasets and return the final result as a Map
+     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @async
+     * @public
+     */
+    async transform(data, logger, namespace) {
+
+        // Get data
+        const /** @type {Map<string, SFDC_Document>} */ documents = data.get(DatasetAliases.DOCUMENTS);
+
+        // Checking data
+        if (!documents) throw new Error(`RecipeDocuments: Data from dataset alias 'DOCUMENTS' was undefined.`);
+
+        // Filter data
+        const array = [];
+        await Processor.forEach(documents, (document) => {
+            if (namespace === '*' || document.package === namespace) {
+                array.push(document);
+            }
+        });
+
+        // Return data
+        return array;
+    }
+}
+
 /**
  * @description Recipe Manager
  */ 
@@ -10758,6 +10978,7 @@ class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.CURRENT_USER_PERMISSIONS, new RecipeCurrentUserPermissions());
         this._recipes.set(RecipeAliases.CUSTOM_FIELDS, new RecipeCustomFields());
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());
+        this._recipes.set(RecipeAliases.DOCUMENTS, new RecipeDocuments());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new  RecipeFlows());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());
@@ -12328,6 +12549,28 @@ class API {
         this._recipeManager.clean(RecipeAliases.CUSTOM_LABELS);
     }
 
+
+    /**
+     * @description Get information about documents (filtered out by namespace/pakage)
+     * @param {string} namespace 
+     * @returns {Promise<Array<SFDC_Document>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getDocuments(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about documents
+     * @public
+     */
+    removeAllDocumentsFromCache() {
+        this._recipeManager.clean(RecipeAliases.DOCUMENTS);
+    }
+
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
      * @param {string} namespace 
@@ -12727,4 +12970,4 @@ class API {
     }
 }
 
-export { API, BasicLoggerIntf, CodeScanner, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SecretSauce, SimpleLoggerIntf };
+export { API, BasicLoggerIntf, CodeScanner, Data, DataCacheItem, DataCacheManagerIntf, DataDependencies, DataDependenciesFactory, DataDependencyItem, DataFactoryInstanceIntf, DataFactoryIntf, DataItemInCache, DataMatrix, DataMatrixColumnHeader, DataMatrixFactory, DataMatrixRow, DataMatrixWorking, DataWithDependencies, DataWithoutScoring, Dataset, DatasetAliases, DatasetManagerIntf, DatasetRunInformation, ItemInCache, LoggerIntf, MetadataItemInCache, OBJECTTYPE_ID_CUSTOM_BIG_OBJECT, OBJECTTYPE_ID_CUSTOM_EVENT, OBJECTTYPE_ID_CUSTOM_EXTERNAL_SOBJECT, OBJECTTYPE_ID_CUSTOM_METADATA_TYPE, OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_ID_KNOWLEDGE_ARTICLE, OBJECTTYPE_ID_STANDARD_SOBJECT, Processor, Recipe, RecipeAliases, RecipeManagerIntf, SFDC_ApexClass, SFDC_ApexTestMethodResult, SFDC_ApexTrigger, SFDC_AppPermission, SFDC_Application, SFDC_CustomLabel, SFDC_Document, SFDC_Field, SFDC_FieldPermission, SFDC_FieldSet, SFDC_Flow, SFDC_FlowVersion, SFDC_Group, SFDC_LightningAuraComponent, SFDC_LightningPage, SFDC_LightningWebComponent, SFDC_Limit, SFDC_Object, SFDC_ObjectPermission, SFDC_ObjectRelationShip, SFDC_ObjectType, SFDC_Organization, SFDC_Package, SFDC_PageLayout, SFDC_PermissionSet, SFDC_PermissionSetLicense, SFDC_Profile, SFDC_ProfileIpRangeRestriction, SFDC_ProfileLoginHourRestriction, SFDC_ProfilePasswordPolicy, SFDC_ProfileRestrictions, SFDC_RecordType, SFDC_User, SFDC_UserRole, SFDC_ValidationRule, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_Workflow, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceMetadataTypes, SalesforceQueryRequest, SalesforceUsageInformation, SalesforceWatchDog, ScoreRule, SecretSauce, SimpleLoggerIntf };

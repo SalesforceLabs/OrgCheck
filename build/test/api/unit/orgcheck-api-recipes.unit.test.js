@@ -6,6 +6,7 @@ import { RecipeAppPermissions } from "../../../src/api/recipe/orgcheck-api-recip
 import { RecipeCurrentUserPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-currentuserpermissions";
 import { RecipeCustomFields } from "../../../src/api/recipe/orgcheck-api-recipe-customfields";
 import { RecipeCustomLabels } from "../../../src/api/recipe/orgcheck-api-recipe-customlabels";
+import { RecipeDocuments } from "../../../src/api/recipe/orgcheck-api-recipe-documents";
 import { RecipeFieldPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-fieldpermissions";
 import { RecipeFlows } from "../../../src/api/recipe/orgcheck-api-recipe-flows";
 import { RecipeLightningAuraComponents } from "../../../src/api/recipe/orgcheck-api-recipe-lightningauracomponents";
@@ -159,6 +160,26 @@ describe('tests.api.unit.Recipes', () => {
   describe('Test RecipeCustomLabels', () => {
   
     const recipe = new RecipeCustomLabels();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(1);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger, 'namespace');
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipeDocuments', () => {
+  
+    const recipe = new RecipeDocuments();
     const logger = new SimpleLoggerMock();
     it('checks if this recipe class extracts and transforms correctly', async () => {
 

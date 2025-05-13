@@ -7,6 +7,7 @@ import { DatasetAppPermissions } from '../../../src/api/dataset/orgcheck-api-dat
 import { DatasetCurrentUserPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
 import { DatasetCustomFields } from '../../../src/api/dataset/orgcheck-api-dataset-customfields';
 import { DatasetCustomLabels } from '../../../src/api/dataset/orgcheck-api-dataset-customlabels';
+import { DatasetDocuments } from '../../../src/api/dataset/orgcheck-api-dataset-documents';
 import { DatasetFieldPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetFlows } from '../../../src/api/dataset/orgcheck-api-dataset-flows';
 import { DatasetGroups } from '../../../src/api/dataset/orgcheck-api-dataset-groups';
@@ -245,6 +246,20 @@ describe('tests.api.unit.Datasets', () => {
   describe('Test DatasetCustomLabels', () => {
   
     const dataset = new DatasetCustomLabels();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+  });
+
+    describe('Test DatasetDocuments', () => {
+  
+    const dataset = new DatasetDocuments();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();

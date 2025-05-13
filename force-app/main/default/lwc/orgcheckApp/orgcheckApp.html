@@ -583,7 +583,7 @@
             <lightning-tab value="setting" label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels,documents"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -591,10 +591,14 @@
                         <h1 class="slds-text-heading_large">🎁 Welcome in the Setting world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🏷️ Custom Labels</b>: List your custom labels in one table and see which one is not used!</li>
+                            <li><b>🍱 Documents</b>: List your Documents and check if they have hardcoded url in them.</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no custom label to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={customLabelsTableDefinition} rows={customLabelsTableData} show-export-button export-basename="CustomLabels"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="documents" label="🍱 Documents" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no document to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={documentsTableDefinition} rows={documentsTableData} show-export-button export-basename="🍱 Documents"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

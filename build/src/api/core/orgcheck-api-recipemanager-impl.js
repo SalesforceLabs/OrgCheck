@@ -40,6 +40,7 @@ import { RecipeFieldPermissions } from '../recipe/orgcheck-api-recipe-fieldpermi
 import { RecipeValidationRules } from '../recipe/orgcheck-api-recipe-validationrules';
 import { RecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permissionsetlicenses';
 import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
+import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
 
 /**
  * @description Recipe Manager
@@ -95,6 +96,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.CURRENT_USER_PERMISSIONS, new RecipeCurrentUserPermissions());
         this._recipes.set(RecipeAliases.CUSTOM_FIELDS, new RecipeCustomFields());
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());
+        this._recipes.set(RecipeAliases.DOCUMENTS, new RecipeDocuments());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new  RecipeFlows());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());

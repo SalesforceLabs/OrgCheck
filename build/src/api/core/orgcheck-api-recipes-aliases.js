@@ -9,6 +9,7 @@
  * @property {string} CURRENT_USER_PERMISSIONS
  * @property {string} CUSTOM_FIELDS
  * @property {string} CUSTOM_LABELS
+ * @property {string} DOCUMENTS
  * @property {string} FIELD_PERMISSIONS
  * @property {string} FLOWS
  * @property {string} LIGHTNING_AURA_COMPONENTS
@@ -45,6 +46,7 @@ export const RecipeAliases = {
     CURRENT_USER_PERMISSIONS: 'current-user-permissions',
     CUSTOM_FIELDS: 'custom-fields',
     CUSTOM_LABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELD_PERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     LIGHTNING_AURA_COMPONENTS: 'lightning-aura-components',

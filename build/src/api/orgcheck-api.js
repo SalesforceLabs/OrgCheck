@@ -39,6 +39,7 @@ import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionse
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
 import { SFDC_PageLayout } from './data/orgcheck-api-data-pagelayout';
+import { SFDC_Document } from './data/orgcheck-api-data-document';
 
 /**
  * @description Org Check API main class
@@ -588,6 +589,28 @@ export class API {
      */
     removeAllCustomLabelsFromCache() {
         this._recipeManager.clean(RecipeAliases.CUSTOM_LABELS);
+    }
+
+
+    /**
+     * @description Get information about documents (filtered out by namespace/pakage)
+     * @param {string} namespace 
+     * @returns {Promise<Array<SFDC_Document>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getDocuments(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about documents
+     * @public
+     */
+    removeAllDocumentsFromCache() {
+        this._recipeManager.clean(RecipeAliases.DOCUMENTS);
     }
 
     /**

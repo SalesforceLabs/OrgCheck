@@ -27,6 +27,7 @@ export * from './data/orgcheck-api-data-apextrigger.js';
 export * from './data/orgcheck-api-data-application.js';
 export * from './data/orgcheck-api-data-apppermission.js';
 export * from './data/orgcheck-api-data-customlabel.js';
+export * from './data/orgcheck-api-data-document.js';
 export * from './data/orgcheck-api-data-field.js';
 export * from './data/orgcheck-api-data-fieldpermission.js';
 export * from './data/orgcheck-api-data-fieldset.js';

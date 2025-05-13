@@ -25,6 +25,7 @@ import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { ScoreRule } from './orgcheck-api-datafactory';
 import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
+import { SFDC_Document } from '../data/orgcheck-api-data-document';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -127,10 +128,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document} */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -432,6 +433,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This Page Layout is not assigned to any Profile. Please review this page layout and assign it to at least one profile.',
         badField: 'profileAssignmentCount',
         applicable: [ SFDC_PageLayout ]
+    }, {
+        id: 50,
+        description: 'Hard-coded URL suspicion in this document',
+        formula: (/** @type {SFDC_Document} */ d) => d.isHardCodedURL === true,
+        errorMessage: 'The URL of this document contains a hard coded URL pointing to domains like salesforce.com or force.*',
+        badField: 'documentUrl',
+        applicable: [ SFDC_Document ]
     }
 ];
 
