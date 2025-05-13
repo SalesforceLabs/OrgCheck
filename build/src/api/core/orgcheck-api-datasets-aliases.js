@@ -31,6 +31,7 @@
  * @property {string} VISUALFORCECOMPONENTS
  * @property {string} VISUALFORCEPAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORDTYPES
  */
 export const DatasetAliases = {
     APEXCLASSES: 'apex-classes',
@@ -59,6 +60,7 @@ export const DatasetAliases = {
     PROFILEPWDPOLICIES: 'profile-password-policies',
     PROFILERESTRICTIONS: 'profile-restrictions',
     PROFILES: 'profiles',
+    RECORDTYPES : 'record-types',
     USERROLES: 'user-roles',
     USERS: 'users',
     VALIDATIONRULES: 'validation-rules',

@@ -35,6 +35,7 @@
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
+ * @property {string} RECORD_TYPES
  */
 export const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -67,6 +68,7 @@ export const RecipeAliases = {
     PROFILES: 'profiles',
     PUBLIC_GROUPS: 'public-groups',
     QUEUES: 'queues',
+    RECORD_TYPES: 'record-types',
     USER_ROLES: 'user-roles',
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',

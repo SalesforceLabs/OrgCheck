@@ -522,6 +522,7 @@ export default class OrgcheckApp extends LightningElement {
         'profiles':                  { label: '🚓 Profiles',                   tab: 'security',    isGlobalView: true,      data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getProfiles(this.namespace); }},
         'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',       isGlobalView: true,      data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._nt,   get: async () => { return this._api?.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',       isGlobalView: true,      data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._nt,   get: async () => { return this._api?.getQueues(); }},
+        'record-types':              { label: 'Record Types',                  tab: 'data-model',  isGlobalView: true,      data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._al,   get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
         'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
         'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
@@ -2419,6 +2420,11 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_Workflow>}
      */
     workflowsTableData;
+    /** 
+     * @description Table data for record types 
+     * @type {Array<ocapi.SFDC_RecordType>}
+     */
+    recordTypesTableData;
 
     /**
      * @description Data matrix for object permissions

@@ -32,6 +32,7 @@ import { DatasetValidationRules } from '../../../src/api/dataset/orgcheck-api-da
 import { DatasetVisualForceComponents } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetVisualForcePages } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWorkflows } from '../../../src/api/dataset/orgcheck-api-dataset-workflows';
+import { DatasetRecordTypes } from '../../../src/api/dataset/orgcheck-api-dataset-recordtypes';
 
 class SfdcManagerMock extends SalesforceManagerIntf { 
 
@@ -180,7 +181,48 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.get('05').nbSystemAsserts).toBe(0);
     });
   });
-
+  describe('Test DatasetRecordTypes', () => { 
+    const dataset = new DatasetRecordTypes();
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+    it('checks if regex are correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+    it('checks if regex are correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM RecordType ', [
+        {
+          DeveloperName: 'RecordType1', 
+          Id: '01', 
+          Name: 'Name1', 
+          SobjectType: 'Account'
+        }
+      ]);
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(1);
+      expect(results.get('01')).toBeDefined();
+      expect(results.get('01').name).toBe('Name1');
+      expect(results.get('01').developerName).toBe('RecordType1');
+      expect(results.get('01').objectId).toBe('Account'); 
+    });
+  });
   describe('Test DatasetApexTriggers', () => {
   
     const dataset = new DatasetApexTriggers();      

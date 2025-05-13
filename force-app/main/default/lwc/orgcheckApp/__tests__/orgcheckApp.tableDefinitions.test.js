@@ -67,7 +67,7 @@ describe('c-orgcheck-app', () => {
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
-            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds' ].sort());
+            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 'objectId', 'objectRef' ].sort());
         });
 
         it('Should have correct table definition for relationships', () => {
