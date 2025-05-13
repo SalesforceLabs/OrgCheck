@@ -7,6 +7,7 @@ import { DatasetAppPermissions } from '../../../src/api/dataset/orgcheck-api-dat
 import { DatasetCurrentUserPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
 import { DatasetCustomFields } from '../../../src/api/dataset/orgcheck-api-dataset-customfields';
 import { DatasetCustomLabels } from '../../../src/api/dataset/orgcheck-api-dataset-customlabels';
+import { DatasetDocuments } from '../../../src/api/dataset/orgcheck-api-dataset-documents';
 import { DatasetFieldPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetFlows } from '../../../src/api/dataset/orgcheck-api-dataset-flows';
 import { DatasetGroups } from '../../../src/api/dataset/orgcheck-api-dataset-groups';
@@ -19,6 +20,7 @@ import { DatasetObjects } from '../../../src/api/dataset/orgcheck-api-dataset-ob
 import { DatasetObjectTypes } from '../../../src/api/dataset/orgcheck-api-dataset-objecttypes';
 import { DatasetOrganization } from '../../../src/api/dataset/orgcheck-api-dataset-organization';
 import { DatasetPackages } from '../../../src/api/dataset/orgcheck-api-dataset-packages';
+import { DatasetPageLayouts } from '../../../src/api/dataset/orgcheck-api-dataset-pagelayouts';
 import { DatasetPermissionSetLicenses } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsetlicenses';
 import { DatasetPermissionSets } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsets';
 import { DatasetProfilePasswordPolicies } from '../../../src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
@@ -286,6 +288,20 @@ describe('tests.api.unit.Datasets', () => {
   describe('Test DatasetCustomLabels', () => {
   
     const dataset = new DatasetCustomLabels();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
+    });
+  });
+
+    describe('Test DatasetDocuments', () => {
+  
+    const dataset = new DatasetDocuments();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
@@ -598,6 +614,20 @@ describe('tests.api.unit.Datasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(3);
+    });
+  });
+
+  describe('Test DatasetPageLayouts', () => {
+  
+    const dataset = new DatasetPageLayouts();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
     });
   });
 

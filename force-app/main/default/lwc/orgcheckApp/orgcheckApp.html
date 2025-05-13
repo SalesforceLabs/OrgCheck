@@ -199,7 +199,7 @@
             <lightning-tab value="data-model" label="⚽ Objects, OWDs, Fields and Validation Rules" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,validation-rules,record-types"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,page-layouts,validation-rules,record-types"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTaDataModel}>
@@ -209,6 +209,7 @@
                             <li><b>🎳 Object Documentation</b>: Get a full documentation of a given specific SObject in one page -- use the global filter to select the object. </li>
                             <li><b>🏉 Org Wide Defaults</b>: List all your objects and their org wide default (internal and external)</li>
                             <li><b>🏈 Custom Fields</b>: List all your custom fields along with their score to check which one should be fixed first!</li>
+                            <li><b>🏓 Page Layouts</b>: list Page Layouts that may have no assignments in profiles </li>
                             <li><b>🎾 Validation Rules</b>: List all your validation rules from your org (whatever the object) in one page!</li>
                             <li><b>Record Types</b>: List all your record types along with their score to check which one should be fixed first!</li>
                         </ul>
@@ -446,6 +447,9 @@
                     <lightning-tab value="custom-fields" label="🏈 Custom Fields" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no custom field to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={customFieldsTableDefinition} rows={customFieldsTableData} show-export-button export-basename="CustomFields"></c-orgcheck-extended-datatable>
                     </lightning-tab>
+                    <lightning-tab value="page-layouts" label="🏓 Page Layouts" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no page layouts to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={pageLayoutsTableDefinition} rows={pageLayoutsTableData} show-export-button export-basename="PageLayouts"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
                     <lightning-tab value="validation-rules" label="🎾 Validation Rules" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no validation rule to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={validationRulesTableDefinition} rows={validationRulesTableData} show-export-button export-basename="ValidationRules"></c-orgcheck-extended-datatable>
                     </lightning-tab>
@@ -583,7 +587,7 @@
             <lightning-tab value="setting" label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels,documents"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -591,10 +595,14 @@
                         <h1 class="slds-text-heading_large">🎁 Welcome in the Setting world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🏷️ Custom Labels</b>: List your custom labels in one table and see which one is not used!</li>
+                            <li><b>🍱 Documents</b>: List your Documents and check if they have hardcoded url in them.</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no custom label to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={customLabelsTableDefinition} rows={customLabelsTableData} show-export-button export-basename="CustomLabels"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="documents" label="🍱 Documents" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no document to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={documentsTableDefinition} rows={documentsTableData} show-export-button export-basename="🍱 Documents"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

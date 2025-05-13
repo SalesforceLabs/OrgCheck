@@ -7,6 +7,7 @@
  * @property {string} CURRENTUSERPERMISSIONS
  * @property {string} CUSTOMFIELDS
  * @property {string} CUSTOMLABELS
+ * @property {string} DOCUMENTS
  * @property {string} FLOWS
  * @property {string} GROUPS
  * @property {string} LIGHTNINGAURACOMPONENTS
@@ -18,6 +19,7 @@
  * @property {string} OBJECTTYPES
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
+ * @property {string} PAGELAYOUTS
  * @property {string} PERMISSIONSETS
  * @property {string} PERMISSIONSETLICENSES
  * @property {string} PROFILEPWDPOLICIES
@@ -39,6 +41,7 @@ export const DatasetAliases = {
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',
     CUSTOMLABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELDPERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     GROUPS: 'groups',
@@ -51,6 +54,7 @@ export const DatasetAliases = {
     OBJECTTYPES: 'object-types',
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
+    PAGELAYOUTS: 'page-layouts',
     PERMISSIONSETS: 'permission-sets',
     PERMISSIONSETLICENSES: 'permission-set-licenses',
     PROFILEPWDPOLICIES: 'profile-password-policies',

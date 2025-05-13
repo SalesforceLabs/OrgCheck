@@ -15,6 +15,7 @@ export const SalesforceMetadataTypes = {
     CUSTOM_SETTING: 'CustomSetting',
     CUSTOM_SITE: 'CustomSite',
     CUSTOM_TAB: 'CustomTab',
+    DOCUMENT: 'Document',
     EXTERNAL_OBJECT: 'ExternalObject',
     FIELD_SET: 'FieldSet',
     FLOW_DEFINITION: 'FlowDefinition',

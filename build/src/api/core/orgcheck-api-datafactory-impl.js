@@ -125,7 +125,7 @@ export class DataFactoryInstance extends DataFactoryInstanceIntf {
         }
         // If dependencies are needed...
         if (this._isDependenciesNeeded === true && configuration.dependencies) {
-            row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, row[configuration.dependencies.idField || 'id']);
+            row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, (configuration.dependencies.idFields || ['id']).map(f => row[f]));
         }
         // Return the row finally
         return row;

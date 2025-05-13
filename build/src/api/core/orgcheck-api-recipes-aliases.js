@@ -9,6 +9,7 @@
  * @property {string} CURRENT_USER_PERMISSIONS
  * @property {string} CUSTOM_FIELDS
  * @property {string} CUSTOM_LABELS
+ * @property {string} DOCUMENTS
  * @property {string} FIELD_PERMISSIONS
  * @property {string} FLOWS
  * @property {string} LIGHTNING_AURA_COMPONENTS
@@ -20,6 +21,7 @@
  * @property {string} OBJECTS
  * @property {string} ORGANIZATION
  * @property {string} PACKAGES
+ * @property {string} PAGE_LAYOUTS
  * @property {string} PERMISSION_SETS
  * @property {string} PERMISSION_SET_LICENSES
  * @property {string} PROCESS_BUILDERS
@@ -45,6 +47,7 @@ export const RecipeAliases = {
     CURRENT_USER_PERMISSIONS: 'current-user-permissions',
     CUSTOM_FIELDS: 'custom-fields',
     CUSTOM_LABELS: 'custom-labels',
+    DOCUMENTS: 'documents',
     FIELD_PERMISSIONS: 'field-permissions',
     FLOWS: 'flows',
     LIGHTNING_AURA_COMPONENTS: 'lightning-aura-components',
@@ -56,6 +59,7 @@ export const RecipeAliases = {
     OBJECT_TYPES: 'object-types',
     ORGANIZATION: 'org-information',
     PACKAGES: 'packages',
+    PAGE_LAYOUTS: 'page-layouts',
     PERMISSION_SETS: 'permission-sets',
     PERMISSION_SET_LICENSES: 'permission-set-licenses',
     PROCESS_BUILDERS: 'process-builders',

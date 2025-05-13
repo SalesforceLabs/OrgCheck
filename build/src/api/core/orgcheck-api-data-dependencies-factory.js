@@ -8,11 +8,12 @@ export class DataDependenciesFactory {
     /**
      * @description Create a new instance of DataDependencies
      * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
-     * @param {string} whatId 
+     * @param {Array<string>} whatIds 
      * @returns {DataDependencies}
      */
-    static create(data, whatId) {
-        if (data.errors?.includes(whatId)) {
+    static create(data, whatIds) {
+        // Check if at least one of the whatIds is present in the data errors list
+        if (data.errors?.some(errorId => whatIds.includes(errorId))) {
             return {
                 hadError: true,
                 using: [],
@@ -20,7 +21,9 @@ export class DataDependenciesFactory {
                 referencedByTypes: {}
             };
         }
-        const using = data.records.filter(e => e.id === whatId).map(n => { 
+        // Data can contain a lot of dependencies from other ids, we just want to get the dependencies for the given whatIds
+        // WhatID is using what? -- Here we are getting the dependencies where the ID is in the whatIds list
+        const using = data.records.filter(e => whatIds.includes(e.id)).map(n => { 
             return { 
                 id: n.refId, 
                 name: n.refName, 
@@ -29,7 +32,8 @@ export class DataDependenciesFactory {
             }; 
         });
         const referencedByTypes = {};
-        const referenced = data.records.filter(e => e.refId === whatId).map(n => {
+        // WhatID is referenced where? -- Here we are getting the dependencies where the REFID is in the whatIds list
+        const referenced = data.records.filter(e => whatIds.includes(e.refId)).map(n => {
             if (referencedByTypes[n.type] === undefined) {
                 referencedByTypes[n.type] = 1;
             } else {
