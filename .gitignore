@@ -36,5 +36,5 @@ $RECYCLE.BIN/
 package-lock.json
 
 #org check generated files
-build/dist/**/*.js
-force-app/main/default/lwc/**/libs/*.js
+build/dist/*/*.js
+force-app/main/default/lwc/*/libs/*.js
