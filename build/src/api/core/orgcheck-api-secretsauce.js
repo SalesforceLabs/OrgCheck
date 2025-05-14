@@ -440,6 +440,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'The URL of this document contains a hard coded URL pointing to domains like salesforce.com or force.*',
         badField: 'documentUrl',
         applicable: [ SFDC_Document ]
+    }, {
+        id: 51,
+        description: 'Unassigned Record Type',
+        formula: (/** @type {SFDC_RecordType} */ d) => d.isDefault === false && d.isAvailable === false,
+        errorMessage: 'This record type is not set as default nor as visible in any profile in this org. Please review this record type and remove it if it is not needed anymore.',
+        badField: 'isDefault',
+        applicable: [ SFDC_RecordType ]
     }
 ];
 

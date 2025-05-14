@@ -118,13 +118,12 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.PROFILES, new RecipeProfiles());
         this._recipes.set(RecipeAliases.PUBLIC_GROUPS, new RecipePublicGroups());
         this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
+        this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
         this._recipes.set(RecipeAliases.USER_ROLES, new RecipeUserRoles());
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
-        this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());
-        this._recipes.set(RecipeAliases.RECORD_TYPE, new RecipeRecordType());
-        
+        this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());        
     }
 
     /**

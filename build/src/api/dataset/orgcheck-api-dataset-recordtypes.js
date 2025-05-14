@@ -17,37 +17,76 @@ export class DatasetRecordTypes extends Dataset {
      */
     async run(sfdcManager, dataFactory, logger) {
 
-        // First SOQL query
-        logger?.log(`Querying Tooling API about Record Types in the org...`);            
+        // First SOQL queries
+        logger?.log(`Querying REST API about Record Types and Profiles in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT DeveloperName, Id, Name, SobjectType, IsActive ' +
+            string: 'SELECT DeveloperName, NamespacePrefix, Id, Name, SobjectType, IsActive ' +
                     'FROM RecordType '
+        }, {
+            string: 'SELECT Id FROM Profile '
         }], logger);
 
         const recordTypeDataFactory = dataFactory.getInstance(SFDC_RecordType);
-
         const recordTypeRecords = results[0];
-        logger?.log(`Parsing ${recordTypeRecords.length} record type...`);
+        const profileRecords = results[1];
+
+        logger?.log(`Parsing ${recordTypeRecords.length} record types...`);
+        const recordTypeDevNameToId = new Map();
         const recordTypes = new Map(await Processor.map(recordTypeRecords, async (record) => {
         
             // Get the ID15 of this record type
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
-            const recordType = recordTypeDataFactory.createWithScore({
+            const recordType = recordTypeDataFactory.create({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 
                     name: record.Name, 
                     developerName: record.DeveloperName,
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE),
+                    package: (record.NamespacePrefix || ''),
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.RECORD_TYPE, record.SobjectType),
                     isActive: record.IsActive,
-                    objectId: record.SobjectType
+                    objectId: record.SobjectType,
+                    isAvailable: false, // as a start value may change when we check the profiles
+                    isDefault: false, // as a start value may change when we check the profiles
                 }
             });
+
+            // Add the reference for later use
+            recordTypeDevNameToId.set(`${record.SobjectType}.${record.NamespacePrefix ? (record.NamespacePrefix+'__') : ''}${record.DeveloperName}`, id);
 
             // Add it to the map  
             return [ recordType.id, recordType ];
         }));
+
+        logger?.log(`Extracting Ids from ${profileRecords.length} profiles...`);
+        const profileIds = await Processor.map(profileRecords, (record) => sfdcManager.caseSafeId(record.Id));
+
+        logger?.log(`Get record type information from Profile Metatdata API`);
+        const profiles = await sfdcManager.readMetadataAtScale('Profile', profileIds, [], logger);
+
+        logger?.log(`Parsing ${profiles.length} profiles looking for record types information...`);
+        await Processor.forEach(profiles, async (profile) => {
+            profile.Metadata?.recordTypeVisibilities?.forEach((rtv) => {
+                if (recordTypeDevNameToId.has(rtv.recordType)) {
+                    const id = recordTypeDevNameToId.get(rtv.recordType);
+                    if (recordTypes.has(id)) {
+                        const recordType = recordTypes.get(id);
+                        if (recordType.isDefault === false && rtv.default === true) {
+                            recordType.isDefault = true;
+                        }
+                        if (recordType.isAvailable === false && rtv.visible === true) {
+                            recordType.isAvailable = true;
+                        }
+                    }
+                }
+            });
+        });
+
+        // Then compute the score of record types 
+        await Processor.forEach(recordTypes, async (recordType) => {
+            recordTypeDataFactory.computeScore(recordType);
+        });
 
         // Return data as map
         logger?.log(`Done`);

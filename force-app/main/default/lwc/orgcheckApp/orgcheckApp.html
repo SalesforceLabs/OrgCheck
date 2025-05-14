@@ -211,7 +211,7 @@
                             <li><b>🏈 Custom Fields</b>: List all your custom fields along with their score to check which one should be fixed first!</li>
                             <li><b>🏓 Page Layouts</b>: list Page Layouts that may have no assignments in profiles </li>
                             <li><b>🎾 Validation Rules</b>: List all your validation rules from your org (whatever the object) in one page!</li>
-                            <li><b>Record Types</b>: List all your record types along with their score to check which one should be fixed first!</li>
+                            <li><b>🏏 Record Types</b>: List all your record types along with their score to check which one should be fixed first!</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
@@ -421,7 +421,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                   table-definition={recordTypesTableDefinition} rows={objectData.recordTypes}></c-orgcheck-extended-datatable>
+                                   table-definition={recordTypesInObjectTableDefinition} rows={objectData.recordTypes}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -453,7 +453,7 @@
                     <lightning-tab value="validation-rules" label="🎾 Validation Rules" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no validation rule to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={validationRulesTableDefinition} rows={validationRulesTableData} show-export-button export-basename="ValidationRules"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="record-types" label="Record Types" onactive={handleSubTabActivation}>
+                    <lightning-tab value="record-types" label="🏏 Record Types" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no record type to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={recordTypesTableDefinition} rows={recordTypesTableData} show-export-button export-basename="RecordTypes"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>

@@ -30,12 +30,12 @@
  * @property {string} PROFILES
  * @property {string} PUBLIC_GROUPS
  * @property {string} QUEUES
+ * @property {string} RECORD_TYPES
  * @property {string} USER_ROLES
  * @property {string} VALIDATION_RULES
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
  * @property {string} WORKFLOWS
- * @property {string} RECORD_TYPES
  */
 export const RecipeAliases = {
     ACTIVE_USERS: 'active-users',

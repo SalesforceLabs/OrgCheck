@@ -225,7 +225,7 @@ export class DatasetObject extends Dataset {
                     developerName: t.developerName, 
                     isActive: t.active,
                     isAvailable: t.available,
-                    isDefaultRecordTypeMapping: t.defaultRecordTypeMapping,
+                    isDefault: t.defaultRecordTypeMapping,
                     isMaster: t.master,
                     url: sfdcManager.setupUrl(t.recordTypeId, SalesforceMetadataTypes.RECORD_TYPE, entity.DurableId)
                 }

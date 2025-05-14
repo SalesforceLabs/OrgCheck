@@ -522,7 +522,7 @@ export default class OrgcheckApp extends LightningElement {
         'profiles':                  { label: '🚓 Profiles',                   tab: 'security',    isGlobalView: true,      data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getProfiles(this.namespace); }},
         'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',       isGlobalView: true,      data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._nt,   get: async () => { return this._api?.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',       isGlobalView: true,      data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._nt,   get: async () => { return this._api?.getQueues(); }},
-        'record-types':              { label: 'Record Types',                  tab: 'data-model',  isGlobalView: true,      data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._al,   get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        'record-types':              { label: '🏏 Record Types',               tab: 'data-model',  isGlobalView: true,      data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._al,   get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
         'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
         'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
@@ -1146,7 +1146,7 @@ export default class OrgcheckApp extends LightningElement {
      * @description Table definition for record types (specific to the current selected object)
      * @type {ocui.Table}
      */
-    recordTypesTableDefinition = {
+    recordTypesInObjectTableDefinition = {
         columns: [
             { label: '#',              type: ocui.ColumnType.IDX },
             { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
@@ -1154,12 +1154,34 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
             { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
-            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefaultRecordTypeMapping' }},
+            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
             { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
+
+    /**
+     * @description Table definition for record types for all objects
+     * @type {ocui.Table}
+     */
+    recordTypesTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'In this object', type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',    type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
+            { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
+            { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
+            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
+            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
      * @description Table definition for sobject relationships (specific to the current selected object)
