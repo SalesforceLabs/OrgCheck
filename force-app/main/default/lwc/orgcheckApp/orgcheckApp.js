@@ -526,8 +526,9 @@ export default class OrgcheckApp extends LightningElement {
         'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
         'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
-        'visual-force-components':   { label: '🍞 Visualforce Components',    tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
-        'visual-force-pages':        { label: '🥖 Visualforce Pages',         tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
+        'visual-force-components':   { label: '🍞 Visualforce Components',     tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
+        'visual-force-pages':        { label: '🥖 Visualforce Pages',          tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
+        'weblinks':                  { label: '🏑 Web Links',                  tab: 'data-model',  isGlobalView: true,      data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._al,   get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
         'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',  isGlobalView: true,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getWorkflows(); }}
     }
 
@@ -1124,16 +1125,16 @@ export default class OrgcheckApp extends LightningElement {
      * @description Table definition for web links (specific to the current selected object)
      * @type {ocui.Table}
      */
-    webLinksTableDefinition = {
+    webLinksInObjectTableDefinition = {
         columns: [
             { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Behavior',      type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
             { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
@@ -1142,6 +1143,30 @@ export default class OrgcheckApp extends LightningElement {
         orderSort: ocui.SortOrder.ASC
     };
     
+    /**
+     * @description Table definition for web links (for all objects)
+     * @type {ocui.Table}
+     */
+    webLinksTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'In this object', type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',    type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
+            { label: 'URLs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',            type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Type',           type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Behavior',       type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.ASC
+    };
+
     /**
      * @description Table definition for record types (specific to the current selected object)
      * @type {ocui.Table}
@@ -2438,10 +2463,17 @@ export default class OrgcheckApp extends LightningElement {
     processBuildersTableData;
 
     /** 
+     * @description Data table for weblinks
+     * @type {Array<ocapi.SFDC_WebLink>}
+     */
+    webLinksTableData;
+
+    /** 
      * @description Data table for workflows 
      * @type {Array<ocapi.SFDC_Workflow>}
      */
     workflowsTableData;
+
     /** 
      * @description Table data for record types 
      * @type {Array<ocapi.SFDC_RecordType>}

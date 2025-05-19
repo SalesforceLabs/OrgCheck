@@ -41,6 +41,7 @@ import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
+import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 
 /**
  * @description Org Check API main class
@@ -906,6 +907,29 @@ export class API {
         });
         return allNodes.get(ROOT_KEY);
     }
+
+    /**
+     * @description Get information about WebLinks
+     * @param {string} namespace 
+     * @param {string} sobjectType 
+     * @param {string} sobject 
+     * @returns {Promise<Array<SFDC_WebLink>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getWeblinks(namespace, sobjectType, sobject) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.WEBLINKS, namespace, sobjectType, sobject));
+    }
+
+    /**
+     * @description Remove all the cached information about WebLinks
+     * @public
+     */
+    removeAllWeblinksFromCache() {
+        this._recipeManager.clean(RecipeAliases.WEBLINKS);
+    }    
 
     /**
      * @description Get information about Workflows

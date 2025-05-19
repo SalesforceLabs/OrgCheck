@@ -25,13 +25,14 @@
  * @property {string} PROFILEPWDPOLICIES
  * @property {string} PROFILERESTRICTIONS
  * @property {string} PROFILES
+ * @property {string} RECORDTYPES
  * @property {string} USERROLES
  * @property {string} USERS
  * @property {string} VALIDATIONRULES
  * @property {string} VISUALFORCECOMPONENTS
  * @property {string} VISUALFORCEPAGES
+ * @property {string} WEBLINKS
  * @property {string} WORKFLOWS
- * @property {string} RECORDTYPES
  */
 export const DatasetAliases = {
     APEXCLASSES: 'apex-classes',
@@ -66,6 +67,7 @@ export const DatasetAliases = {
     VALIDATIONRULES: 'validation-rules',
     VISUALFORCECOMPONENTS: 'visual-force-components',
     VISUALFORCEPAGES: 'visual-force-pages',
+    WEBLINKS: 'web-links',
     WORKFLOWS: 'workflows'
 }
 Object.seal(DatasetAliases);

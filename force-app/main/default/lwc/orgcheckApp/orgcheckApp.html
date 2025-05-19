@@ -196,10 +196,10 @@
             </lightning-tabset>
         </lightning-tab>
         <template if:true={useOrgCheckInThisOrgConfirmed}>
-            <lightning-tab value="data-model" label="⚽ Objects, OWDs, Fields and Validation Rules" onactive={handleMainTabActivation}>
+            <lightning-tab value="data-model" label="⚽ Data model" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,page-layouts,validation-rules,record-types"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,page-layouts,validation-rules,record-types,weblinks"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTaDataModel}>
@@ -212,6 +212,7 @@
                             <li><b>🏓 Page Layouts</b>: list Page Layouts that may have no assignments in profiles </li>
                             <li><b>🎾 Validation Rules</b>: List all your validation rules from your org (whatever the object) in one page!</li>
                             <li><b>🏏 Record Types</b>: List all your record types along with their score to check which one should be fixed first!</li>
+                            <li><b>🏑 Web Links</b>: List all actions and links with may include hardcoded URLs</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="object" label="🎳 Object Documentation" onactive={handleSubTabActivation}>
@@ -376,7 +377,7 @@
                                     is-infinite-scrolling
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
-                                   table-definition={webLinksTableDefinition} rows={objectData.webLinks}></c-orgcheck-extended-datatable>
+                                   table-definition={webLinksInObjectTableDefinition} rows={objectData.webLinks}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             
@@ -456,9 +457,12 @@
                     <lightning-tab value="record-types" label="🏏 Record Types" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no record type to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={recordTypesTableDefinition} rows={recordTypesTableData} show-export-button export-basename="RecordTypes"></c-orgcheck-extended-datatable>
                     </lightning-tab>
+                    <lightning-tab value="weblinks" label="🏑 Web Links" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no web links to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={webLinksTableDefinition} rows={webLinksTableData} show-export-button export-basename="WebLinks"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab value="security" label="👮 Users, Profiles, Permission Sets, Licenses and Rights" onactive={handleMainTabActivation}>
+            <lightning-tab value="security" label="👮 Security and Access" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} 
@@ -528,7 +532,7 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab value="boxes" label="🐇 Roles, Public Groups and Queues" onactive={handleMainTabActivation}>
+            <lightning-tab value="boxes" label="🐇 Boxes" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
@@ -584,7 +588,7 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab value="setting" label="🎁 Setting artefacts" onactive={handleMainTabActivation}>
+            <lightning-tab value="setting" label="🎁 Setting" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels,documents"></lightning-button>
@@ -606,7 +610,7 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab value="visual" label="🥐 Visual Components" onactive={handleMainTabActivation}>
+            <lightning-tab value="visual" label="🥐 User Interface" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components"></lightning-button>
@@ -640,7 +644,7 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
-            <lightning-tab value="code" label="🔥 Apex" onactive={handleMainTabActivation}>
+            <lightning-tab value="code" label="🔥 Programmatic" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="apex-classes,apex-recompilation-needed,apex-triggers,apex-unit-tests"></lightning-button>

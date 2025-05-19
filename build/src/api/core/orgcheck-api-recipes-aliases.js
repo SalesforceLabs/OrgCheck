@@ -35,6 +35,7 @@
  * @property {string} VALIDATION_RULES
  * @property {string} VISUALFORCE_COMPONENTS
  * @property {string} VISUALFORCE_PAGES
+ * @property {string} WEBLINKS
  * @property {string} WORKFLOWS
  */
 export const RecipeAliases = {
@@ -73,6 +74,7 @@ export const RecipeAliases = {
     VALIDATION_RULES: 'validation-rules',
     VISUALFORCE_COMPONENTS: 'visualforce-components',
     VISUALFORCE_PAGES: 'visualforce-pages',
+    WEBLINKS: 'weblinks',
     WORKFLOWS: 'workflows'
 }
 Object.seal(RecipeAliases);

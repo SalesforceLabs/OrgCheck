@@ -42,6 +42,7 @@ import { RecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permi
 import { RecipeRecordType } from '../recipe/orgcheck-api-recipe-recordtypes';
 import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
 import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
+import { RecipeWeblinks } from '../recipe/orgcheck-api-recipe-weblinks';
 
 /**
  * @description Recipe Manager
@@ -123,6 +124,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
+        this._recipes.set(RecipeAliases.WEBLINKS, new RecipeWeblinks());
         this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());        
     }
 

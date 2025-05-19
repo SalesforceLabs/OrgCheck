@@ -40,6 +40,7 @@ import { DatasetPermissionSetLicenses } from '../dataset/orgcheck-api-dataset-pe
 import { DatasetRecordTypes } from '../dataset/orgcheck-api-dataset-recordtypes';
 import { DatasetPageLayouts } from '../dataset/orgcheck-api-dataset-pagelayouts';
 import { DatasetDocuments } from '../dataset/orgcheck-api-dataset-documents';
+import { DatasetWeblinks } from '../dataset/orgcheck-api-dataset-weblinks';
 
 /**
  * @description Dataset manager
@@ -138,13 +139,14 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILEPWDPOLICIES, new DatasetProfilePasswordPolicies());
         this._datasets.set(DatasetAliases.PROFILERESTRICTIONS, new DatasetProfileRestrictions());
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
+        this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());
         this._datasets.set(DatasetAliases.USERS, new DatasetUsers());
         this._datasets.set(DatasetAliases.VALIDATIONRULES, new DatasetValidationRules());
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());
+        this._datasets.set(DatasetAliases.WEBLINKS, new DatasetWeblinks());
         this._datasets.set(DatasetAliases.WORKFLOWS, new DatasetWorkflows());
-        this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
     }
 
     /**

@@ -1,4 +1,5 @@
 import { Data } from '../core/orgcheck-api-data';
+import { SFDC_Object } from './orgcheck-api-data-object';
 
 export class SFDC_WebLink extends Data {
     
@@ -86,4 +87,18 @@ export class SFDC_WebLink extends Data {
      * @public
      */
     url;
+
+    /**
+     * @description Identifier of the object for this trigger
+     * @type {string}
+     * @public
+     */
+    objectId; 
+    
+    /**
+     * @description Reference of the object for this trigger
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
 }
