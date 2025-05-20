@@ -42,6 +42,7 @@ import { DatasetPageLayouts } from '../dataset/orgcheck-api-dataset-pagelayouts'
 import { DatasetDocuments } from '../dataset/orgcheck-api-dataset-documents';
 import { DatasetWeblinks } from '../dataset/orgcheck-api-dataset-weblinks';
 import { DatasetCollaborationGroups } from '../dataset/orgcheck-api-dataset-collaborationgroups';
+import { DatasetHomePageComponents } from '../dataset/orgcheck-api-dataset-homepagecomponents';
 
 /**
  * @description Dataset manager
@@ -126,6 +127,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.FIELDPERMISSIONS, new DatasetFieldPermissions());
         this._datasets.set(DatasetAliases.FLOWS, new DatasetFlows());
         this._datasets.set(DatasetAliases.GROUPS, new DatasetGroups());
+        this._datasets.set(DatasetAliases.HOMEPAGECOMPONENTS, new DatasetHomePageComponents());
         this._datasets.set(DatasetAliases.LIGHTNINGAURACOMPONENTS, new DatasetLightningAuraComponents());
         this._datasets.set(DatasetAliases.LIGHTNINGPAGES, new DatasetLightningPages());
         this._datasets.set(DatasetAliases.LIGHTNINGWEBCOMPONENTS, new DatasetLightningWebComponents());

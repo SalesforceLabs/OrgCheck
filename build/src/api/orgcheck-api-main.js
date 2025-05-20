@@ -34,6 +34,7 @@ export * from './data/orgcheck-api-data-fieldpermission.js';
 export * from './data/orgcheck-api-data-fieldset.js';
 export * from './data/orgcheck-api-data-flow.js';
 export * from './data/orgcheck-api-data-group.js';
+export * from './data/orgcheck-api-data-homepagecomponent.js';
 export * from './data/orgcheck-api-data-lightningauracomponent.js';
 export * from './data/orgcheck-api-data-lightningpage.js';
 export * from './data/orgcheck-api-data-lightningwebcomponent.js';

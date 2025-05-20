@@ -1,6 +1,6 @@
 import { Data } from '../core/orgcheck-api-data';
 
-export class SFDC_CollaborationGroup extends Data {
+export class SFDC_HomePageComponent extends Data {
 
     /** 
      * @description Logical name of what this class represents
@@ -8,28 +8,28 @@ export class SFDC_CollaborationGroup extends Data {
      * @static
      * @public
      */
-    static get label() { return 'Chatter Group' };
+    static get label() { return 'Home Page Component' };
 
     /**
-     * @description Unique identifier of this group in the org.
+     * @description Unique identifier of this page in the org.
      * @type {string}
      * @public
      */
     id;
 
     /**
-     * @description Name of this group in the org.
+     * @description Name of this page in the org.
      * @type {string}
      * @public
      */
     name;
 
     /**
-     * @description Description of this group in the org.
-     * @type {string}
+     * @description Is this item standard or custom?
+     * @type {boolean}
      * @public
      */
-    description;
+    isStandard;
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
@@ -67,7 +67,7 @@ export class SFDC_CollaborationGroup extends Data {
     url;
 
     /**
-     * @description Name of the package where this group is stored.
+     * @description Name of the package where this page is stored.
      * @type {string}
      * @public
      */

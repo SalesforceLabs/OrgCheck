@@ -44,6 +44,7 @@ import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
 import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
 import { RecipeWeblinks } from '../recipe/orgcheck-api-recipe-weblinks';
 import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collaborationgroups';
+import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepagecomponents';
 
 /**
  * @description Recipe Manager
@@ -102,7 +103,8 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());
         this._recipes.set(RecipeAliases.DOCUMENTS, new RecipeDocuments());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
-        this._recipes.set(RecipeAliases.FLOWS, new  RecipeFlows());
+        this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());
+        this._recipes.set(RecipeAliases.HOME_PAGE_COMPONENTS, new RecipeHomePageComponents());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());
         this._recipes.set(RecipeAliases.LIGHTNING_PAGES, new RecipeLightningPages());
         this._recipes.set(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new RecipeLightningWebComponents());

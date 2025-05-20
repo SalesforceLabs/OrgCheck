@@ -1,47 +1,47 @@
 /**
  * @description Metadata types
  */
-export const SalesforceMetadataTypes = {
-    ANY_FIELD: 'Field',
-    APEX_CLASS: 'ApexClass',
-    APEX_TRIGGER: 'ApexTrigger',
-    AURA_WEB_COMPONENT: 'AuraDefinitionBundle',
-    COLLABORATION_GROUP: 'CollaborationGroup',
-    CUSTOM_BIG_OBJECT: 'CustomBigObject',
-    CUSTOM_EVENT: 'CustomEvent',
-    CUSTOM_FIELD: 'CustomField',
-    CUSTOM_LABEL: 'CustomLabel',
-    CUSTOM_METADATA_TYPE: 'CustomMetadataType',
-    CUSTOM_OBJECT: 'CustomObject',
-    CUSTOM_SETTING: 'CustomSetting',
-    CUSTOM_SITE: 'CustomSite',
-    CUSTOM_TAB: 'CustomTab',
-    DOCUMENT: 'Document',
-    EXTERNAL_OBJECT: 'ExternalObject',
-    FIELD_SET: 'FieldSet',
-    FLOW_DEFINITION: 'FlowDefinition',
-    FLOW_VERSION: 'Flow',
-    KNOWLEDGE_ARTICLE: 'KnowledgeArticle',
-    LIGHTNING_PAGE: 'FlexiPage',
-    LIGHTNING_WEB_COMPONENT: 'LightningComponentBundle',
-    PAGE_LAYOUT: 'Layout',
-    PERMISSION_SET: 'PermissionSet',
-    PERMISSION_SET_GROUP: 'PermissionSetGroup',
-    PERMISSION_SET_LICENSE: 'PermissionSetLicense',
-    PROFILE: 'Profile',
-    PUBLIC_GROUP: 'PublicGroup',
-    QUEUE: 'Queue',
-    RECORD_TYPE: 'RecordType',
-    ROLE: 'UserRole',
-    TECHNICAL_GROUP: 'TechnicalGroup',
-    STANDARD_FIELD: 'StandardField',
-    STANDARD_OBJECT: 'StandardEntity',
-    STATIC_RESOURCE: 'StaticResource',
-    USER: 'User',
-    VALIDATION_RULE: 'ValidationRule',
-    VISUAL_FORCE_COMPONENT: 'ApexComponent',
-    VISUAL_FORCE_PAGE: 'ApexPage',
-    WEB_LINK: 'WebLink',
-    WORKFLOW_RULE: 'WorkflowRule'
+export class SalesforceMetadataTypes {
+    static get ANY_FIELD() { return 'Field'; }
+    static get APEX_CLASS() { return 'ApexClass'; }
+    static get APEX_TRIGGER() { return 'ApexTrigger'; }
+    static get AURA_WEB_COMPONENT() { return 'AuraDefinitionBundle'; }
+    static get COLLABORATION_GROUP() { return 'CollaborationGroup'; }
+    static get CUSTOM_BIG_OBJECT() { return 'CustomBigObject'; }
+    static get CUSTOM_EVENT() { return 'CustomEvent'; }
+    static get CUSTOM_FIELD() { return 'CustomField'; }
+    static get CUSTOM_LABEL() { return 'CustomLabel'; }
+    static get CUSTOM_METADATA_TYPE() { return 'CustomMetadataType'; }
+    static get CUSTOM_OBJECT() { return 'CustomObject'; }
+    static get CUSTOM_SETTING() { return 'CustomSetting'; }
+    static get CUSTOM_SITE() { return 'CustomSite'; }
+    static get CUSTOM_TAB() { return 'CustomTab'; }
+    static get DOCUMENT() { return 'Document'; }
+    static get EXTERNAL_OBJECT() { return 'ExternalObject'; }
+    static get FIELD_SET() { return 'FieldSet'; }
+    static get FLOW_DEFINITION() { return 'FlowDefinition'; }
+    static get FLOW_VERSION() { return 'Flow'; }
+    static get HOME_PAGE_COMPONENT() { return 'HomePageComponent'; }
+    static get KNOWLEDGE_ARTICLE() { return 'KnowledgeArticle'; }
+    static get LIGHTNING_PAGE() { return 'FlexiPage'; }
+    static get LIGHTNING_WEB_COMPONENT() { return 'LightningComponentBundle'; }
+    static get PAGE_LAYOUT() { return 'Layout'; }
+    static get PERMISSION_SET() { return 'PermissionSet'; }
+    static get PERMISSION_SET_GROUP() { return 'PermissionSetGroup'; }
+    static get PERMISSION_SET_LICENSE() { return 'PermissionSetLicense'; }
+    static get PROFILE() { return 'Profile'; }
+    static get PUBLIC_GROUP() { return 'PublicGroup'; }
+    static get QUEUE() { return 'Queue'; }
+    static get RECORD_TYPE() { return 'RecordType'; }
+    static get ROLE() { return 'UserRole'; }
+    static get TECHNICAL_GROUP() { return 'TechnicalGroup'; }
+    static get STANDARD_FIELD() { return 'StandardField'; }
+    static get STANDARD_OBJECT() { return 'StandardEntity'; }
+    static get STATIC_RESOURCE() { return 'StaticResource'; }
+    static get USER() { return 'User'; }
+    static get VALIDATION_RULE() { return 'ValidationRule'; }
+    static get VISUAL_FORCE_COMPONENT() { return 'ApexComponent'; }
+    static get VISUAL_FORCE_PAGE() { return 'ApexPage'; }
+    static get WEB_LINK() { return 'WebLink'; }
+    static get WORKFLOW_RULE() { return 'WorkflowRule'; }
 }
-Object.seal(SalesforceMetadataTypes);

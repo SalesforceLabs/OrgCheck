@@ -1,41 +1,41 @@
 /**
  * @description Dataset aliases
  */
-export const DatasetAliases = {
-    APEXCLASSES: 'apex-classes',
-    APEXTRIGGERS: 'apex-triggers',
-    APPLICATIONS: 'applications',
-    APPPERMISSIONS: 'app-permisions',
-    CURRENTUSERPERMISSIONS: 'current-user-permissions',
-    CUSTOMFIELDS: 'custom-fields',
-    CUSTOMLABELS: 'custom-labels',
-    COLLABORATIONGROUPS: 'collaboration-groups',
-    DOCUMENTS: 'documents',
-    FIELDPERMISSIONS: 'field-permissions',
-    FLOWS: 'flows',
-    GROUPS: 'groups',
-    LIGHTNINGAURACOMPONENTS: 'lightning-aura-components',
-    LIGHTNINGPAGES: 'lightning-pages',
-    LIGHTNINGWEBCOMPONENTS: 'lightning-web-components',
-    OBJECT: 'object',
-    OBJECTPERMISSIONS: 'object-permissions',
-    OBJECTS: 'objects',
-    OBJECTTYPES: 'object-types',
-    ORGANIZATION: 'org-information',
-    PACKAGES: 'packages',
-    PAGELAYOUTS: 'page-layouts',
-    PERMISSIONSETS: 'permission-sets',
-    PERMISSIONSETLICENSES: 'permission-set-licenses',
-    PROFILEPWDPOLICIES: 'profile-password-policies',
-    PROFILERESTRICTIONS: 'profile-restrictions',
-    PROFILES: 'profiles',
-    RECORDTYPES : 'record-types',
-    USERROLES: 'user-roles',
-    USERS: 'users',
-    VALIDATIONRULES: 'validation-rules',
-    VISUALFORCECOMPONENTS: 'visual-force-components',
-    VISUALFORCEPAGES: 'visual-force-pages',
-    WEBLINKS: 'web-links',
-    WORKFLOWS: 'workflows'
+export class DatasetAliases {
+    static get APEXCLASSES() { return 'apex-classes'; }
+    static get APEXTRIGGERS() { return 'apex-triggers'; }
+    static get APPLICATIONS() { return 'applications'; }
+    static get APPPERMISSIONS() { return 'app-permisions'; }
+    static get CURRENTUSERPERMISSIONS() { return 'current-user-permissions'; }
+    static get CUSTOMFIELDS() { return 'custom-fields'; }
+    static get CUSTOMLABELS() { return 'custom-labels'; }
+    static get COLLABORATIONGROUPS() { return 'collaboration-groups'; }
+    static get DOCUMENTS() { return 'documents'; }
+    static get FIELDPERMISSIONS() { return 'field-permissions'; }
+    static get FLOWS() { return 'flows'; }
+    static get GROUPS() { return 'groups'; }
+    static get HOMEPAGECOMPONENTS() { return 'home-page-components'; }
+    static get LIGHTNINGAURACOMPONENTS() { return 'lightning-aura-components'; }
+    static get LIGHTNINGPAGES() { return 'lightning-pages'; }
+    static get LIGHTNINGWEBCOMPONENTS() { return 'lightning-web-components'; }
+    static get OBJECT() { return 'object'; }
+    static get OBJECTPERMISSIONS() { return 'object-permissions'; }
+    static get OBJECTS() { return 'objects'; }
+    static get OBJECTTYPES() { return 'object-types'; }
+    static get ORGANIZATION() { return 'org-information'; }
+    static get PACKAGES() { return 'packages'; }
+    static get PAGELAYOUTS() { return 'page-layouts'; }
+    static get PERMISSIONSETS() { return 'permission-sets'; }
+    static get PERMISSIONSETLICENSES() { return 'permission-set-licenses'; }
+    static get PROFILEPWDPOLICIES() { return 'profile-password-policies'; }
+    static get PROFILERESTRICTIONS() { return 'profile-restrictions'; }
+    static get PROFILES() { return 'profiles'; }
+    static get RECORDTYPES () { return 'record-types'; }
+    static get USERROLES() { return 'user-roles'; }
+    static get USERS() { return 'users'; }
+    static get VALIDATIONRULES() { return 'validation-rules'; }
+    static get VISUALFORCECOMPONENTS() { return 'visual-force-components'; }
+    static get VISUALFORCEPAGES() { return 'visual-force-pages'; }
+    static get WEBLINKS() { return 'web-links'; }
+    static get WORKFLOWS() { return 'workflows'; }
 }
-Object.seal(DatasetAliases);

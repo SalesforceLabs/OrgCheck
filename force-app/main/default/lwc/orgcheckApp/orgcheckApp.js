@@ -508,6 +508,7 @@ export default class OrgcheckApp extends LightningElement {
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',    isGlobalView: false,     data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._on,   get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'documents':                 { label: '🚧 Documents',                  tab: 'setting',     isGlobalView: true,      data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._nm,   get: async () => { return this._api?.getDocuments(this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',  isGlobalView: true,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getFlows(); }},
+        'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',      isGlobalView: true,      data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._nt,   get: async () => { return this._api?.getHomePageComponents(); }},
         'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',      isGlobalView: true,      data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._nm,   get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',      isGlobalView: true,      data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getLightningPages(this.namespace); }},
         'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: 'visual',      isGlobalView: true,      data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._nm,   get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
@@ -1973,6 +1974,26 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
+     * @description Table definition for home page components
+     * @type {ocui.Table}
+     */ 
+    homePageComponentsTableDefinition = {
+        columns: [
+            { label: '#',                  type: ocui.ColumnType.IDX },
+            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Is Standard?',       type: ocui.ColumnType.CHK, data: { value: 'isStandard' }},
+            { label: 'URLs',               type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
      * @description Table definition for process builders
      * @type {ocui.Table}
      */
@@ -2480,6 +2501,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_Flow>}
      */
     flowsTableData;
+
+    /**
+     * @description Data table for home page components
+     * @type {Array<ocapi.SFDC_HomePageComponent>}
+     */
+    homePageComponentsTableData;
 
     /** 
      * @description Data table for process builders 

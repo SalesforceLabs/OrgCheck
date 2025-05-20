@@ -27,6 +27,7 @@ import { ScoreRule } from './orgcheck-api-datafactory';
 import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
 import { SFDC_Document } from '../data/orgcheck-api-data-document';
 import { SFDC_CollaborationGroup } from '../data/orgcheck-api-data-collaborationgroup';
+import { SFDC_HomePageComponent } from '../data/orgcheck-api-data-homepagecomponent';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -409,17 +410,17 @@ const ALL_SCORE_RULES = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedURLs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedURLs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
         badField: 'hardCodedURLs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedIDs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedIDs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
         badField: 'hardCodedIDs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
     }, {
         id: 48,
         description: 'At least one successful testing method was very long',
