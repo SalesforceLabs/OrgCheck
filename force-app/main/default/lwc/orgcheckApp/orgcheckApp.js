@@ -1983,7 +1983,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Is Standard?',       type: ocui.ColumnType.CHK, data: { value: 'isStandard' }},
+            { label: 'Is Body Empty?',     type: ocui.ColumnType.CHK, data: { value: 'isBodyEmpty' }},
             { label: 'URLs',               type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
             { label: 'IDs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},

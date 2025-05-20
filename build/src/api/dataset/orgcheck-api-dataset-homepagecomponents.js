@@ -44,7 +44,7 @@ export class DatasetHomePageComponents extends Dataset {
                     id: id,
                     name: record.Name,
                     package: (record.NamespacePrefix || ''),
-                    isStandard: (record.Body ? false : true),
+                    isBodyEmpty: (record.Body ? false : true),
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.HOME_PAGE_COMPONENT)                    

@@ -25,11 +25,11 @@ export class SFDC_HomePageComponent extends Data {
     name;
 
     /**
-     * @description Is this item standard or custom?
+     * @description Is this item has an empty body?
      * @type {boolean}
      * @public
      */
-    isStandard;
+    isBodyEmpty;
 
     /**
      * @description Unique list of hard coded Salesforce URLs in this item
