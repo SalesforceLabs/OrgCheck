@@ -10,6 +10,7 @@ import { RecipeCustomLabels } from "../../../src/api/recipe/orgcheck-api-recipe-
 import { RecipeDocuments } from "../../../src/api/recipe/orgcheck-api-recipe-documents";
 import { RecipeFieldPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-fieldpermissions";
 import { RecipeFlows } from "../../../src/api/recipe/orgcheck-api-recipe-flows";
+import { RecipeHomePageComponents } from "../../../src/api/recipe/orgcheck-api-recipe-homepagecomponents";
 import { RecipeLightningAuraComponents } from "../../../src/api/recipe/orgcheck-api-recipe-lightningauracomponents";
 import { RecipeLightningPages } from "../../../src/api/recipe/orgcheck-api-recipe-lightningpages";
 import { RecipeLightningWebComponents } from "../../../src/api/recipe/orgcheck-api-recipe-lightningwebcomponents";
@@ -233,6 +234,26 @@ describe('tests.api.unit.Recipes', () => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
       });
       const results = await recipe.transform(data, logger, '*', '*');
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipeHomePageComponents', () => {
+  
+    const recipe = new RecipeHomePageComponents();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(1);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
       expect(results).toBeDefined();
     });
 
