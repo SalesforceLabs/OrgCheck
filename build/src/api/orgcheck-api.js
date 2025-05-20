@@ -42,6 +42,7 @@ import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcec
 import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
+import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
 
 /**
  * @description Org Check API main class
@@ -425,6 +426,26 @@ export class API {
     removeAllAppPermissionsFromCache() {
         this._recipeManager.clean(RecipeAliases.APP_PERMISSIONS);
     }
+
+    /**
+     * @description Get information about Chatter groups
+     * @returns {Promise<Array<SFDC_CollaborationGroup>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getChatterGroups() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.COLLABORATION_GROUPS));
+    }
+
+    /**
+     * @description Remove all the cached information about WebLinks
+     * @public
+     */
+    removeAllChatterGroupsFromCache() {
+        this._recipeManager.clean(RecipeAliases.COLLABORATION_GROUPS);
+    }    
 
     /**
      * @description Get information about custom fields (filtered out by namespace/pakage, type and sobject)

@@ -3,6 +3,7 @@ import { RecipeActiveUsers } from "../../../src/api/recipe/orgcheck-api-recipe-a
 import { RecipeApexClasses } from "../../../src/api/recipe/orgcheck-api-recipe-apexclasses";
 import { RecipeApexTriggers } from "../../../src/api/recipe/orgcheck-api-recipe-apextriggers";
 import { RecipeAppPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-apppermissions";
+import { RecipeCollaborationGroups } from "../../../src/api/recipe/orgcheck-api-recipe-collaborationgroups";
 import { RecipeCurrentUserPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-currentuserpermissions";
 import { RecipeCustomFields } from "../../../src/api/recipe/orgcheck-api-recipe-customfields";
 import { RecipeCustomLabels } from "../../../src/api/recipe/orgcheck-api-recipe-customlabels";
@@ -124,6 +125,26 @@ describe('tests.api.unit.Recipes', () => {
     it('checks if this recipe class extracts and transforms correctly', async () => {
 
       const datasets = recipe.extract(logger, ['perm1', 'perm2']);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(1);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipeCollaborationGroups', () => {
+  
+    const recipe = new RecipeCollaborationGroups();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
       expect(datasets.length).toBe(1);

@@ -1,38 +1,5 @@
 /**
  * @description Dataset aliases
- * @property {string} APEXCLASSES
- * @property {string} APEXTRIGGERS
- * @property {string} APPLICATIONS
- * @property {string} APPPERMISSIONS
- * @property {string} CURRENTUSERPERMISSIONS
- * @property {string} CUSTOMFIELDS
- * @property {string} CUSTOMLABELS
- * @property {string} DOCUMENTS
- * @property {string} FLOWS
- * @property {string} GROUPS
- * @property {string} LIGHTNINGAURACOMPONENTS
- * @property {string} LIGHTNINGPAGES
- * @property {string} LIGHTNINGWEBCOMPONENTS
- * @property {string} OBJECT
- * @property {string} OBJECTPERMISSIONS
- * @property {string} OBJECTS
- * @property {string} OBJECTTYPES
- * @property {string} ORGANIZATION
- * @property {string} PACKAGES
- * @property {string} PAGELAYOUTS
- * @property {string} PERMISSIONSETS
- * @property {string} PERMISSIONSETLICENSES
- * @property {string} PROFILEPWDPOLICIES
- * @property {string} PROFILERESTRICTIONS
- * @property {string} PROFILES
- * @property {string} RECORDTYPES
- * @property {string} USERROLES
- * @property {string} USERS
- * @property {string} VALIDATIONRULES
- * @property {string} VISUALFORCECOMPONENTS
- * @property {string} VISUALFORCEPAGES
- * @property {string} WEBLINKS
- * @property {string} WORKFLOWS
  */
 export const DatasetAliases = {
     APEXCLASSES: 'apex-classes',
@@ -42,6 +9,7 @@ export const DatasetAliases = {
     CURRENTUSERPERMISSIONS: 'current-user-permissions',
     CUSTOMFIELDS: 'custom-fields',
     CUSTOMLABELS: 'custom-labels',
+    COLLABORATIONGROUPS: 'collaboration-groups',
     DOCUMENTS: 'documents',
     FIELDPERMISSIONS: 'field-permissions',
     FLOWS: 'flows',

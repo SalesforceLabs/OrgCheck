@@ -5,30 +5,30 @@ describe('tests.api.unit.CodeScanner', () => {
   describe('Test the feature "RemoveComments"', () => {
 
     it('checks if removing comments from an empty source code is an empty string', () => {
-      expect(CodeScanner.RemoveComments(null)).toBe('')
-      expect(CodeScanner.RemoveComments(undefined)).toBe('')
-      expect(CodeScanner.RemoveComments('')).toBe('');
+      expect(CodeScanner.RemoveCommentsFromCode(null)).toBe('')
+      expect(CodeScanner.RemoveCommentsFromCode(undefined)).toBe('')
+      expect(CodeScanner.RemoveCommentsFromCode('')).toBe('');
     });
 
     it('checks if removing comments from a source code without comments is the same', () => {
-      expect(CodeScanner.RemoveComments('abcdef')).toBe('abcdef');
-      expect(CodeScanner.RemoveComments('oiu /* oiuuui')).toBe('oiu /* oiuuui')
-      expect(CodeScanner.RemoveComments('oiu / * oiuuui')).toBe('oiu / * oiuuui')
-      expect(CodeScanner.RemoveComments('oiu */ oiuuui')).toBe('oiu */ oiuuui')
-      expect(CodeScanner.RemoveComments('oiu * / oiuuui')).toBe('oiu * / oiuuui')
-      expect(CodeScanner.RemoveComments('oiu / / oiuuui')).toBe('oiu / / oiuuui');
+      expect(CodeScanner.RemoveCommentsFromCode('abcdef')).toBe('abcdef');
+      expect(CodeScanner.RemoveCommentsFromCode('oiu /* oiuuui')).toBe('oiu /* oiuuui')
+      expect(CodeScanner.RemoveCommentsFromCode('oiu / * oiuuui')).toBe('oiu / * oiuuui')
+      expect(CodeScanner.RemoveCommentsFromCode('oiu */ oiuuui')).toBe('oiu */ oiuuui')
+      expect(CodeScanner.RemoveCommentsFromCode('oiu * / oiuuui')).toBe('oiu * / oiuuui')
+      expect(CodeScanner.RemoveCommentsFromCode('oiu / / oiuuui')).toBe('oiu / / oiuuui');
     });
     
     it('checks if removing comments from a source code with comments works', () => {
-      expect(CodeScanner.RemoveComments('line1\nline2\n/*This is a comment*/line3\n')).toBe('line1 line2  line3 ');
-      expect(CodeScanner.RemoveComments('line1\nline2\n/*This is a comment*/line3')).toBe('line1 line2  line3');
-      expect(CodeScanner.RemoveComments('line1\nline2\n/*This is a comment*/')).toBe('line1 line2  ');
-      expect(CodeScanner.RemoveComments('line1-part1/*This is a comment*/line1-part2\n')).toBe('line1-part1 line1-part2 ');
-      expect(CodeScanner.RemoveComments('line1-part1/*This is a comment*/line1-part2')).toBe('line1-part1 line1-part2');
-      expect(CodeScanner.RemoveComments('line1\n// This is a comment\nline2\n')).toBe('line1  line2 ');
-      expect(CodeScanner.RemoveComments('line1\n// This is a comment\nline2')).toBe('line1  line2');
-      expect(CodeScanner.RemoveComments('line1\n// This is a comment\n')).toBe('line1  ');
-      expect(CodeScanner.RemoveComments('line1\n// This is a comment')).toBe('line1  ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\nline2\n/*This is a comment*/line3\n')).toBe('line1 line2  line3 ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\nline2\n/*This is a comment*/line3')).toBe('line1 line2  line3');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\nline2\n/*This is a comment*/')).toBe('line1 line2  ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1-part1/*This is a comment*/line1-part2\n')).toBe('line1-part1 line1-part2 ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1-part1/*This is a comment*/line1-part2')).toBe('line1-part1 line1-part2');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\n// This is a comment\nline2\n')).toBe('line1  line2 ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\n// This is a comment\nline2')).toBe('line1  line2');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\n// This is a comment\n')).toBe('line1  ');
+      expect(CodeScanner.RemoveCommentsFromCode('line1\n// This is a comment')).toBe('line1  ');
     });
 
   });
@@ -36,26 +36,26 @@ describe('tests.api.unit.CodeScanner', () => {
   describe('Test the feature "IsInterface"', () => {
 
     it('checks if the source code is an interface', () => {
-      expect(CodeScanner.IsInterface('public interface MyInterface {')).toBe(true);
-      expect(CodeScanner.IsInterface('global interface MyInterface {')).toBe(true);
-      expect(CodeScanner.IsInterface('public interface MyInterface extends MySuperInterface {')).toBe(true);
-      expect(CodeScanner.IsInterface('global interface MyInterface extends MySuperInterface {')).toBe(true);
-      expect(CodeScanner.IsInterface('public class MyClass {')).toBe(false);
-      expect(CodeScanner.IsInterface('global class MyClass {')).toBe(false);
-      expect(CodeScanner.IsInterface('public enum MyEnum {')).toBe(false);
-      expect(CodeScanner.IsInterface('global enum MyEnum {')).toBe(false);
+      expect(CodeScanner.IsInterfaceFromApexCode('public interface MyInterface {')).toBe(true);
+      expect(CodeScanner.IsInterfaceFromApexCode('global interface MyInterface {')).toBe(true);
+      expect(CodeScanner.IsInterfaceFromApexCode('public interface MyInterface extends MySuperInterface {')).toBe(true);
+      expect(CodeScanner.IsInterfaceFromApexCode('global interface MyInterface extends MySuperInterface {')).toBe(true);
+      expect(CodeScanner.IsInterfaceFromApexCode('public class MyClass {')).toBe(false);
+      expect(CodeScanner.IsInterfaceFromApexCode('global class MyClass {')).toBe(false);
+      expect(CodeScanner.IsInterfaceFromApexCode('public enum MyEnum {')).toBe(false);
+      expect(CodeScanner.IsInterfaceFromApexCode('global enum MyEnum {')).toBe(false);
     });    
   });
 
   describe('Test the feature "IsEnum"', () => {
 
     it('checks if the source code is an enum', () => {
-      expect(CodeScanner.IsEnum('public enum MyEnum {')).toBe(true);
-      expect(CodeScanner.IsEnum('global enum MyEnum {')).toBe(true);
-      expect(CodeScanner.IsEnum('public class MyClass {')).toBe(false);
-      expect(CodeScanner.IsEnum('global class MyClass {')).toBe(false);
-      expect(CodeScanner.IsEnum('public interface MyInterface {')).toBe(false);
-      expect(CodeScanner.IsEnum('global interface MyInterface {')).toBe(false);
+      expect(CodeScanner.IsEnumFromApexCode('public enum MyEnum {')).toBe(true);
+      expect(CodeScanner.IsEnumFromApexCode('global enum MyEnum {')).toBe(true);
+      expect(CodeScanner.IsEnumFromApexCode('public class MyClass {')).toBe(false);
+      expect(CodeScanner.IsEnumFromApexCode('global class MyClass {')).toBe(false);
+      expect(CodeScanner.IsEnumFromApexCode('public interface MyInterface {')).toBe(false);
+      expect(CodeScanner.IsEnumFromApexCode('global interface MyInterface {')).toBe(false);
     });
   });
 
@@ -164,18 +164,18 @@ describe('tests.api.unit.CodeScanner', () => {
   describe('Test the feature "IsTestSeeAllData"', () => {
 
     it('checks if the source code is a test class with seeAllData annotation', () => {
-      expect(CodeScanner.IsTestSeeAllData('@IsTest(SeeAllData=true)')).toBe(true);
-      expect(CodeScanner.IsTestSeeAllData('@istest(SeeAllData=true)')).toBe(true);
-      expect(CodeScanner.IsTestSeeAllData('@isTest(SeeAllData=false)')).toBe(false);
-      expect(CodeScanner.IsTestSeeAllData('@istest(seealldata=true)')).toBe(true);
-      expect(CodeScanner.IsTestSeeAllData('@isTest(seealldata=false)')).toBe(false);
+      expect(CodeScanner.IsTestSeeAllDataFromApexCode('@IsTest(SeeAllData=true)')).toBe(true);
+      expect(CodeScanner.IsTestSeeAllDataFromApexCode('@istest(SeeAllData=true)')).toBe(true);
+      expect(CodeScanner.IsTestSeeAllDataFromApexCode('@isTest(SeeAllData=false)')).toBe(false);
+      expect(CodeScanner.IsTestSeeAllDataFromApexCode('@istest(seealldata=true)')).toBe(true);
+      expect(CodeScanner.IsTestSeeAllDataFromApexCode('@isTest(seealldata=false)')).toBe(false);
     });
   });
 
   describe('Test the feature "CountOfAsserts"', () => {
 
     it('counts the number of asserts found in a code', () => {
-      const numberOfAsserts = CodeScanner.CountOfAsserts('System.Assert.areEqual(true, true);\nSystem.assertEquals(true, true);\nSystem.assertNotEquals(true, false);\nSystem.assert(false);\n');
+      const numberOfAsserts = CodeScanner.CountOfAssertsFromApexCode('System.Assert.areEqual(true, true);\nSystem.assertEquals(true, true);\nSystem.assertNotEquals(true, false);\nSystem.assert(false);\n');
       expect(numberOfAsserts).toBeDefined();
       expect(numberOfAsserts).toBe(4);
     });
@@ -184,7 +184,7 @@ describe('tests.api.unit.CodeScanner', () => {
   describe('Test the feature "HasSOQL"', () => {
 
     it('checks if the source code contains a soql query', () => {
-      const hasSOQL = CodeScanner.HasSOQL('List<Account> list = [SELECT Id, Name FROM Account WHERE Name = "MyAccount"];'); 
+      const hasSOQL = CodeScanner.HasSOQLFromApexCode('List<Account> list = [SELECT Id, Name FROM Account WHERE Name = "MyAccount"];'); 
       expect(hasSOQL).toBeDefined();
       expect(hasSOQL).toBe(true);
     });
@@ -193,7 +193,7 @@ describe('tests.api.unit.CodeScanner', () => {
   describe('Test the feature "HasDML"', () => {
 
     it('checks if the source code contains a DML statement', () => {
-      const hasDML = CodeScanner.HasDML('insert new Account(Name="MyAccount");');
+      const hasDML = CodeScanner.HasDMLFromApexCode('insert new Account(Name="MyAccount");');
       expect(hasDML).toBeDefined();
       expect(hasDML).toBe(true);
     });

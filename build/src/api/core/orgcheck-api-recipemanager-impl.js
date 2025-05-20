@@ -43,6 +43,7 @@ import { RecipeRecordType } from '../recipe/orgcheck-api-recipe-recordtypes';
 import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
 import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
 import { RecipeWeblinks } from '../recipe/orgcheck-api-recipe-weblinks';
+import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collaborationgroups';
 
 /**
  * @description Recipe Manager
@@ -94,7 +95,8 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.APEX_TESTS, new RecipeApexTests());
         this._recipes.set(RecipeAliases.APEX_TRIGGERS, new RecipeApexTriggers());
         this._recipes.set(RecipeAliases.APEX_UNCOMPILED, new RecipeApexUncompiled());
-        this._recipes.set(RecipeAliases.APP_PERMISSIONS, new RecipeAppPermissions())
+        this._recipes.set(RecipeAliases.APP_PERMISSIONS, new RecipeAppPermissions());
+        this._recipes.set(RecipeAliases.COLLABORATION_GROUPS, new RecipeCollaborationGroups());
         this._recipes.set(RecipeAliases.CURRENT_USER_PERMISSIONS, new RecipeCurrentUserPermissions());
         this._recipes.set(RecipeAliases.CUSTOM_FIELDS, new RecipeCustomFields());
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());

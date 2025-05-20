@@ -85,9 +85,9 @@ export class DatasetApexTriggers extends Dataset {
                 
                 // Get information directly from the source code (if available)
                 if (record.Body) {
-                    const sourceCode = CodeScanner.RemoveComments(record.Body);
-                    apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
-                    apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
+                    const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body);
+                    apexTrigger.hasSOQL = CodeScanner.HasSOQLFromApexCode(sourceCode); 
+                    apexTrigger.hasDML = CodeScanner.HasDMLFromApexCode(sourceCode); 
                     apexTrigger.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                     apexTrigger.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 }

@@ -1,42 +1,5 @@
 /**
  * @description Recipe aliases
- * @property {string} ACTIVE_USERS
- * @property {string} APEX_CLASSES
- * @property {string} APEX_TESTS
- * @property {string} APEX_TRIGGERS
- * @property {string} APEX_UNCOMPILED
- * @property {string} APP_PERMISSIONS
- * @property {string} CURRENT_USER_PERMISSIONS
- * @property {string} CUSTOM_FIELDS
- * @property {string} CUSTOM_LABELS
- * @property {string} DOCUMENTS
- * @property {string} FIELD_PERMISSIONS
- * @property {string} FLOWS
- * @property {string} LIGHTNING_AURA_COMPONENTS
- * @property {string} LIGHTNING_PAGES
- * @property {string} LIGHTNING_WEB_COMPONENTS
- * @property {string} OBJECT
- * @property {string} OBJECT_PERMISSIONS
- * @property {string} OBJECT_TYPES
- * @property {string} OBJECTS
- * @property {string} ORGANIZATION
- * @property {string} PACKAGES
- * @property {string} PAGE_LAYOUTS
- * @property {string} PERMISSION_SETS
- * @property {string} PERMISSION_SET_LICENSES
- * @property {string} PROCESS_BUILDERS
- * @property {string} PROFILE_PWD_POLICIES
- * @property {string} PROFILE_RESTRICTIONS
- * @property {string} PROFILES
- * @property {string} PUBLIC_GROUPS
- * @property {string} QUEUES
- * @property {string} RECORD_TYPES
- * @property {string} USER_ROLES
- * @property {string} VALIDATION_RULES
- * @property {string} VISUALFORCE_COMPONENTS
- * @property {string} VISUALFORCE_PAGES
- * @property {string} WEBLINKS
- * @property {string} WORKFLOWS
  */
 export const RecipeAliases = {
     ACTIVE_USERS: 'active-users',
@@ -45,6 +8,7 @@ export const RecipeAliases = {
     APEX_TRIGGERS: 'apex-triggers',
     APEX_UNCOMPILED: 'apex-uncompiled',
     APP_PERMISSIONS: 'app-permissions',
+    COLLABORATION_GROUPS: 'collaboration-groups',
     CURRENT_USER_PERMISSIONS: 'current-user-permissions',
     CUSTOM_FIELDS: 'custom-fields',
     CUSTOM_LABELS: 'custom-labels',

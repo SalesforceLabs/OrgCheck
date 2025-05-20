@@ -132,17 +132,17 @@ export class DatasetApexClasses extends Dataset {
             
             // Get information directly from the source code (if available)
             if (record.Body) {
-                const sourceCode = CodeScanner.RemoveComments(record.Body);
-                apexClass.isInterface = CodeScanner.IsInterface(sourceCode);
-                apexClass.isEnum = CodeScanner.IsEnum(sourceCode);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body);
+                apexClass.isInterface = CodeScanner.IsInterfaceFromApexCode(sourceCode);
+                apexClass.isEnum = CodeScanner.IsEnumFromApexCode(sourceCode);
                 apexClass.isClass = (apexClass.isInterface === false && apexClass.isEnum === false);
                 apexClass.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 apexClass.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 
                 // Specific scanning for Test Classes
                 if (apexClass.isTest === true) { // this is defined only from the SymbolTable!
-                    apexClass.isTestSeeAllData = CodeScanner.IsTestSeeAllData(sourceCode);
-                    apexClass.nbSystemAsserts = CodeScanner.CountOfAsserts(sourceCode);
+                    apexClass.isTestSeeAllData = CodeScanner.IsTestSeeAllDataFromApexCode(sourceCode);
+                    apexClass.nbSystemAsserts = CodeScanner.CountOfAssertsFromApexCode(sourceCode);
                 }
             }
 

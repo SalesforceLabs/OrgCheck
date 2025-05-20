@@ -6,6 +6,7 @@ export const SalesforceMetadataTypes = {
     APEX_CLASS: 'ApexClass',
     APEX_TRIGGER: 'ApexTrigger',
     AURA_WEB_COMPONENT: 'AuraDefinitionBundle',
+    COLLABORATION_GROUP: 'CollaborationGroup',
     CUSTOM_BIG_OBJECT: 'CustomBigObject',
     CUSTOM_EVENT: 'CustomEvent',
     CUSTOM_FIELD: 'CustomField',

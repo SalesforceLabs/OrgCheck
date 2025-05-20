@@ -33,6 +33,7 @@ import { DatasetVisualForceComponents } from '../../../src/api/dataset/orgcheck-
 import { DatasetVisualForcePages } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWorkflows } from '../../../src/api/dataset/orgcheck-api-dataset-workflows';
 import { DatasetRecordTypes } from '../../../src/api/dataset/orgcheck-api-dataset-recordtypes';
+import { DatasetCollaborationGroups } from '../../../src/api/dataset/orgcheck-api-dataset-collaborationgroups';
 
 class SfdcManagerMock extends SalesforceManagerIntf { 
 
@@ -268,6 +269,20 @@ describe('tests.api.unit.Datasets', () => {
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(1);
+    });
+  });
+  
+  describe('Test DatasetCollaborationGroups', () => {
+  
+    const dataset = new DatasetCollaborationGroups();      
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger, null);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(0);
     });
   });
   

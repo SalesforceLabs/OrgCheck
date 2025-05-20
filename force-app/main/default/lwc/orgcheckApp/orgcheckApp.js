@@ -502,6 +502,7 @@ export default class OrgcheckApp extends LightningElement {
         'apex-triggers':             { label: '🧨 Apex Triggers',              tab: 'code',        isGlobalView: true,      data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._nm,   get: async () => { return this._api?.getApexTriggers(this.namespace); }},
         'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',            tab: 'code',        isGlobalView: true,      data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
         'app-permissions':           { label: '⛕ Application Permissions',     tab: 'security',    isGlobalView: false,     data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
+        'chatter-groups':            { label: '🦙 Chatter Groups',             tab: 'boxes',       isGlobalView: true,      data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._nt,   get: async () => { return this._api?.getChatterGroups(); }},
         'custom-fields':             { label: '🏈 Custom Fields',              tab: 'data-model',  isGlobalView: true,      data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._al,   get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',              tab: 'setting',     isGlobalView: true,      data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._nm,   get: async () => { return this._api?.getCustomLabels(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',    isGlobalView: false,     data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._on,   get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
@@ -1224,6 +1225,23 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.ASC
     };
+
+    /**
+     * @description Table definition for chatter groups
+     * @type {ocui.Table}
+     */
+    chatterGroupsTableDefinition = {
+        columns: [
+            { label: '#',                   type: ocui.ColumnType.IDX },
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Group',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
      * @description Table definition for custom fields
@@ -2305,6 +2323,13 @@ export default class OrgcheckApp extends LightningElement {
      * @type {ocapi.SFDC_Object}
      */
     objectData;
+
+    /**
+     * @description Data table for chatter groups in the org
+     * @type {Array<ocapi.SFDC_CollaborationGroup>}
+     * @public
+     */ 
+    chatterGroupsTableData;
 
     /** 
      * @description Data table for custom fields 

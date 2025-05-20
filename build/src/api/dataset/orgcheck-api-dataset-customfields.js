@@ -114,7 +114,7 @@ export class DatasetCustomFields extends Dataset {
 
             // Get information directly from the source code (if available)
             if (customField.formula) {
-                const sourceCode = CodeScanner.RemoveComments(customField.formula);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(customField.formula);
                 customField.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 customField.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }

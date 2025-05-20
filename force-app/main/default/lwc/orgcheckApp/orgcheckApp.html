@@ -535,7 +535,7 @@
             <lightning-tab value="boxes" label="🐇 Boxes" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues,chatter-groups"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -546,6 +546,7 @@
                             <li><b>🦓 Internal Role Listing</b>: All the internal roles of your org as a tabular table</li>
                             <li><b>🐘 Public Groups</b>: Get the list of public groups in your org</li>
                             <li><b>🦒 Queues</b>: Get the list of queues in your org</li>
+                            <li><b>🦙 Chatter Groups</b>: Get the list of chatter groups in this org that may include hard coded urls</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="roles-explorer" label="🐙 Internal Role Explorer" onactive={handleSubTabActivation}>
@@ -559,6 +560,9 @@
                     </lightning-tab>
                     <lightning-tab value="queues" label="🦒 Queues" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no queue to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={queuesTableDefinition} rows={queuesTableData} show-export-button export-basename="Queues"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="chatter-groups" label="🦙 Chatter Groups" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no chatter group to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={chatterGroupsTableDefinition} rows={chatterGroupsTableData} show-export-button export-basename="ChatterGroups"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
