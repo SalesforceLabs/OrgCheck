@@ -45,6 +45,7 @@ import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
 import { RecipeWeblinks } from '../recipe/orgcheck-api-recipe-weblinks';
 import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collaborationgroups';
 import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepagecomponents';
+import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
 
 /**
  * @description Recipe Manager
@@ -101,6 +102,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.CURRENT_USER_PERMISSIONS, new RecipeCurrentUserPermissions());
         this._recipes.set(RecipeAliases.CUSTOM_FIELDS, new RecipeCustomFields());
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());
+        this._recipes.set(RecipeAliases.CUSTOM_TABS, new RecipeCustomTabs());
         this._recipes.set(RecipeAliases.DOCUMENTS, new RecipeDocuments());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());

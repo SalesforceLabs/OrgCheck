@@ -9,6 +9,7 @@ export class DatasetAliases {
     static get CURRENTUSERPERMISSIONS() { return 'current-user-permissions'; }
     static get CUSTOMFIELDS() { return 'custom-fields'; }
     static get CUSTOMLABELS() { return 'custom-labels'; }
+    static get CUSTOMTABS() { return 'custom-tabs'; }
     static get COLLABORATIONGROUPS() { return 'collaboration-groups'; }
     static get DOCUMENTS() { return 'documents'; }
     static get FIELDPERMISSIONS() { return 'field-permissions'; }

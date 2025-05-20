@@ -505,6 +505,7 @@ export default class OrgcheckApp extends LightningElement {
         'chatter-groups':            { label: '🦙 Chatter Groups',             tab: 'boxes',       isGlobalView: true,      data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._nt,   get: async () => { return this._api?.getChatterGroups(); }},
         'custom-fields':             { label: '🏈 Custom Fields',              tab: 'data-model',  isGlobalView: true,      data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._al,   get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',              tab: 'setting',     isGlobalView: true,      data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._nm,   get: async () => { return this._api?.getCustomLabels(this.namespace); }},
+        'custom-tabs':               { label: '🥠 Custom Tabs',                tab: 'visual',      isGlobalView: true,      data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._nm,   get: async () => { return this._api?.getCustomTabs(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',    isGlobalView: false,     data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._on,   get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'documents':                 { label: '🚧 Documents',                  tab: 'setting',     isGlobalView: true,      data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._nm,   get: async () => { return this._api?.getDocuments(this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',  isGlobalView: true,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getFlows(); }},
@@ -1371,6 +1372,27 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
             { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Value',               type: ocui.ColumnType.TXT, data: { value: 'value'}, modifier: { maximumLength: 45, preformatted: true }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for custom tabs
+     * @type {ocui.Table}
+     */
+    customTabsTableDefinition = {
+        columns: [
+            { label: '#',                   type: ocui.ColumnType.IDX },
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -2363,6 +2385,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_CustomLabel>}
      */
     customLabelsTableData;
+
+    /**
+     * @description Data table for custom tabs 
+     * @type {Array<ocapi.SFDC_CustomTab>}
+     */
+    customTabsTableData;
 
     /**
      * @description Data table for documents

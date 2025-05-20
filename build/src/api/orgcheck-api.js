@@ -615,6 +615,26 @@ export class API {
         this._recipeManager.clean(RecipeAliases.CUSTOM_LABELS);
     }
 
+    /**
+     * @description Get information about custom tabs (filtered out by namespace/pakage)
+     * @param {string} namespace 
+     * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getCustomTabs(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, namespace));
+    }
+
+    /**
+     * @description Remove all the cached information about custom tabs
+     * @public
+     */
+    removeAllCustomTabsFromCache() {
+        this._recipeManager.clean(RecipeAliases.CUSTOM_TABS);
+    }
 
     /**
      * @description Get information about documents (filtered out by namespace/pakage)

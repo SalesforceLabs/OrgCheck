@@ -12,6 +12,7 @@ export class RecipeAliases {
     static get CURRENT_USER_PERMISSIONS() { return 'current-user-permissions'; }
     static get CUSTOM_FIELDS() { return 'custom-fields'; }
     static get CUSTOM_LABELS() { return 'custom-labels'; }
+    static get CUSTOM_TABS() { return 'custom-tabs'; }
     static get DOCUMENTS() { return 'documents'; }
     static get FIELD_PERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }

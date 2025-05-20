@@ -28,6 +28,7 @@ import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
 import { SFDC_Document } from '../data/orgcheck-api-data-document';
 import { SFDC_CollaborationGroup } from '../data/orgcheck-api-data-collaborationgroup';
 import { SFDC_HomePageComponent } from '../data/orgcheck-api-data-homepagecomponent';
+import { SFDC_CustomTab } from '../data/orgcheck-api-data-customtab';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -130,10 +131,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab} */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -410,17 +411,17 @@ const ALL_SCORE_RULES = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedURLs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab} */ d) => d.hardCodedURLs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
         badField: 'hardCodedURLs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab ]
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink} */ d) => d.hardCodedIDs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab} */ d) => d.hardCodedIDs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
         badField: 'hardCodedIDs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab]
     }, {
         id: 48,
         description: 'At least one successful testing method was very long',

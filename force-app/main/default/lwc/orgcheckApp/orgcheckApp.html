@@ -617,7 +617,7 @@
             <lightning-tab value="visual" label="🥐 User Interface" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components,home-page-components"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline" class="slds-var-m-left_x-small" icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="visual-force-pages,visual-force-components,lightning-pages,lightning-aura-components,lightning-web-components,home-page-components,custom-tabs"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -630,6 +630,7 @@
                             <li><b>🧁 Lightning Aura Components</b>: list pages that may have an old API version, not used in your org or without any description</li>
                             <li><b>🍰 Lightning Web Components</b>: list pages that that may have an old API version, not used in your org or without any description</li>
                             <li><b>🍩 Home Page Components</b>: list home page components that could include hardcoded URL</li>
+                            <li><b>🥠 Custom Tabs</b>: list custom tabs that could include hardcoded URL</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="visual-force-pages" label="🥖 Visualforce Pages" onactive={handleSubTabActivation}>
@@ -649,6 +650,9 @@
                     </lightning-tab>
                     <lightning-tab value="home-page-components" label="🍩 Home Page Components" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no Home Page Component to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={homePageComponentsTableDefinition} rows={homePageComponentsTableData} show-export-button export-basename="HomePageComponents"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="custom-tabs" label="🥠 Custom Tabs" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no Custom Tab to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={customTabsTableDefinition} rows={customTabsTableData} show-export-button export-basename="CustomTabs"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
