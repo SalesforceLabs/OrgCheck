@@ -33,6 +33,14 @@ export class DatasetCustomTabs extends Dataset {
 
         // Create the map
         const customTabRecords = results[0];
+
+        // Then retreive dependencies
+        logger?.log(`Retrieving dependencies of ${customTabRecords.length} web links...`);
+        const customTabDependencies = await sfdcManager.dependenciesQuery(
+            await Processor.map(customTabRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            logger
+        );
+
         logger?.log(`Parsing ${customTabRecords.length} installed packages...`);
         const customTabs = new Map(await Processor.map(customTabRecords, (record) => {
 
@@ -52,6 +60,9 @@ export class DatasetCustomTabs extends Dataset {
                     hardCodedURLs: CodeScanner.FindHardCodedURLs(record.Url),
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url),
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_TAB)                    
+                },
+                dependencies: {
+                    data: customTabDependencies
                 }
             });
 

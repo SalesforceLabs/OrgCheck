@@ -1,7 +1,7 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataWithDependencies } from '../core/orgcheck-api-data';
 import { SFDC_Object } from './orgcheck-api-data-object';
 
-export class SFDC_PageLayout extends Data {
+export class SFDC_PageLayout extends DataWithDependencies {
     
     /** 
      * @description Logical name of what this class represents

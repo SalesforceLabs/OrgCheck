@@ -1,6 +1,6 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataWithDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_CustomTab extends Data {
+export class SFDC_CustomTab extends DataWithDependencies {
 
     /** 
      * @description Logical name of what this class represents

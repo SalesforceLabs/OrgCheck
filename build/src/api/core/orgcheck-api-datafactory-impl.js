@@ -124,8 +124,16 @@ export class DataFactoryInstance extends DataFactoryInstanceIntf {
             row.badReasonIds = [];
         }
         // If dependencies are needed...
-        if (this._isDependenciesNeeded === true && configuration.dependencies) {
-            row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, (configuration.dependencies.idFields || ['id']).map(f => row[f]));
+        if (this._isDependenciesNeeded === true) {
+            if (configuration.dependencies) {
+                row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, (configuration.dependencies.idFields || ['id']).map(f => row[f]));
+            } else {
+                throw new TypeError(`This data (of type ${this._dataClass}) is defined as with dependencies, but no dependencies were provided.`);
+            }
+        } else {
+            if (configuration.dependencies) {
+                throw new TypeError(`This data (of type ${this._dataClass}) is defined as without dependencies, but some dependencies were provided.`);
+            }
         }
         // Return the row finally
         return row;

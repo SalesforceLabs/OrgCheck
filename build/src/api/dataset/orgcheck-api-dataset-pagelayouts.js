@@ -40,6 +40,13 @@ export class DatasetPageLayouts extends Dataset {
         const pageLayoutRecords = results[0];
         const pageLayoutProfileAssignRecords = results[1];
 
+        // Then retreive dependencies
+        logger?.log(`Retrieving dependencies of ${pageLayoutRecords.length} page layouts...`);
+        const pageLayoutDependencies = await sfdcManager.dependenciesQuery(
+            await Processor.map(pageLayoutRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            logger
+        );
+
         logger?.log(`Parsing ${pageLayoutRecords.length} page layouts...`);
         const pageLayouts = new Map(await Processor.map(pageLayoutRecords, (record) => {
 
@@ -57,7 +64,10 @@ export class DatasetPageLayouts extends Dataset {
                     profileAssignmentCount: 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGELAYOUT)
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, record.EntityDefinition?.QualifiedApiName)
+                },
+                dependencies: {
+                    data: pageLayoutDependencies
                 }
             });
 

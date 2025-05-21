@@ -32,6 +32,14 @@ export class DatasetHomePageComponents extends Dataset {
 
         // Create the map
         const homePageRecords = results[0];
+
+        // Then retreive dependencies
+        logger?.log(`Retrieving dependencies of ${homePageRecords.length} web links...`);
+        const homePageDependencies = await sfdcManager.dependenciesQuery(
+            await Processor.map(homePageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            logger
+        );
+
         logger?.log(`Parsing ${homePageRecords.length} installed packages...`);
         const homePages = new Map(await Processor.map(homePageRecords, (record) => {
 
@@ -48,6 +56,9 @@ export class DatasetHomePageComponents extends Dataset {
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.HOME_PAGE_COMPONENT)                    
+                },
+                dependencies: {
+                    data: homePageDependencies
                 }
             });
 

@@ -773,7 +773,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
         const result = await this._connection.request({ 
             url: `/tooling/runTestsAsynchronous`,
             method: 'POST',
-            body: '{ "testLevel": "RunLocalTests", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
+            body: '{ "testLevel": "RunAllTestsInOrg", "skipCodeCoverage": false }', // double quote is mandatory by SFDC Json parser.
             headers: { 'Content-Type': 'application/json' }
         });
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage

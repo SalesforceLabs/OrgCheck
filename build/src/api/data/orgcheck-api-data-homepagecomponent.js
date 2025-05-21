@@ -1,6 +1,6 @@
-import { Data } from '../core/orgcheck-api-data';
+import { DataWithDependencies } from '../core/orgcheck-api-data';
 
-export class SFDC_HomePageComponent extends Data {
+export class SFDC_HomePageComponent extends DataWithDependencies {
 
     /** 
      * @description Logical name of what this class represents

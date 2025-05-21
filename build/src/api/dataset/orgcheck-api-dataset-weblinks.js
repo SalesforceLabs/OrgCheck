@@ -34,6 +34,13 @@ export class DatasetWeblinks extends Dataset {
         // Create the map
         const webLinkRecords = results[0];
 
+        // Then retreive dependencies
+        logger?.log(`Retrieving dependencies of ${webLinkRecords.length} web links...`);
+        const webLinkDependencies = await sfdcManager.dependenciesQuery(
+            await Processor.map(webLinkRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            logger
+        );
+
         // Create the map
         logger?.log(`Parsing ${webLinkRecords.length} weblinks...`);
         const webLinks = new Map(await Processor.map(webLinkRecords, async (record) => {
@@ -56,6 +63,9 @@ export class DatasetWeblinks extends Dataset {
                     description: record.Description,
                     objectId: record.EntityDefinition?.DurableId,
                     url: sfdcManager.setupUrl(record.Id, SalesforceMetadataTypes.WEB_LINK, record.PageOrSobjectType)
+                },
+                dependencies: {
+                    data: webLinkDependencies
                 }
             });
 
