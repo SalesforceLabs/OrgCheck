@@ -56,7 +56,7 @@ export class API {
      * @public
      */
     get version() {
-        return 'Boron [B,5]';
+        return 'Carbon [C,6]';
     }
 
     /**
