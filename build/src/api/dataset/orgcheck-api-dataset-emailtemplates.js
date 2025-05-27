@@ -21,9 +21,9 @@ export class DatasetEmailTemplates extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about EmailTemplates in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Name, ApiVersion, IsActive, HtmlValue, CreatedDate, ' +
+            string: 'SELECT Id, Name, ApiVersion, IsActive, HtmlValue, Body, Markup, CreatedDate, ' +
                         'LastModifiedDate, FolderId, FolderName, Description, LastUsedDate, '+
-                        'TimesUsed ' +
+                        'TimesUsed, UiType, TemplateType, NamespacePrefix ' +
                     'FROM EmailTemplate'
         }], logger);
             
@@ -37,7 +37,7 @@ export class DatasetEmailTemplates extends Dataset {
         
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
-            const sourceCode = CodeScanner.RemoveCommentsFromXML(record.HtmlValue);
+            const sourceCode = CodeScanner.RemoveCommentsFromXML(record.HtmlValue || record.Body || record.Markup || '');
 
             // Create the instance
             const emailTemplate = emailTemplateDataFactory.createWithScore({
@@ -47,9 +47,12 @@ export class DatasetEmailTemplates extends Dataset {
                     apiVersion: record.ApiVersion, 
                     isActive: record.IsActive,
                     description: record.Description,
+                    package: record.NamespacePrefix || '',
                     hardCodedURLs: CodeScanner.FindHardCodedURLs(sourceCode),
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(sourceCode),
                     createdDate: record.CreatedDate,
+                    uiType: record.UiType,
+                    type: record.TemplateType,
                     lastModifiedDate: record.LastModifiedDate,
                     lastUsedDate: record.LastUsedDate,
                     timesUsed: record.TimesUsed,

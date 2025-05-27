@@ -5,6 +5,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SFDC_EmailTemplate } from '../data/orgcheck-api-data-emailtemplate';
+import { Processor } from '../core/orgcheck-api-processing';
 
 export class RecipeEmailTemplates extends Recipe {
 
@@ -22,11 +23,12 @@ export class RecipeEmailTemplates extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
+     * @param {string} namespace Name of the package (if all use '*')
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, logger, namespace) {
 
         // Get data
         const /** @type {Map<string, SFDC_EmailTemplate>} */ emailTemplates = data.get(DatasetAliases.EMAILTEMPLATES);
@@ -34,7 +36,15 @@ export class RecipeEmailTemplates extends Recipe {
         // Checking data
         if (!emailTemplates) throw new Error(`RecipeDocuments: Data from dataset alias 'EMAILTEMPLATES' was undefined.`);
 
+        // Filter data
+        const array = [];
+        await Processor.forEach(emailTemplates, (emailTemplate) => {
+            if (namespace === '*' || emailTemplate.package === namespace) {
+                array.push(emailTemplate);
+            }
+        });
+
         // Return data
-        return [... emailTemplates.values()];
+        return array;
     }
 }

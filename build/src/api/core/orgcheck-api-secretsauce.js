@@ -451,6 +451,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This record type is not set as default nor as visible in any profile in this org. Please review this record type and remove it if it is not needed anymore.',
         badField: 'isDefault',
         applicable: [ SFDC_RecordType ]
+    }, {
+        id: 52,
+        description: 'Email template never used',
+        formula: (/** @type {SFDC_EmailTemplate} */ d) => d.lastUsedDate === null,
+        errorMessage: 'This email template was never used. Is it really useful?',
+        badField: 'lastUsedDate',
+        applicable: [ SFDC_EmailTemplate ]
     }
 ];
 

@@ -32,6 +32,27 @@ export class SFDC_EmailTemplate extends Data {
     url;
 
     /**
+     * @description Type of the UI this item is used in
+     * @type {string}
+     * @public
+     */
+    uiType;
+
+    /**
+     * @description Type of this item
+     * @type {string}
+     * @public
+     */
+    type;
+
+    /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
      * @description Unique list of hard coded Salesforce URLs in this item
      * @type {Array<string>}
      * @public

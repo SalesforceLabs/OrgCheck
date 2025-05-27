@@ -1061,14 +1061,15 @@ export class API {
     
     /**
      * @description Get information about EmailTemplate
+     * @param {string} namespace
      * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getEmailTemplates() {
+    async getEmailTemplates(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES));
+        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, namespace));
     }
 
     /**
