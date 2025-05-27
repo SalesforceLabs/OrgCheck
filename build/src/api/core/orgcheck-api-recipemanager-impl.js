@@ -42,10 +42,11 @@ import { RecipePermissionSetLicenses } from '../recipe/orgcheck-api-recipe-permi
 import { RecipeRecordType } from '../recipe/orgcheck-api-recipe-recordtypes';
 import { RecipePageLayouts } from '../recipe/orgcheck-api-recipe-pagelayouts';
 import { RecipeDocuments } from '../recipe/orgcheck-api-recipe-documents';
-import { RecipeWeblinks } from '../recipe/orgcheck-api-recipe-weblinks';
+import { RecipeWebLinks } from '../recipe/orgcheck-api-recipe-weblinks';
 import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collaborationgroups';
 import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepagecomponents';
 import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
+import { RecipeEmailTemplates } from '../recipe/orgcheck-api-recipe-emailtemplates';
 
 /**
  * @description Recipe Manager
@@ -104,6 +105,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.CUSTOM_LABELS, new RecipeCustomLabels());
         this._recipes.set(RecipeAliases.CUSTOM_TABS, new RecipeCustomTabs());
         this._recipes.set(RecipeAliases.DOCUMENTS, new RecipeDocuments());
+        this._recipes.set(RecipeAliases.EMAIL_TEMPLATES, new RecipeEmailTemplates());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());
         this._recipes.set(RecipeAliases.HOME_PAGE_COMPONENTS, new RecipeHomePageComponents());
@@ -130,7 +132,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
-        this._recipes.set(RecipeAliases.WEBLINKS, new RecipeWeblinks());
+        this._recipes.set(RecipeAliases.WEBLINKS, new RecipeWebLinks());
         this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());        
     }
 

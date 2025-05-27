@@ -30,6 +30,7 @@ export * from './data/orgcheck-api-data-customlabel.js';
 export * from './data/orgcheck-api-data-customtab.js';
 export * from './data/orgcheck-api-data-collaborationgroup.js';
 export * from './data/orgcheck-api-data-document.js';
+export * from './data/orgcheck-api-data-emailtemplate.js';
 export * from './data/orgcheck-api-data-field.js';
 export * from './data/orgcheck-api-data-fieldpermission.js';
 export * from './data/orgcheck-api-data-fieldset.js';

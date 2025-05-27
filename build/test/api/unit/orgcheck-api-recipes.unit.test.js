@@ -35,6 +35,8 @@ import { RecipeValidationRules } from "../../../src/api/recipe/orgcheck-api-reci
 import { RecipeVisualForceComponents } from "../../../src/api/recipe/orgcheck-api-recipe-visualforcecomponents";
 import { RecipeVisualForcePages } from "../../../src/api/recipe/orgcheck-api-recipe-visualforcepages";
 import { RecipeWorkflows } from "../../../src/api/recipe/orgcheck-api-recipe-workflows";
+import { RecipeWebLinks } from "../../../src/api/recipe/orgcheck-api-recipe-weblinks";
+import { RecipeEmailTemplates } from "../../../src/api/recipe/orgcheck-api-recipe-emailtemplates";
 
 class SimpleLoggerMock extends SimpleLoggerIntf {
   log() {}
@@ -215,6 +217,26 @@ describe('tests.api.unit.Recipes', () => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
       });
       const results = await recipe.transform(data, logger, 'namespace');
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipeEmailTemplates', () => {
+  
+    const recipe = new RecipeEmailTemplates();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(1);
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
       expect(results).toBeDefined();
     });
 
@@ -750,6 +772,26 @@ describe('tests.api.unit.Recipes', () => {
       expect(datasets).toBeDefined();
       expect(datasets instanceof Array).toBeTruthy();
       expect(datasets.length).toBe(1);      
+      const data = new Map();
+      datasets.forEach((dataset) => {
+        data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());
+      });
+      const results = await recipe.transform(data, logger);
+      expect(results).toBeDefined();
+    });
+
+  });
+
+  describe('Test RecipeWebLinks', () => {
+  
+    const recipe = new RecipeWebLinks();
+    const logger = new SimpleLoggerMock();
+    it('checks if this recipe class extracts and transforms correctly', async () => {
+
+      const datasets = recipe.extract(logger);
+      expect(datasets).toBeDefined();
+      expect(datasets instanceof Array).toBeTruthy();
+      expect(datasets.length).toBe(3);      
       const data = new Map();
       datasets.forEach((dataset) => {
         data.set(typeof dataset === 'string' ? dataset : dataset.alias , new Map());

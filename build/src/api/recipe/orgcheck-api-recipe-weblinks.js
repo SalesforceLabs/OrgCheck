@@ -9,7 +9,7 @@ import { Processor } from '../core/orgcheck-api-processing';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 
-export class RecipeWeblinks extends Recipe {
+export class RecipeWebLinks extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -44,9 +44,9 @@ export class RecipeWeblinks extends Recipe {
         const /** @type {Map<string, SFDC_WebLink>} */ weblinks = data.get(DatasetAliases.WEBLINKS);
 
         // Checking data
-        if (!types) throw new Error(`RecipeWeblinks: Data from dataset alias 'OBJECTTYPES' was undefined.`);
-        if (!objects) throw new Error(`RecipeWeblinks: Data from dataset alias 'OBJECTS' was undefined.`);
-        if (!weblinks) throw new Error(`RecipeWeblinks: Data from dataset alias 'WEBLINKS' was undefined.`);
+        if (!types) throw new Error(`RecipeWebLinks: Data from dataset alias 'OBJECTTYPES' was undefined.`);
+        if (!objects) throw new Error(`RecipeWebLinks: Data from dataset alias 'OBJECTS' was undefined.`);
+        if (!weblinks) throw new Error(`RecipeWebLinks: Data from dataset alias 'WEBLINKS' was undefined.`);
 
         // Augment and filter data
         const array = [];

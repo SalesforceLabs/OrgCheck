@@ -44,6 +44,7 @@ import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
 import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
+import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
 
 /**
  * @description Org Check API main class
@@ -1058,6 +1059,26 @@ export class API {
         this._recipeManager.clean(RecipeAliases.FLOWS);
     }
     
+    /**
+     * @description Get information about EmailTemplate
+     * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getEmailTemplates() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES));
+    }
+
+    /**
+     * @description Remove all the cached information about email template
+     * @public
+     */
+    removeAllEmailTemplatesFromCache() {
+        this._recipeManager.clean(RecipeAliases.EMAIL_TEMPLATES);
+    }
+
     /**
      * @description Get information about home page components
      * @returns {Promise<Array<SFDC_HomePageComponent>>} List of items to return

@@ -509,6 +509,7 @@ export default class OrgcheckApp extends LightningElement {
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',    isGlobalView: false,     data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._on,   get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'documents':                 { label: '🚧 Documents',                  tab: 'setting',     isGlobalView: true,      data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._nm,   get: async () => { return this._api?.getDocuments(this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',  isGlobalView: true,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getFlows(); }},
+        'email-templates':           { label: '🌇 Email Templates',            tab: 'setting',     isGlobalView: true,      data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._nt,   get: async () => { return this._api?.getEmailTemplates(); }},
         'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',      isGlobalView: true,      data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._nt,   get: async () => { return this._api?.getHomePageComponents(); }},
         'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',      isGlobalView: true,      data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._nm,   get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',      isGlobalView: true,      data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getLightningPages(this.namespace); }},
@@ -2006,6 +2007,30 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
+     * @description Table definition for email templates
+     * @type {ocui.Table}
+     */ 
+    emailTemplatesTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',     type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
+            { label: 'Is Active',       type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
+            { label: 'Last Used',       type: ocui.ColumnType.DTM,  data: { value: 'lastUsedDate' }},
+            { label: 'Used',            type: ocui.ColumnType.NUM,  data: { value: 'timesUsed' }},
+            { label: 'URLs',            type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'IDs',             type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
      * @description Table definition for home page components
      * @type {ocui.Table}
      */ 
@@ -2542,6 +2567,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_Flow>}
      */
     flowsTableData;
+
+    /**
+     * @description Data table for email templates
+     * @type {Array<ocapi.SFDC_EmailTemplate>}
+     */
+    emailTemplatesTableData;
 
     /**
      * @description Data table for home page components

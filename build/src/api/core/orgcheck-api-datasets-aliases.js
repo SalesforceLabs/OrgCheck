@@ -12,6 +12,7 @@ export class DatasetAliases {
     static get CUSTOMTABS() { return 'custom-tabs'; }
     static get COLLABORATIONGROUPS() { return 'collaboration-groups'; }
     static get DOCUMENTS() { return 'documents'; }
+    static get EMAILTEMPLATES() { return 'email-templates'; }
     static get FIELDPERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
     static get GROUPS() { return 'groups'; }

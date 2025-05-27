@@ -1,15 +1,22 @@
 import { DataWithDependencies } from './orgcheck-api-data';
+import { ScoreRule } from './orgcheck-api-datafactory';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
+import { SFDC_CollaborationGroup } from '../data/orgcheck-api-data-collaborationgroup';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
+import { SFDC_CustomTab } from '../data/orgcheck-api-data-customtab';
+import { SFDC_Document } from '../data/orgcheck-api-data-document';
+import { SFDC_EmailTemplate } from '../data/orgcheck-api-data-emailtemplate';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { SFDC_Flow } from '../data/orgcheck-api-data-flow';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
+import { SFDC_HomePageComponent } from '../data/orgcheck-api-data-homepagecomponent';
 import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
+import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
@@ -23,12 +30,6 @@ import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforce
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
-import { ScoreRule } from './orgcheck-api-datafactory';
-import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
-import { SFDC_Document } from '../data/orgcheck-api-data-document';
-import { SFDC_CollaborationGroup } from '../data/orgcheck-api-data-collaborationgroup';
-import { SFDC_HomePageComponent } from '../data/orgcheck-api-data-homepagecomponent';
-import { SFDC_CustomTab } from '../data/orgcheck-api-data-customtab';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -117,10 +118,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 4,
         description: 'API Version too old',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent} */ d) => IS_OLD_APIVERSION(SecretSauce.CurrentApiVersion, d.apiVersion),
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_Flow | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_EmailTemplate } */ d) => IS_OLD_APIVERSION(SecretSauce.CurrentApiVersion, d.apiVersion),
         errorMessage: 'The API version of this component is too old. Please update it to a newest version.',
         badField: 'apiVersion',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_Flow, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_EmailTemplate ]
     }, {
         id: 5,
         description: 'No assert in this Apex Test',
@@ -131,10 +132,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab} */ d) => IS_EMPTY(d.description),
+        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab ]
+        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -327,10 +328,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 34,
         description: 'Inactive component',
-        formula: (/** @type {SFDC_ValidationRule | SFDC_RecordType | SFDC_ApexTrigger | SFDC_Workflow} */ d) => d.isActive === false,
+        formula: (/** @type {SFDC_ValidationRule | SFDC_RecordType | SFDC_ApexTrigger | SFDC_Workflow | SFDC_EmailTemplate } */ d) => d.isActive === false,
         errorMessage: 'This component is inactive, so why do not you just remove it from your org?',
         badField: 'isActive',
-        applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger, SFDC_Workflow ]
+        applicable: [ SFDC_ValidationRule, SFDC_RecordType, SFDC_ApexTrigger, SFDC_Workflow, SFDC_EmailTemplate ]
     }, {
         id: 35,
         description: 'No active version for this flow',
@@ -411,17 +412,17 @@ const ALL_SCORE_RULES = [
     }, {
         id: 46,
         description: 'Hard-coded URL suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab} */ d) => d.hardCodedURLs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => d.hardCodedURLs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded URLs pointing to domains like salesforce.com or force.*',
         badField: 'hardCodedURLs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab ]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab, SFDC_EmailTemplate ]
     }, {
         id: 47,
         description: 'Hard-coded Salesforce IDs suspicion in this item',
-        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab} */ d) => d.hardCodedIDs?.length > 0 || false,
+        formula: (/** @type {SFDC_ApexClass | SFDC_ApexTrigger | SFDC_CollaborationGroup | SFDC_Field | SFDC_HomePageComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_WebLink | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => d.hardCodedIDs?.length > 0 || false,
         errorMessage: 'The source code of this item contains one or more hard coded Salesforce IDs',
         badField: 'hardCodedIDs',
-        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab]
+        applicable: [ SFDC_ApexClass, SFDC_ApexTrigger, SFDC_CollaborationGroup, SFDC_Field, SFDC_HomePageComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_WebLink, SFDC_CustomTab, SFDC_EmailTemplate ]
     }, {
         id: 48,
         description: 'At least one successful testing method was very long',

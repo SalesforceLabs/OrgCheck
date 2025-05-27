@@ -18,6 +18,7 @@ export class SalesforceMetadataTypes {
     static get CUSTOM_TAB() { return 'CustomTab'; }
     static get DOCUMENT() { return 'Document'; }
     static get EXTERNAL_OBJECT() { return 'ExternalObject'; }
+    static get EMAIL_TEMPLATE() { return 'EmailTemplate'; }
     static get FIELD_SET() { return 'FieldSet'; }
     static get FLOW_DEFINITION() { return 'FlowDefinition'; }
     static get FLOW_VERSION() { return 'Flow'; }

@@ -14,6 +14,7 @@ export class RecipeAliases {
     static get CUSTOM_LABELS() { return 'custom-labels'; }
     static get CUSTOM_TABS() { return 'custom-tabs'; }
     static get DOCUMENTS() { return 'documents'; }
+    static get EMAIL_TEMPLATES() { return 'email-templates'; }
     static get FIELD_PERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
     static get HOME_PAGE_COMPONENTS() { return 'home-page-components'; }
