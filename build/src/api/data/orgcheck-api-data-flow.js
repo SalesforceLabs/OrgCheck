@@ -236,4 +236,11 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      * @public
      */
     triggerType;
+
+    /**
+     * @description Record trigger type of this flow version (optional)
+     * @type {string}
+     * @public
+     */
+    recordTriggerType;
 }

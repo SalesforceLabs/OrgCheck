@@ -132,6 +132,9 @@ export class DatasetFlows extends Dataset {
                     dmlDeleteNodeCount: record.Metadata.recordDeletes?.length || 0,
                     dmlUpdateNodeCount: record.Metadata.recordUpdates?.length || 0,
                     screenNodeCount: record.Metadata.screens?.length || 0,
+                    sobject: record.Metadata.start?.object || '',
+                    triggerType: record.Metadata.start?.triggerType || '',
+                    recordTriggerType: record.Metadata.start?.recordTriggerType || '',
                     isActive: record.Status === 'Active',
                     description: record.Description,
                     type: record.ProcessType,
@@ -141,13 +144,6 @@ export class DatasetFlows extends Dataset {
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
-            await Processor.forEach(
-                record.Metadata.processMetadataValues,
-                (m) => {
-                    if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
-                    if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
-                }
-            );
 
             // Get the parent Flow definition
             const flowDefinition = flowDefinitions.get(parentId);
