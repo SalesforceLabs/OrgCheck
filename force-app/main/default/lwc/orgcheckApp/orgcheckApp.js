@@ -2063,7 +2063,37 @@ export default class OrgcheckApp extends LightningElement {
      * @description Table definition for process builders
      * @type {ocui.Table}
      */
-    processBuildersTableDefinition = this.flowsTableDefinition;
+    processBuildersTableDefinition = {
+        columns: [
+            { label: '#',                                                 type: ocui.ColumnType.IDX },
+            { label: 'Score',                                             type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                                              type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',                                       type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Number of versions',                                type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
+            { label: 'Current Version (called `it` in the next columns)', type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
+            { label: 'Is it Active?',                                     type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
+            { label: 'Is it the Latest?',                                 type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
+            { label: 'Its SObject',                                       type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.sobject' }},
+            { label: 'Its trigger type',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.triggerType' }},
+            { label: 'Its Running Mode',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
+            { label: 'Its API Version',                                   type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: '# Nodes',                                           type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
+            { label: '# DML Create Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
+            { label: '# DML Delete Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
+            { label: '# DML Update Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
+            { label: '# Screen Nodes',                                    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
+            { label: 'Its created date',                                  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
+            { label: 'Its modified date',                                 type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
+            { label: 'Its description',                                   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Process created date',                              type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Process modified date',                             type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',                                             type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',                                     type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',                                      type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
     
     /**
      * @description Table definition for workflows

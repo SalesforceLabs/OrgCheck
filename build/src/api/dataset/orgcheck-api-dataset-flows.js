@@ -144,6 +144,15 @@ export class DatasetFlows extends Dataset {
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
+            if (activeFlowVersion.type === 'Workflow') {
+                await Processor.forEach(
+                    record.Metadata.processMetadataValues,
+                    (m) => {
+                        if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
+                        if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
+                    }
+                );
+            }
 
             // Get the parent Flow definition
             const flowDefinition = flowDefinitions.get(parentId);

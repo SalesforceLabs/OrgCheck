@@ -132,10 +132,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type {SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => IS_EMPTY(d.description),
+        formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate ]
+        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate ]
     }, {
         id: 7,
         description: 'No description for custom component',
@@ -458,6 +458,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This email template was never used. Is it really useful?',
         badField: 'lastUsedDate',
         applicable: [ SFDC_EmailTemplate ]
+    }, {
+        id: 53,
+        description: 'No description for this flow',
+        formula: (/** @type { SFDC_Flow } */ d) => d.type !== 'Workflow' && IS_EMPTY(d.description),
+        errorMessage: 'This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
+        badField: 'description',
+        applicable: [ SFDC_Flow ]
     }
 ];
 
