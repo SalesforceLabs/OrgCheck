@@ -27,6 +27,17 @@ export class DatasetObject extends Dataset {
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
 
+        const fullObjectApiName = parameters?.get('object');
+
+        // Checking parameters
+        if (fullObjectApiName === undefined || typeof fullObjectApiName !== 'string') {
+            throw new Error(`DatasetObject: No object were provided in the parameters.`);
+        }
+
+        // split name and namespace frpm object api name
+        const splittedApiName = fullObjectApiName.split('__');
+        const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
+
         // Init the factories
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
         const fieldSetDataFactory = dataFactory.getInstance(SFDC_FieldSet);
@@ -38,10 +49,6 @@ export class DatasetObject extends Dataset {
         const relationshipDataFactory = dataFactory.getInstance(SFDC_ObjectRelationShip);
         const objectDataFactory = dataFactory.getInstance(SFDC_Object);
 
-        const fullObjectApiName = parameters?.get('object');
-        const splittedApiName = fullObjectApiName.split('__');
-        const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
-        
         const results = await Promise.all([
             sfdcManager.describe(fullObjectApiName, logger),
             sfdcManager.soqlQuery([{

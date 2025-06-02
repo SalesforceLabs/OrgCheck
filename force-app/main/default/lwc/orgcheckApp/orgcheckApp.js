@@ -511,6 +511,7 @@ export default class OrgcheckApp extends LightningElement {
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',  isGlobalView: true,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getFlows(); }},
         'email-templates':           { label: '🌇 Email Templates',            tab: 'setting',     isGlobalView: true,      data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
         'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',      isGlobalView: true,      data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._nt,   get: async () => { return this._api?.getHomePageComponents(); }},
+        'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: 'setting',     isGlobalView: true,      data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._nt,   get: async () => { return this._api?.getKnowledgeArticles(); }},
         'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',      isGlobalView: true,      data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._nm,   get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',      isGlobalView: true,      data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getLightningPages(this.namespace); }},
         'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: 'visual',      isGlobalView: true,      data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._nm,   get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
@@ -1422,7 +1423,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
             { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1494,6 +1495,26 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
+    
+    /**
+     * @description Table definition for knowledge articles
+     * @type {ocui.Table}
+     */ 
+    knowledgeArticlesTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'versionId', name: 'number' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'number' }},
+            { label: 'Title',          type: ocui.ColumnType.TXT, data: { value: 'title' }},
+            { label: 'Status',         type: ocui.ColumnType.TXT, data: { value: 'status' }},
+            { label: 'Url Name',       type: ocui.ColumnType.TXT, data: { value: 'urlName' }},
+            { label: 'Hardcoded URL?', type: ocui.ColumnType.CHK, data: { value: 'isHardCodedURL' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
      * @description Table definition for lightning web components
@@ -2483,6 +2504,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_LightningPage>}
      */
     flexiPagesTableData;
+
+    /**
+     * @description Data table for knowledge articles
+     * @type {Array<ocapi.SFDC_KnowledgeArticle>}
+     */ 
+    knowledgeArticlesTableData;
 
     /** 
      * @description Data table for lightning web components 

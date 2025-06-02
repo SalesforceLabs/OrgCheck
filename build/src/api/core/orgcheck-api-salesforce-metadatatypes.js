@@ -24,6 +24,7 @@ export class SalesforceMetadataTypes {
     static get FLOW_VERSION() { return 'Flow'; }
     static get HOME_PAGE_COMPONENT() { return 'HomePageComponent'; }
     static get KNOWLEDGE_ARTICLE() { return 'KnowledgeArticle'; }
+    static get KNOWLEDGE_ARTICLE_VERSION() { return 'KnowledgeArticleVersion'; }
     static get LIGHTNING_PAGE() { return 'FlexiPage'; }
     static get LIGHTNING_WEB_COMPONENT() { return 'LightningComponentBundle'; }
     static get PAGE_LAYOUT() { return 'Layout'; }

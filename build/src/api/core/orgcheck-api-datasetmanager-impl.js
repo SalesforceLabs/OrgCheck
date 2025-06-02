@@ -1,7 +1,7 @@
 import { LoggerIntf } from './orgcheck-api-logger';
 import { DataCacheManagerIntf } from './orgcheck-api-cachemanager';
 import { SalesforceManagerIntf } from './orgcheck-api-salesforcemanager';
-import { DataFactoryIntf, ScoreRule } from './orgcheck-api-datafactory';
+import { DataFactoryIntf } from './orgcheck-api-datafactory';
 import { DatasetCustomFields } from '../dataset/orgcheck-api-dataset-customfields';
 import { DatasetCustomLabels } from '../dataset/orgcheck-api-dataset-customlabels';
 import { DatasetObject } from '../dataset/orgcheck-api-dataset-object';
@@ -45,6 +45,7 @@ import { DatasetCollaborationGroups } from '../dataset/orgcheck-api-dataset-coll
 import { DatasetHomePageComponents } from '../dataset/orgcheck-api-dataset-homepagecomponents';
 import { DatasetCustomTabs } from '../dataset/orgcheck-api-dataset-customtabs';
 import { DatasetEmailTemplates } from '../dataset/orgcheck-api-dataset-emailtemplates';
+import { DatasetKnowledgeArticles } from '../dataset/orgcheck-api-dataset-knowledgearticles';
 
 /**
  * @description Dataset manager
@@ -132,6 +133,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.FLOWS, new DatasetFlows());
         this._datasets.set(DatasetAliases.GROUPS, new DatasetGroups());
         this._datasets.set(DatasetAliases.HOMEPAGECOMPONENTS, new DatasetHomePageComponents());
+        this._datasets.set(DatasetAliases.KNOWLEDGEARTICLES, new DatasetKnowledgeArticles());
         this._datasets.set(DatasetAliases.LIGHTNINGAURACOMPONENTS, new DatasetLightningAuraComponents());
         this._datasets.set(DatasetAliases.LIGHTNINGPAGES, new DatasetLightningPages());
         this._datasets.set(DatasetAliases.LIGHTNINGWEBCOMPONENTS, new DatasetLightningWebComponents());

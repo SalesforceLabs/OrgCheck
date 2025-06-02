@@ -194,6 +194,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
             case SalesforceMetadataTypes.LIGHTNING_PAGE:          return `/lightning/setup/ObjectManager/` + (parentId ? `${parentId}/LightningPages/${id}/view` : `page?address=%2F${id}`);
             // APEX PROGAMMATION
             case SalesforceMetadataTypes.APEX_CLASS:              return `/lightning/setup/ApexClasses/page?address=%2F${id}`;
+            case SalesforceMetadataTypes.KNOWLEDGE_ARTICLE_VERSION: return `/${id}`;
             // Other types or even undefined type
             default: {
                 console.error(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
@@ -427,6 +428,44 @@ export class SalesforceManager extends SalesforceManagerIntf {
             return Promise.reject(errors[0]);
         }
         // at this point all promises have been settled (or 'successful' if you)
+        const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled').map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
+        // return the results
+        return Promise.resolve(results);
+    }
+
+    /**
+     * @description Method to call a list of SOSL queries (tooling or not)
+     * @param {Array<SalesforceQueryRequest | any>} queries 
+     * @param {SimpleLoggerIntf} logger
+     * @async
+     * @returns {Promise<Array<Array<any>>>}
+     * @public
+     */
+    async soslQuery(queries, logger) { 
+        // Now we can start, log some message
+        logger?.log(`Preparing ${queries.length} SOSL ${queries.length>1?'queries':'query'}...`);
+        const allSettledPromisesResult = await Promise.allSettled(queries.map(async (query) => {
+            let records;
+            try {
+                records = await this._connection.search(query.string);
+            } catch (error) {
+                if (query.byPasses && query.byPasses.includes && query.byPasses.includes(error.errorCode)) {
+                    // by pass this error! and return an empty array
+                    return [];
+                } else {
+                    // Throw the error
+                    throw Object.assign(error, { 
+                        context: { 
+                            when: 'While running a SOSL query', 
+                            what: query.string 
+                    }});
+                }
+            } finally {
+            }
+            return records?.searchRecords || []; // return the records or an empty array if no records found
+        }));
+        logger?.log(`Done running ${queries.length} SOSL ${queries.length>1?'queries':'query'}.`);
+        // at this point all promises have been settled
         const results = allSettledPromisesResult.filter((result) => result.status === 'fulfilled').map((result) => result.value); // filter just to make sure we have only the fulfilled ones!
         // return the results
         return Promise.resolve(results);

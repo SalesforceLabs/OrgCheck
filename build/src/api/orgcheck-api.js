@@ -45,6 +45,7 @@ import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
 import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
 import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
+import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
 
 /**
  * @description Org Check API main class
@@ -430,6 +431,26 @@ export class API {
     }
 
     /**
+     * @description Get information about knowledge articles
+     * @returns {Promise<Array<SFDC_KnowledgeArticle>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getKnowledgeArticles() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.KNOWLEDGE_ARTICLES));
+    }
+
+    /**
+     * @description Remove all the cached information about knowledge articles
+     * @public
+     */
+    removeAllKnowledgeArticlesFromCache() {
+        this._recipeManager.clean(RecipeAliases.KNOWLEDGE_ARTICLES);
+    }    
+
+    /**
      * @description Get information about Chatter groups
      * @returns {Promise<Array<SFDC_CollaborationGroup>>} List of items to return
      * @throws Exception from recipe manager
@@ -442,7 +463,7 @@ export class API {
     }
 
     /**
-     * @description Remove all the cached information about WebLinks
+     * @description Remove all the cached information about Chatter groups
      * @public
      */
     removeAllChatterGroupsFromCache() {

@@ -28,9 +28,14 @@ export class DatasetOrganization extends Dataset {
                     'FROM Organization ' +
                     'LIMIT 1'
         }], logger);
-        logger?.log(`Received result=${JSON.stringify(results)}`);
+        const organizationRecords = results[0];
+        // Checking data
+        if (!organizationRecords || organizationRecords.length === 0) {
+            throw new Error(`DatasetOrganization: No Organization record found in the org.`);
+        }
+        // Get the first record
+        const record = organizationRecords[0];
         logger?.log(`We need to get the first result and from there the first record...`);
-        const record = results[0][0];
         logger?.log(`Parsing the result...`);
 
         // Init the factory and records

@@ -128,7 +128,7 @@ export class DataFactoryInstance extends DataFactoryInstanceIntf {
             if (configuration.dependencies) {
                 row.dependencies = DataDependenciesFactory.create(configuration.dependencies.data, (configuration.dependencies.idFields || ['id']).map(f => row[f]));
             } else {
-                throw new TypeError(`This data (of type ${this._dataClass}) is defined as with dependencies, but no dependencies were provided.`);
+                console.warn(`This data (of type ${this._dataClass}) is defined as with dependencies, but no dependencies were provided.`);
             }
         } else {
             if (configuration.dependencies) {

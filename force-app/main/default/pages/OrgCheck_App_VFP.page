@@ -105,7 +105,7 @@
                     </object>
                 </div>
                 <div class="orgcheck-loading-text">
-                    Please wait while <b>Org Check</b> is loading...
+                    Please wait while <b>Org Check</b> <sup>[C,6]</sup> is loading...
                 </div>
             </section>
             <section class="orgcheck-jokes-board" >

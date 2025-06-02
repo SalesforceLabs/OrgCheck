@@ -17,6 +17,7 @@ export class DatasetAliases {
     static get FLOWS() { return 'flows'; }
     static get GROUPS() { return 'groups'; }
     static get HOMEPAGECOMPONENTS() { return 'home-page-components'; }
+    static get KNOWLEDGEARTICLES() { return 'knowledge-articles'; }
     static get LIGHTNINGAURACOMPONENTS() { return 'lightning-aura-components'; }
     static get LIGHTNINGPAGES() { return 'lightning-pages'; }
     static get LIGHTNINGWEBCOMPONENTS() { return 'lightning-web-components'; }

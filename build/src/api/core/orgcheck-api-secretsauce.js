@@ -30,6 +30,7 @@ import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforce
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
+import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -440,7 +441,7 @@ const ALL_SCORE_RULES = [
     }, {
         id: 50,
         description: 'Hard-coded URL suspicion in this document',
-        formula: (/** @type {SFDC_Document} */ d) => d.isHardCodedURL === true,
+        formula: (/** @type {SFDC_Document } */ d) => d.isHardCodedURL === true,
         errorMessage: 'The URL of this document contains a hard coded URL pointing to domains like salesforce.com or force.*',
         badField: 'documentUrl',
         applicable: [ SFDC_Document ]
@@ -465,6 +466,13 @@ const ALL_SCORE_RULES = [
         errorMessage: 'This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
         applicable: [ SFDC_Flow ]
+    }, {
+        id: 54,
+        description: 'Hard-coded URL suspicion in this article',
+        formula: (/** @type { SFDC_KnowledgeArticle } */ d) => d.isHardCodedURL === true,
+        errorMessage: 'This article contains text information with links that points to domains like salesforce.com or force.*',
+        badField: 'isHardCodedURL',
+        applicable: [ SFDC_KnowledgeArticle ]
     }
 ];
 

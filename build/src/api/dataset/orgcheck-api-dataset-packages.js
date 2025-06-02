@@ -52,7 +52,13 @@ export class DatasetPackages extends Dataset {
         }));
 
         // Add potential package of the organization if it is set up
-        const localPackage = results[1][0].NamespacePrefix;
+        const organizationRecords = results[1];
+        // Checking data
+        if (!organizationRecords || organizationRecords.length === 0) {
+            throw new Error(`DatasetPackages: No Organization record found in the org.`);
+        }
+        // Get the first record
+        const localPackage = organizationRecords[0].NamespacePrefix;
         if (localPackage) {
             logger?.log(`Adding your local package ${localPackage}...`);
             packages.set(localPackage, packageDataFactory.create({

@@ -18,6 +18,14 @@ export class DatasetCurrentUserPermissions extends Dataset {
 
         const permissionFields = parameters?.get('permissions');
 
+        // Checking parameters
+        if (permissionFields === undefined || permissionFields.length === 0) {
+            throw new Error(`DatasetCurrentUserPermissions: No permissions were provided in the parameters.`);
+        }
+        if (!Array.isArray(permissionFields)) {
+            throw new Error(`DatasetCurrentUserPermissions: 'permissions' parameter should be an array of permission names.`);
+        }
+
         // First SOQL query
         logger?.log(`Querying REST API about UserPermissionAccess in the org...`);            
         const results = await sfdcManager.soqlQuery([{

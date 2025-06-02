@@ -18,6 +18,7 @@ export class RecipeAliases {
     static get FIELD_PERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
     static get HOME_PAGE_COMPONENTS() { return 'home-page-components'; }
+    static get KNOWLEDGE_ARTICLES() { return 'knowledge-articles'; }
     static get LIGHTNING_AURA_COMPONENTS() { return 'lightning-aura-components'; }
     static get LIGHTNING_PAGES() { return 'lightning-pages'; }
     static get LIGHTNING_WEB_COMPONENTS() { return 'lightning-web-components'; }

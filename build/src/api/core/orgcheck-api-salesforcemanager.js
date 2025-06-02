@@ -118,6 +118,16 @@ export class SalesforceManagerIntf {
     async soqlQuery(queries, logger) { throw new Error('Not implemented'); }
 
     /**
+     * @description Method to call a list of SOSL queries (tooling or not)
+     * @param {Array<SalesforceQueryRequest | any>} queries 
+     * @param {SimpleLoggerIntf} logger
+     * @async
+     * @returns {Promise<Array<Array<any>>>}
+     * @public
+     */
+    async soslQuery(queries, logger) { throw new Error('Not implemented'); }
+
+    /**
      * @param {Array<string>} ids
      * @param {SimpleLoggerIntf} logger
      * @async

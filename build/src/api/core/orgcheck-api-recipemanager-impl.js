@@ -47,6 +47,7 @@ import { RecipeCollaborationGroups } from '../recipe/orgcheck-api-recipe-collabo
 import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepagecomponents';
 import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
 import { RecipeEmailTemplates } from '../recipe/orgcheck-api-recipe-emailtemplates';
+import { RecipeKnowledgeArticles } from '../recipe/orgcheck-api-recipe-knowledgearticles';
 
 /**
  * @description Recipe Manager
@@ -109,6 +110,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());
         this._recipes.set(RecipeAliases.HOME_PAGE_COMPONENTS, new RecipeHomePageComponents());
+        this._recipes.set(RecipeAliases.KNOWLEDGE_ARTICLES, new RecipeKnowledgeArticles());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());
         this._recipes.set(RecipeAliases.LIGHTNING_PAGES, new RecipeLightningPages());
         this._recipes.set(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new RecipeLightningWebComponents());

@@ -1,3 +1,4 @@
+import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -5,7 +6,6 @@ import { Processor } from '../core/orgcheck-api-processing';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Document } from '../data/orgcheck-api-data-document';
-import { CodeScanner } from '../orgcheck-api-main';
 
 export class DatasetDocuments extends Dataset {
 
