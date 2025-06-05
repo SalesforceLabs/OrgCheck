@@ -13,16 +13,22 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Text encoder
+     * @type {TextEncoder}
+     * @public
      */ 
     @api textEncoder;
 
     /**
      * @description Text decoder
+     * @type {TextDecoder}
+     * @public
      */ 
     @api textDecoder;
 
     /**
      * @description Local storage
+     * @type {Storage}
+     * @public
      */ 
     @api localStorage;
 

@@ -156,14 +156,14 @@
                         </lightning-layout-item>
                     </lightning-layout>
                 </lightning-tab>
-                <lightning-tab value="help" label="Help" onactive={handleSubTabActivation}>
+                <lightning-tab value="help" label="⁉️ Help" onactive={handleSubTabActivation}>
                     <h1 class="slds-text-heading_large">What are the rules you apply for your score?</h1>
                     <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData} show-export-button export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                 </lightning-tab>
-                <lightning-tab value="global-view" label="Global View" onactive={handleSubTabActivation}>
+                <lightning-tab value="global-view" label="🗺️ Global View" onactive={handleSubTabActivation}>
                     <lightning-layout>
                         <lightning-layout-item>
-                            <h1 class="slds-text-heading_large">Global View of your Salesforce organization <b>{orgName}</b></h1>
+                            <h1 class="slds-text-heading_large">🗺️ Global View on <b>{orgName}</b></h1>
                         </lightning-layout-item>
                         <lightning-layout-item alignment-bump="left">
                             <c-orgcheck-export-button if:true={showGlobalViewExportButton} label="Export all details" source={globalViewItemsExport} basename="GlobalView"></c-orgcheck-export-button>
@@ -192,6 +192,24 @@
                             </lightning-layout-item>    
                         </template>
                     </lightning-layout>
+                </lightning-tab>
+                <lightning-tab value="hardcodedurls-view" label="🐉 Hard coded URLs" onactive={handleSubTabActivation}>
+                    <lightning-layout>
+                        <lightning-layout-item>
+                            <h1 class="slds-text-heading_large">🐉 Hard coded URLs on <b>{orgName}</b></h1>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    <br /><br />
+                    to do...
+                </lightning-tab>
+                <lightning-tab value="hardcodedids-view" label="🦈 Hard coded IDs" onactive={handleSubTabActivation}>
+                    <lightning-layout>
+                        <lightning-layout-item>
+                            <h1 class="slds-text-heading_large">🦈 Hard coded IDs on <b>{orgName}</b></h1>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                    <br /><br />
+                    to do...
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
