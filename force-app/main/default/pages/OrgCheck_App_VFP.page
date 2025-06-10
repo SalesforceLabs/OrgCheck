@@ -28,7 +28,7 @@
         .orgcheck-loading-logo {
         }
         .orgcheck-loading-text {
-            animation: orgcheck-intro 4s ease-out 1s forwards;
+            animation: orgcheck-intro 4s ease-out 0.5s forwards;
             color: rgb(75, 213, 238);
             font-weight: 400;
             font-size: 300%;
@@ -36,7 +36,7 @@
         }
         @keyframes orgcheck-intro {
             0% {
-                opacity: 0;
+                opacity: 0.25;
             }
             20% {
                 opacity: 1;
@@ -86,7 +86,7 @@
                 top: 100%;
             }
             100% {
-                top: -170%;
+                top: 0%;
             }
         }
         .slds-dropdown-trigger_click .slds-dropdown {
@@ -104,9 +104,7 @@
                         <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="250" height="250" />
                     </object>
                 </div>
-                <div class="orgcheck-loading-text">
-                    Please wait while <b>Org Check</b> <sup>[C,6]</sup> is loading...
-                </div>
+                <div class="orgcheck-loading-text" id="orgcheck-loading-text" />
             </section>
             <section class="orgcheck-jokes-board" >
                 <div class="orgcheck-jokes-content" id="orgcheck-jokes">
@@ -164,7 +162,7 @@
             { question: `Why do the French eat snails?`, answer: `They don't like fast food` },
         ];
         const div_jokes = document.getElementById('orgcheck-jokes');
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 7; i++) {
             const index = Math.floor(Math.random() * jokes.length);
             const joke = jokes.splice(index, 1)[0];
             const paragraph = document.createElement('p');
@@ -190,21 +188,42 @@
         const app = `${namespace}:OrgCheck_App_Aura`;
         const component = `${namespace}:orgcheckApp`;
         
-        $Lightning.use(app, () => {
-            $Lightning.createComponent(
-                component, 
-                { 
-                    accessToken: '{! JSENCODE($Api.Session_Id) }', 
-                    userId: '{! JSENCODE($User.Id) }',
-                    textEncoder: new TextEncoder(),
-                    textDecoder: new TextDecoder(),
-                    localStorage: window.localStorage
-                },
-                'orgcheck-app',
-                () => {
-                    document.getElementById('orgcheck-loading-box').remove();
-                }
-            );
-        });
+        /* Load the app */
+        function loadOrgCheckApp() {
+            $Lightning.use(app, () => {
+                $Lightning.createComponent(
+                    component, 
+                    { 
+                        accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                        userId: '{! JSENCODE($User.Id) }',
+                        textEncoder: new TextEncoder(),
+                        textDecoder: new TextDecoder(),
+                        localStorage: window.localStorage
+                    },
+                    'orgcheck-app',
+                    () => {
+                        document.getElementById('orgcheck-loading-box').remove();
+                    }
+                );
+            });
+        }
+
+        /* Launch the app for real */
+        const loadingText = document.getElementById('orgcheck-loading-text');
+        let creditsModeOn = false;
+        document.addEventListener('pointerover', () => { creditsModeOn = true; }, true);
+        loadingText.innerHTML = 'Please wait while <b>Org Check</b> is loading...';
+        setTimeout(() => { 
+            if (creditsModeOn === false) { 
+                loadOrgCheckApp(); 
+            } else {
+                loadingText.innerHTML = 'Credits mode activated! <br /> Enjoy the <b>dad jokes</b> in <b>Org Check</b>!'; 
+                div_jokes.addEventListener('animationend', () => { 
+                    div_jokes.style.visibility = 'hidden';
+                    loadingText.innerHTML = 'Now we load the app (finally!)'; 
+                    loadOrgCheckApp(); 
+                }, true);
+            } 
+        }, { capture: 2000 });
     </script>
 </apex:page>
