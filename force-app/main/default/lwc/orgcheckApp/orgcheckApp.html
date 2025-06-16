@@ -18,7 +18,7 @@
                             <div class="slds-page-header__name-title">
                                 <h1><span class="slds-page-header__title slds-truncate">Welcome in Org Check ({orgCheckVersion})</span></h1>
                                 Monitor your org seamlessly (using Salesforce API v{salesforceApiVersion}.0)
-                                <span if:true={tabLoading}>&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" /> Please wait while loading...</span>
+                                <span if:true={tabLoading}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while loading...</b></font></span>
                                 <br />
                             </div>
                         </div>
@@ -171,45 +171,42 @@
                     </lightning-layout>
                     <br /><br />
                     <lightning-layout multiple-rows>
-                        <template for:each={globalViewItems} for:item="item">
-                            <lightning-layout-item size="4" padding="around-small" key={item.label}>
-                                <div class="slds-box globalViewCard">
-                                    <lightning-card>
-                                        <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
-                                        <lightning-button label="Visit" title="Visit the corresponding tab" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
-                                        <p class="slds-var-p-horizontal_small">
-                                            <lightning-layout>
-                                                <lightning-layout-item size="6">
-                                                    <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator} source={item.dataTable}></c-orgcheck-graphics>
-                                                </lightning-layout-item>
-                                                <lightning-layout-item size="6">
-                                                    <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" pie-categories-decorator={pieCategoriesDecorator2} source={item.dataTable}></c-orgcheck-graphics>
-                                                </lightning-layout-item>
-                                            </lightning-layout>
-                                        </p>
-                                    </lightning-card>
-                                </div>
-                            </lightning-layout-item>    
-                        </template>
-                    </lightning-layout>
-                </lightning-tab>
-                <lightning-tab value="hardcodedurls-view" label="🐉 Hard coded URLs" onactive={handleSubTabActivation}>
-                    <lightning-layout>
-                        <lightning-layout-item>
-                            <h1 class="slds-text-heading_large">🐉 Hard coded URLs on <b>{orgName}</b></h1>
+                        <lightning-layout-item size="1">
+                            <lightning-radio-group name="radioGroup" label="Categories" options={globalViewScoreRuleCategoriesOptions} value={globalViewSelectedScoreRuleCategory} onchange={handleChangeCategoryInGlobalView} type="radio"></lightning-radio-group>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="11">
+                            <lightning-layout multiple-rows>
+                                <template if:true={globalViewData}>
+                                    <template for:each={globalViewData} for:item="item">
+                                        <lightning-layout-item size="4" padding="around-small" class={item.class} key={item.label}>
+                                            <div class="slds-box globalViewCard">
+                                                <lightning-card>
+                                                    <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
+                                                    <lightning-button label="Visit" title="Visit the corresponding tab" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
+                                                    <p class="slds-var-p-horizontal_small">
+                                                        <lightning-layout>
+                                                            <lightning-layout-item size="6">
+                                                                <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" source={item.goodBadData}></c-orgcheck-graphics>
+                                                            </lightning-layout-item>
+                                                            <lightning-layout-item size="6">
+                                                                <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" source={item.badByRuleData}></c-orgcheck-graphics>
+                                                            </lightning-layout-item>
+                                                        </lightning-layout>
+                                                    </p>
+                                                </lightning-card>
+                                            </div>
+                                        </lightning-layout-item>  
+                                    </template>
+                                    <template if:false={globalViewNbItemsToShow}>
+                                        No data to show.
+                                    </template>
+                                </template> 
+                                <template if:false={globalViewData}>
+                                    Global View is loading...
+                                </template>
+                            </lightning-layout>
                         </lightning-layout-item>
                     </lightning-layout>
-                    <br /><br />
-                    to do...
-                </lightning-tab>
-                <lightning-tab value="hardcodedids-view" label="🦈 Hard coded IDs" onactive={handleSubTabActivation}>
-                    <lightning-layout>
-                        <lightning-layout-item>
-                            <h1 class="slds-text-heading_large">🦈 Hard coded IDs on <b>{orgName}</b></h1>
-                        </lightning-layout-item>
-                    </lightning-layout>
-                    <br /><br />
-                    to do...
                 </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
@@ -475,7 +472,7 @@
                     <lightning-tab value="record-types" label="🏏 Record Types" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no record type to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={recordTypesTableDefinition} rows={recordTypesTableData} show-export-button export-basename="RecordTypes"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="weblinks" label="🏑 Web Links" onactive={handleSubTabActivation}>
+                    <lightning-tab value="web-links" label="🏑 Web Links" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no web links to show" show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={webLinksTableDefinition} rows={webLinksTableData} show-export-button export-basename="WebLinks"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
@@ -484,7 +481,7 @@
                 <lightning-layout>
                     <lightning-layout-item>
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} 
-                        data-recipes="active-users,profiles,permission-sets,permission-set-licenses,profile-restrictions,profile-password-policies,object-permissions,field-permissions,app-permissions"></lightning-button>
+                        data-recipes="internal-active-users,profiles,permission-sets,permission-set-licenses,profile-restrictions,profile-password-policies,object-permissions,field-permissions,app-permissions"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -501,7 +498,7 @@
                             <li><b>⛕ Application Permissions</b>: Get the matrix of the application access per profiles and permission sets</li>
                         </ul>
                     </lightning-tab>
-                    <lightning-tab value="active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
+                    <lightning-tab value="internal-active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no active internal user to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={usersTableDefinition} rows={usersTableData} show-export-button export-basename="Users"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="profiles" label="🚓 Profiles" onactive={handleSubTabActivation}>
@@ -567,17 +564,14 @@
                             <li><b>🦙 Chatter Groups</b>: Get the list of chatter groups in this org that may include hard coded urls</li>
                         </ul>
                     </lightning-tab>
-                    <lightning-tab value="roles-explorer" label="🐙 Internal Role Explorer" onactive={handleSubTabActivation}>
+                    <lightning-tab value="user-roles-hierarchy" label="🐙 Internal Role Explorer" onactive={handleSubTabActivation}>
                         <c-orgcheck-graphics type="hierarchy" name="Internal Role Hierarchy" hierarchy-box-color-legend={roleBoxColorsLegend} hierarchy-box-color-decorator={roleBoxColorsDecorator} hierarchy-box-inner-html-decorator={roleBoxInnerHtmlDecorator} hierarchy-box-on-click-decorator={roleBoxOnClickDecorator} hierarchy-show-level source={rolesTree}></c-orgcheck-graphics>
                     </lightning-tab>
-                    <lightning-tab value="roles-listing" label="🦓 Internal Role Listing" onactive={handleSubTabActivation}>
+                    <lightning-tab value="user-roles" label="🦓 Internal Role Listing" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no role to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={rolesTableDefinition} rows={rolesTableData} show-export-button export-basename="Roles"></c-orgcheck-extended-datatable>
                     </lightning-tab>
-                    <lightning-tab value="public-groups" label="🐘 Public Groups" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable empty-message="There is no public group to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={publicGroupsTableDefinition} rows={publicGroupsTableData} show-export-button export-basename="PublicGroups"></c-orgcheck-extended-datatable>
-                    </lightning-tab>
-                    <lightning-tab value="queues" label="🦒 Queues" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable empty-message="There is no queue to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={queuesTableDefinition} rows={queuesTableData} show-export-button export-basename="Queues"></c-orgcheck-extended-datatable>
+                    <lightning-tab value="public-groups-and-queues" label="🐘 Public Groups & 🦒 Queues" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no public group or queues to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={publicGroupsAndQueuesTableDefinition} rows={publicGroupsAndQueuesTableData} show-export-button export-basename="PublicGroupsAndQueues"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="chatter-groups" label="🦙 Chatter Groups" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no chatter group to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={chatterGroupsTableDefinition} rows={chatterGroupsTableData} show-export-button export-basename="ChatterGroups"></c-orgcheck-extended-datatable>

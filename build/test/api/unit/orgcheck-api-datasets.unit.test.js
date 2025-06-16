@@ -27,7 +27,7 @@ import { DatasetProfilePasswordPolicies } from '../../../src/api/dataset/orgchec
 import { DatasetProfileRestrictions } from '../../../src/api/dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfiles } from '../../../src/api/dataset/orgcheck-api-dataset-profiles';
 import { DatasetUserRoles } from '../../../src/api/dataset/orgcheck-api-dataset-userroles';
-import { DatasetUsers } from '../../../src/api/dataset/orgcheck-api-dataset-users';
+import { DatasetInternalActiveUsers } from '../../../src/api/dataset/orgcheck-api-dataset-internalactiveusers';
 import { DatasetValidationRules } from '../../../src/api/dataset/orgcheck-api-dataset-validationrules';
 import { DatasetVisualForceComponents } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetVisualForcePages } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
@@ -126,7 +126,7 @@ describe('tests.api.unit.Datasets', () => {
       DatasetPageLayouts, DatasetPermissionSetLicenses, 
       DatasetPermissionSets, DatasetProfilePasswordPolicies, 
       DatasetProfileRestrictions, DatasetProfiles, DatasetUserRoles, 
-      DatasetUsers, DatasetValidationRules, 
+      DatasetInternalActiveUsers, DatasetValidationRules, 
       DatasetVisualForceComponents, DatasetVisualForcePages, 
       DatasetWorkflows, DatasetRecordTypes, DatasetCollaborationGroups, 
       DatasetHomePageComponents, DatasetCustomTabs, DatasetEmailTemplates 

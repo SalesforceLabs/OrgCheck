@@ -30,7 +30,7 @@ export class Data {
     
     /**
      * @description If the above score is positive, then this property will contain a list of reasons ids that explain why the score is positive.
-     * @type {Array<string>}
+     * @type {Array<number>}
      * @public
      */
     badReasonIds;

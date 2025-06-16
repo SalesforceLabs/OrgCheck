@@ -111,5 +111,5 @@ export class Logger extends LoggerIntf {
  * @param {string | Error} [message='...']
  */
 const CONSOLE_LOG = (operationName, event, message='...') => { 
-    console.error(`${new Date().toISOString()} - ${operationName} - ${event} - ${message}`); 
+    console.log(`${new Date().toISOString()} - ${operationName} - ${event} - ${message}`); 
 }

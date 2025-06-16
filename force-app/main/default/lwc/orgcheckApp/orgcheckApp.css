@@ -1,3 +1,11 @@
+.hidden {
+    display: none;
+}
+
+.shown {
+    display: block;
+}
+
 .globalViewCard {
     border: 1.5px solid #dddbda;
     border-radius: 1rem;

@@ -12,7 +12,6 @@ import { RecipeManagerIntf } from './core/orgcheck-api-recipemanager';
 import { SalesforceManager } from './core/orgcheck-api-salesforcemanager-impl';
 import { SalesforceManagerIntf } from './core/orgcheck-api-salesforcemanager';
 import { SalesforceUsageInformation } from './core/orgcheck-api-salesforce-watchdog';
-import { ScoreRule } from './core/orgcheck-api-datafactory';
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
 import { SFDC_ApexClass } from './data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './data/orgcheck-api-data-apextrigger';
@@ -151,25 +150,6 @@ export class API {
      */
     getCacheInformation() {
         return this._cacheManager.details();
-    }
-
-    /**
-     * @description Get the information of the given Org Check "Score Rule"
-     * @param {number} id
-     * @returns {ScoreRule} Information about a score rule
-     * @public
-     */
-    getScoreRule(id) {
-        return SecretSauce.AllScoreRules[id];
-    }
-
-    /**
-     * @description Get the list of all Org Check "score rules"
-     * @returns {Array<ScoreRule>} Information about score rules
-     * @public
-     */
-    getAllScoreRules() {
-        return SecretSauce.AllScoreRules;
     }
 
     /**
@@ -605,7 +585,7 @@ export class API {
      */
     async getActiveUsers() {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.ACTIVE_USERS));
+        return (await this._recipeManager.run(RecipeAliases.INTERNAL_ACTIVE_USERS));
     }
 
     /**
@@ -613,7 +593,7 @@ export class API {
      * @public
      */
     removeAllActiveUsersFromCache() {
-        this._recipeManager.clean(RecipeAliases.ACTIVE_USERS);
+        this._recipeManager.clean(RecipeAliases.INTERNAL_ACTIVE_USERS);
     }
 
     /**
@@ -785,43 +765,23 @@ export class API {
     }
     
     /**
-     * @description Get information about Public Groups
+     * @description Get information about Public Groups and Queues
      * @returns {Promise<Array<SFDC_Group>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getPublicGroups() {
+    async getPublicGroupsAndQueues() {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
+        return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES));
     }
 
     /**
-     * @description Remove all the cached information about public groups
+     * @description Remove all the cached information about public groups and queues
      * @public
      */
-    removeAllPublicGroupsFromCache() {
-        this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS);
-    }
-
-    /**
-     * @description Get information about Queues
-     * @returns {Promise<Array<SFDC_Group>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    async getQueues() {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.QUEUES));
-    }
-
-    /**
-     * @description Remove all the cached information about queues
-     * @public
-     */
-    removeAllQueuesFromCache() {
-        this._recipeManager.clean(RecipeAliases.QUEUES);
+    removeAllPublicGroupsAndQueuesFromCache() {
+        this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES);
     }
 
     /**
@@ -1162,5 +1122,26 @@ export class API {
      */
     removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
+    }
+
+    /**
+     * @description Get global view of the org
+     * @param {string} category 
+     * @returns {Promise<Array>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getGlobalView(category) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW, category));
+    }
+
+    /**
+     * @description Remove all the cached information about global view
+     * @public
+     */
+    removeGlobalViewFromCache() {
+        this._recipeManager.clean(RecipeAliases.GLOBAL_VIEW);
     }
 }

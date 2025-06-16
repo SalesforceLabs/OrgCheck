@@ -4,7 +4,7 @@ import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from './orgcheck-api-dataset-runinformation';
 import { LoggerIntf } from './orgcheck-api-logger';
 import { Recipe } from './orgcheck-api-recipe';
-import { RecipeActiveUsers } from '../recipe/orgcheck-api-recipe-activeusers';
+import { RecipeInternalActiveUsers } from '../recipe/orgcheck-api-recipe-internalactiveusers';
 import { RecipeAliases } from './orgcheck-api-recipes-aliases';
 import { RecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
 import { RecipeApexTriggers } from '../recipe/orgcheck-api-recipe-apextriggers';
@@ -28,8 +28,7 @@ import { RecipeProcessBuilders } from '../recipe/orgcheck-api-recipe-processbuil
 import { RecipeProfilePasswordPolicies } from '../recipe/orgcheck-api-recipe-profilepasswordpolicies';
 import { RecipeProfileRestrictions } from '../recipe/orgcheck-api-recipe-profilerestrictions';
 import { RecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
-import { RecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
-import { RecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
+import { RecipePublicGroupsAndQueues } from '../recipe/orgcheck-api-recipe-publicgroupsandqueues';
 import { RecipeUserRoles } from '../recipe/orgcheck-api-recipe-userroles';
 import { RecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
 import { RecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-visualforcepages';
@@ -48,6 +47,7 @@ import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepage
 import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
 import { RecipeEmailTemplates } from '../recipe/orgcheck-api-recipe-emailtemplates';
 import { RecipeKnowledgeArticles } from '../recipe/orgcheck-api-recipe-knowledgearticles';
+import { RecipeGlobalView } from '../recipe/orgcheck-api-recipe-globalview';
 
 /**
  * @description Recipe Manager
@@ -94,7 +94,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._logger = logger;
         this._recipes = new Map();
 
-        this._recipes.set(RecipeAliases.ACTIVE_USERS, new RecipeActiveUsers());
+        this._recipes.set(RecipeAliases.INTERNAL_ACTIVE_USERS, new RecipeInternalActiveUsers());
         this._recipes.set(RecipeAliases.APEX_CLASSES, new RecipeApexClasses());
         this._recipes.set(RecipeAliases.APEX_TESTS, new RecipeApexTests());
         this._recipes.set(RecipeAliases.APEX_TRIGGERS, new RecipeApexTriggers());
@@ -109,6 +109,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.EMAIL_TEMPLATES, new RecipeEmailTemplates());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());
+        this._recipes.set(RecipeAliases.GLOBAL_VIEW, new RecipeGlobalView());
         this._recipes.set(RecipeAliases.HOME_PAGE_COMPONENTS, new RecipeHomePageComponents());
         this._recipes.set(RecipeAliases.KNOWLEDGE_ARTICLES, new RecipeKnowledgeArticles());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());
@@ -127,8 +128,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.PROFILE_PWD_POLICIES, new RecipeProfilePasswordPolicies());
         this._recipes.set(RecipeAliases.PROFILE_RESTRICTIONS, new RecipeProfileRestrictions());
         this._recipes.set(RecipeAliases.PROFILES, new RecipeProfiles());
-        this._recipes.set(RecipeAliases.PUBLIC_GROUPS, new RecipePublicGroups());
-        this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
+        this._recipes.set(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES, new RecipePublicGroupsAndQueues());
         this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
         this._recipes.set(RecipeAliases.USER_ROLES, new RecipeUserRoles());
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());

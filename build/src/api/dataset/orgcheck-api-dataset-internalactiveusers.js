@@ -6,7 +6,7 @@ import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadat
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 
-export class DatasetUsers extends Dataset {
+export class DatasetInternalActiveUsers extends Dataset {
 
     /**
      * @description Run the dataset and return the result

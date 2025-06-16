@@ -212,7 +212,7 @@
         /* Launch the app for real */
         const loadingText = document.getElementById('orgcheck-loading-text');
         let creditsModeOn = false;
-        loadingText.addEventListener('mouseover', (event) => { console.error('here'); creditsModeOn = true; }, true);
+        loadingText.addEventListener('click', (event) => { creditsModeOn = true; }, true);
         loadingText.innerHTML = 'Please wait while <b>Org Check</b> is loading...';
         setTimeout(() => { 
             if (creditsModeOn === false) { 

@@ -27,6 +27,13 @@ export default class OrgcheckGraphics extends LightningElement {
   _data;
 
   /**
+   * @description Fiilter to use to render the graphic
+   * @type {any}
+   * @private
+   */
+  _filter;
+
+  /**
    * @description Called when it's about to render the component
    * @public
    */
@@ -222,11 +229,11 @@ export default class OrgcheckGraphics extends LightningElement {
   @api pieStrokeWidth = '1';
 
   /**
-   * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one)
+   * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one) and the optional filter
    * @type {Function}
    * @public
    */
-  @api pieCategoriesDecorator = (data) => { console.debug('pieCategoriesDecorator', data); return []; };
+  @api pieCategoriesDecorator = (data, filter) => { console.debug('pieCategoriesDecorator', data, filter); return []; };
 
   /**
    * @description Pie categories to use in legend
@@ -397,7 +404,7 @@ export default class OrgcheckGraphics extends LightningElement {
    */
   _drawPie() {
     this.pieTotal = 0;
-    this.pieCategories = this.pieCategoriesDecorator(this._data).map((c) => { 
+    this.pieCategories = this._data.map((c) => { 
       this.pieTotal += c.value;
       return { 
         name: c.name,

@@ -173,10 +173,12 @@ export class SalesforceManager extends SalesforceManagerIntf {
             case SalesforceMetadataTypes.PERMISSION_SET:          return `/lightning/setup/PermSets/page?address=%2F${id}`;
             case SalesforceMetadataTypes.PERMISSION_SET_LICENSE:  return `/lightning/setup/PermissionSetLicense/page?address=%2F${id}`;
             case SalesforceMetadataTypes.PERMISSION_SET_GROUP:    return `/lightning/setup/PermSetGroups/page?address=%2F${id}`;
+            // BOXES
             case SalesforceMetadataTypes.ROLE:                    return `/lightning/setup/Roles/page?address=%2F${id}`;
             case SalesforceMetadataTypes.PUBLIC_GROUP:            return `/lightning/setup/PublicGroups/page?address=%2Fsetup%2Fown%2Fgroupdetail.jsp%3Fid%3D${id}`;
             case SalesforceMetadataTypes.QUEUE:                   return `/lightning/setup/Queues/page?address=%2Fp%2Fown%2FQueue%2Fd%3Fid%3D${id}`;
             case SalesforceMetadataTypes.TECHNICAL_GROUP:         return '';
+            case SalesforceMetadataTypes.EMAIL_TEMPLATE:          return `/lightning/r/EmailTemplate/${id}/view`;
             // SETTING
             case SalesforceMetadataTypes.CUSTOM_LABEL:            return `/lightning/setup/ExternalStrings/page?address=%2F${id}`;
             case SalesforceMetadataTypes.STATIC_RESOURCE:         return `/lightning/setup/StaticResources/page?address=%2F${id}`;
@@ -197,7 +199,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
             case SalesforceMetadataTypes.KNOWLEDGE_ARTICLE_VERSION: return `/${id}`;
             // Other types or even undefined type
             default: {
-                console.error(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
+                console.warn(`Type <${type}> not supported yet. Returning "/id" as url. FYI, id was <${id}>, parentId was <${parentId}> and parentType was <${parentType}>`);
                 return `/${id}`;
             }
         }

@@ -16,7 +16,7 @@ import { DatasetPermissionSets } from '../dataset/orgcheck-api-dataset-permissio
 import { DatasetProfiles } from '../dataset/orgcheck-api-dataset-profiles';
 import { DatasetProfileRestrictions } from '../dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfilePasswordPolicies } from '../dataset/orgcheck-api-dataset-profilepasswordpolicies';
-import { DatasetUsers } from '../dataset/orgcheck-api-dataset-users';
+import { DatasetInternalActiveUsers } from '../dataset/orgcheck-api-dataset-internalactiveusers';
 import { DatasetVisualForcePages } from '../dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetVisualForceComponents } from '../dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetLightningAuraComponents } from '../dataset/orgcheck-api-dataset-lighntingauracomponents';
@@ -131,7 +131,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.EMAILTEMPLATES, new DatasetEmailTemplates());
         this._datasets.set(DatasetAliases.FIELDPERMISSIONS, new DatasetFieldPermissions());
         this._datasets.set(DatasetAliases.FLOWS, new DatasetFlows());
-        this._datasets.set(DatasetAliases.GROUPS, new DatasetGroups());
+        this._datasets.set(DatasetAliases.PUBLIC_GROUPS_AND_QUEUES, new DatasetGroups());
         this._datasets.set(DatasetAliases.HOMEPAGECOMPONENTS, new DatasetHomePageComponents());
         this._datasets.set(DatasetAliases.KNOWLEDGEARTICLES, new DatasetKnowledgeArticles());
         this._datasets.set(DatasetAliases.LIGHTNINGAURACOMPONENTS, new DatasetLightningAuraComponents());
@@ -151,7 +151,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
         this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());
-        this._datasets.set(DatasetAliases.USERS, new DatasetUsers());
+        this._datasets.set(DatasetAliases.INTERNALACTIVEUSERS, new DatasetInternalActiveUsers());
         this._datasets.set(DatasetAliases.VALIDATIONRULES, new DatasetValidationRules());
         this._datasets.set(DatasetAliases.VISUALFORCECOMPONENTS, new DatasetVisualForceComponents());
         this._datasets.set(DatasetAliases.VISUALFORCEPAGES, new DatasetVisualForcePages());

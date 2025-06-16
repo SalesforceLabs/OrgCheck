@@ -324,11 +324,6 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     }
 
     /**
-     * @description
-     */
-
-
-    /**
      * @description Convert this table into an Excel data
      * @returns {Array<ocui.ExportedTable>}
      */ 

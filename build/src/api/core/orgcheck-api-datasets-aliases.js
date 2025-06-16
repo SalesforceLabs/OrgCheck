@@ -15,7 +15,6 @@ export class DatasetAliases {
     static get EMAILTEMPLATES() { return 'email-templates'; }
     static get FIELDPERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
-    static get GROUPS() { return 'groups'; }
     static get HOMEPAGECOMPONENTS() { return 'home-page-components'; }
     static get KNOWLEDGEARTICLES() { return 'knowledge-articles'; }
     static get LIGHTNINGAURACOMPONENTS() { return 'lightning-aura-components'; }
@@ -30,12 +29,13 @@ export class DatasetAliases {
     static get PAGELAYOUTS() { return 'page-layouts'; }
     static get PERMISSIONSETS() { return 'permission-sets'; }
     static get PERMISSIONSETLICENSES() { return 'permission-set-licenses'; }
+    static get PUBLIC_GROUPS_AND_QUEUES() { return 'public-groups-and-queues'; }
     static get PROFILEPWDPOLICIES() { return 'profile-password-policies'; }
     static get PROFILERESTRICTIONS() { return 'profile-restrictions'; }
     static get PROFILES() { return 'profiles'; }
     static get RECORDTYPES () { return 'record-types'; }
     static get USERROLES() { return 'user-roles'; }
-    static get USERS() { return 'users'; }
+    static get INTERNALACTIVEUSERS() { return 'internal-active-users'; }
     static get VALIDATIONRULES() { return 'validation-rules'; }
     static get VISUALFORCECOMPONENTS() { return 'visual-force-components'; }
     static get VISUALFORCEPAGES() { return 'visual-force-pages'; }

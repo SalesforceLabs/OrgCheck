@@ -1,5 +1,5 @@
 import { SimpleLoggerIntf } from "../../../src/api/core/orgcheck-api-logger";
-import { RecipeActiveUsers } from "../../../src/api/recipe/orgcheck-api-recipe-activeusers";
+import { RecipeInternalActiveUsers } from "../../../src/api/recipe/orgcheck-api-recipe-internalactiveusers";
 import { RecipeApexClasses } from "../../../src/api/recipe/orgcheck-api-recipe-apexclasses";
 import { RecipeApexTriggers } from "../../../src/api/recipe/orgcheck-api-recipe-apextriggers";
 import { RecipeAppPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-apppermissions";
@@ -28,8 +28,7 @@ import { RecipeProcessBuilders } from "../../../src/api/recipe/orgcheck-api-reci
 import { RecipeProfilePasswordPolicies } from "../../../src/api/recipe/orgcheck-api-recipe-profilepasswordpolicies";
 import { RecipeProfileRestrictions } from "../../../src/api/recipe/orgcheck-api-recipe-profilerestrictions";
 import { RecipeProfiles } from "../../../src/api/recipe/orgcheck-api-recipe-profiles";
-import { RecipePublicGroups } from "../../../src/api/recipe/orgcheck-api-recipe-publicgroups";
-import { RecipeQueues } from "../../../src/api/recipe/orgcheck-api-recipe-queues";
+import { RecipePublicGroupsAndQueues } from "../../../src/api/recipe/orgcheck-api-recipe-publicgroupsandqueues";
 import { RecipeUserRoles } from "../../../src/api/recipe/orgcheck-api-recipe-userroles";
 import { RecipeValidationRules } from "../../../src/api/recipe/orgcheck-api-recipe-validationrules";
 import { RecipeVisualForceComponents } from "../../../src/api/recipe/orgcheck-api-recipe-visualforcecomponents";
@@ -48,7 +47,7 @@ describe('tests.api.unit.Recipes', () => {
 
   describe('Basic test for all recipes', () => {
     [
-      RecipeActiveUsers, RecipeApexClasses, RecipeApexTriggers, 
+      RecipeInternalActiveUsers, RecipeApexClasses, RecipeApexTriggers, 
       RecipeAppPermissions, RecipeCollaborationGroups, 
       RecipeCurrentUserPermissions, RecipeCustomFields, 
       RecipeCustomLabels, RecipeCustomTabs, RecipeDocuments, 
@@ -59,7 +58,7 @@ describe('tests.api.unit.Recipes', () => {
       RecipePackages, RecipePageLayouts, RecipePermissionSetLicenses, 
       RecipePermissionSets, RecipeProcessBuilders, 
       RecipeProfilePasswordPolicies, RecipeProfileRestrictions, 
-      RecipeProfiles, RecipePublicGroups, RecipeQueues, RecipeUserRoles, 
+      RecipeProfiles, RecipePublicGroupsAndQueues, RecipeUserRoles, 
       RecipeValidationRules, RecipeVisualForceComponents, 
       RecipeVisualForcePages, RecipeWorkflows, RecipeWebLinks, 
       RecipeEmailTemplates

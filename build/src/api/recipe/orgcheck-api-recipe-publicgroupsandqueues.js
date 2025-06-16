@@ -8,7 +8,7 @@ import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
-export class RecipePublicGroups extends Recipe {
+export class RecipePublicGroupsAndQueues extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -17,7 +17,7 @@ export class RecipePublicGroups extends Recipe {
      * @public
      */
     extract(logger) {
-        return [DatasetAliases.USERS, DatasetAliases.GROUPS];
+        return [DatasetAliases.INTERNALACTIVEUSERS, DatasetAliases.PUBLIC_GROUPS_AND_QUEUES];
     }
 
     /**
@@ -31,12 +31,12 @@ export class RecipePublicGroups extends Recipe {
     async transform(data, logger) {
 
         // Get data
-        const /** @type {Map<string, SFDC_Group>} */ groups = data.get(DatasetAliases.GROUPS);
-        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
+        const /** @type {Map<string, SFDC_Group>} */ groups = data.get(DatasetAliases.PUBLIC_GROUPS_AND_QUEUES);
+        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
-        if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'GROUPS' was undefined.`);
-        if (!users) throw new Error(`RecipePublicGroups: Data from dataset alias 'USERS' was undefined.`);
+        if (!groups) throw new Error(`RecipePublicGroups: Data from dataset alias 'PUBLIC_GROUPS_AND_QUEUES' was undefined.`);
+        if (!users) throw new Error(`RecipePublicGroups: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
 
         // Augment and filter data
         const array = [];
@@ -53,7 +53,7 @@ export class RecipePublicGroups extends Recipe {
                 (id) => groups.has(id)
             );
             // Filter data
-            if (group.isPublicGroup === true) {
+            if (group.isQueue === true || group.isPublicGroup === true) {
                 array.push(group);
             }
         });

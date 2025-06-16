@@ -19,7 +19,7 @@ export class RecipeUserRoles extends Recipe {
     extract(logger) {
         return [
             DatasetAliases.USERROLES,
-            DatasetAliases.USERS
+            DatasetAliases.INTERNALACTIVEUSERS
         ];
     }
 
@@ -35,7 +35,7 @@ export class RecipeUserRoles extends Recipe {
 
         // Get data
         const /** @type {Map<string, SFDC_UserRole>} */ userRoles = data.get(DatasetAliases.USERROLES);
-        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
+        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
         // Checking data
         if (!userRoles) throw new Error(`RecipeUserRoles: Data from dataset alias 'USERROLES' was undefined.`);

@@ -9,7 +9,7 @@ import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
-export class RecipeActiveUsers extends Recipe {
+export class RecipeInternalActiveUsers extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -19,7 +19,7 @@ export class RecipeActiveUsers extends Recipe {
      */
     extract(logger) {
         return [
-            DatasetAliases.USERS, 
+            DatasetAliases.INTERNALACTIVEUSERS, 
             DatasetAliases.PROFILES, 
             DatasetAliases.PERMISSIONSETS
         ];
@@ -36,12 +36,12 @@ export class RecipeActiveUsers extends Recipe {
     async transform(data, logger) {
 
         // Get data
-        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.USERS);
+        const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.INTERNALACTIVEUSERS);
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
 
         // Checking data
-        if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'USERS' was undefined.`);
+        if (!users) throw new Error(`RecipeActiveUsers: Data from dataset alias 'INTERNALACTIVEUSERS' was undefined.`);
         if (!profiles) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PROFILES' was undefined.`);
         if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 

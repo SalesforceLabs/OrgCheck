@@ -45,6 +45,13 @@ export class ScoreRule {
      * @public
      */    
     applicable;
+
+    /**
+     * @description Category of the rule
+     * @type {string}
+     * @public
+     */
+    category;
 }
 
 /**
