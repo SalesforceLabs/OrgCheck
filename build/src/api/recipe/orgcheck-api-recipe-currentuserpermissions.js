@@ -8,16 +8,20 @@ import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 export class RecipeCurrentUserPermissions extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
      * @param {SimpleLoggerIntf} logger
-     * @param {Array<string>} permissions List of string to represent the permission you need to retreive
+     * @param {Map | undefined} [parameters] List of optional argument to pass
      * @returns {Array<string | DatasetRunInformation>}
      * @public
      */
-    extract(logger, permissions) {
-        const datasetRunInfo = new DatasetRunInformation(DatasetAliases.CURRENTUSERPERMISSIONS, DatasetAliases.CURRENTUSERPERMISSIONS);
-        datasetRunInfo.parameters.set('permissions', permissions);
-        return [datasetRunInfo];
+    extract(logger, parameters) {
+        return [
+            new DatasetRunInformation(
+                DatasetAliases.CURRENTUSERPERMISSIONS,
+                DatasetAliases.CURRENTUSERPERMISSIONS,
+                parameters // should include 'permissions'
+            )
+        ];
     }
 
     /**

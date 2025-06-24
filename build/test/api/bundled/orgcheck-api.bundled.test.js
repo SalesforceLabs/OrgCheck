@@ -3,7 +3,6 @@ import { API } from '../../../dist/orgcheck/orgcheck-api';
 class JsForceConnectionMock {
 }
 
-
 const JsForceMock = {
   Connection: JsForceConnectionMock
 }

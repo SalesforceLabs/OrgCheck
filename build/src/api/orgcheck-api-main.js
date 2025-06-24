@@ -12,7 +12,7 @@ export * from './core/orgcheck-api-dataset.js';
 export * from './core/orgcheck-api-datasetmanager.js';
 export * from './core/orgcheck-api-datasets-aliases.js';
 export * from './core/orgcheck-api-logger.js';
-export * from './core/orgcheck-api-processing.js';
+export * from './core/orgcheck-api-processor.js';
 export * from './core/orgcheck-api-recipe.js';
 export * from './core/orgcheck-api-recipemanager.js';
 export * from './core/orgcheck-api-recipes-aliases.js';

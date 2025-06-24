@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -28,19 +28,20 @@ export class RecipeRecordType extends Recipe {
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
-     * @param {string} namespace Name of the package (if all use '*')
-     * @param {string} objecttype Name of the type (if all use '*')
-     * @param {string} object API name of the object (if all use '*')
+     * @param {Map | undefined} [parameters] List of optional argument to pass
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger, namespace, objecttype, object) {
+    async transform(data, logger, parameters) {
 
-        // Get data
+        // Get data and parameters
         const /** @type {Map<string, SFDC_RecordType>} */ recordTypes = data.get(DatasetAliases.RECORDTYPES);
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
+        const namespace = parameters?.get('namespace') ?? '*';
+        const objecttype = parameters?.get('objecttype') ?? '*';
+        const object = parameters?.get('object') ?? '*';
 
         // Checking data
         if (!recordTypes) throw new Error(`RecipeRecordTypes: Data from dataset alias 'RECORDTYPES' was undefined.`);

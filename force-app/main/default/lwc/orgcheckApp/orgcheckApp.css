@@ -1,12 +1,12 @@
-.hidden {
-    display: none;
+.viewCard-no-bad-data {
+    background-color: #00800066;
 }
 
-.shown {
-    display: block;
+.viewCard-some-bad-data {
+    background-color: #ff000066;
 }
 
-.globalViewCard {
+.viewCard {
     border: 1.5px solid #dddbda;
     border-radius: 1rem;
     box-shadow: 0 2px 2px 0 rgba(0,0,0,.1);

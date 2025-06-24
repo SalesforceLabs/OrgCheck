@@ -174,7 +174,7 @@ export class DatasetManager extends DatasetManagerIntf {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
-            const section = `DATASET ${alias}`;
+            const section = `Run dataset "${alias}"`;
             if (this._datasetPromisesCache.has(cacheKey) === false) {
                 this._datasetPromisesCache.set(cacheKey, new Promise((resolve, reject) => {
                     this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
@@ -188,14 +188,10 @@ export class DatasetManager extends DatasetManagerIntf {
                         this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
                         // Calling the retriever
                         this._datasets.get(alias).run(
-                            // sfdc manager
-                            this._sfdcManager,
-                            // data factory
-                            this._dataFactory,
-                            // local logger
-                            this._logger.toSimpleLogger(section),
-                            // Send any parameters if needed
-                            parameters
+                            this._sfdcManager, // sfdc manager
+                            this._dataFactory, // data factory
+                            this._logger.toSimpleLogger(section), // local logger
+                            parameters // Send any parameters if needed
                         ).then((data) => {
                             // Cache the data (if possible and not too big)
                             this._dataCache.set(cacheKey, data); 

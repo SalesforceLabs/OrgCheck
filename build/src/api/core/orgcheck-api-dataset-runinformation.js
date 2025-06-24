@@ -25,10 +25,11 @@ export class DatasetRunInformation {
      * @description Constructor
      * @param {string} alias 
      * @param {string} cacheKey 
+     * @param {Map} parameters 
      */
-    constructor(alias, cacheKey) {
+    constructor(alias, cacheKey, parameters) {
         this.alias = alias;
         this.cacheKey = cacheKey;
-        this.parameters = new Map();
+        this.parameters = parameters;
     }
 }

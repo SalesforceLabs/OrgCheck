@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -32,7 +32,7 @@ export class RecipeFlows extends Recipe {
         // Get data
         const /** @type {Map<string, SFDC_Flow>} */ flows = data.get(DatasetAliases.FLOWS);
 
-        // Checking data
+        // Checking data and filter
         if (!flows) throw new Error(`RecipeFlows: Data from dataset alias 'FLOWS' was undefined.`);
 
         // Filter data

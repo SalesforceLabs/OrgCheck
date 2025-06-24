@@ -6,7 +6,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 
 export class RecipePermissionSetLicenses extends Recipe {
 

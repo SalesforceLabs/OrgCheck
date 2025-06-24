@@ -227,6 +227,13 @@ export default class OrgcheckSpinner extends LightningElement {
   inProgressMessage;
 
   /**
+   * @description Progression percentage
+   * @type {number}
+   * @public
+   */
+  inProgressPercentage;
+
+  /**
    * @description List of sections to show in the spinner
    * @type {Array<Section>}
    */
@@ -274,25 +281,35 @@ export default class OrgcheckSpinner extends LightningElement {
 
    /** @type {boolean} */ 
    const isMessageAnError = message instanceof Error;
+   // eslint-disable-next-line dot-notation
    const contextIfError = message ? message['context'] : undefined;
 
     /** @type {Section} */
-    let section = {
-      id: sectionName,
-      status: status,
-      label: (isMessageAnError ? `${message.name}: ${message.message}` : message),
-      stack: (isMessageAnError ? message?.stack : ''),
-      when: (contextIfError ? JSON.stringify(contextIfError['when']) : ''),
-      what: (contextIfError ? JSON.stringify(contextIfError['what']) : ''),
-      liClasses: 'slds-progress__item',
-      markerClasses: 'slds-progress__marker'
-    };
+    let section = new Section();
+    section.id = sectionName;
+    section.status = status;
+    section.label = (isMessageAnError ? `${message.name}: ${message.message}` : message);
+    section.stack = (isMessageAnError ? message?.stack : '');
+    section.when = (contextIfError ? JSON.stringify(contextIfError?.when) : '');
+    section.what = (contextIfError ? JSON.stringify(contextIfError?.what) : '');
+    section.liClasses = 'slds-progress__item';
+    section.markerClasses = 'slds-progress__marker';
 
     // Add specific classes depending on the status
     switch (status) {
-      case SectionStatus.IN_PROGRESS: section.liClasses += ' slds-is-completed';          section.markerClasses += ' progress-marker-started'; break;
-      case SectionStatus.ENDED:       section.liClasses += ' slds-is-completed li-ended'; section.markerClasses += ' progress-marker-ended';   break;
-      case SectionStatus.FAILED:      section.liClasses += ' slds-has-error';             section.markerClasses += ' progress-marker-error';   break;
+      case SectionStatus.IN_PROGRESS:
+        section.liClasses += ' slds-is-completed';
+        section.markerClasses += ' progress-marker-started'; 
+        break;
+      case SectionStatus.ENDED:
+        section.liClasses += ' slds-is-completed li-ended';
+        section.markerClasses += ' progress-marker-ended';
+        break;
+      case SectionStatus.FAILED:
+      default:
+        section.liClasses += ' slds-has-error';
+        section.markerClasses += ' progress-marker-error';
+        break;
     }
     
     // Is it a new section?
@@ -314,6 +331,7 @@ export default class OrgcheckSpinner extends LightningElement {
       }
       this.close(0);
     } else {
+      this.inProgressPercentage = Math.round((1 - countInProgressSections / this.sections.length) * 100);
       this.inProgressMessage = `We have currently ${countInProgressSections} section${countInProgressSections>1?'s':''} in progress over a total of ${this.sections.length} section${this.sections.length>1?'s':''}...`;
     }
   }

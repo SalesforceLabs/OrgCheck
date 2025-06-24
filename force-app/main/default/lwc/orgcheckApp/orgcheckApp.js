@@ -4,11 +4,16 @@ import * as ocapi from './libs/orgcheck-api.js';
 import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
-import { Data } from './libs/orgcheck-api.js';
 
 const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
+
+const COLORS = [
+    '#2f89a8', '#fdc223', '#5fc9f8', '#f8b195', '#f67280', 
+    '#c06c84', '#6c5b7b', '#355c7d', '#b56576', '#f8b195', 
+    '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576'
+];
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -140,7 +145,18 @@ export default class OrgcheckApp extends LightningElement {
      * @type {boolean}
      * @public
      */
-    showGlobalViewExportButton = false;
+    get showGlobalViewExportButton() {
+        return false; //return this._internalGlobalViewDataFromAPI !== undefined;
+    }
+
+    /**
+     * @description Is the export button for Hardcoded URLs View is shown or not
+     * @type {boolean}
+     * @public
+     */ 
+    get showHardcodedURLsViewExportButton() {
+        return false; //return this._internalHardcodedURLsViewDataFromAPI !== undefined;
+    }
 
     /**
      * @description Current activated tab in the main tab set
@@ -284,25 +300,6 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description options for the score rule categories in the global view
-     * @type {Array<{label: string, value: string}>}
-     * @public 
-     */ 
-    get globalViewScoreRuleCategoriesOptions() {
-        const list = [ { label: 'All categories', value: '*' } ];
-        list.push(...  ocapi.SecretSauce.ScoreRuleCategories.sort().map((/** @type {string} */ c) => { return { label: c, value: c }; }));
-        return list;
-    }
-
-    /**
-     * @description Selected category for score rule in the global view
-     * @type {string}
-     * @public
-     * @default '*' (meaning any category)
-     */ 
-    globalViewSelectedScoreRuleCategory = '*'; // default to all categories
-
-    /**
      * @description Do we show the "Apex Uncompiled" button in the Apex tab (depends on the size of apexUncompiledTableData)
      * @type {boolean}
      * @public
@@ -363,7 +360,8 @@ export default class OrgcheckApp extends LightningElement {
                 this.accessToken, 
                 // -----------------------
                 // JsForce instance
-                // @ts-ignore
+                // @ts-ignore 
+                // eslint-disable-next-line no-undef
                 jsforce, 
                 // -----------------------
                 // Local Storage methods
@@ -434,6 +432,7 @@ export default class OrgcheckApp extends LightningElement {
                      */ 
                     compress:   (data) => { 
                         // @ts-ignore
+                        // eslint-disable-next-line no-undef
                         return fflate.zlibSync(data, { level: 9 }); 
                     },
                     /** 
@@ -444,6 +443,7 @@ export default class OrgcheckApp extends LightningElement {
                     // @ts-ignore
                     decompress: (data) => { 
                         // @ts-ignore
+                        // eslint-disable-next-line no-undef
                         return fflate.unzlibSync(data); 
                     }
                 },
@@ -503,7 +503,6 @@ export default class OrgcheckApp extends LightningElement {
     _aliasObjNamespace = () => `${this.object}-${this.namespace}`;
     _aliasObject = () => `${this.object}`;
     _aliasTypeNamespace = () => `${this.namespace}-${this.objectType}`;
-    _aliasCategory = () => `${this.globalViewSelectedScoreRuleCategory}`;
 
     /**
      * @description List of internal transformers to get data from the API
@@ -511,28 +510,29 @@ export default class OrgcheckApp extends LightningElement {
      */
     _internalTransformers = {
         'apex-classes':              { label: '❤️‍🔥 Apex Classes',               tab: 'code',            data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }},
-        'apex-unit-tests':           { label: '🚒 Apex Unit Tests',            tab: 'code',            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
+        'apex-tests':                { label: '🚒 Apex Unit Tests',            tab: 'code',            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
         'apex-triggers':             { label: '🧨 Apex Triggers',              tab: 'code',            data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
-        'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',            tab: 'code',            data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
+        'apex-uncompiled':           { label: '🌋 Apex Uncompiled',            tab: 'code',            data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
         'app-permissions':           { label: '⛕ Application Permissions',     tab: 'security',        data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,    get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
         'collaboration-groups':      { label: '🦙 Chatter Groups',             tab: 'boxes',           data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }},
-        'custom-fields':             { label: '🏈 Custom Fields',              tab: 'data-model',      data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
+        'custom-fields':             { label: '🏈 Custom Fields',              tab: 'datamodel',       data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',              tab: 'setting',         data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
         'custom-tabs':               { label: '🥠 Custom Tabs',                tab: 'visual',          data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }},
         'documents':                 { label: '🚧 Documents',                  tab: 'setting',         data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }},
         'email-templates':           { label: '🌇 Email Templates',            tab: 'setting',         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
-        'global-view':               { label: '🌍 Global View',                tab: 'home',            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasCategory,      get: async () => { return this._api?.getGlobalView(this.globalViewSelectedScoreRuleCategory); }},
+        'global-view':               { label: '🌍 Global View',                tab: 'home',            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        'hardcoded-urls-view':       { label: '🌍 Hardcoded URLs View',        tab: 'home',            data: '_internalHardcodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
         'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',          data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
         'internal-active-users':     { label: '👥 Active Internal Users',      tab: 'security',        data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
         'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: 'setting',         data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
         'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',          data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
         'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',          data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }},
         'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: 'visual',          data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
-        'object':                    { label: '🎳 Object Documentation',       tab: 'data-model',      data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
+        'object':                    { label: '🎳 Object Documentation',       tab: 'datamodel',       data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
         'object-permissions':        { label: '🚦 Object Permissions',         tab: 'security',        data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
-        'objects':                   { label: '🏉 Org Wide Defaults',          tab: 'data-model',      data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
+        'objects':                   { label: '🏉 Org Wide Defaults',          tab: 'datamodel',       data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
         'page-layouts':              { label: '🏓 Page Layouts',               tab: 'security',        data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
         'permission-sets':           { label: '🚔 Permission Sets',            tab: 'security',        data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }},
         'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: 'security',        data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }},
@@ -540,14 +540,15 @@ export default class OrgcheckApp extends LightningElement {
         'profile-password-policies': { label: '⛖ Profile Password Policies',  tab: 'security',        data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }},
         'profile-restrictions':      { label: '🚸 Profile Restrictions',       tab: 'security',        data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }},
         'profiles':                  { label: '🚓 Profiles',                   tab: 'security',        data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }},
-        'public-groups-and-queues':  { label: '🐘 Public Groups & 🦒 Queues',   tab: 'boxes',           data: 'publicGroupsAndQueuesTableData',       remove: () => { this._api?.removeAllPublicGroupsAndQueuesFromCache(); },   getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroupsAndQueues(); }},
-        'record-types':              { label: '🏏 Record Types',               tab: 'data-model',      data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',           data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
+        'queues':                    { label: '🦒 Queues',                     tab: 'boxes',           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
+        'record-types':              { label: '🏏 Record Types',               tab: 'datamodel',       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
         'user-roles':                { label: '🦓 Internal Role Listing',      tab: 'boxes',           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
         'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
-        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
-        'visual-force-components':   { label: '🍞 Visualforce Components',     tab: 'visual',          data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
-        'visual-force-pages':        { label: '🥖 Visualforce Pages',          tab: 'visual',          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
-        'web-links':                 { label: '🏑 Web Links',                  tab: 'data-model',      data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
+        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'datamodel',       data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
+        'visualforce-components':    { label: '🍞 Visualforce Components',     tab: 'visual',          data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
+        'visualforce-pages':         { label: '🥖 Visualforce Pages',          tab: 'visual',          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
+        'web-links':                 { label: '🏑 Web Links',                  tab: 'datamodel',       data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
         'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }}
     }
 
@@ -726,15 +727,16 @@ export default class OrgcheckApp extends LightningElement {
      */
     async _updateCurrentTab() {
         if (this._hasRenderOnce === false) return;
-        const TAB_SECTION = `TAB ${this.selectedSubTab}`;
+        const TAB_SECTION = `Tab "${this.selectedSubTab}"`;
         this.tabLoading = true;
+        // eslint-disable-next-line @lwc/lwc/no-async-operation
         setTimeout(async () => {
             try {
                 this._spinner.open();
                 this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
                 switch (this.selectedSubTab) {
-                    case 'welcome':        this._updateCacheInformation(); break;
-                    default:               await this._updateData(this.selectedSubTab);
+                    case 'welcome': this._updateCacheInformation(); break;
+                    default:        await this._updateData(this.selectedSubTab);
                 }
                 this._spinner.sectionEnded(TAB_SECTION, `Done.`);
                 this._spinner.close(0);
@@ -764,7 +766,7 @@ export default class OrgcheckApp extends LightningElement {
      */
     async handleFiltersValidated() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        return this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
+        await this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
     }
 
     /**
@@ -775,7 +777,7 @@ export default class OrgcheckApp extends LightningElement {
     async handleFiltersRefreshed() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            return this._loadFilters(true);
+            await this._loadFilters(true);
         } catch(e) {
             this._showError('Error while handleFiltersRefreshed', e);
         }
@@ -796,10 +798,11 @@ export default class OrgcheckApp extends LightningElement {
         if (!checkbox) return;
         try {
             // is it checked?
-            if (checkbox['checked'] === true) {
+            // @ts-ignore
+            if (checkbox.checked === true) {
                 // yes it is!
                 this._api.acceptUsageTermsManually();
-                return this._loadBasicInformationIfAccepted();
+                await this._loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
         } catch(e) {
@@ -819,26 +822,31 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // Store the current main tab
-            this.selectedMainTab = mainTab['value'];
+            // @ts-ignore
+            this.selectedMainTab = mainTab.value;
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
-            const subTabSet = mainTab['querySelector']('lightning-tabset');
+            // @ts-ignore
+            const subTabSet = mainTab.querySelector('lightning-tabset');
             // Get the active tab value of this sub tab set (it should be the last activated sub tab)
             // NOTE: the previous value could be the one from the previous tab opened ONLY IF the next tab was not yet rendered
             const subTabActivated = subTabSet?.activeTabValue;
             // Get the list of sub tabs
-            const subTabs = mainTab['querySelectorAll']('lightning-tab');
+            // @ts-ignore
+            const subTabs = mainTab.querySelectorAll('lightning-tab');
             // Get the list of tabs' name
             const subTabsAvailable = Array.from(subTabs).map(t => t.value);
-            if (subTabsAvailable.includes(subTabActivated)) {
+
+            if (subTabsAvailable.includes(this.selectedSubTab)) {
+                // If the sub tab was specifically set align it with the sub tab
+                subTabSet.activeTabValue = this.selectedSubTab;
+            } else if (subTabsAvailable.includes(subTabActivated)) {
                 // Now if the subTabActivated is part of the list subTabsAvailable we select it
                 this.selectedSubTab = subTabActivated;
             } else {
                 // if not the tab was not yet rendered, so we are going to select the first tab in the list
                 this.selectedSubTab = subTabsAvailable[0];
             }
-            // Ask to update the current data
-            return this._updateCurrentTab(); // it's not going to throw any error here...
         } catch (e) {
             this._showError('Error while handleMainTabActivation', e);
         }
@@ -856,11 +864,12 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is a sub tab
             const subTab = event?.target; // not throwing any error
             // That subTab's name will be the next currentTab
-            const nextCurrentSubTab = subTab['value']; // not throwing any error
+            // @ts-ignore
+            const nextCurrentSubTab = subTab.value; // not throwing any error
             // Store the curret sub tab
             this.selectedSubTab = nextCurrentSubTab;
             // Ask to update the current data
-            return this._updateCurrentTab(); // not throwing any error here!
+            await this._updateCurrentTab(); // not throwing any error here!
         } catch (e) {
             this._showError('Error while handleSubTabActivation', e);
         }
@@ -888,17 +897,17 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Event called when the user clicks on the "View Score" button on a data table
      * @param {Event} event 
-     * @async
      * @public
      */ 
-    async handleViewScore(event) {
+    handleViewScore(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         // if the api is not loaded yet ignore that call
         if (!this._api) return;
         // if event is undefined ignore that call
         if (!event) return;
         // The event should contain a detail property
-        const detail = event['detail']; // not throwing any error
+        // @ts-ignore
+        const detail = event.detail; // not throwing any error
         // if detail is undefined ignore that call
         if (!detail) return;
         try {
@@ -959,8 +968,9 @@ export default class OrgcheckApp extends LightningElement {
     async handleClickRefreshCurrentTab(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            const recipes = event.target['getAttribute']('data-recipes')?.split(',');
-            return Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
+            // @ts-ignore
+            const recipes = event.target.getAttribute('data-recipes')?.split(',');
+            await Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
         } catch (e) {
             this._showError('Error while handleClickRefreshCurrentTab', e);
         }
@@ -1008,47 +1018,22 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Event called when the user clicks on a button to open a sub tab
      * @param {Event} event
-     * @async
      * @public
      */
-    async handleOpenSubTab(event) {
+    handleOpenSubTab(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is a button with a specific attribute
             const button = event?.target; // not throwing any error
             // The button should have an attribute called data-tab 
-            const tab = button['getAttribute']('data-tab');
+            // @ts-ignore
+            const tab = button.getAttribute('data-tab');
             // Split the tab value into two elements one for the main tab and the other for the sub tab
             const elements = tab.split(':');
             this.selectedMainTab = elements[0];
             this.selectedSubTab = elements[1];
         } catch (e) {
             this._showError('Error while handleClickRecompile', e);
-        }
-    }
-
-    /**
-     * @description Event called when user selects a new category to show in the global view page
-     * @param {Event} event
-     * @public
-     * @async
-     */
-    async handleChangeCategoryInGlobalView(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        // if event is undefined ignore that call
-        if (!event) return;
-        // The event should contain a detail property
-        const detail = event['detail']; // not throwing any error
-        // if detail is undefined ignore that call
-        if (!detail) return;
-        const category = detail.value; // not throwing any error
-        // if category is undefined ignore that call
-        if (!category) return;
-        try {
-            this.globalViewSelectedScoreRuleCategory = category;
-            await this._updateCurrentTab();
-        } catch (e) {
-            this._showError('Error while handleChangeCategoryInGlobalView', e);
         }
     }
 
@@ -1711,10 +1696,10 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table definition for public groups and queues
+     * @description Table definition for public groups
      * @type {ocui.Table}
      */
-    publicGroupsAndQueuesTableDefinition = {
+    publicGroupsTableDefinition = {
         columns: [
             { label: '#',                       type: ocui.ColumnType.IDX },
             { label: 'Score',                   type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
@@ -1729,6 +1714,12 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
+
+    /**
+     * @description Table definition for queues
+     * @type {ocui.Table}
+     */
+    queuesTableDefinition = this.publicGroupsTableDefinition;
 
     /**
      * @description Table definition for active internal users
@@ -2391,23 +2382,28 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocui.ExportedTable>}
      */
     get globalViewItemsExport() {
-        try {
-            const sheets = [];
-            /*
-            this._globalViewTransformersKeys.forEach((/** @type {string} */ /*recipe) => { 
-                const transfomer = this._internalTransformers[recipe]; 
-                const columnDef = this[transfomer.data.replace(/Data$/, 'Definition')];
-                sheets.push(... ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label, ocapi.SecretSauce.GetScoreRuleDescription));
-            });
-            */
-            return sheets;
-        } catch (error) {
-            this._showError('Error while exporting global view items:', error);
-        }
+        return []; //return this._export('_internalGlobalViewDataFromAPI');
     }
-    
 
+    /**
+     * @description Representation of an export for the hardcoded urls view data
+     * @type {Array<ocui.ExportedTable>}
+     */
+    get hardcodedURLsViewItemsExport() {
+        return []; //return this._export('_internalHardcodedURLsViewDataFromAPI');
+    }
 
+    /*_export(data) {
+        const sheets = [];
+        if (this[data]) {
+            this[data].forEach((result, alias) => {
+                const transfomer = this._internalTransformers[alias];
+                const definition = this[transfomer.data.replace(/Data$/, 'Definition')];
+                sheets.push(... ocui.RowsFactory.createAndExport(definition, this[transfomer.data], transfomer.label, ocapi.SecretSauce.GetScoreRuleDescription));
+            });
+        }
+        return sheets;
+    }*/
 
 
 
@@ -2536,32 +2532,61 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Global View data from API
-     * @type {Array<any>}
+     * @type {Map}
      */ 
     _internalGlobalViewDataFromAPI;
-
-    globalViewNbItemsToShow;
 
     /** 
      * @description Data for the gloabl view
      */
     get globalViewData() {
-        if (this._internalGlobalViewDataFromAPI) {
-            let nbItemsToShow = 0;
-            const allData = this._internalGlobalViewDataFromAPI.map((d) => {
-                const transfomer = this._internalTransformers[d.key];
-                if (d.hasData === true) {
-                    nbItemsToShow++;
-                }
-                return {
-                    ...d,
-                    label: transfomer?.label,
-                    class: d.hasData ? 'shown' : 'hidden',
-                    tab: `${transfomer?.tab}:${d.key}`,
-                }
+        return this._stat('_internalGlobalViewDataFromAPI');
+    }
+
+    /**
+     * @description Hardcoded URLs View data from API
+     * @type {Map}
+     */ 
+    _internalHardcodedURLsViewDataFromAPI;
+
+    /** 
+     * @description Data for the hardcoded URLs view
+     */
+    get hardcodedURLsViewData() {
+        return this._stat('_internalHardcodedURLsViewDataFromAPI');
+    }
+
+    _stat(data) {
+        if (this[data]) {
+            const allData = [];
+            this[data].forEach((result, alias) => {
+                const transfomer = this._internalTransformers[alias];
+                const definition = this[transfomer.data.replace(/Data$/, 'Definition')];
+                allData.push({
+                    orderBy: result.countBad,
+                    label: transfomer.label ?? `Unknown for ${alias}`,
+                    class: `slds-box viewCard ${result.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
+                    tab: `${transfomer.tab}:${alias}`,
+                    goodBadData: [
+                        { name: 'Good', value: result.countGood, color: 'green' },
+                        { name: 'Bad', value: result.countBad, color: 'red' }
+                    ],
+                    badByRuleData: result?.countBadByRule.map((c, i) => {
+                        return {
+                            name: c.name, 
+                            value: c.value,
+                            color: COLORS[i]
+                        }
+                    }) ?? [],
+                    table: result.data,
+                    definition: {
+                        columns: definition.columns.slice(0, 10),
+                        orderIndex: 1,
+                        orderSort: ocui.SortOrder.DESC
+                    }
+                });
             });
-            this.globalViewNbItemsToShow = nbItemsToShow;
-            return allData;
+            return allData.sort((a, b) => { return a.orderBy < b. orderBy ? 1 : -1 });
         }
         return undefined;
     }

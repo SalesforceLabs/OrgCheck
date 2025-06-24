@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -16,20 +16,25 @@ export class RecipeObject extends Recipe {
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
      * @param {SimpleLoggerIntf} logger
-     * @param {string} object Name of the object to describe in this recipe's instance.
+     * @param {Map | undefined} [parameters] List of optional argument to pass
      * @returns {Array<string | DatasetRunInformation>}
      * @public
      */
-    extract(logger, object) {
-        const datasetRunInfoObject = new DatasetRunInformation(DatasetAliases.OBJECT, `${DatasetAliases.OBJECT}_${object}`);
-        const datasetRunInfoCustomField = new DatasetRunInformation(DatasetAliases.CUSTOMFIELDS, `${DatasetAliases.CUSTOMFIELDS}_${object}`);
-        datasetRunInfoObject.parameters.set('object', object);
-        datasetRunInfoCustomField.parameters.set('object', object);
-        return [ datasetRunInfoObject, 
+    extract(logger, parameters) {
+        return [ 
+            new DatasetRunInformation(
+                DatasetAliases.OBJECT,
+                `${DatasetAliases.OBJECT}_${parameters.get('object')}`,
+                parameters // should include 'object'
+            ),
             DatasetAliases.OBJECTTYPES,
             DatasetAliases.APEXTRIGGERS,
             DatasetAliases.LIGHTNINGPAGES,
-            datasetRunInfoCustomField
+            new DatasetRunInformation(
+                DatasetAliases.CUSTOMFIELDS,
+                `${DatasetAliases.CUSTOMFIELDS}_${parameters.get('object')}`,
+                parameters // should include 'object'
+            ),
         ];
     }
 

@@ -572,21 +572,12 @@ export class SecretSauce {
     static get AllScoreRules() { return ALL_SCORE_RULES; }
 
     /**
-     * @description Returns an unmutable array of all score rule category.
-     * @returns {Array<string>}
-     * @static
-     * @readonly
-     */
-    static get ScoreRuleCategories() { return Object.values(SCORE_RULE_CATEGORIES); }
-
-    /**
      * @description Returns an unmutable array of score rules belonging to a given category.
-     * @param {string} category The category to filter.
      * @returns {Array<number>}
      * @static
      * @readonly
      */
-    static GetScoreRulesWithCategory(category) { return ALL_SCORE_RULES.filter(r => r.category === category).map(r => r.id); }
+    static GetScoreRulesForHardCodedURLs() { return ALL_SCORE_RULES.filter(r => r.category === SCORE_RULE_CATEGORIES.HARDCODED_URL).map(r => r.id); }
 
     /**
      * @description Returns an unmutable score rule given its id.

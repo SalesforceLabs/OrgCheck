@@ -5,7 +5,7 @@ import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 
@@ -29,19 +29,20 @@ export class RecipeWebLinks extends Recipe {
      * @description transform the data from the datasets and return the final result as an Array
      * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
      * @param {SimpleLoggerIntf} logger
-     * @param {string} namespace Name of the package (if all use '*')
-     * @param {string} objecttype Name of the type (if all use '*')
-     * @param {string} object API name of the object (if all use '*')
+     * @param {Map | undefined} [parameters] List of optional argument to pass
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
      * @async
      * @public
      */
-    async transform(data, logger, namespace, objecttype, object) {
+    async transform(data, logger, parameters) {
 
-        // Get data
+        // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
         const /** @type {Map<string, SFDC_WebLink>} */ weblinks = data.get(DatasetAliases.WEBLINKS);
+        const namespace = parameters?.get('namespace') ?? '*';
+        const objecttype = parameters?.get('objecttype') ?? '*';
+        const object = parameters?.get('object') ?? '*';
 
         // Checking data
         if (!types) throw new Error(`RecipeWebLinks: Data from dataset alias 'OBJECTTYPES' was undefined.`);

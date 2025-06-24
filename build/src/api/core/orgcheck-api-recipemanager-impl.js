@@ -3,7 +3,7 @@ import { DataMatrix } from './orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from './orgcheck-api-dataset-runinformation';
 import { LoggerIntf } from './orgcheck-api-logger';
-import { Recipe } from './orgcheck-api-recipe';
+import { Recipe, RecipeCollection } from './orgcheck-api-recipe';
 import { RecipeInternalActiveUsers } from '../recipe/orgcheck-api-recipe-internalactiveusers';
 import { RecipeAliases } from './orgcheck-api-recipes-aliases';
 import { RecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
@@ -28,7 +28,6 @@ import { RecipeProcessBuilders } from '../recipe/orgcheck-api-recipe-processbuil
 import { RecipeProfilePasswordPolicies } from '../recipe/orgcheck-api-recipe-profilepasswordpolicies';
 import { RecipeProfileRestrictions } from '../recipe/orgcheck-api-recipe-profilerestrictions';
 import { RecipeProfiles } from '../recipe/orgcheck-api-recipe-profiles';
-import { RecipePublicGroupsAndQueues } from '../recipe/orgcheck-api-recipe-publicgroupsandqueues';
 import { RecipeUserRoles } from '../recipe/orgcheck-api-recipe-userroles';
 import { RecipeVisualForceComponents } from '../recipe/orgcheck-api-recipe-visualforcecomponents';
 import { RecipeVisualForcePages } from '../recipe/orgcheck-api-recipe-visualforcepages';
@@ -47,7 +46,11 @@ import { RecipeHomePageComponents } from '../recipe/orgcheck-api-recipe-homepage
 import { RecipeCustomTabs } from '../recipe/orgcheck-api-recipe-customtabs';
 import { RecipeEmailTemplates } from '../recipe/orgcheck-api-recipe-emailtemplates';
 import { RecipeKnowledgeArticles } from '../recipe/orgcheck-api-recipe-knowledgearticles';
-import { RecipeGlobalView } from '../recipe/orgcheck-api-recipe-globalview';
+import { RecipeGlobalView } from '../recipecollection/orgcheck-api-recipe-globalview';
+import { RecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
+import { RecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
+import { RecipeHardcodedURLsView } from '../recipecollection/orgcheck-api-recipe-hardcodedurlsview';
+import { Processor } from './orgcheck-api-processor';
 
 /**
  * @description Recipe Manager
@@ -67,6 +70,13 @@ export class RecipeManager extends RecipeManagerIntf {
      * @private
      */
     _recipes;
+
+    /**
+     * @description Map of recipe collections given their alias.
+     * @type {Map<string, RecipeCollection>}
+     * @private
+     */
+    _recipeCollections;
 
     /**
      * @description Recipes need a dataset manager to work
@@ -93,7 +103,9 @@ export class RecipeManager extends RecipeManagerIntf {
         this._datasetManager = datasetManager;
         this._logger = logger;
         this._recipes = new Map();
+        this._recipeCollections = new Map();
 
+        // Recipes
         this._recipes.set(RecipeAliases.INTERNAL_ACTIVE_USERS, new RecipeInternalActiveUsers());
         this._recipes.set(RecipeAliases.APEX_CLASSES, new RecipeApexClasses());
         this._recipes.set(RecipeAliases.APEX_TESTS, new RecipeApexTests());
@@ -109,7 +121,6 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.EMAIL_TEMPLATES, new RecipeEmailTemplates());
         this._recipes.set(RecipeAliases.FIELD_PERMISSIONS, new RecipeFieldPermissions());
         this._recipes.set(RecipeAliases.FLOWS, new RecipeFlows());
-        this._recipes.set(RecipeAliases.GLOBAL_VIEW, new RecipeGlobalView());
         this._recipes.set(RecipeAliases.HOME_PAGE_COMPONENTS, new RecipeHomePageComponents());
         this._recipes.set(RecipeAliases.KNOWLEDGE_ARTICLES, new RecipeKnowledgeArticles());
         this._recipes.set(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new RecipeLightningAuraComponents());
@@ -128,14 +139,53 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.PROFILE_PWD_POLICIES, new RecipeProfilePasswordPolicies());
         this._recipes.set(RecipeAliases.PROFILE_RESTRICTIONS, new RecipeProfileRestrictions());
         this._recipes.set(RecipeAliases.PROFILES, new RecipeProfiles());
-        this._recipes.set(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES, new RecipePublicGroupsAndQueues());
+        this._recipes.set(RecipeAliases.PUBLIC_GROUPS, new RecipePublicGroups());
+        this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
         this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
         this._recipes.set(RecipeAliases.USER_ROLES, new RecipeUserRoles());
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());
         this._recipes.set(RecipeAliases.VISUALFORCE_PAGES, new RecipeVisualForcePages());
         this._recipes.set(RecipeAliases.WEBLINKS, new RecipeWebLinks());
-        this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());        
+        this._recipes.set(RecipeAliases.WORKFLOWS, new RecipeWorkflows());
+
+        // Recipe collections
+        this._recipeCollections.set(RecipeAliases.GLOBAL_VIEW, new RecipeGlobalView());
+        this._recipeCollections.set(RecipeAliases.HARDCODED_URLS_VIEW, new RecipeHardcodedURLsView());
+    }
+
+    /**
+     * @description Runs a designated recipe (by its alias)
+     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map} [parameters] List of values to pass to the recipe
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>} Returns as it is the value returned by the transform method recipe.
+     * @async
+     * @public
+     */
+    async run(alias, parameters) {
+        if (this._recipes.has(alias)) {
+            return this._runRecipe(alias, parameters);
+        } else if (this._recipeCollections.has(alias)) {
+            return this._runRecipeCollection(alias, parameters);
+        } else {
+            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
+        }
+    }
+
+    /**
+     * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
+     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map} [parameters] List of values to pass to the recipe
+     * @public
+     */
+    clean(alias, parameters) {
+        if (this._recipes.has(alias)) {
+            return this._cleanRecipe(alias, parameters);
+        } else if (this._recipeCollections.has(alias)) {
+            return this._cleanRecipeCollection(alias, parameters);
+        } else {
+            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
+        }
     }
 
     /**
@@ -144,46 +194,32 @@ export class RecipeManager extends RecipeManagerIntf {
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Transform the retrieved data and return the final result as a Map
      * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Array<string|object>} parameters List of values to pass to the exract and tranform methods of the recipe.
+     * @param {Map} [parameters] List of values to pass to the recipe
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>} Returns as it is the value returned by the transform method recipe.
      * @async
-     * @public
      */
-    async run(alias, ...parameters) {
-        // Check if alias is registered
-        if (this._recipes.has(alias) === false) {
-            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
-        } 
-        const section = `RECIPE ${alias}`;
-        
-        /**
-         * @description The recipe designated by the alias
-         * @type {Recipe}
-         */
+    async _runRecipe(alias, parameters) {
+
+        const section = `Run recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
 
         // -------------------
-        // Extract
+        // STEP 1. Extract
         // -------------------
         this._logger.log(section, 'How many datasets this recipe has?');
-
-        /**
-         * @description The list of datasets to be used by this recipe
-         * @type {Array<string | DatasetRunInformation>}}
-         */
+        /** @type {Array<string | DatasetRunInformation>}} */
         let datasets;
         try {
-            datasets = recipe.extract(
-                // local logger
-                this._logger.toSimpleLogger(section),
-                // all parameters
-                ...parameters
-            );
+            datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             this._logger.failed(section, error);
             throw error;
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
+
+        // -------------------
+        // STEP 2. Run
+        // -------------------
         let data;
         try {
             data = await this._datasetManager.run(datasets);
@@ -194,23 +230,71 @@ export class RecipeManager extends RecipeManagerIntf {
         this._logger.log(section, 'Datasets information successfuly retrieved!');
 
         // -------------------
-        // Transform
+        // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-
-        /**
-         * @description The final data that we will return as it is.
-         * @type {Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map}
-         */
+        /** @type {Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map} */
         let finalData;
         try {
-            finalData = await recipe.transform(
-                // Data from datasets
-                data, 
-                // local logger
-                this._logger.toSimpleLogger(section),
-                // all parameters
-                ...parameters);
+            finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.ended(section, 'Transformation successfuly done!');
+        
+        // Return value
+        return finalData;
+    }
+
+    /**
+     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map} [parameters] List of values to pass to the recipe
+     * @returns {Promise<Map>} Returns as it is the value returned by the transform method recipe collection.
+     * @async
+     */
+    async _runRecipeCollection(alias, parameters) {
+
+        const section = `Run recipe collection "${alias}"`;
+        const recipeCollection = this._recipeCollections.get(alias);
+
+        // -------------------
+        // STEP 1. Extract recipes in the collection
+        // -------------------
+        this._logger.log(section, 'How many recipes this recipe collection has?');
+        /** @type {Array<string>}} */
+        let recipes;
+        try {
+            recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
+
+        // -------------------
+        // STEP 2. Run the recipes in the collection
+        // -------------------
+        const data = new Map();
+        try {
+            await Processor.forEach(recipes, async (recipe) => {
+                const recipeData = await this._runRecipe(recipe, parameters);
+                data.set(recipe, recipeData);
+            });
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.log(section, 'All datasets information successfuly retrieved from recipes!');
+
+        // -------------------
+        // STEP 3. Transform the recipe collection finally
+        // -------------------
+        this._logger.log(section, 'This recipe collection will now transform all this information...');
+        /** @type {Map} */
+        let finalData;
+        try {
+            finalData = await recipeCollection.transform(data, this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             this._logger.failed(section, error);
             throw error;
@@ -226,29 +310,21 @@ export class RecipeManager extends RecipeManagerIntf {
      *    - Step 1. Extract the list of datasets to clean that this recipe uses
      *    - Step 2. Clean the given datasets
      * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Array<string|object>} [parameters] List of values to pass to the exract method of the recipe.
+     * @param {Map} [parameters] List of values to pass to the recipe
      * @public
      */
-    clean(alias, ...parameters) {
-        // Check if alias is registered
-        if (this._recipes.has(alias) === false) {
-            throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
-        } 
-        const section = `RECIPE ${alias}`;
+    _cleanRecipe(alias, parameters) {
+
+        const section = `Clean recipe "${alias}"`;
         const recipe = this._recipes.get(alias);
 
         // -------------------
-        // Extract
+        // STEP 1. Extract
         // -------------------
         this._logger.log(section, 'How many datasets this recipe has?');
         let datasets;
         try {
-            datasets = recipe.extract(
-                // local logger
-                this._logger.toSimpleLogger(section),
-                // all parameters
-                ...parameters
-            );
+            datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
         } catch(error) {
             this._logger.failed(section, error);
             throw error;
@@ -256,7 +332,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
         // -------------------
-        // Clean
+        // STEP 2. Clean
         // -------------------
         this._logger.log(section, 'Clean all datasets...');
         try {
@@ -266,5 +342,43 @@ export class RecipeManager extends RecipeManagerIntf {
             throw error;
         }
         this._logger.ended(section, 'Datasets succesfully cleaned!');
+    }
+
+
+    /**
+     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map} [parameters] List of values to pass to the recipe
+     * @public
+     */
+    _cleanRecipeCollection(alias, parameters) {
+
+        const section = `Clean recipe collection "${alias}"`;
+        const recipeCollection = this._recipeCollections.get(alias);
+
+        // -------------------
+        // STEP 1. Extract
+        // -------------------
+        this._logger.log(section, 'How many recipes this recipe collection has?');
+        /** @type {Array<string>}} */
+        let recipes;
+        try {
+            recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
+
+        // -------------------
+        // STEP 2. Clean
+        // -------------------
+        this._logger.log(section, 'Clean all datasets of these recipes...');
+        try {
+            recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters); });
+        } catch(error) {
+            this._logger.failed(section, error);
+            throw error;
+        }
+        this._logger.ended(section, 'Datasets of these recipes succesfully cleaned!');
     }
 }

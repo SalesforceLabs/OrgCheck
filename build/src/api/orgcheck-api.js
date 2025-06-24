@@ -255,7 +255,9 @@ export class API {
      */
     async checkCurrentUserPermissions() {
         // @ts-ignore
-        const /** @type {Map} */ perms = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, [ 'ModifyAllData','AuthorApex','ApiEnabled','InstallPackaging' ]));
+        const /** @type {Map} */ perms = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
+            ['permissions', [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
+        ])));
         if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
             perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
                 throw (new TypeError(
@@ -301,7 +303,11 @@ export class API {
      */
     async getPageLayouts(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, namespace, sobjectType, sobject));
+        return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
+            ['sobject', sobject],
+            ['namespace', namespace],
+            ['sobjectType', sobjectType]
+        ])));
     }
 
     /**
@@ -335,7 +341,10 @@ export class API {
      */
     async getObjects(namespace, sobjectType) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECTS, namespace, sobjectType));
+        return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
+            ['namespace', namespace],
+            ['sobjectType', sobjectType],
+        ])));
     }
 
     /**
@@ -356,7 +365,9 @@ export class API {
      */
     async getObject(sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECT, sobject));
+        return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
+            ['sobject', sobject]
+        ])));
     }
 
     /**
@@ -365,7 +376,7 @@ export class API {
      * @public
      */
     removeObjectFromCache(sobject) {
-        this._recipeManager.clean(RecipeAliases.OBJECT, sobject);
+        this._recipeManager.clean(RecipeAliases.OBJECT, new Map([['sobject', sobject]]));
     }
 
     /**
@@ -378,7 +389,9 @@ export class API {
      */
     async getObjectPermissionsPerParent(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -399,7 +412,9 @@ export class API {
      */
     async getApplicationPermissionsPerParent(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -462,7 +477,11 @@ export class API {
      */
     async getCustomFields(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, namespace, sobjectType, sobject));
+        return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
+            ['namespace', namespace], 
+            ['sobjectType', sobjectType],
+            ['sobject', sobject]
+        ])));
     }
 
     /**
@@ -483,7 +502,9 @@ export class API {
      */
     async getPermissionSets(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
     
     /**
@@ -524,7 +545,9 @@ export class API {
      */
     async getProfiles(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROFILES, namespace));
+        return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -545,7 +568,9 @@ export class API {
      */
     async getProfileRestrictions(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -606,7 +631,9 @@ export class API {
      */
     async getCustomLabels(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -627,7 +654,9 @@ export class API {
      */
     async getCustomTabs(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -648,7 +677,9 @@ export class API {
      */
     async getDocuments(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -669,7 +700,9 @@ export class API {
      */
     async getLightningWebComponents(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
     
     /**
@@ -690,7 +723,9 @@ export class API {
      */
     async getLightningAuraComponents(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -711,7 +746,9 @@ export class API {
      */
     async getLightningPages(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, namespace));
+        return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -732,7 +769,9 @@ export class API {
      */
     async getVisualForceComponents(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
     
     /**
@@ -753,7 +792,9 @@ export class API {
      */
     async getVisualForcePages(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, namespace));
+        return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -765,23 +806,43 @@ export class API {
     }
     
     /**
-     * @description Get information about Public Groups and Queues
+     * @description Get information about Public Groups
      * @returns {Promise<Array<SFDC_Group>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getPublicGroupsAndQueues() {
+    async getPublicGroups() {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES));
+        return (await this._recipeManager.run(RecipeAliases.PUBLIC_GROUPS));
     }
 
     /**
-     * @description Remove all the cached information about public groups and queues
+     * @description Remove all the cached information about public groups
      * @public
      */
-    removeAllPublicGroupsAndQueuesFromCache() {
-        this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS_AND_QUEUES);
+    removeAllPublicGroupsFromCache() {
+        this._recipeManager.clean(RecipeAliases.PUBLIC_GROUPS);
+    }
+
+    /**
+     * @description Get information about Queues
+     * @returns {Promise<Array<SFDC_Group>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getQueues() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.QUEUES));
+    }
+
+    /**
+     * @description Remove all the cached information about queues
+     * @public
+     */
+    removeAllQueuesFromCache() {
+        this._recipeManager.clean(RecipeAliases.QUEUES);
     }
 
     /**
@@ -794,7 +855,9 @@ export class API {
      */
     async getApexClasses(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, namespace));
+        return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -815,7 +878,9 @@ export class API {
      */
     async getApexTests(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -836,7 +901,9 @@ export class API {
      */
     async getApexTriggers(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, namespace));
+        return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -857,7 +924,9 @@ export class API {
      */
     async getApexUncompiled(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, namespace));
+        return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
+            [ 'namespace', namespace ]
+        ])));
     }
 
     /**
@@ -944,7 +1013,11 @@ export class API {
      */
     async getWeblinks(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.WEBLINKS, namespace, sobjectType, sobject));
+        return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
+            ['sobject', sobject],
+            ['namespace', namespace],
+            ['sobjectType', sobjectType]
+        ])));
     }
 
     /**
@@ -987,7 +1060,11 @@ export class API {
      */
     async getRecordTypes(namespace, sobjectType, sobject) {
         // @ts-ignore    
-        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, namespace, sobjectType, sobject));
+        return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
+            ['sobject', sobject],
+            ['namespace', namespace],
+            ['sobjectType', sobjectType]
+        ])));
     }
 
     /**
@@ -1009,7 +1086,10 @@ export class API {
      */
     async getFieldPermissionsPerParent(sobject, namespace) {
         // @ts-ignore    
-        return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, sobject, namespace));
+        return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, new Map([
+            ['sobject', sobject],
+            ['namespace', namespace]
+        ])));
     }
 
     /**
@@ -1050,7 +1130,9 @@ export class API {
      */
     async getEmailTemplates(namespace) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, namespace));
+        return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
+            ['namespace', namespace]
+        ])));
     }
 
     /**
@@ -1113,7 +1195,11 @@ export class API {
      */
     async getValidationRules(namespace, sobjectType, sobject) {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, namespace, sobjectType, sobject));
+        return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
+            ['sobject', sobject],
+            ['namespace', namespace],
+            ['sobjectType', sobjectType]
+        ])));
     }
     
     /**
@@ -1126,15 +1212,14 @@ export class API {
 
     /**
      * @description Get global view of the org
-     * @param {string} category 
      * @returns {Promise<Array>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
      */
-    async getGlobalView(category) {
+    async getGlobalView() {
         // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW, category));
+        return (await this._recipeManager.run(RecipeAliases.GLOBAL_VIEW));
     }
 
     /**
@@ -1143,5 +1228,25 @@ export class API {
      */
     removeGlobalViewFromCache() {
         this._recipeManager.clean(RecipeAliases.GLOBAL_VIEW);
+    }
+
+    /**
+     * @description Get hardcoded URLs view of the org
+     * @returns {Promise<Array>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getHardcodedURLsView() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.HARDCODED_URLS_VIEW));
+    }
+
+    /**
+     * @description Remove all the cached information about hardcoded URLs view
+     * @public
+     */
+    removeHardcodedURLsFromCache() {
+        this._recipeManager.clean(RecipeAliases.HARDCODED_URLS_VIEW);
     }
 }

@@ -28,14 +28,14 @@
   },
   "homepage": "https://sfdc.co/OrgCheck",
   "devDependencies": {
+    "@lwc/eslint-plugin-lwc": "^3.1.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "@salesforce/eslint-config-lwc": "^4.0.0",
+    "@salesforce/eslint-plugin-lightning": "^2.0.0",
     "@salesforce/sfdx-lwc-jest": "^7.0.1",
+    "eslint": "^9.29.0",
     "rollup": "^4.34.6",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^2.1.0"
-  },
-  "dependencies": {
-    "@salesforce/eslint-config-lwc": "github:salesforce/eslint-config-lwc",
-    "eslint": "^8.57.0"
   }
 }

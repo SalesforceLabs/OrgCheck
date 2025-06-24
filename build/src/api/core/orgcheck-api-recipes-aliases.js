@@ -17,6 +17,7 @@ export class RecipeAliases {
     static get FIELD_PERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
     static get GLOBAL_VIEW() { return 'global-view'; }
+    static get HARDCODED_URLS_VIEW() { return 'hardcoded-urls' };
     static get HOME_PAGE_COMPONENTS() { return 'home-page-components'; }
     static get INTERNAL_ACTIVE_USERS() { return 'internal-active-users'; }
     static get KNOWLEDGE_ARTICLES() { return 'knowledge-articles'; }
@@ -36,7 +37,8 @@ export class RecipeAliases {
     static get PROFILE_PWD_POLICIES() { return 'profile-password-policies'; }
     static get PROFILE_RESTRICTIONS() { return 'profile-restrictions'; }
     static get PROFILES() { return 'profiles'; }
-    static get PUBLIC_GROUPS_AND_QUEUES() { return 'public-groups-and-queues'; }
+    static get PUBLIC_GROUPS() { return 'public-groups'; }
+    static get QUEUES() { return 'queues'; }
     static get RECORD_TYPES() { return 'record-types'; }
     static get USER_ROLES() { return 'user-roles'; }
     static get VALIDATION_RULES() { return 'validation-rules'; }

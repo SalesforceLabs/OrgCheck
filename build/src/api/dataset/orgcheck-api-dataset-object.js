@@ -1,5 +1,5 @@
 import { Dataset } from '../core/orgcheck-api-dataset';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';

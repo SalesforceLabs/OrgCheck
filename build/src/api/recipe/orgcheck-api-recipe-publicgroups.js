@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -8,7 +8,7 @@ import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
-export class RecipePublicGroupsAndQueues extends Recipe {
+export class RecipePublicGroups extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
@@ -53,7 +53,7 @@ export class RecipePublicGroupsAndQueues extends Recipe {
                 (id) => groups.has(id)
             );
             // Filter data
-            if (group.isQueue === true || group.isPublicGroup === true) {
+            if (group.isPublicGroup === true) {
                 array.push(group);
             }
         });
