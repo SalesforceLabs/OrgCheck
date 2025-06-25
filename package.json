@@ -1,6 +1,6 @@
 {
   "name": "orgcheck",
-  "version": "Boron",
+  "version": "Carbon",
   "description": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
   "main": "index.js",
   "directories": {
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@lwc/eslint-plugin-lwc": "^3.1.0",
     "@rollup/plugin-terser": "^0.4.4",
+    "@sa11y/jest": "^7.2.9",
     "@salesforce/eslint-config-lwc": "^4.0.0",
     "@salesforce/eslint-plugin-lightning": "^2.0.0",
     "@salesforce/sfdx-lwc-jest": "^7.0.1",

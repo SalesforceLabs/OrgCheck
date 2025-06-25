@@ -1,15 +1,15 @@
 // @ts-ignore
 import { createElement } from '@lwc/engine-dom';
-import OrgcheckApp from '../orgcheckApp';
+import OrgcheckDependencyLink from '../orgcheckDependencyLink';
 
-describe('c-orgcheck-app', () => {
+describe('c-orgcheck-dependency-link', () => {
 
-  it('includes the app component can be added with no error and checks for its accessibility', async () => {
+  it('makes sure the component can be added in the document with no error and checks for its accessibility', async () => {
     try {
-      const element = createElement('c-orgcheck-app', {
-        is: OrgcheckApp   
+      const element = createElement('c-orgcheck-dependency-link', {
+        is: OrgcheckDependencyLink   
       });
-      
+
       // Check if the component can be created
       expect(element).toBeDefined();
       document.body.appendChild(element);

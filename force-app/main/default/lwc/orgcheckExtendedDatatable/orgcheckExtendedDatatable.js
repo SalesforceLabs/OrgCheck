@@ -252,7 +252,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 this.usesDependencyViewer = true;
             };
             return {
-                index: i,
+                index: (i + 1),
                 label: c.label,
                 isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
                 cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 

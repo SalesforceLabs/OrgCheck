@@ -4,7 +4,27 @@ import OrgcheckModal from '../orgcheckModal';
     
 describe('c-orgcheck-modal', () => {
 
-  it('Modal should be closed when it has been initialized', async () => {
+  it('makes sure the component can be added in the document with no error and checks for its accessibility', async () => {
+    try {
+      const element = createElement('c-orgcheck-modal', {
+        is: OrgcheckModal   
+      });
+      
+      // Check if the component can be created
+      expect(element).toBeDefined();
+      document.body.appendChild(element);
+
+      // Check accessibility
+      // @ts-ignore
+      await expect(element).toBeAccessible();
+
+    } catch (e) {
+      // Check if there is no erros while creating nor inserting the compoent in the dom
+      expect(e).toBeUndefined();
+    }
+  });
+
+  it('makes sure the modal is hidden by default', async () => {
     const element = createElement('c-orgcheck-modal', {
       is: OrgcheckModal
     });
@@ -16,7 +36,7 @@ describe('c-orgcheck-modal', () => {
     });
   });
 
-  it('Modal should be open after we call open() method', async () => {
+  it('makes sure the modal is shown after calling the open() method', async () => {
     const element = createElement('c-orgcheck-modal', {
       is: OrgcheckModal
     });
