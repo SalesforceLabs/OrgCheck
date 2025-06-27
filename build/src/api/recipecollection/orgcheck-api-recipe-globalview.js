@@ -83,8 +83,9 @@ export class RecipeGlobalView extends RecipeCollection {
                     countBad: countBadOnes,
                     countGood: countAll - countBadOnes,
                     countBadByRule: Array.from(series.keys()).map((id) => { return { 
-                        name: SecretSauce.GetScoreRuleDescription(id), 
-                        value: series.get(id)
+                        ruleId: id,
+                        ruleName: SecretSauce.GetScoreRuleDescription(id), 
+                        count: series.get(id)
                     }}),
                     data: filteredRecords
                 }

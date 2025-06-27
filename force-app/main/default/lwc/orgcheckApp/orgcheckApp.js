@@ -145,18 +145,14 @@ export default class OrgcheckApp extends LightningElement {
      * @type {boolean}
      * @public
      */
-    get showGlobalViewExportButton() {
-        return false; //return this._internalGlobalViewDataFromAPI !== undefined;
-    }
+    showGlobalViewExportButton = false;
 
     /**
      * @description Is the export button for Hardcoded URLs View is shown or not
      * @type {boolean}
      * @public
      */ 
-    get showHardcodedURLsViewExportButton() {
-        return false; //return this._internalHardcodedURLsViewDataFromAPI !== undefined;
-    }
+    showHardcodedURLsViewExportButton = false;
 
     /**
      * @description Current activated tab in the main tab set
@@ -835,7 +831,7 @@ export default class OrgcheckApp extends LightningElement {
             // @ts-ignore
             const subTabs = mainTab.querySelectorAll('lightning-tab');
             // Get the list of tabs' name
-            const subTabsAvailable = Array.from(subTabs).map(t => t.value);
+            const subTabsAvailable = Array.from(subTabs)?.map(t => t.value);
 
             if (subTabsAvailable.includes(this.selectedSubTab)) {
                 // If the sub tab was specifically set align it with the sub tab
@@ -970,7 +966,7 @@ export default class OrgcheckApp extends LightningElement {
         try {
             // @ts-ignore
             const recipes = event.target.getAttribute('data-recipes')?.split(',');
-            await Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
+            await Promise.all(recipes?.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
         } catch (e) {
             this._showError('Error while handleClickRefreshCurrentTab', e);
         }
@@ -1006,7 +1002,7 @@ export default class OrgcheckApp extends LightningElement {
                     } else if (cr.errors && Array.isArray(cr.errors)) {
                         reasons = cr.errors;
                     }
-                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
+                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons?.map(e => JSON.stringify(e)).join(', ')}`);
                 }
             }));
             this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
@@ -2382,7 +2378,7 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocui.ExportedTable>}
      */
     get globalViewItemsExport() {
-        return []; //return this._export('_internalGlobalViewDataFromAPI');
+        return this._export('_internalGlobalViewDataFromAPI');
     }
 
     /**
@@ -2390,20 +2386,32 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocui.ExportedTable>}
      */
     get hardcodedURLsViewItemsExport() {
-        return []; //return this._export('_internalHardcodedURLsViewDataFromAPI');
+        return this._export('_internalHardcodedURLsViewDataFromAPI');
     }
 
-    /*_export(data) {
-        const sheets = [];
-        if (this[data]) {
-            this[data].forEach((result, alias) => {
-                const transfomer = this._internalTransformers[alias];
-                const definition = this[transfomer.data.replace(/Data$/, 'Definition')];
-                sheets.push(... ocui.RowsFactory.createAndExport(definition, this[transfomer.data], transfomer.label, ocapi.SecretSauce.GetScoreRuleDescription));
-            });
+    _export(dataPropertyName) {
+        if (!this[dataPropertyName]) {
+            return undefined;
         }
+        const sheets = [];
+        sheets.push({ header: 'Statistics (Good and Bad)', columns: [ 'Item', 'Good', 'Bad' ], rows: [] });
+        sheets.push({ header: 'Statistics (Rules)', columns: [ 'Item', 'Rule Id', 'Rule Label', 'Bad' ], rows: [] });
+        const goodAndBadRows = [];
+        const rulesRows = [];
+        this[dataPropertyName].forEach((item, alias) => { 
+            const transfomer = this._internalTransformers[alias];
+            const itemName = transfomer.label ?? alias;
+            goodAndBadRows.push([ itemName, item.countGood, item.countBad ]); 
+            item.countBadByRule?.map((c, i) => {
+                rulesRows.push([ itemName, c.ruleId, c.ruleName, c.count ]);
+            });
+            const definition = transfomer.data.replace(/Data$/, 'Definition');
+            sheets.push(... ocui.RowsFactory.createAndExport(this[definition], item.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+        });
+        sheets[0].rows = goodAndBadRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
+        sheets[1].rows = rulesRows.sort((a, b) => { return a[3] < b[3] ? 1 : -1 }) // Index=3 sorted by Bad count
         return sheets;
-    }*/
+    }
 
 
 
@@ -2540,7 +2548,9 @@ export default class OrgcheckApp extends LightningElement {
      * @description Data for the gloabl view
      */
     get globalViewData() {
-        return this._stat('_internalGlobalViewDataFromAPI');
+        const data = this._stat('_internalGlobalViewDataFromAPI');
+        this.showGlobalViewExportButton = data && data.length > 0;
+        return data;
     }
 
     /**
@@ -2553,42 +2563,44 @@ export default class OrgcheckApp extends LightningElement {
      * @description Data for the hardcoded URLs view
      */
     get hardcodedURLsViewData() {
-        return this._stat('_internalHardcodedURLsViewDataFromAPI');
+        const data = this._stat('_internalHardcodedURLsViewDataFromAPI');
+        this.showHardcodedURLsViewExportButton = data && data.length > 0;
+        return data;
     }
 
-    _stat(data) {
-        if (this[data]) {
-            const allData = [];
-            this[data].forEach((result, alias) => {
-                const transfomer = this._internalTransformers[alias];
-                const definition = this[transfomer.data.replace(/Data$/, 'Definition')];
-                allData.push({
-                    orderBy: result.countBad,
-                    label: transfomer.label ?? `Unknown for ${alias}`,
-                    class: `slds-box viewCard ${result.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
-                    tab: `${transfomer.tab}:${alias}`,
-                    goodBadData: [
-                        { name: 'Good', value: result.countGood, color: 'green' },
-                        { name: 'Bad', value: result.countBad, color: 'red' }
-                    ],
-                    badByRuleData: result?.countBadByRule.map((c, i) => {
-                        return {
-                            name: c.name, 
-                            value: c.value,
-                            color: COLORS[i]
-                        }
-                    }) ?? [],
-                    table: result.data,
-                    definition: {
-                        columns: definition.columns.slice(0, 10),
-                        orderIndex: 1,
-                        orderSort: ocui.SortOrder.DESC
-                    }
-                });
-            });
-            return allData.sort((a, b) => { return a.orderBy < b. orderBy ? 1 : -1 });
+    _stat(dataPropertyName) {
+        if (!this[dataPropertyName]) {
+            return undefined;
         }
-        return undefined;
+        const allData = [];
+        this[dataPropertyName].forEach((result, alias) => {
+            const transfomer = this._internalTransformers[alias];
+            const definition = this[transfomer.data.replace(/Data$/, 'Definition')];
+            allData.push({
+                orderBy: result.countBad,
+                label: transfomer.label ?? `Unknown for ${alias}`,
+                class: `slds-box viewCard ${result.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
+                tab: `${transfomer.tab}:${alias}`,
+                goodBadData: [
+                    { name: 'Good', value: result.countGood, color: 'green' },
+                    { name: 'Bad', value: result.countBad, color: 'red' }
+                ],
+                badByRuleData: result?.countBadByRule?.map((c, i) => {
+                    return {
+                        name: `${c.ruleName} (${c.ruleId})`, 
+                        value: c.count,
+                        color: COLORS[i]
+                    }
+                }) ?? [],
+                table: result.data,
+                definition: {
+                    columns: definition.columns.slice(0, 10),
+                    orderIndex: 1,
+                    orderSort: ocui.SortOrder.DESC
+                }
+            });
+        });
+        return allData.sort((a, b) => { return a.orderBy < b. orderBy ? 1 : -1 });
     }
 
     /**
