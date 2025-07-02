@@ -45,6 +45,7 @@ import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationg
 import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
 import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
 import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
+import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
 
 /**
  * @description Org Check API main class
@@ -256,7 +257,7 @@ export class API {
     async checkCurrentUserPermissions() {
         // @ts-ignore
         const /** @type {Map} */ perms = (await this._recipeManager.run(RecipeAliases.CURRENT_USER_PERMISSIONS, new Map([
-            ['permissions', [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
+            [OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST, [ 'ModifyAllData', 'AuthorApex', 'ApiEnabled', 'InstallPackaging' ]]
         ])));
         if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
             perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
@@ -304,9 +305,9 @@ export class API {
     async getPageLayouts(namespace, sobjectType, sobject) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PAGE_LAYOUTS, new Map([
-            ['sobject', sobject],
-            ['namespace', namespace],
-            ['sobjectType', sobjectType]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
         ])));
     }
 
@@ -342,8 +343,8 @@ export class API {
     async getObjects(namespace, sobjectType) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECTS, new Map([
-            ['namespace', namespace],
-            ['sobjectType', sobjectType],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
         ])));
     }
 
@@ -366,7 +367,7 @@ export class API {
     async getObject(sobject) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT, new Map([
-            ['sobject', sobject]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
         ])));
     }
 
@@ -376,7 +377,7 @@ export class API {
      * @public
      */
     removeObjectFromCache(sobject) {
-        this._recipeManager.clean(RecipeAliases.OBJECT, new Map([['sobject', sobject]]));
+        this._recipeManager.clean(RecipeAliases.OBJECT, new Map([[OrgCheckGlobalParameter.SOBJECT_NAME, sobject]]));
     }
 
     /**
@@ -390,7 +391,7 @@ export class API {
     async getObjectPermissionsPerParent(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.OBJECT_PERMISSIONS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -413,7 +414,7 @@ export class API {
     async getApplicationPermissionsPerParent(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APP_PERMISSIONS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -478,9 +479,9 @@ export class API {
     async getCustomFields(namespace, sobjectType, sobject) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_FIELDS, new Map([
-            ['namespace', namespace], 
-            ['sobjectType', sobjectType],
-            ['sobject', sobject]
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace], 
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType],
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject]
         ])));
     }
 
@@ -503,7 +504,7 @@ export class API {
     async getPermissionSets(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PERMISSION_SETS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
     
@@ -546,7 +547,7 @@ export class API {
     async getProfiles(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILES, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -569,7 +570,7 @@ export class API {
     async getProfileRestrictions(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.PROFILE_RESTRICTIONS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -632,7 +633,7 @@ export class API {
     async getCustomLabels(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_LABELS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -655,7 +656,7 @@ export class API {
     async getCustomTabs(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.CUSTOM_TABS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -678,7 +679,7 @@ export class API {
     async getDocuments(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.DOCUMENTS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -701,7 +702,7 @@ export class API {
     async getLightningWebComponents(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_WEB_COMPONENTS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
     
@@ -724,7 +725,7 @@ export class API {
     async getLightningAuraComponents(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_AURA_COMPONENTS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -747,7 +748,7 @@ export class API {
     async getLightningPages(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.LIGHTNING_PAGES, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -770,7 +771,7 @@ export class API {
     async getVisualForceComponents(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_COMPONENTS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
     
@@ -793,7 +794,7 @@ export class API {
     async getVisualForcePages(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VISUALFORCE_PAGES, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -856,7 +857,7 @@ export class API {
     async getApexClasses(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_CLASSES, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -879,7 +880,7 @@ export class API {
     async getApexTests(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TESTS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -902,7 +903,7 @@ export class API {
     async getApexTriggers(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -925,7 +926,7 @@ export class API {
     async getApexUncompiled(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.APEX_UNCOMPILED, new Map([
-            [ 'namespace', namespace ]
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
         ])));
     }
 
@@ -1014,9 +1015,9 @@ export class API {
     async getWeblinks(namespace, sobjectType, sobject) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.WEBLINKS, new Map([
-            ['sobject', sobject],
-            ['namespace', namespace],
-            ['sobjectType', sobjectType]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
         ])));
     }
 
@@ -1061,9 +1062,9 @@ export class API {
     async getRecordTypes(namespace, sobjectType, sobject) {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.RECORD_TYPES, new Map([
-            ['sobject', sobject],
-            ['namespace', namespace],
-            ['sobjectType', sobjectType]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
         ])));
     }
 
@@ -1087,8 +1088,8 @@ export class API {
     async getFieldPermissionsPerParent(sobject, namespace) {
         // @ts-ignore    
         return (await this._recipeManager.run(RecipeAliases.FIELD_PERMISSIONS, new Map([
-            ['sobject', sobject],
-            ['namespace', namespace]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
         ])));
     }
 
@@ -1131,7 +1132,7 @@ export class API {
     async getEmailTemplates(namespace) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.EMAIL_TEMPLATES, new Map([
-            ['namespace', namespace]
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
         ])));
     }
 
@@ -1196,9 +1197,9 @@ export class API {
     async getValidationRules(namespace, sobjectType, sobject) {
         // @ts-ignore
         return (await this._recipeManager.run(RecipeAliases.VALIDATION_RULES, new Map([
-            ['sobject', sobject],
-            ['namespace', namespace],
-            ['sobjectType', sobjectType]
+            [OrgCheckGlobalParameter.SOBJECT_NAME, sobject],
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace],
+            [OrgCheckGlobalParameter.SOBJECT_TYPE_NAME, sobjectType]
         ])));
     }
     

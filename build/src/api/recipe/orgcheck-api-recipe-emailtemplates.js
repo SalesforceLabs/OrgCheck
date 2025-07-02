@@ -6,6 +6,7 @@ import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SFDC_EmailTemplate } from '../data/orgcheck-api-data-emailtemplate';
 import { Processor } from '../core/orgcheck-api-processor';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeEmailTemplates extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeEmailTemplates extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_EmailTemplate>} */ emailTemplates = data.get(DatasetAliases.EMAILTEMPLATES);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!emailTemplates) throw new Error(`RecipeDocuments: Data from dataset alias 'EMAILTEMPLATES' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeEmailTemplates extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(emailTemplates, (emailTemplate) => {
-            if (namespace === '*' || emailTemplate.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || emailTemplate.package === namespace) {
                 array.push(emailTemplate);
             }
         });

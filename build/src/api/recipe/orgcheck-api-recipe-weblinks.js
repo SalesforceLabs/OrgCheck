@@ -8,6 +8,7 @@ import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { Processor } from '../core/orgcheck-api-processor';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeWebLinks extends Recipe {
 
@@ -40,9 +41,9 @@ export class RecipeWebLinks extends Recipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
         const /** @type {Map<string, SFDC_WebLink>} */ weblinks = data.get(DatasetAliases.WEBLINKS);
-        const namespace = parameters?.get('namespace') ?? '*';
-        const objecttype = parameters?.get('objecttype') ?? '*';
-        const object = parameters?.get('object') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
+        const object = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // Checking data
         if (!types) throw new Error(`RecipeWebLinks: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -59,9 +60,9 @@ export class RecipeWebLinks extends Recipe {
             }
             weblink.objectRef = objectRef;
             // Filter data
-            if ((namespace === '*' || weblink.package === namespace) &&
-                (objecttype === '*' || weblink.objectRef?.typeRef?.id === objecttype) &&
-                (object === '*' || weblink.objectRef?.apiname === object)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || weblink.package === namespace) &&
+                (objecttype === OrgCheckGlobalParameter.ALL_VALUES || weblink.objectRef?.typeRef?.id === objecttype) &&
+                (object === OrgCheckGlobalParameter.ALL_VALUES || weblink.objectRef?.apiname === object)) {
                 array.push(weblink);
             }
         });

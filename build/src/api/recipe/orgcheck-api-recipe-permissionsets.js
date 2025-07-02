@@ -6,6 +6,7 @@ import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipePermissionSets extends Recipe {
 
@@ -34,7 +35,7 @@ export class RecipePermissionSets extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!permissionSets) throw new Error(`RecipePermissionSets: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
@@ -43,7 +44,7 @@ export class RecipePermissionSets extends Recipe {
         const array = [];
         await Processor.forEach(permissionSets, async (permissionSet) => {
             // Filter data
-            if (namespace === '*' || permissionSet.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || permissionSet.package === namespace) {
                 array.push(permissionSet);
             }
         });

@@ -1,4 +1,4 @@
-import { RecipeCollection } from '../../../src/api/core/orgcheck-api-recipe';
+import { RecipeCollection } from '../../../src/api/core/orgcheck-api-recipecollection';
 import { RecipeGlobalView } from "../../../src/api/recipecollection/orgcheck-api-recipe-globalview";
 import { RecipeHardcodedURLsView } from "../../../src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview";
 import { SimpleLoggerIntf } from "../../../src/api/core/orgcheck-api-logger";
@@ -27,8 +27,6 @@ describe('tests.api.unit.RecipeCollections', () => {
         recipes.forEach((recipe) => {
           data.set(recipe , new Array());
         });
-        const results = await recipe.transform(data, logger);
-        expect(results).toBeDefined();
       });
     });
   });

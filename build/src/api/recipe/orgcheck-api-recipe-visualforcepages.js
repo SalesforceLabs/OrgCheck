@@ -6,6 +6,7 @@ import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeVisualForcePages extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeVisualForcePages extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_VisualForcePage>} */ pages = data.get(DatasetAliases.VISUALFORCEPAGES);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!pages) throw new Error(`RecipeVisualForcePages: Data from dataset alias 'VISUALFORCEPAGES' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeVisualForcePages extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(pages, (page) => {
-            if (namespace === '*' || page.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || page.package === namespace) {
                 array.push(page);
             }
         });

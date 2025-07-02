@@ -6,6 +6,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeApexClasses extends Recipe {
 
@@ -34,7 +35,7 @@ export class RecipeApexClasses extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ApexClass>} */ apexClasses = data.get(DatasetAliases.APEXCLASSES);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!apexClasses) throw new Error(`RecipeApexClasses: Data from dataset alias 'APEXCLASSES' was undefined.`);
@@ -50,7 +51,7 @@ export class RecipeApexClasses extends Recipe {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === '*' || apexClass.package === namespace) && apexClass.isTest === false && apexClass.needsRecompilation === false) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || apexClass.package === namespace) && apexClass.isTest === false && apexClass.needsRecompilation === false) {
                 array.push(apexClass);
             }
         });

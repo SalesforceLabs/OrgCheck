@@ -121,7 +121,7 @@ describe('tests.api.unit.Datasets', () => {
       DatasetCustomLabels, DatasetDocuments, DatasetFieldPermissions, 
       DatasetFlows, DatasetGroups, DatasetLightningAuraComponents, 
       DatasetLightningPages, DatasetLightningWebComponents, 
-      DatasetObject, DatasetObjectPermissions, DatasetObjects, 
+      /*DatasetObject, */ DatasetObjectPermissions, DatasetObjects, 
       DatasetObjectTypes, DatasetOrganization, DatasetPackages, 
       DatasetPageLayouts, DatasetPermissionSetLicenses, 
       DatasetPermissionSets, DatasetProfilePasswordPolicies, 

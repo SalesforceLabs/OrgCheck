@@ -95,44 +95,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
     }
 
     /**
-     * @description Is the cache has a specific key? (based on the metadata entry to make it faster!)
-     * @param {string} key 
-     * @returns {boolean} true if the cache has the key, false if not
-     * @public
-     */
-    has(key) {
-        const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
-        const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
-        // Get information about this key in the metadata first (it will be faster to deserialize!)
-        /** @type {MetadataItemInCache} */
-        const metadataEntry = this._getEntryFromCache(metadataPhysicalKey);
-        // if we get null it means the data is not in the cache or it is too old
-        if (metadataEntry === null) {
-            // making sure the metadata and related data are removed from local storage if necessary
-            this._storageRemoveItem(metadataPhysicalKey);
-            this._storageRemoveItem(dataPhysicalKey);
-        } else {
-            // making sure the data exists in the localstorage (just the key -- do not spend time deserializing!)
-            let dataKeyExists = false;
-            for (let i = 0; i < this._storageLength() && dataKeyExists === false; i++) {
-                if (this._storageKey(i) === dataPhysicalKey) {
-                    dataKeyExists = true;
-                }
-            }
-            if (dataKeyExists === false) {
-                // the related data does not exist in the local storage
-                // even though the metadata says the contrary...
-                // so we are going to align the metadata with the data, by removing the metadata entry and return false
-                this._storageRemoveItem(metadataPhysicalKey);
-                return false;
-            }
-        }
-        // in this case, the metadata and the data are aligned we can return this statement
-        return (metadataEntry !== null);
-    }
-
-    /**
-     * @description Get the entry form the cache (based on the data entry this time!)
+     * @description Get the entry from the cache (based on the data entry this time!)
      * @param {string} key 
      * @returns {Map | any}
      * @public
@@ -148,7 +111,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
             this._storageRemoveItem(metadataPhysicalKey);
             this._storageRemoveItem(dataPhysicalKey);  
             // return null as the metadata is not in the cache
-            return null;          
+            return null;
         }
         // now get the data from the local storage
         /** @type {DataItemInCache} */
@@ -160,7 +123,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
             return null;
         }
         // Make sure the metadata is up to date with the data
-        metadataEntry.length = dataEntry.content.length;
+        metadataEntry.length = dataEntry.content?.length ?? 0;
         // ... and is saved!
         this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
         // if the data is a map
@@ -200,12 +163,12 @@ export class DataCacheManager extends DataCacheManagerIntf {
             } : {
                 type: 'array', length: value.length, created: now
             };
+            if (value instanceof Map) {
+                // remove any reference "key" to avoid circular references
+                value.forEach((v, k) => { if (k.endsWith('Ref') === true) value.delete(k); });
+            }
             /** @type {DataItemInCache} */
-            const dataEntry = value instanceof Map ? {
-                content: Array.from(value.entries().filter(([k]) => k.endsWith('Ref') === false)), created: now
-            } : {
-                content: value, created: now
-            };
+            const dataEntry = { content: value, created: now };
             try {
                 this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry)); // this is more likely to throw an error if data exceeds the local storage limit, so do it first!
                 this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));

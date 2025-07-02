@@ -7,6 +7,7 @@ import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeApexTriggers extends Recipe {
 
@@ -37,7 +38,7 @@ export class RecipeApexTriggers extends Recipe {
         // Get data and parameters
         const /** @type {Map<string, SFDC_ApexTrigger>} */ apexTriggers = data.get(DatasetAliases.APEXTRIGGERS);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!apexTriggers) throw new Error(`RecipeApexTriggers: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
@@ -49,7 +50,7 @@ export class RecipeApexTriggers extends Recipe {
             // Augment data
             apexTrigger.objectRef = objects.get(apexTrigger.objectId);
             // Filter data
-            if (namespace === '*' || apexTrigger.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || apexTrigger.package === namespace) {
                 array.push(apexTrigger);
             }
         });

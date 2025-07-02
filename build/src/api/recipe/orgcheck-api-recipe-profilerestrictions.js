@@ -7,6 +7,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_ProfileRestrictions } from '../data/orgcheck-api-data-profilerestrictions';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeProfileRestrictions extends Recipe {
 
@@ -37,7 +38,7 @@ export class RecipeProfileRestrictions extends Recipe {
         // Get data and parameters
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_ProfileRestrictions>} */ profileRestrictions = data.get(DatasetAliases.PROFILERESTRICTIONS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!profiles) throw new Error(`RecipeProfileRestrictions: Data from dataset alias 'PROFILES' was undefined.`);
@@ -49,7 +50,7 @@ export class RecipeProfileRestrictions extends Recipe {
             // Augment data
             restriction.profileRef = profiles.get(restriction.profileId);
             // Filter data
-            if (namespace === '*' || restriction.profileRef?.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || restriction.profileRef?.package === namespace) {
                 array.push(restriction);
             }
         });

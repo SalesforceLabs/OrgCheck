@@ -6,6 +6,7 @@ import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeLightningWebComponents extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeLightningWebComponents extends Recipe {
 
         // Get data and parameters
         const  /** @type {Map<string, SFDC_LightningWebComponent>} */ components = data.get(DatasetAliases.LIGHTNINGWEBCOMPONENTS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeLightningWebComponents: Data from dataset alias 'LIGHTNINGWEBCOMPONENTS' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeLightningWebComponents extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(components, (component) => {
-            if (namespace === '*' || component.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }
         });

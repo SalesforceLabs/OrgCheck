@@ -6,6 +6,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Document } from '../data/orgcheck-api-data-document';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeDocuments extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeDocuments extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_Document>} */ documents = data.get(DatasetAliases.DOCUMENTS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!documents) throw new Error(`RecipeDocuments: Data from dataset alias 'DOCUMENTS' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeDocuments extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(documents, (document) => {
-            if (namespace === '*' || document.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || document.package === namespace) {
                 array.push(document);
             }
         });

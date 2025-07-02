@@ -6,6 +6,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeCustomLabels extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeCustomLabels extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_CustomLabel>} */ customLabels = data.get(DatasetAliases.CUSTOMLABELS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!customLabels) throw new Error(`RecipeCustomLabels: Data from dataset alias 'CUSTOMLABELS' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeCustomLabels extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(customLabels, (customLabel) => {
-            if (namespace === '*' || customLabel.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || customLabel.package === namespace) {
                 array.push(customLabel);
             }
         });

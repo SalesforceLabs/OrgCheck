@@ -379,7 +379,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
         // Get the old and new columns index
         const previousSortingColumnIndex = this._sortingIndex;
-        const newSortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10);
+        const newSortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10) - 1; // aria-colindex is 1-based index, we need 0-based index
 
         // Set the new sorting column index
         this._sortingIndex = newSortingColumnIndex;

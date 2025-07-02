@@ -73,14 +73,6 @@ export class MetadataItemInCache extends ItemInCache {
 export class DataCacheManagerIntf {
 
     /**
-     * @description Is the cache has a specific key?
-     * @param {string} key 
-     * @returns {boolean} true if the cache has the key, false if not
-     * @public
-     */
-    has(key) { throw new Error('Not implemented'); }
-
-    /**
      * @description Get the entry form the cache
      * @param {string} key 
      * @returns {Map | any}

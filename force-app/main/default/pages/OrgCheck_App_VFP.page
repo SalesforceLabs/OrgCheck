@@ -171,7 +171,7 @@
             div_jokes.appendChild(paragraph);
         }
 
-        /* Reset the cache of previous versions */
+        /* Reset the cache of previous versions of Org Check that used VFP localStorage (before LWC impl.) */
         try {
             Object.keys(localStorage)
                 .filter(e => e.startsWith('OrgCheck.'))

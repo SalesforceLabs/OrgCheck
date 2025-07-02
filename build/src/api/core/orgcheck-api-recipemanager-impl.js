@@ -3,7 +3,8 @@ import { DataMatrix } from './orgcheck-api-data-matrix';
 import { DatasetManagerIntf } from './orgcheck-api-datasetmanager';
 import { DatasetRunInformation } from './orgcheck-api-dataset-runinformation';
 import { LoggerIntf } from './orgcheck-api-logger';
-import { Recipe, RecipeCollection } from './orgcheck-api-recipe';
+import { Recipe } from './orgcheck-api-recipe';
+import { RecipeCollection } from './orgcheck-api-recipecollection';
 import { RecipeInternalActiveUsers } from '../recipe/orgcheck-api-recipe-internalactiveusers';
 import { RecipeAliases } from './orgcheck-api-recipes-aliases';
 import { RecipeApexClasses } from '../recipe/orgcheck-api-recipe-apexclasses';
@@ -51,6 +52,8 @@ import { RecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
 import { RecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
 import { RecipeHardcodedURLsView } from '../recipecollection/orgcheck-api-recipe-hardcodedurlsview';
 import { Processor } from './orgcheck-api-processor';
+import { SecretSauce } from './orgcheck-api-secretsauce';
+import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
 
 /**
  * @description Recipe Manager
@@ -250,7 +253,7 @@ export class RecipeManager extends RecipeManagerIntf {
     /**
      * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
      * @param {Map} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Map>} Returns as it is the value returned by the transform method recipe collection.
+     * @returns {Promise<Map<string, DataCollectionStatistics>>}
      * @async
      */
     async _runRecipeCollection(alias, parameters) {
@@ -275,11 +278,17 @@ export class RecipeManager extends RecipeManagerIntf {
         // -------------------
         // STEP 2. Run the recipes in the collection
         // -------------------
+        /** @type {Map<string, Array<Data>>}} */
         const data = new Map();
         try {
-            await Processor.forEach(recipes, async (recipe) => {
+            await Processor.forEach(recipes, async (/** @type {string} */ recipe) => {
                 const recipeData = await this._runRecipe(recipe, parameters);
-                data.set(recipe, recipeData);
+                if (Array.isArray(recipeData)) {
+                    // @ts-ignore
+                    data.set(recipe, recipeData);
+                } else {
+                    throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected.`);
+                }
             });
         } catch(error) {
             this._logger.failed(section, error);
@@ -291,10 +300,34 @@ export class RecipeManager extends RecipeManagerIntf {
         // STEP 3. Transform the recipe collection finally
         // -------------------
         this._logger.log(section, 'This recipe collection will now transform all this information...');
-        /** @type {Map} */
-        let finalData;
+        const listRuleIds = recipeCollection.filterByScoreRuleIds(this._logger.toSimpleLogger(section), parameters);
+        const isFilterOn = (listRuleIds !== undefined && listRuleIds?.length > 0);
+        /** @type {Map<string, DataCollectionStatistics>} */
+        const finalData = new Map();
         try {
-            finalData = await recipeCollection.transform(data, this._logger.toSimpleLogger(section), parameters);
+            await Processor.forEach(data, (/** @type {Array<Data>} */records, /** @type {string} */ key) => {
+                const onlyBadRecords = records?.filter((r) => {
+                    const isBad = r.score && r.score > 0;
+                    if (isFilterOn === false) return isBad;
+                    return isBad && r.badReasonIds?.some((id) => listRuleIds.includes(id));
+                })?.sort((a, b) => a.score > b.score ? -1 : 1);
+                const series = new Map();
+                onlyBadRecords?.forEach((d) => { 
+                    d.badReasonIds.forEach(id => {
+                        series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
+                    });
+                });
+                const stats = new DataCollectionStatistics();
+                stats.countAll = (records?.length ?? 0);
+                stats.countBad = (onlyBadRecords?.length ?? 0);
+                stats.countBadByRule = Array.from(series.keys()).map((id) => { return { 
+                    ruleId: id,
+                    ruleName: SecretSauce.GetScoreRuleDescription(id), 
+                    count: series.get(id)
+                }});
+                stats.data = onlyBadRecords;
+                finalData.set(key, stats);
+            });
         } catch(error) {
             this._logger.failed(section, error);
             throw error;

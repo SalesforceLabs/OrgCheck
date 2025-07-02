@@ -170,7 +170,7 @@ export class DatasetManager extends DatasetManagerIntf {
         if (datasets instanceof Array === false) {
             throw new TypeError('The given datasets is not an instance of Array.');
         }
-        return new Map((await Promise.all(datasets.map((dataset) => {
+        const data = await Promise.all(datasets.map((dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
             const parameters = (typeof dataset === 'string' ? undefined : dataset.parameters);
@@ -178,12 +178,13 @@ export class DatasetManager extends DatasetManagerIntf {
             if (this._datasetPromisesCache.has(cacheKey) === false) {
                 this._datasetPromisesCache.set(cacheKey, new Promise((resolve, reject) => {
                     this._logger.log(section, `Checking the data cache for key=${cacheKey}...`);
-                    // Check data cache if any
-                    if (this._dataCache.has(cacheKey) === true) {
+                    // Get data cache if any
+                    const dataFromCache = this._dataCache.get(cacheKey);
+                    if (dataFromCache) {
                         // Set the results from data cache
                         this._logger.ended(section, 'There was data in data cache, we use it!');
                         // Return the key/alias and value from the data cache
-                        resolve([ alias, this._dataCache.get(cacheKey) ]); // when data comes from cache instanceof won't work! (keep that in mind)
+                        resolve([ alias, dataFromCache ]); // when data comes from cache instanceof won't work! (keep that in mind)
                     } else {
                         this._logger.log(section, `There was no data in data cache. Let's retrieve data.`);
                         // Calling the retriever
@@ -208,7 +209,8 @@ export class DatasetManager extends DatasetManagerIntf {
                 }));
             }
             return this._datasetPromisesCache.get(cacheKey);
-        }))));
+        }));
+        return new Map(data);
     }
 
     /**

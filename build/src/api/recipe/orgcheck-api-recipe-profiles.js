@@ -6,6 +6,7 @@ import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeProfiles extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeProfiles extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!profiles) throw new Error(`RecipeProfiles: Data from dataset alias 'PROFILES' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeProfiles extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(profiles, (profile) => {
-            if (namespace === '*' || profile.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || profile.package === namespace) {
                 array.push(profile);
             }
         });

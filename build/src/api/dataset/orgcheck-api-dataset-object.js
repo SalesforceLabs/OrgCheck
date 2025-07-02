@@ -14,6 +14,7 @@ import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class DatasetObject extends Dataset {
 
@@ -27,7 +28,7 @@ export class DatasetObject extends Dataset {
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
 
-        const fullObjectApiName = parameters?.get('object');
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // Checking parameters
         if (fullObjectApiName === undefined || typeof fullObjectApiName !== 'string') {

@@ -9,6 +9,7 @@ import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_FieldPermission } from '../data/orgcheck-api-data-fieldpermission';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeFieldPermissions extends Recipe {
 
@@ -46,7 +47,7 @@ export class RecipeFieldPermissions extends Recipe {
         const /** @type {Map<string, SFDC_FieldPermission>} */ fieldPermissions = data.get(DatasetAliases.FIELDPERMISSIONS);
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!fieldPermissions) throw new Error(`RecipeFieldPermissions: Data from dataset alias 'FIELDPERMISSIONS' was undefined.`);
@@ -64,7 +65,7 @@ export class RecipeFieldPermissions extends Recipe {
                 fp.parentRef = profiles.get(fp.parentId);
             }
             // Filter data
-            if (namespace === '*' || fp.parentRef.package === namespace ) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || fp.parentRef.package === namespace ) {
                 if (workingMatrix.hasRowHeader(fp.parentId) === false) {
                     workingMatrix.setRowHeader(fp.parentId, fp.parentRef);
                 }

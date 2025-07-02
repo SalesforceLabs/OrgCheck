@@ -6,6 +6,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeLightningAuraComponents extends Recipe {
 
@@ -32,7 +33,7 @@ export class RecipeLightningAuraComponents extends Recipe {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_LightningAuraComponent>} */ components = data.get(DatasetAliases.LIGHTNINGAURACOMPONENTS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!components) throw new Error(`RecipeLightningAuraComponents: Data from dataset alias 'LIGHTNINGAURACOMPONENTS' was undefined.`);
@@ -40,7 +41,7 @@ export class RecipeLightningAuraComponents extends Recipe {
         // Filter data
         const array = [];
         await Processor.forEach(components, (component) => {
-            if (namespace === '*' || component.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || component.package === namespace) {
                 array.push(component);
             }
         });

@@ -447,6 +447,10 @@ export default class OrgcheckApp extends LightningElement {
                 // Log methods -- delegation to the UI spinner
                 {
                     /**
+                     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+                     */
+                    isConsoleFallback: () => { return true; },
+                    /**
                      * @description Standard log method
                      * @param section {string}
                      * @param message {string}
@@ -540,7 +544,7 @@ export default class OrgcheckApp extends LightningElement {
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
         'record-types':              { label: '🏏 Record Types',               tab: 'datamodel',       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
         'user-roles':                { label: '🦓 Internal Role Listing',      tab: 'boxes',           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
-        'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
+        'user-roles-hierarchy':      { label: '🐙 Internal Role Explorer',     tab: 'boxes',           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'datamodel',       data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
         'visualforce-components':    { label: '🍞 Visualforce Components',     tab: 'visual',          data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
         'visualforce-pages':         { label: '🥖 Visualforce Pages',          tab: 'visual',          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},

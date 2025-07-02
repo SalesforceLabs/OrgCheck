@@ -55,7 +55,9 @@ export class Logger extends LoggerIntf {
      * @param {string} [message] 
      */
     log(operationName, message) { 
-        CONSOLE_LOG(operationName, 'LOG', message);
+        if (this._logger.isConsoleFallback()) {
+            CONSOLE_LOG(operationName, 'LOG', message);
+        }
         this._logger?.log(operationName, message);
         this._operationNames.set(operationName, LOG_OPERATION_IN_PROGRESS);
     }
@@ -66,7 +68,9 @@ export class Logger extends LoggerIntf {
      * @param {string} [message] 
      */
     ended(operationName, message) { 
-        CONSOLE_LOG(operationName, 'ENDED', message);
+        if (this._logger.isConsoleFallback()) {
+            CONSOLE_LOG(operationName, 'ENDED', message);
+        }
         this._countSuccesses++;
         this._logger?.ended(operationName, message);
         this._operationNames.set(operationName, LOG_OPERATION_DONE);
@@ -79,7 +83,9 @@ export class Logger extends LoggerIntf {
      * @public
      */
     failed(operationName, error) { 
-        CONSOLE_LOG(operationName, 'FAILED', error);
+        if (this._logger.isConsoleFallback()) {
+            CONSOLE_LOG(operationName, 'FAILED', error);
+        }
         this._countFailures++;
         this._logger?.failed(operationName, error);
         this._operationNames.set(operationName, LOG_OPERATION_FAILED);
@@ -94,11 +100,15 @@ export class Logger extends LoggerIntf {
         const internalLogger = this._logger;
         return { 
             log: (message) => { 
-                CONSOLE_LOG(operationName, 'LOG', message);
+                if (this._logger.isConsoleFallback()) {
+                    CONSOLE_LOG(operationName, 'LOG', message);
+                }
                 internalLogger?.log(operationName, message);
             },
             debug: (message) => { 
-                CONSOLE_LOG(operationName, 'DEBUG', message);
+                if (this._logger.isConsoleFallback()) {
+                    CONSOLE_LOG(operationName, 'DEBUG', message);
+                }
             }
         };
     }

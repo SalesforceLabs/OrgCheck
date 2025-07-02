@@ -7,6 +7,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeObjects extends Recipe {
 
@@ -34,8 +35,8 @@ export class RecipeObjects extends Recipe {
         // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
-        const namespace = parameters?.get('namespace') ?? '*';
-        const type = parameters?.get('type') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const type = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
 
         // Checking data
         if (!types) throw new Error(`RecipeObjects: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -47,8 +48,8 @@ export class RecipeObjects extends Recipe {
             // Augment data
             object.typeRef = types.get(object.typeId);
             // Filter data
-            if ((namespace === '*' || object.package === namespace) &&
-                (type === '*' || object.typeRef?.id === type)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || object.package === namespace) &&
+                (type === OrgCheckGlobalParameter.ALL_VALUES || object.typeRef?.id === type)) {
                 array.push(object);
             }
         });

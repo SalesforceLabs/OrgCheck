@@ -7,6 +7,7 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeLightningPages extends Recipe {
 
@@ -37,7 +38,7 @@ export class RecipeLightningPages extends Recipe {
         // Get data and parameters
         const /** @type {Map<string, SFDC_LightningPage>} */ pages = data.get(DatasetAliases.LIGHTNINGPAGES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!pages) throw new Error(`RecipeLightningPages: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
@@ -52,7 +53,7 @@ export class RecipeLightningPages extends Recipe {
                 page.objectRef = objects.get(page.objectId);
             }
             // Filter data
-            if (namespace === '*' || page.package === namespace) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || page.package === namespace) {
                 array.push(page);
             }
         });

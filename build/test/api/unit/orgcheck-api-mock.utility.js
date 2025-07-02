@@ -135,6 +135,8 @@ export class JsForceConnectionMock {
       nextRecordsUrl: `/next #Remaining=${remaining}# #SupportQueryMore,batchSize=${batchSize}# #Fields=${fields.join(',')}#`
     }
   }
+
+  get tooling() { return this; }
 }
 
 export const JsForceMock = {

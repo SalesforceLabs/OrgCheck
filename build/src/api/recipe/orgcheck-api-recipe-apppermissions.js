@@ -10,6 +10,7 @@ import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_AppPermission } from '../data/orgcheck-api-data-apppermission';
 import { SFDC_Application } from '../data/orgcheck-api-data-application';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeAppPermissions extends Recipe {
 
@@ -44,7 +45,7 @@ export class RecipeAppPermissions extends Recipe {
         const /** @type {Map<string, SFDC_AppPermission>} */ appPermissions = data.get(DatasetAliases.APPPERMISSIONS);
         const /** @type {Map<string, SFDC_Profile>} */ profiles = data.get(DatasetAliases.PROFILES);
         const /** @type {Map<string, SFDC_PermissionSet>} */ permissionSets = data.get(DatasetAliases.PERMISSIONSETS);
-        const namespace = parameters?.get('namespace') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
 
         // Checking data
         if (!applications) throw new Error(`RecipeAppPermissions: Data from dataset alias 'APPLICATIONS' was undefined.`);
@@ -63,7 +64,7 @@ export class RecipeAppPermissions extends Recipe {
                 ap.parentRef = profiles.get(ap.parentId);
             }
             // Filter data
-            if (namespace === '*' || ap.parentRef.package === namespace || ap.appRef.appPackage === namespace ) {
+            if (namespace === OrgCheckGlobalParameter.ALL_VALUES || ap.parentRef.package === namespace || ap.appRef.appPackage === namespace ) {
                 if (workingMatrix.hasRowHeader(ap.parentId) === false) {
                     workingMatrix.setRowHeader(ap.parentId, ap.parentRef);
                 }

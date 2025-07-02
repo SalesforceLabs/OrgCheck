@@ -4,6 +4,15 @@
 export class BasicLoggerIntf {
 
     /**
+     * @description Check if this logger is a console fallback logger
+     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+     * @public
+     */
+    isConsoleFallback() {
+        throw new TypeError(`You need to implement the method "isConsoleFallback()"`);
+    }
+
+    /**
      * @description The logger logs
      * @param {string} operationName
      * @param {string} [message] 

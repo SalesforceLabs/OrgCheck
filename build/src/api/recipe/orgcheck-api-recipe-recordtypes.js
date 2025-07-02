@@ -8,6 +8,7 @@ import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeRecordType extends Recipe {
 
@@ -39,9 +40,9 @@ export class RecipeRecordType extends Recipe {
         const /** @type {Map<string, SFDC_RecordType>} */ recordTypes = data.get(DatasetAliases.RECORDTYPES);
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
-        const namespace = parameters?.get('namespace') ?? '*';
-        const objecttype = parameters?.get('objecttype') ?? '*';
-        const object = parameters?.get('object') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
+        const object = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // Checking data
         if (!recordTypes) throw new Error(`RecipeRecordTypes: Data from dataset alias 'RECORDTYPES' was undefined.`);
@@ -60,9 +61,9 @@ export class RecipeRecordType extends Recipe {
             }
             recordType.objectRef = objectRef;
             // Filter data
-            if ((namespace === '*' || recordType.package === namespace) &&
-                (objecttype === '*' || recordType.objectRef?.typeRef?.id === objecttype) &&
-                (object === '*' || recordType.objectRef?.apiname === object)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || recordType.package === namespace) &&
+                (objecttype === OrgCheckGlobalParameter.ALL_VALUES || recordType.objectRef?.typeRef?.id === objecttype) &&
+                (object === OrgCheckGlobalParameter.ALL_VALUES || recordType.objectRef?.apiname === object)) {
                 array.push(recordType);
                 logger.log(`Pushing a record type in the array: ${recordType}`);
             }

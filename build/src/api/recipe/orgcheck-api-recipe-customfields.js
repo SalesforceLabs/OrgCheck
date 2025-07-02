@@ -8,6 +8,7 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeCustomFields extends Recipe {
 
@@ -40,9 +41,9 @@ export class RecipeCustomFields extends Recipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
-        const namespace = parameters?.get('namespace') ?? '*';
-        const objecttype = parameters?.get('objecttype') ?? '*';
-        const object = parameters?.get('object') ?? '*';
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
+        const object = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // Checking data
         if (!types) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -59,9 +60,9 @@ export class RecipeCustomFields extends Recipe {
             }
             customField.objectRef = objectRef;
             // Filter data
-            if ((namespace === '*' || customField.package === namespace) &&
-                (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
-                (object === '*' || customField.objectRef?.apiname === object)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || customField.package === namespace) &&
+                (objecttype === OrgCheckGlobalParameter.ALL_VALUES || customField.objectRef?.typeRef?.id === objecttype) &&
+                (object === OrgCheckGlobalParameter.ALL_VALUES || customField.objectRef?.apiname === object)) {
                 array.push(customField);
             }
         });

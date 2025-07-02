@@ -1,6 +1,7 @@
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
@@ -27,7 +28,7 @@ export class DatasetCustomFields extends Dataset {
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
 
-        const fullObjectApiName = parameters?.get('object');
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // First SOQL query
         logger?.log(`Querying Tooling API about CustomField in the org...`);            
@@ -36,7 +37,7 @@ export class DatasetCustomFields extends Dataset {
             string: 'SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix ' +
                     'FROM CustomField ' +
                     `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
-                    (fullObjectApiName ? `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'` : '')
+                    (fullObjectApiName === OrgCheckGlobalParameter.ALL_VALUES ? '' : `AND EntityDefinition.QualifiedApiName = '${fullObjectApiName}'`)
         }], logger);
 
         // Init the factory and records

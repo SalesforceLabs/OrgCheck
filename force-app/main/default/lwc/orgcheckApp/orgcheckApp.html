@@ -251,7 +251,7 @@
                                                         </lightning-layout>
                                                     </lightning-layout-item>
                                                     <lightning-layout-item size="8" padding="around-small" if:true={item.table.length}>
-                                                        <span class="slds-text-heading_medium">Details of bad rows</span>
+                                                        <span class="slds-text-heading_medium">Details of bad rows including Hardcoded URLs</span>
                                                         <c-orgcheck-extended-datatable empty-message="Congratulations, there is no bad row to show!" show-search onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=5 infinite-scrolling-additional-nb-rows=100 table-definition={item.definition} rows={item.table} show-export-button export-basename={item.label}></c-orgcheck-extended-datatable>
                                                     </lightning-layout-item>
                                                 </lightning-layout>
@@ -608,7 +608,7 @@
             <lightning-tab value="boxes" label="🐇 Boxes" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="roles-explorer,roles-listing,public-groups,queues,collaboration-groups"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="user-roles-hierarchy,roles-listing,public-groups,queues,collaboration-groups"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
