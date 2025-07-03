@@ -29,11 +29,11 @@
         }        
         .orgcheck-jokes-board {
             opacity: 0;
-            animation: orgcheck-jokes-board 2s ease-out 4s forwards;
+            animation: orgcheck-jokes-board 1s ease-out 3.5s forwards;
             border-radius: 15px;
             box-shadow: 10px 10px 10px #9daf8b;
             background-color: black;
-            width: 50%;
+            width: 67%;
             padding: 10px 20px 10px 20px;
             margin: 5em auto auto;
         }
@@ -44,7 +44,7 @@
             100% { opacity: 1; }
         } 
         .orgcheck-jokes-content {
-            font-size: medium ; 
+            font-size: small ; 
             font-family: monospace;
             text-align: left;
             color: #30ff15;
@@ -123,23 +123,23 @@
             { question: `Why do French people eat only one egg for dinner?`, answer: `Because one egg is un oeuf.` },
             { question: `Why do the French eat snails?`, answer: `They don't like fast food` },
         ];
-        const NB_JOKES = 7;
+        const NB_JOKES = 5;
         let jokeContent = '';
         for (let i = 0; i < NB_JOKES; i++) {
             const index = Math.floor(Math.random() * jokes.length);
             const joke = jokes.splice(index, 1)[0];
             jokeContent += `${joke.question} \n ${joke.answer} \n\n`;
         }
-        document.getElementById('orgcheck-jokes-board').addEventListener('animationend', () => {
+        document.getElementById('orgcheck-loading-text').addEventListener('animationend', () => {
             const divJokes = document.getElementById('orgcheck-jokes');
             let iCar = 0;
             const iId = setInterval(() => {
                 const c = jokeContent.charAt(iCar++);
                 divJokes.innerHTML += c === '\n' ? '<br />' : c;
-                if (iCar >= jokeContent.length) {
+                if (iCar >= jokeContent.length - 2) {
                     clearInterval(iId);
                 }
-            }, 76);
+            }, 55);
         }, true);
         
         /* Reset the cache of previous versions of Org Check that used VFP localStorage (before LWC impl.) */
