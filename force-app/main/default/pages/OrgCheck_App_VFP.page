@@ -6,96 +6,56 @@
     <style>
         .orgcheck-app {
             height: 100vh;
-            background: linear-gradient(white, #878797 150px, #000000 70%);
+        }
+        .orgcheck-loading-box {
+            position: relative;
+            top: 25vh;
         }
         .orgcheck-loading {
             text-align: center;
-            animation: orgcheck-moveLogo 3s linear 1s forwards;
-            background-color: #00000000;
-            border: 0px;
-            position: relative;
-            z-index: 1;
-            top: 25vh;
-        }
-        @keyframes orgcheck-moveLogo {
-            0% {
-                top: 25vh;
-            }
-            100% {
-                top: 0vh;
-            }
         }
         .orgcheck-loading-logo {
         }
         .orgcheck-loading-text {
-            animation: orgcheck-intro 4s ease-out 0.5s forwards;
+            opacity: 0;
+            animation: orgcheck-intro 3s ease-out 0.5s forwards;
             color: rgb(75, 213, 238);
             font-weight: 400;
             font-size: 300%;
-            opacity: 0;
         }
         @keyframes orgcheck-intro {
-            0% {
-                opacity: 0.25;
-            }
-            20% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                opacity: 0.5;
-            }
+            0%   { opacity: 0.25; }
+            100% { opacity: 1; }
         }        
         .orgcheck-jokes-board {
-            font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
-            transform: perspective(300px) rotateX(25deg);
-            transform-origin: 50% 100%;
-            text-align: justify;
-            position: absolute;
-            margin-left: -10em;
-            overflow: hidden;
-            font-size: 350%;
-            height: 50em;
-            width: 20em;
-            bottom: 0;
-            left: 50%;
+            opacity: 0;
+            animation: orgcheck-jokes-board 2s ease-out 4s forwards;
+            border-radius: 15px;
+            box-shadow: 10px 10px 10px #9daf8b;
+            background-color: black;
+            width: 50%;
+            padding: 10px 20px 10px 20px;
+            margin: 5em auto auto;
         }
-        .orgcheck-jokes-board::after {    
-            position: absolute;
-            content: ' ';
-            bottom: 60%;
-            left: 0;
-            right: 0;
-            top: 0;
-        }
+        @keyframes orgcheck-jokes-board {
+            0%   { opacity: 0; }
+            10%   { opacity: 0.25; }
+            50%   { opacity: 0.50; }
+            100% { opacity: 1; }
+        } 
         .orgcheck-jokes-content {
-            animation: orgcheck-scrollJokes 100s linear 4s;
-            position: absolute;
-            top: 100%;
-        }
-        .orgcheck-jokes-content > p {
-            font-size: 30px;
-            font-weight: bolder;
-            color: #FFFF82;
-            margin-bottom: 5em;
-        }
-        @keyframes orgcheck-scrollJokes {
-            0% {
-                top: 100%;
-            }
-            100% {
-                top: 0%;
-            }
+            font-size: medium ; 
+            font-family: monospace;
+            text-align: left;
+            color: #30ff15;
         }
         .slds-dropdown-trigger_click .slds-dropdown {
             min-width: fit-content;
         }
     </style>
     <div class="orgcheck-app" id="orgcheck-app">
-        <div id="orgcheck-loading-box">
-            <section class="orgcheck-loading" id="orgcheck-loading">
+        <div class="orgcheck-loading-box" id="orgcheck-loading-box">
+            <div class="orgcheck-loading" id="orgcheck-loading">
                 <div class="orgcheck-loading-logo">
                     <object type="image/svg+xml" data="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="200" height="200">
                         <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Mascot+Animated.svg')}" width="200" height="200" />
@@ -104,12 +64,14 @@
                         <img src="{!URLFOR($Resource.OrgCheck_SR, 'img/Logo.svg')}" width="250" height="250" />
                     </object>
                 </div>
-                <div class="orgcheck-loading-text" id="orgcheck-loading-text" />
-            </section>
-            <section class="orgcheck-jokes-board" >
+                <div class="orgcheck-loading-text" id="orgcheck-loading-text">
+                    Please wait while <b>Org Check</b> is l<img src="/img/loading.gif" alt="o" />ading...
+                </div>
+            </div>
+            <div class="orgcheck-jokes-board" id="orgcheck-jokes-board">
                 <div class="orgcheck-jokes-content" id="orgcheck-jokes">
                 </div>
-            </section>
+            </div>
         </div>
     </div>  
     <script>
@@ -161,16 +123,25 @@
             { question: `Why do French people eat only one egg for dinner?`, answer: `Because one egg is un oeuf.` },
             { question: `Why do the French eat snails?`, answer: `They don't like fast food` },
         ];
-        const div_jokes = document.getElementById('orgcheck-jokes');
         const NB_JOKES = 7;
+        let jokeContent = '';
         for (let i = 0; i < NB_JOKES; i++) {
             const index = Math.floor(Math.random() * jokes.length);
             const joke = jokes.splice(index, 1)[0];
-            const paragraph = document.createElement('p');
-            paragraph.innerHTML = `${joke.question} &nbsp; ${joke.answer}`;
-            div_jokes.appendChild(paragraph);
+            jokeContent += `${joke.question} \n ${joke.answer} \n\n`;
         }
-
+        document.getElementById('orgcheck-jokes-board').addEventListener('animationend', () => {
+            const divJokes = document.getElementById('orgcheck-jokes');
+            let iCar = 0;
+            const iId = setInterval(() => {
+                const c = jokeContent.charAt(iCar++);
+                divJokes.innerHTML += c === '\n' ? '<br />' : c;
+                if (iCar >= jokeContent.length) {
+                    clearInterval(iId);
+                }
+            }, 76);
+        }, true);
+        
         /* Reset the cache of previous versions of Org Check that used VFP localStorage (before LWC impl.) */
         try {
             Object.keys(localStorage)
@@ -210,21 +181,6 @@
         }
 
         /* Launch the app for real */
-        const loadingText = document.getElementById('orgcheck-loading-text');
-        let creditsModeOn = false;
-        loadingText.addEventListener('click', (event) => { creditsModeOn = true; }, true);
-        loadingText.innerHTML = 'Please wait while <b>Org Check</b> is l<img src="/img/loading.gif" alt="o" />ading...';
-        setTimeout(() => { 
-            if (creditsModeOn === false) { 
-                loadOrgCheckApp(); 
-            } else {
-                loadingText.innerHTML = `Credits mode activated! <br /> Enjoy these ${NB_JOKES} <b>dad jokes</b> before we load <b>Org Check</b>!`; 
-                div_jokes.addEventListener('animationend', () => { 
-                    div_jokes.style.visibility = 'hidden';
-                    loadingText.innerHTML = 'Now we load the app (finally!)'; 
-                    loadOrgCheckApp(); 
-                }, true);
-            } 
-        }, 2000);
+        loadOrgCheckApp(); 
     </script>
 </apex:page>
