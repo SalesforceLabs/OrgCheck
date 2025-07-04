@@ -2233,11 +2233,9 @@ export default class OrgcheckApp extends LightningElement {
         /** @type {ocui.Table} */
         const table = {
             columns: [
-                { label: 'ID',       type: ocui.ColumnType.NUM, data: { value: 'header.id' }},
-                { label: 'Name',     type: ocui.ColumnType.TXT, data: { value: 'header.description' }},
-                { label: 'Category', type: ocui.ColumnType.TXT, data: { value: 'header.category' }} 
+                { label: 'Name', type: ocui.ColumnType.TXT, data: { value: 'header.description' }}
             ],
-            orderIndex: 1,
+            orderIndex: 0,
             orderSort: ocui.SortOrder.ASC
         };
         if (this._internalAllScoreRulesDataMatrix) {
