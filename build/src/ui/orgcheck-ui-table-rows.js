@@ -131,15 +131,12 @@ export class RowsFactory {
      * @param {Array<Row>} rows
      * @param {string} title
      * @param {Function} badScoreLabelById
-     * @returns {Array<ExportedTable>}
+     * @returns {ExportedTable}
      */ 
     static export(tableDefintion, rows, title, badScoreLabelById) {
 
         /** @type {ExportedTable} */
         const exportedRows = { header: title, columns: [], rows: [] };
-
-        /** @type {ExportedTable} */
-        const exportedReasons = { header: `⚠️ ${title}`, columns: [ '(#) Item', '(Id) Reason' ], rows: [] };
 
         // Parsing columns
         tableDefintion.columns.forEach((column) => {
@@ -172,18 +169,13 @@ export class RowsFactory {
         // Parsing rows and cells
         rows.forEach((row) => {
 
-            // Add the bad reasons in the second table for this row
-            row.badReasonIds?.forEach((id) => {
-                exportedReasons.rows.push([`(${row.index}) ${row.name}`, `(${id}) ${badScoreLabelById(id)}`]);
-            });
-
             // Add the row in the first table
             const exportRow = [];
             row.cells?.forEach((cell) => {
                 if (cell.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(row.index);
                 } else if (cell.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
-                    exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => id)));
+                    exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => badScoreLabelById(id))));
                 } else if (cell.typeofid === true) { // for URL typed cell, we set the label and then the URL
                     exportRow.push(cell.data.label, cell.data.value);
                 } else if (cell.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
@@ -202,13 +194,7 @@ export class RowsFactory {
             exportedRows.rows.push(exportRow);
         });
 
-        // return the two sheets
-        if (exportedReasons.rows.length === 0) {
-            // There is no reasong why any of the records are bad here, so better not include that empty sheet in the export!
-            return [ exportedRows ];
-        }
-        // If there is at least one reason why we have bad rows, let's return this next to the rows
-        return [ exportedRows, exportedReasons ];
+        return exportedRows;
     }
 
     /**
@@ -217,7 +203,7 @@ export class RowsFactory {
      * @param {Array<any>} records
      * @param {string} title 
      * @param {Function} badScoreLabelById
-     * @returns {Array<ExportedTable>}
+     * @returns {ExportedTable}
      */ 
     static createAndExport(tableDefintion, records, title, badScoreLabelById) {
         const donothing = () => {};

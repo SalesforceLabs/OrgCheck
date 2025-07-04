@@ -171,38 +171,24 @@
                     </lightning-layout>
                     <br /><br />
                     <template if:true={globalViewData}>
+                        <span class="slds-badge slds-theme_success">There are {globalViewData.length} items.</span>
+                        <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
+                        <span class="slds-badge viewCard-some-bad-data">Items circled in red have at least one "bad" row.</span>
+                        <span class="slds-badge viewCard-no-bad-data">Items circled in green have no "bad" row at all.</span>
                         <lightning-layout multiple-rows>
-                            <lightning-layout-item class="slds-size_12-of-12">
-                                <span class="slds-badge slds-theme_success">There are {globalViewData.length} items.</span>
-                                <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
-                                <span class="slds-badge viewCard-some-bad-data">Items circled in red have at least one "bad" row.</span>
-                                <span class="slds-badge viewCard-no-bad-data">Items circled in green have no "bad" row at all.</span>
-                            </lightning-layout-item>
                             <template for:each={globalViewData} for:item="item">
-                                <lightning-layout-item size="12" padding="around-small" key={item.label}>
+                                <lightning-layout-item size="4" padding="around-small" key={item.label}>
                                     <div class={item.class}>
                                         <lightning-card>
                                             <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
-                                            <lightning-button label="Visit" title="Visit the corresponding tab" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
-                                            <p class="slds-var-p-horizontal_small">
-                                                <lightning-layout>
-                                                    <lightning-layout-item size="4" padding="around-small">
-                                                        <span class="slds-text-heading_medium">Statistics</span>
-                                                        <lightning-layout>
-                                                            <lightning-layout-item size="6" padding="around-small">
-                                                                <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" source={item.goodBadData}></c-orgcheck-graphics>
-                                                            </lightning-layout-item>
-                                                            <lightning-layout-item size="6" padding="around-small" if:true={item.table.length}>
-                                                                <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" source={item.badByRuleData}></c-orgcheck-graphics>
-                                                            </lightning-layout-item>
-                                                        </lightning-layout>
-                                                    </lightning-layout-item>
-                                                    <lightning-layout-item size="8" padding="around-small" if:true={item.table.length}>
-                                                        <span class="slds-text-heading_medium">Details of bad rows</span>
-                                                        <c-orgcheck-extended-datatable empty-message="Congratulations, there is no bad row to show!" show-search onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=5 infinite-scrolling-additional-nb-rows=100 table-definition={item.definition} rows={item.table} show-export-button export-basename={item.label}></c-orgcheck-extended-datatable>
-                                                    </lightning-layout-item>
-                                                </lightning-layout>
-                                            </p>
+                                            <lightning-button label="Details..." title="Go the corresponding taband see the details for this type of items" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
+                                            <section if:true={item.countBad} class="slds-var-p-horizontal_small">
+                                                <p>We believe you should correct <b>{item.countBad}</b> items, for the below reasons:</p>
+                                                <c-orgcheck-extended-datatable table-definition={item.tableDefinition} rows={item.tableData}></c-orgcheck-extended-datatable>
+                                            </section>
+                                            <section if:false={item.countBad} class="slds-var-p-horizontal_small">
+                                                <p>All good!!</p>
+                                            </section>
                                         </lightning-card>
                                     </div>
                                 </lightning-layout-item>  
@@ -211,59 +197,6 @@
                     </template> 
                     <template if:false={globalViewData}>
                         <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the global view is loading...</b></font></span>
-                    </template>
-                </lightning-tab>
-                <lightning-tab value="hardcoded-urls-view" label="🗺️ Hardcoded URLs View" onactive={handleSubTabActivation}>
-                    <lightning-layout>
-                        <lightning-layout-item>
-                            <h1 class="slds-text-heading_large">🗺️ Hardcoded URLs View on <b>{orgName}</b></h1>
-                        </lightning-layout-item>
-                        <lightning-layout-item alignment-bump="left">
-                            <c-orgcheck-export-button if:true={showHardcodedURLsViewExportButton} label="Export all details" source={hardcodedURLsViewItemsExport} basename="HardcodedURLs"></c-orgcheck-export-button>
-                        </lightning-layout-item>
-                    </lightning-layout>
-                    <br /><br />
-                    <template if:true={hardcodedURLsViewData}>
-                        <lightning-layout multiple-rows>
-                            <lightning-layout-item class="slds-size_12-of-12">
-                                <span class="slds-badge slds-theme_success">There are {hardcodedURLsViewData.length} items.</span>
-                                <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
-                                <span class="slds-badge viewCard-some-bad-data">Items circled in red have at least one "bad" row.</span>
-                                <span class="slds-badge viewCard-no-bad-data">Items circled in green have no "bad" row at all.</span>
-                            </lightning-layout-item>
-                            <template for:each={hardcodedURLsViewData} for:item="item">
-                                <lightning-layout-item size="12" padding="around-small" key={item.label}>
-                                    <div class={item.class}>
-                                        <lightning-card>
-                                            <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
-                                            <lightning-button label="Visit" title="Visit the corresponding tab" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
-                                            <p class="slds-var-p-horizontal_small">
-                                                <lightning-layout>
-                                                    <lightning-layout-item size="4" padding="around-small">
-                                                        <span class="slds-text-heading_medium">Statistics</span>
-                                                        <lightning-layout>
-                                                            <lightning-layout-item size="6" padding="around-small">
-                                                                <c-orgcheck-graphics type="pie" name="Good and Bad" pie-size="120" pie-stroke-width="2" source={item.goodBadData}></c-orgcheck-graphics>
-                                                            </lightning-layout-item>
-                                                            <lightning-layout-item size="6" padding="around-small" if:true={item.table.length}>
-                                                                <c-orgcheck-graphics type="pie" name="Rules" pie-size="120" pie-stroke-width="2" source={item.badByRuleData}></c-orgcheck-graphics>
-                                                            </lightning-layout-item>
-                                                        </lightning-layout>
-                                                    </lightning-layout-item>
-                                                    <lightning-layout-item size="8" padding="around-small" if:true={item.table.length}>
-                                                        <span class="slds-text-heading_medium">Details of bad rows including Hardcoded URLs</span>
-                                                        <c-orgcheck-extended-datatable empty-message="Congratulations, there is no bad row to show!" show-search onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=5 infinite-scrolling-additional-nb-rows=100 table-definition={item.definition} rows={item.table} show-export-button export-basename={item.label}></c-orgcheck-extended-datatable>
-                                                    </lightning-layout-item>
-                                                </lightning-layout>
-                                            </p>
-                                        </lightning-card>
-                                    </div>
-                                </lightning-layout-item>  
-                            </template>
-                        </lightning-layout>
-                    </template> 
-                    <template if:false={hardcodedURLsViewData}>
-                        <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the hardcoded URLs view is loading...</b></font></span>
                     </template>
                 </lightning-tab>
             </lightning-tabset>
