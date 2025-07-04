@@ -2233,7 +2233,7 @@ export default class OrgcheckApp extends LightningElement {
         /** @type {ocui.Table} */
         const table = {
             columns: [
-                { label: 'Name', type: ocui.ColumnType.TXT, data: { value: 'header.description' }}
+                { label: 'Rules (or reason why metadata is bad)', type: ocui.ColumnType.TXT, data: { value: 'header.description' }}
             ],
             orderIndex: 0,
             orderSort: ocui.SortOrder.ASC
