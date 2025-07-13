@@ -58,6 +58,7 @@ export class SFDC_Group extends Data {
 
     /**
      * @description Salesfiorce Id of the related entity for this "box"
+     * @type {string}
      * @public
      */
     relatedId;

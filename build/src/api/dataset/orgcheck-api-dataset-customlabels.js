@@ -10,9 +10,9 @@ export class DatasetCustomLabels extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_CustomLabel>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -34,13 +34,13 @@ export class DatasetCustomLabels extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customLabelRecords.length} custom labels...`);
         const customLabelsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(customLabelRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(customLabelRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
         
         // Create the map
         logger?.log(`Parsing ${customLabelRecords.length} custom labels...`);
-        const customLabels = new Map(await Processor.map(customLabelRecords, (record) => {
+        const customLabels = new Map(await Processor.map(customLabelRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);
@@ -60,9 +60,7 @@ export class DatasetCustomLabels extends Dataset {
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_LABEL)
                 }, 
-                dependencies: {
-                    data: customLabelsDependencies
-                }
+                dependencyData: customLabelsDependencies
             });
 
             // Add it to the map  

@@ -1,4 +1,4 @@
-import { DataDependencies } from "./orgcheck-api-data-dependencies";
+import { DataDependenciesForOneItem } from "./orgcheck-api-data-dependencies";
 
 /**
  * @description This class represents a set of information around a unique instance of a specific artefact (like User, Profile, UserRole, ...) 
@@ -43,7 +43,7 @@ export class DataWithDependencies extends Data {
 
     /**
      * @description Optionnal dependencies information for this data.
-     * @type {DataDependencies}
+     * @type {DataDependenciesForOneItem}
      * @public
      */
     dependencies;

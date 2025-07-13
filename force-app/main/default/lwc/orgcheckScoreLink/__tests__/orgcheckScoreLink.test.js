@@ -13,7 +13,7 @@ describe('c-orgcheck-score-link', () => {
     element.score = 0;
     return Promise.resolve().then(() => {
       // as there is a button shown ONLY if the score is defined and > 0 we should have nothing in the element
-      expect(element.shadowRoot.innerHTML).toBe('');
+      expect(element.shadowRoot.childElementCount).toBe(0);
     });
   });
 
@@ -26,7 +26,7 @@ describe('c-orgcheck-score-link', () => {
     element.score = 1;
     return Promise.resolve().then(() => {
       // as there is a button shown ONLY if the score is defined and > 0 we should have that button in the element
-      expect(element.shadowRoot.innerHTML).not.toBe('');
+      expect(element.shadowRoot.childElementCount).toBe(1);
       expect(element.shadowRoot.querySelector('lightning-button')).not.toBeNull();
     });
   });

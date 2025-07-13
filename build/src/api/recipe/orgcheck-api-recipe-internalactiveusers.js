@@ -12,12 +12,12 @@ import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 export class RecipeInternalActiveUsers extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Array<string | DatasetRunInformation>}
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger) {
+    extract(_logger) {
         return [
             DatasetAliases.INTERNALACTIVEUSERS, 
             DatasetAliases.PROFILES, 
@@ -27,13 +27,13 @@ export class RecipeInternalActiveUsers extends Recipe {
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, _logger) {
 
         // Get data
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.INTERNALACTIVEUSERS);
@@ -46,7 +46,7 @@ export class RecipeInternalActiveUsers extends Recipe {
         if (!permissionSets) throw new Error(`RecipeActiveUsers: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(users, async (user) => {
+        await Processor.forEach(users, async (/** @type {SFDC_User} */ user) => {
             user.profileRef = profiles.get(user.profileId);
             user.permissionSetRefs = await Processor.map(
                 user.permissionSetIds,

@@ -11,9 +11,9 @@ export class DatasetCollaborationGroups extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_CollaborationGroup>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -31,7 +31,7 @@ export class DatasetCollaborationGroups extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${groupRecords.length} chatter groups...`);
-        const groups = new Map(await Processor.map(groupRecords, (record) => {
+        const groups = new Map(await Processor.map(groupRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);

@@ -137,6 +137,12 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      * @public
      */
     url;
+
+    /**
+     * @description API Version (as a string) set in the metadata for this item.
+     * @type {string}
+     * @public
+     */
     version;
     
     /**

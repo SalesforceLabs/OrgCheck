@@ -170,15 +170,15 @@ describe('tests.api.unit.CellFactory', () => {
         
         /** @type {Array<any>} */
         const data = [ 
-            { score: 0, id: 'iii', name: 'Label III', dependencies: {} }, 
-            { score: 1, id: 'jjj', name: 'Label JJJ', dependencies: {} },
-            { score: 2, id: 'kkk', name: 'Label KKK', dependencies: {} }
+            { score: 0, id: 'iii', name: 'Label III', dependencyData: {} }, 
+            { score: 1, id: 'jjj', name: 'Label JJJ', dependencyData: {} },
+            { score: 2, id: 'kkk', name: 'Label KKK', dependencyData: {} }
         ];
         it('checks if create method works fine', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();

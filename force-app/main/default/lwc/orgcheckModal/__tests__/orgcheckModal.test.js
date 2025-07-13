@@ -5,6 +5,7 @@ import OrgcheckModal from '../orgcheckModal';
 describe('c-orgcheck-modal', () => {
 
   it('makes sure the component can be added in the document with no error and checks for its accessibility', async () => {
+    let hadError = false;
     try {
       const element = createElement('c-orgcheck-modal', {
         is: OrgcheckModal   
@@ -19,8 +20,11 @@ describe('c-orgcheck-modal', () => {
       await expect(element).toBeAccessible();
 
     } catch (e) {
+      console.error(e);
+      hadError = true;
+    } finally {
       // Check if there is no erros while creating nor inserting the compoent in the dom
-      expect(e).toBeUndefined();
+      expect(hadError).toBeFalsy();
     }
   });
 
@@ -32,7 +36,7 @@ describe('c-orgcheck-modal', () => {
     // do not call open()...
     return Promise.resolve().then(() => {
       // as we did not call open() yet, the modal should be invisible
-      expect(element.shadowRoot.innerHTML).toBe('');
+      expect(element.shadowRoot.textContent).toBe('');
     });
   });
 
@@ -46,14 +50,14 @@ describe('c-orgcheck-modal', () => {
 
     return Promise.resolve().then(async () => {
       // as we did not call open() yet, the modal should be invisible
-      expect(element.shadowRoot.innerHTML).not.toBe('');
-      expect(element.shadowRoot.querySelector('h1').innerHTML).toBe('title');
+      expect(element.shadowRoot.textContent).not.toBe('');
+      expect(element.shadowRoot.querySelector('h1').textContent).toBe('title');
       const closeIcon = element.shadowRoot.querySelector('lightning-icon[title=Close]');
       expect(closeIcon).not.toBeNull();
       // Let's click on the close button
       await closeIcon.click();
       // it should close the modal
-      expect(element.shadowRoot.innerHTML).toBe('');
+      expect(element.shadowRoot.textContent).toBe('');
     });
   });
 });

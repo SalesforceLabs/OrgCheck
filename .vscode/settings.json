@@ -4,5 +4,7 @@
     "**/bower_components": true,
     "**/.sfdx": true
   },
-  "salesforcedx-vscode-core.show-cli-success-msg": false
+  "salesforcedx-vscode-core.show-cli-success-msg": false,
+  "codeAnalyzer.configFile": "./code-analyzer.yml",
+  "codeAnalyzer.ruleSelectors": "all"
 }

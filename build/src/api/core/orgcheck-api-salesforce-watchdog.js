@@ -9,7 +9,7 @@ const DAILY_API_REQUEST_WARNING_THRESHOLD = 0.70; // =70%
  * @description Threshold value when percentage is reaching a "critical" zone.
  * @type {number}
  * @private
-*/
+ */
 const DAILY_API_REQUEST_FATAL_THRESHOLD = 0.90; // =90%
 
 /**
@@ -92,7 +92,7 @@ export class SalesforceWatchDog {
 
     /**
      * @description Constructor
-     * @param {() => { used: number, max: number }} apiLimitExtractor
+     * @param {() => { used: number, max: number }} apiLimitExtractor - How we extract the API Limit information from Salesforce.
      * @public
      */
     constructor(apiLimitExtractor) {
@@ -126,7 +126,7 @@ export class SalesforceWatchDog {
 
     /**
      * @description Before calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
-     * @param {function} [callback]
+     * @param {Function} [callback] - Optional callback to call if we reach the limit
      * @throws {TypeError} If we reach the limit
      * @public
      */
@@ -147,7 +147,7 @@ export class SalesforceWatchDog {
 
     /**
      * @description After calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
-     * @param {function} [callback]
+     * @param {Function} [callback] - Optional callback to call if we reach the limit
      * @throws {TypeError} If we reach the limit
      * @public
      */
@@ -173,9 +173,9 @@ export class SalesforceWatchDog {
 
 /**
  * @description Return the percentage representation of a ratio as a string (without the percentage sign)
- * @param {number} ratio 
- * @param {number} [decimals=2]
- * @returns {string}
+ * @param {number} ratio - The ratio to convert to a percentage
+ * @param {number} [decimals] - The number of decimals to keep in the percentage (default is 2)
+ * @returns {string} String representation of the percentage
  * @private
  */
 const RATIO_TO_PERCENTAGE = (ratio, decimals=2) => {

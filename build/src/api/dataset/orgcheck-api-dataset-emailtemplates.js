@@ -11,9 +11,9 @@ export class DatasetEmailTemplates extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_EmailTemplate>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -33,7 +33,7 @@ export class DatasetEmailTemplates extends Dataset {
          
         // Create the map
         logger?.log(`Parsing ${emailTemplateRecords.length} email templates...`);
-        const emailTemplates = new Map(await Processor.map(emailTemplateRecords, (record) => {
+        const emailTemplates = new Map(await Processor.map(emailTemplateRecords, (/** @type {any} */ record) => {
         
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);

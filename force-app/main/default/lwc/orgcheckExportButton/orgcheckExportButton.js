@@ -91,16 +91,18 @@ export default class OrgcheckExportButton extends LightningElement {
 
     /**
      * @description Event when user clicks on the export button
-     * @async so that the spinner animation can be shown ;)
+     * @async
      * @public
      */
     async handleClickExportXLS() {
         this.isExporting = true;
-        setTimeout(() => {
-            this._exportAsXls()
-            .catch((error) => console.error(error, JSON.stringify(error), error.stack))
-            .finally(() => this.isExporting = false);
-        }, 1);
+        try {
+            await this._exportAsXls();
+        } catch(error) {
+            console.error(error, JSON.stringify(error), error.stack);
+        } finally {
+            this.isExporting = false;
+        }
     }
 
     async _exportAsXls() {
@@ -121,7 +123,14 @@ export default class OrgcheckExportButton extends LightningElement {
     _createTheWorkBook() {
         const workbook = this._api.utils.book_new();
         this.source.forEach(item => {
-            const datasheet = [ item.columns ].concat(item.rows.map(row => row.map(cell => typeof cell === 'string' && cell.length > CELL_MAX_SIZE ? cell?.substring(0, CELL_MAX_SIZE) : cell)));
+            const datasheet = [ item.columns ].concat(
+                item.rows.map(row => 
+                    row.map(cell => {
+                        if (typeof cell === 'string' && cell.length > CELL_MAX_SIZE) return cell?.substring(0, CELL_MAX_SIZE);
+                        return cell;
+                    })
+                )
+            );
             const worksheet = this._api.utils.aoa_to_sheet(datasheet);
             worksheet['!cols'] = item.columns.map((c, i) => { 
                 const maxWidth = datasheet.reduce((prev, curr) => {
@@ -138,6 +147,7 @@ export default class OrgcheckExportButton extends LightningElement {
 
     /**
      * @description Internal method to create an Excel Workbook using the API
+     * @param {any} workbook - The workbook definition
      * @returns {string} The file as an object URL
      * @private
      */ 
@@ -151,6 +161,7 @@ export default class OrgcheckExportButton extends LightningElement {
 
     /**
      * @description Internal method to release the URL created by _generateTheFileAsURL
+     * @param {string} url - The url to release
      * @private
      */ 
     _releaseTheURL(url) {

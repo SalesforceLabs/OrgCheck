@@ -11,9 +11,9 @@ export class DatasetCustomTabs extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_CustomTab>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -37,12 +37,12 @@ export class DatasetCustomTabs extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customTabRecords.length} web links...`);
         const customTabDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(customTabRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(customTabRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         logger?.log(`Parsing ${customTabRecords.length} installed packages...`);
-        const customTabs = new Map(await Processor.map(customTabRecords, (record) => {
+        const customTabs = new Map(await Processor.map(customTabRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -61,9 +61,7 @@ export class DatasetCustomTabs extends Dataset {
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(record.Url),
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_TAB)                    
                 },
-                dependencies: {
-                    data: customTabDependencies
-                }
+                dependencyData: customTabDependencies
             });
 
             // Add it to the map  

@@ -34,10 +34,10 @@ import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticl
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
- * @param {any} currentVersion set for a specific item like VFP, apex class, etc.
- * @param {any} version used by the api (should be the latest)
- * @param {number} [definition_of_old=3] Definition of "old" in years (three years by default)
- * @returns true if the given current version is said too old, false otherwise.
+ * @param {any} currentVersion - Version set for a specific item like VFP, apex class, etc.
+ * @param {any} version - Version used by the api (should be the latest)
+ * @param {number} [definition_of_old] - Definition of "old" in years (three years by default)
+ * @returns {boolean} true if the given current version is said too old, false otherwise.
  * @private
  */
 const IS_OLD_APIVERSION = (currentVersion, version, definition_of_old = 3) => { 
@@ -47,8 +47,8 @@ const IS_OLD_APIVERSION = (currentVersion, version, definition_of_old = 3) => {
 
 /**
  * @description Checks if a given value is "empty". The value can be a string or an Array.
- * @param {Array | string} value
- * @returns true if the value is empty. false otherwise
+ * @param {Array<any> | string} value - Any value to check
+ * @returns {boolean} true if the value is empty. false otherwise
  * @private
  */
 const IS_EMPTY = (value) => {
@@ -67,7 +67,7 @@ const IS_EMPTY = (value) => {
 
 /**
  * @description Get the latest API version a Salesforce org can handle (exception for sandboxes that are in preview mode)
- * @returns {number}
+ * @returns {number} Get the lastest API version
  * @private
  */ 
 const GET_LATEST_API_VERSION = () => {
@@ -565,15 +565,15 @@ export class SecretSauce {
 
     /**
      * @description Returns an unmutable list of all score rules.
-     * @returns {Array<ScoreRule>}
+     * @returns {Array<ScoreRule>} List of score rules
      * @static
      * @readonly
      */
     static get AllScoreRules() { return ALL_SCORE_RULES; }
 
     /**
-     * @description Returns an unmutable array of score rules belonging to a given category.
-     * @returns {Array<number>}
+     * @description Returns an unmutable array of score rules only related to hardcoded urls.
+     * @returns {Array<number>} Score rues only related to hardcoded urls
      * @static
      * @readonly
      */
@@ -581,8 +581,8 @@ export class SecretSauce {
 
     /**
      * @description Returns an unmutable score rule given its id.
-     * @param {number} id The ID of the score rule to retrieve.
-     * @returns {ScoreRule}
+     * @param {number} id - The ID of the score rule to retrieve.
+     * @returns {ScoreRule} The score rule given its id
      * @static
      * @readonly
      */
@@ -590,8 +590,8 @@ export class SecretSauce {
 
     /**
      * @description Returns the description of a given rule from its id.
-     * @param {number} id The ID of the score rule.
-     * @returns {string}
+     * @param {number} id - The ID of the score rule.
+     * @returns {string} Description of the given rule
      * @static
      * @readonly
      */
@@ -599,7 +599,7 @@ export class SecretSauce {
 
     /**
      * @description Returns the "potential" latest API version that a production org and non preview org can have
-     * @returns {number}
+     * @returns {number} Api Version to use
      * @static
      * @readonly
      */

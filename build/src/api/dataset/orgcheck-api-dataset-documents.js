@@ -11,9 +11,9 @@ export class DatasetDocuments extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Document>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -33,7 +33,7 @@ export class DatasetDocuments extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${documentRecords.length} documents...`);
-        const documents = new Map(await Processor.map(documentRecords, (record) => {
+        const documents = new Map(await Processor.map(documentRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom label
             const id = sfdcManager.caseSafeId(record.Id);

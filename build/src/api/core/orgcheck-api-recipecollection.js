@@ -1,5 +1,4 @@
-import { Data, DataWithoutScoring } from "./orgcheck-api-data";
-import { DataMatrix } from "./orgcheck-api-data-matrix";
+import { Data } from "./orgcheck-api-data";
 import { SimpleLoggerIntf } from "./orgcheck-api-logger";
 
 /**
@@ -9,26 +8,21 @@ export class RecipeCollection {
 
     /**
      * @description List all recipe aliases that this recipe collection needs
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
-     * @returns {Array<string>}
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any> | undefined} [parameters] - List of optional argument to pass
+     * @returns {Array<string> | undefined} List of recipe aliases that this recipe collection needs
      * @public
      */
-    extract(logger, parameters) {
-        throw new TypeError(`You need to implement the method "extract()"`);
-    }
+    extract(logger, parameters) { throw new Error(`Method extract(logger=${logger}, parameters=${parameters}) not implemented yet.`); }
 
     /**
      * @description Filter the data items by score rule ids
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any> | undefined} [parameters] - List of optional argument to pass
      * @returns {Array<number> | undefined} List of score rule ids to filter by or undefined if no filtering is needed
      * @public
-     * @default No filtering
      */ 
-    filterByScoreRuleIds(logger, parameters) {
-        return undefined;
-    }
+    filterByScoreRuleIds(logger, parameters) { throw new Error(`Method extract(logger=${logger}, parameters=${parameters}) not implemented yet.`); }
 }
 
 export class DataCollectionStatistics {

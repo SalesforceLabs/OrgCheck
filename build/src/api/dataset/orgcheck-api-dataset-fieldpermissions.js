@@ -10,10 +10,10 @@ export class DatasetFieldPermissions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map} parameters
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SFDC_FieldPermission>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
@@ -35,7 +35,7 @@ export class DatasetFieldPermissions extends Dataset {
         // Create the map
         logger?.log(`Parsing ${permissions.length} Field Permissions...`);
         const fieldPermissions = new Map(await Processor.map(permissions, 
-            (record) => {
+            (/** @type {any} */ record) => {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
 

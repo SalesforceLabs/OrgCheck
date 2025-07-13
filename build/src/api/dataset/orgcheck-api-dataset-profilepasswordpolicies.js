@@ -9,9 +9,9 @@ export class DatasetProfilePasswordPolicies extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_ProfilePasswordPolicy>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,7 +35,7 @@ export class DatasetProfilePasswordPolicies extends Dataset {
         const policies = new Map(
             await Processor.map(
                 profilePasswordPolicies,
-                (ppp) => {
+                (/** @type {any} */ ppp) => {
                     // Create the instance
                     const policy = policyDataFactory.createWithScore({
                         properties: {
@@ -57,7 +57,7 @@ export class DatasetProfilePasswordPolicies extends Dataset {
                 // Metadata could return profile pwd policy for deleted profile
                 // In this case, profile will be equal to { $: {xsi:nil: 'true'} } or an empty string
                 // And we expect profile to be the name of the profile so....
-                (ppp) => (typeof ppp.profile === 'string') && (ppp.profile !== '') // if "profile" is a string and is not empty, then the profile exists.
+                (/** @type {any} */ ppp) => (typeof ppp.profile === 'string') && (ppp.profile !== '') // if "profile" is a string and is not empty, then the profile exists.
             )
         );
 

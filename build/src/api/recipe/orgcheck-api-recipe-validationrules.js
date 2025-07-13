@@ -13,12 +13,12 @@ import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 export class RecipeValidationRules extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Array<string | DatasetRunInformation>}
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger) {
+    extract(_logger) {
         return [
             DatasetAliases.VALIDATIONRULES,
             DatasetAliases.OBJECTTYPES, 
@@ -28,10 +28,10 @@ export class RecipeValidationRules extends Recipe {
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
@@ -51,6 +51,7 @@ export class RecipeValidationRules extends Recipe {
         if (!validationRules) throw new Error(`RecipeValidationRules: Data from dataset alias 'VALIDATIONRULES' was undefined.`);
 
         // Augment and filter data
+        /** @type {Array<SFDC_ValidationRule>} */ 
         const array = [];
         await Processor.forEach(validationRules, (/** @type {SFDC_ValidationRule} */ validationRule) => {
             // Augment

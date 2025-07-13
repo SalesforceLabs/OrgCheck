@@ -11,7 +11,8 @@
             "c/*": [
                 "*"
             ]
-        }
+        },
+        "typeRoots": ["./node_modules/@types/*"]
     },
     "include": [
         "**/*",

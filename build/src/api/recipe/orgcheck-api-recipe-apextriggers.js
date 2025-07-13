@@ -12,12 +12,12 @@ import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 export class RecipeApexTriggers extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Array<string | DatasetRunInformation>}
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger) {
+    extract(_logger) {
         return [
             DatasetAliases.APEXTRIGGERS,
             DatasetAliases.OBJECTS
@@ -26,14 +26,14 @@ export class RecipeApexTriggers extends Recipe {
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, logger, parameters) {
+    async transform(data, _logger, parameters) {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ApexTrigger>} */ apexTriggers = data.get(DatasetAliases.APEXTRIGGERS);
@@ -45,8 +45,9 @@ export class RecipeApexTriggers extends Recipe {
         if (!objects) throw new Error(`RecipeApexTriggers: Data from dataset alias 'OBJECTS' was undefined.`);
 
         // Augment and filter data
+        /** @type {Array<SFDC_ApexTrigger>} */
         const array = [];
-        await Processor.forEach(apexTriggers, (apexTrigger) => {
+        await Processor.forEach(apexTriggers, (/** @type {SFDC_ApexTrigger} */ apexTrigger) => {
             // Augment data
             apexTrigger.objectRef = objects.get(apexTrigger.objectId);
             // Filter data

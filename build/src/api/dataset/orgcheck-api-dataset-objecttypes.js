@@ -28,12 +28,12 @@ export class DatasetObjectTypes extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} _sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Promise<Map<string, SFDC_ObjectType>>} The result of the dataset
      */
-    async run(sfdcManager, dataFactory, logger) {
+    async run(_sfdcManager, dataFactory, _logger) {
     
         // Init the factory and records
         const objecTypeDataFactory = dataFactory.getInstance(SFDC_ObjectType);

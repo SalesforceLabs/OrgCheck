@@ -10,9 +10,9 @@ export class DatasetInternalActiveUsers extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_User>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -36,7 +36,7 @@ export class DatasetInternalActiveUsers extends Dataset {
         // Create the map
         const userRecords = results[0];
         logger?.log(`Parsing ${userRecords.length} users...`);
-        const users = new Map(await Processor.map(userRecords, async (record) => {
+        const users = new Map(await Processor.map(userRecords, async (/** @type {any} */ record) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
@@ -44,7 +44,7 @@ export class DatasetInternalActiveUsers extends Dataset {
             // Get the ID15 of Permission Sets assigned to this user
             const permissionSetIdsAssigned = await Processor.map(
                 record?.PermissionSetAssignments?.records, 
-                (assignment) => sfdcManager.caseSafeId(assignment.PermissionSetId)
+                (/** @type {any} */ assignment) => sfdcManager.caseSafeId(assignment.PermissionSetId)
             );
 
             // Create the instance

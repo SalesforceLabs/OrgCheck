@@ -10,9 +10,9 @@ export class DatasetPermissionSets extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_PermissionSet>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -69,7 +69,7 @@ export class DatasetPermissionSets extends Dataset {
 
         // Create the map of permission sets
         logger?.log(`Parsing ${permissionSetRecords.length} permission sets...`);
-        const permissionSets = new Map(await Processor.map(permissionSetRecords, (record) => {
+        const permissionSets = new Map(await Processor.map(permissionSetRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -109,7 +109,7 @@ export class DatasetPermissionSets extends Dataset {
 
         logger?.log(`Parsing ${permissionSetGroupRecords.length} permission set groups, ${objectPermissionRecords.length} object permissions and ${fieldPermissionRecords.length} field permissions...`);
         await Promise.all([
-            Processor.forEach(permissionSetGroupRecords, (record) => {
+            Processor.forEach(permissionSetGroupRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.Id);
                 const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
                 if (permissionSets.has(permissionSetId)) {
@@ -119,21 +119,21 @@ export class DatasetPermissionSets extends Dataset {
                     permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
                 }
             }),
-            Processor.forEach(objectPermissionRecords, (record) => {
+            Processor.forEach(objectPermissionRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
                     permissionSet.nbObjectPermissions = record.CountObject;
                 }
             }),
-            Processor.forEach(fieldPermissionRecords, (record) => {
+            Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
                     permissionSet.nbFieldPermissions = record.CountField;    
                 }
             }),
-            Processor.forEach(assignmentRecords, (record) => {
+            Processor.forEach(assignmentRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
@@ -144,7 +144,7 @@ export class DatasetPermissionSets extends Dataset {
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
-        await Processor.forEach(permissionSets, (permissionSet) => {
+        await Processor.forEach(permissionSets, (/** @type {SFDC_PermissionSet} */ permissionSet) => {
             permissionSetDataFactory.computeScore(permissionSet);
         });
         

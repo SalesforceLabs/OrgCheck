@@ -9,9 +9,9 @@ export class DatasetPackages extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Package>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -32,7 +32,7 @@ export class DatasetPackages extends Dataset {
         // Create the map
         const packageRecords = results[0];
         logger?.log(`Parsing ${packageRecords.length} installed packages...`);
-        const packages = new Map(await Processor.map(packageRecords, (record) => {
+        const packages = new Map(await Processor.map(packageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);

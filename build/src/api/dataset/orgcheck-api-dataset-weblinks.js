@@ -11,9 +11,9 @@ export class DatasetWeblinks extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_WebLink>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -37,13 +37,13 @@ export class DatasetWeblinks extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${webLinkRecords.length} web links...`);
         const webLinkDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(webLinkRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(webLinkRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${webLinkRecords.length} weblinks...`);
-        const webLinks = new Map(await Processor.map(webLinkRecords, async (record) => {
+        const webLinks = new Map(await Processor.map(webLinkRecords, async (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -64,9 +64,7 @@ export class DatasetWeblinks extends Dataset {
                     objectId: record.EntityDefinition?.DurableId,
                     url: sfdcManager.setupUrl(record.Id, SalesforceMetadataTypes.WEB_LINK, record.PageOrSobjectType)
                 },
-                dependencies: {
-                    data: webLinkDependencies
-                }
+                dependencyData: webLinkDependencies
             });
 
             // Add it to the map  

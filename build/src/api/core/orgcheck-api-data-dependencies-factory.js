@@ -1,4 +1,4 @@
-import { DataDependencies } from "./orgcheck-api-data-dependencies";
+import { DataDependenciesForOneItem, DataDependencies } from "./orgcheck-api-data-dependencies";
 
 /**
  * @description Factory of dependencies
@@ -7,9 +7,9 @@ export class DataDependenciesFactory {
     
     /**
      * @description Create a new instance of DataDependencies
-     * @param {{ records: Array<{ id: string, name: string, type: string, url: string, refId: string, refName: string, refType: string, refUrl: string }>, errors: Array<string> }} data 
-     * @param {Array<string>} whatIds 
-     * @returns {DataDependencies}
+     * @param {DataDependencies} data - The data containing records and errors
+     * @param {Array<string>} whatIds - The IDs for which we want to get the dependencies
+     * @returns {DataDependenciesForOneItem} Returns a new instance of DataDependencies containing the dependencies for the given whatIds
      */
     static create(data, whatIds) {
         // Check if at least one of the whatIds is present in the data errors list
@@ -18,7 +18,7 @@ export class DataDependenciesFactory {
                 hadError: true,
                 using: [],
                 referenced: [],
-                referencedByTypes: {}
+                referencedByTypes: {},
             };
         }
         // Data can contain a lot of dependencies from other ids, we just want to get the dependencies for the given whatIds
@@ -31,13 +31,14 @@ export class DataDependenciesFactory {
                 url: n.refUrl
             }; 
         });
-        const referencedByTypes = {};
+        /** @type {any} */
+        const refByTypes = {};
         // WhatID is referenced where? -- Here we are getting the dependencies where the REFID is in the whatIds list
         const referenced = data.records.filter(e => whatIds.includes(e.refId)).map(n => {
-            if (referencedByTypes[n.type] === undefined) {
-                referencedByTypes[n.type] = 1;
+            if (refByTypes[n.type] === undefined) {
+                refByTypes[n.type] = 1;
             } else {
-                referencedByTypes[n.type]++; 
+                refByTypes[n.type]++;
             }
             return { 
                 id: n.id, 
@@ -50,7 +51,7 @@ export class DataDependenciesFactory {
             hadError: false,
             using: using,
             referenced: referenced,
-            referencedByTypes: referencedByTypes
+            referencedByTypes: refByTypes
         }
     }
 }

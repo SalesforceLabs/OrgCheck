@@ -69,9 +69,9 @@ But the prefered way now is to install the application via the AppExchange.
  - You should see the application definitly!
 
 ### I have the same error on EVERY tabs when the tool is accessing the API: INVALID_SESSION_ID: This session is not valid for use with the REST API 
-In case you have enabled the "**API Client Whitelisting**" feature, you will need to:
+In case you have enabled the "**API Access Control**" feature, you will need to:
  - Create a permission set.
- - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API CLient Whitelisting**" feature -- that's why we can't add it to everybody).
+ - In this permission set, check the system permission called "**Use any API Client**" (which appears ONLY if you activate the "**API Access Control**" feature -- that's why we can't add it to everybody).
  - And assign your user to this additional permission set.
 For more information, you can check that closed issue: https://github.com/SalesforceLabs/OrgCheck/issues/118
 

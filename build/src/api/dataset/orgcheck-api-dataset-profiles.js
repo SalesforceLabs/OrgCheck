@@ -10,9 +10,9 @@ export class DatasetProfiles extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Profile>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -61,7 +61,7 @@ export class DatasetProfiles extends Dataset {
 
         // Create the map of profiles
         logger?.log(`Parsing ${profileRecords.length} profiles...`);
-        const profiles = new Map(await Processor.map(profileRecords, (record) => {
+        const profiles = new Map(await Processor.map(profileRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.ProfileId);
@@ -97,38 +97,38 @@ export class DatasetProfiles extends Dataset {
 
         logger?.log(`Parsing ${objectPermissionRecords.length} object permissions, ${fieldPermissionRecords.length} field permissions and ${assignmentRecords.length} assignments...`);
         await Promise.all([
-            Processor.forEach(objectPermissionRecords, (record) => {
+            Processor.forEach(objectPermissionRecords, (/** @type {any} */ record) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.nbObjectPermissions = record.CountObject;
                 } else {
-                    logger.log(`[objectPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                    logger.log(`[objectPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(/** @type {any} */ record)}`);
                 }
             }),
-            Processor.forEach(fieldPermissionRecords, (record) => {
+            Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of Parent.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.nbFieldPermissions = record.CountField;    
                 } else {
-                    logger.log(`[fieldPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                    logger.log(`[fieldPermissionRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(/** @type {any} */ record)}`);
                 }
             }),
-            Processor.forEach(assignmentRecords, (record) => {
+            Processor.forEach(assignmentRecords, (/** @type {any} */ record) => {
                 const profileId = sfdcManager.caseSafeId(record.ProfileId); // see warning in the SOQL query (this is not a bug we use ProfileId instead of PermissionSet.ProfileId)
                 if (profiles.has(profileId)) {
                     const profile = profiles.get(profileId);
                     profile.memberCounts = record.CountAssignment;    
                 } else {
-                    logger.log(`[assignmentRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(record)}`);
+                    logger.log(`[assignmentRecords] Not Profile found with ID: ${profileId}, and we had Record=${JSON.stringify(/** @type {any} */ record)}`);
                 }
             })
         ]);
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${profiles.size} profiles...`);
-        await Processor.forEach(profiles, (profile) => {
+        await Processor.forEach(profiles, (/** @type {SFDC_Profile} */ profile) => {
             profileDataFactory.computeScore(profile);
         });
 

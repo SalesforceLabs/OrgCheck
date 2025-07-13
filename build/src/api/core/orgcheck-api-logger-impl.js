@@ -39,7 +39,7 @@ export class Logger extends LoggerIntf {
 
     /**
      * @description Constructor
-     * @param {BasicLoggerIntf} logger 
+     * @param {BasicLoggerIntf} logger - The injected logger
      */
     constructor(logger) {
         super()
@@ -51,8 +51,8 @@ export class Logger extends LoggerIntf {
 
     /**
      * @see LoggerIntf.log
-     * @param {string} operationName
-     * @param {string} [message] 
+     * @param {string} operationName - The name of the operation
+     * @param {string} [message] - The message to log
      */
     log(operationName, message) { 
         if (this._logger.isConsoleFallback()) {
@@ -64,8 +64,8 @@ export class Logger extends LoggerIntf {
 
     /**
      * @see LoggerIntf.ended
-     * @param {string} operationName
-     * @param {string} [message] 
+     * @param {string} operationName - The name of the operation
+     * @param {string} [message] - The message to log
      */
     ended(operationName, message) { 
         if (this._logger.isConsoleFallback()) {
@@ -78,8 +78,8 @@ export class Logger extends LoggerIntf {
 
     /**
      * @see LoggerIntf.failed
-     * @param {string} operationName
-     * @param {Error | string} [error] 
+     * @param {string} operationName - The name of the operation
+     * @param {Error | string} [error] - The error to log
      * @public
      */
     failed(operationName, error) { 
@@ -93,8 +93,8 @@ export class Logger extends LoggerIntf {
 
     /**
      * @description Turn this logger into a simple logger for a specific section
-     * @param {string} operationName
-     * @returns {SimpleLoggerIntf}
+     * @param {string} operationName - The name of the operation
+     * @returns {SimpleLoggerIntf} The simple logger created from the logger for that specific section
      */ 
     toSimpleLogger(operationName) {
         const internalLogger = this._logger;
@@ -116,9 +116,9 @@ export class Logger extends LoggerIntf {
 
 /**
  * @description Logs the end of this section
- * @param {string} operationName
- * @param {string} event 
- * @param {string | Error} [message='...']
+ * @param {string} operationName - The name of the operation
+ * @param {string} event - The event to log
+ * @param {string | Error} [message] - The message to log
  */
 const CONSOLE_LOG = (operationName, event, message='...') => { 
     console.log(`${new Date().toISOString()} - ${operationName} - ${event} - ${message}`); 

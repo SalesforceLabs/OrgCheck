@@ -9,9 +9,9 @@ export class DatasetObjectPermissions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_ObjectPermission>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -34,7 +34,7 @@ export class DatasetObjectPermissions extends Dataset {
         logger?.log(`Parsing ${permissionRecords.length} object permissions...`);
         const permissions = new Map(await Processor.map(
             permissionRecords,
-            (record) => {
+            (/** @type {any} */ record) => {
                 // Create the instance
                 const permission = permissionDataFactory.create({
                     properties: {
@@ -54,7 +54,7 @@ export class DatasetObjectPermissions extends Dataset {
                 // Add it to the map  
                 return [ `${permission.parentId}_${permission.objectType}`, permission ];
             },
-            (record) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
+            (/** @type {any} */ record) => record.Parent !== null // in some orgs, 'ParentId' is set to a value, BUT 'Parent' is null (because id can't be found!),
         ));
 
         // Return data as map

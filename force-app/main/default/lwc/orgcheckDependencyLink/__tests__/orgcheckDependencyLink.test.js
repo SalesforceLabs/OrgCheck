@@ -5,6 +5,7 @@ import OrgcheckDependencyLink from '../orgcheckDependencyLink';
 describe('c-orgcheck-dependency-link', () => {
 
   it('makes sure the component can be added in the document with no error and checks for its accessibility', async () => {
+    let hadError = false;
     try {
       const element = createElement('c-orgcheck-dependency-link', {
         is: OrgcheckDependencyLink   
@@ -19,8 +20,11 @@ describe('c-orgcheck-dependency-link', () => {
       await expect(element).toBeAccessible();
 
     } catch (e) {
+      console.error(e);
+      hadError = true;
+    } finally {
       // Check if there is no erros while creating nor inserting the compoent in the dom
-      expect(e).toBeUndefined();
+      expect(hadError).toBeFalsy();
     }
   });
 });

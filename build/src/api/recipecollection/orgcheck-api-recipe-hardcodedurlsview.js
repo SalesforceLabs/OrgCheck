@@ -7,12 +7,11 @@ export class RecipeHardcodedURLsView extends RecipeCollection {
 
     /**
      * @description List all recipe aliases that this recipe collection needs
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
-     * @returns {Array<string>}
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string>} List of recipe aliases that this recipe collection needs
      * @public
      */
-    extract(logger, parameters) {
+    extract(_logger) {
         return [
             RecipeAliases.APEX_CLASSES,
             RecipeAliases.APEX_TESTS,
@@ -33,13 +32,11 @@ export class RecipeHardcodedURLsView extends RecipeCollection {
 
     /**
      * @description Filter the data items by score rule ids
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map | undefined} [parameters] List of optional argument to pass
+     * @param {SimpleLoggerIntf} _logger - Logger
      * @returns {Array<number> | undefined} List of score rule ids to filter by or undefined if no filtering is needed
      * @public
-     * @default No filtering
      */ 
-    filterByScoreRuleIds(logger, parameters) {
+    filterByScoreRuleIds(_logger) {
         return SecretSauce.GetScoreRulesForHardCodedURLs();
     }
 }

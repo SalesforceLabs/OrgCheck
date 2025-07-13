@@ -9,9 +9,9 @@ export class DatasetObjects extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Object>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -48,10 +48,11 @@ export class DatasetObjects extends Dataset {
 
         const objectsDescription = results[0]; 
         const entities = results[1][0];
+        /** @type {any} */ 
         const entitiesByName = {};
         const qualifiedApiNames = await Processor.map(
             entities, 
-            (record) => { 
+            (/** @type {any} */ record) => { 
                 entitiesByName[record.QualifiedApiName] = record; 
                 return record.QualifiedApiName;
             }
@@ -61,7 +62,7 @@ export class DatasetObjects extends Dataset {
         logger?.log(`Parsing ${objectsDescription.length} objects...`);
         const objects = new Map(await Processor.map(
             objectsDescription,
-            (object) => {
+            (/** @type {any} */ object) => {
 
                 const type = sfdcManager.getObjectType(object.name, object.customSetting)
                 const entity = entitiesByName[object.name];
@@ -84,7 +85,7 @@ export class DatasetObjects extends Dataset {
                 // Add it to the map  
                 return [ obj.id, obj ];
             },
-            (object) => {
+            (/** @type {any} */ object) => {
                 return qualifiedApiNames?.includes(object.name) ? true : false;
             }
         ));

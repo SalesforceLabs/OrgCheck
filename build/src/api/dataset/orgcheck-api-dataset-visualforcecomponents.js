@@ -11,9 +11,9 @@ export class DatasetVisualForceComponents extends Dataset {
     
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_VisualForceComponent>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,13 +35,13 @@ export class DatasetVisualForceComponents extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords.length} visualforce components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(componentRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${componentRecords.length} visualforce components...`);
-        const components = new Map(await Processor.map(componentRecords, (record) => {
+        const components = new Map(await Processor.map(componentRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -58,9 +58,7 @@ export class DatasetVisualForceComponents extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_COMPONENT)
                 }, 
-                dependencies: {
-                    data: componentsDependencies
-                }
+                dependencyData: componentsDependencies
             });
 
             // Get information directly from the source code (if available)

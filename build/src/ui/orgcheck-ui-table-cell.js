@@ -4,9 +4,9 @@ export class CellFactory {
 
     /**
      * @description Create an instance of WhereToGetData like objects from a type and a set of properties
-     * @param {TableColumn | TableColumnWithData | TableColumnWithModifiers} column 
-     * @param {any} row
-     * @returns {any}
+     * @param {TableColumn | TableColumnWithData | TableColumnWithModifiers} column - Column header information
+     * @param {any} row - Input data
+     * @returns {any} Output data
      * @static
      */
     static create(column, row) {
@@ -47,21 +47,21 @@ export class CellFactory {
 
 /**
  * @description Get the value of the given property (could include neasted properties using the dot sign) in the given row.
- * @param {any} row 
- * @param {string} property 
- * @returns any
+ * @param {any} row - Input row
+ * @param {string} property - Name of the property to look for.
+ * @returns {any} Value of the given property in the given row
  */
 const RESOLVE = (row, property) => {
     let reference = row;
-    property.split('.').forEach((/** @type string} */ p) => { if (reference) reference = reference[p]; });
+    property.split('.').forEach((/** @type {string} */ p) => { if (reference) reference = reference[p]; });
     return reference;
 }
 
 /**
  * @description Decorate the cell based on modifiers and potentially add a decoration property to the given cell
- * @param {any} cell 
- * @param {any} modifier 
- * @returns the cell with a potential decoration property
+ * @param {any} cell - Cell information
+ * @param {any} modifier - Modifier information
+ * @returns {any} the cell with a potential decoration property
  */
 const DECORATE = (cell, modifier) => {
     if (modifier) {

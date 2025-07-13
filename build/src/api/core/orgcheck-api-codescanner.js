@@ -16,22 +16,57 @@ const SALESFORCE_MY_DOMAIN = '.my.salesforce.com';
  */ 
 export class CodeScanner {
 
+    /**
+     * @description Remove comments from a source code in Javascript, Apex, or any other language that uses similar comment syntax.
+     * @param {string} sourceCode - the source code to remove comments from.
+     * @returns {string} Returns the source code without comments and new lines.
+     * @public
+     * @static
+     */
     static RemoveCommentsFromCode(sourceCode) {
         return sourceCode?.replaceAll(REGEX_ALLCODE_COMMENTS_AND_NEWLINES, ' ') || '';
     }
 
+    /**
+     * @description Remove comments from a source code in XML, HTML, or any other language that uses similar comment syntax.
+     * @param {string} sourceCode - the source code to remove comments from.
+     * @returns {string} Returns the source code without comments and new lines.
+     * @public
+     * @static
+     */
     static RemoveCommentsFromXML(sourceCode) {
         return sourceCode?.replaceAll(REGEX_XML_COMMENTS_AND_NEWLINES, ' ') || '';
     }
 
+    /**
+     * @description Check if the given source code is an interface in Apex code.
+     * @param {string} sourceCode - the source code to check.
+     * @returns {boolean} Returns true if the source code is an interface in Apex code, false otherwise.
+     * @public
+     * @static
+     */
     static IsInterfaceFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_ISINTERFACE) !== null || false;
     }
 
+    /**
+     * @description Check if the given source code is an enum in Apex code.
+     * @param {string} sourceCode - the source code to check.
+     * @returns {boolean} Returns true if the source code is an enum in Apex code, false otherwise.
+     * @public
+     * @static
+     */
     static IsEnumFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_ISENUM) !== null || false;
     }
 
+    /**
+     * @description Find hard-coded URLs in the given source code.
+     * @param {string} sourceCode - the source code to search for hard-coded URLs.
+     * @returns {Array<string>} Returns an array of hard-coded URLs found in the source code.
+     * @public
+     * @static
+     */
     static FindHardCodedURLs(sourceCode) {
         return sourceCode?.match(REGEX_HARDCODEDURLS) // extract the domains
             ?.filter((domain) => SALESFORCE_DOMAINS.findIndex((sfdomain) => domain.indexOf(sfdomain) >= 0) >= 0)  // filter only the salesforce domains
@@ -40,6 +75,13 @@ export class CodeScanner {
             .filter((domain) => domain.indexOf(SALESFORCE_MY_DOMAIN) < 0); // remove the my.salesforce.com domains
     }
 
+    /**
+     * @description Find hard-coded Salesforce IDs in the given source code.
+     * @param {string} sourceCode - the source code to search for hard-coded Salesforce IDs.
+     * @returns {Array<string>} Returns an array of hard-coded Salesforce IDs found in the source code.
+     * @public
+     * @static
+     */
     static FindHardCodedIDs(sourceCode) {
         return sourceCode?.match(REGEX_HARDCODEDIDS) // extract the salesforce ids
             ?.map(id => id?.substring(1, id?.length-1)) // remove the surrounding quotes or so
@@ -48,18 +90,46 @@ export class CodeScanner {
             || []; // empty array if no ids found
     }
 
+    /**
+     * @description Check if the given source code is an Apex test class that has the @IsTest(SeeAllData=true) annotation.
+     * @param {string} sourceCode - the source code to check.
+     * @returns {boolean} Returns true if the source code is an Apex test class with the @IsTest(SeeAllData=true) annotation, false otherwise.
+     * @public
+     * @static
+     */
     static IsTestSeeAllDataFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_ISTESTSEEALLDATA) !== null || false;
     }
 
+    /**
+     * @description Count the number of asserts in an Apex test class source code.
+     * @param {string} sourceCode - the source code of the Apex test class to analyze.
+     * @returns {number} Returns the number of asserts found in the Apex test class source code.
+     * @public
+     * @static
+     */
     static CountOfAssertsFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_TESTNBASSERTS)?.length || 0;
     }
 
+    /**
+     * @description Check if the given source code contains SOQL queries.
+     * @param {string} sourceCode - the source code to check.
+     * @returns {boolean} Returns true if the source code contains SOQL queries, false otherwise.
+     * @public
+     * @static
+     */
     static HasSOQLFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_HASSOQL) !== null || false; 
     }
 
+    /**
+     * @description Check if the given source code contains DML operations.
+     * @param {string} sourceCode - the source code to check.
+     * @returns {boolean} Returns true if the source code contains DML operations, false otherwise.
+     * @public
+     * @static
+     */
     static HasDMLFromApexCode(sourceCode) {
         return sourceCode?.match(REGEX_APEXCODE_HASDML) !== null || false;
     }

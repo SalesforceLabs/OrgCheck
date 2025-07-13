@@ -398,10 +398,5 @@ describe('c-orgcheck-app', () => {
             expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds',
                 'parentId', 'hasParent', 'activeMemberIds' ].sort());
         });
-
-        it('Should have correct set of role box decorators', () => {
-            // roleBoxColorsDecorator uses 
-        });
-
     });
 });

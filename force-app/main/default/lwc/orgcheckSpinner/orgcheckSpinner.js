@@ -281,11 +281,11 @@ export default class OrgcheckSpinner extends LightningElement {
 
    /** @type {boolean} */ 
    const isMessageAnError = message instanceof Error;
-   // eslint-disable-next-line dot-notation
-   const contextIfError = message ? message['context'] : undefined;
+   // @ts-ignore
+   const contextIfError = message ? message.context : undefined;
 
     /** @type {Section} */
-    let section = new Section();
+    const section = new Section();
     section.id = sectionName;
     section.status = status;
     section.label = (isMessageAnError ? `${message.name}: ${message.message}` : message);

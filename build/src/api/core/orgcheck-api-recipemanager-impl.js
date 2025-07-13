@@ -90,8 +90,8 @@ export class RecipeManager extends RecipeManagerIntf {
             
     /**
      * @description Recipe Manager constructor
-     * @param {DatasetManagerIntf} datasetManager 
-     * @param {LoggerIntf} logger
+     * @param {DatasetManagerIntf} datasetManager - Dataset manager to inject
+     * @param {LoggerIntf} logger - Logger to inject
      */
     constructor(datasetManager, logger) {
         super();
@@ -159,9 +159,9 @@ export class RecipeManager extends RecipeManagerIntf {
 
     /**
      * @description Runs a designated recipe (by its alias)
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>} Returns as it is the value returned by the transform method recipe.
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
@@ -177,15 +177,15 @@ export class RecipeManager extends RecipeManagerIntf {
 
     /**
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
      * @public
      */
     clean(alias, parameters) {
         if (this._recipes.has(alias)) {
-            return this._cleanRecipe(alias, parameters);
+            this._cleanRecipe(alias, parameters);
         } else if (this._recipeCollections.has(alias)) {
-            return this._cleanRecipeCollection(alias, parameters);
+            this._cleanRecipeCollection(alias, parameters);
         } else {
             throw new TypeError(`The given alias (${alias}) does not correspond to a registered recipe.`);
         }
@@ -196,9 +196,9 @@ export class RecipeManager extends RecipeManagerIntf {
      *   - Step 1. Extract the list of datasets to run that this recipe uses
      *   - Step 2. Run the given datasets and gather the global data retrieved
      *   - Step 3. Transform the retrieved data and return the final result as a Map
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>} Returns as it is the value returned by the transform method recipe.
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      */
     async _runRecipe(alias, parameters) {
@@ -236,7 +236,7 @@ export class RecipeManager extends RecipeManagerIntf {
         // STEP 3. Transform
         // -------------------
         this._logger.log(section, 'This recipe will now transform all this information...');
-        /** @type {Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map} */
+        /** @type {Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>} */
         let finalData;
         try {
             finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
@@ -251,9 +251,9 @@ export class RecipeManager extends RecipeManagerIntf {
     }
 
     /**
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
-     * @returns {Promise<Map<string, DataCollectionStatistics>>}
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] - List of values to pass to the recipe
+     * @returns {Promise<Map<string, DataCollectionStatistics>>} Returns as it is the value returned by the transform method recipe.
      * @async
      */
     async _runRecipeCollection(alias, parameters) {
@@ -342,8 +342,8 @@ export class RecipeManager extends RecipeManagerIntf {
      * @description Cleans a designated recipe (by its alias) and the corresponding datasets.
      *    - Step 1. Extract the list of datasets to clean that this recipe uses
      *    - Step 2. Clean the given datasets
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @public
      */
     _cleanRecipe(alias, parameters) {
@@ -379,8 +379,8 @@ export class RecipeManager extends RecipeManagerIntf {
 
 
     /**
-     * @param {string} alias String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
-     * @param {Map} [parameters] List of values to pass to the recipe
+     * @param {string} alias - String representation of a recipe -- use one of the RECIPE_*_ALIAS constants available in this unit.
+     * @param {Map<string, any>} [parameters] List of values to pass to the recipe
      * @public
      */
     _cleanRecipeCollection(alias, parameters) {

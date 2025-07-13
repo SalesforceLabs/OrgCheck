@@ -84,8 +84,8 @@ export default class OrgcheckDependencyViewer extends LightningElement {
     /**
      * @description Returns the index of the legend from a specific depth
      * @see dependencyBoxColorsLegend
-     * @param {number} depth
-     * @returns {number}
+     * @param {number} depth - the depth of the box
+     * @returns {number} Index of the legend
      * @public
      */ 
     dependencyBoxColorsDecorator = (depth) => {
@@ -100,9 +100,9 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /**
      * @description Returns the HTML code for each box depending on its depth and data
-     * @param {number} depth
-     * @param {any} data
-     * @returns {string}
+     * @param {number} depth - the depth of the box
+     * @param {any} data - the data of the box
+     * @returns {string} HTML code for the box
      * @public
      */ 
     dependencyBoxInnerHtmlDecorator = (depth, data) => {
@@ -136,9 +136,10 @@ export default class OrgcheckDependencyViewer extends LightningElement {
 
     /**
      * @description Set information about the item and its dependencies and then open the modal
-     * @param {string} whatId
-     * @param {string} whatName
-     * @param {ocapi.DataDependencies} dependencies
+     * @param {string} whatId - Salesforce ID of the item
+     * @param {string} whatName - Name of the item
+     * @param {ocapi.DataDependenciesForOneItem} dependencies - Data dependencies of the item
+     * @public
      */ 
     @api open(whatId, whatName, dependencies) {
 

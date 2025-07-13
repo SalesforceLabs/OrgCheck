@@ -30,11 +30,11 @@ export class RowsFactory {
 
     /**
      * @description Create the rows of a table
-     * @param {Table} tableDefinition
-     * @param {Array<any>} records 
-     * @param {Function} onEachRowCallback
-     * @param {Function} onEachCellCallback
-     * @returns {Array<Row>}
+     * @param {Table} tableDefinition - Definition of the table
+     * @param {Array<any>} records - List of records
+     * @param {Function} onEachRowCallback - Callback to be called for each row
+     * @param {Function} onEachCellCallback - Callback to be called for each cell
+     * @returns {Array<Row>} List of rows
      */
     static create(tableDefinition, records, onEachRowCallback, onEachCellCallback) {
         return records.map((record, rIndex) => {
@@ -67,10 +67,10 @@ export class RowsFactory {
 
     /**
      * @description Sort table
-     * @param {Table} tableDefintion
-     * @param {Array<Row>} rows
-     * @param {number} columnIndex 
-     * @param {string} order
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<Row>} rows - List of rows
+     * @param {number} columnIndex - Index of the column to sort
+     * @param {string} order - Sort order, can be ASC or DESC
      */ 
     static sort(tableDefintion, rows,  columnIndex, order) {
         const column = tableDefintion.columns[columnIndex];
@@ -80,7 +80,7 @@ export class RowsFactory {
         const property = column.type == ColumnType.URL ? 'label' : 'value';
         let index = 0;
         let value1, value2;
-        return rows.sort((row1, row2) => {
+        rows.sort((row1, row2) => {
             if (isIterative === true) {
                 value1 = row1.cells[columnIndex].data?.values?.length || 0;
                 value2 = row2.cells[columnIndex].data?.values?.length || 0;
@@ -102,8 +102,8 @@ export class RowsFactory {
 
     /**
      * @description Filter table
-     * @param {Array<Row>} rows
-     * @param {string} searchInput
+     * @param {Array<Row>} rows - List of rows
+     * @param {string} searchInput - Search input
      */ 
     static filter(rows, searchInput) {
         if (searchInput?.length > 2) {
@@ -127,11 +127,11 @@ export class RowsFactory {
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion
-     * @param {Array<Row>} rows
-     * @param {string} title
-     * @param {Function} badScoreLabelById
-     * @returns {ExportedTable}
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<Row>} rows - List of rows
+     * @param {string} title - Title of the exported table
+     * @param {Function} badScoreLabelById - Function to get the label of a bad score
+     * @returns {ExportedTable} Exported table
      */ 
     static export(tableDefintion, rows, title, badScoreLabelById) {
 
@@ -199,11 +199,11 @@ export class RowsFactory {
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion
-     * @param {Array<any>} records
-     * @param {string} title 
-     * @param {Function} badScoreLabelById
-     * @returns {ExportedTable}
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<any>} records - List of records
+     * @param {string} title - Title of the exported table
+     * @param {Function} badScoreLabelById - Function to get the label of a bad score
+     * @returns {ExportedTable} Exported table
      */ 
     static createAndExport(tableDefintion, records, title, badScoreLabelById) {
         const donothing = () => {};

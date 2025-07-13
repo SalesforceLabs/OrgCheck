@@ -7,9 +7,15 @@
     "doc": "docs"
   },
   "scripts": {
-    "lint": "npm run lint:lwc",
+    "lint:api": "eslint build/src/api",
+    "lint:ui": "eslint build/src/ui",
     "lint:lwc": "eslint force-app/main/default/lwc",
-    "build": "for i in 'first run' 'second run'; do echo \"Rollup: ${i}\"; rollup --config; echo; done; echo 'Build SR: '; echo; ./build/build-static-resource.sh",
+    "lint:test": "eslint build/test",
+    "build:js": "rollup --config; rollup --config;",
+    "build:sr": "./build/build-static-resource.sh",
+    "scan:api": "sf code-analyzer run --target ./build/src/api --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
+    "scan:ui": "sf code-analyzer run --target ./build/src/ui --output-file /tmp/orgcheck-ui-scan.html; open /tmp/orgcheck-ui-scan.html",
+    "scan:lwc": "sf code-analyzer run --target './force-app/main/default/lwc/*/*.js' --output-file /tmp/orgcheck-lwc-scan.html; open /tmp/orgcheck-lwc-scan.html",
     "sf:open": "sf force org open",
     "sf:clean": "sf project deploy start --metadata-dir manifest/destructive",
     "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
@@ -29,15 +35,20 @@
   },
   "homepage": "https://sfdc.co/OrgCheck",
   "devDependencies": {
-    "@lwc/eslint-plugin-lwc": "^3.1.0",
+    "@lwc/eslint-plugin-lwc": "^3.0.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@sa11y/jest": "^7.2.9",
     "@salesforce/eslint-config-lwc": "^4.0.0",
     "@salesforce/eslint-plugin-lightning": "^2.0.0",
     "@salesforce/sfdx-lwc-jest": "^7.0.1",
-    "eslint": "^9.29.0",
-    "rollup": "^4.34.6",
+    "eslint": "^9.24.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jest": "^29.0.1",
+    "eslint-plugin-jsdoc": "^51.3.4",
+    "jest": "^30.0.4",
+    "rollup": "^4.44.2",
     "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-delete": "^2.1.0"
-  }
+    "rollup-plugin-delete": "^3.0.1"
+  },
+  "dependencies": {}
 }

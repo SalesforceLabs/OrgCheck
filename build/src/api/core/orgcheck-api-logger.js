@@ -5,36 +5,34 @@ export class BasicLoggerIntf {
 
     /**
      * @description Check if this logger is a console fallback logger
-     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+     * @returns {boolean | undefined} true if this logger is a console fallback logger, false otherwise
      * @public
      */
-    isConsoleFallback() {
-        throw new TypeError(`You need to implement the method "isConsoleFallback()"`);
-    }
+    isConsoleFallback() { throw new Error(`Method isConsoleFallback() not implemented yet.`); }
 
     /**
      * @description The logger logs
-     * @param {string} operationName
-     * @param {string} [message] 
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
      * @public
      */
-    log(operationName, message) { throw new TypeError(`You need to implement the method "log()"`); }
+    log(operationName, message) { throw new Error(`Method log(operationName=${operationName}, message=${message}) not implemented yet.`); }
 
     /**
      * @description The given operation ended (with an optional message)
-     * @param {string} operationName
-     * @param {string} [message] 
+     * @param {string} operationName - the name of the operation
+     * @param {string} [message] - the message to log
      * @public
      */
-    ended(operationName, message) { throw new TypeError(`You need to implement the method "ended()"`); }
+    ended(operationName, message) { throw new Error(`Method ended(operationName=${operationName}, message=${message}) not implemented yet.`); }
 
     /**
      * @description The given operation failed (with an optional message/error)
-     * @param {string} operationName
-     * @param {Error | string} [error] 
+     * @param {string} operationName - the name of the operation
+     * @param {Error | string} [error] - the error to log
      * @public
      */
-    failed(operationName, error) { throw new TypeError(`You need to implement the method "failed()"`); }
+    failed(operationName, error) { throw new Error(`Method failed(operationName=${operationName}, error=${error}) not implemented yet.`); }
 }
 
 /**
@@ -44,10 +42,10 @@ export class LoggerIntf extends BasicLoggerIntf {
 
     /**
      * @description Turn this logger into a simple logger for a specific operation
-     * @param {string} operationName 
-     * @returns {SimpleLoggerIntf}
+     * @param {string} operationName - the name of the operation
+     * @returns {SimpleLoggerIntf | undefined} - a simple logger
      */ 
-    toSimpleLogger(operationName) { throw new TypeError(`You need to implement the method "toSimpleLogger()"`); }
+    toSimpleLogger(operationName) { throw new Error(`Method toSimpleLogger(operationName=${operationName}) not implemented yet.`); }
 }
 
 /**
@@ -60,12 +58,12 @@ export class SimpleLoggerIntf {
      * @type {(message: string) => void}
      * @public
      */
-    log(message) { throw new TypeError(`You need to implement the method "log()"`); };
+    log(message) { throw new Error(`Method log(message=${message}) not implemented yet.`); };
 
     /**
      * @description Simple debug method with a message to output somewhere
      * @type {(message: string) => void}
      * @public
      */
-    debug(message) { throw new TypeError(`You need to implement the method "debug()"`); };
+    debug(message) { throw new Error(`Method debug(message=${message}) not implemented yet.`); };
 }

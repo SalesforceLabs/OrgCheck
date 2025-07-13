@@ -23,7 +23,7 @@ export class SalesforceManagerMock extends SalesforceManagerIntf {
 }
 
 export class JsForceMetadataMock {
-  list(requests) {
+  async list(requests) {
     if (requests[0].type === ProfilePasswordPolicy) {
       return [
         { fullName: 'test36_profilePasswordPolicy1677694498243' }, 
@@ -34,7 +34,7 @@ export class JsForceMetadataMock {
     }
     throw new Error('Need implt.');
   }
-  read(type, members) {
+  async read(type, members) {
     if (type === ProfilePasswordPolicy) {
       return [
         {"fullName":"test36_profilePasswordPolicy1677694498243","forgotPasswordRedirect":false,"lockoutInterval":60,"maxLoginAttempts":5,"minimumPasswordLength":8,"minimumPasswordLifetime":true,"obscure":true,"passwordComplexity":1,"passwordExpiration":90,"passwordHistory":3,"passwordQuestion":1,"profile":ProfilePasswordPolicy_Member1__Profile},

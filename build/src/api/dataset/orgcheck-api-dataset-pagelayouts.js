@@ -10,9 +10,9 @@ export class DatasetPageLayouts extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_PageLayout>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -43,12 +43,12 @@ export class DatasetPageLayouts extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageLayoutRecords.length} page layouts...`);
         const pageLayoutDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(pageLayoutRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(pageLayoutRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         logger?.log(`Parsing ${pageLayoutRecords.length} page layouts...`);
-        const pageLayouts = new Map(await Processor.map(pageLayoutRecords, (record) => {
+        const pageLayouts = new Map(await Processor.map(pageLayoutRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.Id);
@@ -66,21 +66,19 @@ export class DatasetPageLayouts extends Dataset {
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, record.EntityDefinition?.QualifiedApiName)
                 },
-                dependencies: {
-                    data: pageLayoutDependencies
-                }
+                dependencyData: pageLayoutDependencies
             });
 
             // Add it to the map  
             return [ pageLayout.id, pageLayout ];
 
-        }, (record) => { 
+        }, (/** @type {any} */ record) => { 
             if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
             return true;
         }));
 
         logger?.log(`Parsing ${pageLayoutProfileAssignRecords.length} page layout assignment counts...`);
-        await Processor.forEach(pageLayoutProfileAssignRecords, (record) => {
+        await Processor.forEach(pageLayoutProfileAssignRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this page layout
             const id = sfdcManager.caseSafeId(record.LayoutId);
@@ -95,7 +93,7 @@ export class DatasetPageLayouts extends Dataset {
         });
 
         // Compute the score of all items
-        await Processor.forEach(pageLayouts, (pageLayout) => {
+        await Processor.forEach(pageLayouts, (/** @type {SFDC_PageLayout} */ pageLayout) => {
             pageLayoutDataFactory.computeScore(pageLayout);
         });
 

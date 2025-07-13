@@ -11,9 +11,9 @@ export class DatasetVisualForcePages extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_VisualForcePage>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,13 +35,13 @@ export class DatasetVisualForcePages extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords.length} visualforce pages...`);
         const pagesDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(pageRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${pageRecords.length} visualforce pages...`);
-        const pages = new Map(await Processor.map(pageRecords, (record) => {
+        const pages = new Map(await Processor.map(pageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -59,9 +59,7 @@ export class DatasetVisualForcePages extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_PAGE)
                 }, 
-                dependencies: {
-                    data: pagesDependencies
-                }
+                dependencyData: pagesDependencies
             });
 
             // Get information directly from the source code (if available)

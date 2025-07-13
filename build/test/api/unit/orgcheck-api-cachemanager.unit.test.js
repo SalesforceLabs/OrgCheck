@@ -1,23 +1,34 @@
+import { DataCacheManagerIntf } from "../../../src/api/core/orgcheck-api-cachemanager";
 import { DataCacheManager } from "../../../src/api/core/orgcheck-api-cachemanager-impl";
 
 describe('tests.api.unit.DataCacheManager', () => {
   it('checks if the cache manager implementation runs correctly', async () => {
     const manager = new DataCacheManager({ 
-      compress: (d) => d,
-      decompress: (d) => d,
-      encode: (d) => d,
-      decode: (d) => d,
+      compression: {
+        compress: (d) => d,
+        decompress: (d) => d
+      },
+      encoding: {
+        encode: (d) => d,
+        decode: (d) => d
+      },
       storage: {}
     });
+    expect(manager).toBeDefined();
+    expect(manager).toBeInstanceOf(DataCacheManagerIntf);
   });
 
   it('checks if the cache manager implementation behaves normally when storage is full', async () => {
     const mockCache = new Map();
     const manager = new DataCacheManager({ 
-      compress: (buffer) => buffer,
-      decompress: (buffer) => buffer,
-      encode: (/** @type {string} */ stringData) => new Uint8Array(stringData.length),
-      decode: (/** @type {Uint8Array} */ buffer) => `{"data": "${'value'.padStart(buffer.length, '*')}"}`,
+      compression: {
+        compress: (buffer) => buffer,
+        decompress: (buffer) => buffer
+      },
+      encoding: {
+        encode: (/** @type {string} */ stringData) => new Uint8Array(stringData.length),
+        decode: (/** @type {Uint8Array} */ buffer) => `{"data": "${'value'.padStart(buffer.length, '*')}"}`
+      },
       storage: {
         setItem: (key, value) => { 
           console.error('setItem', key, value.length);

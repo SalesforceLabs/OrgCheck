@@ -10,9 +10,9 @@ export class DatasetRecordTypes extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger List of optional argument to pass
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - List of optional argument to pass
      * @returns {Promise<Map<string, SFDC_RecordType>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -32,7 +32,7 @@ export class DatasetRecordTypes extends Dataset {
 
         logger?.log(`Parsing ${recordTypeRecords.length} record types...`);
         const recordTypeDevNameToId = new Map();
-        const recordTypes = new Map(await Processor.map(recordTypeRecords, async (record) => {
+        const recordTypes = new Map(await Processor.map(recordTypeRecords, async (/** @type {any} */ record) => {
         
             // Get the ID15 of this record type
             const id = sfdcManager.caseSafeId(record.Id);
@@ -60,14 +60,14 @@ export class DatasetRecordTypes extends Dataset {
         }));
 
         logger?.log(`Extracting Ids from ${profileRecords.length} profiles...`);
-        const profileIds = await Processor.map(profileRecords, (record) => sfdcManager.caseSafeId(record.Id));
+        const profileIds = await Processor.map(profileRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id));
 
         logger?.log(`Get record type information from Profile Metatdata API`);
         const profiles = await sfdcManager.readMetadataAtScale('Profile', profileIds, [], logger);
 
         logger?.log(`Parsing ${profiles.length} profiles looking for record types information...`);
-        await Processor.forEach(profiles, async (profile) => {
-            profile.Metadata?.recordTypeVisibilities?.forEach((rtv) => {
+        await Processor.forEach(profiles, (/** @type {any} */ profile) => {
+            profile.Metadata?.recordTypeVisibilities?.forEach((/** @type {any} */ rtv) => {
                 if (recordTypeDevNameToId.has(rtv.recordType)) {
                     const id = recordTypeDevNameToId.get(rtv.recordType);
                     if (recordTypes.has(id)) {
@@ -84,7 +84,7 @@ export class DatasetRecordTypes extends Dataset {
         });
 
         // Then compute the score of record types 
-        await Processor.forEach(recordTypes, async (recordType) => {
+        await Processor.forEach(recordTypes, (/** @type {SFDC_RecordType} */ recordType) => {
             recordTypeDataFactory.computeScore(recordType);
         });
 

@@ -158,13 +158,14 @@
                 </lightning-tab>
                 <lightning-tab value="help" label="⁉️ Help" onactive={handleSubTabActivation}>
                     <h1 class="slds-text-heading_large">Need some help?</h1>
-                    <p><b>Org Check</b> uses a set of rules to compute the scores in your org. These rules are 
-                        listed in the matrix below in the row headers. They represent bad practices or anti-pattern
-                        if you will. Org Check only analyzes metadata in your org, and not data. The list of metadata types
-                        can be seen in this matrix in the column headers, like Apex Classes, Email Templates, etc.
-                        The way we <b>compute the score</b> is rather simple. For each metadata we analyze, depending 
-                        on its type, we run a set of appropriate rules. Every time a rule is met, the score 
-                        increases by <b>+1</b>.</p>
+                    <ul class="slds-list_dotted">
+                        <li><b>Org Check</b> uses a set of <b>rules</b> to compute the scores in your org. <b>Rules</b> represent bad practices or 
+                            anti-pattern if you will. These rules are listed in the matrix below in the row headers.</li>
+                        <li>Org Check only analyzes <b>metadata</b> in your org, and not data. The list of metadata types can be seen in this 
+                            matrix in the column headers, like Apex Classes, Email Templates, etc.</li>
+                        <li>The way we <b>compute the score</b> is rather simple. For each metadata we analyze, depending on its type, we run a 
+                            set of appropriate rules. Every time a rule is met, the score increases by <b>+1</b>.</li>
+                    </ul>
                     <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData} show-export-button export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                 </lightning-tab>
                 <lightning-tab value="global-view" label="🗺️ Global View" onactive={handleSubTabActivation}>

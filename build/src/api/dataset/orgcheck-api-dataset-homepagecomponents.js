@@ -11,9 +11,9 @@ export class DatasetHomePageComponents extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_HomePageComponent>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -36,12 +36,12 @@ export class DatasetHomePageComponents extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${homePageRecords.length} web links...`);
         const homePageDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(homePageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(homePageRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         logger?.log(`Parsing ${homePageRecords.length} installed packages...`);
-        const homePages = new Map(await Processor.map(homePageRecords, (record) => {
+        const homePages = new Map(await Processor.map(homePageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -57,9 +57,7 @@ export class DatasetHomePageComponents extends Dataset {
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.HOME_PAGE_COMPONENT)                    
                 },
-                dependencies: {
-                    data: homePageDependencies
-                }
+                dependencyData: homePageDependencies
             });
 
             // Get information directly from the source code (if available)

@@ -19,6 +19,8 @@ export class SFDC_PermissionSet extends SFDC_Profile {
 
     /**
      * @description Corresponding Permission Set Group Salesforce Id, if this item is a Permission Set Group
+     * @type {string}
+     * @public
      */
     groupId;
 }

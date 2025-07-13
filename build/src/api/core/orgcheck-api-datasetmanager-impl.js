@@ -61,7 +61,7 @@ export class DatasetManager extends DatasetManagerIntf {
 
     /**
      * @description Datasets promise cache
-     * @type {Map<string, Promise>}
+     * @type {Map<string, Promise<Array<any>>>}
      * @private
      */
     _datasetPromisesCache;
@@ -96,9 +96,9 @@ export class DatasetManager extends DatasetManagerIntf {
 
     /**
      * @description Dataset Manager constructor
-     * @param {SalesforceManagerIntf} sfdcManager 
-     * @param {DataCacheManagerIntf} cacheManager
-     * @param {LoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The instance of the salesforce manager
+     * @param {DataCacheManagerIntf} cacheManager - The instance of the cache manager
+     * @param {LoggerIntf} logger - The instance of the logger
      * @public
      */
     constructor(sfdcManager, cacheManager, logger) {
@@ -161,8 +161,8 @@ export class DatasetManager extends DatasetManagerIntf {
 
     /**
      * @description Run the given list of datasets and return them as a result
-     * @param {Array<string | DatasetRunInformation>} datasets 
-     * @returns {Promise<Map>}
+     * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to run
+     * @returns {Promise<Map<string, any>>} Returns the result 
      * @public
      * @async
      */
@@ -170,6 +170,7 @@ export class DatasetManager extends DatasetManagerIntf {
         if (datasets instanceof Array === false) {
             throw new TypeError('The given datasets is not an instance of Array.');
         }
+        /** @type {Array<any>} */
         const data = await Promise.all(datasets.map((dataset) => {
             const alias      = (typeof dataset === 'string' ? dataset : dataset.alias);
             const cacheKey   = (typeof dataset === 'string' ? dataset : dataset.cacheKey);
@@ -215,7 +216,7 @@ export class DatasetManager extends DatasetManagerIntf {
 
     /**
      * @description Clean the given list of datasets from cache (if present)
-     * @param {Array<string | DatasetRunInformation>} datasets 
+     * @param {Array<string | DatasetRunInformation>} datasets - The list of datasets to clean
      * @public
      */
     clean(datasets) {

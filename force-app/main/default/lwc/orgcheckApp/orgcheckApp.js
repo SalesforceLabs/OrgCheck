@@ -1,3 +1,5 @@
+/*global jsforce, fflate*/
+
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import * as ocapi from './libs/orgcheck-api.js';
@@ -8,12 +10,6 @@ import { loadScript } from 'lightning/platformResourceLoader';
 const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
-
-const COLORS = [
-    '#2f89a8', '#fdc223', '#5fc9f8', '#f8b195', '#f67280', 
-    '#c06c84', '#6c5b7b', '#355c7d', '#b56576', '#f8b195', 
-    '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576'
-];
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -150,7 +146,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Current activated tab in the main tab set
      * @type {string}
-     * @oublic
+     * @public
      */
     selectedMainTab;
 
@@ -316,7 +312,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load the Org Check API (and it dependencies) only the first time
-     * @param {any} [logger]
+     * @param {any} [logger] - The logger
      * @private
      * @async
      */ 
@@ -350,7 +346,6 @@ export default class OrgcheckApp extends LightningElement {
                 // -----------------------
                 // JsForce instance
                 // @ts-ignore 
-                // eslint-disable-next-line no-undef
                 jsforce, 
                 // -----------------------
                 // Local Storage methods
@@ -358,56 +353,45 @@ export default class OrgcheckApp extends LightningElement {
                 {
                     /**
                      * @description Set an item in the local storage
-                     * @param {string} key
-                     * @param {string} value 
+                     * @param {string} key - The key to set
+                     * @param {string} value - The value to set
                      */
                     setItem: (key, value) => { this.localStorage.setItem(key, value); },
                     /**
                      * @description Get an item from the local storage
-                     * @param {string} key
-                     * @returns {string}
+                     * @param {string} key - The key to set
+                     * @returns {string} The stored value for the given key
                      */
                     getItem: (key) => { return this.localStorage.getItem(key); },
                     /**
                      * @description Removes an item from the local storage
-                     * @param {string} key
+                     * @param {string} key - The key to remove
                      */
                     removeItem: (key) => { this.localStorage.removeItem(key); },
                     /**
-                     * @description Get the nth key in the storage, returns null if out of range
-                     * @param {number} index
-                     * @returns {string | null}
-                     */
-                    key: (index) => { return this.localStorage.key(index); },
-                    /**
                      * @description Get all the keys in the storage
-                     * @returns {Array<string>}
+                     * @returns {Array<string>} List of keys
                      */
                     keys: () => {  
                         const keys = []; 
                         for (let i = 0; i < this.localStorage.length; i++) {
                             keys.push(this.localStorage.key(i)); 
                         }
-                        return keys; },
-                    /**
-                     * @description Get the current length of the storage
-                     * @returns {number}
-                     */
-                    length: () => { return this.localStorage.length; }
+                        return keys; }
                 },
                 // -----------------------
                 // Encoding methods
                 { 
                     /** 
                      * @description Encoding method
-                     * @param data {string}
-                     * @returns {Uint8Array} 
+                     * @param {string} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     encode: (data) => { return this.textEncoder.encode(data); }, 
                     /** 
                      * @description Decoding method
-                     * @param data {Uint8Array}
-                     * @returns {string} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {string} Output data
                      */ 
                     decode: (data) => { return this.textDecoder.decode(data); }
                 },            
@@ -416,23 +400,21 @@ export default class OrgcheckApp extends LightningElement {
                 { 
                     /** 
                      * @description Compress method
-                     * @param data {Uint8Array}
-                     * @returns {Uint8Array} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     compress:   (data) => { 
                         // @ts-ignore
-                        // eslint-disable-next-line no-undef
                         return fflate.zlibSync(data, { level: 9 }); 
                     },
                     /** 
                      * @description Decompress method
-                     * @param data {Uint8Array}
-                     * @returns {Uint8Array} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     // @ts-ignore
                     decompress: (data) => { 
                         // @ts-ignore
-                        // eslint-disable-next-line no-undef
                         return fflate.unzlibSync(data); 
                     }
                 },
@@ -445,20 +427,20 @@ export default class OrgcheckApp extends LightningElement {
                     isConsoleFallback: () => { return true; },
                     /**
                      * @description Standard log method
-                     * @param section {string}
-                     * @param message {string}
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
                      */ 
                     log: (section, message) => { this._spinner.sectionLog(section, message); },
                     /**
                      * @description Log method when task is ended
-                     * @param section {string}
-                     * @param message {string}
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
                      */ 
                     ended: (section, message) => { this._spinner.sectionEnded(section, message); },
                     /**
                      * @description Log method when task has just failed
-                     * @param section {string}
-                     * @param error {string | Error}
+                     * @param {string} section - The section name
+                     * @param {string | Error} error - The error to log
                      */ 
                     failed: (section, error) => { this._spinner.sectionFailed(section, error); }
                 }
@@ -477,8 +459,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Show the error in a modal (that can be closed)
-     * @param {string} title
-     * @param {Error} error
+     * @param {string} title - The title of the modal
+     * @param {Error} error - The error to show in the error modal
      * @private
      */ 
     _showError(title, error) {
@@ -546,9 +528,9 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
-     * @param {string} recipe 
-     * @param {boolean} [forceRefresh=false] 
-     * @param {boolean} [lazyRefresh=true] 
+     * @param {string} recipe - The alias of the alias to use
+     * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
+     * @param {boolean} [lazyRefresh] - Is it a lazey refresh or not (true by default)
      * @private
      * @async
      */ 
@@ -638,7 +620,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load basic information to use the app (including the filters)
-     * @param {any} [logger]
+     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @throws {Error} If the current user has not enough permissions to run the app (please display the error it has information about missing permissions)
      * @private
      * @async
@@ -676,8 +658,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load the list of values for the filter
-     * @param {boolean} [forceRefresh=false] 
-     * @param {any} [logger]
+     * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
+     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @private
      * @async
      */ 
@@ -721,24 +703,21 @@ export default class OrgcheckApp extends LightningElement {
         if (this._hasRenderOnce === false) return;
         const TAB_SECTION = `Tab "${this.selectedSubTab}"`;
         this.tabLoading = true;
-        // eslint-disable-next-line @lwc/lwc/no-async-operation
-        setTimeout(async () => {
-            try {
-                this._spinner.open();
-                this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
-                switch (this.selectedSubTab) {
-                    case 'welcome': this._updateCacheInformation(); break;
-                    default:        await this._updateData(this.selectedSubTab);
-                }
-                this._spinner.sectionEnded(TAB_SECTION, `Done.`);
-                this._spinner.close(0);
-            } catch (error) {
-                this._spinner.sectionFailed(TAB_SECTION, error);
-            } finally {
-                this._updateLimits();
-                this.tabLoading = false;
+        try {
+            this._spinner.open();
+            this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
+            switch (this.selectedSubTab) {
+                case 'welcome': this._updateCacheInformation(); break;
+                default:        await this._updateData(this.selectedSubTab);
             }
-        }, 1);
+            this._spinner.sectionEnded(TAB_SECTION, `Done.`);
+            this._spinner.close(0);
+        } catch (error) {
+            this._spinner.sectionFailed(TAB_SECTION, error);
+        } finally {
+            this._updateLimits();
+            this.tabLoading = false;
+        }
     }
 
 
@@ -778,7 +757,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description When the org is a production, we show a message and a checkbox. This event is triggered when the user clicks on this checkbox.
      *              This should activate the usage of the Salesforce API from Org Check API.
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -804,7 +783,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when user selects a main tab
-     * @param {Event} event
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -846,7 +825,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when user selects a sub tab (within a main tab)
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -888,7 +867,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on the "View Score" button on a data table
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @public
      */ 
     handleViewScore(event) {
@@ -953,7 +932,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on the "Refresh" button from the current tab
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @async
      * @public
      */ 
@@ -1009,7 +988,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on a button to open a sub tab
-     * @param {Event} event
+     * @param {Event | any} event - The event information
      * @public
      */
     handleOpenSubTab(event) {
@@ -2268,8 +2247,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /** 
      * @description Color decorator for the role hierarchy graphic view.
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @returns {number} The index of the color in the legend
      * @public
      */
@@ -2281,8 +2260,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Inner HTML decorator for the role hierarchy graphic view
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @returns {string} The inner HTML to display in the role box
      * @public
      */
@@ -2292,10 +2271,9 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /** 
-     * @description Decorator for the Pop-Up dialog when clikcing in a role box
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
-     * @returns {string} The inner HTML to display in the pop-up box
+     * @description OnClick handler when clikcing in a role box
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @public
      */ 
     roleBoxOnClickDecorator = (depth, data) => {
@@ -2529,10 +2507,10 @@ export default class OrgcheckApp extends LightningElement {
                     class: `slds-box viewCard ${item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
                     tab: `${transfomer.tab}:${alias}`,
                     tableDefinition: ruleTableDefinition,
-                    tableData: item?.countBadByRule?.map((c, i) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
+                    tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
                 });
                 goodAndBadRows.push([ itemName, item.countGood, item.countBad ]); 
-                item.countBadByRule?.map((c, i) => {
+                item.countBadByRule?.forEach((c) => {
                     rulesRows.push([ itemName, c.ruleName, c.count ]);
                 });
                 sheets.push(ocui.RowsFactory.createAndExport(this[definition], item.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));

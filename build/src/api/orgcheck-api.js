@@ -1,6 +1,6 @@
 import { BasicLoggerIntf, LoggerIntf } from './core/orgcheck-api-logger';
 import { DataCacheItem, DataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
-import { DataCacheManager } from './core/orgcheck-api-cachemanager-impl';
+import { DataCacheManager, DataCacheManagerSetup_Compression, DataCacheManagerSetup_Encoding, DataCacheManagerSetup_Storage } from './core/orgcheck-api-cachemanager-impl';
 import { DataMatrix } from './core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { DatasetManager } from './core/orgcheck-api-datasetmanager-impl';
@@ -46,6 +46,7 @@ import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecompone
 import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
 import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
 import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
+import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
 
 /**
  * @description Org Check API main class
@@ -114,22 +115,20 @@ export class API {
 
     /**
      * @description Org Check constructor
-     * @param {string} accessToken
-     * @param {any} jsConnectionFactory
-     * @param {{setItem: function, getItem: function, removeItem: function, key: function, keys: function, length: function}} jsLocalStorage
-     * @param {{encode: function, decode: function}} jsEncoding
-     * @param {{compress: function, decompress: function}} jsCompressing
-     * @param {BasicLoggerIntf} loggerSetup
+     * @param {string} accessToken - the access token to use to connect to Salesforce
+     * @param {any} jsConnectionFactory - the connection factory to use to create a Salesforce connection
+     * @param {DataCacheManagerSetup_Storage} jsLocalStorage - the local storage to use to store the cache
+     * @param {DataCacheManagerSetup_Encoding} jsEncoding - the encoding to use to encode the cache
+     * @param {DataCacheManagerSetup_Compression} jsCompressing - the compression to use to compress the cache
+     * @param {BasicLoggerIntf} loggerSetup - the logger setup to use to log information
      */
     constructor(accessToken, jsConnectionFactory, jsLocalStorage, jsEncoding, jsCompressing, loggerSetup) {
         this._logger = new Logger(loggerSetup);
         this._sfdcManager = new SalesforceManager(jsConnectionFactory, accessToken); 
         this._cacheManager = new DataCacheManager({
-            compress:   jsCompressing.compress,
-            decompress: jsCompressing.decompress,
-            encode:     jsEncoding.encode,
-            decode:     jsEncoding.decode,
-            storage:    jsLocalStorage
+            compression: jsCompressing,
+            encoding:    jsEncoding,
+            storage:     jsLocalStorage
         });
         this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
         this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
@@ -195,8 +194,8 @@ export class API {
 
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
-     * @param {Array<string>} apexClassIds
-     * @returns {Promise}
+     * @param {Array<string>} apexClassIds - the list of Apex Class Ids to compile
+     * @returns {Promise<Array<any>>} The list of compilation results, each result is an object with the following properties:
      * @async
      * @public
      */
@@ -233,6 +232,7 @@ export class API {
 
     /**
      * @description Returns if the usage terms were accepted manually
+     * @returns {boolean} true if the usage terms were accepted manually, false otherwise
      * @public
      */
     wereUsageTermsAcceptedManually() {
@@ -294,9 +294,9 @@ export class API {
 
     /**
      * @description Get information about the page layouts
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @param {string} sobject 
+     * @param {string} namespace - the namespace of the package to filter the page layouts
+     * @param {string} sobjectType - the sobject type to filter the page layouts
+     * @param {string} sobject - the sobject to filter the page layouts
      * @returns {Promise<Array<SFDC_PageLayout>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -333,8 +333,8 @@ export class API {
 
     /**
      * @description Get information about the objects 
-     * @param {string} namespace 
-     * @param {string} sobjectType 
+     * @param {string} namespace - the namespace of the package to filter the objects
+     * @param {string} sobjectType - the sobject type to filter the objects
      * @returns {Promise<Array<SFDC_Object>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -358,7 +358,7 @@ export class API {
 
     /**
      * @description Get information about a specific sobject
-     * @param {string} sobject
+     * @param {string} sobject - the name of the sobject to get information about
      * @returns {Promise<SFDC_Object>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -373,7 +373,7 @@ export class API {
 
     /**
      * @description Remove all the cached information about a specific sobject
-     * @param {string} sobject
+     * @param {string} sobject - the name of the sobject to remove from cache
      * @public
      */
     removeObjectFromCache(sobject) {
@@ -382,7 +382,7 @@ export class API {
 
     /**
      * @description Get information about object permissions per parent (kind of matrix view)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the object permissions
      * @returns {Promise<DataMatrix>} Information about objects (list of string) and permissions (list of SFDC_ObjectPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
@@ -405,7 +405,7 @@ export class API {
 
     /**
      * @description Get information about application permissions per parent (kind of matrix view)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the application permissions
      * @returns {Promise<DataMatrix>} Information about applications (list of string) and permissions (list of SFDC_AppPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
@@ -468,9 +468,9 @@ export class API {
 
     /**
      * @description Get information about custom fields (filtered out by namespace/pakage, type and sobject)
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @param {string} sobject 
+     * @param {string} namespace - the namespace of the package to filter the custom fields
+     * @param {string} sobjectType - the sobject type to filter the custom fields
+     * @param {string} sobject - the sobject to filter the custom fields
      * @returns {Promise<Array<SFDC_Field>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -495,7 +495,7 @@ export class API {
 
     /**
      * @description Get information about permission sets (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the permission sets
      * @returns {Promise<Array<SFDC_PermissionSet>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -538,7 +538,7 @@ export class API {
 
     /**
      * @description Get information about profiles (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the profiles
      * @returns {Promise<Array<SFDC_Profile>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -561,7 +561,7 @@ export class API {
 
     /**
      * @description Get information about profile restrictions (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the profile restrictions
      * @returns {Promise<Array<SFDC_ProfileRestrictions>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -624,7 +624,7 @@ export class API {
 
     /**
      * @description Get information about custom labels (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the custom labels
      * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -647,7 +647,7 @@ export class API {
 
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the custom tabs
      * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -670,7 +670,7 @@ export class API {
 
     /**
      * @description Get information about documents (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the documents
      * @returns {Promise<Array<SFDC_Document>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -693,7 +693,7 @@ export class API {
 
     /**
      * @description Get information about LWCs (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the lightning web components
      * @returns {Promise<Array<SFDC_LightningWebComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -716,7 +716,7 @@ export class API {
 
     /**
      * @description Get information about Aura Components (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the lightning aura components
      * @returns {Promise<Array<SFDC_LightningAuraComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -739,7 +739,7 @@ export class API {
 
     /**
      * @description Get information about flexipages (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the lightning pages
      * @returns {Promise<Array<SFDC_LightningPage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -762,7 +762,7 @@ export class API {
     
     /**
      * @description Get information about VFCs (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the visualforce components
      * @returns {Promise<Array<SFDC_VisualForceComponent>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -785,7 +785,7 @@ export class API {
 
     /**
      * @description Get information about VFPs (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the visualforce pages
      * @returns {Promise<Array<SFDC_VisualForcePage>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -848,7 +848,7 @@ export class API {
 
     /**
      * @description Get information about Apex Classes (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the apex classes
      * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -871,7 +871,7 @@ export class API {
     
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the apex tests
      * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -894,7 +894,7 @@ export class API {
 
     /**
      * @description Get information about Apex triggers (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the apex triggers
      * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -917,7 +917,7 @@ export class API {
 
     /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
-     * @param {string} namespace 
+     * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
      * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -1004,9 +1004,9 @@ export class API {
 
     /**
      * @description Get information about WebLinks
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @param {string} sobject 
+     * @param {string} namespace - the namespace of the package to filter the weblinks
+     * @param {string} sobjectType - the sobject type to filter the weblinks
+     * @param {string} sobject - the sobject to filter the weblinks
      * @returns {Promise<Array<SFDC_WebLink>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -1051,9 +1051,9 @@ export class API {
 
     /**
      * @description Get information about record types
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @param {string} sobject 
+     * @param {string} namespace - the namespace of the package to filter the record types
+     * @param {string} sobjectType - the sobject type to filter the record types
+     * @param {string} sobject - the sobject to filter the record types
      * @returns {Promise<Array<SFDC_RecordType>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -1078,8 +1078,8 @@ export class API {
 
     /**
      * @description Get information about field permissions per parent (kind of matrix view) for a specific sobject
-     * @param {string} sobject
-     * @param {string} namespace
+     * @param {string} sobject - the name of the sobject to get information about
+     * @param {string} namespace - the namespace of the package to filter the field permissions
      * @returns {Promise<DataMatrix>} Information about fields (list of string) and permissions (list of SFDC_FieldPermissionsPerParent)
      * @throws Exception from recipe manager
      * @async
@@ -1123,7 +1123,7 @@ export class API {
     
     /**
      * @description Get information about EmailTemplate
-     * @param {string} namespace
+     * @param {string} namespace - the namespace of the package to filter the email templates
      * @returns {Promise<Array<SFDC_EmailTemplate>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -1186,9 +1186,9 @@ export class API {
     
     /**
      * @description Get information about Validation rules
-     * @param {string} namespace 
-     * @param {string} sobjectType 
-     * @param {string} sobject 
+     * @param {string} namespace - the namespace of the package to filter the validation rules
+     * @param {string} sobjectType - the sobject type to filter the validation rules
+     * @param {string} sobject - the sobject to filter the validation rules
      * @returns {Promise<Array<SFDC_ValidationRule>>} List of items to return
      * @throws Exception from recipe manager
      * @async
@@ -1213,7 +1213,7 @@ export class API {
 
     /**
      * @description Get global view of the org
-     * @returns {Promise<Array>} List of items to return
+     * @returns {Promise<Map<string, DataCollectionStatistics>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
@@ -1233,7 +1233,7 @@ export class API {
 
     /**
      * @description Get hardcoded URLs view of the org
-     * @returns {Promise<Array>} List of items to return
+     * @returns {Promise<Map<string, DataCollectionStatistics>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public

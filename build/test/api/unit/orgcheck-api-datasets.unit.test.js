@@ -61,40 +61,40 @@ class SfdcManagerMock extends SalesforceManagerIntf {
 
   caseSafeId(id) { return id; }
 
-  setupUrl(id, type, parentId, parentType) { return `/setupURL/type/${type}/id/${id}`; }
+  setupUrl(id, type, _parentId, _parentType) { return `/setupURL/type/${type}/id/${id}`; }
 
-  getObjectType(objectName, isCustomSetting) {
+  getObjectType(_objectName, isCustomSetting) {
     return isCustomSetting ? 'CustomSetting' : 'StandardObject';
   }
 
   get dailyApiRequestLimitInformation() { return null; }
 
-  async soqlQuery(queries, logger) { 
+  async soqlQuery(queries, _logger) { 
     return queries.map((query) => { 
       const key = Object.keys(this.#soqlQueryResponses).find((p) => query?.string?.indexOf(p) !== -1);
       return (key ? this.#soqlQueryResponses[key] : []); 
     });
   }
 
-  async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
+  async dependenciesQuery(_ids, _logger) { return { records: [], errors: [] }; }
 
-  async readMetadata(metadatas, logger) { return new Map(); }
+  async readMetadata(_metadatas, _logger) { return new Map(); }
 
-  async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
+  async readMetadataAtScale(_type, _ids, _byPasses, _logger) { return []; }
 
-  async describeGlobal(logger) { return this.#describeGlobal; }
+  async describeGlobal(_logger) { return this.#describeGlobal; }
 
-  async describe(sobjectDevName, logger) { return {}; }
+  async describe(_sobjectDevName, _logger) { return {}; }
 
-  async recordCount(sobjectDevName, logger) { return 0; }
+  async recordCount(_sobjectDevName, _logger) { return 0; }
 
 }
 
 class DataFactoryMock extends DataFactoryIntf { 
 
-  getScoreRule(id) { return null; }
+  getScoreRule(_id) { return null; }
 
-  getInstance(dataClass) {
+  getInstance(_dataClass) {
     return {
       create: (setup) => { return setup.properties; },
       createWithScore: (setup) => { setup.score = 0; return setup.properties; },
@@ -136,21 +136,20 @@ describe('tests.api.unit.Datasets', () => {
         const sfdcManager = new SfdcManagerMock();
         const dataFactory = new DataFactoryMock();
         const logger = new SimpleLoggerMock();
+        let hadError = false, errorMessageIfAny = undefined;
         try {
           const results = await dataset.run(sfdcManager, dataFactory, logger);
           expect(results).toBeDefined();
           expect(results instanceof Map).toBeTruthy();
           expect(results.size).toBeDefined();
-        } catch (e) {
-          expect(e instanceof Error).toBeTruthy();
-          expect(e.message).toBeDefined();
-          const isOrgCheckError = e.message.indexOf(`${dataset.constructor.name}: `) === 0;
-          if (isOrgCheckError === false) {
-            console.error(`Dataset '${dataset.constructor.name}': Message of the error was: ${e.message}`);
-            console.error(`Dataset '${dataset.constructor.name}': Stack trace of the error was: ${e.stack}`);
-          }
-          expect(isOrgCheckError).toBeTruthy();
-          //expect(e.message).toContain(`${dataset.constructor.name}: `, e.stackTrace);
+        } catch (error) {
+          hadError = true;
+          errorMessageIfAny = error?.message;
+        } finally {
+          // hadError = true -> OK
+          // hadError = false AND msg startsWith.... = true -> OK
+          // hadError = false AND msg startsWith.... = false -> KO
+          expect(hadError === false && errorMessageIfAny?.startsWith(`${dataset.constructor.name}: `) === false).toBeFalsy();
         }
       });
     });
@@ -232,7 +231,7 @@ describe('tests.api.unit.Datasets', () => {
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
     });
-    it('checks if regex are correct', async() => {
+    it('checks if we get the correct data', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
       sfdcManager.addSoqlQueryResponse('FROM RecordType ', [

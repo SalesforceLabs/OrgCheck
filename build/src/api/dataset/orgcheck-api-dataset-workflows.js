@@ -10,9 +10,9 @@ export class DatasetWorkflows extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Workflow>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -28,7 +28,7 @@ export class DatasetWorkflows extends Dataset {
         // List of flow ids
         const workflowRuleRecords = results[0];
         logger?.log(`Parsing ${workflowRuleRecords.length} Workflow Rules...`);
-        const workflowRuleIds = await Processor.map(workflowRuleRecords, (record) => record.Id);
+        const workflowRuleIds = await Processor.map(workflowRuleRecords, (/** @type {any} */ record) => record.Id);
 
         // Init the factory and records
         const workflowDataFactory = dataFactory.getInstance(SFDC_Workflow);
@@ -39,7 +39,7 @@ export class DatasetWorkflows extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records.length} workflows...`);
-        const workflows = new Map(await Processor.map(records, async (record) => {
+        const workflows = new Map(await Processor.map(records, async (/** @type {any} */ record) => {
 
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
@@ -64,14 +64,14 @@ export class DatasetWorkflows extends Dataset {
             const directActions = record.Metadata.actions;
             workflow.actions = await Processor.map(
                 directActions,
-                (action) => { return { name: action.name, type: action.type } }
+                (/** @type {any} */ action) => { return { name: action.name, type: action.type } }
             );
 
             // Add information about time triggered actions
             const timeTriggers = record.Metadata.workflowTimeTriggers;
             await Processor.forEach(
                 timeTriggers, 
-                async (tt) => {
+                (/** @type {any} */ tt) => {
                     const field = tt.offsetFromField || 'TriggerDate';
                     if (tt.actions.length === 0) {
                         workflow.emptyTimeTriggers.push({
@@ -79,17 +79,14 @@ export class DatasetWorkflows extends Dataset {
                             delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}`
                         });
                     } else {
-                        await Processor.forEach(
-                            tt.actions,
-                            (action) => {
-                                workflow.futureActions.push({ 
-                                    name: action.name, 
-                                    type: action.type, 
-                                    field: field,
-                                    delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}` 
-                                });
-                            }
-                        )
+                        tt.actions.forEach((/** @type {any} */ action) => {
+                            workflow.futureActions.push({ 
+                                name: action.name, 
+                                type: action.type, 
+                                field: field,
+                                delay: `${tt.timeLength} ${tt.workflowTimeTriggerUnit}` 
+                            });
+                        });
                     }
                 }
             );

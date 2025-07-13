@@ -9,13 +9,13 @@ export class DatasetCurrentUserPermissions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map} parameters
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} _dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, boolean>>} The result of the dataset
      */
-    async run(sfdcManager, dataFactory, logger, parameters) {
+    async run(sfdcManager, _dataFactory, logger, parameters) {
 
         const permissionFields = parameters?.get(OrgCheckGlobalParameter.SYSTEM_PERMISSIONS_LIST);
 
@@ -40,8 +40,8 @@ export class DatasetCurrentUserPermissions extends Dataset {
         // Return data as map
         return new Map(await Processor.map(
             Object.keys(permissions),
-            (field) => [ field, permissions[field] ],
-            (field) => field.startsWith('Permissions')
+            (/** @type {string} */ field) => [ field, permissions[field] ],
+            (/** @type {string} */ field) => field.startsWith('Permissions')
         ));
     } 
 }

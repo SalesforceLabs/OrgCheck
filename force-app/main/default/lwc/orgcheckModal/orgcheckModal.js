@@ -14,9 +14,10 @@ export default class OrgcheckModal extends LightningElement {
     
     /**
      * @description Opens the modal
-     * @param {string} title
-     * @param {Error | string | object} content
-     * @param {boolean} isClosable
+     * @param {string} title - Title of the modal
+     * @param {Error | string | object} content - Content of the modal
+     * @param {boolean} isClosable - Flag to allow the user to close the modal
+     * @public
      */
     @api open(title, content, isClosable=true) {
         if (this.isShown === false) {

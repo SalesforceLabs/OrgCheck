@@ -20,10 +20,10 @@ export class DatasetCustomFields extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map} parameters
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SFDC_Field>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
@@ -48,14 +48,14 @@ export class DatasetCustomFields extends Dataset {
         
         const entityInfoByCustomFieldId = new Map(await Processor.map(
             customFieldRecords, 
-            (record) => [ 
+            (/** @type {any} */ record) => [ 
                 sfdcManager.caseSafeId(record.Id), 
                 { 
                     qualifiedApiName: record.EntityDefinition.QualifiedApiName, 
                     isCustomSetting: record.EntityDefinition.IsCustomSetting 
                 }
             ],
-            (record) => {
+            (/** @type {any} */ record) => {
                 if (!record.EntityDefinition) return false; // ignore if no EntityDefinition linked
                 if (EXCLUDED_OBJECT_PREFIXES.includes(record.EntityDefinition.KeyPrefix)) return false; // ignore these objects
                 if (record.EntityDefinition.QualifiedApiName?.endsWith('_hd')) return false; // ignore the trending historical objects
@@ -66,7 +66,7 @@ export class DatasetCustomFields extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${customFieldRecords.length} custom fields...`);
         const customFieldsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(customFieldRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(customFieldRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
@@ -76,7 +76,7 @@ export class DatasetCustomFields extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records.length} custom fields...`);
-        const customFields = new Map(await Processor.map(records, (record) => {
+        const customFields = new Map(await Processor.map(records, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -104,14 +104,24 @@ export class DatasetCustomFields extends Dataset {
                     isExternalId: record.Metadata.externalId === true,
                     isIndexed: record.Metadata.unique === true || record.Metadata.externalId === true,
                     defaultValue: record.Metadata.defaultValue,
-                    isRestrictedPicklist: record.Metadata.valueSet && record.Metadata.valueSet.restricted === true,
                     formula: record.Metadata.formula,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.CUSTOM_FIELD, entityInfo.qualifiedApiName, sfdcManager.getObjectType( entityInfo.qualifiedApiName, entityInfo.isCustomSetting))
                 }, 
-                dependencies: {
-                    data: customFieldsDependencies
-                }
+                dependencyData: customFieldsDependencies
             });
+
+            if (record.Metadata.valueSet) {
+                if (typeof record.Metadata.valueSet === 'string') {
+                    // If valueSet is a string it refers to a global picklist and is ALWAYS restricted
+                    // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_skills.htm
+                    customField.isRestrictedPicklist = true;
+                } else {
+                    // see https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_field_types.htm?q=valueSetDefinition
+                    customField.isRestrictedPicklist = (record.Metadata.valueSet.restricted === true);
+                }
+            } else {
+                customField.isRestrictedPicklist = false
+            }
 
             // Get information directly from the source code (if available)
             if (customField.formula) {
