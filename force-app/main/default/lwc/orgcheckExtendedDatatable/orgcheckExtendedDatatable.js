@@ -257,7 +257,9 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
                 cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
                           (this.isStickyHeaders ? 'sticky ': '') + 
-                          (c instanceof ocui.TableColumnWithOrientation && c.orientation === ocui.Orientation.VERTICAL ? 'vertical ' : ' ')
+                          // eslint-disable-next-line dot-notation
+                          (c['orientation'] === ocui.Orientation.VERTICAL ? 'vertical ' : ' ')
+                          // Note: can't use instanceof on 'c'
             }
         });
     }

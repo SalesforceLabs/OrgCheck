@@ -293,11 +293,11 @@ export default class OrgcheckGraphics extends LightningElement {
   _drawHierarchy() {
     // If specified from the parent component (via @api), these properties will be typed as string! 
     // Making sure it is considered as a number whatever the case
-    const boxHeight = Number.parseInt(this.hierarchyBoxHeight, 2); 
-    const boxWidth = Number.parseInt(this.hierarchyBoxWidth, 2);
-    const boxVerticalPadding = Number.parseInt(this.hierarchyBoxVerticalPadding, 2);
-    const boxHorizontalPadding = Number.parseInt(this.hierarchyBoxHorizontalPadding, 2);
-    const boxTextPadding = Number.parseInt(this.hierarchyBoxTextPadding, 2);
+    const boxHeight = Number.parseInt(this.hierarchyBoxHeight, 10); 
+    const boxWidth = Number.parseInt(this.hierarchyBoxWidth, 10);
+    const boxVerticalPadding = Number.parseInt(this.hierarchyBoxVerticalPadding, 10);
+    const boxHorizontalPadding = Number.parseInt(this.hierarchyBoxHorizontalPadding, 10);
+    const boxTextPadding = Number.parseInt(this.hierarchyBoxTextPadding, 10);
 
     // add the css style to the legend
     this.hierarchyLegend = this.hierarchyBoxColorLegend.map((c) => {
@@ -415,9 +415,9 @@ export default class OrgcheckGraphics extends LightningElement {
     });
     const values = this.pieCategories.map((d) => d.value);
     const colors = this.pieCategories.map((d) => d.color);
-    const diameter = Number.parseInt(this.pieSize, 2); // if size is specified its type will be string! making sure it is considered as a number whatever the case
+    const diameter = Number.parseInt(this.pieSize, 10); // if size is specified its type will be string! making sure it is considered as a number whatever the case
     const radius = diameter / 2;
-    const stroke = Number.parseInt(this.pieStrokeWidth, 2); // same for stroke!
+    const stroke = Number.parseInt(this.pieStrokeWidth, 10); // same for stroke!
 
     // Get the main tag 
     const mainTag = this._api.select(this.template.querySelector('.orgcheck-graph'));

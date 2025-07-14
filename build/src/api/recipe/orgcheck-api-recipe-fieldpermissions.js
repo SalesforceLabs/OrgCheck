@@ -24,7 +24,7 @@ export class RecipeFieldPermissions extends Recipe {
         return [
             new DatasetRunInformation(
                 DatasetAliases.FIELDPERMISSIONS,
-                `${DatasetAliases.FIELDPERMISSIONS}_${parameters.get('object')}`,
+                `${DatasetAliases.FIELDPERMISSIONS}_${OrgCheckGlobalParameter.getSObjectName(parameters)}`,
                 parameters // should contain 'object'
             ),
             DatasetAliases.PROFILES,

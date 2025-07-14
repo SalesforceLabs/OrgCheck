@@ -10,6 +10,7 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeObject extends Recipe {
 
@@ -24,7 +25,7 @@ export class RecipeObject extends Recipe {
         return [ 
             new DatasetRunInformation(
                 DatasetAliases.OBJECT,
-                `${DatasetAliases.OBJECT}_${parameters.get('object')}`,
+                `${DatasetAliases.OBJECT}_${OrgCheckGlobalParameter.getSObjectName(parameters)}`,
                 parameters // should include 'object'
             ),
             DatasetAliases.OBJECTTYPES,
@@ -32,7 +33,7 @@ export class RecipeObject extends Recipe {
             DatasetAliases.LIGHTNINGPAGES,
             new DatasetRunInformation(
                 DatasetAliases.CUSTOMFIELDS,
-                `${DatasetAliases.CUSTOMFIELDS}_${parameters.get('object')}`,
+                `${DatasetAliases.CUSTOMFIELDS}_${OrgCheckGlobalParameter.getSObjectName(parameters)}`,
                 parameters // should include 'object'
             ),
         ];

@@ -126,16 +126,16 @@ export class DataFactoryInstance extends DataFactoryInstanceIntf {
         }
         // If dependencies are needed...
         if (this._isDependenciesNeeded === true) {
-            if (setup instanceof DataFactoryInstanceCreateSetup_WithDependencies && setup.dependencies) {
+            if (setup['dependencyData']) {
                 row.dependencies = DataDependenciesFactory.create(
-                    setup.dependencies.data, 
-                    (setup.dependencies.idFields || ['id']).map((/** @type {string} */ f) => row[f])
+                    setup['dependencyData'], 
+                    (setup['dependencyIdFields'] || ['id']).map((/** @type {string} */ f) => row[f])
                 );
             } else {
                 console.warn(`This data (of type ${this._dataClass}) is defined as with dependencies, but no dependencies were provided.`);
             }
         } else {
-            if (setup instanceof DataFactoryInstanceCreateSetup_WithDependencies && setup.dependencies) {
+            if (setup['dependencyData']) {
                 throw new TypeError(`This data (of type ${this._dataClass}) is defined as without dependencies, but some dependencies were provided.`);
             }
         }

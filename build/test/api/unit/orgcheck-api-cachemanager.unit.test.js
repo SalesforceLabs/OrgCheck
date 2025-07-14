@@ -31,7 +31,6 @@ describe('tests.api.unit.DataCacheManager', () => {
       },
       storage: {
         setItem: (key, value) => { 
-          console.error('setItem', key, value.length);
           if (value.length > 200) { 
             throw new Error(`Simulation of a LocalStorage limitation`); 
           } else { 
