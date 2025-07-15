@@ -17,36 +17,12 @@ export class Logger extends LoggerIntf {
     _logger;
 
     /**
-     * @description Operation names that are/were logged
-     * @type {Map<string, number>}}
-     * @private
-     */
-    _operationNames;
-
-    /**
-     * @description Count of successful operations
-     * @type {number}
-     * @private
-     */
-    _countSuccesses;
-
-    /**
-     * @description Count of failed operations
-     * @type {number}
-     * @private
-     */
-    _countFailures;
-
-    /**
      * @description Constructor
      * @param {BasicLoggerIntf} logger - The injected logger
      */
     constructor(logger) {
         super()
         this._logger = logger;
-        this._countSuccesses = 0;
-        this._countFailures = 0;
-        this._operationNames = new Map();
     }
 
     /**
@@ -59,7 +35,6 @@ export class Logger extends LoggerIntf {
             CONSOLE_LOG(operationName, 'LOG', message);
         }
         this._logger?.log(operationName, message);
-        this._operationNames.set(operationName, LOG_OPERATION_IN_PROGRESS);
     }
 
     /**
@@ -71,9 +46,7 @@ export class Logger extends LoggerIntf {
         if (this._logger.isConsoleFallback()) {
             CONSOLE_LOG(operationName, 'ENDED', message);
         }
-        this._countSuccesses++;
         this._logger?.ended(operationName, message);
-        this._operationNames.set(operationName, LOG_OPERATION_DONE);
     }
 
     /**
@@ -86,9 +59,7 @@ export class Logger extends LoggerIntf {
         if (this._logger.isConsoleFallback()) {
             CONSOLE_LOG(operationName, 'FAILED', error);
         }
-        this._countFailures++;
         this._logger?.failed(operationName, error);
-        this._operationNames.set(operationName, LOG_OPERATION_FAILED);
     }
 
     /**
@@ -97,16 +68,15 @@ export class Logger extends LoggerIntf {
      * @returns {SimpleLoggerIntf} The simple logger created from the logger for that specific section
      */ 
     toSimpleLogger(operationName) {
-        const internalLogger = this._logger;
         return { 
             log: (message) => { 
-                if (this._logger.isConsoleFallback()) {
+                if (this._logger?.isConsoleFallback() ?? true) {
                     CONSOLE_LOG(operationName, 'LOG', message);
                 }
-                internalLogger?.log(operationName, message);
+                this._logger?.log(operationName, message);
             },
             debug: (message) => { 
-                if (this._logger.isConsoleFallback()) {
+                if (this._logger?.isConsoleFallback() ?? true) {
                     CONSOLE_LOG(operationName, 'DEBUG', message);
                 }
             }

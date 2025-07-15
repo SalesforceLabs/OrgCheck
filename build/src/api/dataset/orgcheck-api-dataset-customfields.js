@@ -75,7 +75,6 @@ export class DatasetCustomFields extends Dataset {
         const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()), [], logger);
 
         // Create the map
-        logger?.log(`Parsing ${records.length} custom fields...`);
         const customFields = new Map(await Processor.map(records, (/** @type {any} */ record) => {
 
             // Get the ID15

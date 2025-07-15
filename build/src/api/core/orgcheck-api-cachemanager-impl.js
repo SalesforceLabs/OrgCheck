@@ -1,93 +1,25 @@
 import { DataCacheItem, DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from "./orgcheck-api-cachemanager";
-
-export class DataCacheManagerSetup_Compression {
-
-    /**
-     * @description Compress function
-     * @type {Function}
-     * @param {Uint8Array} data - Input data
-     * @returns {Uint8Array} Output data
-     */
-    compress;
-
-    /**
-     * @description Decompress function
-     * @type {Function}
-     * @param {Uint8Array} data - Input data
-     * @returns {Uint8Array} Output data
-     */
-    decompress;
-}
-
-export class DataCacheManagerSetup_Encoding {
-
-    /**
-     * @description Encode function
-     * @type {Function}
-     * @param {string} data - Input data
-     * @returns {Uint8Array} Output data
-     */
-    encode;
-
-    /**
-     * @description Decode function
-     * @type {Function}
-     * @param {Uint8Array} data - Input data
-     * @returns {string} Output data
-     */
-    decode;
-}
-
-export class DataCacheManagerSetup_Storage {
-
-    /**
-     * @description Set an Item in the storage
-     * @type {Function}
-     * @param {string} key - The key to set
-     * @param {string} value - The value to set
-     */
-    setItem;
-
-    /**
-     * @description Get an Item in the storage
-     * @type {Function}
-     * @param {string} key - The key to set
-     * @returns {string} The stored value for the given key
-     */
-    getItem;
-
-    /**
-     * @description Remove an Item in the storage
-     * @type {Function}
-     * @param {string} key - The key to remove
-     */
-    removeItem;
-
-    /**
-     * @description Get all the keys in the storage
-     * @type {Function}
-     * @returns {Array<string>} List of keys
-     */
-    keys;
-}
+import { CompressorIntf } from "./orgcheck-api-compressor";
+import { EncoderIntf } from "./orgcheck-api-encoder";
+import { StorageIntf } from "./orgcheck-api-storage";
 
 export class DataCacheManagerSetup {
 
     /**
      * @description Compression set of functions
-     * @type {DataCacheManagerSetup_Compression}
+     * @type {CompressorIntf}
      */
     compression;
 
     /**
      * @description Encoding set of functions
-     * @type {DataCacheManagerSetup_Encoding}
+     * @type {EncoderIntf}
      */
     encoding;
 
     /**
      * @description Storage set of functions
-     * @type {DataCacheManagerSetup_Storage}
+     * @type {StorageIntf}
      */
     storage;
 }

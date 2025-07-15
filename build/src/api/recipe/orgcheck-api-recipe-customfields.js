@@ -29,13 +29,13 @@ export class RecipeCustomFields extends Recipe {
     /**
      * @description transform the data from the datasets and return the final result as a Map
      * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {SimpleLoggerIntf} logger - Logger
      * @param {Map<string, any>} [parameters] - List of optional argument to pass
      * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, _logger, parameters) {
+    async transform(data, logger, parameters) {
 
         // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
@@ -67,6 +67,7 @@ export class RecipeCustomFields extends Recipe {
                 array.push(customField);
             }
         });
+        logger?.log(`Done transforming custom fields!`);
 
         // Return data
         return array;

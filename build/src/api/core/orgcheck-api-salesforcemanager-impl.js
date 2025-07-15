@@ -12,6 +12,20 @@ import { SecretSauce } from "./orgcheck-api-secretsauce";
 const MAX_IDS_IN_DAPI_REQUEST_SIZE = 100;
 
 /**
+ * @description When requesting a lot of dependencies, we will start the nth first, wait for all them to finish, 
+ *                  and continue with the next batch
+ * @private
+ */
+const MAX_DAPI_TOOLING_BATCH_SIZE = 500;
+
+/**
+ * @description When requesting a lot of metadata "at scale", we will start the nth first, wait for all them to finish, 
+ *                  and continue with the next batch
+ * @private
+ */
+const MAX_ATSCALE_TOOLING_BATCH_SIZE = 1000;
+
+/**
  * @description When an SObject does not support QueryMore we use an alternative that will gather a maximum number of records
  *                  Where the salesforce maximum is 2000 for EntityDefinition
  * @private
@@ -508,39 +522,51 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 referenceId: `chunk${i}`
             });
         }
-        let nbPending = bodies.length, nbDone = 0, nbErrors = 0;
-        const results = await Promise.all(bodies.map(async (body) => {
-            try {
-                // Call the tooling composite request
-                const results = await this._connection.tooling.request({
-                    url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
-                    method: 'POST',
-                    body: JSON.stringify(body), 
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-                this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
-                // Update the stats
-                nbDone++;
-                // Returning this results
-                return results;
-            } catch (error) {
-                logger.log(`Error here: ${error}`);
-                // Update the stats
-                nbErrors++;
-            } finally {
-                // Update the stats
-                nbPending--;
-                logger?.log(`Processing ${bodies.length} Tooling composite queries... Pending: ${nbPending}, Done: ${nbDone}, Error: ${nbErrors}`);
-            }
-        }));
+        let nbPending = bodies.length, nbDone = 0, nbErrors = 0, batchCount = 0;
+        const allResults = [];
+        for (let i = 0; i < bodies.length; i += MAX_DAPI_TOOLING_BATCH_SIZE) {
+            const bodiesInBatch = bodies.slice(i, i + MAX_DAPI_TOOLING_BATCH_SIZE);
+            batchCount++;
+            const results = await Promise.all(bodiesInBatch.map(async (body) => {
+                try {
+                    // Call the tooling composite request
+                    const results = await this._connection.tooling.request({
+                        url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
+                        method: 'POST',
+                        body: JSON.stringify(body), 
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+                    this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
+                    // Update the stats
+                    nbDone++;
+                    // Returning this results
+                    return results;
+                } catch (error) {
+                    logger.log(`Error here: ${error}`);
+                    // Update the stats
+                    nbErrors++;
+                } finally {
+                    // Update the stats
+                    nbPending--;
+                    logger?.log(
+                        `Processing ${bodies.length} Tooling composite ${bodies.length>1?'queries':'query'}... `+
+                        `🙌 Number of batch done: ${batchCount}, `+
+                        `⏳ Pending: (${nbPending}), `+
+                        `✅ Done: (${nbDone}), `+
+                        `❌ Error: (${nbErrors})`
+                    );
+                }
+            }));
+            allResults.push(... results);
+        }
         logger?.log(`Got all the results`);
         /** @type {Array<any>} */
         const dependenciesRecords = []; // dependencies records
         /** @type {Array<string>} */
         const idsInError = []; // ids contained in a batch that has an error
         const duplicateCheck = new Set(); // Using a set to filter duplicates
-        results.forEach((result) => {
+        allResults.filter((result) => result !== undefined).forEach((result) => {
             result.compositeResponse.forEach((/** @type {any} */ response) => {
                 if (response.httpStatusCode === 200) {
                     logger?.log(`This response had a code: 200 so we add the ${response?.body?.records?.length} records`);
@@ -710,20 +736,47 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 referenceId: `chunk${i}`
             });
         });
-        const results = await Promise.all(bodies.map((body) => {
-            // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
-            this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
-            // Call the tooling composite request
-            return this._connection.tooling.request({
-                url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
-                method: 'POST',
-                body: JSON.stringify(body), 
-                headers: { 'Content-Type': 'application/json' }
-            });    
-        }));
+        let nbPending = bodies.length, nbDone = 0, nbErrors = 0, batchCount = 0;
+        const allResults = [];
+        for (let i = 0; i < bodies.length; i += MAX_ATSCALE_TOOLING_BATCH_SIZE) {
+            const bodiesInBatch = bodies.slice(i, i + MAX_ATSCALE_TOOLING_BATCH_SIZE);
+            batchCount++;
+            const results = await Promise.all(bodiesInBatch.map(async (body) => {
+                try {
+                    // Call the tooling composite request
+                    const results = await this._connection.tooling.request({
+                        url: `/tooling/composite`, // here JsForce will automatically complete the start of the URI
+                        method: 'POST',
+                        body: JSON.stringify(body), 
+                        headers: { 'Content-Type': 'application/json' }
+                    });    
+                    // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
+                    this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
+                    // Update the stats
+                    nbDone++;
+                    // Returning this results
+                    return results;
+                } catch (error) {
+                    logger.log(`Error here: ${error}`);
+                    // Update the stats
+                    nbErrors++;
+                } finally {
+                    // Update the stats
+                    nbPending--;
+                    logger?.log(
+                        `Processing ${bodies.length} Tooling composite ${bodies.length>1?'queries':'query'}... `+
+                        `🙌 Number of batch done: ${batchCount}, `+
+                        `⏳ Pending: (${nbPending}), `+
+                        `✅ Done: (${nbDone}), `+
+                        `❌ Error: (${nbErrors})`
+                    );
+                }
+            }));
+            allResults.push(... results);
+        }
         /** @type {Array<any>} */
         const records = [];
-        results.forEach((result) => {
+        allResults.filter((result) => result !== undefined).forEach((result) => {
             result.compositeResponse.forEach((/** @type {any} */ response) => {
                 if (response.httpStatusCode === 200) {
                     records.push(response.body); // here only one record per response 
@@ -894,7 +947,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 body: { MetadataContainerId: '@{container.id}', ContentEntityId: apexClass.Id, Body: apexClass.Body }
             });
         });
-        const promises = bodies.map((body) => {
+        const promises = bodies.map(async (body) => {
             // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
             this._watchDog?.afterRequest(); // if limit has been reached, we reject the promise with a specific error and stop the process
             // Call the tooling composite request

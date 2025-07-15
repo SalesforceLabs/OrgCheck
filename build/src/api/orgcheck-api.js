@@ -1,6 +1,6 @@
 import { BasicLoggerIntf, LoggerIntf } from './core/orgcheck-api-logger';
 import { DataCacheItem, DataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
-import { DataCacheManager, DataCacheManagerSetup_Compression, DataCacheManagerSetup_Encoding, DataCacheManagerSetup_Storage } from './core/orgcheck-api-cachemanager-impl';
+import { DataCacheManager } from './core/orgcheck-api-cachemanager-impl';
 import { DataMatrix } from './core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { DatasetManager } from './core/orgcheck-api-datasetmanager-impl';
@@ -47,6 +47,9 @@ import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
 import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
 import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
 import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
+import { StorageIntf } from './core/orgcheck-api-storage';
+import { EncoderIntf } from './core/orgcheck-api-encoder';
+import { CompressorIntf } from './core/orgcheck-api-compressor';
 
 /**
  * @description Org Check API main class
@@ -117,9 +120,9 @@ export class API {
      * @description Org Check constructor
      * @param {string} accessToken - the access token to use to connect to Salesforce
      * @param {any} jsConnectionFactory - the connection factory to use to create a Salesforce connection
-     * @param {DataCacheManagerSetup_Storage} jsLocalStorage - the local storage to use to store the cache
-     * @param {DataCacheManagerSetup_Encoding} jsEncoding - the encoding to use to encode the cache
-     * @param {DataCacheManagerSetup_Compression} jsCompressing - the compression to use to compress the cache
+     * @param {StorageIntf} jsLocalStorage - the local storage to use to store the cache
+     * @param {EncoderIntf} jsEncoding - the encoding to use to encode the cache
+     * @param {CompressorIntf} jsCompressing - the compression to use to compress the cache
      * @param {BasicLoggerIntf} loggerSetup - the logger setup to use to log information
      */
     constructor(accessToken, jsConnectionFactory, jsLocalStorage, jsEncoding, jsCompressing, loggerSetup) {
