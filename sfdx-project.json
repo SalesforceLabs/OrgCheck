@@ -5,7 +5,7 @@
       "default": true,
       "package": "OrgCheck",
       "versionName": "Carbon",
-      "versionNumber": "6.1.5.NEXT",
+      "versionNumber": "6.1.6.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     },
     {
@@ -13,7 +13,7 @@
       "default": false,
       "package": "Org Check",
       "versionName": "Carbon",
-      "versionNumber": "6.0.0.NEXT",
+      "versionNumber": "6.1.6.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
@@ -21,25 +21,9 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "60.0",
   "packageAliases": {
-    "OrgCheck": "0Ho2X000000KyjaSAC",
-    "OrgCheck@1.8.1-4": "04t7R000001u5tiQAA",
-    "OrgCheck@1.9.7-2": "04t7R000001IG9JQAW",
-    "OrgCheck@2.4.2-1": "04t7R0000018kAuQAI",
-    "OrgCheck@2.5.2-1": "04t7R000001hrl1QAA",
-    "OrgCheck@4.9.0-1": "04tKB000000D38wYAC",
-    "OrgCheck@4.11.0-1": "04tKB000000DAOGYA4",
-    "OrgCheck@5.6.0-3": "04tKB000000DIiRYAW",
-    "OrgCheck@5.6.0-4": "04tKB000000DJjVYAW",
-    "OrgCheck@5.7.0-1": "04tKB000000DJjaYAG",
-    "OrgCheck@6.1.0-1": "04tKB000000DOyTYAW",
-    "OrgCheck@6.1.1-1": "04tKB000000DP6yYAG",
-    "OrgCheck@6.1.2-1": "04tKB000000DPVuYAO",
-    "OrgCheck@6.1.3-1": "04tKB000000DPeZYAW",
-    "OrgCheck@6.1.4-1": "04tKB000000DPimYAG",
     "Org Check": "0HoKB000000PAsc0AG",
-    "Org Check@0.1.0-1": "04tKB000000DPirYAG",
     "Org Check@6.0.0-1": "04tKB000000DPiwYAG",
-    "OrgCheck@6.1.5-1": "04tKB000000DQD8YAO",
-    "OrgCheck@6.1.5-2": "04tKB000000DQDDYA4"
+    "OrgCheck": "0Ho2X000000KyjaSAC",
+    "OrgCheck@6.1.6-1": "04tKB000000DQDIYA4"
   }
 }
