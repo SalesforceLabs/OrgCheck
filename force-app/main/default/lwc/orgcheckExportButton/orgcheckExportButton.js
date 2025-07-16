@@ -69,7 +69,7 @@ export default class OrgcheckExportButton extends LightningElement {
     }
 
     /**
-     * @type {Array<ocui.ExportedTable>}
+     * @type {Array<ocui.ExportedTable> | ocui.ExportedTable}
      */
     @api source;
     
@@ -122,7 +122,7 @@ export default class OrgcheckExportButton extends LightningElement {
      */ 
     _createTheWorkBook() {
         const workbook = this._api.utils.book_new();
-        this.source.forEach(item => {
+        (Array.isArray(this.source) ? this.source : [ this.source ]).forEach(item => {
             const datasheet = [ item.columns ].concat(
                 item.rows.map(row => 
                     row.map(cell => {
