@@ -51,6 +51,7 @@ import { RecipeGlobalView } from '../recipecollection/orgcheck-api-recipe-global
 import { RecipePublicGroups } from '../recipe/orgcheck-api-recipe-publicgroups';
 import { RecipeQueues } from '../recipe/orgcheck-api-recipe-queues';
 import { RecipeHardcodedURLsView } from '../recipecollection/orgcheck-api-recipe-hardcodedurlsview';
+import { RecipeStaticResources } from '../recipe/orgcheck-api-recipe-staticresources';
 import { Processor } from './orgcheck-api-processor';
 import { SecretSauce } from './orgcheck-api-secretsauce';
 import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
@@ -145,6 +146,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.PUBLIC_GROUPS, new RecipePublicGroups());
         this._recipes.set(RecipeAliases.QUEUES, new RecipeQueues());
         this._recipes.set(RecipeAliases.RECORD_TYPES, new RecipeRecordType());
+        this._recipes.set(RecipeAliases.STATIC_RESOURCES, new RecipeStaticResources());
         this._recipes.set(RecipeAliases.USER_ROLES, new RecipeUserRoles());
         this._recipes.set(RecipeAliases.VALIDATION_RULES, new RecipeValidationRules());
         this._recipes.set(RecipeAliases.VISUALFORCE_COMPONENTS, new RecipeVisualForceComponents());

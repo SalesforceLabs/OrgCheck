@@ -31,6 +31,7 @@ import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage'
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
+import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -108,10 +109,10 @@ const ALL_SCORE_RULES = [
     { 
         id: 0,
         description: 'Not referenced anywhere',
-        formula: (/** @type {SFDC_CustomLabel | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage} */ d) => d.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
+        formula: (/** @type {SFDC_CustomLabel | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_StaticResource} */ d) => d.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: 'This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.',
         badField: 'dependencies.referenced.length',
-        applicable: [ SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage ],
+        applicable: [ SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_StaticResource ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 1,
@@ -156,10 +157,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate } */ d) => IS_EMPTY(d.description),
+        formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate | SFDC_StaticResource } */ d) => IS_EMPTY(d.description),
         errorMessage: 'This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.',
         badField: 'description',
-        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate ],
+        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate, SFDC_StaticResource ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 7,

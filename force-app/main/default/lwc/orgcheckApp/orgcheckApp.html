@@ -609,7 +609,7 @@
             <lightning-tab value="setting" label="🎁 Setting" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
-                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels,documents,email-templates,knowledge-articles"></lightning-button>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="custom-labels,documents,email-templates,knowledge-articles,static-resources"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTab}>
@@ -620,6 +620,7 @@
                             <li><b>🍱 Documents</b>: List your Documents and check if they have hardcoded url in them.</li>
                             <li><b>🌇 Email Templates</b>: List your email templates and check if they have hardcoded url in them.</li>
                             <li><b>📚 Knowledge Articles</b>: List your knowledge articles and check if they have hardcoded url in them.</li>
+                            <li><b>🗿 Static Resources</b>: List static resources in your org.</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="custom-labels" label="🏷️ Custom Labels" onactive={handleSubTabActivation}>
@@ -632,7 +633,10 @@
                         <c-orgcheck-extended-datatable empty-message="There is no email template to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={emailTemplatesTableDefinition} rows={emailTemplatesTableData} show-export-button export-basename="EmailTemplates"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="knowledge-articles" label="📚 Knowledge Articles" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable empty-message="There is no knowledge articles to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={knowledgeArticlesTableDefinition} rows={knowledgeArticlesTableData} show-export-button export-basename="KnowledgeArticles"></c-orgcheck-extended-datatable>
+                        <c-orgcheck-extended-datatable empty-message="There is no knowledge article to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={knowledgeArticlesTableDefinition} rows={knowledgeArticlesTableData} show-export-button export-basename="KnowledgeArticles"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="static-resources" label="🗿 Static Resources" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no static resource to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={staticResourcesTableDefinition} rows={staticResourcesTableData} show-export-button export-basename="StaticResources"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

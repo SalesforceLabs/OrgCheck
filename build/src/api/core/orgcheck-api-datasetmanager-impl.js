@@ -46,6 +46,7 @@ import { DatasetHomePageComponents } from '../dataset/orgcheck-api-dataset-homep
 import { DatasetCustomTabs } from '../dataset/orgcheck-api-dataset-customtabs';
 import { DatasetEmailTemplates } from '../dataset/orgcheck-api-dataset-emailtemplates';
 import { DatasetKnowledgeArticles } from '../dataset/orgcheck-api-dataset-knowledgearticles';
+import { DatasetStaticResources } from '../dataset/orgcheck-api-dataset-staticresources';
 
 /**
  * @description Dataset manager
@@ -150,6 +151,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.PROFILERESTRICTIONS, new DatasetProfileRestrictions());
         this._datasets.set(DatasetAliases.PROFILES, new DatasetProfiles());
         this._datasets.set(DatasetAliases.RECORDTYPES, new DatasetRecordTypes());
+        this._datasets.set(DatasetAliases.STATICRESOURCES, new DatasetStaticResources());
         this._datasets.set(DatasetAliases.USERROLES, new DatasetUserRoles());
         this._datasets.set(DatasetAliases.INTERNALACTIVEUSERS, new DatasetInternalActiveUsers());
         this._datasets.set(DatasetAliases.VALIDATIONRULES, new DatasetValidationRules());

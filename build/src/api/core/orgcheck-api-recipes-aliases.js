@@ -40,6 +40,7 @@ export class RecipeAliases {
     static get PUBLIC_GROUPS() { return 'public-groups'; }
     static get QUEUES() { return 'queues'; }
     static get RECORD_TYPES() { return 'record-types'; }
+    static get STATIC_RESOURCES() { return 'static-resources'; }
     static get USER_ROLES() { return 'user-roles'; }
     static get VALIDATION_RULES() { return 'validation-rules'; }
     static get VISUALFORCE_COMPONENTS() { return 'visualforce-components'; }

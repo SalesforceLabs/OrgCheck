@@ -60,6 +60,7 @@ export * from './data/orgcheck-api-data-profile.js';
 export * from './data/orgcheck-api-data-profilepasswordpolicy.js';
 export * from './data/orgcheck-api-data-profilerestrictions.js';
 export * from './data/orgcheck-api-data-recordtype.js';
+export * from './data/orgcheck-api-data-staticresource.js';
 export * from './data/orgcheck-api-data-user.js';
 export * from './data/orgcheck-api-data-userrole.js';
 export * from './data/orgcheck-api-data-validationrule.js';

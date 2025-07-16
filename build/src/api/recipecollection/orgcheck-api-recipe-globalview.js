@@ -39,6 +39,7 @@ export class RecipeGlobalView extends RecipeCollection {
             RecipeAliases.PUBLIC_GROUPS,
             RecipeAliases.QUEUES,
             RecipeAliases.RECORD_TYPES,
+            RecipeAliases.STATIC_RESOURCES,
             RecipeAliases.USER_ROLES,
             RecipeAliases.VALIDATION_RULES,
             RecipeAliases.VISUALFORCE_COMPONENTS,

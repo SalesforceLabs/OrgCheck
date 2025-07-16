@@ -517,6 +517,7 @@ export default class OrgcheckApp extends LightningElement {
         'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',           data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                     tab: 'boxes',           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
         'record-types':              { label: '🏏 Record Types',               tab: 'datamodel',       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        'static-resources':          { label: '🗿 Static Resources',            tab: 'setting',         data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }},
         'user-roles':                { label: '🦓 Internal Role Listing',      tab: 'boxes',           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
         'user-roles-hierarchy':      { label: '🐙 Internal Role Explorer',     tab: 'boxes',           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
         'validation-rules':          { label: '🎾 Validation Rules',           tab: 'datamodel',       data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
@@ -1151,6 +1152,28 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
             { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
             { label: 'Ref. in Layout?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.ASC
+    };
+
+    /**
+     * @description Table definition for static resources
+     * @type {ocui.Table}
+     */
+    staticResourcesTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Content Type',    type: ocui.ColumnType.TXT, data: { value: 'contentType' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
             { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
             { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
@@ -2616,6 +2639,12 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_WebLink>}
      */
     webLinksTableData;
+
+    /**
+     * @description Data table for static resources
+     * @type {Array<ocapi.SFDC_StaticResource>}
+     */ 
+    staticResourcesTableData;
 
     /** 
      * @description Data table for workflows 

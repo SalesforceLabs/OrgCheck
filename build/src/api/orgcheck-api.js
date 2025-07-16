@@ -50,6 +50,7 @@ import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
 import { StorageIntf } from './core/orgcheck-api-storage';
 import { EncoderIntf } from './core/orgcheck-api-encoder';
 import { CompressorIntf } from './core/orgcheck-api-compressor';
+import { SFDC_StaticResource } from './data/orgcheck-api-data-staticresource';
 
 /**
  * @description Org Check API main class
@@ -1003,6 +1004,29 @@ export class API {
             parentNode.children.push(node);
         });
         return allNodes.get(ROOT_KEY);
+    }
+
+    /**
+     * @description Get information about Static Resources
+     * @param {string} namespace - the namespace of the package to filter the weblinks
+     * @returns {Promise<Array<SFDC_StaticResource>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getStaticResources(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.STATIC_RESOURCES, new Map([
+            [OrgCheckGlobalParameter.PACKAGE_NAME, namespace]
+        ])));
+    }
+
+    /**
+     * @description Remove all the cached information about Static Resources
+     * @public
+     */
+    removeAllStaticResourcesFromCache() {
+        this._recipeManager.clean(RecipeAliases.STATIC_RESOURCES);
     }
 
     /**

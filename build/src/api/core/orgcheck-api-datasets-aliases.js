@@ -34,6 +34,7 @@ export class DatasetAliases {
     static get PROFILERESTRICTIONS() { return 'profile-restrictions'; }
     static get PROFILES() { return 'profiles'; }
     static get RECORDTYPES () { return 'record-types'; }
+    static get STATICRESOURCES() { return 'static-resources'; }
     static get USERROLES() { return 'user-roles'; }
     static get INTERNALACTIVEUSERS() { return 'internal-active-users'; }
     static get VALIDATIONRULES() { return 'validation-rules'; }
