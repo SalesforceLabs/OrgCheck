@@ -1128,7 +1128,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
         orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
+        orderSort: ocui.SortOrder.DESC
     };
     
     /**
@@ -1156,7 +1156,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
         orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
+        orderSort: ocui.SortOrder.DESC
     };
 
     /**
@@ -1178,7 +1178,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
         orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
+        orderSort: ocui.SortOrder.DESC
     };
 
     /**
