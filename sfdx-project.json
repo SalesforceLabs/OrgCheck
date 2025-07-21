@@ -4,8 +4,16 @@
       "path": "force-app",
       "default": true,
       "package": "OrgCheck",
-      "versionName": "Boron",
-      "versionNumber": "5.6.0.NEXT",
+      "versionName": "Carbon",
+      "versionNumber": "6.1.6.NEXT",
+      "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
+    },
+    {
+      "path": "force-app",
+      "default": false,
+      "package": "Org Check",
+      "versionName": "Carbon",
+      "versionNumber": "6.1.6.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
@@ -13,13 +21,9 @@
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "60.0",
   "packageAliases": {
+    "Org Check": "0HoKB000000PAsc0AG",
+    "Org Check@6.0.0-1": "04tKB000000DPiwYAG",
     "OrgCheck": "0Ho2X000000KyjaSAC",
-    "OrgCheck@1.8.1-4": "04t7R000001u5tiQAA",
-    "OrgCheck@1.9.7-2": "04t7R000001IG9JQAW",
-    "OrgCheck@2.4.2-1": "04t7R0000018kAuQAI",
-    "OrgCheck@2.5.2-1": "04t7R000001hrl1QAA",
-    "OrgCheck@4.9.0-1": "04tKB000000D38wYAC",
-    "OrgCheck@4.11.0-1": "04tKB000000DAOGYA4",
-    "OrgCheck@5.6.0-3": "04tKB000000DIiRYAW"
+    "OrgCheck@6.1.6-1": "04tKB000000DQDIYA4"
   }
 }

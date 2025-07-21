@@ -27,6 +27,13 @@ export default class OrgcheckGraphics extends LightningElement {
   _data;
 
   /**
+   * @description Fiilter to use to render the graphic
+   * @type {any}
+   * @private
+   */
+  _filter;
+
+  /**
    * @description Called when it's about to render the component
    * @public
    */
@@ -51,7 +58,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Set the data used in the graphic
-   * @param {any} data
+   * @param {any} data - Data to use to render the graphic
    * @public
    */
   @api set source(data) {
@@ -62,7 +69,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Get the data used in the graphic
-   * @returns {any}
+   * @returns {any} Data used to render the graphic
    * @public
    */
   get source() {
@@ -100,7 +107,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Returns true if the type is "pie"
-   * @returns {boolean}
+   * @returns {boolean} Is it a PIE?
    * @public
    */
   get isPie() {
@@ -109,7 +116,7 @@ export default class OrgcheckGraphics extends LightningElement {
 
   /**
    * @description Returns true if the type is "hierarchy"
-   * @returns {boolean}
+   * @returns {boolean} Is it a HIERARCHY?
    * @public
    */
   get isHierarchy() {
@@ -222,11 +229,11 @@ export default class OrgcheckGraphics extends LightningElement {
   @api pieStrokeWidth = '1';
 
   /**
-   * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one)
+   * @description Decorator function to get the categories depending on the data (in case the graphic is a pie one) and the optional filter
    * @type {Function}
    * @public
    */
-  @api pieCategoriesDecorator = (data) => { console.debug('pieCategoriesDecorator', data); return []; };
+  @api pieCategoriesDecorator = (data, filter) => { console.debug('pieCategoriesDecorator', data, filter); return []; };
 
   /**
    * @description Pie categories to use in legend
@@ -257,7 +264,7 @@ export default class OrgcheckGraphics extends LightningElement {
   hasNoData = true;
 
   /**
-   * @descriptio Draw the graph
+   * @description Draw the graph
    * @private
    */
   _drawGraph() {
@@ -280,17 +287,17 @@ export default class OrgcheckGraphics extends LightningElement {
   }
 
   /**
-   * @descriptio Draw the graph as a hierarchy one
+   * @description Draw the graph as a hierarchy one
    * @private
    */
   _drawHierarchy() {
     // If specified from the parent component (via @api), these properties will be typed as string! 
     // Making sure it is considered as a number whatever the case
-    const boxHeight = Number.parseInt(this.hierarchyBoxHeight); 
-    const boxWidth = Number.parseInt(this.hierarchyBoxWidth);
-    const boxVerticalPadding = Number.parseInt(this.hierarchyBoxVerticalPadding);
-    const boxHorizontalPadding = Number.parseInt(this.hierarchyBoxHorizontalPadding);
-    const boxTextPadding = Number.parseInt(this.hierarchyBoxTextPadding);
+    const boxHeight = Number.parseInt(this.hierarchyBoxHeight, 10); 
+    const boxWidth = Number.parseInt(this.hierarchyBoxWidth, 10);
+    const boxVerticalPadding = Number.parseInt(this.hierarchyBoxVerticalPadding, 10);
+    const boxHorizontalPadding = Number.parseInt(this.hierarchyBoxHorizontalPadding, 10);
+    const boxTextPadding = Number.parseInt(this.hierarchyBoxTextPadding, 10);
 
     // add the css style to the legend
     this.hierarchyLegend = this.hierarchyBoxColorLegend.map((c) => {
@@ -392,12 +399,12 @@ export default class OrgcheckGraphics extends LightningElement {
   }
 
   /**
-   * @descriptio Draw the graph as a pie one
+   * @description Draw the graph as a pie one
    * @private
    */
   _drawPie() {
     this.pieTotal = 0;
-    this.pieCategories = this.pieCategoriesDecorator(this._data).map((c) => { 
+    this.pieCategories = this._data.map((c) => { 
       this.pieTotal += c.value;
       return { 
         name: c.name,
@@ -408,9 +415,9 @@ export default class OrgcheckGraphics extends LightningElement {
     });
     const values = this.pieCategories.map((d) => d.value);
     const colors = this.pieCategories.map((d) => d.color);
-    const diameter = Number.parseInt(this.pieSize); // if size is specified its type will be string! making sure it is considered as a number whatever the case
+    const diameter = Number.parseInt(this.pieSize, 10); // if size is specified its type will be string! making sure it is considered as a number whatever the case
     const radius = diameter / 2;
-    const stroke = Number.parseInt(this.pieStrokeWidth); // same for stroke!
+    const stroke = Number.parseInt(this.pieStrokeWidth, 10); // same for stroke!
 
     // Get the main tag 
     const mainTag = this._api.select(this.template.querySelector('.orgcheck-graph'));

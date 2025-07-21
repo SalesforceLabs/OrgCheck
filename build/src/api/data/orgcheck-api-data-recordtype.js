@@ -1,4 +1,5 @@
 import { Data } from '../core/orgcheck-api-data';
+import { SFDC_Object } from './orgcheck-api-data-object';
 
 export class SFDC_RecordType extends Data {
     
@@ -32,6 +33,13 @@ export class SFDC_RecordType extends Data {
     developerName;
     
     /**
+     * @description Name of the potential namespace/package where this item comes from. Empty string if none.
+     * @type {string}
+     * @public
+     */
+    package;
+
+    /**
      * @description Setup URL of this item
      * @type {string}
      * @public
@@ -46,18 +54,18 @@ export class SFDC_RecordType extends Data {
     isActive;
 
     /**
-     * @description Is this RT available?
+     * @description Is this record type available?
      * @type {boolean}
      * @public
      */
     isAvailable;
 
     /**
-     * @description Is this the default RT mapping?
+     * @description Is this the default record type?
      * @type {boolean}
      * @public
      */
-    isDefaultRecordTypeMapping;
+    isDefault;
 
     /**
      * @description Is this the master record type?
@@ -65,4 +73,18 @@ export class SFDC_RecordType extends Data {
      * @public
      */
     isMaster;
+
+    /**
+     * @description Object Id of thid record type
+     * @type {string}
+     * @public
+     */
+    objectId;
+
+    /**
+     * @description Object reference of this record type
+     * @type {SFDC_Object}
+     * @public
+     */
+    objectRef;
 }

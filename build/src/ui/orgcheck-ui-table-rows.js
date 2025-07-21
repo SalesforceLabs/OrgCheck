@@ -30,11 +30,11 @@ export class RowsFactory {
 
     /**
      * @description Create the rows of a table
-     * @param {Table} tableDefinition
-     * @param {Array<any>} records 
-     * @param {Function} onEachRowCallback
-     * @param {Function} onEachCellCallback
-     * @returns {Array<Row>}
+     * @param {Table} tableDefinition - Definition of the table
+     * @param {Array<any>} records - List of records
+     * @param {Function} onEachRowCallback - Callback to be called for each row
+     * @param {Function} onEachCellCallback - Callback to be called for each cell
+     * @returns {Array<Row>} List of rows
      */
     static create(tableDefinition, records, onEachRowCallback, onEachCellCallback) {
         return records.map((record, rIndex) => {
@@ -67,10 +67,10 @@ export class RowsFactory {
 
     /**
      * @description Sort table
-     * @param {Table} tableDefintion
-     * @param {Array<Row>} rows
-     * @param {number} columnIndex 
-     * @param {string} order
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<Row>} rows - List of rows
+     * @param {number} columnIndex - Index of the column to sort
+     * @param {string} order - Sort order, can be ASC or DESC
      */ 
     static sort(tableDefintion, rows,  columnIndex, order) {
         const column = tableDefintion.columns[columnIndex];
@@ -80,7 +80,7 @@ export class RowsFactory {
         const property = column.type == ColumnType.URL ? 'label' : 'value';
         let index = 0;
         let value1, value2;
-        return rows.sort((row1, row2) => {
+        rows.sort((row1, row2) => {
             if (isIterative === true) {
                 value1 = row1.cells[columnIndex].data?.values?.length || 0;
                 value2 = row2.cells[columnIndex].data?.values?.length || 0;
@@ -102,8 +102,8 @@ export class RowsFactory {
 
     /**
      * @description Filter table
-     * @param {Array<Row>} rows
-     * @param {string} searchInput
+     * @param {Array<Row>} rows - List of rows
+     * @param {string} searchInput - Search input
      */ 
     static filter(rows, searchInput) {
         if (searchInput?.length > 2) {
@@ -127,19 +127,16 @@ export class RowsFactory {
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion
-     * @param {Array<Row>} rows
-     * @param {string} title
-     * @param {Function} badScoreLabelById
-     * @returns {Array<ExportedTable>}
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<Row>} rows - List of rows
+     * @param {string} title - Title of the exported table
+     * @param {Function} badScoreLabelById - Function to get the label of a bad score
+     * @returns {ExportedTable} Exported table
      */ 
     static export(tableDefintion, rows, title, badScoreLabelById) {
 
         /** @type {ExportedTable} */
         const exportedRows = { header: title, columns: [], rows: [] };
-
-        /** @type {ExportedTable} */
-        const exportedReasons = { header: `⚠️ ${title}`, columns: [ '(#) Item', '(Id) Reason' ], rows: [] };
 
         // Parsing columns
         tableDefintion.columns.forEach((column) => {
@@ -172,18 +169,13 @@ export class RowsFactory {
         // Parsing rows and cells
         rows.forEach((row) => {
 
-            // Add the bad reasons in the second table for this row
-            row.badReasonIds?.forEach((id) => {
-                exportedReasons.rows.push([`(${row.index}) ${row.name}`, `(${id}) ${badScoreLabelById(id)}`]);
-            });
-
             // Add the row in the first table
             const exportRow = [];
             row.cells?.forEach((cell) => {
                 if (cell.typeofindex === true) { // for INDEX typed cell, we set the row's index
                     exportRow.push(row.index);
                 } else if (cell.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
-                    exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => id)));
+                    exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => badScoreLabelById(id))));
                 } else if (cell.typeofid === true) { // for URL typed cell, we set the label and then the URL
                     exportRow.push(cell.data.label, cell.data.value);
                 } else if (cell.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
@@ -202,22 +194,16 @@ export class RowsFactory {
             exportedRows.rows.push(exportRow);
         });
 
-        // return the two sheets
-        if (exportedReasons.rows.length === 0) {
-            // There is no reasong why any of the records are bad here, so better not include that empty sheet in the export!
-            return [ exportedRows ];
-        }
-        // If there is at least one reason why we have bad rows, let's return this next to the rows
-        return [ exportedRows, exportedReasons ];
+        return exportedRows;
     }
 
     /**
      * @description Export table
-     * @param {Table} tableDefintion
-     * @param {Array<any>} records
-     * @param {string} title 
-     * @param {Function} badScoreLabelById
-     * @returns {Array<ExportedTable>}
+     * @param {Table} tableDefintion - Definition of the table
+     * @param {Array<any>} records - List of records
+     * @param {string} title - Title of the exported table
+     * @param {Function} badScoreLabelById - Function to get the label of a bad score
+     * @returns {ExportedTable} Exported table
      */ 
     static createAndExport(tableDefintion, records, title, badScoreLabelById) {
         const donothing = () => {};

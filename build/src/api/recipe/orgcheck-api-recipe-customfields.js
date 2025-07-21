@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformation';
@@ -8,16 +8,17 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeCustomFields extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Array<string | DatasetRunInformation>}
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger) {
+    extract(_logger) {
         return [
             DatasetAliases.CUSTOMFIELDS, 
             DatasetAliases.OBJECTTYPES, 
@@ -27,21 +28,22 @@ export class RecipeCustomFields extends Recipe {
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @param {string} namespace Name of the package (if all use '*')
-     * @param {string} objecttype Name of the type (if all use '*')
-     * @param {string} object API name of the object (if all use '*')
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, logger, namespace, objecttype, object) {
+    async transform(data, logger, parameters) {
 
-        // Get data
+        // Get data and parameters
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {Map<string, SFDC_Object>} */ objects = data.get(DatasetAliases.OBJECTS);
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
+        const namespace = OrgCheckGlobalParameter.getPackageName(parameters);
+        const objecttype = OrgCheckGlobalParameter.getSObjectTypeName(parameters);
+        const object = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // Checking data
         if (!types) throw new Error(`RecipeCustomFields: Data from dataset alias 'OBJECTTYPES' was undefined.`);
@@ -49,6 +51,7 @@ export class RecipeCustomFields extends Recipe {
         if (!customFields) throw new Error(`RecipeCustomFields: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
         // Augment and filter data
+        /** @type {Array<SFDC_Field>} */
         const array = [];
         await Processor.forEach(customFields, (/** @type {SFDC_Field} */customField) => {
             // Augment data
@@ -58,12 +61,13 @@ export class RecipeCustomFields extends Recipe {
             }
             customField.objectRef = objectRef;
             // Filter data
-            if ((namespace === '*' || customField.package === namespace) &&
-                (objecttype === '*' || customField.objectRef?.typeRef?.id === objecttype) &&
-                (object === '*' || customField.objectRef?.apiname === object)) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || customField.package === namespace) &&
+                (objecttype === OrgCheckGlobalParameter.ALL_VALUES || customField.objectRef?.typeRef?.id === objecttype) &&
+                (object === OrgCheckGlobalParameter.ALL_VALUES || customField.objectRef?.apiname === object)) {
                 array.push(customField);
             }
         });
+        logger?.log(`Done transforming custom fields!`);
 
         // Return data
         return array;

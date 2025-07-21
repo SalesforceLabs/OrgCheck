@@ -1,5 +1,5 @@
 import { Recipe } from '../core/orgcheck-api-recipe';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { Data, DataWithoutScoring } from '../core/orgcheck-api-data';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
@@ -10,38 +10,44 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeObject extends Recipe {
 
     /**
      * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @param {string} object Name of the object to describe in this recipe's instance.
-     * @returns {Array<string | DatasetRunInformation>}
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @param {Map<string, any>} [parameters] - List of optional argument to pass
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger, object) {
-        const datasetRunInfoObject = new DatasetRunInformation(DatasetAliases.OBJECT, `${DatasetAliases.OBJECT}_${object}`);
-        const datasetRunInfoCustomField = new DatasetRunInformation(DatasetAliases.CUSTOMFIELDS, `${DatasetAliases.CUSTOMFIELDS}_${object}`);
-        datasetRunInfoObject.parameters.set('object', object);
-        datasetRunInfoCustomField.parameters.set('object', object);
-        return [ datasetRunInfoObject, 
+    extract(_logger, parameters) {
+        return [ 
+            new DatasetRunInformation(
+                DatasetAliases.OBJECT,
+                `${DatasetAliases.OBJECT}_${OrgCheckGlobalParameter.getSObjectName(parameters)}`,
+                parameters // should include 'object'
+            ),
             DatasetAliases.OBJECTTYPES,
             DatasetAliases.APEXTRIGGERS,
             DatasetAliases.LIGHTNINGPAGES,
-            datasetRunInfoCustomField
+            new DatasetRunInformation(
+                DatasetAliases.CUSTOMFIELDS,
+                `${DatasetAliases.CUSTOMFIELDS}_${OrgCheckGlobalParameter.getSObjectName(parameters)}`,
+                parameters // should include 'object'
+            ),
         ];
     }
 
     /**
      * @description transform the data from the datasets and return the final result as an Array
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, _logger) {
 
         // Get data
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
@@ -63,26 +69,26 @@ export class RecipeObject extends Recipe {
         const result = await Promise.all([
             Processor.map( // returns apexTriggerRefs
                 object.apexTriggerIds,
-                (id) => { 
+                (/** @type {string} */ id) => { 
                     const apexTrigger = apexTriggers.get(id);
                     apexTrigger.objectRef = object;
                     return apexTrigger;
                 },
-                (id) => apexTriggers.has(id)
+                (/** @type {string} */ id) => apexTriggers.has(id)
             ),
-            Processor.forEach(pages, (page) => {
+            Processor.forEach(pages, (/** @type {SFDC_LightningPage} */ page) => {
                 if (page.objectId === object.id) {
                     object.flexiPages.push(page);
                 }
             }),
             Processor.map( // returns customFieldRefs
                 object.customFieldIds,
-                (id) => { 
+                (/** @type {string} */ id) => { 
                     const customField = customFields.get(id);
                     customField.objectRef = object;
                     return customField;
                 },
-                (id) => customFields.has(id)
+                (/** @type {string} */ id) => customFields.has(id)
             )
         ]);
         object.apexTriggerRefs = result[0];

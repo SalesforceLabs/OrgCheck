@@ -1,7 +1,5 @@
 import { API } from "../../../src/api/orgcheck-api";
-import { DataMatrix } from "../../../src/api/core/orgcheck-api-data-matrix";
 import { SecretSauce } from "../../../src/api/core/orgcheck-api-secretsauce";
-import { ScoreRule } from '../../../src/api/core/orgcheck-api-datafactory';
 
 class JsForceConnectionMock {}
 
@@ -38,8 +36,9 @@ describe('orgcheck-api-scorerules', () => {
         let countTrue = 0;
         rows.forEach((row) => {
             items.forEach((item) => {
-                if (row.data[item]) {
-                    expect(row.data[item]).toBe('true');
+                const value = row.data[item];
+                expect(value === 'true' || value === undefined).toBeTruthy();
+                if (value === 'true') {
                     countTrue++;
                 }
             });

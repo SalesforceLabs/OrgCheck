@@ -8,10 +8,10 @@
         <members>OrgCheck_App_Aura</members>
         <name>AuraDefinitionBundle</name>
     </types>
-    <types>
+    <!--<types>
         <members>Badge1</members>
         <name>ContentAsset</name>
-    </types>
+    </types>-->
     <types>
         <members>OrgCheck_APP</members>
         <name>CustomApplication</name>

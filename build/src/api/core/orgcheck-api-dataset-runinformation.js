@@ -16,19 +16,20 @@ export class DatasetRunInformation {
     cacheKey;
 
     /**
-     * @type {Map}
+     * @type {Map<string, any>}
      * @public
      */
     parameters;
     
     /**
      * @description Constructor
-     * @param {string} alias 
-     * @param {string} cacheKey 
+     * @param {string} alias - The recipe alias
+     * @param {string} cacheKey - The cache key
+     * @param {Map<string, any>} parameters - The parameters
      */
-    constructor(alias, cacheKey) {
+    constructor(alias, cacheKey, parameters) {
         this.alias = alias;
         this.cacheKey = cacheKey;
-        this.parameters = new Map();
+        this.parameters = parameters;
     }
 }

@@ -1,13 +1,13 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ProfileRestrictions, 
             SFDC_ProfileIpRangeRestriction,
             SFDC_ProfileLoginHourRestriction } from '../data/orgcheck-api-data-profilerestrictions';
 
-const COMPUTE_NUMBER_FROM_IP = (ip) => {
+const COMPUTE_NUMBER_FROM_IP = (/** @type {string} */ ip) => {
     return ip?.split('.').reduce((prev, currentItem, currentIndex, array) => { 
         return prev + Number(currentItem) * Math.pow(255, array.length-1-currentIndex); 
     }, 0);
@@ -19,9 +19,9 @@ export class DatasetProfileRestrictions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_ProfileRestrictions>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -36,7 +36,7 @@ export class DatasetProfileRestrictions extends Dataset {
         // List of profile ids
         const profileIdRecords = results[0];
         logger?.log(`Parsing ${profileIdRecords.length} Profiles...`);
-        const profileIds = await Processor.map(profileIdRecords, (record) => record.Id);
+        const profileIds = await Processor.map(profileIdRecords, (/** @type {any} */ record) => record.Id);
 
         // Init the factories
         const restrictionsFactory = dataFactory.getInstance(SFDC_ProfileRestrictions);
@@ -49,7 +49,7 @@ export class DatasetProfileRestrictions extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${records.length} profile restrictions...`);
-        const profileRestrictions = new Map(await Processor.map(records, async (record) => {
+        const profileRestrictions = new Map(await Processor.map(records, async (/** @type {any} */ record) => {
 
             // Get the ID15 of this profile
             const profileId = sfdcManager.caseSafeId(record.Id);
@@ -59,7 +59,7 @@ export class DatasetProfileRestrictions extends Dataset {
             if (record.Metadata.loginHours) {
                 loginHours = await Processor.map(
                     WEEKDAYS,
-                    (day) => {
+                    (/** @type {string} */ day) => {
                         const hourStart = record.Metadata.loginHours[day + 'Start'];
                         const hourEnd = record.Metadata.loginHours[day + 'End'];
                         return loginHourDataFactory.create({
@@ -76,10 +76,10 @@ export class DatasetProfileRestrictions extends Dataset {
 
             // Ip Ranges
             let ipRanges;
-            if (record.Metadata.loginIpRanges && record.Metadata.loginIpRanges.length > 0) {
+            if (record.Metadata.loginIpRanges?.length ?? 0 > 0) {
                 ipRanges = await Processor.map(
                     record.Metadata.loginIpRanges,
-                    range => {
+                    (/** @type {any} */ range) => {
                         const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
                         const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
                         return ipRangeDataFactory.create({

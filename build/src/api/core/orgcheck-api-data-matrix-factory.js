@@ -7,7 +7,7 @@ export class DataMatrixFactory {
 
     /**
      * @description Create a new instance of DataMatrixWorking
-     * @returns {DataMatrixWorking}
+     * @returns {DataMatrixWorking} Returns a new instance of DataMatrixWorking that can be used to build a DataMatrix
      */
     static create() {
         return new DataMatrixWorking();
@@ -31,9 +31,10 @@ export class DataMatrixWorking {
     
     /**
      * @description Convert this working object into a data matrix object
-     * @returns {DataMatrix}
+     * @returns {DataMatrix} Returns a DataMatrix object containing the column headers and rows
      */
     toDataMatrix() {
+        /** @type {Array<any>} */
         const columnHeaders = [];
         this._columnIds.forEach((columnId) => {
             columnHeaders.push(this._columns.has(columnId) ? this._columns.get(columnId) : columnId);
@@ -46,9 +47,9 @@ export class DataMatrixWorking {
 
     /**
      * @description Add a value to the property of a specific row given its id
-     * @param {string} rowId 
-     * @param {string} columnId 
-     * @param {string} value 
+     * @param {string} rowId - the id of the row to which we want to add a value
+     * @param {string} columnId - the id of the column to which we want to add a value
+     * @param {string} value - the value to add to the property of the row
      * @public
      */
     addValueToProperty(rowId, columnId, value) {
@@ -61,8 +62,8 @@ export class DataMatrixWorking {
 
     /**
      * @description Check if the header column has been already specified
-     * @param {string} columnId
-     * @returns {boolean}
+     * @param {string} columnId - the id of the column to check
+     * @returns {boolean} Returns true if the column header has been specified, false otherwise
      */
     hasColumnHeader(columnId) {
         return this._columns.has(columnId);
@@ -70,8 +71,8 @@ export class DataMatrixWorking {
     
     /**
      * @description Set the header column
-     * @param {string} columnId
-     * @param {any} columnRef
+     * @param {string} columnId - the id of the column to set
+     * @param {any} columnRef - the reference to the column header, can be a string or any other type
      */
     setColumnHeader(columnId, columnRef) {
         this._columns.set(columnId, columnRef);
@@ -79,8 +80,8 @@ export class DataMatrixWorking {
    
     /**
      * @description Check if the header row has been already specified
-     * @param {string} rowId
-     * @returns {boolean}
+     * @param {string} rowId - the id of the row to check
+     * @returns {boolean} Returns true if the row header has been specified, false otherwise
      */
     hasRowHeader(rowId) {
         return this._rows.has(rowId) && this._rows.get(rowId).header;
@@ -88,8 +89,8 @@ export class DataMatrixWorking {
     
     /**
      * @description Set the header row
-     * @param {string} rowId
-     * @param {any} rowRef
+     * @param {string} rowId - the id of the row to set
+     * @param {any} rowRef - the reference to the row header, can be a string or any other type
      */
     setRowHeader(rowId, rowRef) {
         if (this._rows.has(rowId) === true) {

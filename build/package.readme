@@ -2,10 +2,18 @@
 List of usefull commands for packaging
 ============================================================
 
+sf package update --target-dev-hub vfinet.devhub@salesforce.com --package "OrgCheck" --name "Org Check (alt. package)" --description "OrgCheck is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
 sf package version list --target-dev-hub vfinet.devhub@salesforce.com 
-sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck --definition-file config/project-scratch-def.json --installation-key-bypass --code-coverage --wait 10
+sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck --installation-key-bypass --code-coverage --wait 10
 sf package version promote --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck@5.2.0-1
 sf package version delete --target-dev-hub vfinet.devhub@salesforce.com --package OrgCheck@2.5.0-0
+
+
+============================================================
+List of usefull commands for 1GP->2GP migration
+============================================================
+
+sf package convert --package 0333V0000004Pb8 --installation-key-bypass --code-coverage --wait 20 --target-dev-hub vfinet.devhub@salesforce.com 
 
 
 ============================================================

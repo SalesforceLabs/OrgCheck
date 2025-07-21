@@ -137,6 +137,12 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      * @public
      */
     url;
+
+    /**
+     * @description API Version (as a string) set in the metadata for this item.
+     * @type {string}
+     * @public
+     */
     version;
     
     /**
@@ -236,4 +242,11 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      * @public
      */
     triggerType;
+
+    /**
+     * @description Record trigger type of this flow version (optional)
+     * @type {string}
+     * @public
+     */
+    recordTriggerType;
 }

@@ -1,7 +1,7 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
@@ -10,9 +10,9 @@ export class DatasetValidationRules extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger List of optional argument to pass
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - List of optional argument to pass
      * @returns {Promise<Map<string, SFDC_ValidationRule>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -33,7 +33,7 @@ export class DatasetValidationRules extends Dataset {
         // Create the map
         const validationRuleRecords = results[0];
         logger?.log(`Parsing ${validationRuleRecords.length} validation rules...`);
-        const validationRules = new Map(await Processor.map(validationRuleRecords, async (record) => {
+        const validationRules = new Map(await Processor.map(validationRuleRecords, async (/** @type {any} */ record) => {
         
             // Get the ID15 of this validaiton rule
             const id = sfdcManager.caseSafeId(record.Id);

@@ -1,5 +1,5 @@
 import { Dataset } from '../core/orgcheck-api-dataset';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
@@ -14,18 +14,30 @@ import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
 import { CodeScanner } from '../core/orgcheck-api-codescanner';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class DatasetObject extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map} parameters
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<SFDC_Object>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
+
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
+
+        // Checking parameters
+        if (fullObjectApiName === undefined || typeof fullObjectApiName !== 'string') {
+            throw new Error(`DatasetObject: No object were provided in the parameters.`);
+        }
+
+        // split name and namespace frpm object api name
+        const splittedApiName = fullObjectApiName.split('__');
+        const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
 
         // Init the factories
         const fieldDataFactory = dataFactory.getInstance(SFDC_Field);
@@ -38,10 +50,6 @@ export class DatasetObject extends Dataset {
         const relationshipDataFactory = dataFactory.getInstance(SFDC_ObjectRelationShip);
         const objectDataFactory = dataFactory.getInstance(SFDC_Object);
 
-        const fullObjectApiName = parameters?.get('object');
-        const splittedApiName = fullObjectApiName.split('__');
-        const packageName = splittedApiName.length === 3 ? splittedApiName[0] : '';
-        
         const results = await Promise.all([
             sfdcManager.describe(fullObjectApiName, logger),
             sfdcManager.soqlQuery([{
@@ -86,9 +94,10 @@ export class DatasetObject extends Dataset {
         const recordCount = results[2]; 
 
         // fields (standard and custom)
+        /** @type {Array<string>} */
         const customFieldIds = []; 
         const standardFieldsMapper = new Map();
-        await Processor.forEach(fields, (f) => {
+        await Processor.forEach(fields, (/** @type {any} */f) => {
             if (f && f.DurableId && f.DurableId.split && f.DurableId.includes) {
                 const id = sfdcManager.caseSafeId(f.DurableId.split('.')[1]);
                 if (f.DurableId?.includes('.00N')) {
@@ -104,7 +113,7 @@ export class DatasetObject extends Dataset {
         });
         const standardFields = await Processor.map(
             sobjectDescribed.fields,
-            (field) => {
+            (/** @type {any} */ field) => {
                 const fieldMapper = standardFieldsMapper.get(field.name);
                 return fieldDataFactory.createWithScore({
                     properties: {
@@ -125,19 +134,19 @@ export class DatasetObject extends Dataset {
                     }
                 });
             },
-            (field) => standardFieldsMapper.has(field.name)
+            (/** @type {any} */ field) => standardFieldsMapper.has(field.name)
         );
 
         // apex triggers
         const apexTriggerIds = await Processor.map(
             entity.ApexTriggers?.records, 
-            (t) => sfdcManager.caseSafeId(t.Id)
+            (/** @type {any} */ t) => sfdcManager.caseSafeId(t.Id)
         );
 
         // field sets
         const fieldSets = await Processor.map(
             entity.FieldSets?.records,
-            (t) => fieldSetDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => fieldSetDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     label: t.MasterLabel, 
@@ -150,7 +159,7 @@ export class DatasetObject extends Dataset {
         // page layouts
         const layouts = await Processor.map(
             entity.Layouts?.records,
-            (t) => layoutDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => layoutDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
@@ -163,7 +172,7 @@ export class DatasetObject extends Dataset {
         // limits
         const limits = await Processor.map(
             entity.Limits?.records,
-            (t) => limitDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => limitDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.DurableId), 
                     label: t.Label, 
@@ -179,7 +188,7 @@ export class DatasetObject extends Dataset {
         // validation rules
         const validationRules = await Processor.map(
             entity.ValidationRules?.records,
-            (t) => validationRuleDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => validationRuleDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.ValidationName, 
@@ -198,7 +207,7 @@ export class DatasetObject extends Dataset {
         // weblinks and actions
         const webLinks = await Processor.map(
             entity.WebLinks?.records,
-            (t) => webLinkDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => webLinkDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.Id), 
                     name: t.Name, 
@@ -206,7 +215,7 @@ export class DatasetObject extends Dataset {
                     hardCodedIDs: CodeScanner.FindHardCodedIDs(t.Url),
                     type: t.LinkType,
                     behavior: t.OpenType,
-                    package: t.NamespacePrefix,
+                    package: (t.NamespacePrefix || ''),
                     createdDate: t.CreatedDate,
                     lastModifiedDate: t.LastModifiedDate,
                     description: t.Description,                
@@ -218,14 +227,14 @@ export class DatasetObject extends Dataset {
         // record types
         const recordTypes = await Processor.map(
             sobjectDescribed.recordTypeInfos,
-            (t) => recordTypeDataFactory.createWithScore({ 
+            (/** @type {any} */ t) => recordTypeDataFactory.createWithScore({ 
                 properties: {
                     id: sfdcManager.caseSafeId(t.recordTypeId), 
                     name: t.name, 
                     developerName: t.developerName, 
                     isActive: t.active,
                     isAvailable: t.available,
-                    isDefaultRecordTypeMapping: t.defaultRecordTypeMapping,
+                    isDefault: t.defaultRecordTypeMapping,
                     isMaster: t.master,
                     url: sfdcManager.setupUrl(t.recordTypeId, SalesforceMetadataTypes.RECORD_TYPE, entity.DurableId)
                 }
@@ -235,7 +244,7 @@ export class DatasetObject extends Dataset {
         // relationships
         const relationships = await Processor.map(
             sobjectDescribed.childRelationships,
-            (relationship) => relationshipDataFactory.createWithScore({ 
+            (/** @type {any} */ relationship) => relationshipDataFactory.createWithScore({ 
                 properties: {
                     name: relationship.relationshipName,
                     childObject: relationship.childSObject,
@@ -244,7 +253,7 @@ export class DatasetObject extends Dataset {
                     isRestrictedDelete: relationship.restrictedDelete
                 }
             }),
-            (relationship) => relationship.relationshipName !== null
+            (/** @type {any} */ relationship) => relationship.relationshipName !== null
         );
 
         const object = objectDataFactory.createWithScore({

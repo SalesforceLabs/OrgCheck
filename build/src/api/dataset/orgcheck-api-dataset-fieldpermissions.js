@@ -1,7 +1,8 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
+import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_FieldPermission } from '../data/orgcheck-api-data-fieldpermission';
 
@@ -9,15 +10,15 @@ export class DatasetFieldPermissions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
-     * @param {Map} parameters
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
+     * @param {Map<string, any>} parameters - The parameters
      * @returns {Promise<Map<string, SFDC_FieldPermission>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger, parameters) {
 
-        const fullObjectApiName = parameters?.get('object');
+        const fullObjectApiName = OrgCheckGlobalParameter.getSObjectName(parameters);
 
         // First SOQL query
         logger?.log(`Querying REST API about SetupEntityAccess for TabSet in the org...`);            
@@ -34,7 +35,7 @@ export class DatasetFieldPermissions extends Dataset {
         // Create the map
         logger?.log(`Parsing ${permissions.length} Field Permissions...`);
         const fieldPermissions = new Map(await Processor.map(permissions, 
-            (record) => {
+            (/** @type {any} */ record) => {
                 // Get the ID15 of this parent
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
 

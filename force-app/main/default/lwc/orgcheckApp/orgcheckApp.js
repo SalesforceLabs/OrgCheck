@@ -1,3 +1,5 @@
+/*global jsforce, fflate*/
+
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import * as ocapi from './libs/orgcheck-api.js';
@@ -13,16 +15,22 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Text encoder
+     * @type {TextEncoder}
+     * @public
      */ 
     @api textEncoder;
 
     /**
      * @description Text decoder
+     * @type {TextDecoder}
+     * @public
      */ 
     @api textDecoder;
 
     /**
      * @description Local storage
+     * @type {Storage}
+     * @public
      */ 
     @api localStorage;
 
@@ -138,7 +146,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description Current activated tab in the main tab set
      * @type {string}
-     * @oublic
+     * @public
      */
     selectedMainTab;
 
@@ -277,19 +285,6 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description List of elements to put in the global view
-     * @type {Array<{label: string, dataTable: Array<any>, tab: string}>}
-     */ 
-    get globalViewItems() {
-        return Object.keys(this._internalTransformers)
-            .filter((/** @type {string} */ recipe) => this._internalTransformers[recipe].isGlobalView)
-            .map((/** @type {string} */ recipe) => { 
-                const transfomer = this._internalTransformers[recipe]; 
-                return { label: transfomer.label, dataTable: this[transfomer.data], tab: `${transfomer.tab}:${recipe}` };
-            });
-    }
-
-    /**
      * @description Do we show the "Apex Uncompiled" button in the Apex tab (depends on the size of apexUncompiledTableData)
      * @type {boolean}
      * @public
@@ -317,7 +312,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load the Org Check API (and it dependencies) only the first time
-     * @param {any} [logger]
+     * @param {any} [logger] - The logger
      * @private
      * @async
      */ 
@@ -350,7 +345,7 @@ export default class OrgcheckApp extends LightningElement {
                 this.accessToken, 
                 // -----------------------
                 // JsForce instance
-                // @ts-ignore
+                // @ts-ignore 
                 jsforce, 
                 // -----------------------
                 // Local Storage methods
@@ -358,56 +353,45 @@ export default class OrgcheckApp extends LightningElement {
                 {
                     /**
                      * @description Set an item in the local storage
-                     * @param {string} key
-                     * @param {string} value 
+                     * @param {string} key - The key to set
+                     * @param {string} value - The value to set
                      */
                     setItem: (key, value) => { this.localStorage.setItem(key, value); },
                     /**
                      * @description Get an item from the local storage
-                     * @param {string} key
-                     * @returns {string}
+                     * @param {string} key - The key to set
+                     * @returns {string} The stored value for the given key
                      */
                     getItem: (key) => { return this.localStorage.getItem(key); },
                     /**
                      * @description Removes an item from the local storage
-                     * @param {string} key
+                     * @param {string} key - The key to remove
                      */
                     removeItem: (key) => { this.localStorage.removeItem(key); },
                     /**
-                     * @description Get the nth key in the storage, returns null if out of range
-                     * @param {number} index
-                     * @returns {string | null}
-                     */
-                    key: (index) => { return this.localStorage.key(index); },
-                    /**
                      * @description Get all the keys in the storage
-                     * @returns {Array<string>}
+                     * @returns {Array<string>} List of keys
                      */
                     keys: () => {  
                         const keys = []; 
                         for (let i = 0; i < this.localStorage.length; i++) {
                             keys.push(this.localStorage.key(i)); 
                         }
-                        return keys; },
-                    /**
-                     * @description Get the current length of the storage
-                     * @returns {number}
-                     */
-                    length: () => { return this.localStorage.length; }
+                        return keys; }
                 },
                 // -----------------------
                 // Encoding methods
                 { 
                     /** 
                      * @description Encoding method
-                     * @param data {string}
-                     * @returns {Uint8Array} 
+                     * @param {string} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     encode: (data) => { return this.textEncoder.encode(data); }, 
                     /** 
                      * @description Decoding method
-                     * @param data {Uint8Array}
-                     * @returns {string} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {string} Output data
                      */ 
                     decode: (data) => { return this.textDecoder.decode(data); }
                 },            
@@ -416,8 +400,8 @@ export default class OrgcheckApp extends LightningElement {
                 { 
                     /** 
                      * @description Compress method
-                     * @param data {Uint8Array}
-                     * @returns {Uint8Array} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     compress:   (data) => { 
                         // @ts-ignore
@@ -425,8 +409,8 @@ export default class OrgcheckApp extends LightningElement {
                     },
                     /** 
                      * @description Decompress method
-                     * @param data {Uint8Array}
-                     * @returns {Uint8Array} 
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
                      */ 
                     // @ts-ignore
                     decompress: (data) => { 
@@ -438,21 +422,25 @@ export default class OrgcheckApp extends LightningElement {
                 // Log methods -- delegation to the UI spinner
                 {
                     /**
+                     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+                     */
+                    isConsoleFallback: () => { return true; },
+                    /**
                      * @description Standard log method
-                     * @param section {string}
-                     * @param message {string}
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
                      */ 
                     log: (section, message) => { this._spinner.sectionLog(section, message); },
                     /**
                      * @description Log method when task is ended
-                     * @param section {string}
-                     * @param message {string}
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
                      */ 
                     ended: (section, message) => { this._spinner.sectionEnded(section, message); },
                     /**
                      * @description Log method when task has just failed
-                     * @param section {string}
-                     * @param error {string | Error}
+                     * @param {string} section - The section name
+                     * @param {string | Error} error - The error to log
                      */ 
                     failed: (section, error) => { this._spinner.sectionFailed(section, error); }
                 }
@@ -471,8 +459,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Show the error in a modal (that can be closed)
-     * @param {string} title
-     * @param {Error} error
+     * @param {string} title - The title of the modal
+     * @param {Error} error - The error to show in the error modal
      * @private
      */ 
     _showError(title, error) {
@@ -484,61 +472,66 @@ export default class OrgcheckApp extends LightningElement {
         console.error(title, error);
     }
 
-    _nt = () => '';
-    _nm = () => `${this.namespace}`;
-    _al = () => `${this.namespace}-${this.objectType}-${this.object}`;
-    _on = () => `${this.object}-${this.namespace}`;
-    _ob = () => `${this.object}`;
-    _no = () => `${this.namespace}-${this.objectType}`;
+    _aliasNone = () => '';
+    _aliasNamespace = () => `${this.namespace}`;
+    _aliasAll = () => `${this.namespace}-${this.objectType}-${this.object}`;
+    _aliasObjNamespace = () => `${this.object}-${this.namespace}`;
+    _aliasObject = () => `${this.object}`;
+    _aliasTypeNamespace = () => `${this.namespace}-${this.objectType}`;
 
     /**
      * @description List of internal transformers to get data from the API
      * @private
      */
     _internalTransformers = {
-        'active-users':              { label: '👥 Active Internal Users',      tab: 'security',    isGlobalView: true,      data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._nt,   get: async () => { return this._api?.getActiveUsers(); }},
-        'apex-classes':              { label: '❤️‍🔥 Apex Classes',               tab: 'code',        isGlobalView: true,      data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._nm,   get: async () => { return this._api?.getApexClasses(this.namespace); }},
-        'apex-unit-tests':           { label: '🚒 Apex Unit Tests',            tab: 'code',        isGlobalView: true,      data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._nm,   get: async () => { return this._api?.getApexTests(this.namespace); }},
-        'apex-triggers':             { label: '🧨 Apex Triggers',              tab: 'code',        isGlobalView: true,      data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._nm,   get: async () => { return this._api?.getApexTriggers(this.namespace); }},
-        'apex-recompilation-needed': { label: '🌋 Apex Uncompiled',            tab: 'code',        isGlobalView: true,      data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
-        'app-permissions':           { label: '⛕ Application Permissions',     tab: 'security',    isGlobalView: false,     data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
-        'custom-fields':             { label: '🏈 Custom Fields',              tab: 'data-model',  isGlobalView: true,      data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._al,   get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
-        'custom-labels':             { label: '🏷️ Custom Labels',              tab: 'setting',     isGlobalView: true,      data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._nm,   get: async () => { return this._api?.getCustomLabels(this.namespace); }},
-        'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',    isGlobalView: false,     data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._on,   get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
-        'flows':                     { label: '🏎️ Flows',                      tab: 'automation',  isGlobalView: true,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getFlows(); }},
-        'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',      isGlobalView: true,      data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._nm,   get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
-        'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',      isGlobalView: true,      data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._nm,   get: async () => { return this._api?.getLightningPages(this.namespace); }},
-        'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: 'visual',      isGlobalView: true,      data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._nm,   get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
-        'object':                    { label: '🎳 Object Documentation',       tab: 'data-model',  isGlobalView: false,     data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._ob,   get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
-        'object-permissions':        { label: '🚦 Object Permissions',         tab: 'security',    isGlobalView: false,     data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._nm,   get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
-        'objects':                   { label: '🏉 Org Wide Defaults',          tab: 'data-model',  isGlobalView: false,     data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._no,   get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
-        'permission-sets':           { label: '🚔 Permission Sets',            tab: 'security',    isGlobalView: true,      data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getPermissionSets(this.namespace); }},
-        'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: 'security',    isGlobalView: true,      data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getPermissionSetLicenses(); }},
-        'process-builders':          { label: '🛺 Process Builders',           tab: 'automation',  isGlobalView: true,      data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._nt,   get: async () => { return this._api?.getProcessBuilders(); }},
-        'profile-password-policies': { label: '⛖ Profile Password Policies',  tab: 'security',     isGlobalView: true,     data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._nt,   get: async () => { return this._api?.getProfilePasswordPolicies(); }},
-        'profile-restrictions':      { label: '🚸 Profile Restrictions',       tab: 'security',    isGlobalView: true,      data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._nm,   get: async () => { return this._api?.getProfileRestrictions(this.namespace); }},
-        'profiles':                  { label: '🚓 Profiles',                   tab: 'security',    isGlobalView: true,      data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._nm,   get: async () => { return this._api?.getProfiles(this.namespace); }},
-        'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',       isGlobalView: true,      data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._nt,   get: async () => { return this._api?.getPublicGroups(); }},
-        'queues':                    { label: '🦒 Queues',                     tab: 'boxes',       isGlobalView: true,      data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._nt,   get: async () => { return this._api?.getQueues(); }},
-        'roles-listing':             { label: '🦓 Internal Role Listing',      tab: 'boxes',       isGlobalView: true,      data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRoles(); }},
-        'roles-explorer':            { label: '🐙 Internal Role Explorer',     tab: 'boxes',       isGlobalView: false,     data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._nt,   get: async () => { return this._api?.getRolesTree(); }},
-        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'data-model',  isGlobalView: true,      data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._al,   get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
-        'visual-force-components':   { label: '🍞 Visualforce Components',    tab: 'visual',      isGlobalView: true,      data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._nm,   get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
-        'visual-force-pages':        { label: '🥖 Visualforce Pages',         tab: 'visual',      isGlobalView: true,      data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._nm,   get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
-        'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',  isGlobalView: true,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._nt,   get: async () => { return this._api?.getWorkflows(); }}
+        'apex-classes':              { label: '❤️‍🔥 Apex Classes',               tab: 'code',            data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }},
+        'apex-tests':                { label: '🚒 Apex Unit Tests',            tab: 'code',            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
+        'apex-triggers':             { label: '🧨 Apex Triggers',              tab: 'code',            data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
+        'apex-uncompiled':           { label: '🌋 Apex Uncompiled',            tab: 'code',            data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
+        'app-permissions':           { label: '⛕ Application Permissions',     tab: 'security',        data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,    get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
+        'collaboration-groups':      { label: '🦙 Chatter Groups',             tab: 'boxes',           data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }},
+        'custom-fields':             { label: '🏈 Custom Fields',              tab: 'datamodel',       data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
+        'custom-labels':             { label: '🏷️ Custom Labels',              tab: 'setting',         data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
+        'custom-tabs':               { label: '🥠 Custom Tabs',                tab: 'visual',          data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }},
+        'documents':                 { label: '🚧 Documents',                  tab: 'setting',         data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }},
+        'email-templates':           { label: '🌇 Email Templates',            tab: 'setting',         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
+        'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
+        'flows':                     { label: '🏎️ Flows',                      tab: 'automation',      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
+        'global-view':               { label: '🌍 Global View',                tab: 'home',            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',          data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
+        'internal-active-users':     { label: '👥 Active Internal Users',      tab: 'security',        data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
+        'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: 'setting',         data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
+        'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: 'visual',          data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
+        'lightning-pages':           { label: '🎂 Lightning Pages',            tab: 'visual',          data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }},
+        'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: 'visual',          data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
+        'object':                    { label: '🎳 Object Documentation',       tab: 'datamodel',       data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
+        'object-permissions':        { label: '🚦 Object Permissions',         tab: 'security',        data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
+        'objects':                   { label: '🏉 Org Wide Defaults',          tab: 'datamodel',       data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
+        'page-layouts':              { label: '🏓 Page Layouts',               tab: 'security',        data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
+        'permission-sets':           { label: '🚔 Permission Sets',            tab: 'security',        data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }},
+        'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: 'security',        data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }},
+        'process-builders':          { label: '🛺 Process Builders',           tab: 'automation',      data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getProcessBuilders(); }},
+        'profile-password-policies': { label: '⛖ Profile Password Policies',  tab: 'security',        data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }},
+        'profile-restrictions':      { label: '🚸 Profile Restrictions',       tab: 'security',        data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }},
+        'profiles':                  { label: '🚓 Profiles',                   tab: 'security',        data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }},
+        'public-groups':             { label: '🐘 Public Groups',              tab: 'boxes',           data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
+        'queues':                    { label: '🦒 Queues',                     tab: 'boxes',           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
+        'record-types':              { label: '🏏 Record Types',               tab: 'datamodel',       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        'static-resources':          { label: '🗿 Static Resources',            tab: 'setting',         data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }},
+        'user-roles':                { label: '🦓 Internal Role Listing',      tab: 'boxes',           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
+        'user-roles-hierarchy':      { label: '🐙 Internal Role Explorer',     tab: 'boxes',           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
+        'validation-rules':          { label: '🎾 Validation Rules',           tab: 'datamodel',       data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
+        'visualforce-components':    { label: '🍞 Visualforce Components',     tab: 'visual',          data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
+        'visualforce-pages':         { label: '🥖 Visualforce Pages',          tab: 'visual',          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
+        'web-links':                 { label: '🏑 Web Links',                  tab: 'datamodel',       data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
+        'workflows':                 { label: '🚗 Workflows',                  tab: 'automation',      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }}
     }
 
     /**
-     * @description List of transformer keys that will be included in the global view tab
-     * @private
-     */
-    _globalViewTransformersKeys = Object.keys(this._internalTransformers).filter((/** @type {string} */ recipe) => this._internalTransformers[recipe].isGlobalView === true)
-
-    /**
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
-     * @param {string} recipe 
-     * @param {boolean} [forceRefresh=false] 
-     * @param {boolean} [lazyRefresh=true] 
+     * @param {string} recipe - The alias of the alias to use
+     * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
+     * @param {boolean} [lazyRefresh] - Is it a lazey refresh or not (true by default)
      * @private
      * @async
      */ 
@@ -628,7 +621,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load basic information to use the app (including the filters)
-     * @param {any} [logger]
+     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @throws {Error} If the current user has not enough permissions to run the app (please display the error it has information about missing permissions)
      * @private
      * @async
@@ -666,8 +659,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load the list of values for the filter
-     * @param {boolean} [forceRefresh=false] 
-     * @param {any} [logger]
+     * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
+     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @private
      * @async
      */ 
@@ -703,44 +696,29 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Unique method to launch the update of all data and update the screen accordingly
-     * @private
-     * @async
-     */
-    async _updateGlobalView() {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
-        this.showGlobalViewExportButton = false;
-        await Promise.all(this._globalViewTransformersKeys.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, false, false); } ));
-        this.showGlobalViewExportButton = true;
-    }
-
-    /**
      * @description Unique method to propagate a change to be done in the current tab. DOES NOT THROW any error
      * @private
      * @async
      */
     async _updateCurrentTab() {
         if (this._hasRenderOnce === false) return;
-        const TAB_SECTION = `TAB ${this.selectedSubTab}`;
+        const TAB_SECTION = `Tab "${this.selectedSubTab}"`;
         this.tabLoading = true;
-        setTimeout(async () => {
-            try {
-                this._spinner.open();
-                this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
-                switch (this.selectedSubTab) {
-                    case 'welcome':     this._updateCacheInformation(); break;
-                    case 'global-view': await this._updateGlobalView(); break;
-                    default:            await this._updateData(this.selectedSubTab);
-                }
-                this._spinner.sectionEnded(TAB_SECTION, `Done.`);
-                this._spinner.close(0);
-            } catch (error) {
-                this._spinner.sectionFailed(TAB_SECTION, error);
-            } finally {
-                this._updateLimits();
-                this.tabLoading = false;
+        try {
+            this._spinner.open();
+            this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
+            switch (this.selectedSubTab) {
+                case 'welcome': this._updateCacheInformation(); break;
+                default:        await this._updateData(this.selectedSubTab);
             }
-        }, 1);
+            this._spinner.sectionEnded(TAB_SECTION, `Done.`);
+            this._spinner.close(0);
+        } catch (error) {
+            this._spinner.sectionFailed(TAB_SECTION, error);
+        } finally {
+            this._updateLimits();
+            this.tabLoading = false;
+        }
     }
 
 
@@ -760,7 +738,7 @@ export default class OrgcheckApp extends LightningElement {
      */
     async handleFiltersValidated() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        return this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
+        await this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
     }
 
     /**
@@ -771,7 +749,7 @@ export default class OrgcheckApp extends LightningElement {
     async handleFiltersRefreshed() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            return this._loadFilters(true);
+            await this._loadFilters(true);
         } catch(e) {
             this._showError('Error while handleFiltersRefreshed', e);
         }
@@ -780,7 +758,7 @@ export default class OrgcheckApp extends LightningElement {
     /**
      * @description When the org is a production, we show a message and a checkbox. This event is triggered when the user clicks on this checkbox.
      *              This should activate the usage of the Salesforce API from Org Check API.
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -792,10 +770,11 @@ export default class OrgcheckApp extends LightningElement {
         if (!checkbox) return;
         try {
             // is it checked?
-            if (checkbox['checked'] === true) {
+            // @ts-ignore
+            if (checkbox.checked === true) {
                 // yes it is!
                 this._api.acceptUsageTermsManually();
-                return this._loadBasicInformationIfAccepted();
+                await this._loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
         } catch(e) {
@@ -805,7 +784,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when user selects a main tab
-     * @param {Event} event
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -815,26 +794,31 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // Store the current main tab
-            this.selectedMainTab = mainTab['value'];
+            // @ts-ignore
+            this.selectedMainTab = mainTab.value;
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
-            const subTabSet = mainTab['querySelector']('lightning-tabset');
+            // @ts-ignore
+            const subTabSet = mainTab.querySelector('lightning-tabset');
             // Get the active tab value of this sub tab set (it should be the last activated sub tab)
             // NOTE: the previous value could be the one from the previous tab opened ONLY IF the next tab was not yet rendered
             const subTabActivated = subTabSet?.activeTabValue;
             // Get the list of sub tabs
-            const subTabs = mainTab['querySelectorAll']('lightning-tab');
+            // @ts-ignore
+            const subTabs = mainTab.querySelectorAll('lightning-tab');
             // Get the list of tabs' name
-            const subTabsAvailable = Array.from(subTabs).map(t => t.value);
-            if (subTabsAvailable.includes(subTabActivated)) {
+            const subTabsAvailable = Array.from(subTabs)?.map(t => t.value);
+
+            if (subTabsAvailable.includes(this.selectedSubTab)) {
+                // If the sub tab was specifically set align it with the sub tab
+                subTabSet.activeTabValue = this.selectedSubTab;
+            } else if (subTabsAvailable.includes(subTabActivated)) {
                 // Now if the subTabActivated is part of the list subTabsAvailable we select it
                 this.selectedSubTab = subTabActivated;
             } else {
                 // if not the tab was not yet rendered, so we are going to select the first tab in the list
                 this.selectedSubTab = subTabsAvailable[0];
             }
-            // Ask to update the current data
-            return this._updateCurrentTab(); // it's not going to throw any error here...
         } catch (e) {
             this._showError('Error while handleMainTabActivation', e);
         }
@@ -842,7 +826,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when user selects a sub tab (within a main tab)
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @public
      * @async
      */
@@ -852,11 +836,12 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is a sub tab
             const subTab = event?.target; // not throwing any error
             // That subTab's name will be the next currentTab
-            const nextCurrentSubTab = subTab['value']; // not throwing any error
+            // @ts-ignore
+            const nextCurrentSubTab = subTab.value; // not throwing any error
             // Store the curret sub tab
             this.selectedSubTab = nextCurrentSubTab;
             // Ask to update the current data
-            return this._updateCurrentTab(); // not throwing any error here!
+            await this._updateCurrentTab(); // not throwing any error here!
         } catch (e) {
             this._showError('Error while handleSubTabActivation', e);
         }
@@ -883,18 +868,18 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on the "View Score" button on a data table
-     * @param {Event} event 
-     * @async
+     * @param {Event | any} event - The event information
      * @public
      */ 
-    async handleViewScore(event) {
+    handleViewScore(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         // if the api is not loaded yet ignore that call
         if (!this._api) return;
         // if event is undefined ignore that call
         if (!event) return;
         // The event should contain a detail property
-        const detail = event['detail']; // not throwing any error
+        // @ts-ignore
+        const detail = event.detail; // not throwing any error
         // if detail is undefined ignore that call
         if (!detail) return;
         try {
@@ -902,7 +887,7 @@ export default class OrgcheckApp extends LightningElement {
             let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
                               `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
             detail.reasonIds?.forEach((/** @type {number} */ id) => {
-                const reason = this._api.getScoreRule(id); // may throw an error
+                const reason = ocapi.SecretSauce.GetScoreRule(id); // may throw an error
                 if (reason) {
                     htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
                 }
@@ -911,7 +896,7 @@ export default class OrgcheckApp extends LightningElement {
             // show the modal
             this._modal.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
         } catch (e) {
-            // in case this._api.getScoreRule threw an error!
+            // in case ocapi.SecretSauce.GetScoreRule threw an error!
             this._showError('Error while handleViewScore', e);
         }
     }
@@ -948,15 +933,16 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Event called when the user clicks on the "Refresh" button from the current tab
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      * @async
      * @public
      */ 
     async handleClickRefreshCurrentTab(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            const recipes = event.target['getAttribute']('data-recipes')?.split(',');
-            return Promise.all(recipes.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
+            // @ts-ignore
+            const recipes = event.target.getAttribute('data-recipes')?.split(',');
+            await Promise.all(recipes?.map(async (/** @type {string} */ recipe) => { await this._updateData(recipe, true); } ));
         } catch (e) {
             this._showError('Error while handleClickRefreshCurrentTab', e);
         }
@@ -992,7 +978,7 @@ export default class OrgcheckApp extends LightningElement {
                     } else if (cr.errors && Array.isArray(cr.errors)) {
                         reasons = cr.errors;
                     }
-                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons.map(e => JSON.stringify(e)).join(', ')}`);
+                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons?.map(e => JSON.stringify(e)).join(', ')}`);
                 }
             }));
             this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
@@ -1001,13 +987,19 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    async handleOpenSubTab(event) {
+    /**
+     * @description Event called when the user clicks on a button to open a sub tab
+     * @param {Event | any} event - The event information
+     * @public
+     */
+    handleOpenSubTab(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is a button with a specific attribute
             const button = event?.target; // not throwing any error
             // The button should have an attribute called data-tab 
-            const tab = button['getAttribute']('data-tab');
+            // @ts-ignore
+            const tab = button.getAttribute('data-tab');
             // Split the tab value into two elements one for the main tab and the other for the sub tab
             const elements = tab.split(':');
             this.selectedMainTab = elements[0];
@@ -1027,7 +1019,7 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * @description Table for field sets (specific to the current selected object)
+     * @description Table definition for field sets (specific to the current selected object)
      * @type {ocui.Table}
      */ 
     fieldSetsTableDefinition = {
@@ -1041,7 +1033,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for page layouts (specific to the current selected object)
+     * @description Table definition for page layouts (specific to the current selected object)
      * @type {ocui.Table}
      */
     layoutsTableDefinition = {
@@ -1055,7 +1047,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for object limits (specific to the current selected object)
+     * @description Table definition for object limits (specific to the current selected object)
      * @type {ocui.Table}
      */
     limitsTableDefinition = {
@@ -1074,7 +1066,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for validation rules
+     * @description Table definition for validation rules
      * @type {ocui.Table}
      */
     validationRulesTableDefinition = {
@@ -1097,7 +1089,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for validation rules (specific to the current selected object)
+     * @description Table definition for validation rules (specific to the current selected object)
      * @type {ocui.Table}
      */
     validationRulesInObjectTableDefinition = {
@@ -1118,29 +1110,98 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for web links (specific to the current selected object)
+     * @description Table definition for web links (specific to the current selected object)
+     * @type {ocui.Table}
+     */
+    webLinksInObjectTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Type',           type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Behavior',       type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+    
+    /**
+     * @description Table definition for web links (for all objects)
      * @type {ocui.Table}
      */
     webLinksTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Behavior',      type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'In this object',  type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',     type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
+            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Behavior',        type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Ref. in Layout?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
         ],
         orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
+        orderSort: ocui.SortOrder.DESC
     };
-    
+
     /**
-     * @description Table for record types (specific to the current selected object)
+     * @description Table definition for static resources
+     * @type {ocui.Table}
+     */
+    staticResourcesTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Content Type',    type: ocui.ColumnType.TXT, data: { value: 'contentType' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for record types (specific to the current selected object)
+     * @type {ocui.Table}
+     */
+    recordTypesInObjectTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
+            { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
+            { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
+            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
+            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for record types for all objects
      * @type {ocui.Table}
      */
     recordTypesTableDefinition = {
@@ -1149,17 +1210,20 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'In this object', type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',    type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
             { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
             { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
-            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefaultRecordTypeMapping' }},
+            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
             { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
-    };
+    }
 
     /**
-     * @description Table for sobject relationships (specific to the current selected object)
+     * @description Table definition for sobject relationships (specific to the current selected object)
      * @type {ocui.Table}
      */
     relationshipsTableDefinition = {
@@ -1176,18 +1240,35 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom fields
+     * @description Table definition for chatter groups
+     * @type {ocui.Table}
+     */
+    chatterGroupsTableDefinition = {
+        columns: [
+            { label: '#',                   type: ocui.ColumnType.IDX },
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Group',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
+     * @description Table definition for custom fields
      * @type {ocui.Table}
      */
     customFieldsTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'In this object',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }},  //filter: 'obj', 
-            { label: 'Object Type',         type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }}, //filter: 'obj', 
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }}, // filter: 'cus',
+            { label: 'In this object',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
+            { label: 'Object Type',         type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
             { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
@@ -1197,17 +1278,17 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Restricted?',         type: ocui.ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
             { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
             { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }}, // filter: 'dep', 
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, // filter: 'dep', 
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, // filter: 'dep', 
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, // filter: 'dep', 
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, // filter: 'dep', 
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},// filter: 'dep', 
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
+            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }},
+            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }},
+            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1215,16 +1296,16 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom fields (specific to the current selected object)
+     * @description Table definition for custom fields (specific to the current selected object)
      * @type {ocui.Table}
      */
     customFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }}, // filter: 'cus',
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
             { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
@@ -1234,17 +1315,17 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Restricted?',         type: ocui.ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
             { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
             { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'URLs',                type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',                 type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }}, // filter: 'dep', 
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, // filter: 'dep', 
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, // filter: 'dep', 
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, // filter: 'dep', 
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, // filter: 'dep', 
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},// filter: 'dep', 
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, 
+            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, 
+            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, 
+            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1252,13 +1333,13 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for standard fields (specific to the current selected object)
+     * @description Table definition for standard fields (specific to the current selected object)
      * @type {ocui.Table}
      */
     standardFieldsInObjectTableDefinition = {
         columns: [
             { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, //filter: 'sco',
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, 
             { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
             { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
@@ -1271,8 +1352,8 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
             { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
             { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},// filter: 'noc', 
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},// filter: 'noc', 
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
@@ -1280,7 +1361,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for custom labels
+     * @description Table definition for custom labels
      * @type {ocui.Table}
      */
     customLabelsTableDefinition = {
@@ -1308,7 +1389,53 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning aura components
+     * @description Table definition for custom tabs
+     * @type {ocui.Table}
+     */
+    customTabsTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for documents
+     * @type {ocui.Table}
+     */
+    documentsTableDefinition = {
+        columns: [
+            { label: '#',                   type: ocui.ColumnType.IDX },
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Folder',              type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
+            { label: 'Document URL',        type: ocui.ColumnType.TXT, data: { value: 'documentUrl' }},
+            { label: 'Size (bytes)',        type: ocui.ColumnType.NUM, data: { value: 'size' }},
+            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for lightning aura components
      * @type {ocui.Table}
      */
     auraComponentsTableDefinition = {
@@ -1330,7 +1457,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning pages
+     * @description Table definition for lightning pages
      * @type {ocui.Table}
      */
     flexiPagesTableDefinition = {
@@ -1340,7 +1467,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
             { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }}, // filter: 'obj',
+            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
             { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
             { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
             { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
@@ -1353,7 +1480,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for lightning pages within an SObject
+     * @description Table definition for lightning pages within an SObject
      * @type {ocui.Table}
      */
     flexiPagesInObjectTableDefinition = {
@@ -1373,9 +1500,29 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
+    
+    /**
+     * @description Table definition for knowledge articles
+     * @type {ocui.Table}
+     */ 
+    knowledgeArticlesTableDefinition = {
+        columns: [
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'versionId', name: 'number' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'number' }},
+            { label: 'Title',          type: ocui.ColumnType.TXT, data: { value: 'title' }},
+            { label: 'Status',         type: ocui.ColumnType.TXT, data: { value: 'status' }},
+            { label: 'Url Name',       type: ocui.ColumnType.TXT, data: { value: 'urlName' }},
+            { label: 'Hardcoded URL?', type: ocui.ColumnType.CHK, data: { value: 'isHardCodedURL' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
-     * @description Table for lightning web components
+     * @description Table definition for lightning web components
      * @type {ocui.Table}
      */
     lightningWebComponentsTableDefinition = {
@@ -1396,8 +1543,32 @@ export default class OrgcheckApp extends LightningElement {
         orderSort: ocui.SortOrder.DESC
     };
 
+
     /**
-     * @description Table for permission sets
+     * @description Table definition for page layouts
+     * @type {ocui.Table}
+     */
+    pageLayoutsTableDefinition = {
+        columns: [
+            { label: '#',                type: ocui.ColumnType.IDX },
+            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Type',             type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Object',           type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
+            { label: 'Assignment Count', type: ocui.ColumnType.NUM, data: { value: 'profileAssignmentCount' }},
+            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
+     * @description Table definition for permission sets
      * @type {ocui.Table}
      */
     permissionSetsTableDefinition = {
@@ -1425,7 +1596,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for permission set licenses
+     * @description Table definition for permission set licenses
      * @type {ocui.Table}
      */
     permissionSetLicensesTableDefinition = {
@@ -1450,7 +1621,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profiles
+     * @description Table definition for profiles
      * @type {ocui.Table}
      */
     profilesTableDefinition = {
@@ -1477,7 +1648,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profile restrictions
+     * @description Table definition for profile restrictions
      * @type {ocui.Table}
      */
     profileRestrictionsTableDefinition = {
@@ -1496,7 +1667,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for profiles password policies
+     * @description Table definition for profiles password policies
      * @type {ocui.Table}
      */
     profilePasswordPoliciesTableDefinition = {
@@ -1519,7 +1690,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for public groups
+     * @description Table definition for public groups
      * @type {ocui.Table}
      */
     publicGroupsTableDefinition = {
@@ -1539,27 +1710,13 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for queues
+     * @description Table definition for queues
      * @type {ocui.Table}
      */
-    queuesTableDefinition = {
-        columns: [
-            { label: '#',                       type: ocui.ColumnType.IDX },
-            { label: 'Score',                   type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                    type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',          type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
-            { label: 'With bosses?',            type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
-            { label: '#Explicit members',       type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
-            { label: 'Explicit groups (links)', type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }},
-            { label: 'Explicit groups (info)',  type: ocui.ColumnType.OBJS, data: { values: 'directGroupRefs', template: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses':''}${g.includeSubordinates?' with subordinates':''})` }},
-            { label: 'Explicit users',          type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    queuesTableDefinition = this.publicGroupsTableDefinition;
 
     /**
-     * @description Table for active internal users
+     * @description Table definition for active internal users
      * @type {ocui.Table}
      */
     usersTableDefinition = {
@@ -1587,56 +1744,56 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for visualforce components
+     * @description Table definition for visualforce components
      * @type {ocui.Table}
      */
     visualForceComponentsTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',  type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
 
     /**
-     * @description Table for visualforce pages
+     * @description Table definition for visualforce pages
      * @type {ocui.Table}
      */
     visualForcePagesTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Mobile',        type: ocui.ColumnType.CHK, data: { value: 'isMobileReady' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Mobile',         type: ocui.ColumnType.CHK, data: { value: 'isMobileReady' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',  type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
 
     /**
-     * @description Table for apex classes (compiled and not tests)
+     * @description Table definition for apex classes (compiled and not tests)
      * @type {ocui.Table}
      */
     apexClassesTableDefinition = {
@@ -1655,8 +1812,8 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Implements',      type: ocui.ColumnType.TXTS, data: { values: 'interfaces' }},
             { label: 'Extends',         type: ocui.ColumnType.TXT,  data: { value: 'extends' }},
             { label: 'Size',            type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'URLs',            type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',             type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'Methods',         type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
             { label: 'Inner Classes',   type: ocui.ColumnType.NUM,  data: { value: 'innerClassesCount' }},
             { label: 'Annotations',     type: ocui.ColumnType.TXTS, data: { values: 'annotations' }},
@@ -1675,7 +1832,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for uncompiled apex classes
+     * @description Table definition for uncompiled apex classes
      * @type {ocui.Table}
      */    
     apexUncompiledTableDefinition = {
@@ -1699,74 +1856,74 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for apex triggers
+     * @description Table definition for apex triggers
      * @type {ocui.Table}
      */
     apexTriggersTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Size',          type: ocui.ColumnType.NUM, data: { value: 'length' }},
-            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, // filter: 'nob'
-            { label: 'Active?',       type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Has SOQL?',     type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
-            { label: 'Has DML?',      type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
-            { label: '*Insert',       type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
-            { label: 'Insert*',       type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
-            { label: '*Update',       type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
-            { label: 'Update*',       type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
-            { label: '*Delete',       type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
-            { label: 'Delete*',       type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
-            { label: 'Undelete',      type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Size',           type: ocui.ColumnType.NUM, data: { value: 'length' }},
+            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Object',         type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }},
+            { label: 'Active?',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
+            { label: 'Has SOQL?',      type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
+            { label: 'Has DML?',       type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
+            { label: '*Insert',        type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
+            { label: 'Insert*',        type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
+            { label: '*Update',        type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
+            { label: 'Update*',        type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
+            { label: '*Delete',        type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
+            { label: 'Delete*',        type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
+            { label: 'Undelete',       type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
+            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
 
     /**
-     * @description Table for apex triggers within SObject
+     * @description Table definition for apex triggers within SObject
      * @type {ocui.Table}
      */
     apexTriggersInObjectTableDefinition =  {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Size',          type: ocui.ColumnType.NUM, data: { value: 'length' }},
-            { label: 'URLs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',           type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Active?',       type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Has SOQL?',     type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
-            { label: 'Has DML?',      type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
-            { label: '*Insert',       type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
-            { label: 'Insert*',       type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
-            { label: '*Update',       type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
-            { label: 'Update*',       type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
-            { label: '*Delete',       type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
-            { label: 'Delete*',       type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
-            { label: 'Undelete',      type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: '#',              type: ocui.ColumnType.IDX },
+            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Size',           type: ocui.ColumnType.NUM, data: { value: 'length' }},
+            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Active?',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
+            { label: 'Has SOQL?',      type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
+            { label: 'Has DML?',       type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
+            { label: '*Insert',        type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
+            { label: 'Insert*',        type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
+            { label: '*Update',        type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
+            { label: 'Update*',        type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
+            { label: '*Delete',        type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
+            { label: 'Delete*',        type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
+            { label: 'Undelete',       type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
+            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
 
     /**
-     * @description Table for apex classes that are tests
+     * @description Table definition for apex classes that are tests
      * @type {ocui.Table}
      */
     apexTestsTableDefinition = {
@@ -1777,8 +1934,8 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'API Version',                type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
             { label: 'Package',                    type: ocui.ColumnType.TXT,  data: { value: 'package' }},
             { label: 'Size',                       type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'URLs',                       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'IDs',                        type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Hardcoded URLs',             type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',              type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
             { label: 'See All Data',               type: ocui.ColumnType.CHK,  data: { value: 'isTestSeeAllData' }},
             { label: 'Nb Asserts',                 type: ocui.ColumnType.NUM,  data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
             { label: 'Methods',                    type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
@@ -1809,7 +1966,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for SObject Org Wide Default
+     * @description Table definition for SObject Org Wide Default
      * @type {ocui.Table}
      */
     owdTableDefinition = {
@@ -1826,49 +1983,132 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for flows
+     * @description Table definition for flows
      * @type {ocui.Table}
      */
     flowsTableDefinition = {
         columns: [
-            { label: '#',                  type: ocui.ColumnType.IDX },
-            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',        type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',        type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Number of versions', type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
-            { label: 'Current Version',    type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
-            { label: 'Is it Active?',      type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
-            { label: 'Is it the Latest?',  type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
-            { label: 'Its Running Mode',   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-            { label: 'Its API Version',    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: '# Nodes',            type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
-            { label: '# DML Create Nodes', type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
-            { label: '# DML Delete Nodes', type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
-            { label: '# DML Update Nodes', type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
-            { label: '# Screen Nodes',     type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
-            { label: 'Its Created date',   type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
-            { label: 'Its Modified date',  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
-            { label: 'Its Description',    type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Using',              type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',      type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',       type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
+            { label: '#',                                                 type: ocui.ColumnType.IDX },
+            { label: 'Score',                                             type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                                              type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',                                       type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Type',                                              type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Number of versions',                                type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
+            { label: 'Current Version (called `it` in the next columns)', type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
+            { label: 'Is it Active?',                                     type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
+            { label: 'Is it the Latest?',                                 type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
+            { label: 'Its SObject',                                       type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.sobject' }},
+            { label: 'Its trigger type',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.triggerType' }},
+            { label: 'Its record trigger type',                           type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.recordTriggerType' }},
+            { label: 'Its Running Mode',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
+            { label: 'Its API Version',                                   type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: '# Nodes',                                           type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
+            { label: '# DML Create Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
+            { label: '# DML Delete Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
+            { label: '# DML Update Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
+            { label: '# Screen Nodes',                                    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
+            { label: 'Its created date',                                  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
+            { label: 'Its modified date',                                 type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
+            { label: 'Its description',                                   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Flow created date',                                 type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Flow modified date',                                type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Flow description',                                  type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Using',                                             type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',                                     type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',                                      type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
 
     /**
-     * @description Table for process builders
+     * @description Table definition for email templates
+     * @type {ocui.Table}
+     */ 
+    emailTemplatesTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',     type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'UI Type',         type: ocui.ColumnType.TXT, data: { value: 'uiType' }},
+            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
+            { label: 'Is Active',       type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
+            { label: 'Last Used',       type: ocui.ColumnType.DTM,  data: { value: 'lastUsedDate' }, modifier: { valueIfEmpty: 'Never used!' }},
+            { label: 'Used',            type: ocui.ColumnType.NUM,  data: { value: 'timesUsed' }},
+            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
+     * @description Table definition for home page components
+     * @type {ocui.Table}
+     */ 
+    homePageComponentsTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Is Body Empty?',  type: ocui.ColumnType.CHK, data: { value: 'isBodyEmpty' }},
+            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
+            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
+            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for process builders
      * @type {ocui.Table}
      */
-    processBuildersTableDefinition = this.flowsTableDefinition;
+    processBuildersTableDefinition = {
+        columns: [
+            { label: '#',                                                 type: ocui.ColumnType.IDX },
+            { label: 'Score',                                             type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',                                              type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'API Version',                                       type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: 'Number of versions',                                type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
+            { label: 'Current Version (called `it` in the next columns)', type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
+            { label: 'Is it Active?',                                     type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
+            { label: 'Is it the Latest?',                                 type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
+            { label: 'Its SObject',                                       type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.sobject' }},
+            { label: 'Its trigger type',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.triggerType' }},
+            { label: 'Its Running Mode',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
+            { label: 'Its API Version',                                   type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
+            { label: '# Nodes',                                           type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
+            { label: '# DML Create Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
+            { label: '# DML Delete Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
+            { label: '# DML Update Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
+            { label: '# Screen Nodes',                                    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
+            { label: 'Its created date',                                  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
+            { label: 'Its modified date',                                 type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
+            { label: 'Its description',                                   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Process created date',                              type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Process modified date',                             type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Using',                                             type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',                                     type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',                                      type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
     
     /**
-     * @description Table for workflows
+     * @description Table definition for workflows
      * @type {ocui.Table}
      */
     workflowsTableDefinition = {
@@ -1890,7 +2130,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for roles
+     * @description Table definition for roles
      * @type {ocui.Table}
      */
     rolesTableDefinition = {
@@ -1908,7 +2148,7 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table for object permissions
+     * @description Table definition for object permissions
      * @type {ocui.Table}
      */
     get objectPermissionsTableDefinition() {
@@ -1934,7 +2174,7 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Table for application permissions
+     * @description Table definition for application permissions
      * @type {ocui.Table}
      */
     get appPermissionsTableDefinition() {
@@ -1962,7 +2202,7 @@ export default class OrgcheckApp extends LightningElement {
     }
     
     /**
-     * @description Table for field permissions
+     * @description Table definition for field permissions
      * @type {ocui.Table}
      */
     get fieldPermissionsTableDefinition() {
@@ -1988,17 +2228,16 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /**
-     * @description Table for score rules
+     * @description Table definition for score rules
      * @type {ocui.Table}
      */
     get scoreRulesTableDefinition() {
         /** @type {ocui.Table} */
         const table = {
             columns: [
-                { label: 'ID',   type: ocui.ColumnType.NUM, data: { value: 'header.id' }},
-                { label: 'Name', type: ocui.ColumnType.TXT, data: { value: 'header.description' }} 
+                { label: 'Rules (or reason why metadata is bad)', type: ocui.ColumnType.TXT, data: { value: 'header.description' }}
             ],
-            orderIndex: 1,
+            orderIndex: 0,
             orderSort: ocui.SortOrder.ASC
         };
         if (this._internalAllScoreRulesDataMatrix) {
@@ -2031,8 +2270,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /** 
      * @description Color decorator for the role hierarchy graphic view.
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @returns {number} The index of the color in the legend
      * @public
      */
@@ -2044,8 +2283,8 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Inner HTML decorator for the role hierarchy graphic view
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @returns {string} The inner HTML to display in the role box
      * @public
      */
@@ -2055,10 +2294,9 @@ export default class OrgcheckApp extends LightningElement {
     }
 
     /** 
-     * @description Decorator for the Pop-Up dialog when clikcing in a role box
-     * @param {number} depth The depth of the current role in the hierarchy
-     * @param {any} data The data of the current role
-     * @returns {string} The inner HTML to display in the pop-up box
+     * @description OnClick handler when clikcing in a role box
+     * @param {number} depth - The depth of the current role in the hierarchy
+     * @param {any} data - The data of the current role
      * @public
      */ 
     roleBoxOnClickDecorator = (depth, data) => {
@@ -2081,46 +2319,6 @@ export default class OrgcheckApp extends LightningElement {
         }
         this._modal.open(`Details for role ${data.record.name}`, htmlContent);
     }
-
-
-
-
-
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-    // Decoration for Global View 
-    // ----------------------------------------------------------------------------------------------------------------
-    // ----------------------------------------------------------------------------------------------------------------
-
-    pieCategoriesDecorator = (data) => {
-        if (data) {
-            const all = data.length;
-            const badOnes = data.filter((d) => d?.score > 0).length;
-            const goodOnes = all - badOnes;
-            return [ 
-                { name: 'Bad',  value: badOnes,  color: 'red' }, 
-                { name: 'Good', value: goodOnes, color: 'green' } 
-            ];
-        };
-    }
-
-    _colors = ['#2f89a8', '#fdc223', '#5fc9f8', '#f8b195', '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576', '#f8b195', '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#b56576'];
-
-    pieCategoriesDecorator2 = (data) => {
-        if (data) {
-            const series = new Map();
-            data.forEach((d) => { 
-                d.badReasonIds.forEach(id => {
-                    series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
-                });
-            });
-            return Array.from(series.keys()).map((id, index) => { return { 
-                name: this._api.getScoreRule(id).description, value: series.get(id), 'color': this._colors[index]
-            }});
-        };
-    }
-
-
 
 
 
@@ -2156,17 +2354,17 @@ export default class OrgcheckApp extends LightningElement {
                 [ 'External Sharing', this.objectData.externalSharingModel ]
             ]
         });
-        sheets.push(... ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(... ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
         return sheets;
     }
 
@@ -2174,21 +2372,7 @@ export default class OrgcheckApp extends LightningElement {
      * @description Representation of an export for the global view data
      * @type {Array<ocui.ExportedTable>}
      */
-    get globalViewItemsExport() {
-        try {
-            const sheets = [];
-            this._globalViewTransformersKeys.forEach((/** @type {string} */ recipe) => { 
-                const transfomer = this._internalTransformers[recipe]; 
-                const columnDef = this[transfomer.data.replace(/Data$/, 'Definition')];
-                sheets.push(... ocui.RowsFactory.createAndExport(columnDef, this[transfomer.data], transfomer.label, ocapi.SecretSauce.GetScoreRuleDescription));
-            });
-            return sheets;
-        } catch (error) {
-            this._showError('Error while exporting global view items:', error);
-        }
-    }
-    
-
+    globalViewItemsExport;
 
 
 
@@ -2213,6 +2397,13 @@ export default class OrgcheckApp extends LightningElement {
      */
     objectData;
 
+    /**
+     * @description Data table for chatter groups in the org
+     * @type {Array<ocapi.SFDC_CollaborationGroup>}
+     * @public
+     */ 
+    chatterGroupsTableData;
+
     /** 
      * @description Data table for custom fields 
      * @type {Array<ocapi.SFDC_Field>}
@@ -2224,6 +2415,18 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_CustomLabel>}
      */
     customLabelsTableData;
+
+    /**
+     * @description Data table for custom tabs 
+     * @type {Array<ocapi.SFDC_CustomTab>}
+     */
+    customTabsTableData;
+
+    /**
+     * @description Data table for documents
+     * @type {Array<ocapi.SFDC_Document>}
+     */
+    documentsTableData;
 
     /** 
      * @description Data table for lightning aura components 
@@ -2237,11 +2440,23 @@ export default class OrgcheckApp extends LightningElement {
      */
     flexiPagesTableData;
 
+    /**
+     * @description Data table for knowledge articles
+     * @type {Array<ocapi.SFDC_KnowledgeArticle>}
+     */ 
+    knowledgeArticlesTableData;
+
     /** 
      * @description Data table for lightning web components 
      * @type {Array<ocapi.SFDC_LightningWebComponent>}
      */
     lightningWebComponentsTableData;
+
+    /** 
+     * @description Data table for page layouts
+     * @type {Array<ocapi.SFDC_PageLayout>}
+     */
+    pageLayoutsTableData;
 
     /** 
      * @description Data table for permission sets
@@ -2274,22 +2489,72 @@ export default class OrgcheckApp extends LightningElement {
     profilePasswordPoliciesTableData;
 
     /** 
-     * @description Data table for process builders 
+     * @description Data table for public groups and queues 
      * @type {Array<ocapi.SFDC_Group>}
      */
-    publicGroupsTableData;
-
-    /** 
-     * @description Data table for queues
-     * @type {Array<ocapi.SFDC_Group>}
-     */
-    queuesTableData;
+    publicGroupsAndQueuesTableData;
 
     /** 
      * @description Data table for active users 
      * @type {Array<ocapi.SFDC_User>}
      */
     usersTableData;
+
+    /**
+     * @description Global View data from API
+     * @type {Map}
+     */ 
+    set _internalGlobalViewDataFromAPI(data) {
+        if (data) {
+            const globalViewData = [];
+            const sheets = [];
+            sheets.push({ header: 'Statistics (Good and Bad)', columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], rows: [] });
+            sheets.push({ header: 'Statistics (Reasons)', columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], rows: [] });
+            const goodAndBadRows = [];
+            const rulesRows = [];
+            const ruleTableDefinition = {
+                columns: [
+                    { label: 'Items', type: ocui.ColumnType.NUM, data: { value: 'value' }},
+                    { label: 'What is the issue?', type: ocui.ColumnType.TXT, data: { value: 'name' }}
+                ],
+                orderIndex: 0,
+                orderSort: ocui.SortOrder.DESC
+            }
+            data.forEach((item, alias) => {
+                const transfomer = this._internalTransformers[alias];
+                const itemName = transfomer.label ?? `[${alias}]`;
+                const definition = transfomer.data.replace(/Data$/, 'Definition');
+                globalViewData.push({
+                    countBad: item?.countBad,
+                    label: itemName,
+                    class: `slds-box viewCard ${item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
+                    tab: `${transfomer.tab}:${alias}`,
+                    tableDefinition: ruleTableDefinition,
+                    tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
+                });
+                goodAndBadRows.push([ itemName, item.countGood, item.countBad ]); 
+                item.countBadByRule?.forEach((c) => {
+                    rulesRows.push([ itemName, c.ruleName, c.count ]);
+                });
+                sheets.push(ocui.RowsFactory.createAndExport(this[definition], item.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+            });
+            sheets[0].rows = goodAndBadRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
+            sheets[1].rows = rulesRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
+            this.globalViewData = globalViewData.sort((a, b) => { return a.countBad < b. countBad ? 1 : -1 });
+            this.globalViewItemsExport = sheets;
+            this.showGlobalViewExportButton = true;
+        } else {
+            this.globalViewData = [];
+            this.globalViewItemsExport = [];
+            this.showGlobalViewExportButton = false;
+        }
+    }
+
+    /** 
+     * @description Data for the gloabl view
+     * @type {Array}
+     */
+    globalViewData;
 
     /**
      * @description Data table for validation rules
@@ -2351,6 +2616,18 @@ export default class OrgcheckApp extends LightningElement {
      */
     flowsTableData;
 
+    /**
+     * @description Data table for email templates
+     * @type {Array<ocapi.SFDC_EmailTemplate>}
+     */
+    emailTemplatesTableData;
+
+    /**
+     * @description Data table for home page components
+     * @type {Array<ocapi.SFDC_HomePageComponent>}
+     */
+    homePageComponentsTableData;
+
     /** 
      * @description Data table for process builders 
      * @type {Array<ocapi.SFDC_Flow>}
@@ -2358,10 +2635,28 @@ export default class OrgcheckApp extends LightningElement {
     processBuildersTableData;
 
     /** 
+     * @description Data table for weblinks
+     * @type {Array<ocapi.SFDC_WebLink>}
+     */
+    webLinksTableData;
+
+    /**
+     * @description Data table for static resources
+     * @type {Array<ocapi.SFDC_StaticResource>}
+     */ 
+    staticResourcesTableData;
+
+    /** 
      * @description Data table for workflows 
      * @type {Array<ocapi.SFDC_Workflow>}
      */
     workflowsTableData;
+
+    /** 
+     * @description Table data for record types 
+     * @type {Array<ocapi.SFDC_RecordType>}
+     */
+    recordTypesTableData;
 
     /**
      * @description Data matrix for object permissions
@@ -2418,4 +2713,5 @@ export default class OrgcheckApp extends LightningElement {
     get allScoreRulesTableData() {
         return this._internalAllScoreRulesDataMatrix?.rows || [];
     }
+
 }

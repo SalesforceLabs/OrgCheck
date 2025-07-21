@@ -153,7 +153,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Array of all visible rows (filter and infiniteScrolling)
-     * @type {array}
+     * @type {Array}
      */
     visibleRows;
 
@@ -232,7 +232,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Setter for the columns (it will set the internal <code>_columns</code> property)
-     * @param {ocui.Table} tableDefinition 
+     * @param {ocui.Table} tableDefinition - Defintion of the table
      */
     @api set tableDefinition(tableDefinition) {
 
@@ -252,12 +252,14 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 this.usesDependencyViewer = true;
             };
             return {
-                index: i,
+                index: (i + 1),
                 label: c.label,
                 isIterative: c.type === ocui.ColumnType.TXTS || c.type === ocui.ColumnType.URLS || c.type === ocui.ColumnType.OBJS,
                 cssClass: (this._sortingIndex === i ? `sorted ${this._sortingOrder === ocui.SortOrder.ASC ? 'sorted-asc' : 'sorted-desc'} ` : '') + 
                           (this.isStickyHeaders ? 'sticky ': '') + 
+                          // eslint-disable-next-line dot-notation
                           (c['orientation'] === ocui.Orientation.VERTICAL ? 'vertical ' : ' ')
+                          // Note: can't use instanceof on 'c'
             }
         });
     }
@@ -268,7 +270,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
     
     /**
      * @description Setter for the rows (it will set the internal <code>_allRows</code> property).
-     * @param {Array<any>} rows 
+     * @param {Array<any>} rows - Array of rows 
      */
     @api set rows(rows) {
 
@@ -317,26 +319,21 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Getter for the rows (it will return the internal <code>_allRows</code> property)
-     * @return {Array<any>} rows 
+     * @returns {Array<any>} rows 
      */
     get rows() {
         return this._allRows;
     }
 
     /**
-     * @description
-     */
-
-
-    /**
      * @description Convert this table into an Excel data
-     * @returns {Array<ocui.ExportedTable>}
+     * @returns {ocui.ExportedTable} The exported table
      */ 
     get exportedRows() {
         if (this._tableDefinition && this._tableDefinition.columns && this._allRows) {
             return ocui.RowsFactory.export(this._tableDefinition, this._allRows, this.exportBasename, ocapi.SecretSauce.GetScoreRuleDescription);
         }
-        return [];
+        return undefined;
     }
 
 
@@ -368,23 +365,23 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user type a search text in the appropriate input text field
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      */
     handleSearchInputChanged(event) {
-        this._filteringSearchInput = event.target['value'];
+        this._filteringSearchInput = event.target.value;
         this._filterAllRows();
         this._setVisibleRows();
     }
 
     /**
      * @description Handler when a user clicks on a header of the table
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      */
     handleSortColumnClick(event) {
 
         // Get the old and new columns index
         const previousSortingColumnIndex = this._sortingIndex;
-        const newSortingColumnIndex = parseInt(event.target['getAttribute']('aria-colindex'), 10);
+        const newSortingColumnIndex = parseInt(event.target.getAttribute('aria-colindex'), 10) - 1; // aria-colindex is 1-based index, we need 0-based index
 
         // Set the new sorting column index
         this._sortingIndex = newSortingColumnIndex;
@@ -420,25 +417,25 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
 
     /**
      * @description Handler when a user click on the dependency link to open the modal dialog with dependency diagram
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      */
     handleViewDependency(event) {
         /** @type {any} */
         const viewer = this.template.querySelector('c-orgcheck-dependency-viewer');
-        viewer.open(event.target['whatId'], event.target['whatName'], event.target['dependencies']);
+        viewer.open(event.target.whatId, event.target.whatName, event.target.dependencies);
     }
 
     /**
      * @description Handler when a user click on the score link to open the modal dialog with score explanation
-     * @param {Event} event 
+     * @param {Event | any} event - The event information
      */
     handleViewScore(event) {
         this.dispatchEvent(new CustomEvent('viewscore', { detail: { 
-            whatId: event.target['whatId'],
-            whatName: event.target['whatName'],
-            score: event.target['score'],
-            reasonIds: event.target['reasonIds'], 
-            fields: event.target['fields']
+            whatId: event.target.whatId,
+            whatName: event.target.whatName,
+            score: event.target.score,
+            reasonIds: event.target.reasonIds, 
+            fields: event.target.fields
         }}));
     }
 

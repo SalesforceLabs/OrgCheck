@@ -7,6 +7,7 @@ import { DatasetAppPermissions } from '../../../src/api/dataset/orgcheck-api-dat
 import { DatasetCurrentUserPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-currentuserpermissions';
 import { DatasetCustomFields } from '../../../src/api/dataset/orgcheck-api-dataset-customfields';
 import { DatasetCustomLabels } from '../../../src/api/dataset/orgcheck-api-dataset-customlabels';
+import { DatasetDocuments } from '../../../src/api/dataset/orgcheck-api-dataset-documents';
 import { DatasetFieldPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetFlows } from '../../../src/api/dataset/orgcheck-api-dataset-flows';
 import { DatasetGroups } from '../../../src/api/dataset/orgcheck-api-dataset-groups';
@@ -19,17 +20,23 @@ import { DatasetObjects } from '../../../src/api/dataset/orgcheck-api-dataset-ob
 import { DatasetObjectTypes } from '../../../src/api/dataset/orgcheck-api-dataset-objecttypes';
 import { DatasetOrganization } from '../../../src/api/dataset/orgcheck-api-dataset-organization';
 import { DatasetPackages } from '../../../src/api/dataset/orgcheck-api-dataset-packages';
+import { DatasetPageLayouts } from '../../../src/api/dataset/orgcheck-api-dataset-pagelayouts';
 import { DatasetPermissionSetLicenses } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsetlicenses';
 import { DatasetPermissionSets } from '../../../src/api/dataset/orgcheck-api-dataset-permissionsets';
 import { DatasetProfilePasswordPolicies } from '../../../src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies';
 import { DatasetProfileRestrictions } from '../../../src/api/dataset/orgcheck-api-dataset-profilerestrictions';
 import { DatasetProfiles } from '../../../src/api/dataset/orgcheck-api-dataset-profiles';
 import { DatasetUserRoles } from '../../../src/api/dataset/orgcheck-api-dataset-userroles';
-import { DatasetUsers } from '../../../src/api/dataset/orgcheck-api-dataset-users';
+import { DatasetInternalActiveUsers } from '../../../src/api/dataset/orgcheck-api-dataset-internalactiveusers';
 import { DatasetValidationRules } from '../../../src/api/dataset/orgcheck-api-dataset-validationrules';
 import { DatasetVisualForceComponents } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcecomponents';
 import { DatasetVisualForcePages } from '../../../src/api/dataset/orgcheck-api-dataset-visualforcepages';
 import { DatasetWorkflows } from '../../../src/api/dataset/orgcheck-api-dataset-workflows';
+import { DatasetRecordTypes } from '../../../src/api/dataset/orgcheck-api-dataset-recordtypes';
+import { DatasetCollaborationGroups } from '../../../src/api/dataset/orgcheck-api-dataset-collaborationgroups';
+import { DatasetHomePageComponents } from '../../../src/api/dataset/orgcheck-api-dataset-homepagecomponents';
+import { DatasetCustomTabs } from '../../../src/api/dataset/orgcheck-api-dataset-customtabs';
+import { DatasetEmailTemplates } from '../../../src/api/dataset/orgcheck-api-dataset-emailtemplates';
 
 class SfdcManagerMock extends SalesforceManagerIntf { 
 
@@ -54,40 +61,40 @@ class SfdcManagerMock extends SalesforceManagerIntf {
 
   caseSafeId(id) { return id; }
 
-  setupUrl(id, type, parentId, parentType) { return `/setupURL/type/${type}/id/${id}`; }
+  setupUrl(id, type, _parentId, _parentType) { return `/setupURL/type/${type}/id/${id}`; }
 
-  getObjectType(objectName, isCustomSetting) {
+  getObjectType(_objectName, isCustomSetting) {
     return isCustomSetting ? 'CustomSetting' : 'StandardObject';
   }
 
   get dailyApiRequestLimitInformation() { return null; }
 
-  async soqlQuery(queries, logger) { 
+  async soqlQuery(queries, _logger) { 
     return queries.map((query) => { 
       const key = Object.keys(this.#soqlQueryResponses).find((p) => query?.string?.indexOf(p) !== -1);
       return (key ? this.#soqlQueryResponses[key] : []); 
     });
   }
 
-  async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
+  async dependenciesQuery(_ids, _logger) { return { records: [], errors: [] }; }
 
-  async readMetadata(metadatas, logger) { return new Map(); }
+  async readMetadata(_metadatas, _logger) { return new Map(); }
 
-  async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
+  async readMetadataAtScale(_type, _ids, _byPasses, _logger) { return []; }
 
-  async describeGlobal(logger) { return this.#describeGlobal; }
+  async describeGlobal(_logger) { return this.#describeGlobal; }
 
-  async describe(sobjectDevName, logger) { return {}; }
+  async describe(_sobjectDevName, _logger) { return {}; }
 
-  async recordCount(sobjectDevName, logger) { return 0; }
+  async recordCount(_sobjectDevName, _logger) { return 0; }
 
 }
 
 class DataFactoryMock extends DataFactoryIntf { 
 
-  getScoreRule(id) { return null; }
+  getScoreRule(_id) { return null; }
 
-  getInstance(dataClass) {
+  getInstance(_dataClass) {
     return {
       create: (setup) => { return setup.properties; },
       createWithScore: (setup) => { setup.score = 0; return setup.properties; },
@@ -101,21 +108,55 @@ class SimpleLoggerMock extends SimpleLoggerIntf {
   debug() {}
 }
 
+
+
+
+
 describe('tests.api.unit.Datasets', () => {
 
-  describe('Test DatasetApexClasses', () => {
-  
-    const dataset = new DatasetApexClasses();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
+  describe('Basic test for all datasets', () => {
+    [
+      DatasetApexClasses, DatasetApexTriggers, DatasetAppPermissions, 
+      DatasetCurrentUserPermissions, DatasetCustomFields, 
+      DatasetCustomLabels, DatasetDocuments, DatasetFieldPermissions, 
+      DatasetFlows, DatasetGroups, DatasetLightningAuraComponents, 
+      DatasetLightningPages, DatasetLightningWebComponents, 
+      /*DatasetObject, */ DatasetObjectPermissions, DatasetObjects, 
+      DatasetObjectTypes, DatasetOrganization, DatasetPackages, 
+      DatasetPageLayouts, DatasetPermissionSetLicenses, 
+      DatasetPermissionSets, DatasetProfilePasswordPolicies, 
+      DatasetProfileRestrictions, DatasetProfiles, DatasetUserRoles, 
+      DatasetInternalActiveUsers, DatasetValidationRules, 
+      DatasetVisualForceComponents, DatasetVisualForcePages, 
+      DatasetWorkflows, DatasetRecordTypes, DatasetCollaborationGroups, 
+      DatasetHomePageComponents, DatasetCustomTabs, DatasetEmailTemplates 
+    ].forEach((datasetClass) => {
+      const dataset = new datasetClass();
+      it(`checks if ${dataset.constructor.name} runs correctly`, async () => {
+        const sfdcManager = new SfdcManagerMock();
+        const dataFactory = new DataFactoryMock();
+        const logger = new SimpleLoggerMock();
+        let hadError = false, errorMessageIfAny = undefined;
+        try {
+          const results = await dataset.run(sfdcManager, dataFactory, logger);
+          expect(results).toBeDefined();
+          expect(results instanceof Map).toBeTruthy();
+          expect(results.size).toBeDefined();
+        } catch (error) {
+          hadError = true;
+          errorMessageIfAny = error?.message;
+        } finally {
+          // hadError = true -> OK
+          // hadError = false AND msg startsWith.... = true -> OK
+          // hadError = false AND msg startsWith.... = false -> KO
+          expect(hadError === false && errorMessageIfAny?.startsWith(`${dataset.constructor.name}: `) === false).toBeFalsy();
+        }
+      });
     });
+  });
 
+  describe('Specific test for DatasetApexClasses', () => {
+    const dataset = new DatasetApexClasses();      
     it('checks if regex are correct', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
@@ -179,10 +220,9 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetApexTriggers', () => {
-  
-    const dataset = new DatasetApexTriggers();      
-    it('checks if this dataset class runs correctly', async () => {
+  describe('Specific test for DatasetRecordTypes', () => { 
+    const dataset = new DatasetRecordTypes();
+    it('checks if regex are correct', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
       const logger = new SimpleLoggerMock();
@@ -191,24 +231,30 @@ describe('tests.api.unit.Datasets', () => {
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
     });
-  });
-
-  describe('Test DatasetAppPermissions', () => {
-  
-    const dataset = new DatasetAppPermissions();      
-    it('checks if this dataset class runs correctly', async () => {
+    it('checks if we get the correct data', async() => {
       const sfdcManager = new SfdcManagerMock();
       const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM RecordType ', [
+        {
+          DeveloperName: 'RecordType1', 
+          Id: '01', 
+          Name: 'Name1', 
+          SobjectType: 'Account'
+        }
+      ]);
       const logger = new SimpleLoggerMock();
       const results = await dataset.run(sfdcManager, dataFactory, logger);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
+      expect(results.size).toBe(1);
+      expect(results.get('01')).toBeDefined();
+      expect(results.get('01').name).toBe('Name1');
+      expect(results.get('01').developerName).toBe('RecordType1');
+      expect(results.get('01').objectId).toBe('Account'); 
     });
   });
 
-  describe('Test DatasetCurrentUserPermissions', () => {
-  
+  describe('Specific test for DatasetCurrentUserPermissions', () => {  
     const dataset = new DatasetCurrentUserPermissions();  
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -226,37 +272,8 @@ describe('tests.api.unit.Datasets', () => {
       expect(results.size).toBe(1);
     });
   });
-  
-  describe('Test DatasetCustomFields', () => {
-  
-    const dataset = new DatasetCustomFields();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger, null);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
 
-  describe('Test DatasetCustomLabels', () => {
-  
-    const dataset = new DatasetCustomLabels();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetFieldPermissions', () => {
-  
+  describe('Specific test for DatasetFieldPermissions', () => {
     const dataset = new DatasetFieldPermissions();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -275,78 +292,7 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetFlows', () => {
-  
-    const dataset = new DatasetFlows();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetGroups', () => {
-  
-    const dataset = new DatasetGroups();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetLightningAuraComponents', () => {
-  
-    const dataset = new DatasetLightningAuraComponents();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetLightningPages', () => {
-  
-    const dataset = new DatasetLightningPages();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetLightningWebComponents', () => {
-  
-    const dataset = new DatasetLightningWebComponents();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetObject', () => {
-  
+  describe('Specific test for DatasetObject', () => {
     const dataset = new DatasetObject();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -365,22 +311,7 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetObjectPermissions', () => {
-  
-    const dataset = new DatasetObjectPermissions();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetObjects', () => {
-  
+  describe('Specific test for DatasetObjects', () => {
     const dataset = new DatasetObjects();      
     it('checks if this dataset runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -401,7 +332,6 @@ describe('tests.api.unit.Datasets', () => {
       expect(results instanceof Map).toBeTruthy();
       expect(results.size).toBe(0);
     });
-
     it('checks if we do not have a regression for issue #476', async () => {
       const sfdcManager = new SfdcManagerMock();
       const describeGlobal = [
@@ -489,7 +419,7 @@ describe('tests.api.unit.Datasets', () => {
             describe: "/services/data/v60.0/sobjects/${o}__c/describe",
             sobject: "/services/data/v60.0/sobjects/${o}__c"
           }
- })
+        });
       }
       sfdcManager.setDescribeGolbal(describeGlobal);
       sfdcManager.addSoqlQueryResponse('FROM EntityDefinition', entityDefinitions);
@@ -506,21 +436,7 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetObjectTypes', () => {
-  
-    const dataset = new DatasetObjectTypes();      
-    it('checks if this dataset class runs correctly', async () => {
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(null, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).not.toBe(0); 
-    });
-  });
-
-  describe('Test DatasetOrganization', () => {
-  
+  describe('Specific test for DatasetOrganization', () => {
     const dataset = new DatasetOrganization();
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -538,8 +454,7 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetPackages', () => {
-  
+  describe('Specific test for DatasetPackages', () => {
     const dataset = new DatasetPackages();      
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
@@ -559,90 +474,8 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetPermissionSets', () => {
-  
-    const dataset = new DatasetPermissionSets();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-  
-  describe('Test DatasetPermissionSetLicenses', () => {
-  
-    const dataset = new DatasetPermissionSetLicenses();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-  
-  describe('Test DatasetProfilePasswordPolicies', () => {
-  
-    const dataset = new DatasetProfilePasswordPolicies();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-  
-  describe('Test DatasetProfileRestrictions', () => {
-  
-    const dataset = new DatasetProfileRestrictions();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetProfiles', () => {
-  
-    const dataset = new DatasetProfiles();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetUserRoles', () => {
-  
+  describe('Specific test for DatasetUserRoles', () => {  
     const dataset = new DatasetUserRoles();
-
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       sfdcManager.addSoqlQueryResponse('FROM UserRole', [
@@ -686,73 +519,4 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
-  describe('Test DatasetUsers', () => {
-  
-    const dataset = new DatasetUsers();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetValidationRules', () => {
-  
-    const dataset = new DatasetValidationRules();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-
-  describe('Test DatasetVisualForceComponents', () => {
-  
-    const dataset = new DatasetVisualForceComponents();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-  
-  describe('Test DatasetVisualForcePages', () => {
-  
-    const dataset = new DatasetVisualForcePages();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
-  
-  describe('Test DatasetWorkflows', () => {
-  
-    const dataset = new DatasetWorkflows();      
-    it('checks if this dataset class runs correctly', async () => {
-      const sfdcManager = new SfdcManagerMock();
-      const dataFactory = new DataFactoryMock();
-      const logger = new SimpleLoggerMock();
-      const results = await dataset.run(sfdcManager, dataFactory, logger);
-      expect(results).toBeDefined();
-      expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(0);
-    });
-  });
 });

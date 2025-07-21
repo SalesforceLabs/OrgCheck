@@ -4,7 +4,31 @@ import OrgcheckSpinner from '../orgcheckSpinner';
     
 describe('c-orgcheck-spinner', () => {
 
-  it('spinner is initially invisible', () => {
+  it('makes sure the component can be added in the document with no error and checks for its accessibility', async () => {
+    let hadError = false;
+    try {
+      const element = createElement('c-orgcheck-spinner', {
+        is: OrgcheckSpinner   
+      });
+      
+      // Check if the component can be created
+      expect(element).toBeDefined();
+      document.body.appendChild(element);
+
+      // Check accessibility
+      // @ts-ignore
+      await expect(element).toBeAccessible();
+
+    } catch (e) {
+      console.error(e);
+      hadError = true;
+    } finally {
+      // Check if there is no erros while creating nor inserting the compoent in the dom
+      expect(hadError).toBeFalsy();
+    }
+  });
+
+  it('makes sure the spinner is invisible by default', () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -13,7 +37,7 @@ describe('c-orgcheck-spinner', () => {
     expect(section.classList.contains('slds-hide')).toBeTruthy();
   });
 
-  it('spinner is shown after calling open(), by default without the closing icon', async () => {
+  it('makes sure the spinner is shown after calling open(), by default without the closing icon', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -28,7 +52,7 @@ describe('c-orgcheck-spinner', () => {
     });
   });
 
-  it('spinner is shown with closing icon if at least one section failed, and clicking on that icon closes the spinner', async () => {
+  it('makes sure the spinner is shown with closing icon if at least one section failed, and clicking on that icon closes the spinner', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });
@@ -50,7 +74,7 @@ describe('c-orgcheck-spinner', () => {
     });
   });
 
-  it('spinner is showing messages by sections and do not mix them', async () => {
+  it('makes sure the spinner is showing messages by sections and do not mix them', async () => {
     const element = createElement('c-orgcheck-spinner', {
       is: OrgcheckSpinner
     });

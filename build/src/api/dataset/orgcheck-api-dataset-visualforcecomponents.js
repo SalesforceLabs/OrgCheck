@@ -2,7 +2,7 @@ import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforcecomponent';
@@ -11,9 +11,9 @@ export class DatasetVisualForceComponents extends Dataset {
     
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_VisualForceComponent>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,13 +35,13 @@ export class DatasetVisualForceComponents extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${componentRecords.length} visualforce components...`);
         const componentsDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(componentRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(componentRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${componentRecords.length} visualforce components...`);
-        const components = new Map(await Processor.map(componentRecords, (record) => {
+        const components = new Map(await Processor.map(componentRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
             const id = sfdcManager.caseSafeId(record.Id);
@@ -58,14 +58,12 @@ export class DatasetVisualForceComponents extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_COMPONENT)
                 }, 
-                dependencies: {
-                    data: componentsDependencies
-                }
+                dependencyData: componentsDependencies
             });
 
             // Get information directly from the source code (if available)
             if (record.Markup) {
-                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup);
                 component.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 component.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }

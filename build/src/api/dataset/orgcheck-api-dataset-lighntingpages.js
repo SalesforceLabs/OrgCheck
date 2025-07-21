@@ -1,7 +1,7 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
@@ -10,9 +10,9 @@ export class DatasetLightningPages extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_LightningPage>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,13 +35,13 @@ export class DatasetLightningPages extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords.length} lightning pages...`);
         const pagesDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(pageRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${pageRecords.length} lightning pages...`);
-        const pages = new Map(await Processor.map(pageRecords, (record) => {
+        const pages = new Map(await Processor.map(pageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -59,9 +59,7 @@ export class DatasetLightningPages extends Dataset {
                     objectId: (record.EntityDefinition?.QualifiedApiName || ''),
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.LIGHTNING_PAGE)
                 }, 
-                dependencies: {
-                    data: pagesDependencies
-                }
+                dependencyData: pagesDependencies
             });
 
             // Add it to the map  

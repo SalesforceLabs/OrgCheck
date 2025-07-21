@@ -48,6 +48,11 @@ export class SFDC_CustomLabel extends DataWithDependencies {
      */
     category;
 
+    /**
+     * @description Is this item protected?
+     * @type {boolean}
+     * @public
+     */
     isProtected;
 
     /**

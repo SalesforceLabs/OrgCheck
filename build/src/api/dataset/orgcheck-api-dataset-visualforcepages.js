@@ -2,7 +2,7 @@ import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
@@ -11,9 +11,9 @@ export class DatasetVisualForcePages extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_VisualForcePage>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,13 +35,13 @@ export class DatasetVisualForcePages extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageRecords.length} visualforce pages...`);
         const pagesDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(pageRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(pageRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
         // Create the map
         logger?.log(`Parsing ${pageRecords.length} visualforce pages...`);
-        const pages = new Map(await Processor.map(pageRecords, (record) => {
+        const pages = new Map(await Processor.map(pageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15
             const id = sfdcManager.caseSafeId(record.Id);
@@ -59,14 +59,12 @@ export class DatasetVisualForcePages extends Dataset {
                     description: record.Description,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.VISUAL_FORCE_PAGE)
                 }, 
-                dependencies: {
-                    data: pagesDependencies
-                }
+                dependencyData: pagesDependencies
             });
 
             // Get information directly from the source code (if available)
             if (record.Markup) {
-                const sourceCode = CodeScanner.RemoveComments(record.Markup);
+                const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Markup);
                 page.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                 page.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
             }

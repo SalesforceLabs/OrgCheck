@@ -1,7 +1,7 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_AppPermission } from '../data/orgcheck-api-data-apppermission';
 
@@ -9,9 +9,9 @@ export class DatasetAppPermissions extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_AppPermission>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -35,14 +35,14 @@ export class DatasetAppPermissions extends Dataset {
 
         // Create a map of the app menu items
         logger?.log(`Parsing ${appMenuItems.length} Application Menu Items...`);
-        const appMenuItemAccesses = new Map(await Processor.map(appMenuItems, (record) => {
+        const appMenuItemAccesses = new Map(await Processor.map(appMenuItems, (/** @type {any} */ record) => {
             return [ sfdcManager.caseSafeId(record.ApplicationId), { a: record.IsAccessible, v: record. IsVisible }] ;
         }));
 
         // Create the map
         logger?.log(`Parsing ${setupEntityAccesses.length} Application Menu Items...`);
         const appPermissions = new Map(await Processor.map(setupEntityAccesses, 
-            (record) => {
+            (/** @type {any} */ record) => {
                 // Get the ID15 of this application
                 const appId = sfdcManager.caseSafeId(record.SetupEntityId);
                 const parentId = sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile ? record.Parent.ProfileId : record.ParentId);
@@ -63,7 +63,7 @@ export class DatasetAppPermissions extends Dataset {
                 // Add the app in map
                 return [ `${appId}-${parentId}`, appPermission ];
             }, 
-            (record) => { 
+            (/** @type {any} */ record) => { 
                 // Make sure we only get the access for Application that have in AppMenuItem
                 return appMenuItemAccesses.has(sfdcManager.caseSafeId(record.SetupEntityId));
             }

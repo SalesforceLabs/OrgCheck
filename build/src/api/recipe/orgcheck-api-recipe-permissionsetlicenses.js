@@ -6,17 +6,17 @@ import { DatasetRunInformation } from '../core/orgcheck-api-dataset-runinformati
 import { DatasetAliases } from '../core/orgcheck-api-datasets-aliases';
 import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 
 export class RecipePermissionSetLicenses extends Recipe {
 
     /**
-     * @description List all dataset aliases (or datasetRunInfo) that this recipe is using
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Array<string | DatasetRunInformation>}
+     * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Array<string | DatasetRunInformation>} The datasets aliases that this recipe is using
      * @public
      */
-    extract(logger) {
+    extract(_logger) {
         return [
             DatasetAliases.PERMISSIONSETLICENSES,
             DatasetAliases.PERMISSIONSETS
@@ -25,13 +25,13 @@ export class RecipePermissionSetLicenses extends Recipe {
 
     /**
      * @description transform the data from the datasets and return the final result as a Map
-     * @param {Map} data Records or information grouped by datasets (given by their alias) in a Map
-     * @param {SimpleLoggerIntf} logger
-     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map>}
+     * @param {Map<string, any>} data - Records or information grouped by datasets (given by their alias) in a Map
+     * @param {SimpleLoggerIntf} _logger - Logger
+     * @returns {Promise<Array<Data | DataWithoutScoring> | DataMatrix | Data | DataWithoutScoring | Map<string, any>>} Returns as it is the value returned by the transform method recipe.
      * @async
      * @public
      */
-    async transform(data, logger) {
+    async transform(data, _logger) {
 
         // Get data
         const /** @type {Map<string, SFDC_PermissionSetLicense>} */ permissionSetLicenses = data.get(DatasetAliases.PERMISSIONSETLICENSES);
@@ -42,7 +42,7 @@ export class RecipePermissionSetLicenses extends Recipe {
         if (!permissionSets) throw new Error(`RecipePermissionSetLicenses: Data from dataset alias 'PERMISSIONSETS' was undefined.`);
 
         // Augment data
-        await Processor.forEach(permissionSetLicenses, async (permissionSetLicense) => {
+        await Processor.forEach(permissionSetLicenses, async (/** @type {SFDC_PermissionSetLicense} */ permissionSetLicense) => {
             permissionSetLicense.permissionSetRefs = await Processor.map(
                 permissionSetLicense.permissionSetIds,
                 (/** @type {string} */ id) => permissionSets.get(id),

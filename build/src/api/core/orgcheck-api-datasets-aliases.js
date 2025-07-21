@@ -1,65 +1,45 @@
 /**
  * @description Dataset aliases
- * @property {string} APEXCLASSES
- * @property {string} APEXTRIGGERS
- * @property {string} APPLICATIONS
- * @property {string} APPPERMISSIONS
- * @property {string} CURRENTUSERPERMISSIONS
- * @property {string} CUSTOMFIELDS
- * @property {string} CUSTOMLABELS
- * @property {string} FLOWS
- * @property {string} GROUPS
- * @property {string} LIGHTNINGAURACOMPONENTS
- * @property {string} LIGHTNINGPAGES
- * @property {string} LIGHTNINGWEBCOMPONENTS
- * @property {string} OBJECT
- * @property {string} OBJECTPERMISSIONS
- * @property {string} OBJECTS
- * @property {string} OBJECTTYPES
- * @property {string} ORGANIZATION
- * @property {string} PACKAGES
- * @property {string} PERMISSIONSETS
- * @property {string} PERMISSIONSETLICENSES
- * @property {string} PROFILEPWDPOLICIES
- * @property {string} PROFILERESTRICTIONS
- * @property {string} PROFILES
- * @property {string} USERROLES
- * @property {string} USERS
- * @property {string} VALIDATIONRULES
- * @property {string} VISUALFORCECOMPONENTS
- * @property {string} VISUALFORCEPAGES
- * @property {string} WORKFLOWS
  */
-export const DatasetAliases = {
-    APEXCLASSES: 'apex-classes',
-    APEXTRIGGERS: 'apex-triggers',
-    APPLICATIONS: 'applications',
-    APPPERMISSIONS: 'app-permisions',
-    CURRENTUSERPERMISSIONS: 'current-user-permissions',
-    CUSTOMFIELDS: 'custom-fields',
-    CUSTOMLABELS: 'custom-labels',
-    FIELDPERMISSIONS: 'field-permissions',
-    FLOWS: 'flows',
-    GROUPS: 'groups',
-    LIGHTNINGAURACOMPONENTS: 'lightning-aura-components',
-    LIGHTNINGPAGES: 'lightning-pages',
-    LIGHTNINGWEBCOMPONENTS: 'lightning-web-components',
-    OBJECT: 'object',
-    OBJECTPERMISSIONS: 'object-permissions',
-    OBJECTS: 'objects',
-    OBJECTTYPES: 'object-types',
-    ORGANIZATION: 'org-information',
-    PACKAGES: 'packages',
-    PERMISSIONSETS: 'permission-sets',
-    PERMISSIONSETLICENSES: 'permission-set-licenses',
-    PROFILEPWDPOLICIES: 'profile-password-policies',
-    PROFILERESTRICTIONS: 'profile-restrictions',
-    PROFILES: 'profiles',
-    USERROLES: 'user-roles',
-    USERS: 'users',
-    VALIDATIONRULES: 'validation-rules',
-    VISUALFORCECOMPONENTS: 'visual-force-components',
-    VISUALFORCEPAGES: 'visual-force-pages',
-    WORKFLOWS: 'workflows'
+export class DatasetAliases {
+    static get APEXCLASSES() { return 'apex-classes'; }
+    static get APEXTRIGGERS() { return 'apex-triggers'; }
+    static get APPLICATIONS() { return 'applications'; }
+    static get APPPERMISSIONS() { return 'app-permisions'; }
+    static get CURRENTUSERPERMISSIONS() { return 'current-user-permissions'; }
+    static get CUSTOMFIELDS() { return 'custom-fields'; }
+    static get CUSTOMLABELS() { return 'custom-labels'; }
+    static get CUSTOMTABS() { return 'custom-tabs'; }
+    static get COLLABORATIONGROUPS() { return 'collaboration-groups'; }
+    static get DOCUMENTS() { return 'documents'; }
+    static get EMAILTEMPLATES() { return 'email-templates'; }
+    static get FIELDPERMISSIONS() { return 'field-permissions'; }
+    static get FLOWS() { return 'flows'; }
+    static get HOMEPAGECOMPONENTS() { return 'home-page-components'; }
+    static get KNOWLEDGEARTICLES() { return 'knowledge-articles'; }
+    static get LIGHTNINGAURACOMPONENTS() { return 'lightning-aura-components'; }
+    static get LIGHTNINGPAGES() { return 'lightning-pages'; }
+    static get LIGHTNINGWEBCOMPONENTS() { return 'lightning-web-components'; }
+    static get OBJECT() { return 'object'; }
+    static get OBJECTPERMISSIONS() { return 'object-permissions'; }
+    static get OBJECTS() { return 'objects'; }
+    static get OBJECTTYPES() { return 'object-types'; }
+    static get ORGANIZATION() { return 'org-information'; }
+    static get PACKAGES() { return 'packages'; }
+    static get PAGELAYOUTS() { return 'page-layouts'; }
+    static get PERMISSIONSETS() { return 'permission-sets'; }
+    static get PERMISSIONSETLICENSES() { return 'permission-set-licenses'; }
+    static get PUBLIC_GROUPS_AND_QUEUES() { return 'public-groups-and-queues'; }
+    static get PROFILEPWDPOLICIES() { return 'profile-password-policies'; }
+    static get PROFILERESTRICTIONS() { return 'profile-restrictions'; }
+    static get PROFILES() { return 'profiles'; }
+    static get RECORDTYPES () { return 'record-types'; }
+    static get STATICRESOURCES() { return 'static-resources'; }
+    static get USERROLES() { return 'user-roles'; }
+    static get INTERNALACTIVEUSERS() { return 'internal-active-users'; }
+    static get VALIDATIONRULES() { return 'validation-rules'; }
+    static get VISUALFORCECOMPONENTS() { return 'visual-force-components'; }
+    static get VISUALFORCEPAGES() { return 'visual-force-pages'; }
+    static get WEBLINKS() { return 'web-links'; }
+    static get WORKFLOWS() { return 'workflows'; }
 }
-Object.seal(DatasetAliases);

@@ -38,12 +38,12 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_ValidationRule());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'id', 'score', 'name', 'url', 'package', 'isActive', 
-                'errorDisplayField', 'errorMessage', 'description', 'createdDate', 'lastModifiedDate' ];
+                'errorDisplayField', 'errorMessage', 'description', 'createdDate', 'lastModifiedDate',
+                'objectRef' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
-            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 
-                'objectId', 'objectRef' ].sort());
+            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 'objectId' ].sort());
         });
 
         it('Should have correct table definition for web links', () => {
@@ -51,11 +51,11 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_WebLink());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'id', 'score', 'url', 'name', 'hardCodedURLs', 'hardCodedIDs', 'type',
-                'behavior', 'package', 'createdDate', 'lastModifiedDate', 'description' ];
+                'behavior', 'package', 'createdDate', 'lastModifiedDate', 'description', 'objectRef', 'dependencies' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
-            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds' ].sort());
+            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 'objectId' ].sort());
         });
 
         it('Should have correct table definition for record types', () => {
@@ -63,11 +63,11 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_RecordType());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'score', 'id', 'name', 'url', 'developerName', 'isActive', 'isAvailable',
-                'isDefaultRecordTypeMapping', 'isMaster' ];
+                'isDefault', 'isMaster', 'objectRef', 'package' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
-            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds' ].sort());
+            expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 'objectId' ].sort());
         });
 
         it('Should have correct table definition for relationships', () => {
@@ -398,10 +398,5 @@ describe('c-orgcheck-app', () => {
             expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds',
                 'parentId', 'hasParent', 'activeMemberIds' ].sort());
         });
-
-        it('Should have correct set of role box decorators', () => {
-            // roleBoxColorsDecorator uses 
-        });
-
     });
 });

@@ -1,4 +1,12 @@
-.globalViewCard {
+.viewCard-no-bad-data {
+    background-color: #00800066;
+}
+
+.viewCard-some-bad-data {
+    background-color: #ff000066;
+}
+
+.viewCard {
     border: 1.5px solid #dddbda;
     border-radius: 1rem;
     box-shadow: 0 2px 2px 0 rgba(0,0,0,.1);

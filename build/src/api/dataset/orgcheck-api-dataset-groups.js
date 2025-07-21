@@ -1,7 +1,7 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
@@ -10,9 +10,9 @@ export class DatasetGroups extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger List of optional argument to pass
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - List of optional argument to pass
      * @returns {Promise<Map<string, SFDC_Group>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -31,7 +31,7 @@ export class DatasetGroups extends Dataset {
         // Create the map
         const groupRecords = results[0];
         logger?.log(`Parsing ${groupRecords.length} groups...`);
-        const groups = new Map(await Processor.map(groupRecords, async (record) => {
+        const groups = new Map(await Processor.map(groupRecords, async (/** @type {any} */ record) => {
         
             // Get the ID15 of this custom field
             const groupId = sfdcManager.caseSafeId(record.Id);
@@ -68,11 +68,12 @@ export class DatasetGroups extends Dataset {
             }
 
             // Handle the direct group membership
-            const groupDirectUserIds = [], groupDirectGroupIds = [];
+            const /** @type {Array<string>} */ groupDirectUserIds = [], 
+                  /** @type {Array<string>} */ groupDirectGroupIds = [];
             if (record.GroupMembers && record.GroupMembers.records && record.GroupMembers.records.length > 0) {
                 await Processor.forEach(
                     record.GroupMembers.records, 
-                    (m) => {
+                    (/** @type {any} */ m) => {
                         const groupMemberId = sfdcManager.caseSafeId(m.UserOrGroupId);
                         (groupMemberId.startsWith('005') ? groupDirectUserIds : groupDirectGroupIds).push(groupMemberId);
                     }

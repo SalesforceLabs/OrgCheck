@@ -1,7 +1,7 @@
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Application } from '../data/orgcheck-api-data-application';
 
@@ -9,9 +9,9 @@ export class DatasetApplications extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_Application>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -30,7 +30,7 @@ export class DatasetApplications extends Dataset {
 
         // Create the map
         logger?.log(`Parsing ${applicationRecords.length} applications...`);
-        const applications = new Map(await Processor.map(applicationRecords, (record) => {
+        const applications = new Map(await Processor.map(applicationRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this application
             const id = sfdcManager.caseSafeId(record.ApplicationId);

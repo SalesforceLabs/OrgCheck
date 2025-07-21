@@ -2,7 +2,7 @@ import { CodeScanner } from '../core/orgcheck-api-codescanner';
 import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processing';
+import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
@@ -11,9 +11,9 @@ export class DatasetApexTriggers extends Dataset {
 
     /**
      * @description Run the dataset and return the result
-     * @param {SalesforceManagerIntf} sfdcManager
-     * @param {DataFactoryIntf} dataFactory
-     * @param {SimpleLoggerIntf} logger
+     * @param {SalesforceManagerIntf} sfdcManager - The salesforce manager to use
+     * @param {DataFactoryIntf} dataFactory - The data factory to use
+     * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, SFDC_ApexTrigger>>} The result of the dataset
      */
     async run(sfdcManager, dataFactory, logger) {
@@ -42,7 +42,7 @@ export class DatasetApexTriggers extends Dataset {
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexTriggerRecords.length} apex triggers...`);
         const apexTriggersDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(apexTriggerRecords, (record) => sfdcManager.caseSafeId(record.Id)), 
+            await Processor.map(apexTriggerRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
@@ -50,7 +50,7 @@ export class DatasetApexTriggers extends Dataset {
         logger?.log(`Parsing ${apexTriggerRecords.length} apex triggers...`);
         const apexTriggers = new Map(await Processor.map(
             apexTriggerRecords,
-            (record) => {
+            (/** @type {any} */ record) => {
 
                 // Get the ID15
                 const id = sfdcManager.caseSafeId(record.Id);
@@ -78,16 +78,14 @@ export class DatasetApexTriggers extends Dataset {
                         lastModifiedDate: record.LastModifiedDate,
                         url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.APEX_TRIGGER, record.EntityDefinition?.QualifiedApiName)
                     }, 
-                    dependencies: {
-                        data: apexTriggersDependencies
-                    }
+                    dependencyData: apexTriggersDependencies
                 });
                 
                 // Get information directly from the source code (if available)
                 if (record.Body) {
-                    const sourceCode = CodeScanner.RemoveComments(record.Body);
-                    apexTrigger.hasSOQL = CodeScanner.HasSOQL(sourceCode); 
-                    apexTrigger.hasDML = CodeScanner.HasDML(sourceCode); 
+                    const sourceCode = CodeScanner.RemoveCommentsFromCode(record.Body);
+                    apexTrigger.hasSOQL = CodeScanner.HasSOQLFromApexCode(sourceCode); 
+                    apexTrigger.hasDML = CodeScanner.HasDMLFromApexCode(sourceCode); 
                     apexTrigger.hardCodedURLs = CodeScanner.FindHardCodedURLs(sourceCode);
                     apexTrigger.hardCodedIDs = CodeScanner.FindHardCodedIDs(sourceCode);
                 }
@@ -98,7 +96,7 @@ export class DatasetApexTriggers extends Dataset {
                 // Add it to the map  
                 return [ apexTrigger.id, apexTrigger ];
             },
-            (record)=> (record.EntityDefinition ? true : false)
+            (/** @type {any} */ record)=> (record.EntityDefinition ? true : false)
         ));
 
         // Return data as map

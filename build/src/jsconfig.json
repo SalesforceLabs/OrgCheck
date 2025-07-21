@@ -7,20 +7,11 @@
         "noImplicitAny": false,
         "baseUrl": ".",
         "pretty": true,
-        "paths": {
-            "c/*": [
-                "*"
-            ]
-        }
+        "typeRoots": ["./node_modules/@types/*"]
     },
     "include": [
         "**/*"
     ],
-    "paths": {
-        "c/*": [
-            "*"
-        ]
-    },
     "typeAcquisition": {
         "include": [
             "jest"

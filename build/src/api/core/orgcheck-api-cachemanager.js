@@ -73,45 +73,37 @@ export class MetadataItemInCache extends ItemInCache {
 export class DataCacheManagerIntf {
 
     /**
-     * @description Is the cache has a specific key?
-     * @param {string} key 
-     * @returns {boolean} true if the cache has the key, false if not
+     * @description Get the entry from the cache
+     * @param {string} key - the key of the entry to get
+     * @returns {any} the value of the entry in the cache
      * @public
      */
-    has(key) { throw new Error('Not implemented'); }
-
-    /**
-     * @description Get the entry form the cache
-     * @param {string} key 
-     * @returns {Map | any}
-     * @public
-     */
-    get(key) { throw new Error('Not implemented'); }
+    get(key) { throw new Error(`Method get(key=${key}) not implemented yet.`); }
 
     /**
      * @description Set an entry into the cache with a given key
-     * @param {string} key 
-     * @param {Map | any} value
+     * @param {string} key - the key of the entry to set
+     * @param {any} value - the value of the entry to set
      * @public
      */
-    set(key, value) { throw new Error('Not implemented'); }
+    set(key, value) { throw new Error(`Method set(key=${key}, value=${value}) not implemented yet.`); }
 
     /**
      * @description Get details of the cache.
-     * @returns {Array<DataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
+     * @returns {Array<DataCacheItem> | undefined} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
-    details() { throw new Error('Not implemented'); }
+    details() { throw new Error(`Method details() not implemented yet.`); }
 
     /**
      * @description Remove an entry of the cache.
-     * @param {string} key 
+     * @param {string} key - the key of the entry to remove
      * @public
      */
-    remove(key) { throw new Error('Not implemented'); }
+    remove(key) { throw new Error(`Method remove(key=${key}) not implemented yet.`); }
 
     /**
      * @description Remove all entries in the cache.
      * @public
      */
-    clear() { throw new Error('Not implemented'); }
+    clear() { throw new Error(`Method clear() not implemented yet.`); }
 }

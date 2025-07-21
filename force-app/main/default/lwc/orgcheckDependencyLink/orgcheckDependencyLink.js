@@ -20,7 +20,7 @@ export default class OrgcheckDependencyLink extends LightningElement {
 
     /**
      * @description Data dependencies of the item
-     * @type {ocapi.DataDependencies}
+     * @type {ocapi.DataDependenciesForOneItem}
      * @public
      */ 
     @api dependencies;
