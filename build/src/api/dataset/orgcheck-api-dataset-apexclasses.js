@@ -25,26 +25,19 @@ export class DatasetApexClasses extends Dataset {
                         'Body, LengthWithoutComments, SymbolTable, ' +
                         'CreatedDate, LastModifiedDate ' +
                     'FROM ApexClass ' +
-                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') `,
-            tooling: true
-        }, {
-            string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
-                    'FROM ApexCodeCoverage ' +
-                    'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
-            queryMoreField: 'CreatedDate',
-            tooling: true
-        }, {
-            string: 'SELECT ApexClassorTriggerId, NumLinesCovered, ' +
-                        'NumLinesUncovered, Coverage ' +
-                    'FROM ApexCodeCoverageAggregate ',
+                    `WHERE ManageableState IN ('installedEditable', 'unmanaged') ` +
+                    'ORDER BY Id',
             tooling: true
         }, {
             string: 'SELECT ApexClassId ' +
                     'FROM AsyncApexJob ' +
-                    `WHERE JobType = 'ScheduledApex' `
+                    `WHERE JobType = 'ScheduledApex' ` +
+                    `AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') `,
+            tooling: true
         }, {
-            string: 'SELECT id, ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
-                        'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
+            string: 'SELECT ApexClassId, MethodName, ApexTestRunResult.CreatedDate, '+
+                        'RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, ' +
+                        'QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) '+
                     'FROM ApexTestResult '+
                     `WHERE (Outcome != 'Pass' OR RunTime > 20000) `+
                     `AND ApexTestRunResult.Status = 'Completed' `+
@@ -52,24 +45,50 @@ export class DatasetApexClasses extends Dataset {
                     'ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName ',
             tooling: true
         }], logger);
-
+        
         // Init the factory and records and records
         const apexClassDataFactory = dataFactory.getInstance(SFDC_ApexClass);
         const apexTestResultDataFactory = dataFactory.getInstance(SFDC_ApexTestMethodResult);
         const apexClassRecords = results[0];
-        const apexCodeCoverageRecords = results[1];
-        const apexCodeCoverageAggRecords = results[2];
-        const asyncApexJobRecords = results[3];
-        const apexTestResultRecords = results[4];
+        const asyncApexJobRecords = results[1];
+        const apexTestResultRecords = results[2];
 
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${apexClassRecords.length} apex classes...`);
-        const apexClassesDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(apexClassRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
-            logger
-        );
+        const apexClassIds = await Processor.map(apexClassRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id));
+        const apexClassesDependencies = await sfdcManager.dependenciesQuery(apexClassIds, logger);
 
-        // Part 1b- apex classes
+        // Second set of SOQL queries only for the apex classes that are editable
+        // This workaround is due to the fact that we can't filter on ApexClassOrTrigger.ManageableState in these queres
+        const apexCodeCoverageQueries = [];
+        const apexCodeCoverageAggQueries = [];
+        for (let i = 0; i < apexClassIds.length; i += 500) {
+            const subsetIds = `'${apexClassIds.slice(i, i + 500).join("','")}'`;
+            apexCodeCoverageQueries.push({
+                string: 'SELECT ApexClassOrTriggerId, ApexTestClassId ' +
+                        'FROM ApexCodeCoverage ' +
+                        `WHERE ApexClassOrTriggerId IN (${subsetIds}) `+
+                        `AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged') `+
+                        'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
+                queryMoreField: 'CreatedDate',
+                tooling: true
+            });
+            apexCodeCoverageAggQueries.push({
+                string: 'SELECT ApexClassOrTriggerId, NumLinesCovered, ' +
+                            'NumLinesUncovered, Coverage ' +
+                        'FROM ApexCodeCoverageAggregate ' +
+                        `WHERE ApexClassOrTriggerId IN (${subsetIds}) `,
+                tooling: true
+            });
+        }
+        const results2 = await Promise.all([
+            sfdcManager.soqlQuery(apexCodeCoverageQueries, logger),
+            sfdcManager.soqlQuery(apexCodeCoverageAggQueries, logger)
+        ]);
+        const apexCodeCoverageRecords = [].concat(... results2[0]);
+        const apexCodeCoverageAggRecords = [].concat(... results2[1]);
+
+        // Create instances of SFDC_ApexClass
         logger?.log(`Parsing ${apexClassRecords.length} apex classes...`);
         /** @type {Map<string, SFDC_ApexClass>} */
         const apexClasses = new Map(await Processor.map(apexClassRecords, async (/** @type {any} */ record) => {
@@ -152,7 +171,7 @@ export class DatasetApexClasses extends Dataset {
             return [ apexClass.id, apexClass ];
         }));
 
-        // Part 2- add the related tests to apex classes
+        // Add the related tests to apex classes
         logger?.log(`Parsing ${apexCodeCoverageRecords.length} apex code coverages...`);
         /** @type {Map<string, Set<string>>} */
         const relatedTestsByApexClass = new Map();
@@ -173,18 +192,20 @@ export class DatasetApexClasses extends Dataset {
                 }
             }
         );
-        await Processor.forEach(relatedTestsByApexClass, (/** @type {Set<string>} */ relatedTestsIds, /** @type {string} */ apexClassId) => {
-            if (apexClasses.has(apexClassId)) { // Just to be safe!
-                apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
-            }
-        });
-        await Processor.forEach(relatedClassesByApexTest, (/** @type {Set<string>} */ relatedClassesIds, /** @type {string} */apexTestId) => {
-            if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
-                apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
-            }
-        });
+        await Promise.all([
+            Processor.forEach(relatedTestsByApexClass, (/** @type {Set<string>} */ relatedTestsIds, /** @type {string} */ apexClassId) => {
+                if (apexClasses.has(apexClassId)) { // Just to be safe!
+                    apexClasses.get(apexClassId).relatedTestClassIds = Array.from(relatedTestsIds);
+                }
+            }),
+            Processor.forEach(relatedClassesByApexTest, (/** @type {Set<string>} */ relatedClassesIds, /** @type {string} */apexTestId) => {
+                if (apexClasses.has(apexTestId)) { // In case a test from a package is covering a classe the id will not be in the Class map!
+                    apexClasses.get(apexTestId).relatedClassIds = Array.from(relatedClassesIds);
+                }
+            })
+        ]);
 
-        // Part 3- add the aggregate code coverage to apex classes
+        // Add the aggregate code coverage to apex classes
         logger?.log(`Parsing ${apexCodeCoverageAggRecords.length} apex code coverage aggregates...`);
         await Processor.forEach(
             apexCodeCoverageAggRecords,
@@ -198,7 +219,7 @@ export class DatasetApexClasses extends Dataset {
             }
         );
 
-        // Part 4- add if class is scheduled
+        // Add if class is scheduled
         logger?.log(`Parsing ${asyncApexJobRecords.length} schedule apex classes...`);
         await Processor.forEach(
             asyncApexJobRecords,
@@ -212,7 +233,7 @@ export class DatasetApexClasses extends Dataset {
             }
         );
 
-        // Part 4- add if class is scheduled
+        // Add if unit test have been succesful or not
         logger?.log(`Parsing ${apexTestResultRecords.length} test results...`);
         await Processor.forEach(
             apexTestResultRecords,
@@ -255,7 +276,8 @@ export class DatasetApexClasses extends Dataset {
             }
         );
 
-        // Compute the score of all items
+        // FINALLY!!!! Compute the score of all items
+        logger?.log(`Computing scores for ${apexClasses.size} Apex classes...`);
         await Processor.forEach(apexClasses, (/** @type {SFDC_ApexClass} */ apexClass) => {
             apexClassDataFactory.computeScore(apexClass);
         });
