@@ -324,6 +324,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
         const allRecords = [];
         const indexOfFromStatment = query.indexOf(' FROM ');
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
+        const isWhereStatmentAlreadyUsed = query.indexOf(' WHERE ') !== -1;
         const isAggregateQuery = indexOfGroupByStatment !== -1;
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
         const doNextQuery = async (/** @type {string} */ startingValue) => {
@@ -332,11 +333,11 @@ export class SalesforceManager extends SalesforceManagerIntf {
             }
             let realQuery;
             if (isAggregateQuery === false) {
-                realQuery = `${query} AND ${field} > '${startingValue}' ORDER BY ${field} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
+                realQuery = `${query} ${isWhereStatmentAlreadyUsed ? 'AND' : 'WHERE'} ${field} > '${startingValue}' ORDER BY ${field} LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
             } else {
                 realQuery = `${query.substring(0, indexOfFromStatment)}, MAX(${field}) qmField `+ // Note that the max field is aliased to "qmField"
                             `${query.substring(indexOfFromStatment, indexOfGroupByStatment)} `+
-                            (startingValue ? `WHERE ${field} > ${startingValue} ` : '')+
+                            (startingValue ? `${isWhereStatmentAlreadyUsed ? 'AND' : 'WHERE'} ${field} > ${startingValue} ` : '')+
                             `${query.substring(indexOfGroupByStatment)} `+
                             `ORDER BY MAX(${field}) `+
                             `LIMIT ${MAX_NOQUERYMORE_BATCH_SIZE}`;
