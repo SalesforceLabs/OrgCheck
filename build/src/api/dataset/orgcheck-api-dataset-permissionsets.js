@@ -94,7 +94,9 @@ export class DatasetPermissionSets extends Dataset {
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
                     memberCounts: 0, // default value, may be changed in second SOQL
-                    assignedToNonEmptyGroup: false, // default value
+                    allIncludingGroupsAreEmpty: false, // default value
+                    permissionSetIds: [],
+                    permissionSetGroupIds: [],
                     isGroup: isPermissionSetGroup,
                     type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
                     createdDate: record.CreatedDate, 
@@ -153,9 +155,9 @@ export class DatasetPermissionSets extends Dataset {
             })
         ]);
 
-        // Once all the ps and psg have memberCount set we can check the following:
-        // If a PS is empty (aka "no member") but used in (aka "assigned to") at least one PSG that is not empty, that's another story!
+        // Once all the ps and psg are in the map we can check the following:
         logger?.log(`Checking the ${psAssignmentRecords.length} Permission Set assignments to Permission Set Groups...`);
+        const psgMemberCountSumByPermissionSetId = new Map();        
         await Processor.forEach(psAssignmentRecords, (/** @type {any} */ record) => {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
@@ -163,15 +165,18 @@ export class DatasetPermissionSets extends Dataset {
             if (permissionSets.has(permissionSetId) && permissionSets.has(permissionSetGroup_psId)) {
                 const permissionSet = permissionSets.get(permissionSetId);
                 const permissionSetGroup = permissionSets.get(permissionSetGroup_psId);
-                if (permissionSet.assignedToNonEmptyGroup === false && permissionSetGroup.memberCounts > 0) {
-                    permissionSet.assignedToNonEmptyGroup = true;
-                }
+                permissionSet.permissionSetGroupIds.push(permissionSetGroup_psId);
+                permissionSetGroup.permissionSetIds.push(permissionSetId);
+                psgMemberCountSumByPermissionSetId.set(permissionSetId, psgMemberCountSumByPermissionSetId.get(permissionSetId) ?? 0 + permissionSetGroup.memberCounts);
             }
         });
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);
         await Processor.forEach(permissionSets, (/** @type {SFDC_PermissionSet} */ permissionSet) => {
+            if (psgMemberCountSumByPermissionSetId.get(permissionSet.id) === 0) {
+                permissionSet.allIncludingGroupsAreEmpty = true;
+            }
             permissionSetDataFactory.computeScore(permissionSet);
         });
         

@@ -25,9 +25,37 @@ export class SFDC_PermissionSet extends SFDC_Profile {
     groupId;
 
     /**
-     * @description Is this permission is assigned to at least on permission set group that has at least one active member
+     * @description True if all the permission set groups including this permission set are empty
      * @type {boolean}
      * @public
      */
-    assignedToNonEmptyGroup;
+    allIncludingGroupsAreEmpty;
+
+    /**
+     * @description List of permission set Salesforce Ids associated with the current group (if it's a group!)
+     * @type {Array<string>}
+     * @public
+     */
+    permissionSetIds;
+
+    /**
+     * @description Corresponding references of the permission sets associated with the current group (if it's a group!)
+     * @type {Array<SFDC_PermissionSet>}
+     * @public
+     */
+    permissionSetRefs;
+
+    /**
+     * @description List of permission set group Salesforce Ids that include the current permission set (if it's NOT a group!)
+     * @type {Array<string>}
+     * @public
+     */
+    permissionSetGroupIds;
+
+    /**
+     * @description Corresponding references of the permission set groups that include the current permission set (if it's NOT a group!)
+     * @type {Array<SFDC_PermissionSet>}
+     * @public
+     */
+    permissionSetGroupRefs;
 }

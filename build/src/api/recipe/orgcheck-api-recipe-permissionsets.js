@@ -43,7 +43,15 @@ export class RecipePermissionSets extends Recipe {
         // Augment and Filter data
         /** @type {Array<SFDC_PermissionSet>} */
         const array = [];
-        await Processor.forEach(permissionSets, (/** @type {SFDC_PermissionSet} */ permissionSet) => {
+        await Processor.forEach(permissionSets, async (/** @type {SFDC_PermissionSet} */ permissionSet) => {
+            // Augment data
+            const results = await Promise.all([
+                Processor.map(permissionSet.permissionSetIds, (/** @type {string} */ id) => permissionSets.get(id)),
+                Processor.map(permissionSet.permissionSetGroupIds, (/** @type {string} */ id) => permissionSets.get(id))
+            ]);
+            permissionSet.permissionSetRefs = results[0];
+            permissionSet.permissionSetGroupRefs = results[1];
+
             // Filter data
             if (namespace === OrgCheckGlobalParameter.ALL_VALUES || permissionSet.package === namespace) {
                 array.push(permissionSet);
