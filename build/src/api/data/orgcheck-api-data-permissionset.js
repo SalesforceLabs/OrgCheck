@@ -23,4 +23,11 @@ export class SFDC_PermissionSet extends SFDC_Profile {
      * @public
      */
     groupId;
+
+    /**
+     * @description Is this permission is assigned to at least on permission set group that has at least one active member
+     * @type {boolean}
+     * @public
+     */
+    assignedToNonEmptyGroup;
 }

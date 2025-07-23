@@ -41,19 +41,25 @@ export class DatasetPermissionSets extends Dataset {
                     'GROUP BY ParentId '+
                     'ORDER BY ParentId '+
                     'LIMIT 2000'
-        },{
+        }, {
             string: 'SELECT ParentId, COUNT(Field) CountField '+ 
                     'FROM FieldPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
                     'GROUP BY ParentId '+
                     'ORDER BY ParentId '+
                     'LIMIT 2000'
-        },{
+        }, {
             string: 'SELECT PermissionSetId, COUNT(Id) CountAssignment '+ 
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = FALSE '+
                     'GROUP BY PermissionSetId '+
                     'ORDER BY PermissionSetId '+
+                    'LIMIT 2000'
+        }, {
+            string: 'SELECT PermissionSetGroupId, PermissionSetId ' + 
+                    'FROM PermissionSetGroupComponent ' +
+                    'WHERE PermissionSet.IsOwnedByProfile = FALSE ' +
+                    'ORDER BY PermissionSetGroupId '+
                     'LIMIT 2000'
         }], logger);
 
@@ -62,7 +68,8 @@ export class DatasetPermissionSets extends Dataset {
         const permissionSetGroupRecords = results[1];
         const objectPermissionRecords = results[2];
         const fieldPermissionRecords = results[3];
-        const assignmentRecords = results[4];
+        const userAssignmentRecords = results[4];
+        const psAssignmentRecords = results[5];
 
         // Init the factory and records
         const permissionSetDataFactory = dataFactory.getInstance(SFDC_PermissionSet);
@@ -87,7 +94,8 @@ export class DatasetPermissionSets extends Dataset {
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
                     memberCounts: 0, // default value, may be changed in second SOQL
-                    isGroup: isPermissionSetGroup,  
+                    assignedToNonEmptyGroup: false, // default value
+                    isGroup: isPermissionSetGroup,
                     type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
@@ -108,6 +116,7 @@ export class DatasetPermissionSets extends Dataset {
         }));
 
         logger?.log(`Parsing ${permissionSetGroupRecords.length} permission set groups, ${objectPermissionRecords.length} object permissions and ${fieldPermissionRecords.length} field permissions...`);
+        const psgToPsIds = new Map();
         await Promise.all([
             Processor.forEach(permissionSetGroupRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.Id);
@@ -116,7 +125,9 @@ export class DatasetPermissionSets extends Dataset {
                     const permissionSet = permissionSets.get(permissionSetId);
                     permissionSet.isGroup = true;
                     permissionSet.groupId = permissionSetGroupId;
+                    permissionSet.description = record.PermissionSetGroup?.Description ?? '';
                     permissionSet.url = sfdcManager.setupUrl(permissionSetGroupId, SalesforceMetadataTypes.PERMISSION_SET_GROUP);
+                    psgToPsIds.set(permissionSetGroupId, permissionSetId);
                 }
             }),
             Processor.forEach(objectPermissionRecords, (/** @type {any} */ record) => {
@@ -133,7 +144,7 @@ export class DatasetPermissionSets extends Dataset {
                     permissionSet.nbFieldPermissions = record.CountField;    
                 }
             }),
-            Processor.forEach(assignmentRecords, (/** @type {any} */ record) => {
+            Processor.forEach(userAssignmentRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
@@ -141,6 +152,22 @@ export class DatasetPermissionSets extends Dataset {
                 }
             })
         ]);
+
+        // Once all the ps and psg have memberCount set we can check the following:
+        // If a PS is empty (aka "no member") but used in (aka "assigned to") at least one PSG that is not empty, that's another story!
+        logger?.log(`Checking the ${psAssignmentRecords.length} Permission Set assignments to Permission Set Groups...`);
+        await Processor.forEach(psAssignmentRecords, (/** @type {any} */ record) => {
+            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
+            const permissionSetGroupId = sfdcManager.caseSafeId(record.PermissionSetGroupId);
+            const permissionSetGroup_psId = psgToPsIds.get(permissionSetGroupId);
+            if (permissionSets.has(permissionSetId) && permissionSets.has(permissionSetGroup_psId)) {
+                const permissionSet = permissionSets.get(permissionSetId);
+                const permissionSetGroup = permissionSets.get(permissionSetGroup_psId);
+                if (permissionSet.assignedToNonEmptyGroup === false && permissionSetGroup.memberCounts > 0) {
+                    permissionSet.assignedToNonEmptyGroup = true;
+                }
+            }
+        });
 
         // Compute scores for all permission sets
         logger?.log(`Computing the score for ${permissionSets.size} permission sets...`);

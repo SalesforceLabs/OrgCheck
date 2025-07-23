@@ -1587,6 +1587,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'License',          type: ocui.ColumnType.TXT,  data: { value: 'license' }},
             { label: 'Package',          type: ocui.ColumnType.TXT,  data: { value: 'package' }},
             { label: '#Active users',    type: ocui.ColumnType.NUM,  data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user!', valueIfEmpty: '' }},
+            { label: 'Assigned to non empty group',    type: ocui.ColumnType.CHK,  data: { value: 'assignedToNonEmptyGroup' }},
             { label: 'Created date',     type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
             { label: 'Modified date',    type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
             { label: 'Description',      type: ocui.ColumnType.TXT,  data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}

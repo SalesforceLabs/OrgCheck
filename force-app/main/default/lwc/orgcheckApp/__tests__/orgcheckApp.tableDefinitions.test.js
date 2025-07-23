@@ -172,7 +172,7 @@ describe('c-orgcheck-app', () => {
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'score', 'id', 'name', 'url', 'isGroup', 'isCustom', 'nbFieldPermissions', 
                 'nbObjectPermissions', 'importantPermissions', 'license', 'package', 'memberCounts', 'createdDate', 
-                'lastModifiedDate', 'description' ];
+                'lastModifiedDate', 'description', 'assignedToNonEmptyGroup' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
