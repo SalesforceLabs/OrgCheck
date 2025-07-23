@@ -190,8 +190,8 @@
                                         <lightning-card>
                                             <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
                                             <lightning-button label="Details..." title="Go the corresponding taband see the details for this type of items" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
-                                            <section if:true={item.countBad} class="slds-var-p-horizontal_small">
-                                                <p>We believe you should correct <b>{item.countBad}</b> items, for the below reasons:</p>
+                                            <section if:true={item.countBad}>
+                                                <p class="slds-text-heading_small"><b>{item.countBad}</b> items to correct for the below reasons:</p>
                                                 <c-orgcheck-extended-datatable table-definition={item.tableDefinition} rows={item.tableData}></c-orgcheck-extended-datatable>
                                             </section>
                                             <section if:false={item.countBad} class="slds-var-p-horizontal_small">
