@@ -40,7 +40,7 @@ export class DatasetAppPermissions extends Dataset {
         }));
 
         // Create the map
-        logger?.log(`Parsing ${setupEntityAccesses.length} Application Menu Items...`);
+        logger?.log(`Parsing ${setupEntityAccesses.length} Setup Entity Accesses...`);
         const appPermissions = new Map(await Processor.map(setupEntityAccesses, 
             (/** @type {any} */ record) => {
                 // Get the ID15 of this application

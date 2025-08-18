@@ -35,13 +35,13 @@ export class DatasetCustomTabs extends Dataset {
         const customTabRecords = results[0];
 
         // Then retreive dependencies
-        logger?.log(`Retrieving dependencies of ${customTabRecords.length} web links...`);
+        logger?.log(`Retrieving dependencies of ${customTabRecords.length} custom tabs...`);
         const customTabDependencies = await sfdcManager.dependenciesQuery(
             await Processor.map(customTabRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
-        logger?.log(`Parsing ${customTabRecords.length} installed packages...`);
+        logger?.log(`Parsing ${customTabRecords.length} custom tabs...`);
         const customTabs = new Map(await Processor.map(customTabRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field

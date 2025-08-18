@@ -34,13 +34,13 @@ export class DatasetHomePageComponents extends Dataset {
         const homePageRecords = results[0];
 
         // Then retreive dependencies
-        logger?.log(`Retrieving dependencies of ${homePageRecords.length} web links...`);
+        logger?.log(`Retrieving dependencies of ${homePageRecords.length} homepage components...`);
         const homePageDependencies = await sfdcManager.dependenciesQuery(
             await Processor.map(homePageRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
             logger
         );
 
-        logger?.log(`Parsing ${homePageRecords.length} installed packages...`);
+        logger?.log(`Parsing ${homePageRecords.length} homepage components...`);
         const homePages = new Map(await Processor.map(homePageRecords, (/** @type {any} */ record) => {
 
             // Get the ID15 of this custom field
