@@ -21,6 +21,7 @@ export class DatasetCollaborationGroups extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about CollaborationGroup in the org...`);            
         const results = await sfdcManager.soqlQuery([{
+            byPasses: ['INVALID_TYPE'], // if Chatter is not enable in the org, CollaborationGroup is not defined!
             string: 'SELECT Id, InformationBody, Description, Name, CreatedDate, LastModifiedDate ' +
                     'FROM CollaborationGroup '
         }], logger);
