@@ -72,7 +72,12 @@ export class DatasetCustomFields extends Dataset {
 
         // Get information about custom fields using metadata
         logger?.log(`Calling Tooling API Composite to get more information about these ${entityInfoByCustomFieldId.size} custom fields...`);
-        const records = await sfdcManager.readMetadataAtScale('CustomField', Array.from(entityInfoByCustomFieldId.keys()), [], logger);
+        const records = await sfdcManager.readMetadataAtScale(
+            'CustomField', 
+            Array.from(entityInfoByCustomFieldId.keys()), 
+            [ 'INVALID_CROSS_REFERENCE_KEY' ], 
+            logger
+        );
 
         // Create the map
         const customFields = new Map(await Processor.map(records, (/** @type {any} */ record) => {
