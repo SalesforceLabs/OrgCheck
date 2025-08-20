@@ -289,7 +289,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
         }
         try {
             // Call the first time
-            await doNextQuery(); // and then the method will chain next calls
+            await doNextQuery(undefined); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
@@ -369,7 +369,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
         }
         try {
             // Call the first time with a fake Id that will always be first
-            await doNextQuery(); // and then the method will chain next calls
+            await doNextQuery(undefined); // and then the method will chain next calls
             // return the records
             return allRecords;
         } catch (error) {
