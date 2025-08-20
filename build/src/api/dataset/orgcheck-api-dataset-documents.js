@@ -21,7 +21,6 @@ export class DatasetDocuments extends Dataset {
         // First SOQL query
         logger?.log(`Querying REST API about Document in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            tooling: true,
             string: 'SELECT Id, Name, Url, BodyLength, ContentType, CreatedDate, Description, ' +
                         'DeveloperName, Folder.Name, Folder.Id, LastModifiedDate, NamespacePrefix ' +
                     'FROM Document '
