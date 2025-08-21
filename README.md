@@ -36,7 +36,7 @@ Please note that you will need to sign the Salesforce CLA to do this.
 
 
 ## Useful references
-- [Salesforce Help article mentionning Org Check as an alternative of the Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242)
+- [Salesforce Help article mentionning Org Check as an alternative of the Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242&type=1)
 - [Youtube Video: "Optimizer Is Sunsetting: Learn How To Use Org Check!" by Kate Lessard](https://www.youtube.com/watch?v=DwHchT_uFGQ)
 - [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
 - [Article on Pablo Gonzalez blog: "10 Salesforce Open-source Projects for DevOps Engineers"](https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck)
