@@ -59,6 +59,41 @@ export class SalesforceMetadataRequest {
     members;
 }
 
+/**
+ * @description Salesforce Error Information
+ */
+export class SalesforceError extends Error {
+
+    /** 
+     * @description Error code (should be capitalized by Salesforce)
+     * @type {string}
+     * @public
+     * @readonly
+     */
+    code;
+
+    /** 
+     * @description Context information about the error, such as the query that caused the error, but not limited to it.
+     * @type {any}
+     * @public
+     * @readonly
+     */
+    contextInformation;
+
+    /**
+     * @description Constructor for SalesforceError
+     * @param {string} message - Context of this error
+     * @param {string} code - Salesforce error code
+     * @param {any} [contextInformation] - Json object with additional context information
+     * @public
+     */
+    constructor(message, code, contextInformation) {
+        super(message)
+        this.code = code;
+        this.contextInformation = contextInformation;
+    }
+}
+
 /** 
  * @description Salesforce APIs Manager Interface
  */
@@ -111,6 +146,7 @@ export class SalesforceManagerIntf {
      * @param {Array<SalesforceQueryRequest | any>} queries - Array of queries to be called
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Array<Array<any>>>} Results of the called queries
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -121,6 +157,7 @@ export class SalesforceManagerIntf {
      * @param {Array<SalesforceQueryRequest | any>} queries - Array of queries to be called
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Array<Array<any>>>} Results of the called queries
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -130,6 +167,7 @@ export class SalesforceManagerIntf {
      * @param {Array<string>} ids - Array of Salesforce Ids
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<{ records: Array<any>, errors: Array<string> }>} Dependency data
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -140,6 +178,7 @@ export class SalesforceManagerIntf {
      * @param {Array<SalesforceMetadataRequest>} metadatas - Information of what metadata you want to retrieve
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Map<string, Array<any>>>} Information by metadata type
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -152,6 +191,7 @@ export class SalesforceManagerIntf {
      * @param {string[]} byPasses - Errors to bypass
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Array<any>>} Information of the metadata type
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -161,6 +201,7 @@ export class SalesforceManagerIntf {
      * @description Method to get the list of sobjects
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Array<any>>} Information of the objects
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -171,6 +212,7 @@ export class SalesforceManagerIntf {
      * @param {string} sobjectDevName - Name of the sobject to describe
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<any>} Information of the sobject
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -181,6 +223,7 @@ export class SalesforceManagerIntf {
      * @param {string} sobjectDevName - Name of the sobject to describe
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<number>} Number of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -190,6 +233,7 @@ export class SalesforceManagerIntf {
      * @description Method to run all apex test in the org
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<string>} Result of the tests running from tooling api
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -200,6 +244,7 @@ export class SalesforceManagerIntf {
      * @param {Array<string>} apexClassIds - List of apex class ids to compile
      * @param {SimpleLoggerIntf} logger - Logger to use
      * @returns {Promise<Array<any>>} Result of the compilation from tooling api
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */

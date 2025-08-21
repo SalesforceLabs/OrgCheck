@@ -2,7 +2,7 @@ import { OBJECTTYPE_ID_CUSTOM_SETTING, OBJECTTYPE_ID_CUSTOM_SOBJECT, OBJECTTYPE_
 import { SimpleLoggerIntf } from "./orgcheck-api-logger";
 import { SalesforceMetadataTypes } from "./orgcheck-api-salesforce-metadatatypes";
 import { SalesforceWatchDog, SalesforceUsageInformation } from "./orgcheck-api-salesforce-watchdog";
-import { SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from "./orgcheck-api-salesforcemanager";
+import { SalesforceError, SalesforceManagerIntf, SalesforceMetadataRequest, SalesforceQueryRequest } from "./orgcheck-api-salesforcemanager";
 import { SecretSauce } from "./orgcheck-api-secretsauce";
 
 /**
@@ -251,6 +251,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<string>} byPasses - List of error codes to by-pass
      * @param {Function} callback - Callback function
      * @returns {Promise<Array<any>>} List of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
@@ -298,11 +299,17 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 return [];
             } else {
                 // Throw the error
-                throw Object.assign(error, { 
-                    context: { 
-                        when: 'While running a SOQL query with the standard queryMore', 
-                        what: query 
-                }});
+                throw new SalesforceError(
+                    `There was an error while running a SOQL query with the standard queryMore`,
+                    error.errorCode,
+                    { 
+                        'SoqlQuery': query ?? '(empty)',
+                        'Tooling': useTooling,
+                        'ByPasses': byPasses?.join(', ') ?? '(empty)',
+                        'Cause': error?.message ?? '(empty)',
+                        'Where': 'SalesforceManagerImpl.soqlQuery/_standardSOQLQuery'
+                    }
+                );
             }
         }
     }
@@ -313,6 +320,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {string} field - Field name to use for the custom QueryMore
      * @param {Function} callback - Callback function
      * @returns {Promise<Array<any>>} List of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @private
      */
@@ -374,11 +382,17 @@ export class SalesforceManager extends SalesforceManagerIntf {
             return allRecords;
         } catch (error) {
             // Throw the error
-            throw Object.assign(error, { 
-                context: { 
-                    when: 'While running a SOQL query with the custom queryMore', 
-                    what: query 
-            }});
+            throw new SalesforceError(
+                `There was an error while running a SOQL query with the custom queryMore`,
+                error.errorCode,
+                { 
+                    'SoqlQuery': query ?? '(empty)',
+                    'Tooling': useTooling,
+                    'Field': field ?? '(empty)',
+                    'Cause': error?.message ?? '(empty)',
+                    'Where': 'SalesforceManagerImpl.soqlQuery/_customSOQLQuery'
+                }
+            );
         }
     }
 
@@ -387,6 +401,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<SalesforceQueryRequest>} queries - List of queries
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Array<Array<any>>>} List of list records -- order is the same as queries.
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      */
     async soqlQuery(queries, logger) {
@@ -459,6 +474,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<SalesforceQueryRequest | any>} queries - List of queries
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Array<Array<any>>>} List of list records -- order is the same as queries.
+     * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public
      */
@@ -475,11 +491,16 @@ export class SalesforceManager extends SalesforceManagerIntf {
                     return [];
                 } else {
                     // Throw the error
-                    throw Object.assign(error, { 
-                        context: { 
-                            when: 'While running a SOSL query', 
-                            what: query.string 
-                    }});
+                    throw new SalesforceError(
+                        `There was an error while running a SOSL query`,
+                        error.errorCode,
+                        { 
+                            'SoslQuery': query.string ?? '(empty)',
+                            'ByPasses': query.byPasses?.join(', ') ?? '(empty)',
+                            'Cause': error?.message ?? '(empty)',
+                            'Where': 'SalesforceManagerImpl.soslQuery'
+                        }
+                    );
                 }
             }
             return records?.searchRecords || []; // return the records or an empty array if no records found
@@ -496,6 +517,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<string>} ids - List of salesforce IDs
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<{ records: Array<any>, errors: Array<string> }>} Dependencies data
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
@@ -595,20 +617,19 @@ export class SalesforceManager extends SalesforceManagerIntf {
                     const errorCode = response.body[0].errorCode;
                     if (errorCode === 'UNKNOWN_EXCEPTION') {
                         // This is a known issue with the DAPI in case the metadata in the org is messy for one of the IDs
-                        logger?.log(`This response had a code: ${errorCode}`);
                         idsInError.push(... ids);
                     } else {
-                        logger?.log(`This response had a code: ${errorCode}`);
-                        const error = new TypeError(`One of the request had an issue with HTTP errorCode=${errorCode}`);
-                        throw Object.assign(error, { 
-                            context: { 
-                                when: 'Calling Composite Tooling API to get dependencies.',
-                                what: {
-                                    ids: ids,
-                                    body: response.body
-                                }
+                        // Throw the error
+                        throw new SalesforceError(
+                            `There was an error while calling Composite Tooling API to get dependencies. `,
+                            errorCode,
+                            { 
+                                'AllIds': JSON.stringify(ids ?? []) || '[]',
+                                'HttpStatusCode': response.httpStatusCode,
+                                'HttpResponse': JSON.stringify(response?.body ?? {}) || 'N/A',
+                                'Where': 'SalesforceManagerImpl.dependenciesQuery'
                             }
-                        });
+                        );
                     }
                 }
             });
@@ -621,6 +642,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<SalesforceMetadataRequest>} metadatas - Information of what metadata you want to retrieve
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Map<string, Array<any>>>} Information by metadata type
+     * @throws {SalesforceError} If an error occurs during the metadata read
      * @public
      * @async
      */
@@ -648,15 +670,17 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 } catch (error) {
                     logger?.log(`The method metadata.list returned an error: ${JSON.stringify(error)}`);
                     // We reject the promise with the current error and additional context information
-                    throw Object.assign(error, { 
-                        context: { 
-                            when: 'Calling Metadata API to get a list of metadata.',
-                            what: {
-                                type: metadata.type,
-                                apiVersion: this._apiVersion
-                            }
+                    // Throw the error
+                    throw new SalesforceError(
+                        `There was an error while calling Metadata API to get a list of metadata.`,
+                        'METADATA_LIST',
+                        { 
+                            'Type': metadata.type ?? '(empty)', 
+                            'ApiVersion': this._apiVersion,
+                            'Cause': JSON.stringify(error ?? {}) || 'N/A',
+                            'Where': 'SalesforceManagerImpl.readMetadata'
                         }
-                    });
+                    );
                 }
             })
         );
@@ -688,16 +712,18 @@ export class SalesforceManager extends SalesforceManagerIntf {
                     }).catch((/** @type {Error} */ error) => {
                         logger?.log(`The method metadata.read returned an error: ${JSON.stringify(error)}`);
                         // We reject the promise with the current error and additional context information
-                        reject(Object.assign(error, { 
-                            context: { 
-                                when: 'Calling Metadata API to read a list of metadata.',
-                                what: {
-                                    type: metadata.type,
-                                    pendingMembers: metadata.members,
-                                    membersInProcess: currentMembers,
-                                }
+                        // Throw the error
+                        reject(new SalesforceError(
+                            `There was an error while calling Metadata API to read a list of metadata.`,
+                            'METADATA_READ',
+                            { 
+                                'Type': metadata.type ?? '(empty)', 
+                                'PendingMembers': JSON.stringify(metadata?.members ?? []) || '[]',
+                                'MembersInProcess': JSON.stringify(currentMembers ?? []) || '[]',
+                                'Cause': JSON.stringify(error ?? {}) || 'N/A',
+                                'Where': 'SalesforceManagerImpl.readMetadata'
                             }
-                        }));
+                        ));
                     });
                 }));
             }
@@ -715,6 +741,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {string[]} byPasses - List of bypass types
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Array<any>>} List of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
@@ -784,17 +811,19 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 } else {
                     const errorCode = response.body[0].errorCode;
                     if (byPasses && byPasses.includes && byPasses.includes(errorCode) === false) {
-                        const error = new TypeError(`One of the request for type=${type} had an issue with HTTP errorCode=${errorCode}`);
-                        throw Object.assign(error, { 
-                            context: { 
-                                when: 'Calling Composite Tooling API to get metadata at scale.',
-                                what: {
-                                    type: type,
-                                    ids: ids,
-                                    body: response.body
-                                }
+                        // Throw the error
+                        throw new SalesforceError(
+                            `There was an error while calling Composite Tooling API to get metadata at scale.`,
+                            errorCode,
+                            { 
+                                'Type': type ?? '(empty)', 
+                                'AllIds': JSON.stringify(ids ?? []) || '[]',
+                                'ByPasses': byPasses?.join(', ') ?? '(empty)',
+                                'HttpStatusCode': response.httpStatusCode,
+                                'HttpResponse': JSON.stringify(response?.body ?? {}) || 'N/A',
+                                'Where': 'SalesforceManagerImpl.readMetadataAtScale'
                             }
-                        });
+                        );
                     }
                 }
             });
@@ -807,6 +836,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @see SalesforceManagerIntf.describeGlobal
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Array<any>>} List of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
@@ -830,6 +860,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {string} sobjectDevName - Name of the sobject
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<any>} Information about the given sobject
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
@@ -855,6 +886,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {string} sobjectDevName - Name of the sobject
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<number>} Number of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */
@@ -877,6 +909,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @see SalesforceManagerIntf.runAllTests
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<string>} Return the raw result of the call to the tooling API
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */ 
@@ -902,6 +935,7 @@ export class SalesforceManager extends SalesforceManagerIntf {
      * @param {Array<string>} apexClassIds - List of Apex Class IDs
      * @param {SimpleLoggerIntf} logger - Logger
      * @returns {Promise<Array<any>>} List of records
+     * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
      */ 

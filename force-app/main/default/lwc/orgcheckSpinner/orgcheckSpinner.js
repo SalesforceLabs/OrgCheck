@@ -47,22 +47,10 @@ class Section {
   label;
 
   /**
-   * @description The error stack trace (if any) that happened during the execution of the section
-   * @type {string} 
+   * @description Context information that could help the investigation
+   * @type {Array<{ key: string, value: string }>}
    */
-  stack;
-
-  /** 
-   * @description Some context about WHEN the error occured
-   * @type {string} 
-   */
-  when;
-
-  /** 
-   * @description Some context about WHAT the error is about
-   * @type {string} 
-   */
-  what;
+  contextInformation;
 }
 
 /**
@@ -270,7 +258,7 @@ export default class OrgcheckSpinner extends LightningElement {
   /**
    * @description Sets a section with the given section name, message, status, and error. We show the spinner if not yet opened.
    * @param {string} sectionName - The name of the section.
-   * @param {string | Error} message - The message (string or error) to handle in the section.
+   * @param {string | Error } message - The message (string or error) to handle in the section.
    * @param {string} status - The status of the section.
    * @private
    */
@@ -281,17 +269,26 @@ export default class OrgcheckSpinner extends LightningElement {
 
    /** @type {boolean} */ 
    const isMessageAnError = message instanceof Error;
-   // @ts-ignore
-   const contextIfError = message ? message.context : undefined;
 
     /** @type {Section} */
     const section = new Section();
     section.id = sectionName;
     section.status = status;
-    section.label = (isMessageAnError ? `${message.name}: ${message.message}` : message);
-    section.stack = (isMessageAnError ? message?.stack : '');
-    section.when = (contextIfError ? JSON.stringify(contextIfError?.when) : '');
-    section.what = (contextIfError ? JSON.stringify(contextIfError?.what) : '');
+    if (isMessageAnError === true) {
+      section.label = 'There was an error during the process...';
+      // @ts-ignore
+      const context = message.contextInformation || {};
+      const keys = Object.keys(context);
+      section.contextInformation = [
+        { key: 'Message', value: message.message }
+      ];
+      for (const key of keys) {
+        section.contextInformation.push({ key: key, value: context[key] });
+      }
+    } else {
+      section.label = message;
+      section.contextInformation = undefined;
+    }
     section.liClasses = 'slds-progress__item';
     section.markerClasses = 'slds-progress__marker';
 

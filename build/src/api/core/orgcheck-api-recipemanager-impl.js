@@ -216,9 +216,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let datasets;
         try {
             datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while extracting the datasets`);
+            return;
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
@@ -228,9 +229,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let data;
         try {
             data = await this._datasetManager.run(datasets);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while running the dataset ${error.dataset}.`);
+            return;
         }
         this._logger.log(section, 'Datasets information successfuly retrieved!');
 
@@ -242,9 +244,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let finalData;
         try {
             finalData = await recipe.transform(data, this._logger.toSimpleLogger(section), parameters);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while transforming the data`);
+            return;
         }
         this._logger.ended(section, 'Transformation successfuly done!');
         
@@ -271,9 +274,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let recipes;
         try {
             recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while extracting the recipes`);
+            return;
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
@@ -292,9 +296,10 @@ export class RecipeManager extends RecipeManagerIntf {
                     throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected.`);
                 }
             });
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while running the recipes`);
+            return;
         }
         this._logger.log(section, 'All datasets information successfuly retrieved from recipes!');
 
@@ -330,9 +335,10 @@ export class RecipeManager extends RecipeManagerIntf {
                 stats.data = onlyBadRecords;
                 finalData.set(key, stats);
             });
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while transforming the data`);
+            return;
         }
         this._logger.ended(section, 'Transformation successfuly done!');
 
@@ -360,9 +366,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let datasets;
         try {
             datasets = recipe.extract(this._logger.toSimpleLogger(section), parameters);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while extracting the datasets`);
+            return;
         }
         this._logger.log(section, `This recipe has ${datasets?.length} ${datasets?.length>1?'datasets':'dataset'}: ${datasets.map((d) => d instanceof DatasetRunInformation ? d.alias : d ).join(', ')}...`);
 
@@ -372,9 +379,10 @@ export class RecipeManager extends RecipeManagerIntf {
         this._logger.log(section, 'Clean all datasets...');
         try {
             this._datasetManager.clean(datasets);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while cleaning the datasets`);
+            return;
         }
         this._logger.ended(section, 'Datasets succesfully cleaned!');
     }
@@ -398,9 +406,10 @@ export class RecipeManager extends RecipeManagerIntf {
         let recipes;
         try {
             recipes = recipeCollection.extract(this._logger.toSimpleLogger(section), parameters);
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while extracting the recipes`);
+            return;
         }
         this._logger.log(section, `This recipe collection has ${recipes?.length} ${recipes?.length>1?'recipes':'recipe'}: ${recipes.join(', ')}...`);
 
@@ -410,9 +419,10 @@ export class RecipeManager extends RecipeManagerIntf {
         this._logger.log(section, 'Clean all datasets of these recipes...');
         try {
             recipes.forEach((recipe) => { this._cleanRecipe(recipe, parameters); });
+        // eslint-disable-next-line no-unused-vars
         } catch(error) {
-            this._logger.failed(section, error);
-            throw error;
+            this._logger.failed(section, `An error occurred while cleaning the datasets`);
+            return;
         }
         this._logger.ended(section, 'Datasets of these recipes succesfully cleaned!');
     }

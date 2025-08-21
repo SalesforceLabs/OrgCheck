@@ -203,10 +203,10 @@ export class DatasetManager extends DatasetManagerIntf {
                             this._logger.ended(section, `Data retrieved and saved in cache with key=${cacheKey}`);
                             // Return the key/alias and value from the cache
                             resolve([ alias, data ]);
-                        }).catch((error) => {
+                        }).catch((/** @type {Error} */ error) => {
                             // Reject with this error
                             this._logger.failed(section, error);
-                            reject(error);
+                            reject({ dataset: alias, cause: error });
                         });
                     }
                 }));

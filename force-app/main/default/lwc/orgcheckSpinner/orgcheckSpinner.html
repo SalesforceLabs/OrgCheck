@@ -39,17 +39,14 @@
                                                 <div class={section.markerClasses}></div>
                                                 <div class="slds-progress__item_content"><b>{section.id}</b> {section.label}</div>
                                             </li>
-                                            <li lwc:if={section.stack} key={section.id}>
-                                                <pre>{section.stack}</pre>
-                                            </li>
-                                            <li lwc:if={section.when} key={section.id}>
-                                                <b>When did this error occur?</b><br />
-                                                <pre>{section.when}</pre>
-                                            </li>
-                                            <li lwc:if={section.what} key={section.id}>
-                                                <b>What is this error about?</b><br />
-                                                <pre>{section.what}</pre>
-                                            </li>
+                                            <template if:true={section.contextInformation}>
+                                                <b key={section.id}>Context information about the issue:</b>
+                                                <ol key={section.id} class="slds-list_dotted">
+                                                    <template for:each={section.contextInformation} for:item="item">
+                                                        <li key={item.key}><b>{item.key}</b>: {item.value}</li>
+                                                    </template>
+                                                </ol>
+                                            </template> 
                                         </template>
                                     </ol>
                                 </div>

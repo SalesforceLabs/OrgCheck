@@ -1,3 +1,5 @@
+import { SalesforceError } from "./orgcheck-api-salesforcemanager";
+
 /**
  * @description Threshold value when percentage is reaching a "warning" zone (not yet a "critical" zone)
  * @type {number}
@@ -127,7 +129,7 @@ export class SalesforceWatchDog {
     /**
      * @description Before calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
      * @param {Function} [callback] - Optional callback to call if we reach the limit
-     * @throws {TypeError} If we reach the limit
+     * @throws {SalesforceError} If we reach the limit
      * @public
      */
     beforeRequest(callback) {
@@ -135,10 +137,14 @@ export class SalesforceWatchDog {
             Date.now() - this._lastRequestToSalesforce <= IF_LIMIT_INFO_ARE_OLDER_THAN_THIS_FORCE_REFRESH && 
             this._lastApiUsage.isRedZone
         ) {
-            const error = new TypeError(
-                `WATCH DOG: Daily API Request limit is ${RATIO_TO_PERCENTAGE(this._lastApiUsage.currentUsageRatio)}%, `+
-                `and our internal threshold is ${RATIO_TO_PERCENTAGE(this._lastApiUsage.redThresholdPercentage)}%. `+
-                'We stop there to keep your org safe.'
+            const error = new SalesforceError(
+                `The Daily API Request limit has been reached. We cannot continue.`,
+                'WATCH_DOG', 
+                { 
+                    'CurrentUsagePercentage': this._lastApiUsage.currentUsagePercentage, 
+                    'CurrentUsageRatio': this._lastApiUsage.currentUsageRatio, 
+                    'ThresholdPercentage': this._lastApiUsage.redThresholdPercentage 
+                }
             );
             if (callback) callback(error); 
             throw error;
@@ -148,7 +154,7 @@ export class SalesforceWatchDog {
     /**
      * @description After calling the Salesforce API, this is a watch dog to make sure we don't exceed the daily API request limit
      * @param {Function} [callback] - Optional callback to call if we reach the limit
-     * @throws {TypeError} If we reach the limit
+     * @throws {SalesforceError} If we reach the limit
      * @public
      */
     afterRequest(callback) {
