@@ -12,6 +12,10 @@ header {
     background: unset;
 }
 
+header > h1 {
+    display: none;
+}
+
 section {
     width: 70%;
     float: right;
