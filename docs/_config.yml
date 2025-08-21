@@ -1,29 +1,64 @@
-remote_theme: pages-themes/architect@v0.2.0
 plugins:
 - jekyll-remote-theme
 
-show_title: false
+remote_theme: just-the-docs/just-the-docs
+
+logo: "/assets/pngs/Logo+Mascot-v3.png"
+#favicon_ico: "/assets/icos/favicon.ico"
+
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: false
+  focus_shortcut_key: 'k'
+
+mermaid:
+  version: "9.1.3"
+
+aux_links:
+  "Org Check on GitHub":
+    - "//github.com/SalesforceLabs/OrgCheck"
+aux_links_new_tab: false
+
+nav_enabled: true
+
+heading_anchors: true
+
+color_scheme: dark
+
+
+
+
+
+
+
+##show_title: false
 ##title: Org Check
-
-show_imagetitle: true
-imagetitle: https://SalesforceLabs.github.io/OrgCheck/assets/pngs/Logo+Mascot-v3.png
-
-description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
-
-show_downloads: false
-
-email: vfinet@salesforce.com
-twitter_username: VinceFINET
-github_username:  VinceFINET
-
-page_home_label: Home
-page_home_url: /
-
-page_preview_label: Preview
-page_preview_url: /preview
-
-page_installation_label: Install
-page_installation_url: /installation
-
-page_dev_label: Development
-page_dev_url: /development
+##
+##show_imagetitle: true
+##imagetitle: https://SalesforceLabs.github.io/OrgCheck/assets/pngs/Logo+Mascot-v3.png
+##
+##description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
+##
+##show_downloads: false
+##
+##email: vfinet@salesforce.com
+##twitter_username: VinceFINET
+##github_username:  VinceFINET
+##
+##page_home_label: Home
+##page_home_url: /
+##
+##page_preview_label: Preview
+##page_preview_url: /preview
+##
+##page_installation_label: Install
+##page_installation_url: /installation
+##
+##page_dev_label: Development
+##page_dev_url: /development
