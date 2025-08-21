@@ -1,6 +1,7 @@
 ---
 layout: default
 title: Frequently Asked Question by Security
+permalink: /security/
 ---
 
 # Frequently Asked Question by Security
