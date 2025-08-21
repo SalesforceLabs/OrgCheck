@@ -17,7 +17,6 @@
 ## More about Org Check:
 - [Website](https://SalesforceLabs.github.io/OrgCheck/)
 - [LinkedIn](https://www.linkedin.com/company/orgchecksfdc/)
-- [Twitter](https://www.twitter.com/OrgCheckSFDC)
 - [AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
 - [Installation Guide](https://SalesforceLabs.github.io/OrgCheck/installation/)
 
@@ -37,6 +36,8 @@ Please note that you will need to sign the Salesforce CLA to do this.
 
 
 ## Useful references
+- [Salesforce Help article mentionning Org Check as an alternative of the Salesforce Optimizer](https://help.salesforce.com/s/articleView?id=004980242)
+- [Youtube Video: "Optimizer Is Sunsetting: Learn How To Use Org Check!" by Kate Lessard](https://www.youtube.com/watch?v=DwHchT_uFGQ)
 - [Article on  Salesforce's Ben: "Free technical debt analysis"](https://www.salesforceben.com/salesforce-org-check-free-technical-debt-analysis)
 - [Article on Pablo Gonzalez blog: "10 Salesforce Open-source Projects for DevOps Engineers"](https://www.pablogonzalez.io/top-10-salesforce-open-source-projects-for-devops/#4-orgcheck)
 - [Youtube Video: "Reduce Technical Debt with Org Check"](https://www.youtube.com/watch?v=gjv6q-AR1m0)
@@ -47,3 +48,4 @@ Please note that you will need to sign the Salesforce CLA to do this.
 - [Albanian Dreamin21: "Org Check presentation" by Sara Sali and Vincent Finet](https://dreamin21.sfalbania.al/schedule/schedule-fullwidth-filterable/)
 - [Article on Unofficial SF: "Analyze your org with Org Check"](https://unofficialsf.com/from-vincent-finet-analyze-your-org-with-orgcheck/)
 - [Article on Salesforce's Ben: "Free ways to monitor your Salesforce org"](https://www.salesforceben.com/free-ways-to-monitor-your-salesforce-org/)
+
