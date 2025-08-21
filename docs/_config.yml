@@ -2,6 +2,7 @@ plugins:
 - jekyll-remote-theme
 
 remote_theme: pmarsceill/just-the-docs
+baseurl: "/v6"
 
 logo: "/assets/pngs/Logo+Mascot-v3.png"
 #favicon_ico: "/assets/icos/favicon.ico"
