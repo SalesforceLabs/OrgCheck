@@ -3,6 +3,21 @@
 
 @import "{{ site.theme }}";
 
+.wrapper {
+    width: 90%;
+}
+
 header {
-  background: #1c6067;
+    width: 20%;
+    background: unset;
+}
+
+section {
+    width: 70%;
+    float: right;
+    padding-bottom: 50px;
+}
+
+footer {
+    width: 20%;
 }
