@@ -229,7 +229,6 @@ export class RecipeManager extends RecipeManagerIntf {
         let data;
         try {
             data = await this._datasetManager.run(datasets);
-        // eslint-disable-next-line no-unused-vars
         } catch(error) {
             this._logger.failed(section, `An error occurred while running the dataset ${error.dataset}.`);
             return;
