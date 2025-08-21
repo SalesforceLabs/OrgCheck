@@ -1,6 +1,7 @@
 ---
-layout: home
+layout: default
 title: Welcome to Org Check
+description: Let's have an application in Salesforce to monitor and help continuously reduce your technical debt.
 ---
 
 
