@@ -33,7 +33,7 @@ You will need org Check to verify some things in your organisation like:
 - It requires no additional software or platform whatsoever. 
 - All you need is to install the application in your org from the AppExchange.
 - No custom object will be added, no external connection, all stays in your browser and your org.
-- The app is free of use: open sourced, available on the AppExchange for free and a support on slack and GitHub.
+- The app is free of use: open sourced and available on the AppExchange (thanks to the great program called **Salesforce Labs** at Salesforce).
 - Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
 - Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/SalesforceLabs/OrgCheck/issues.
 
@@ -44,21 +44,16 @@ You will need org Check to verify some things in your organisation like:
 
 - At this point of time, the Org Check application is only analyzing configuration data in the Salesforce org where it is installed.
 - We usually call this data as “metadata” such as list of Apex Classes, SObjects definition, Custom fields, etc. 
-- We do not collect your data such as Account, Contact , Opportunity or any custom object you may have created in your org.
-- The metadata types that are gathered (as of 6 November 2024) by the application using Salesforce APIs from the org where the app is installed are:
+- We do not collect your data such as Account, Contact, Opportunity or any custom object you may have created in your org.
+- The metadata types that are gathered (as of August 2025) by the application using Salesforce APIs from the org where the app is installed are:
   * Home: InstalledSubscriberPackage, Organization
-  * ⚽ Objects tab: Field, FieldSet, Layout, Limit, ValidationRule, WebLink
-  * 🥕 Custom Fields tab: CustomField, EntityDefinition
-  * 🧔 Users tab: User, UserPermissionAccess
-  * 👮 Profiles and Permission Sets tab: Profile, PermissionSet, PermissionSetAssignment, AppMenuItem, SetupEntityAccess
-  * 🐇 Roles tab: UserRole
-  * 🌶️ Public Groups and Queues tab: Group
-  * 🤖 Automations tab: Flow, FlowDefinition, WorkflowRule
-  * 🎁 Custom Labels tab: ExternalString
-  * 🥐 Visual Components tab: ApexComponent, ApexPage, AuraDefinitionBundle, LightningComponentBundle, FlexiPage
-  * 🔥 Apex tab: ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate, AsyncApexJob, ApexTrigger
-- Please note that we have in our roadmap a Data Skew Analyser (but not until end of 2025).
-- At this moment, we do not know if such feature will be included in the same package or in a different package from the AppExchange. That could be an option to garantee that you use a package that does not touch you data at all.
+  * ⚽ Data model: Field, FieldSet, Layout, Limit, ValidationRule, WebLink, CustomField, EntityDefinition
+  * 👮 Security and Access: User, UserPermissionAccess, Profile, PermissionSet, PermissionSetAssignment, AppMenuItem, SetupEntityAccess
+  * 🐇 Boxes: UserRole, Group
+  * 🤖 Automations: Flow, FlowDefinition, WorkflowRule
+  * 🎁 Setting: ExternalString
+  * 🥐 User Interface: ApexComponent, ApexPage, AuraDefinitionBundle, LightningComponentBundle, FlexiPage
+  * 🔥 Programmatic: ApexClass, ApexCodeCoverage, ApexCodeCoverageAggregate, AsyncApexJob, ApexTrigger
 
 ### Is the data processed outside of my region or Country?
 
