@@ -123,9 +123,9 @@ You will need org Check to verify some things in your organisation like:
 
 
 ## How to get help and support?
-- Source code is available to anyone at: [sfdc.co/OrgCheck-Repository](https://www.sfdc.co/OrgCheck-Repository)
+- Source code is available for anyone at: [sfdc.co/OrgCheck-Repository](https://www.sfdc.co/OrgCheck-Repository)
 - Issues or ideas are welcome and can be logged by anyone at: [sfdc.co/OrgCheck-Backlog](https://www.sfdc.co/OrgCheck-Backlog)
-- Join us on the Trailblazer COmmunity at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
+- Join us on the Trailblazer Community at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
 
 
 ## Useful references
