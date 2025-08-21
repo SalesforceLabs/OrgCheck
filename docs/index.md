@@ -41,8 +41,8 @@ You will need org Check to verify some things in your organisation like:
 
 ## Frequently Asked Question by Security
 
-Usually your security team will ask a lot of questions about installing a package from AppExchange.
-But we got you covered with this [Security FAQ](security)!
+- Usually your security team will ask a lot of questions about installing a package from AppExchange.
+- But we got you covered with this [Security FAQ](security)!
 
 
 ## How do I install this application?
