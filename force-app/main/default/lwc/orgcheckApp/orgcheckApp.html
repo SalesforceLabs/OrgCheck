@@ -78,64 +78,8 @@
                             </lightning-card>
                         </lightning-layout-item>
                         <lightning-layout-item size="3">
-                            <lightning-card icon-name="standard:record_lookup" title="Complementary Tools">
-                                <div class="slds-var-p-horizontal_small">
-                                    <b>Tools from Salesforce</b>
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="/lightning/setup/SalesforceOptimizer/home" target="_blank" rel="external noopener noreferrer">Salesforce Optimizer</a></li>
-                                        <li><a href="https://help.salesforce.com/articleView?id=sf.lex_readiness_check.htm&amp;#38;type=5" target="_blank" rel="external noopener noreferrer">Salesforce LEX Readiness Report</a></li>
-                                        <li><a href="https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview" target="_blank" rel="external noopener noreferrer">Salesforce Code Analyzer</a></li>
-                                        <li><a href="https://help.salesforce.com/s/articleView?id=sf.scale_center_overview.htm&type=5" target="_blank" rel="external noopener noreferrer">Scale Center (including Apex Guru!)</a></li>
-                                    </ul>
-                                    <br />
-                                    <b>Code</b>
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://developer.salesforce.com/docs/atlas.en-us.secure_coding_guide.meta/secure_coding_guide/secure_coding_guidelines.htm" target="_blank" rel="external noopener noreferrer">Salesforce Guidelines for secure code</a></li>
-                                        <li><a href="https://pmd.github.io/latest/pmd_rules_apex.html" target="_blank" rel="external noopener noreferrer">Apex PMD Rules</a></li>
-                                        <li><a href="https://security.my.salesforce-sites.com/security/tools/forcecom/scanner" target="_blank" rel="external noopener noreferrer">Checkmarx</a></li>
-                                        <li><a href="https://www.getclayton.com/" target="_blank" rel="external noopener noreferrer">Clayton</a></li>
-                                        <li><a href="https://www.codescan.io/" target="_blank" rel="external noopener noreferrer">Codescan</a></li>
-                                    </ul>
-                                    <br />
-                                    <b>Debug Logs</b>
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://developer.salesforce.com/tools/vscode/en/apex/replay-debugger" target="_blank" rel="external noopener noreferrer">Apex Replay Debugger</a></li>
-                                        <li><a href="https://guillaumeperon.github.io/RAL/RAL.html" target="_blank" rel="external noopener noreferrer">Online Debug Log Tree (on github)</a></li>
-                                    </ul>
-                                    <br />
-                                    <b>Dependencies</b>
-                                    <ul class="slds-list_dotted">
-                                        <li><a href="https://happysoup.io/" target="_blank" rel="external noopener noreferrer">Happy Soup</a></li>
-                                    </ul>
-                                </div>
-                            </lightning-card>
                         </lightning-layout-item>
                         <lightning-layout-item size="4">
-                            <template if:true={useOrgCheckInThisOrgConfirmed}>
-                                <lightning-card icon-name="standard:account" title="Metadata Cache">
-                                    <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
-                                    <div class="slds-var-p-horizontal_small">
-                                        List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
-                                        <div class="slds-progress slds-progress_vertical">
-                                            <ol class="slds-progress__list" id="list-loading-items">
-                                                <template for:each={cacheManagerData} for:item="item">
-                                                    <template if:false={item.isEmpty}>
-                                                        <li key={item.name} class="slds-progress__item slds-is-completed">
-                                                            <div class="slds-progress__marker"></div>
-                                                            <div class="slds-progress__item_content">
-                                                                <b>{item.name}</b>: 
-                                                                <template lwc:if={item.isMap}> {item.length} in a map</template>
-                                                                <template lwc:else> 1 in an object</template>
-                                                                <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
-                                                            </div>
-                                                        </li>
-                                                    </template>
-                                                </template>
-                                            </ol>
-                                        </div>
-                                    </div>
-                                </lightning-card>
-                            </template>
                             <template if:true={useOrgCheckInThisOrgNeedConfirmation}>
                                 <lightning-card icon-name="utility:signature" title="Usage acceptance">
                                     <div class="slds-var-p-horizontal_small" style="background-color: lightgoldenrodyellow;">
@@ -156,10 +100,35 @@
                         </lightning-layout-item>
                     </lightning-layout>
                 </lightning-tab>
-                <lightning-tab value="help" label="⁉️ Help" onactive={handleSubTabActivation}>
-                    <h1 class="slds-text-heading_large">Need some help?</h1>
+                <lightning-tab if:true={useOrgCheckInThisOrgConfirmed} value="metadata-cache" label="🛠️ Metadata Cache">
+                    <lightning-card icon-name="standard:account" title="Metadata Cache">
+                        <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
+                        <div class="slds-var-p-horizontal_small">
+                            List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
+                            <div class="slds-progress slds-progress_vertical">
+                                <ol class="slds-progress__list" id="list-loading-items">
+                                    <template for:each={cacheManagerData} for:item="item">
+                                        <template if:false={item.isEmpty}>
+                                            <li key={item.name} class="slds-progress__item slds-is-completed">
+                                                <div class="slds-progress__marker"></div>
+                                                <div class="slds-progress__item_content">
+                                                    <b>{item.name}</b>: 
+                                                    <template lwc:if={item.isMap}> {item.length} in a map</template>
+                                                    <template lwc:else> 1 in an object</template>
+                                                    <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
+                                                </div>
+                                            </li>
+                                        </template>
+                                    </template>
+                                </ol>
+                            </div>
+                        </div>
+                    </lightning-card>
+                </lightning-tab>
+                <lightning-tab value="help" label="⁉️ Score explanation" onactive={handleSubTabActivation}>
+                    <h1 class="slds-text-heading_large">How do you compute the scores in Org Check?</h1>
                     <ul class="slds-list_dotted">
-                        <li><b>Org Check</b> uses a set of <b>rules</b> to compute the scores in your org. <b>Rules</b> represent bad practices or 
+                        <li><b>Org Check</b> uses a set of <b>rules</b> to compute its scores. <b>Rules</b> represent bad practices or 
                             anti-pattern if you will. These rules are listed in the matrix below in the row headers.</li>
                         <li>Org Check only analyzes <b>metadata</b> in your org, and not data. The list of metadata types can be seen in this 
                             matrix in the column headers, like Apex Classes, Email Templates, etc.</li>
@@ -168,48 +137,57 @@
                     </ul>
                     <c-orgcheck-extended-datatable is-sticky-headers dont-use-all-space table-definition={scoreRulesTableDefinition} rows={allScoreRulesTableData} show-export-button export-basename="Org Check Rules"></c-orgcheck-extended-datatable>
                 </lightning-tab>
-                <lightning-tab value="global-view" label="🗺️ Global View" onactive={handleSubTabActivation}>
-                    <lightning-layout>
-                        <lightning-layout-item>
-                            <h1 class="slds-text-heading_large">🗺️ Global View on <b>{orgName}</b></h1>
-                        </lightning-layout-item>
-                        <lightning-layout-item alignment-bump="left">
-                            <c-orgcheck-export-button if:true={showGlobalViewExportButton} label="Export all details" source={globalViewItemsExport} basename="GlobalView"></c-orgcheck-export-button>
-                        </lightning-layout-item>
-                    </lightning-layout>
-                    <br /><br />
-                    <template if:true={globalViewData}>
-                        <span class="slds-badge slds-theme_success">There are {globalViewData.length} items.</span>
-                        <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
-                        <span class="slds-badge viewCard-some-bad-data">Items circled in red have at least one "bad" row.</span>
-                        <span class="slds-badge viewCard-no-bad-data">Items circled in green have no "bad" row at all.</span>
-                        <lightning-layout multiple-rows>
-                            <template for:each={globalViewData} for:item="item">
-                                <lightning-layout-item size="4" padding="around-small" key={item.label}>
-                                    <div class={item.class}>
-                                        <lightning-card>
-                                            <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
-                                            <lightning-button label="Details..." title="Go the corresponding taband see the details for this type of items" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
-                                            <section if:true={item.countBad}>
-                                                <p class="slds-text-heading_small"><b>{item.countBad}</b> items to correct for the below reasons:</p>
-                                                <c-orgcheck-extended-datatable table-definition={item.tableDefinition} rows={item.tableData}></c-orgcheck-extended-datatable>
-                                            </section>
-                                            <section if:false={item.countBad} class="slds-var-p-horizontal_small">
-                                                <p>All good!!</p>
-                                            </section>
-                                        </lightning-card>
-                                    </div>
-                                </lightning-layout-item>  
-                            </template>
-                        </lightning-layout>
-                    </template> 
-                    <template if:false={globalViewData}>
-                        <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the global view is loading...</b></font></span>
-                    </template>
-                </lightning-tab>
             </lightning-tabset>
         </lightning-tab>
         <template if:true={useOrgCheckInThisOrgConfirmed}>
+            <lightning-tab value="organization" label="🗺️ Salesforce Organization" onactive={handleMainTabActivation}>
+                <lightning-layout>
+                    <lightning-layout-item>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="global-view"></lightning-button>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <lightning-tabset active-tab-value={selectedSubTaDataModel}>
+                    <lightning-tab value="global-view" label="🗺️ Overview" onactive={handleSubTabActivation}>
+                        <lightning-layout>
+                            <lightning-layout-item>
+                                <h1 class="slds-text-heading_large">🗺️ Overview of your Salesforce Organization</h1>
+                            </lightning-layout-item>
+                            <lightning-layout-item alignment-bump="left">
+                                <c-orgcheck-export-button if:true={showGlobalViewExportButton} label="Export all details" source={globalViewItemsExport} basename="GlobalView"></c-orgcheck-export-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                        <br /><br />
+                        <template if:true={globalViewData}>
+                            <span class="slds-badge slds-theme_success">There are {globalViewData.length} items.</span>
+                            <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
+                            <span class="slds-badge viewCard-some-bad-data">Items circled in red have at least one "bad" row.</span>
+                            <span class="slds-badge viewCard-no-bad-data">Items circled in green have no "bad" row at all.</span>
+                            <lightning-layout multiple-rows>
+                                <template for:each={globalViewData} for:item="item">
+                                    <lightning-layout-item size="4" padding="around-small" key={item.label}>
+                                        <div class={item.class}>
+                                            <lightning-card>
+                                                <h1 class="slds-text-heading_medium" slot="title">{item.label}</h1>
+                                                <lightning-button label="Details..." title="Go the corresponding taband see the details for this type of items" variant="brand-outline"  class="slds-var-m-left_x-small" icon-name="utility:new_window" onclick={handleOpenSubTab} data-tab={item.tab} slot="actions"></lightning-button>
+                                                <section if:true={item.countBad}>
+                                                    <p class="slds-text-heading_small"><b>{item.countBad}</b> items to correct for the below reasons:</p>
+                                                    <c-orgcheck-extended-datatable is-all-cell-wrapped table-definition={item.tableDefinition} rows={item.tableData}></c-orgcheck-extended-datatable>
+                                                </section>
+                                                <section if:false={item.countBad} class="slds-var-p-horizontal_small">
+                                                    <p>All good!!</p>
+                                                </section>
+                                            </lightning-card>
+                                        </div>
+                                    </lightning-layout-item>  
+                                </template>
+                            </lightning-layout>
+                        </template> 
+                        <template if:false={globalViewData}>
+                            <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the global view is loading...</b></font></span>
+                        </template>
+                    </lightning-tab>
+                </lightning-tabset>
+            </lightning-tab>
             <lightning-tab value="datamodel" label="⚽ Data model" onactive={handleMainTabActivation}>
                 <lightning-layout>
                     <lightning-layout-item>
