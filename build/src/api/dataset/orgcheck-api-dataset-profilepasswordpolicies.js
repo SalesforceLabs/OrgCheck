@@ -47,7 +47,7 @@ export class DatasetProfilePasswordPolicies extends Dataset {
                             passwordComplexity: parseInt(ppp.passwordComplexity, 10),
                             passwordExpiration: parseInt(ppp.passwordExpiration, 10),
                             passwordHistory: parseInt(ppp.passwordHistory, 10),
-                            passwordQuestion: (ppp.passwordQuestion === '1'),
+                            passwordQuestion: (ppp.passwordQuestion === '0'), // If set to 1, the answer to the password hint cannot contain the password itself. If 0, the answer has no restrictions.
                             profileName: ppp.profile
                         }
                     });
