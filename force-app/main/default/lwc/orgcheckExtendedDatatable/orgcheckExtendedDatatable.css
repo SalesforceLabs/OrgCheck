@@ -33,6 +33,10 @@ tr.bad {
     background-color: #ffe099;
 }
 
+td.wrapped {
+    white-space: pre-line; /* Allows wrapping within cells but respects line breaks */
+}
+
 td.bad {
     background-color: #ffd079;
     background-image: url(/img/msg_icons/warning16.png);

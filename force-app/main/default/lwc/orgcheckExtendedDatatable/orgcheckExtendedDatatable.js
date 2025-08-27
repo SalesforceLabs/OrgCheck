@@ -72,6 +72,13 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
      */
     @api isStickyHeaders = false;
 
+    /**
+     * @description Do you want all cells to be wrapped (with line breaks) if the content is too long? False by default.
+     * @type {boolean}
+     */ 
+    @api isAllCellWrapped = false;
+
+
 
     
     // ----------------------------------------------------------------------------------------------------------------
@@ -301,9 +308,7 @@ export default class OrgcheckExtentedDatatable extends LightningElement {
                 row.key = `${rowIndex}`;
             }, 
             (cell, isBad, cellIndex, rowIndex) => {
-                if (isBad === true) {
-                    cell.cssClass = 'bad';
-                }
+                cell.cssClass = `${this.isAllCellWrapped === true ? 'wrapped' : ''} ${isBad === true ? 'bad' : ''}`;
                 cell.key = `${rowIndex}.${cellIndex}`;
                 if (cell.data && cell.data.values && cell.data.values.forEach) {
                     cell.data.values.forEach((v, i) => {
