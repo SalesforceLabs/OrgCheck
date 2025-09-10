@@ -307,19 +307,27 @@ export class RecipeManager extends RecipeManagerIntf {
         // -------------------
         this._logger.log(section, 'This recipe collection will now transform all this information...');
         const listRuleIds = recipeCollection.filterByScoreRuleIds(this._logger.toSimpleLogger(section), parameters);
-        const isFilterOn = (listRuleIds !== undefined && listRuleIds?.length > 0);
+        const isRuleFilterOn = listRuleIds?.length > 0 || false;
         /** @type {Map<string, DataCollectionStatistics>} */
         const finalData = new Map();
         try {
             await Processor.forEach(data, (/** @type {Array<Data>} */records, /** @type {string} */ key) => {
                 const onlyBadRecords = records?.filter((r) => {
-                    const isBad = r.score && r.score > 0;
-                    if (isFilterOn === false) return isBad;
-                    return isBad && r.badReasonIds?.some((id) => listRuleIds.includes(id));
+                    if (r.score && r.score > 0) {
+                        if (isRuleFilterOn === true) {
+                            return r.badReasonIds?.some((id) => listRuleIds.includes(id)) ?? false;
+                        } else {
+                            return true;
+                        }
+                    } else {
+                        return false;
+                    }
                 })?.sort((a, b) => a.score > b.score ? -1 : 1);
                 const series = new Map();
                 onlyBadRecords?.forEach((d) => { 
-                    d.badReasonIds.forEach(id => {
+                    d.badReasonIds.filter(id => { 
+                        return isRuleFilterOn === true ? listRuleIds.includes(id) : true;
+                    }).forEach(id => {
                         series.set(id, series.has(id) ? (series.get(id) + 1) : 1);
                     });
                 });

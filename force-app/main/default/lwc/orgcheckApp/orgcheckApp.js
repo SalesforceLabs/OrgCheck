@@ -10,6 +10,7 @@ import { loadScript } from 'lightning/platformResourceLoader';
 const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
+const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 5;
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -142,6 +143,13 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     showGlobalViewExportButton = false;
+
+    /**
+     * @description Is the export button for Hard-coded URLs View is shown or not
+     * @type {boolean}
+     * @public
+     */
+    showhardCodedURLsViewExportButton = false;
 
     /**
      * @description Current activated tab in the main tab set
@@ -457,21 +465,6 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
-    /**
-     * @description Show the error in a modal (that can be closed)
-     * @param {string} title - The title of the modal
-     * @param {Error} error - The error to show in the error modal
-     * @private
-     */ 
-    _showError(title, error) {
-        const htmlContent = `<font color="red">Sorry! An error occured while processing... <br /><br />`+
-                            `Please create an issue on <a href="https://github.com/SalesforceLabs/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
-                            `along with the context, a screenshot and the following error. <br /><br /> `+
-                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
-        this._modal?.open(title, htmlContent);
-        console.error(title, error);
-    }
-
     _aliasNone = () => '';
     _aliasNamespace = () => `${this.namespace}`;
     _aliasAll = () => `${this.namespace}-${this.objectType}-${this.object}`;
@@ -497,7 +490,8 @@ export default class OrgcheckApp extends LightningElement {
         'email-templates':           { label: '🌇 Email Templates',            tab: 'setting',         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: 'security',        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: 'automation',      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
-        'global-view':               { label: '🌍 Global View',                tab: 'home',            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        'global-view':               { label: '🏞️ Overview',                   tab: 'home',            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        'hard-coded-urls-view':      { label: '🏖️ Hard-coded URLs',            tab: 'home',            data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
         'home-page-components':      { label: '🍩 Home Page Components',       tab: 'visual',          data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
         'internal-active-users':     { label: '👥 Active Internal Users',      tab: 'security',        data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
         'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: 'setting',         data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
@@ -894,7 +888,7 @@ export default class OrgcheckApp extends LightningElement {
             });
             htmlContent += '</ul>';
             // show the modal
-            this._modal.open(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
+            this._openModal(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
         } catch (e) {
             // in case ocapi.SecretSauce.GetScoreRule threw an error!
             this._showError('Error while handleViewScore', e);
@@ -921,7 +915,7 @@ export default class OrgcheckApp extends LightningElement {
                 htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
                 htmlContent += '<li>Go <a href="/lightning/setup/ApexTestQueue/home" target="_blank" rel="external noopener noreferrer">here</a> to see the results of these tests.</li>';
                 htmlContent += `<li>Check with Tooling API the status of the following record: /tooling/sobjects/AsyncApexJob/${asyncApexJobId}</li><ul>`;
-                this._modal.open('Asynchronous Run All Test Asked', htmlContent);
+                this._openModal('Asynchronous Run All Test Asked', htmlContent);
 
             } catch (error) {
                 this._spinner.sectionFailed(LOG_SECTION, error);
@@ -1002,11 +996,55 @@ export default class OrgcheckApp extends LightningElement {
             const tab = button.getAttribute('data-tab');
             // Split the tab value into two elements one for the main tab and the other for the sub tab
             const elements = tab.split(':');
-            this.selectedMainTab = elements[0];
-            this.selectedSubTab = elements[1];
+            // call the naviagtion method
+            this._navigateToTab( elements[0], elements[1] );
         } catch (e) {
-            this._showError('Error while handleClickRecompile', e);
+            this._showError('Error while handleOpenSubTab', e);
         }
+    }
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    // Navigation and Showing modals methods
+    // ----------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
+    
+    /**
+     * @description Navigate to a specific tab and sub tab
+     * @param {string} mainTab - The main tab to navigate to
+     * @param {string} subTab - The sub tab to navigate to
+     * @private
+     */
+    _navigateToTab(mainTab, subTab) {
+        this.selectedMainTab = mainTab;
+        this.selectedSubTab = subTab;
+    }
+
+    /**
+     * @description Open a modal with specific title and HTML content
+     * @param {string} title Title of the modal
+     * @param {string} htmlContent HTML content of the modal
+     */
+    _openModal(title, htmlContent) {
+        this._modal?.open(title, htmlContent);
+    }
+
+    /**
+     * @description Show the error in a modal (that can be closed)
+     * @param {string} title - The title of the modal
+     * @param {Error} error - The error to show in the error modal
+     * @private
+     */ 
+    _showError(title, error) {
+        const htmlContent = `<font color="red">Sorry! An error occured while processing... <br /><br />`+
+                            `Please create an issue on <a href="https://github.com/SalesforceLabs/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
+                            `along with the context, a screenshot and the following error. <br /><br /> `+
+                            `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
+        this._openModal(title, htmlContent);
+        console.error(title, error);
     }
 
 
@@ -2320,7 +2358,7 @@ export default class OrgcheckApp extends LightningElement {
         } else {
             htmlContent += 'No parent';
         }
-        this._modal.open(`Details for role ${data.record.name}`, htmlContent);
+        this._openModal(`Details for role ${data.record.name}`, htmlContent);
     }
 
 
@@ -2377,8 +2415,11 @@ export default class OrgcheckApp extends LightningElement {
      */
     globalViewItemsExport;
 
-
-
+    /**
+     * @description Representation of an export for hardcoded URLs view data
+     * @type {Array<ocui.ExportedTable>}
+     */ 
+    hardCodedURLsViewItemsExport;
 
 
 
@@ -2523,10 +2564,11 @@ export default class OrgcheckApp extends LightningElement {
                 orderIndex: 0,
                 orderSort: ocui.SortOrder.DESC
             }
-            data.forEach((item, alias) => {
+            data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
                 const itemName = transfomer.label ?? `[${alias}]`;
-                const definition = transfomer.data.replace(/Data$/, 'Definition');
+                const definitionName = transfomer.data.replace(/Data$/, 'Definition');
+                const definitionTable = this[definitionName];
                 globalViewData.push({
                     countBad: item?.countBad,
                     label: itemName,
@@ -2536,10 +2578,10 @@ export default class OrgcheckApp extends LightningElement {
                     tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
                 });
                 goodAndBadRows.push([ itemName, item.countGood, item.countBad ]); 
-                item.countBadByRule?.forEach((c) => {
+                item?.countBadByRule?.forEach((c) => {
                     rulesRows.push([ itemName, c.ruleName, c.count ]);
                 });
-                sheets.push(ocui.RowsFactory.createAndExport(this[definition], item.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
             });
             sheets[0].rows = goodAndBadRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
             sheets[1].rows = rulesRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
@@ -2553,11 +2595,65 @@ export default class OrgcheckApp extends LightningElement {
         }
     }
 
+    /**
+     * @description Hard-coded URLS View data from API
+     * @type {Map}
+     */ 
+    set _internalHardCodedURLsViewDataFromAPI(data) {
+        if (data) {
+            const hardCodedURLsViewData = [];
+            const sheets = [];
+            data?.forEach((item, alias) => {
+                const transfomer = this._internalTransformers[alias];
+                const itemName = transfomer.label ?? `[${alias}]`;
+                const definitionName = transfomer.data.replace(/Data$/, 'Definition');
+                const definitionTable = this[definitionName];
+                const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];
+                hardCodedURLsViewData.push({
+                    type: itemName,
+                    countAll: item?.countAll,
+                    countBad: item?.countBad,
+                    items: item?.data?.filter((d, i) => i < MAX_ITEMS_IN_HARDCODED_URLS_LIST).map(d => {
+                        return {
+                            url: d?.[firstUrlColumn.data.value],
+                            name: d?.[firstUrlColumn.data.label]
+                        };
+                    })
+                });
+                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data.filter(d => d?.length > 0 || false), itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+            });
+            this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort as the data will be shown in an extendetible table (which will be sorted by countBad desc by default)
+            this.hardCodedURLsViewItemsExport = sheets;
+            this.showhardCodedURLsViewExportButton = true;
+        } else {
+            this.hardCodedURLsViewData = [];
+            this.hardCodedURLsViewItemsExport = [];
+            this.showhardCodedURLsViewExportButton = false;
+        }
+    }
+
     /** 
-     * @description Data for the gloabl view
+     * @description Data for the global view
      * @type {Array}
      */
     globalViewData;
+
+    /** 
+     * @description Data for the hard coded urls view
+     * @type {Array}
+     */
+    hardCodedURLsViewData;
+
+    hardCodedURLsViewTableDefinition = {
+        columns: [
+            { label: 'Type', type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Bad', type: ocui.ColumnType.NUM, data: { value: 'countBad' }},
+            { label: 'Total', type: ocui.ColumnType.NUM, data: { value: 'countAll' }},
+            { label: `First ${MAX_ITEMS_IN_HARDCODED_URLS_LIST} items...`, type: ocui.ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
      * @description Data table for validation rules

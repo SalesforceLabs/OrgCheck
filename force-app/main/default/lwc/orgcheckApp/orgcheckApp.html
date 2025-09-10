@@ -145,7 +145,14 @@
                     </lightning-layout-item>
                 </lightning-layout>
                 <lightning-tabset active-tab-value={selectedSubTaDataModel}>
-                    <lightning-tab value="global-view" label="🗺️ Overview" onactive={handleSubTabActivation}>
+                    <lightning-tab value="summary-00" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">🗺️ Welcome in the Global View of your Salesforce organization!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🏞️ Overview</b>: Let's scan your entire organization in one click and get insights in one page!</li>
+                            <li><b>🏖️ Hard-coded URLs</b>: Let's scan your entire organization as well but focus on hard-coded URLs!</li>
+                        </ul>
+                    </lightning-tab>
+                    <lightning-tab value="global-view" label="🏞️ Overview" onactive={handleSubTabActivation}>
                         <lightning-layout>
                             <lightning-layout-item>
                                 <h1 class="slds-text-heading_large">🗺️ Overview of your Salesforce Organization</h1>
@@ -154,7 +161,6 @@
                                 <c-orgcheck-export-button if:true={showGlobalViewExportButton} label="Export all details" source={globalViewItemsExport} basename="GlobalView"></c-orgcheck-export-button>
                             </lightning-layout-item>
                         </lightning-layout>
-                        <br /><br />
                         <template if:true={globalViewData}>
                             <span class="slds-badge slds-theme_success">There are {globalViewData.length} items.</span>
                             <span class="slds-badge">Items are sorted by number of "bad" rows in descending order.</span>
@@ -181,7 +187,23 @@
                             </lightning-layout>
                         </template> 
                         <template if:false={globalViewData}>
-                            <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the global view is loading...</b></font></span>
+                            <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the overview is loading...</b></font></span>
+                        </template>
+                    </lightning-tab>
+                    <lightning-tab value="hard-coded-urls-view" label="🏖️ Hard-coded URLs" onactive={handleSubTabActivation}>
+                        <lightning-layout>
+                            <lightning-layout-item>
+                                <h1 class="slds-text-heading_large">🏖️ Hard-coded URLs in your Salesforce Organization</h1>
+                            </lightning-layout-item>
+                            <lightning-layout-item alignment-bump="left">
+                                <c-orgcheck-export-button if:true={showhardCodedURLsViewExportButton} label="Export all details" source={hardCodedURLsViewItemsExport} basename="HardCodedURLs"></c-orgcheck-export-button>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                        <template if:true={hardCodedURLsViewData}>
+                            <c-orgcheck-extended-datatable table-definition={hardCodedURLsViewTableDefinition} rows={hardCodedURLsViewData} dont-use-all-space></c-orgcheck-extended-datatable>
+                        </template>
+                        <template if:false={hardCodedURLsViewData}>
+                            <span><img src="/img/loading.gif" alt="[loading]" />&nbsp;<font color="orange"><b>Please wait while the hard-coded url overview is loading...</b></font></span>
                         </template>
                     </lightning-tab>
                 </lightning-tabset>
