@@ -6,6 +6,13 @@
             </div>
         </div>
     </span>
+    <span if:true={useOrgCheckInThisOrgNeedConfirmation}>
+        <div class="slds-text-align_center slds-size_full slds-text-body_regular oneSystemMessage">
+            <div aria-live="polite" class="slds-notify_alert system-message level-info slds-theme_info" style="background-color: #7d7d57;">
+                Using Org Check in this Salesforce organization needs your confirmation in the "Welcome" tab.
+            </div>
+        </div>
+    </span>
     <div style="padding-bottom: 12px;">
         <lightning-layout>
             <lightning-layout-item padding="around-small">
