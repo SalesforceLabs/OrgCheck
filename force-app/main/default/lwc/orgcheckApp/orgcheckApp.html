@@ -56,7 +56,7 @@
             <lightning-tabset active-tab-value={selectedSubTab}>
                 <lightning-tab value="welcome" label="Welcome!" onactive={handleSubTabActivation}>
                     <lightning-layout>
-                        <lightning-layout-item size="6">
+                        <lightning-layout-item>
                             <lightning-card icon-name="standard:opportunity" title="General Information">
                                 <div class="slds-var-p-horizontal_small">
                                     Introducing <b>Org Check</b>. An easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and 
@@ -84,7 +84,7 @@
                                 </div>
                             </lightning-card>
                         </lightning-layout-item>
-                        <lightning-layout-item size="6">
+                        <lightning-layout-item>
                             <template if:true={useOrgCheckInThisOrgNeedConfirmation}>
                                 <lightning-card icon-name="utility:signature" title="Usage acceptance">
                                     <div class="slds-var-p-horizontal_small" style="background-color: lightgoldenrodyellow;">
