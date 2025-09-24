@@ -51,7 +51,7 @@ export class DatasetCustomTabs extends Dataset {
             const customTab = customTabDataFactory.createWithScore({
                 properties: {
                     id: id,
-                    name: record.DeveloperName,
+                    name: record.DeveloperName || `${id} (No name from API!)`,
                     package: (record.NamespacePrefix || ''),
                     type: record.Type,
                     description: record.Description,
