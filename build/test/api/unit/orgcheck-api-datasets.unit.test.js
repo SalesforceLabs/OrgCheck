@@ -278,9 +278,10 @@ describe('tests.api.unit.Datasets', () => {
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
       sfdcManager.addSoqlQueryResponse('FROM FieldPermissions', [
-        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: true, ParentId: '123', Parent: { IsOwnedByProfile: false, ProfileId: null }},
-        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: false, ParentId: '456', Parent: { IsOwnedByProfile: true, ProfileId: 'ABC' }},
-        { Field: 'Account.Name', PermissionsRead: false, PermissionsEdit: false, ParentId: '789', Parent: { IsOwnedByProfile: true, ProfileId: 'XYZ' }}
+        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: true, ParentId: '0MQ123', Parent: null},
+        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: true, ParentId: '0PS123', Parent: { IsOwnedByProfile: false, ProfileId: null }},
+        { Field: 'Account.Name', PermissionsRead: true, PermissionsEdit: false, ParentId: '0PS456', Parent: { IsOwnedByProfile: true, ProfileId: '00eABC' }},
+        { Field: 'Account.Name', PermissionsRead: false, PermissionsEdit: false, ParentId: '0PS789', Parent: { IsOwnedByProfile: true, ProfileId: 'XYZ' }}
       ]);
       const dataFactory = new DataFactoryMock();
       const logger = new SimpleLoggerMock();
