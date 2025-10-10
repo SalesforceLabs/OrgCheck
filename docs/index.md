@@ -51,13 +51,14 @@ You will need org Check to verify some things in your organisation like:
 
 - You install this application directly in the org you want to analyse from the AppExchange.
 - Then, you navigate through the tabs in the app to discover some bad practices in the org.
-- Any issues installing the application? Please, [go to this dedicated page](installation) about installation, including some frequently asked questions.
+- Any issues installing the application? Please, visit our ([Installation FAQ](installation)!
 
 
 ## How to get help and support?
+- Join us on the Trailblazer Community at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
+- Join us on LinkedIn at: [@OrgCheckSFDC](https://www.linkedin.com/company/orgchecksfdc)
 - Source code is available for anyone at: [sfdc.co/OrgCheck-Repository](https://www.sfdc.co/OrgCheck-Repository)
 - Issues or ideas are welcome and can be logged by anyone at: [sfdc.co/OrgCheck-Backlog](https://www.sfdc.co/OrgCheck-Backlog)
-- Join us on the Trailblazer Community at: [sfdc.co/OrgCheck-Community](https://sfdc.co/OrgCheck-Community)
 
 
 ## Useful references
