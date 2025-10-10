@@ -6,5 +6,6 @@
   },
   "salesforcedx-vscode-core.show-cli-success-msg": false,
   "codeAnalyzer.configFile": "./code-analyzer.yml",
-  "codeAnalyzer.ruleSelectors": "all"
+  "codeAnalyzer.ruleSelectors": "all",
+  "xml.preferences.showSchemaDocumentationType": "none"
 }

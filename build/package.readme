@@ -3,10 +3,10 @@ List of usefull commands for packaging
 ============================================================
 
 ## list all available packages
-sf package list --target-dev-hub vfinet.devhub@salesforce.com 
+sf package list --target-dev-hub vfinet.devhub@salesforce.com | grep -v Deprecated
 
 ## list all available versions
-sf package version list --target-dev-hub vfinet.devhub@salesforce.com 
+sf package version list --target-dev-hub vfinet.devhub@salesforce.com | grep -v Deprecated
 
 ## create version for unlocked package
 sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package "Org Check (unlocked)" --installation-key-bypass --code-coverage --wait 10
