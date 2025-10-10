@@ -21,7 +21,8 @@ permalink: /installation/
     - Click on "Install" (or "Upgrade")
     - Once installed, go to the app "Org Check", and you are done!
 
-<img src="../images/screenshots/OrgCheck-Screenshot-Home.png" alt="Welcome in Org Check screenshot" style="max-width: 150px;" />
+<img src="../images/screenshots/OrgCheck-Screenshot-Home.png" alt="Welcome in Org Check screenshot" style="max-width: 800px; min-width: 600px;" width="100%" />
+
 
 
 ## I can't install the package because some Apex class are not compiling
@@ -29,7 +30,7 @@ permalink: /installation/
  - It is more likely an **existing Apex class** in the org you want to analyze that **does not compile** (it happens!).
  - In that case, you can still install the package BUT you will have to specify during the installation process that you only want to validate the classes that are included in the package. This can be done via the **advanced setting when installing the app**.
 
-<img src="../images/screenshots/OrgCheck-Screenshot-Install.png" alt="Installation Notice screenshot" style="max-width: 150px;" />
+<img src="../images/screenshots/OrgCheck-Screenshot-Install.png" alt="Installation Notice screenshot" style="max-width: 800px; min-width: 600px;" width="100%" />
 
 
 ## I can't see the Org Check application, even if I am SysAdmin
@@ -70,17 +71,16 @@ For more information, you can check that closed issue: https://github.com/Salesf
 
 ## I see you also have a standalone package
 Historically, Org Check was available as an "**unlocked package**".
+But the prefered way now is to install the application via the AppExchange.
 
-The benefits of such a package were:
+The benefits of such a package are:
 - We are able to **push a new version** of the package in your org, to make sure you have the latest fixes and features of the application, without to worry about anything. We take care of this.
 - The content of the application can be **modified in your org** (using the Salesforce Dev Console) in case you find a solution to a bug. Do not forget that every component of this package is under the MIT licence. And when we push a new version, your modification will be erased. Use this capability to send us technical feedback and maybe even solutions!
 
-The URLs are still pointing to the latest version of the app and can be reached at:
-- If you want to install the application on a **sandbox**, please follow this link: 
-<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img src="../assets/pngs/Install-SDBX.png" alt="Installation on sandbox" style="max-width: 150px;" /></a>
+The following links are pointing to the latest version of the app:
 
-- If you want to install the application on a **developer edition org**, please follow this link: 
-<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img src="../assets/pngs/Install-DevEdition.png" alt="Installation on dev edition" style="max-width: 150px;" /></a>
+<a href="https://sfdc.co/OrgCheck-InstallToday-SDB"><img src="../assets/pngs/Install-SDBX.png" alt="Installation on sandbox" style="max-width: 300px; min-width: 200px;" width="100%" /></a>
 
-But the prefered way now is to install the application via the AppExchange.
+<a href="https://sfdc.co/OrgCheck-InstallToday-DE"><img src="../assets/pngs/Install-DevEdition.png" alt="Installation on dev edition" style="max-width: 300px; min-width: 200px;" width="100%" /></a>
+
 
