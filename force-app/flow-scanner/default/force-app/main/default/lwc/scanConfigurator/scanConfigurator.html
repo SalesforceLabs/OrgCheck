@@ -1,0 +1,54 @@
+<template>
+    <div class="config-page">
+        <template if:true={rules}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr>
+                        <th>Active</th>
+                        <th>Rule Name</th>
+                        <th>Description</th>
+                        <th>Severity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="toggle-all-row">
+                        <td colspan="4">
+                            <lightning-input
+                                type="checkbox"
+                                label={toggleAllLabel}
+                                checked={allRulesEnabled}
+                                onchange={handleToggleAllRules}
+                                class="toggle-all-checkbox"
+                            ></lightning-input>
+                        </td>
+                    </tr>
+                    <template for:each={rules} for:item="rule">
+                        <tr key={rule.id}>
+                            <td>
+                                <lightning-input
+                                    type="checkbox"
+                                    checked={rule.isActive}
+                                    data-rule-id={rule.id}
+                                    onchange={handleRuleToggle}
+                                ></lightning-input>
+                            </td>
+                            <td>{rule.name}</td>
+                            <td>{rule.description}</td>
+                            <td>
+                                <lightning-combobox
+                                    data-rule-id={rule.id}
+                                    value={rule.severity}
+                                    options={severityOptions}
+                                    onchange={handleSeverityChange}
+                                ></lightning-combobox>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+        <template if:false={rules}>
+            <p>No rules available.</p>
+        </template>
+    </div>
+</template>

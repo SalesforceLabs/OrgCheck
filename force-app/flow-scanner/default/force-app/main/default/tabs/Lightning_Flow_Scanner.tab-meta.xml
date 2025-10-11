@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Lightning Flow Scanner Page</description>
+    <icon>LFS/LFSI.png</icon>
+    <label>Flow Analysis</label>
+    <page>LFS_VF_Launcher</page>
+    <motif>Custom270: TV Widescreen</motif>
+</CustomTab>

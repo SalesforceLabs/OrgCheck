@@ -1,0 +1,32 @@
+<apex:page >
+    <apex:includeLightning />
+    <div id="loading">
+            Loading...
+        </div>
+    <div id="app">
+    </div>  
+    
+    <script>
+    /* Reset the cache of previous versions */
+    try {
+        Object.keys(localStorage)
+            .filter(e => e.startsWith('lfs.'))
+            .forEach(e => localStorage.removeItem(e));
+    } catch (e) {
+        console.log('Error')
+    }
+    /* Insert LWC app */
+    $Lightning.use('c:LFS_App', function() {
+        $Lightning.createComponent('c:lightningFlowScannerApp',
+            { 
+               accessToken: '{! JSENCODE($Api.Session_Id) }', 
+                userId: '{! JSENCODE($User.Id) }' 
+            },
+            'app',
+            function(cmp) {
+                document.getElementById('loading').style.display = 'none';
+            }
+        );
+    });
+    </script>
+</apex:page>

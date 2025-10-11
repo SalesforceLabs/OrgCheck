@@ -1,0 +1,27 @@
+.config-page {
+    padding: 1rem;
+    background-color: #f4f6f9;
+}
+
+.slds-table th {
+    background-color: #003087; /* Dark blue background */
+    color: #ffffff; /* White text */
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+.slds-table td {
+    padding: 0.5rem;
+}
+
+.toggle-all-row {
+    background-color: #ffffff; /* Match table row background */
+    border-bottom: 1px solid #ddd; /* Match table borders */
+}
+
+.toggle-all-checkbox {
+    --slds-c-checkbox-label-font-size: 0.875rem;
+    --slds-c-checkbox-label-font-weight: bold;
+    --slds-c-checkbox-color-border: #003087; /* Dark blue border */
+    padding-left: 0.5rem;
+}
