@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Lightning Flow Scanner Icon</description>
+    <internalUseOnly>false</internalUseOnly>
+    <name>LFSI</name>
+    <public>true</public>
+</Document>

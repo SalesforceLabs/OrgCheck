@@ -1,0 +1,81 @@
+<template>
+    <div class="page">
+        <template if:true={flowName}>
+            <div class="navigation">
+                <lightning-button
+                    label="Previous Flow"
+                    variant="brand"
+                    disabled={isFirstFlow}
+                    onclick={handlePreviousFlow}
+                ></lightning-button>
+                <lightning-button
+                    label="Next Flow"
+                    variant="brand"
+                    disabled={isLastFlow}
+                    onclick={handleNextFlow}
+                ></lightning-button>
+            </div>
+            <div class="header">
+                <div class="flow-container">
+                    <div class="flow-column">
+                        <div class="info-item"><strong>Name:</strong> {name}</div>
+                        <div class="info-item"><strong>Label:</strong> {metadata.label}</div>
+                        <div class="info-item"><strong>Status:</strong> {metadata.status}</div>
+                    </div>
+                    <div class="flow-column">
+                        <div class="info-item"><strong>Type:</strong> {metadata.processType}</div>
+                        <div class="info-item"><strong>API Version:</strong> {metadata.apiVersion}</div>
+                        <div class="info-item">
+                            <strong># Rules Run:</strong> {numberOfRules}
+                        </div>
+                    </div>
+                </div>
+                <div class="description"><strong>Description:</strong> {metadata.description}</div>
+            </div>
+        </template>
+        <template if:true={error}>
+            <p class="error">Error scanning Flow: {error}</p>
+        </template>
+        <template if:true={hasScanResults}>
+            <div class="results">
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                    <thead>
+                        <tr>
+                            <th>Rule Name</th>
+                            <th>Severity</th>
+                            <th>Violation Name</th>
+                            <th>Type</th>
+                            <th>Meta Type</th>
+                            <th>Data Type</th>
+                            <th>Location X</th>
+                            <th>Location Y</th>
+                            <th>Connects To</th>
+                            <th>Expression</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={scanResult.ruleResults} for:item="rule">
+                            <template for:each={rule.details} for:item="detail">
+                                <tr key={detail.id}>
+                                    <td>{rule.ruleName}</td>
+                                    <td>{rule.severity}</td>
+                                    <td>{detail.name}</td>
+                                    <td>{detail.type}</td>
+                                    <td>{detail.metaType}</td>
+                                    <td>{detail.details.dataType}</td>
+                                    <td>{detail.details.locationX}</td>
+                                    <td>{detail.details.locationY}</td>
+                                    <td>{detail.connectsTo}</td>
+                                    <td>{detail.details.expression}</td>
+                                </tr>
+                            </template>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+        <div class="github-star">
+            <p>Want to help improve <a href="https://flow-scanner.github.io/lightning-flow-scanner-core/">Lightning Flow Scanner</a>? See our <a href="https://github.com/Flow-Scanner/lightning-flow-scanner-core/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guidelines</a>.</p>
+        </div>
+    </div>
+</template>

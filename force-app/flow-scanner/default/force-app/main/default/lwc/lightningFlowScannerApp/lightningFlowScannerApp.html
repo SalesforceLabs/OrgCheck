@@ -1,0 +1,44 @@
+<template>
+    <div class="slds-tabs_default">
+        <ul class="slds-tabs_default__nav" role="tablist">
+            <li class="slds-tabs_default__item" title="Flows" role="presentation">
+                <a class="slds-tabs_default__link {FlowsClass}" href="javascript:void(0);" role="tab" tabindex="0" data-tab="1" onclick={handleTabClick}>Flows</a>
+            </li>
+            <li class="slds-tabs_default__item" title="Analysis" role="presentation">
+                <a class="slds-tabs_default__link {AnalysisClass}" href="javascript:void(0);" role="tab" tabindex="-1" data-tab="2" onclick={handleTabClick}>Details</a>
+            </li>
+            <li class="slds-tabs_default__item" title="Configuration" role="presentation">
+                <a class="slds-tabs_default__link {ConfigClass}" href="javascript:void(0);" role="tab" tabindex="-1" data-tab="3" onclick={handleTabClick}>Configuration</a>
+            </li>
+        </ul>
+        <div class="slds-tabs_default__content">
+            <template if:true={isTab1Active}>
+                <c-flow-overview
+                    records={records}
+                    has-more-records={hasMoreRecords}
+                    onscanflow={handleScanFlow}
+                    onsearch={handleSearch}
+                    onloadmore={handleLoadMore}
+                ></c-flow-overview>
+            </template>
+            <template if:true={isTab2Active}>
+                <c-lightning-flow-scanner
+                    name={flowName}
+                    metadata={flowMetadata}
+                    scan-result={scanResult}
+                    number-of-rules={numberOfRules}
+                    error={err}
+                    records={records}
+                    selected-flow-record={selectedFlowRecord}
+                    onnavigateflow={handleNavigateFlow}
+                ></c-lightning-flow-scanner>
+            </template>
+            <template if:true={isTab3Active}>
+                <c-scan-configurator rules={rules} onrulechange={handleRuleChange}></c-scan-configurator>
+            </template>
+        </div>
+    </div>
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+    </template>
+</template>

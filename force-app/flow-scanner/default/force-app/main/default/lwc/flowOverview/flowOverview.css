@@ -1,0 +1,40 @@
+:host {
+    display: block;
+    padding: 1.5rem;
+    background-color: #f4f6f9;
+}
+
+lightning-card {
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+    padding: 0.25rem 1rem; /* Reduced padding for less height */
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+}
+
+.search-bar lightning-input {
+    max-width: 300px; /* Smaller width for compact look */
+    --slds-c-input-color-border: #003087; /* Dark blue border */
+    --slds-c-input-radius-border: 0.25rem;
+    --slds-c-input-font-size: 0.875rem; /* Smaller font for compactness */
+}
+
+lightning-datatable {
+    margin: 0 1rem;
+}
+
+lightning-button {
+    --slds-c-button-brand-color-background: #003087;
+    --slds-c-button-brand-color-background-hover: #00205b;
+    --slds-c-button-text-color: #ffffff;
+}
+
+.slds-p-horizontal_small {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
