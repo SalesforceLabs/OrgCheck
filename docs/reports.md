@@ -12,15 +12,15 @@ These are the results of the code scan of the last version of Org Check done on 
 
 ## UI module code scan (16 October 2025):
 
-![Code scan of the UI module in Org Check](./20251016-CodeAnalyzer-UI.png)
+![Code scan of the UI module in Org Check](./reports/20251016-CodeAnalyzer-UI.png)
 
 
 ## API module code scan (16 October 2025):
 
-![Code scan of the API module in Org Check](./20251016-CodeAnalyzer-API.png)
+![Code scan of the API module in Org Check](./reports/20251016-CodeAnalyzer-API.png)
 
 
 ## LWC module code scan (16 October 2025):
 
-![Code scan of the LWC module in Org Check](./20251016-CodeAnalyzer-LWC.png)
+![Code scan of the LWC module in Org Check](./reports/20251016-CodeAnalyzer-LWC.png)
 
