@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Code scan reports
-description: These are the result of the code scan of the last version of Org Check
+permalink: /reports/
 ---
 
 
