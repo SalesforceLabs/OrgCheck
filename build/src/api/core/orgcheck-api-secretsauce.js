@@ -252,9 +252,9 @@ const ALL_SCORE_RULES = [
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 18,
-        description: 'Custom profile with no member',
+        description: 'Custom profile with no active member',
         formula: (/** @type {SFDC_Profile} */ d) => d?.isCustom === true && d?.memberCounts === 0,
-        errorMessage: `This custom profile has no members. Is it empty on purpose? Maybe you should review its use in your org...`,
+        errorMessage: `This custom profile has no active members. Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ SFDC_Profile ],
         category: SCORE_RULE_CATEGORIES.USELESS
@@ -548,25 +548,25 @@ const ALL_SCORE_RULES = [
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
         id: 55,
-        description: 'Custom permission set with no member and only assigned to empty group(s)',
+        description: 'Custom permission set with no active member and only assigned to empty group(s)',
         formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts === 0 && d?.allIncludingGroupsAreEmpty === true,
-        errorMessage: `This custom permission set has no members and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
+        errorMessage: `This custom permission set has no active members and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'allIncludingGroupsAreEmpty',
         applicable: [ SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 56,
-        description: 'Custom permission set group with no member',
+        description: 'Custom permission set group with no active member',
         formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts === 0,
-        errorMessage: `This custom permission set group has no members. Is it empty on purpose? Maybe you should review its use in your org...`,
+        errorMessage: `This custom permission set group has no active members. Is it empty on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
         id: 57,
-        description: 'Custom permission set with no member and not even assigned to group',
+        description: 'Custom permission set with no active member and not even assigned to group',
         formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts === 0 && d?.permissionSetGroupIds?.length === 0,
-        errorMessage: `This custom permission set has no members and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
+        errorMessage: `This custom permission set has no active members and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
         badField: 'memberCounts',
         applicable: [ SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS

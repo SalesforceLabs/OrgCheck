@@ -45,6 +45,7 @@ export class DatasetProfiles extends Dataset {
             string: 'SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment '+ // warning: 'ProfileId' will be used as 'PermissionSet.ProfileId' (bc aggregate query)
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = TRUE '+
+                    'AND Assignee.IsActive = TRUE '+
                     'GROUP BY PermissionSet.ProfileId '+
                     'ORDER BY PermissionSet.ProfileId '+
                     'LIMIT 2000'

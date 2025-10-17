@@ -52,6 +52,7 @@ export class DatasetPermissionSets extends Dataset {
             string: 'SELECT PermissionSetId, COUNT(Id) CountAssignment '+ 
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = FALSE '+
+                    'AND Assignee.IsActive = TRUE '+
                     'GROUP BY PermissionSetId '+
                     'ORDER BY PermissionSetId '+
                     'LIMIT 2000'
