@@ -73,7 +73,7 @@ export class Logger extends LoggerIntf {
 
     /**
      * @description Enable or disable the failed logging
-     * @param {boolean} [flag=true] - Enable or disable the failed logging
+     * @param {boolean} [flag] - Enable or disable the failed logging
      * @public
      */
     enableFailed(flag=true) { 
