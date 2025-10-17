@@ -220,6 +220,75 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
+  describe('Specific test for DatasetGroups', () => {
+    const dataset = new DatasetGroups();      
+    it('checks if mapping is correct', async() => {
+      const sfdcManager = new SfdcManagerMock();
+      const dataFactory = new DataFactoryMock();
+      sfdcManager.addSoqlQueryResponse('FROM Group ', [
+        { Id: '01', Name: 'n01', DeveloperName: 'dn01', DoesIncludeBosses: true,  Type: 'Regular' },
+        { Id: '02', Name: 'n02', DeveloperName: 'dn02', DoesIncludeBosses: false, Type: 'Regular' },
+        { Id: '03', Name: 'n03', DeveloperName: 'dn03', DoesIncludeBosses: false, Type: 'Queue' },
+        { Id: '04', Name: 'n04', DeveloperName: 'dn04', DoesIncludeBosses: true,  Type: 'Role', RelatedId: '0A', Related: { Name: 'n0A' } },
+        { Id: '05', Name: 'n05', DeveloperName: 'dn05', DoesIncludeBosses: false, Type: 'RoleAndSubordinates', RelatedId: '0B', Related: { Name: 'n0B' }},
+        { Id: '06', Name: 'n06', DeveloperName: 'dn06', DoesIncludeBosses: false, Type: 'RoleAndSubordinatesInternal' },
+        { Id: '07', Name: 'n07', DeveloperName: 'dn07', DoesIncludeBosses: false, Type: 'AllCustomerPortal' },
+        { Id: '08', Name: 'n08', DeveloperName: 'dn08', DoesIncludeBosses: false, Type: 'Organization' },
+        { Id: '09', Name: 'n09', DeveloperName: 'dn09', DoesIncludeBosses: false, Type: 'PRMOrganization' },
+        { Id: '10', Name: 'n10', DeveloperName: 'dn10', DoesIncludeBosses: false, Type: 'GuestUserGroup' },
+      ]);
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(10);
+      expect(results.get('01').name).toBe('n01');
+      expect(results.get('01').developerName).toBe('dn01');
+      expect(results.get('01').type).toBe('PublicGroup');
+      expect(results.get('01').isPublicGroup).toBeTruthy();
+      expect(results.get('01').isQueue).toBeFalsy();
+      expect(results.get('01').nbDirectMembers).toBe(0);
+      expect(results.get('01').directUserIds.length).toBe(0);
+      expect(results.get('01').directGroupIds.length).toBe(0);
+      expect(results.get('01').includeBosses).toBeTruthy();
+      expect(results.get('01').includeSubordinates).toBeFalsy();
+      expect(results.get('01').relatedId).toBeUndefined();
+      expect(results.get('03').name).toBe('n03');
+      expect(results.get('03').developerName).toBe('dn03');
+      expect(results.get('03').type).toBe('Queue');
+      expect(results.get('03').isPublicGroup).toBeFalsy();
+      expect(results.get('03').isQueue).toBeTruthy();
+      expect(results.get('03').nbDirectMembers).toBe(0);
+      expect(results.get('03').directUserIds.length).toBe(0);
+      expect(results.get('03').directGroupIds.length).toBe(0);
+      expect(results.get('03').includeBosses).toBeFalsy();
+      expect(results.get('03').includeSubordinates).toBeFalsy();
+      expect(results.get('03').relatedId).toBeUndefined();
+      expect(results.get('04').name).toBe('n0A'); // should be the name of the related role!
+      expect(results.get('04').developerName).toBeUndefined(); // no developer name for roles
+      expect(results.get('04').type).toBe('UserRole');
+      expect(results.get('04').isPublicGroup).toBeFalsy();
+      expect(results.get('04').isQueue).toBeFalsy();
+      expect(results.get('04').nbDirectMembers).toBe(0);
+      expect(results.get('04').directUserIds.length).toBe(0);
+      expect(results.get('04').directGroupIds.length).toBe(0);
+      expect(results.get('04').includeBosses).toBeFalsy();
+      expect(results.get('04').includeSubordinates).toBeFalsy();
+      expect(results.get('04').relatedId).toBe('0A');
+      expect(results.get('06').name).toBe('(unknown)'); // In this case we do not have a related role so name is unknown!
+      expect(results.get('06').developerName).toBeUndefined(); // no developer name for roles
+      expect(results.get('06').type).toBe('UserRole');
+      expect(results.get('06').isPublicGroup).toBeFalsy();
+      expect(results.get('06').isQueue).toBeFalsy();
+      expect(results.get('06').nbDirectMembers).toBe(0);
+      expect(results.get('06').directUserIds.length).toBe(0);
+      expect(results.get('06').directGroupIds.length).toBe(0);
+      expect(results.get('06').includeBosses).toBeFalsy();
+      expect(results.get('06').includeSubordinates).toBeTruthy();
+      expect(results.get('06').relatedId).toBeUndefined(); // In this case we do not have a related role so relatedId is undefined!
+    });
+  });
+
   describe('Specific test for DatasetRecordTypes', () => { 
     const dataset = new DatasetRecordTypes();
     it('checks if regex are correct', async() => {
