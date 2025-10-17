@@ -2572,7 +2572,8 @@ export default class OrgcheckApp extends LightningElement {
                 globalViewData.push({
                     countBad: item?.countBad,
                     label: itemName,
-                    class: `slds-box viewCard ${item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data'}`,
+                    hadError: item?.hadError,
+                    class: `slds-box viewCard ${item?.hadError === true ? 'viewCard-error' : (item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data')}`,
                     tab: `${transfomer.tab}:${alias}`,
                     tableDefinition: ruleTableDefinition,
                     tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
@@ -2603,7 +2604,7 @@ export default class OrgcheckApp extends LightningElement {
         if (data) {
             const hardCodedURLsViewData = [];
             const sheets = [];
-            data?.forEach((item, alias) => {
+            data?.filter((item) => item?.hadError === false).forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
                 const itemName = transfomer.label ?? `[${alias}]`;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');

@@ -28,18 +28,28 @@ export class RecipeCollection {
 export class DataCollectionStatistics {
 
     /** 
-     * @description Number of all records
-     * @type {number}
+     * @description Indicates if an error occurred while building the collection
+     * @type {boolean}
+     * @default false
      * @public
      */
-    countAll;
+    hadError = false;
+
+    /** 
+     * @description Number of all records
+     * @type {number}
+     * @default 0
+     * @public
+     */
+    countAll = 0;
 
     /** 
      * @description Number of records that are considered "bad" (i.e. at least one bad reason id)
      * @type {number}
+     * @default 0
      * @public
      */
-    countBad;
+    countBad = 0;
 
     /** 
      * @description Number of records that are considered "good" (i.e. no bad reason ids)
@@ -53,14 +63,16 @@ export class DataCollectionStatistics {
     /**
      * @description Number of bad records by rule
      * @type {Array<{ruleId: number, ruleName: string, count: number}>}
+     * @default []
      * @public
      */
-    countBadByRule;
+    countBadByRule = [];
 
     /**
      * @description List of all data items that are part of this collection
      * @type {Array<Data>}
+     * @default []
      * @public
      */ 
-    data;
+    data = [];
 }

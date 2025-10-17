@@ -6,6 +6,10 @@
     background-color: #ff000066;
 }
 
+.viewCard-error {
+    background-color: #ffea0066;
+}
+
 .viewCard {
     border: 1.5px solid #dddbda;
     border-radius: 1rem;

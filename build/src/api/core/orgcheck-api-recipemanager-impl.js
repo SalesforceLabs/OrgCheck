@@ -285,20 +285,29 @@ export class RecipeManager extends RecipeManagerIntf {
         // -------------------
         /** @type {Map<string, Array<Data>>}} */
         const data = new Map();
+        const recipesInError = new Set();
         try {
+            this._logger.enableFailed(false);
             await Processor.forEach(recipes, async (/** @type {string} */ recipe) => {
-                const recipeData = await this._runRecipe(recipe, parameters);
-                if (Array.isArray(recipeData)) {
-                    // @ts-ignore
-                    data.set(recipe, recipeData);
-                } else {
-                    throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected.`);
+                try {
+                    const recipeData = await this._runRecipe(recipe, parameters);
+                    if (Array.isArray(recipeData)) {
+                        // @ts-ignore
+                        data.set(recipe, recipeData);
+                    } else {
+                        throw new TypeError(`The recipe "${recipe}" did not return an array of data as expected.`);
+                    }
+                // eslint-disable-next-line no-unused-vars
+                } catch(error) {
+                    recipesInError.add(recipe);
                 }
             });
         // eslint-disable-next-line no-unused-vars
         } catch(error) {
             this._logger.failed(section, `An error occurred while running the recipes`);
             return;
+        } finally {
+            this._logger.enableFailed(true);
         }
         this._logger.log(section, 'All datasets information successfuly retrieved from recipes!');
 
@@ -311,6 +320,7 @@ export class RecipeManager extends RecipeManagerIntf {
         /** @type {Map<string, DataCollectionStatistics>} */
         const finalData = new Map();
         try {
+            // Add the successful recipes and their stats in the final list
             await Processor.forEach(data, (/** @type {Array<Data>} */records, /** @type {string} */ key) => {
                 const onlyBadRecords = records?.filter((r) => {
                     if (r.score && r.score > 0) {
@@ -332,6 +342,7 @@ export class RecipeManager extends RecipeManagerIntf {
                     });
                 });
                 const stats = new DataCollectionStatistics();
+                stats.hadError = false;
                 stats.countAll = (records?.length ?? 0);
                 stats.countBad = (onlyBadRecords?.length ?? 0);
                 stats.countBadByRule = Array.from(series.keys()).map((id) => { return { 
@@ -341,6 +352,13 @@ export class RecipeManager extends RecipeManagerIntf {
                 }});
                 stats.data = onlyBadRecords;
                 finalData.set(key, stats);
+            });
+
+            // Add the recipes in error in the final list
+            recipesInError.forEach((recipe) => {
+                const stats = new DataCollectionStatistics();
+                stats.hadError = true;
+                finalData.set(recipe, stats);
             });
         // eslint-disable-next-line no-unused-vars
         } catch(error) {

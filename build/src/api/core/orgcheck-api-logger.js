@@ -33,6 +33,13 @@ export class BasicLoggerIntf {
      * @public
      */
     failed(operationName, error) { throw new Error(`Method failed(operationName=${operationName}, error=${error}) not implemented yet.`); }
+
+    /**
+     * @description Enable or disable the failed logging
+     * @param {boolean} [flag=true] - Enable or disable the failed logging
+     * @public
+     */
+    enableFailed(flag=true) { throw new Error(`Method enableFailed(flag=${flag}) not implemented yet.`); }
 }
 
 /**

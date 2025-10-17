@@ -17,6 +17,13 @@ export class Logger extends LoggerIntf {
     _logger;
 
     /**
+     * @description Is the failed logging enabled?
+     * @type {boolean}
+     * @private
+     */
+    _enabledFailed = true;
+
+    /**
      * @description Constructor
      * @param {BasicLoggerIntf} logger - The injected logger
      */
@@ -56,10 +63,21 @@ export class Logger extends LoggerIntf {
      * @public
      */
     failed(operationName, error) { 
-        if (this._logger.isConsoleFallback()) {
-            CONSOLE_LOG(operationName, 'FAILED', error);
+        if (this._enabledFailed === true) {
+            if (this._logger.isConsoleFallback()) {
+                CONSOLE_LOG(operationName, 'FAILED', error);
+            }
+            this._logger?.failed(operationName, error);
         }
-        this._logger?.failed(operationName, error);
+    }
+
+    /**
+     * @description Enable or disable the failed logging
+     * @param {boolean} [flag=true] - Enable or disable the failed logging
+     * @public
+     */
+    enableFailed(flag=true) { 
+        this._enabledFailed = (flag === true);
     }
 
     /**
