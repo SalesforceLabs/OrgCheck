@@ -802,13 +802,18 @@ export default class OrgcheckApp extends LightningElement {
         try {
             // The source of the event is the main tab
             const mainTab = event.target;
+            // @ts-ignore
+            const mainTabValue = mainTab?.value;
+            // Check if value is defined and of type "string"
+            if (mainTabValue === undefined || typeof mainTabValue !== 'string') {
+                return; // unknown tab, do nothing
+            }
             // Check if value is expected
-            if (MAIN_TABS_VALUES.indexOf(mainTab.value) === -1) {
+            if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 return; // unknown tab, do nothing
             }
             // Value is expected, store it as the current main tab
-            // @ts-ignore
-            this.selectedMainTab = mainTab.value;
+            this.selectedMainTab = mainTabValue;
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
             // @ts-ignore
