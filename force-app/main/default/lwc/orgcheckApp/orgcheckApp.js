@@ -803,11 +803,7 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = mainTab?.value;
-            // Check if value is defined and of type "string"
-            if (mainTabValue === undefined || typeof mainTabValue !== 'string') {
-                return; // unknown tab, do nothing
-            }
+            const mainTabValue = ocui.Sanitizer.sanitize(mainTab?.value);
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 return; // unknown tab, do nothing
