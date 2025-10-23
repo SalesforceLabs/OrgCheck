@@ -4,4 +4,3 @@ export * from './orgcheck-ui-table-datagetters.js';
 export * from './orgcheck-ui-table-datamodifiers.js';
 export * from './orgcheck-ui-table-rows.js';
 export * from './orgcheck-ui-table.js';
-export * from './orgcheck-ui-security.js';

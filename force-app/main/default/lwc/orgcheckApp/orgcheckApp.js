@@ -25,6 +25,23 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 
+const REGEX_HTMLTAGS = new RegExp("/[<>]/", 'g');
+
+/** 
+ * @description Sanitize the given input to prevent XSS attacks.
+ * @param {any} input - The input to sanitize
+ * @returns {string} Sanitized string
+ */
+const SANITIZE = (input) => {
+    if (input === undefined || input === null) {
+        return '';
+    }
+    if (typeof input !== 'string') {
+        return '';
+    }
+    return input.replace(REGEX_HTMLTAGS, '');
+}
+
 export default class OrgcheckApp extends LightningElement {
 
     /**
@@ -803,7 +820,7 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = ocui.Sanitizer.sanitize(`${mainTab?.value}`);
+            const mainTabValue = SANITIZE(mainTab?.value);
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 return; // unknown tab, do nothing
