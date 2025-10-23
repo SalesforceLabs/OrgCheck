@@ -39,7 +39,7 @@ const SANITIZE = (input) => {
     if (typeof input !== 'string') {
         return '';
     }
-    return input.replace(REGEX_HTMLTAGS, '');
+    return `${input}`.replace(REGEX_HTMLTAGS, '');
 }
 
 export default class OrgcheckApp extends LightningElement {
@@ -823,6 +823,7 @@ export default class OrgcheckApp extends LightningElement {
             const mainTabValue = SANITIZE(mainTab?.value);
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
+                event.stopPropagation();
                 return; // unknown tab, do nothing
             }
             this.selectedMainTab = mainTabValue;

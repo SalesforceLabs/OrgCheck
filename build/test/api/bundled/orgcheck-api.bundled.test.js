@@ -7,15 +7,15 @@ class JsForceConnectionMock {
   }
   async describe(objectname) { return { name: objectname }};
   async describeGlobal() { return { sobjects: [] }; }
-  async query(string, options) { return { done: true, size: 0, records: [] }; }
-  async search(string, options) { return { done: true, size: 0, records: [] }; }
-  async request(options) { return {}; }
+  async query() { return { done: true, size: 0, records: [] }; }
+  async search() { return { done: true, size: 0, records: [] }; }
+  async request() { return {}; }
   get tooling() { return this; }
 }
 
-export class JsForceMetadataMock {
-  async list(requests) { return []; }
-  async read(type, members) { return []; }
+class JsForceMetadataMock {
+  async list() { return []; }
+  async read() { return []; }
 }
 
 const JsForceMock = {
@@ -23,10 +23,10 @@ const JsForceMock = {
 }
 
 const StorageMock = {
-  setItem: (k, v) => undefined,
-  getItem: (k) => undefined,
-  removeItem: (k) => undefined,
-  key: (i) => undefined,
+  setItem: () => undefined,
+  getItem: () => undefined,
+  removeItem: () => undefined,
+  key: () => undefined,
   keys: ()  => [],
   length: () => 0
 }
@@ -44,9 +44,9 @@ const CompressionMock = {
 /** @type {BasicLoggerIntf} */
 const LoggerMock = {
   isConsoleFallback: () => false,
-  log: (section, message) => { },
-  ended: (section, message) => { },
-  failed: (section, error) => { }
+  log: () => { },
+  ended: () => { },
+  failed: () => { }
 }
 
 describe('tests.api.bundled.API', () => {
