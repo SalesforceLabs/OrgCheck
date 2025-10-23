@@ -1,3 +1,6 @@
+const REGEX_HTMLTAGS = new RegExp("/[<>]/", 'g');
+const EMPTY_STRING = '';
+
 export class Sanitizer {
 
     /**
@@ -7,9 +10,12 @@ export class Sanitizer {
      * @static
      */
     static sanitize(input) {
-        if (typeof input !== 'string') {
-            return '';
+        if (input === undefined || input === null) {
+            return EMPTY_STRING;
         }
-        return input.replace(/[<>]/g, '');
+        if (typeof input !== 'string') {
+            return EMPTY_STRING;
+        }
+        return input.replace(REGEX_HTMLTAGS, EMPTY_STRING);
     }
 }

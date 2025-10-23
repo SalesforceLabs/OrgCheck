@@ -803,12 +803,11 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = ocui.Sanitizer.sanitize(mainTab?.value);
+            const mainTabValue = ocui.Sanitizer.sanitize(`${mainTab?.value}`);
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 return; // unknown tab, do nothing
             }
-            // Value is expected, store it as the current main tab
             this.selectedMainTab = mainTabValue;
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
