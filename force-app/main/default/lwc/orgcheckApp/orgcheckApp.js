@@ -25,21 +25,16 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 
-const REGEX_HTMLTAGS = new RegExp("/[<>]/", 'g');
-
 /** 
  * @description Sanitize the given input to prevent XSS attacks.
  * @param {any} input - The input to sanitize
  * @returns {string} Sanitized string
  */
 const SANITIZE = (input) => {
-    if (input === undefined || input === null) {
-        return '';
+    if (input !== undefined && input !== null && typeof input === 'string') {
+        return input.replace(/[<>]/g, '');
     }
-    if (typeof input !== 'string') {
-        return '';
-    }
-    return `${input}`.replace(REGEX_HTMLTAGS, '');
+    return '';
 }
 
 export default class OrgcheckApp extends LightningElement {
