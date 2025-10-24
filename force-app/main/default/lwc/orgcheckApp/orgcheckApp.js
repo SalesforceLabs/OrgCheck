@@ -25,18 +25,6 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 
-/** 
- * @description Sanitize the given input to prevent XSS attacks.
- * @param {any} input - The input to sanitize
- * @returns {string} Sanitized string
- */
-const SANITIZE = (input) => {
-    if (input !== undefined && input !== null && typeof input === 'string') {
-        return input.replace(/[<>]/g, '');
-    }
-    return '';
-}
-
 export default class OrgcheckApp extends LightningElement {
 
     /**
@@ -815,13 +803,13 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = mainTab?.value;
+            const mainTabValue = typeof mainTab?.value === 'string' ? mainTab?.value?.replace(/[<>]/g, '') : '';
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 event.stopPropagation();
                 return; // unknown tab, do nothing
             }
-            this.selectedMainTab = SANITIZE(mainTabValue);
+            this.selectedMainTab = mainTabValue;
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
             // @ts-ignore
