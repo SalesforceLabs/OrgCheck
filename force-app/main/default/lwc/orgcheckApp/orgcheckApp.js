@@ -24,6 +24,7 @@ const MAIN_TABS = {
 };
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
+Object.freeze(MAIN_TABS_VALUES);
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -803,7 +804,7 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = typeof mainTab?.value === 'string' ? mainTab?.value?.replace(/[<>]/g, '') : '';
+            const mainTabValue = typeof mainTab?.value === 'string' ? mainTab?.value?.replace(/[^a-z]/g, '') : '';
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 event.stopPropagation();
