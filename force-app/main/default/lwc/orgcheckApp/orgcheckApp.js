@@ -28,8 +28,7 @@ Object.freeze(MAIN_TABS_VALUES);
 const SANITIZE_ALPHABETICAL_INPUT = (/** @type {string} */ input) => {
     if (input === undefined || input === null) return '';
     if (typeof input !== 'string') return '';
-    if (!input.replace) return '';
-    return input.replace(/[^a-zA-Z]/g, '');
+    return '*'.concat(input).replace(/[^a-zA-Z]/g, '');
 }
 
 export default class OrgcheckApp extends LightningElement {
