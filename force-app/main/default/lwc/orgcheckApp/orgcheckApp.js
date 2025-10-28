@@ -25,10 +25,12 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 Object.freeze(MAIN_TABS_VALUES);
-const SANITIZE_ALPHABETICAL_INPUT = (/** @type {string} */ input) => {
-    if (input === undefined || input === null) return '';
-    if (typeof input !== 'string') return '';
-    return '*'.concat(input).replace(/[^a-zA-Z]/g, '');
+const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => {
+    if (input === undefined || input === null) throw new Error('Input is undefined or null');
+    if (typeof input !== 'string') throw new Error('Input is not a string');
+    const sanitizedInput = '*'.concat(input).replace(/[^a-zA-Z]/g, '')
+    if (MAIN_TABS_VALUES.indexOf(sanitizedInput) === -1) throw new Error('Input is not a valid main tab value');
+    return sanitizedInput;
 }
 
 export default class OrgcheckApp extends LightningElement {
@@ -809,13 +811,7 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = SANITIZE_ALPHABETICAL_INPUT(mainTab?.value);
-            // Check if value is expected
-            if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
-                event.stopPropagation();
-                return; // unknown tab, do nothing
-            }
-            this.selectedMainTab = mainTabValue;
+            this.selectedMainTab = SANITIZE_MAIN_TAB_INPUT(mainTab?.value);
             // In each main tab there is an inner tabset with tabs (called SubTabs here)
             // Get a reference of the sub tabset (undefined if not found)
             // @ts-ignore
