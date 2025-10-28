@@ -37,5 +37,5 @@ package-lock.json
 
 #org check generated files
 build/dist/*/*.js
-force-app/main/default/lwc/*/libs/*.js
+force-app/main/default/lwc/*/libs/orgcheck-*.js
 force-app/main/default/staticresources/OrgCheck_SR.resource

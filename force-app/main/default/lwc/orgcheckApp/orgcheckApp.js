@@ -25,6 +25,12 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 Object.freeze(MAIN_TABS_VALUES);
+const SANITIZE_ALPHABETICAL_INPUT = (/** @type {string} */ input) => {
+    if (input === undefined || input === null) return '';
+    if (typeof input !== 'string') return '';
+    if (!input.replace) return '';
+    return input.replace(/[^a-zA-Z]/g, '');
+}
 
 export default class OrgcheckApp extends LightningElement {
 
@@ -804,7 +810,7 @@ export default class OrgcheckApp extends LightningElement {
             // The source of the event is the main tab
             const mainTab = event.target;
             // @ts-ignore
-            const mainTabValue = typeof mainTab?.value === 'string' ? mainTab?.value?.replace(/[^a-z]/g, '') : '';
+            const mainTabValue = SANITIZE_ALPHABETICAL_INPUT(mainTab?.value);
             // Check if value is expected
             if (MAIN_TABS_VALUES.indexOf(mainTabValue) === -1) {
                 event.stopPropagation();
