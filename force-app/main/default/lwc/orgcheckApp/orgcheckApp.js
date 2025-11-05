@@ -13,6 +13,7 @@ const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
 const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 5;
 const MAIN_TABS = {
     HOME: 'home',
+    ORG: 'organization',
     CODE: 'code',
     VISUAL: 'visual',
     DATAMODEL: 'datamodel',
@@ -29,7 +30,7 @@ const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => {
     if (input === undefined || input === null) throw new Error('Input is undefined or null');
     if (typeof input !== 'string') throw new Error('Input is not a string');
     const sanitizedInput = '*'.concat(input).replace(/[^a-zA-Z]/g, '')
-    if (MAIN_TABS_VALUES.indexOf(sanitizedInput) === -1) throw new Error('Input is not a valid main tab value');
+    if (MAIN_TABS_VALUES.indexOf(sanitizedInput) === -1) throw new Error(`Input <${sanitizedInput}> is not a valid main tab value`);
     return sanitizedInput;
 }
 
@@ -511,8 +512,8 @@ export default class OrgcheckApp extends LightningElement {
         'email-templates':           { label: '🌇 Email Templates',            tab: MAIN_TABS.SETTING,         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: MAIN_TABS.SECURITY,        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: MAIN_TABS.AUTOMATION,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
-        'global-view':               { label: '🏞️ Overview',                   tab: MAIN_TABS.HOME,            data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
-        'hard-coded-urls-view':      { label: '🏖️ Hard-coded URLs',            tab: MAIN_TABS.HOME,            data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
+        'global-view':               { label: '🏞️ Overview',                   tab: MAIN_TABS.ORG,             data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        'hard-coded-urls-view':      { label: '🏖️ Hard-coded URLs',            tab: MAIN_TABS.ORG,             data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
         'home-page-components':      { label: '🍩 Home Page Components',       tab: MAIN_TABS.VISUAL,          data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
         'internal-active-users':     { label: '👥 Active Internal Users',      tab: MAIN_TABS.SECURITY,        data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
         'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: MAIN_TABS.SETTING,         data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
@@ -880,6 +881,24 @@ export default class OrgcheckApp extends LightningElement {
         } catch (e) {
             this._showError('Error while handleRemoveAllCache', e);
         }
+    }
+
+    /**
+     * @description Method called when the user ask to log a specific cache item in the console
+     * @param {Event | any} event - The event information
+     * @public
+     */ 
+    handleLogCacheItem(event) {
+        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
+        // if the api is not loaded yet ignore that call
+        if (!this._api) return;
+        // Get attribute data-item-name
+        const itemName = event?.target?.getAttribute('data-item-name');
+        // DUmp the cach in the console!
+        console.error('**********');
+        console.error(`Cache Item: ${itemName}`);
+        console.error(this._api.getCacheData(itemName));
+        console.error('**********');
     }
 
     /**

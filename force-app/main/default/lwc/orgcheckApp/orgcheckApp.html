@@ -110,23 +110,31 @@
                         <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
                         <div class="slds-var-p-horizontal_small">
                             List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
-                            <div class="slds-progress slds-progress_vertical">
-                                <ol class="slds-progress__list" id="list-loading-items">
-                                    <template for:each={cacheManagerData} for:item="item">
-                                        <template if:false={item.isEmpty}>
-                                            <li key={item.name} class="slds-progress__item slds-is-completed">
-                                                <div class="slds-progress__marker"></div>
-                                                <div class="slds-progress__item_content">
-                                                    <b>{item.name}</b>: 
-                                                    <template lwc:if={item.isMap}> {item.length} in a map</template>
-                                                    <template lwc:else> 1 in an object</template>
-                                                    <template lwc:if={item.created}>, Created on <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time></template>
+                            <lightning-layout>
+                                <template for:each={cacheManagerData} for:item="item">
+                                    <lightning-layout-item padding="around-small" key={item.name}>
+                                        <div class="viewCacheItem">
+                                            <lightning-card>
+                                                <lightning-button label="Log" slot="actions" onclick={handleLogCacheItem} data-item-name={item.name}></lightning-button>
+                                                <h3 slot="title">
+                                                    <lightning-icon icon-name="utility:database" size="small"></lightning-icon>
+                                                    &nbsp; 
+                                                    {item.name}
+                                                    &nbsp;&nbsp;&nbsp; 
+                                                </h3>
+                                                <div slot="footer">
+                                                    <lightning-badge if:true={item.isMap} label="Map"></lightning-badge>
+                                                    <lightning-badge if:false={item.isMap} label="Object"></lightning-badge>
                                                 </div>
-                                            </li>
-                                        </template>
-                                    </template>
-                                </ol>
-                            </div>
+                                                <p class="slds-var-p-horizontal_small">
+                                                    <span if:true={item.length}>Size: <lightning-formatted-number value={item.length}></lightning-formatted-number><br /></span>
+                                                    Created: <lightning-formatted-date-time value={item.created}></lightning-formatted-date-time><br />
+                                                </p>
+                                            </lightning-card>
+                                        </div>
+                                    </lightning-layout-item>  
+                                </template>
+                            </lightning-layout>
                         </div>
                     </lightning-card>
                 </lightning-tab>

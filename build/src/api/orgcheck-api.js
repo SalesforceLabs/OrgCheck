@@ -157,6 +157,16 @@ export class API {
     }
 
     /**
+     * @description Get cache data from dataset manager
+     * @param {string} itemName - the name of the cache item to get
+     * @returns {any} cached data 
+     * @public
+     */
+    getCacheData(itemName) {
+        return this._cacheManager.get(itemName);
+    }
+
+    /**
      * @description Get the list of all Org Check "score rules" as a matrix
      * @returns {DataMatrix} Information about score rules as a matrix
      * @public

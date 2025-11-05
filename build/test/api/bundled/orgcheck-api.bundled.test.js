@@ -22,13 +22,14 @@ const JsForceMock = {
   Connection: JsForceConnectionMock
 }
 
+const localStorageMock = new Map();
+
 const StorageMock = {
-  setItem: () => undefined,
-  getItem: () => undefined,
-  removeItem: () => undefined,
-  key: () => undefined,
-  keys: ()  => [],
-  length: () => 0
+  setItem: (key, value) => localStorageMock.set(key, value),
+  getItem: (key) => localStorageMock.get(key),
+  removeItem: (key) => localStorageMock.delete(key),
+  keys: () => Array.from(localStorageMock.keys()),
+  length: () => localStorageMock.size
 }
 
 const EncoderMock = {
@@ -46,7 +47,7 @@ const LoggerMock = {
   isConsoleFallback: () => false,
   log: () => { },
   ended: () => { },
-  failed: () => { }
+  failed: (... argv) => { console.error(argv); },
 }
 
 describe('tests.api.bundled.API', () => {

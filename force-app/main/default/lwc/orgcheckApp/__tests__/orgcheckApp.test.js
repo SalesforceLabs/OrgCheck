@@ -52,6 +52,8 @@ describe('c-orgcheck-app', () => {
     // Verify that the first tab value has been changed for real
     expect(firstTab.value).not.toBe('home');
     expect(firstTab.value).toBe('<script>alert("XSS")</script>');
+    // Suppress console error output for this test
+    console.error = jest.fn();
     // Simulate a user selecting the first tab again but with altered value to simulate XSS attack
     firstTab.dispatchEvent(new CustomEvent('active'));
     // Wait for the DOM to be updated

@@ -172,12 +172,12 @@ export class DataCacheManager extends DataCacheManagerIntf {
             } : {
                 type: 'array', length: value.length, created: now
             };
-            if (value instanceof Map) {
-                // remove any reference "key" to avoid circular references
-                Array.from(value.keys()).forEach((k) => { if (k.endsWith('Ref') === true) value.delete(k); });
-            }
             /** @type {DataItemInCache} */
-            const dataEntry = { content: value, created: now };
+            const dataEntry = value instanceof Map ? {
+                content: Array.from(value.entries()).filter(t => t[0].endsWith('Ref') === false), created: now
+            } : {
+                content: value, created: now
+            };
             try {
                 this._setItemToCache(dataPhysicalKey, JSON.stringify(dataEntry)); // this is more likely to throw an error if data exceeds the local storage limit, so do it first!
                 this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
