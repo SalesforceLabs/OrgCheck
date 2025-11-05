@@ -28,20 +28,23 @@ export class DatasetCurrentUserPermissions extends Dataset {
         }
 
         // First SOQL query
-        logger?.log(`Querying REST API about UserPermissionAccess in the org...`);            
-        const results = await sfdcManager.soqlQuery([{
-            string: `SELECT ${permissionFields.map(p => `Permissions${p}`).join(`, `)} ` +
-                    'FROM UserPermissionAccess '+
-                    'LIMIT 1'
-        }], logger);
-        const permissions = results[0][0];
-        logger?.log(`Parsing the results...`);            
+        logger?.log(`Querying REST API about UserPermissionAccess in the org...`);   
+        const permissionFieldsAsInSOQL = permissionFields.map(p => `Permissions${p}`);
+        const results = await sfdcManager.soqlQuery(
+            permissionFieldsAsInSOQL.map(field => { return {
+                string: `SELECT ${field} FROM UserPermissionAccess LIMIT 1`,
+                byPasses: ['INVALID_FIELD'] // in case the permission does not exist in this SFDC version
+            }; }), logger);
+        logger?.log(`Parsing the results...`);    
+        const permissionsMap = new Map();
+        results.forEach((records, queryIndex) => {
+            if (queryIndex < permissionFieldsAsInSOQL.length) {
+                const field = permissionFieldsAsInSOQL[queryIndex];
+                permissionsMap.set(field, records?.length === 1 ? records[0][field] : undefined);
+            }
+        });
 
         // Return data as map
-        return new Map(await Processor.map(
-            Object.keys(permissions),
-            (/** @type {string} */ field) => [ field, permissions[field] ],
-            (/** @type {string} */ field) => field.startsWith('Permissions')
-        ));
+        return permissionsMap;
     } 
 }
