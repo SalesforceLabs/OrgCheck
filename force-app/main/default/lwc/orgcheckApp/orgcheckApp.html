@@ -110,7 +110,7 @@
                         <lightning-button label="Clear all" variant="destructive" slot="actions" onclick={handleRemoveAllCache}></lightning-button>
                         <div class="slds-var-p-horizontal_small">
                             List of cached metadata from the Salesforce org you want to check into your Browser persistant cache.<br />
-                            <lightning-layout>
+                            <lightning-layout multiple-rows>
                                 <template for:each={cacheManagerData} for:item="item">
                                     <lightning-layout-item padding="around-small" key={item.name}>
                                         <div class="viewCacheItem">

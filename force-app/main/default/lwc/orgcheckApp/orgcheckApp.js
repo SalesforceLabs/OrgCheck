@@ -894,11 +894,28 @@ export default class OrgcheckApp extends LightningElement {
         if (!this._api) return;
         // Get attribute data-item-name
         const itemName = event?.target?.getAttribute('data-item-name');
-        // DUmp the cach in the console!
-        console.error('**********');
-        console.error(`Cache Item: ${itemName}`);
-        console.error(this._api.getCacheData(itemName));
-        console.error('**********');
+        // Get the data from cache
+        const cacheData = this._api.getCacheData(itemName);
+        // Dump the cache in the dialogBox
+        let htmlContent = '';
+        if (cacheData === null || cacheData === undefined) {
+            htmlContent += 'There is no data in the cache for this item.';
+        } else if (cacheData instanceof Map) {
+            htmlContent += `<b>Type:</b> Map<br /><br /><b>Size:</b> ${cacheData.size}<br /><br /><b>Content:</b><ul>`;
+            Array.from(cacheData.entries()).forEach((entry, index) => {
+                htmlContent += `<li><b>INDEX:</b> ${index}, <b>KEY:</b> ${entry[0]}, <b>VALUE:</b> ${JSON.stringify(entry[1])}</li>`;
+            });
+            htmlContent += '</ul>';
+        } else if (Array.isArray(cacheData)) {
+            htmlContent += `<b>Type:</b> Array<br /><br /><b>Size:</b> ${cacheData.length}<br /><br /><b>Content:</b><ul>`;
+            cacheData.forEach((value, index) => console.error(`<li><b>INDEX:</b> ${index}, <b>VALUE:</b> ${JSON.stringify(value)}</li>`))
+            htmlContent += '</ul>';
+        } else {
+            htmlContent += `<b>Type:</b> ${typeof cacheData}<br /><br /><b>Content:</b><br />`;
+            htmlContent += JSON.stringify(cacheData);
+        }
+        // show the modal
+        this._openModal(`Dump of the browser cache for item: ${itemName}`, htmlContent);
     }
 
     /**
