@@ -17,17 +17,23 @@ export class DatasetInternalActiveUsers extends Dataset {
      */
     async run(sfdcManager, dataFactory, logger) {
 
-        // First SOQL query
+        // First SOQL queries
         logger?.log(`Querying REST API about internal active User in the org...`);            
         const results = await sfdcManager.soqlQuery([{
-            string: 'SELECT Id, Name, ProfileId, ' +
-                        'LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
-                        'UserPreferencesLightningExperiencePreferred, ' +
-                        '(SELECT PermissionSetId FROM PermissionSetAssignments WHERE PermissionSet.IsOwnedByProfile = false) ' + // optimisation?
+            string: 'SELECT Id, Name, ProfileId, LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
+                        'UserPreferencesLightningExperiencePreferred ' +
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
                     'AND Profile.Id != NULL ' // we do not want the Automated Process users!
+        }, {
+            string: 'SELECT Id, AssigneeId, PermissionSetId ' +
+                    'FROM PermissionSetAssignment ' +
+                    'WHERE Assignee.IsActive = true ' +
+                    'AND PermissionSet.IsOwnedByProfile = false ' +
+                    'AND Assignee.ContactId = NULL ' +
+                    'AND Assignee.Profile.Id != NULL',
+            queryMoreField: 'Id'
         }], logger);
 
         // Init the factory and records
@@ -35,20 +41,15 @@ export class DatasetInternalActiveUsers extends Dataset {
 
         // Create the map
         const userRecords = results[0];
+        const assignmentRecords = results[1];
         logger?.log(`Parsing ${userRecords.length} users...`);
         const users = new Map(await Processor.map(userRecords, async (/** @type {any} */ record) => {
         
             // Get the ID15 of this user
             const id = sfdcManager.caseSafeId(record.Id);
 
-            // Get the ID15 of Permission Sets assigned to this user
-            const permissionSetIdsAssigned = await Processor.map(
-                record?.PermissionSetAssignments?.records, 
-                (/** @type {any} */ assignment) => sfdcManager.caseSafeId(assignment.PermissionSetId)
-            );
-
             // Create the instance
-            const user = userDataFactory.createWithScore({
+            const user = userDataFactory.create({
                 properties: {
                     id: id,
                     name: record.Name,
@@ -57,7 +58,7 @@ export class DatasetInternalActiveUsers extends Dataset {
                     onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
                     lastPasswordChange: record.LastPasswordChangeDate,
                     profileId: sfdcManager.caseSafeId(record.ProfileId),
-                    permissionSetIds: permissionSetIdsAssigned,
+                    permissionSetIds: [],
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.USER)
                 }
             });
@@ -65,6 +66,23 @@ export class DatasetInternalActiveUsers extends Dataset {
             // Add it to the map  
             return [ user.id, user ];
         }));
+
+        // Now process the permission set assignments
+        logger?.log(`Parsing ${assignmentRecords.length} permission set assignments...`);
+        assignmentRecords.forEach((/** @type {any} */ record) => {
+            const assigneeId = sfdcManager.caseSafeId(record.AssigneeId);
+            const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
+            const user = users.get(assigneeId);
+            if (user) {
+                user.permissionSetIds.push(permissionSetId);
+            }
+        });
+
+        // FINALLY!!!! Compute the score of all items
+        logger?.log(`Computing scores for ${users.size} users...`);
+        await Processor.forEach(users, (/** @type {SFDC_User} */ user) => {
+            userDataFactory.computeScore(user);
+        });
 
         // Return data as map
         logger?.log(`Done`);
