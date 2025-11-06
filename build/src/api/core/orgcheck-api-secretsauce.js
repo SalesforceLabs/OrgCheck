@@ -364,9 +364,9 @@ const ALL_SCORE_RULES = [
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
         id: 32,
-        description: 'IP Range too large',
+        description: 'IP Range too large (> 100,000)',
         formula: (/** @type {SFDC_ProfileRestrictions} */ d) => d?.ipRanges.filter(i => i.difference > 100000).length > 0,
-        errorMessage: `This profile includes an IP range that is too wide (more than 100.000 IP addresses!). If you set an IP Range it should be not that large. You could split that range into multiple ones. The risk is that you include an IP that is not part of your company. Please review this setting.`,
+        errorMessage: `This profile includes an IP range that is too wide (more than 100,000 IP addresses!). If you set an IP Range it should be not that large. You could split that range into multiple ones. The risk is that you include an IP that is not part of your company. Please review this setting.`,
         badField: 'ipRanges',
         applicable: [ SFDC_ProfileRestrictions ],
         category: SCORE_RULE_CATEGORIES.SECURITY
@@ -570,6 +570,14 @@ const ALL_SCORE_RULES = [
         badField: 'memberCounts',
         applicable: [ SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 58,
+        description: 'IP Range too large (> 16,777,216)',
+        formula: (/** @type {SFDC_ProfileRestrictions} */ d) => d?.ipRanges.filter(i => i.difference > 16777216).length > 0,
+        errorMessage: `This profile includes an IP range that is too wide (more than 16,777,216 IP addresses!). If you set an IP Range it should be not that large. You could split that range into multiple ones. The risk is that you include an IP that is not part of your company. Please review this setting.`,
+        badField: 'ipRanges',
+        applicable: [ SFDC_ProfileRestrictions ],
+        category: SCORE_RULE_CATEGORIES.SECURITY
     }
 ];
 Object.freeze(ALL_SCORE_RULES);
