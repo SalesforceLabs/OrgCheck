@@ -2,7 +2,6 @@ import { DataFactoryIntf } from '../core/orgcheck-api-datafactory';
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 import { SimpleLoggerIntf } from '../core/orgcheck-api-logger';
-import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 
 export class DatasetCurrentUserPermissions extends Dataset {
