@@ -1,4 +1,4 @@
-import { DataWithoutScoring } from '../core/orgcheck-api-data';
+import { Data } from '../core/orgcheck-api-data';
 import { SFDC_ApexTrigger } from './orgcheck-api-data-apextrigger';
 import { SFDC_Field } from './orgcheck-api-data-field';
 import { SFDC_FieldSet } from './orgcheck-api-data-fieldset';
@@ -14,7 +14,7 @@ import { SFDC_WebLink } from './orgcheck-api-data-weblink';
 /**
  * @description Representation of as SObject in Org Check
  */
-export class SFDC_Object extends DataWithoutScoring {
+export class SFDC_Object extends Data {
     
     /** 
      * @description Logical name of what this class represents
@@ -172,6 +172,13 @@ export class SFDC_Object extends DataWithoutScoring {
     layouts;
 
     /**
+     * @description Number of page layouts for this object
+     * @type {number}
+     * @public
+     */
+    nbPageLayouts;
+
+    /**
      * @description List of Ligthning Pages for this object
      * @type {Array<SFDC_LightningPage>}
      * @public
@@ -191,6 +198,13 @@ export class SFDC_Object extends DataWithoutScoring {
      * @public
      */
     validationRules;
+
+    /**
+     * @description Number of validation rules for this object
+     * @type {number}
+     * @public
+     */ 
+    nbValidationRules;
     
     /**
      * @description List of web links for this object
@@ -212,6 +226,13 @@ export class SFDC_Object extends DataWithoutScoring {
      * @public
      */
     customFieldIds;
+
+    /**
+     * @description Number of custom fields for this object
+     * @type {number}
+     * @public
+     */
+    nbCustomFields;
     
     /**
      * @description List of custom field references for this object
@@ -227,6 +248,20 @@ export class SFDC_Object extends DataWithoutScoring {
      */
     recordTypes;
     
+    /**
+     * @description Number of record types for this object
+     * @type {number}
+     * @public
+     */
+    nbRecordTypes;
+
+    /**
+     * @description Number of workflow rules for this object
+     * @type {number}
+     * @public
+     */ 
+    nbWorkflowRules;
+
     /**
      * @description List of relationships for this object
      * @type {Array<SFDC_ObjectRelationShip>}

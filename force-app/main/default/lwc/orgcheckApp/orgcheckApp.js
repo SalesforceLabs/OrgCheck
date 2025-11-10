@@ -522,7 +522,7 @@ export default class OrgcheckApp extends LightningElement {
         'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: MAIN_TABS.VISUAL,          data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
         'object':                    { label: '🎳 Object Documentation',       tab: MAIN_TABS.DATAMODEL,       data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
         'object-permissions':        { label: '🚦 Object Permissions',         tab: MAIN_TABS.SECURITY,        data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
-        'objects':                   { label: '🏉 Org Wide Defaults',          tab: MAIN_TABS.DATAMODEL,       data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
+        'objects':                   { label: '🏉 Objects',                    tab: MAIN_TABS.DATAMODEL,       data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
         'page-layouts':              { label: '🏓 Page Layouts',               tab: MAIN_TABS.SECURITY,        data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
         'permission-sets':           { label: '🚔 Permission Sets',            tab: MAIN_TABS.SECURITY,        data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }},
         'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: MAIN_TABS.SECURITY,        data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }},
@@ -2065,20 +2065,26 @@ export default class OrgcheckApp extends LightningElement {
     };
 
     /**
-     * @description Table definition for SObject Org Wide Default
+     * @description Table definition for SObjects
      * @type {ocui.Table}
      */
     owdTableDefinition = {
         columns: [
-            { label: '#',         type: ocui.ColumnType.IDX },
-            { label: 'Label',     type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Name',      type: ocui.ColumnType.TXT, data: { value: 'name' }},
-            { label: 'Package',   type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Internal',  type: ocui.ColumnType.TXT, data: { value: 'internalSharingModel' }},
-            { label: 'External',  type: ocui.ColumnType.TXT, data: { value: 'externalSharingModel' }}
+            { label: '#',                type: ocui.ColumnType.IDX },
+            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Label',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'label' }},
+            { label: 'Name',             type: ocui.ColumnType.TXT, data: { value: 'name' }},
+            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Custom fields',    type: ocui.ColumnType.NUM, data: { value: 'nbCustomFields' }},
+            { label: 'Page layouts',     type: ocui.ColumnType.NUM, data: { value: 'nbPageLayouts' }},
+            { label: 'Record types',     type: ocui.ColumnType.NUM, data: { value: 'nbRecordTypes' }},
+            { label: 'Workflows',        type: ocui.ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
+            { label: 'Validation Rules', type: ocui.ColumnType.NUM, data: { value: 'nbValidationRules' }},
+            { label: 'Internal OWD',     type: ocui.ColumnType.TXT, data: { value: 'internalSharingModel' }},
+            { label: 'External OWD',     type: ocui.ColumnType.TXT, data: { value: 'externalSharingModel' }}
         ],
         orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
+        orderSort: ocui.SortOrder.DESC
     };
 
     /**
@@ -2488,13 +2494,13 @@ export default class OrgcheckApp extends LightningElement {
     // ----------------------------------------------------------------------------------------------------------------
 
     /** 
-     * @description Data table for Org Wide default in the org 
+     * @description Data table for all objects in the org 
      * @type {Array<ocapi.SFDC_Object>}
      */
     objectsTableData;
 
     /** 
-     * @description Data table for Org Wide default in the org 
+     * @description Data table for one object in the org 
      * @type {ocapi.SFDC_Object}
      */
     objectData;

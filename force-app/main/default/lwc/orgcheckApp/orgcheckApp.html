@@ -240,7 +240,7 @@
                         <h1 class="slds-text-heading_large">⚽ Welcome in the Data model world!</h1>
                         <ul class="slds-list_dotted">
                             <li><b>🎳 Object Documentation</b>: Get a full documentation of a given specific SObject in one page -- use the global filter to select the object. </li>
-                            <li><b>🏉 Org Wide Defaults</b>: List all your objects and their org wide default (internal and external)</li>
+                            <li><b>🏉 Objects</b>: List all your objects and their org wide default (internal and external) and number of custom fields, page layouts, record types, etc.</li>
                             <li><b>🏈 Custom Fields</b>: List all your custom fields along with their score to check which one should be fixed first!</li>
                             <li><b>🏓 Page Layouts</b>: list Page Layouts that may have no assignments in profiles </li>
                             <li><b>🎾 Validation Rules</b>: List all your validation rules from your org (whatever the object) in one page!</li>
@@ -475,8 +475,8 @@
                             </template>
                         </template>
                     </lightning-tab>
-                    <lightning-tab value="objects" label="🏉 Org Wide Defaults" onactive={handleSubTabActivation}>
-                        <c-orgcheck-extended-datatable empty-message="There is no org wide default to show." show-search show-statistics is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={owdTableDefinition} rows={objectsTableData} show-export-button export-basename="OrgWideDefault"></c-orgcheck-extended-datatable>
+                    <lightning-tab value="objects" label="🏉 Objects" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no object to show." show-search show-statistics is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={owdTableDefinition} rows={objectsTableData} show-export-button export-basename="Objects"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="custom-fields" label="🏈 Custom Fields" onactive={handleSubTabActivation}>
                         <c-orgcheck-extended-datatable empty-message="There is no custom field to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={customFieldsTableDefinition} rows={customFieldsTableData} show-export-button export-basename="CustomFields"></c-orgcheck-extended-datatable>

@@ -32,6 +32,7 @@ import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
 import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
+import { SFDC_Object } from '../data/orgcheck-api-data-object';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -578,6 +579,38 @@ const ALL_SCORE_RULES = [
         badField: 'ipRanges',
         applicable: [ SFDC_ProfileRestrictions ],
         category: SCORE_RULE_CATEGORIES.SECURITY
+    }, {
+        id: 59,
+        description: 'Object with more than 350 custom fields',
+        formula: (/** @type {SFDC_Object} */ d) => d?.nbCustomFields > 350,
+        errorMessage: `This object has more than 350 custom fields. Please consider reducing that number as it can impact performance and usability.`,
+        badField: 'nbCustomFields',
+        applicable: [ SFDC_Object ],
+        category: SCORE_RULE_CATEGORIES.OVERUSE
+    }, {
+        id: 60,
+        description: 'Object with more than 15 page layouts',
+        formula: (/** @type {SFDC_Object} */ d) => d?.nbPageLayouts > 15,
+        errorMessage: `This object has more than 15 page layouts. Please consider reducing that number as it can impact performance and usability.`,
+        badField: 'nbPageLayouts',
+        applicable: [ SFDC_Object ],
+        category: SCORE_RULE_CATEGORIES.OVERUSE
+    }, {
+        id: 61,
+        description: 'Object with more than 20 workflow rules',
+        formula: (/** @type {SFDC_Object} */ d) => d?.nbWorkflowRules > 20,
+        errorMessage: `This object has more than 20 workflow rules. Please consider reducing that number as it can impact performance and usability.`,
+        badField: 'nbWorkflowRules',
+        applicable: [ SFDC_Object ],
+        category: SCORE_RULE_CATEGORIES.OVERUSE
+    }, {
+        id: 62,
+        description: 'Object with more than 20 validation rules',
+        formula: (/** @type {SFDC_Object} */ d) => d?.nbValidationRules > 20,
+        errorMessage: `This object has more than 20 validation rules. Please consider reducing that number as it can impact performance and usability.`,
+        badField: 'nbValidationRules',
+        applicable: [ SFDC_Object ],
+        category: SCORE_RULE_CATEGORIES.OVERUSE
     }
 ];
 Object.freeze(ALL_SCORE_RULES);
