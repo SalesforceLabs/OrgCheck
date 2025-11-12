@@ -29,6 +29,7 @@ export class RecipeGlobalView extends RecipeCollection {
             RecipeAliases.LIGHTNING_AURA_COMPONENTS,
             RecipeAliases.LIGHTNING_PAGES,
             RecipeAliases.LIGHTNING_WEB_COMPONENTS,
+            RecipeAliases.OBJECTS,
             RecipeAliases.PAGE_LAYOUTS,
             RecipeAliases.PERMISSION_SETS,
             RecipeAliases.PERMISSION_SET_LICENSES,

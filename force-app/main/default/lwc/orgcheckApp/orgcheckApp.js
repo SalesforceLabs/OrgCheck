@@ -2068,7 +2068,7 @@ export default class OrgcheckApp extends LightningElement {
      * @description Table definition for SObjects
      * @type {ocui.Table}
      */
-    owdTableDefinition = {
+    objectsTableDefinition = {
         columns: [
             { label: '#',                type: ocui.ColumnType.IDX },
             { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
