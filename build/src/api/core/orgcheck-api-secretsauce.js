@@ -611,6 +611,30 @@ const ALL_SCORE_RULES = [
         badField: 'nbValidationRules',
         applicable: [ SFDC_Object ],
         category: SCORE_RULE_CATEGORIES.OVERUSE
+    }, {
+        id: 63,
+        description: 'Page layout with more than 100 fields',
+        formula: (/** @type {SFDC_PageLayout} */ d) => d?.nbFields > 100,
+        errorMessage: `This page layout has more than 100 fields. Please consider reducing that number as it can impact user adoption.`,
+        badField: 'nbFields',
+        applicable: [ SFDC_PageLayout ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    }, {
+        id: 64,
+        description: 'Page layout with more than 11 related lists',
+        formula: (/** @type {SFDC_PageLayout} */ d) => d?.nbRelatedLists > 11,
+        errorMessage: `This page layout has more than 11 related lists. Please consider reducing that number as it can impact user adoption.`,
+        badField: 'nbRelatedLists',
+        applicable: [ SFDC_PageLayout ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    }, {
+        id: 65,
+        description: 'Page layout with Notes and Attachments related list',
+        formula: (/** @type {SFDC_PageLayout} */ d) => d?.isAttachmentRelatedListIncluded === true,
+        errorMessage: `This page layout has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
+        badField: 'isAttachmentRelatedListIncluded',
+        applicable: [ SFDC_PageLayout ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

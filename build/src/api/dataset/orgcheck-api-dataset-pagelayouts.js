@@ -21,8 +21,8 @@ export class DatasetPageLayouts extends Dataset {
         logger?.log(`Querying Tooling API about Layout and ProfileLayout in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             tooling: true,
-            string: 'SELECT Id, Name, NamespacePrefix, LayoutType, EntityDefinition.QualifiedApiName, '+
-                        'CreatedDate, LastModifiedDate ' +
+            string: 'SELECT Id, Name, NamespacePrefix, LayoutType, EntityDefinition.DurableId, ' +
+                        'EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate ' +
                     'FROM Layout '
         }, {
             tooling: true,
@@ -40,12 +40,12 @@ export class DatasetPageLayouts extends Dataset {
         const pageLayoutRecords = results[0];
         const pageLayoutProfileAssignRecords = results[1];
 
+        // Get the page layout Ids
+        const pageLayoutIds = await Processor.map(pageLayoutRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id))
+
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${pageLayoutRecords.length} page layouts...`);
-        const pageLayoutDependencies = await sfdcManager.dependenciesQuery(
-            await Processor.map(pageLayoutRecords, (/** @type {any} */ record) => sfdcManager.caseSafeId(record.Id)), 
-            logger
-        );
+        const pageLayoutDependencies = await sfdcManager.dependenciesQuery(pageLayoutIds, logger);
 
         logger?.log(`Parsing ${pageLayoutRecords.length} page layouts...`);
         const pageLayouts = new Map(await Processor.map(pageLayoutRecords, (/** @type {any} */ record) => {
@@ -64,7 +64,7 @@ export class DatasetPageLayouts extends Dataset {
                     profileAssignmentCount: 0,
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, record.EntityDefinition?.QualifiedApiName)
+                    url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.PAGE_LAYOUT, record.EntityDefinition?.DurableId)
                 },
                 dependencyData: pageLayoutDependencies
             });
@@ -89,6 +89,34 @@ export class DatasetPageLayouts extends Dataset {
 
                 // Set the assignment count
                 pageLayout.profileAssignmentCount += record.CountAssignment;
+            }
+        });
+
+        // Get information about the previous identified page layouts using metadata api
+        logger?.log(`Calling Tooling API Composite to get more information about these ${pageLayoutIds.length} page layouts...`);
+        const pageLayoutMetadataRecords = await sfdcManager.readMetadataAtScale('Layout', pageLayoutIds, [ 'FIELD_INTEGRITY_EXCEPTION', 'UNKNOWN_EXCEPTION' ], logger);
+
+        logger?.log(`Parsing ${pageLayoutMetadataRecords.length} page layout metadata information...`);
+        await Processor.forEach(pageLayoutMetadataRecords, (/** @type {any} */ metadataRecord) => {
+
+            // Get the ID15 of this page layout
+            const id = sfdcManager.caseSafeId(metadataRecord.Id);
+
+            if (pageLayouts.has(id)) {
+                // Get the page layout
+                const pageLayout = pageLayouts.get(id);
+
+                // Set the metadata info
+                pageLayout.nbRelatedLists = metadataRecord?.Metadata?.relatedLists?.length ?? 0;
+                pageLayout.isAttachmentRelatedListIncluded = metadataRecord?.Metadata?.relatedLists?.some((relList) => relList.relatedList === 'RelatedNoteList') ?? false;
+                pageLayout.nbFields = 0;
+                metadataRecord?.Metadata?.layoutSections?.forEach((section) => {
+                    section?.layoutColumns?.forEach((column) => {
+                        column?.layoutItems?.forEach((item) => {
+                            if (item.field) pageLayout.nbFields++;
+                        });
+                    });
+                });
             }
         });
 

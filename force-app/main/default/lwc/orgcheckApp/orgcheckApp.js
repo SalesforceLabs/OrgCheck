@@ -1653,11 +1653,14 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Type',             type: ocui.ColumnType.TXT, data: { value: 'type' }},
             { label: 'Object',           type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
             { label: 'Assignment Count', type: ocui.ColumnType.NUM, data: { value: 'profileAssignmentCount' }},
+            { label: '#Fields',          type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
+            { label: '#Related Lists',   type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
+            { label: 'Attachment List?', type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
             { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
             { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
             { label: 'Using',            type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
             { label: 'Referenced in',    type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Dependencies',     type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Dependencies',     type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC

@@ -80,4 +80,25 @@ export class SFDC_PageLayout extends DataWithDependencies {
      * @public
      */
     lastModifiedDate;
+
+    /**
+     * @description Number of related lists on this page layout
+     * @type {number}
+     * @public
+     */
+    nbRelatedLists;
+
+    /**
+     * @description Indicates if the attachment related list is included on this page layout
+     * @type {boolean}
+     * @public
+     */
+    isAttachmentRelatedListIncluded;
+
+    /**
+     * @description Number of fields on this page layout
+     * @type {number}
+     * @public
+     */ 
+    nbFields;
 }
