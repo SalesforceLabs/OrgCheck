@@ -632,6 +632,7 @@
                         <c-orgcheck-extended-datatable empty-message="There is no process builder to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={processBuildersTableDefinition} rows={processBuildersTableData} show-export-button export-basename="ProcessBuilders"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                     <lightning-tab value="workflows" label="🚗 Workflows" onactive={handleSubTabActivation}>
+                        Salesforce provides a <a href="/lightning/setup/MigrateToFlowTool/home" target="_blank" rel="external noopener noreferrer">migration tool</a> for your workflows<br /><br />
                         <c-orgcheck-extended-datatable empty-message="There is no workflow to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={workflowsTableDefinition} rows={workflowsTableData} show-export-button export-basename="Workflows"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
