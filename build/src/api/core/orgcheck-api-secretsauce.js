@@ -635,6 +635,38 @@ const ALL_SCORE_RULES = [
         badField: 'isAttachmentRelatedListIncluded',
         applicable: [ SFDC_PageLayout ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    }, {
+        id: 66,
+        description: 'Custom profile with low number of active members',
+        formula: (/** @type {SFDC_Profile} */ d) => d?.isCustom === true && d?.memberCounts <= 10,
+        errorMessage: `This custom profile has a low number of active members (<= 10). Maybe you should review its use in your org...`,
+        badField: 'memberCounts',
+        applicable: [ SFDC_Profile ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 67,
+        description: 'Custom permission set with low number of active members and only assigned to empty group(s)',
+        formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.allIncludingGroupsAreEmpty === true,
+        errorMessage: `This custom permission set has a low number of active members (<= 10) and is only included in empty permission set groups. Is it on purpose? Maybe you should review its use in your org...`,
+        badField: 'allIncludingGroupsAreEmpty',
+        applicable: [ SFDC_PermissionSet ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 68,
+        description: 'Custom permission set group with low number of active members',
+        formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === true && d?.memberCounts <= 10,
+        errorMessage: `This custom permission set group has a low number of active members (<= 10). Is it empty on purpose? Maybe you should review its use in your org...`,
+        badField: 'memberCounts',
+        applicable: [ SFDC_PermissionSet ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 69,
+        description: 'Custom permission set with low number of active members and not even assigned to group',
+        formula: (/** @type {SFDC_PermissionSet} */ d) => d?.isCustom === true && d?.isGroup === false && d?.memberCounts <= 10 && d?.permissionSetGroupIds?.length === 0,
+        errorMessage: `This custom permission set has a low number of active members (<= 10) and is not even assigned to a permission set group. Is it on purpose? Maybe you should review its use in your org...`,
+        badField: 'memberCounts',
+        applicable: [ SFDC_PermissionSet ],
+        category: SCORE_RULE_CATEGORIES.USELESS
     }
 ];
 Object.freeze(ALL_SCORE_RULES);
