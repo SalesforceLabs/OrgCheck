@@ -47,6 +47,7 @@ import { DatasetCustomTabs } from '../dataset/orgcheck-api-dataset-customtabs';
 import { DatasetEmailTemplates } from '../dataset/orgcheck-api-dataset-emailtemplates';
 import { DatasetKnowledgeArticles } from '../dataset/orgcheck-api-dataset-knowledgearticles';
 import { DatasetStaticResources } from '../dataset/orgcheck-api-dataset-staticresources';
+import { DatasetBrowsers } from '../dataset/orgcheck-api-dataset-browsers';
 
 /**
  * @description Dataset manager
@@ -123,6 +124,7 @@ export class DatasetManager extends DatasetManagerIntf {
         this._datasets.set(DatasetAliases.APEXTRIGGERS, new DatasetApexTriggers());
         this._datasets.set(DatasetAliases.APPLICATIONS, new DatasetApplications());
         this._datasets.set(DatasetAliases.APPPERMISSIONS, new DatasetAppPermissions());
+        this._datasets.set(DatasetAliases.BROWSERS, new DatasetBrowsers());
         this._datasets.set(DatasetAliases.CURRENTUSERPERMISSIONS, new DatasetCurrentUserPermissions());
         this._datasets.set(DatasetAliases.CUSTOMFIELDS, new DatasetCustomFields());
         this._datasets.set(DatasetAliases.CUSTOMLABELS, new DatasetCustomLabels());

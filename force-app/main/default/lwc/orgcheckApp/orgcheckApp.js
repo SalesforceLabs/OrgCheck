@@ -503,7 +503,8 @@ export default class OrgcheckApp extends LightningElement {
         'apex-tests':                { label: '🚒 Apex Unit Tests',            tab: MAIN_TABS.CODE,            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
         'apex-triggers':             { label: '🧨 Apex Triggers',              tab: MAIN_TABS.CODE,            data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
         'apex-uncompiled':           { label: '🌋 Apex Uncompiled',            tab: MAIN_TABS.CODE,            data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
-        'app-permissions':           { label: '⛕ Application Permissions',    tab: MAIN_TABS.SECURITY,        data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,    get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
+        'app-permissions':           { label: '⛕ Application Permissions',    tab: MAIN_TABS.SECURITY,        data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,      get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
+        'browsers':                  { label: '🌐 Browsers Used in Org',       tab: MAIN_TABS.SECURITY,        data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }},
         'collaboration-groups':      { label: '🦙 Chatter Groups',             tab: MAIN_TABS.BOXES,           data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }},
         'custom-fields':             { label: '🏈 Custom Fields',              tab: MAIN_TABS.DATAMODEL,       data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
         'custom-labels':             { label: '🏷️ Custom Labels',              tab: MAIN_TABS.SETTING,         data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
@@ -1351,6 +1352,23 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     }
+
+    /**
+     * @description Data definition for browsers
+     * @type {ocui.Table}
+     */
+    browsersTableDefinition = {
+        columns: [
+            { label: '#',                   type: ocui.ColumnType.IDX },
+            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Full name',           type: ocui.ColumnType.TXT, data: { value: 'fullName' }},
+            { label: 'Name',                type: ocui.ColumnType.TXT, data: { value: 'name' }},
+            { label: 'Version',             type: ocui.ColumnType.NUM, data: { value: 'version' }},
+            { label: '#Application Logins', type: ocui.ColumnType.NUM, data: { value: 'nbApplicationLogin' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
 
     /**
      * @description Table definition for custom fields
@@ -2514,6 +2532,13 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     chatterGroupsTableData;
+
+    /**
+     * @description Data table for browsers in the org
+     * @type {Array<ocapi.SFDC_Browser>}
+     * @public
+     */
+    browsersTableData;
 
     /** 
      * @description Data table for custom fields 

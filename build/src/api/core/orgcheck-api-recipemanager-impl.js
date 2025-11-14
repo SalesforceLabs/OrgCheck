@@ -55,6 +55,7 @@ import { RecipeStaticResources } from '../recipe/orgcheck-api-recipe-staticresou
 import { Processor } from './orgcheck-api-processor';
 import { SecretSauce } from './orgcheck-api-secretsauce';
 import { DataCollectionStatistics } from './orgcheck-api-recipecollection';
+import { RecipeBrowsers } from '../recipe/orgcheck-api-recipe-browsers';
 
 /**
  * @description Recipe Manager
@@ -116,6 +117,7 @@ export class RecipeManager extends RecipeManagerIntf {
         this._recipes.set(RecipeAliases.APEX_TRIGGERS, new RecipeApexTriggers());
         this._recipes.set(RecipeAliases.APEX_UNCOMPILED, new RecipeApexUncompiled());
         this._recipes.set(RecipeAliases.APP_PERMISSIONS, new RecipeAppPermissions());
+        this._recipes.set(RecipeAliases.BROWSERS, new RecipeBrowsers());
         this._recipes.set(RecipeAliases.COLLABORATION_GROUPS, new RecipeCollaborationGroups());
         this._recipes.set(RecipeAliases.CURRENT_USER_PERMISSIONS, new RecipeCurrentUserPermissions());
         this._recipes.set(RecipeAliases.CUSTOM_FIELDS, new RecipeCustomFields());

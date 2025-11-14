@@ -51,6 +51,7 @@ import { StorageIntf } from './core/orgcheck-api-storage';
 import { EncoderIntf } from './core/orgcheck-api-encoder';
 import { CompressorIntf } from './core/orgcheck-api-compressor';
 import { SFDC_StaticResource } from './data/orgcheck-api-data-staticresource';
+import { SFDC_Browser } from './data/orgcheck-api-data-browser';
 
 /**
  * @description Org Check API main class
@@ -634,6 +635,26 @@ export class API {
      */
     removeAllActiveUsersFromCache() {
         this._recipeManager.clean(RecipeAliases.INTERNAL_ACTIVE_USERS);
+    }
+
+    /**
+     * @description Get information about browsers
+     * @returns {Promise<Array<SFDC_Browser>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getBrowsers() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.BROWSERS));
+    }
+
+    /**
+     * @description Remove all the cached information about browsers
+     * @public
+     */
+    removeAllBrowsersFromCache() {
+        this._recipeManager.clean(RecipeAliases.BROWSERS);
     }
 
     /**

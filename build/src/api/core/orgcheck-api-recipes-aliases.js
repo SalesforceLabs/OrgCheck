@@ -7,6 +7,7 @@ export class RecipeAliases {
     static get APEX_TRIGGERS() { return 'apex-triggers'; }
     static get APEX_UNCOMPILED() { return 'apex-uncompiled'; }
     static get APP_PERMISSIONS() { return 'app-permissions'; }
+    static get BROWSERS() { return 'browsers'; }
     static get COLLABORATION_GROUPS() { return 'collaboration-groups'; }
     static get CURRENT_USER_PERMISSIONS() { return 'current-user-permissions'; }
     static get CUSTOM_FIELDS() { return 'custom-fields'; }

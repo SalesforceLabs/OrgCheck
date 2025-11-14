@@ -525,6 +525,7 @@
                             <li><b>🚦 Object Permissions</b>: Get the matrix of the CRUDs for all objects per profiles and permission sets</li>
                             <li><b>🚧 Field Level Securities</b>: Get the matrix of the FLSs for all fields of a sepcific object (use the global filter to select one) per profiles and permission sets</li>
                             <li><b>⛕ Application Permissions</b>: Get the matrix of the application access per profiles and permission sets</li>
+                            <li><b>🌐 Browsers</b>: Get the browsers that were used to log into Salesforce</li>
                         </ul>
                     </lightning-tab>
                     <lightning-tab value="internal-active-users" label="👥 Active Internal Users" onactive={handleSubTabActivation}>
@@ -573,6 +574,10 @@
                             <b>Legend:</b> A means <i>Accessible</i> and V means <i>Visible</i>.
                         </div>
                         <c-orgcheck-extended-datatable empty-message="There is no application permission to show." show-search show-statistics is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={appPermissionsTableDefinition} rows={appPermissionsTableData} show-export-button export-basename="AppPermissions"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="browsers" label="🌐 Browsers" onactive={handleSubTabActivation}>
+                        If you are interested in the login history details, please go to <a href="/lightning/setup/OrgLoginHistory/home" target="_blank" rel="external noopener noreferrer">the Login History setup page</a> where you can download the last six months of login history (including user information and the browser that was used).<br /><br />
+                        <c-orgcheck-extended-datatable empty-message="There is no browser to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={browsersTableDefinition} rows={browsersTableData} show-export-button export-basename="Browsers"></c-orgcheck-extended-datatable>
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>

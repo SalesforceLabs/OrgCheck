@@ -6,6 +6,7 @@ export class DatasetAliases {
     static get APEXTRIGGERS() { return 'apex-triggers'; }
     static get APPLICATIONS() { return 'applications'; }
     static get APPPERMISSIONS() { return 'app-permisions'; }
+    static get BROWSERS() { return 'browsers'; }
     static get CURRENTUSERPERMISSIONS() { return 'current-user-permissions'; }
     static get CUSTOMFIELDS() { return 'custom-fields'; }
     static get CUSTOMLABELS() { return 'custom-labels'; }

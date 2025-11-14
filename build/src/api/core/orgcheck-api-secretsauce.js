@@ -33,6 +33,7 @@ import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
 import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
 import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
+import { SFDC_Browser } from '../data/orgcheck-api-data-browser';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -667,6 +668,26 @@ const ALL_SCORE_RULES = [
         badField: 'memberCounts',
         applicable: [ SFDC_PermissionSet ],
         category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 70,
+        description: 'This browser is considered out-of-date by Salesforce',
+        formula: (/** @type {SFDC_Browser} */ d) => 
+            (d.name === 'Chrome' && d.version < 88) ||
+            (d.name === 'Edge' && d.version < 91) ||
+            (d.name === 'Firefox' && d.version < 88) ||
+            (d.name === 'Safari' && d.version < 14),
+        errorMessage: `This browser is considered out-of-date by Salesforce. At this time, we consider the following list: Chrome <88, Edge <91, Firefox <88 and Safari <14. Please work with your user to make them switch to a more recent/supported browser. To identity the users you can go to the setup page "Login History" and export the data to identify them.`,
+        badField: 'fullName',
+        applicable: [ SFDC_Browser ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    }, {
+        id: 71,
+        description: 'This browser is unsupported by Salesforce',
+        formula: (/** @type {SFDC_Browser} */ d) => d.name === 'IE',
+        errorMessage: `This browser is unsupported by Salesforce. At this time, we consider only Internet Explorer whatever its version. Please work with your user to make them switch to a more recent/supported browser. To identity the users you can go to the setup page "Login History" and export the data to identify them.`,
+        badField: 'name',
+        applicable: [ SFDC_Browser ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

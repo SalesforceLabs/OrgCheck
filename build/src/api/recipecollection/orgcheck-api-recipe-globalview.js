@@ -16,6 +16,7 @@ export class RecipeGlobalView extends RecipeCollection {
             RecipeAliases.APEX_TESTS,
             RecipeAliases.APEX_TRIGGERS,
             RecipeAliases.APEX_UNCOMPILED,
+            RecipeAliases.BROWSERS,
             RecipeAliases.COLLABORATION_GROUPS,
             RecipeAliases.CUSTOM_FIELDS,
             RecipeAliases.CUSTOM_LABELS,

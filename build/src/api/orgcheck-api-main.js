@@ -33,6 +33,7 @@ export * from './data/orgcheck-api-data-apexclass.js';
 export * from './data/orgcheck-api-data-apextrigger.js';
 export * from './data/orgcheck-api-data-application.js';
 export * from './data/orgcheck-api-data-apppermission.js';
+export * from './data/orgcheck-api-data-browser.js';
 export * from './data/orgcheck-api-data-customlabel.js';
 export * from './data/orgcheck-api-data-customtab.js';
 export * from './data/orgcheck-api-data-collaborationgroup.js';
