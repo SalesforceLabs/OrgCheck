@@ -38,6 +38,7 @@ export class DatasetRecordTypes extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_RecordType} */
             const recordType = recordTypeDataFactory.create({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 

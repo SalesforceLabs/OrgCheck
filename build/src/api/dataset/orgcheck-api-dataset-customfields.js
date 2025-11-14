@@ -88,7 +88,8 @@ export class DatasetCustomFields extends Dataset {
             // Get Information about entity
             const entityInfo = entityInfoByCustomFieldId.get(id);
 
-            // Create the instance (with score)
+            // Create the instance
+            /** @type {SFDC_Field} */
             const customField = fieldDataFactory.create({
                 properties: {
                     id: id,

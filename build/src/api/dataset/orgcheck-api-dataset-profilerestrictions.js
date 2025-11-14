@@ -62,6 +62,7 @@ export class DatasetProfileRestrictions extends Dataset {
                     (/** @type {string} */ day) => {
                         const hourStart = record.Metadata.loginHours[day + 'Start'];
                         const hourEnd = record.Metadata.loginHours[day + 'End'];
+                        /** @type {SFDC_ProfileLoginHourRestriction} */
                         return loginHourDataFactory.create({
                             properties: {
                                 day: day,
@@ -82,6 +83,7 @@ export class DatasetProfileRestrictions extends Dataset {
                     (/** @type {any} */ range) => {
                         const startNumber = COMPUTE_NUMBER_FROM_IP(range.startAddress);
                         const endNumber = COMPUTE_NUMBER_FROM_IP(range.endAddress);
+                        /** @type {SFDC_ProfileIpRangeRestriction} */
                         return ipRangeDataFactory.create({
                             properties: {
                                 startAddress: range.startAddress,

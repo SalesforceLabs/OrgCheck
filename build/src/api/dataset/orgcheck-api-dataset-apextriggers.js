@@ -56,6 +56,7 @@ export class DatasetApexTriggers extends Dataset {
                 const id = sfdcManager.caseSafeId(record.Id);
 
                 // Create the instance
+                /** @type {SFDC_ApexTrigger} */
                 const apexTrigger = apexTriggerDataFactory.create({
                     properties: {
                         id: id,

@@ -68,6 +68,7 @@ export class DatasetProfiles extends Dataset {
             const id = sfdcManager.caseSafeId(record.ProfileId);
 
             // Create the instance
+            /** @type {SFDC_Profile} */
             const profile = profileDataFactory.create({
                 properties: {
                     id: id,

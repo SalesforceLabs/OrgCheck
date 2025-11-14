@@ -38,6 +38,7 @@ export class DatasetDocuments extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_Document} */
             const document = documentDataFactory.createWithScore({
                 properties: {
                     id: id,

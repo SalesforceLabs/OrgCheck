@@ -47,6 +47,7 @@ export class DatasetVisualForcePages extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_VisualForcePage} */
             const page = pageDataFactory.create({
                 properties: {
                     id: id,

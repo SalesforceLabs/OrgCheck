@@ -38,6 +38,7 @@ export class DatasetCollaborationGroups extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_CollaborationGroup} */
             const group = groupDataFactory.create({
                 properties: {
                     id: id,

@@ -44,6 +44,7 @@ export class DatasetStaticResources extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
+            /** @type {SFDC_StaticResource} */
             const staticResource = staticResourceDataFactory.createWithScore({
                 properties: {
                     id: id,

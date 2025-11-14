@@ -45,6 +45,7 @@ export class DatasetWorkflows extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_Workflow} */
             const workflow = workflowDataFactory.create({
                 properties: {
                     id: id,

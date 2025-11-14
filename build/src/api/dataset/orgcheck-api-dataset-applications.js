@@ -36,6 +36,7 @@ export class DatasetApplications extends Dataset {
             const id = sfdcManager.caseSafeId(record.ApplicationId);
 
             // Create the instance
+            /** @type {SFDC_Application} */
             const application = applicationDataFactory.create({
                 properties: {
                     id: id,

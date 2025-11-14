@@ -46,6 +46,7 @@ export class DatasetLightningAuraComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_LightningAuraComponent} */
             const component = componentDataFactory.createWithScore({
                 properties: {
                     id: id,

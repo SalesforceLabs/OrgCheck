@@ -41,6 +41,7 @@ export class DatasetKnowledgeArticles extends Dataset {
             const articeId = sfdcManager.caseSafeId(record.KnowledgeArticleId);
 
             // Create the instance
+            /** @type {SFDC_KnowledgeArticle} */
             const knowledgeArticle = knowledgeArticleDataFactory.createWithScore({
                 properties: {
                     id: articeId,

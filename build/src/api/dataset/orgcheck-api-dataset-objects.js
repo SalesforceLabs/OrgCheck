@@ -121,6 +121,7 @@ export class DatasetObjects extends Dataset {
                 const durableId = entity.DurableId;
 
                 // Create the instance
+                /** @type {SFDC_Object} */
                 const obj = objectDataFactory.createWithScore({
                     properties: {
                         id: object.name,

@@ -48,6 +48,7 @@ export class DatasetCustomTabs extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_CustomTab} */
             const customTab = customTabDataFactory.createWithScore({
                 properties: {
                     id: id,

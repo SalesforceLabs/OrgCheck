@@ -39,6 +39,7 @@ export class DatasetValidationRules extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_ValidationRule} */
             const validationRule = validationRuleDataFactory.createWithScore({
                 properties: {
                     id: sfdcManager.caseSafeId(id), 

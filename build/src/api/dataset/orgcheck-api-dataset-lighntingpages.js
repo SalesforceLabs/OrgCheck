@@ -47,6 +47,7 @@ export class DatasetLightningPages extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_LightningPage} */
             const page = pageDataFactory.createWithScore({
                 properties: {
                     id: id,

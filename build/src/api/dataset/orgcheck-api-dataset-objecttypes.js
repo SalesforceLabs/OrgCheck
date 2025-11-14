@@ -39,6 +39,10 @@ export class DatasetObjectTypes extends Dataset {
         const objecTypeDataFactory = dataFactory.getInstance(SFDC_ObjectType);
 
         // Return data
-        return new Map(OBJECTTYPES.map((type) => [ type.id, objecTypeDataFactory.create({ properties: { id: type.id, label: type.label }}) ]));
+        return new Map(OBJECTTYPES.map((type) => [ 
+            type.id, 
+            /** @type {SFDC_ObjectType} */
+            objecTypeDataFactory.create({ properties: { id: type.id, label: type.label }}) 
+        ]));
     } 
 }

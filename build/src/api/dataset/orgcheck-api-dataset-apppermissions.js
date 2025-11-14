@@ -51,6 +51,7 @@ export class DatasetAppPermissions extends Dataset {
                 const accesses = appMenuItemAccesses.get(appId);
 
                 // Create the instance
+                /** @type {SFDC_AppPermission} */
                 const appPermission = appPermissionDataFactory.create({
                     properties: {
                         appId: appId,

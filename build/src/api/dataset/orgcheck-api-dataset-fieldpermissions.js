@@ -44,6 +44,7 @@ export class DatasetFieldPermissions extends Dataset {
                 const fieldName = indeOfDot === -1 ? record.Field : record.Field.substring(indeOfDot + 1);
 
                 // Create the instance
+                /** @type {SFDC_FieldPermission} */
                 const fieldPermission = fieldPermissionDataFactory.create({
                     properties: {
                         fieldApiName: fieldName,

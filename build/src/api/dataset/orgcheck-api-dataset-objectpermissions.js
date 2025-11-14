@@ -36,6 +36,7 @@ export class DatasetObjectPermissions extends Dataset {
             permissionRecords,
             (/** @type {any} */ record) => {
                 // Create the instance
+                /** @type {SFDC_ObjectPermission} */
                 const permission = permissionDataFactory.create({
                     properties: {
                         parentId: sfdcManager.caseSafeId(record.Parent.IsOwnedByProfile === true ? record.Parent.ProfileId : record.ParentId),

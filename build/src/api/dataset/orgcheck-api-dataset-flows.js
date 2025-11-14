@@ -64,6 +64,7 @@ export class DatasetFlows extends Dataset {
             const latestVersionId = sfdcManager.caseSafeId(record.LatestVersionId);
 
             // Create the instance
+            /** @type {SFDC_Flow} */
             const flowDefinition = flowDefinitionDataFactory.create({
                     properties: {
                     id: id,
@@ -116,6 +117,7 @@ export class DatasetFlows extends Dataset {
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
 
             // Create the instance
+            /** @type {SFDC_FlowVersion} */
             const activeFlowVersion = flowVersionDataFactory.create({
                 properties: {
                     id: id,

@@ -37,6 +37,7 @@ export class DatasetProfilePasswordPolicies extends Dataset {
                 profilePasswordPolicies,
                 (/** @type {any} */ ppp) => {
                     // Create the instance
+                    /** @type {SFDC_ProfilePasswordPolicy} */
                     const policy = policyDataFactory.createWithScore({
                         properties: {
                             lockoutInterval: parseInt(ppp.lockoutInterval, 10),

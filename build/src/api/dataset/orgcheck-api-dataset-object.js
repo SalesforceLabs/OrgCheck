@@ -1,5 +1,6 @@
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { Processor } from '../core/orgcheck-api-processor';
+import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
@@ -111,6 +112,7 @@ export class DatasetObject extends Dataset {
                 }
             }
         });
+        /** @type {Array<SFDC_Field>} */
         const standardFields = await Processor.map(
             sobjectDescribed.fields,
             (/** @type {any} */ field) => {
@@ -138,12 +140,14 @@ export class DatasetObject extends Dataset {
         );
 
         // apex triggers
+        /** @type {Array<SFDC_ApexTrigger>} */
         const apexTriggerIds = await Processor.map(
             entity.ApexTriggers?.records, 
             (/** @type {any} */ t) => sfdcManager.caseSafeId(t.Id)
         );
 
         // field sets
+        /** @type {Array<SFDC_FieldSet>} */
         const fieldSets = await Processor.map(
             entity.FieldSets?.records,
             (/** @type {any} */ t) => fieldSetDataFactory.createWithScore({ 
@@ -157,6 +161,7 @@ export class DatasetObject extends Dataset {
         );
 
         // page layouts
+        /** @type {Array<SFDC_PageLayout>} */
         const layouts = await Processor.map(
             entity.Layouts?.records,
             (/** @type {any} */ t) => layoutDataFactory.createWithScore({ 
@@ -170,6 +175,7 @@ export class DatasetObject extends Dataset {
         );
         
         // limits
+        /** @type {Array<SFDC_Limit>} */
         const limits = await Processor.map(
             entity.Limits?.records,
             (/** @type {any} */ t) => limitDataFactory.createWithScore({ 
@@ -186,6 +192,7 @@ export class DatasetObject extends Dataset {
         );
         
         // validation rules
+        /** @type {Array<SFDC_ValidationRule>} */
         const validationRules = await Processor.map(
             entity.ValidationRules?.records,
             (/** @type {any} */ t) => validationRuleDataFactory.createWithScore({ 
@@ -205,6 +212,7 @@ export class DatasetObject extends Dataset {
         );
         
         // weblinks and actions
+        /** @type {Array<SFDC_WebLink>} */
         const webLinks = await Processor.map(
             entity.WebLinks?.records,
             (/** @type {any} */ t) => webLinkDataFactory.createWithScore({ 
@@ -225,6 +233,7 @@ export class DatasetObject extends Dataset {
         );
         
         // record types
+        /** @type {Array<SFDC_RecordType>} */
         const recordTypes = await Processor.map(
             sobjectDescribed.recordTypeInfos,
             (/** @type {any} */ t) => recordTypeDataFactory.createWithScore({ 
@@ -242,6 +251,7 @@ export class DatasetObject extends Dataset {
         );
         
         // relationships
+        /** @type {Array<SFDC_ObjectRelationShip>} */
         const relationships = await Processor.map(
             sobjectDescribed.childRelationships,
             (/** @type {any} */ relationship) => relationshipDataFactory.createWithScore({ 
@@ -256,6 +266,8 @@ export class DatasetObject extends Dataset {
             (/** @type {any} */ relationship) => relationship.relationshipName !== null
         );
 
+        // Create the object
+        /** @type {SFDC_Object} */
         const object = objectDataFactory.createWithScore({
             properties: {
                 id: entity.DurableId,

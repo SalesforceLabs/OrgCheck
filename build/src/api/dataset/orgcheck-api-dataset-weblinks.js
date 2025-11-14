@@ -49,6 +49,7 @@ export class DatasetWeblinks extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_WebLink} */
             const webLink = webLinkDataFactory.createWithScore({
                 properties: {
                     id: id,

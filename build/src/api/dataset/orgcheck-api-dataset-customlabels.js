@@ -46,6 +46,7 @@ export class DatasetCustomLabels extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_CustomLabel} */
             const customLabel = labelDataFactory.createWithScore({
                 properties: {
                     id: id,

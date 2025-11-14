@@ -81,6 +81,7 @@ export class DatasetGroups extends Dataset {
             }
 
             // Create the instance (common one)
+            /** @type {SFDC_Group} */
             const group = groupDataFactory.createWithScore({
                 properties: {
                     id: groupId,

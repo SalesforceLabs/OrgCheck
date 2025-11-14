@@ -41,6 +41,7 @@ export class DatasetUserRoles extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_UserRole} */
             const userRole = userRoleDataFactory.create({
                 properties: {
                     id: id,

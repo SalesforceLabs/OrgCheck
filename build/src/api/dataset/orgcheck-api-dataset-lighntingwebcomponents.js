@@ -46,6 +46,7 @@ export class DatasetLightningWebComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_LightningWebComponent} */
             const component = componentDataFactory.createWithScore({
                 properties: {
                     id: id,

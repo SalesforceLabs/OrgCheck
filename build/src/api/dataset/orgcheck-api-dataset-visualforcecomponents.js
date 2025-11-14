@@ -47,6 +47,7 @@ export class DatasetVisualForceComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_VisualForceComponent} */
             const component = componentDataFactory.create({
                 properties: {
                     id: id,

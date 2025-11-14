@@ -86,6 +86,7 @@ export class DatasetPermissionSets extends Dataset {
             const isPermissionSetGroup = (record.Type === 'Group'); // other values can be 'Regular', 'Standard', 'Session'
 
             // Create the instance
+            /** @type {SFDC_PermissionSet} */
             const permissionSet = permissionSetDataFactory.create({
                 properties: {
                     id: id,

@@ -97,6 +97,7 @@ export class DatasetApexClasses extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
             
             // Create the instance
+            /** @type {SFDC_ApexClass} */
             const apexClass = apexClassDataFactory.create({
                 properties: {
                     id: id,
@@ -250,6 +251,7 @@ export class DatasetApexClasses extends Dataset {
                             tc.testFailedMethods = [];
                         }
                         if (tc.lastTestRunDate === record.ApexTestRunResult?.CreatedDate) {
+                            /** @type {SFDC_ApexTestMethodResult} */
                             const result = apexTestResultDataFactory.create({ 
                                 properties: {
                                     methodName: record.MethodName,

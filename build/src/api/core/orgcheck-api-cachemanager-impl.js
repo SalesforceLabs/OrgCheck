@@ -174,7 +174,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
             };
             /** @type {DataItemInCache} */
             const dataEntry = value instanceof Map ? {
-                content: Array.from(value.entries()).filter(t => t[0].endsWith('Ref') === false), created: now
+                content: Array.from(value.entries()).filter(t => t[0]?.endsWith('Ref') === false), created: now
             } : {
                 content: value, created: now
             };

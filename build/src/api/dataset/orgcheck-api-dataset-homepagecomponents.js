@@ -47,6 +47,7 @@ export class DatasetHomePageComponents extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_HomePageComponent} */
             const homePage = homePageDataFactory.create({
                 properties: {
                     id: id,

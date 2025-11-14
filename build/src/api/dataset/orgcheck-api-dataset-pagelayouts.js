@@ -54,6 +54,7 @@ export class DatasetPageLayouts extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_PageLayout} */
             const pageLayout = pageLayoutDataFactory.create({
                 properties: {
                     id: id,

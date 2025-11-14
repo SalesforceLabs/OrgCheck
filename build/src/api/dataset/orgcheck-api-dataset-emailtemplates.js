@@ -40,6 +40,7 @@ export class DatasetEmailTemplates extends Dataset {
             const sourceCode = CodeScanner.RemoveCommentsFromXML(record.HtmlValue || record.Body || record.Markup || '');
 
             // Create the instance
+            /** @type {SFDC_EmailTemplate} */
             const emailTemplate = emailTemplateDataFactory.createWithScore({
                     properties: {
                     id: id,

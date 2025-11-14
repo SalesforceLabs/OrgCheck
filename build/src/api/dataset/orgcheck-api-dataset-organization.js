@@ -49,6 +49,7 @@ export class DatasetOrganization extends Dataset {
         else type = ORGTYPE_PROD;
 
         // Create the data
+        /** @type {SFDC_Organization} */
         const organization = organizationDataFactory.create({
             properties: {
                 id: sfdcManager.caseSafeId(record.Id),

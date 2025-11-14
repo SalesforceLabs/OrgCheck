@@ -38,6 +38,7 @@ export class DatasetPackages extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_Package} */
             const installedPackage = packageDataFactory.create({
                 properties: {
                     id: id,
@@ -61,14 +62,18 @@ export class DatasetPackages extends Dataset {
         const localPackage = organizationRecords[0].NamespacePrefix;
         if (localPackage) {
             logger?.log(`Adding your local package ${localPackage}...`);
-            packages.set(localPackage, packageDataFactory.create({
-                properties: {
-                    id: localPackage, 
-                    name: localPackage, 
-                    namespace: localPackage, 
-                    type: 'Local'
-                }
-            }));
+            packages.set(
+                localPackage, 
+                /** @type {SFDC_Package} */
+                packageDataFactory.create({
+                    properties: {
+                        id: localPackage, 
+                        name: localPackage, 
+                        namespace: localPackage, 
+                        type: 'Local'
+                    }
+                })
+            );
         }
 
         // Return data as map

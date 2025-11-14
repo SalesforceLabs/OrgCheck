@@ -51,6 +51,7 @@ export class DatasetPermissionSetLicenses extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
         
             // Create the instance
+            /** @type {SFDC_PermissionSetLicense} */
             const permissionSetLicense = permissionSetLicenseDataFactory.create({
                 properties: {
                     id: id,

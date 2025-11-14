@@ -49,6 +49,7 @@ export class DatasetInternalActiveUsers extends Dataset {
             const id = sfdcManager.caseSafeId(record.Id);
 
             // Create the instance
+            /** @type {SFDC_User} */
             const user = userDataFactory.create({
                 properties: {
                     id: id,
