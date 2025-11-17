@@ -16,10 +16,13 @@ This page is also a good start if you want to participate in the project and pro
 
 ## Prerequisites
 
-Before you begin, ensure you have the following:
+Before you begin, ensure you have installed the following elements:
 
-- A development setup with two connected Salesforce orgs
-- Salesforce CLI installed
+- Git
+- Npm
+- Yarn
+- A development tool like VsCode
+- Salesforce CLI
 
 
 ## Step 1: Clone the Org Check Project
@@ -29,6 +32,12 @@ First, clone the Org Check project repository from GitHub:
 ```bash
 git clone https://github.com/SalesforceLabs/OrgCheck.git
 cd OrgCheck
+```
+
+Make sure your user is correclty setup in git:
+```bash
+git config --global user.name "<Your Fullname>"
+git config --global user.email "<Your Email>"
 ```
 
 
@@ -76,22 +85,7 @@ Replace `<namespace>` with your actual namespace.
 
 Rename the `force-app` folder to match your namespace name.
 
-## Step 5: Adjust VisualForce Page
-
-Update the `OrgCheck_App_VFP.page` to point to your namespace as well:
-
-```html
-<apex:page
-    <script>
-        Lightning.use('<namespace>:OrgCheck_App_Aura', function() {
-            $Lightning.createComponent('<namespace>:orgcheckApp', {});
-        });
-    </script>
-</apex:page>
-```
-Replace `<namespace>` with your actual namespace.
-
-## Step 6: Create the Package
+## Step 5: Create the Package
 
 Create the package using the Salesforce CLI:
 
@@ -101,7 +95,7 @@ sf package create --name <namespace> --package-type Unlocked --path <namespace> 
 
 Note the generated **Package Id**.
 
-## Step 7: Create a Package Version
+## Step 6: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
@@ -111,7 +105,7 @@ sf package version create --package <namespace> --installation-key-bypass --wait
 
 Note the **Subscriber Package Version Id** from the output.
 
-## Step 8: Optional - Create a Scratch Org
+## Step 7: Optional - Create a Scratch Org
 
 If you want to use a scratch org, create it using:
 
@@ -119,7 +113,7 @@ If you want to use a scratch org, create it using:
 sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
-## Step 9: Deploy the Package
+## Step 8: Deploy the Package
 
 Deploy the package to your org using the **Subscriber Package Version Id**.
 
