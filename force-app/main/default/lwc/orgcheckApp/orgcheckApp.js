@@ -1576,18 +1576,23 @@ export default class OrgcheckApp extends LightningElement {
      */
     flexiPagesTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Object',        type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: '#',                  type: ocui.ColumnType.IDX },
+            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Object',             type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
+            { label: '#Components',        type: ocui.ColumnType.NUM, data: { value: 'nbComponents' }},
+            { label: '#Fields',            type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
+            { label: '#Related Lists',     type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
+            { label: 'Attachment List?',   type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
+            { label: 'Lists from Layout?', type: ocui.ColumnType.CHK, data: { value: 'isRelatedListFromPageLayoutIncluded' }},
+            { label: 'Using',              type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',      type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',       type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',        type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
@@ -1599,17 +1604,22 @@ export default class OrgcheckApp extends LightningElement {
      */
     flexiPagesInObjectTableDefinition = {
         columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',          type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+            { label: '#',                  type: ocui.ColumnType.IDX },
+            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: '#Components',        type: ocui.ColumnType.NUM, data: { value: 'nbComponents' }},
+            { label: '#Fields',            type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
+            { label: '#Related Lists',     type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
+            { label: 'Attachment List?',   type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
+            { label: 'Lists from Layout?', type: ocui.ColumnType.CHK, data: { value: 'isRelatedListFromPageLayoutIncluded' }},
+            { label: 'Using',              type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
+            { label: 'Referenced in',      type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
+            { label: 'Dependencies',       type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
+            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',        type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
         ],
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC

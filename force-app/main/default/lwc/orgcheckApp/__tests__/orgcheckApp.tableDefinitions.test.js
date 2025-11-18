@@ -133,7 +133,8 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_LightningPage ());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'score', 'id', 'name', 'url', 'type', 'package', 'objectRef', 'dependencies', 
-                'createdDate', 'lastModifiedDate', 'description' ];
+                'createdDate', 'lastModifiedDate', 'description', 'isAttachmentRelatedListIncluded',
+                'isRelatedListFromPageLayoutIncluded', 'nbComponents', 'nbFields', 'nbRelatedLists' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
@@ -146,7 +147,8 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_LightningPage ());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'score', 'id', 'name', 'url', 'type', 'package', 'dependencies', 
-                'createdDate', 'lastModifiedDate', 'description' ];
+                'createdDate', 'lastModifiedDate', 'description', 'isAttachmentRelatedListIncluded',
+                'isRelatedListFromPageLayoutIncluded', 'nbComponents', 'nbFields', 'nbRelatedLists' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties

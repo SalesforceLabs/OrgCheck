@@ -696,6 +696,14 @@ const ALL_SCORE_RULES = [
         badField: 'nbDirectLoginWithoutMFA',
         applicable: [ SFDC_User ],
         category: SCORE_RULE_CATEGORIES.SECURITY
+    }, {
+        id: 73,
+        description: 'Lightning page with Notes and Attachments related list',
+        formula: (/** @type {SFDC_LightningPage} */ d) => d?.isAttachmentRelatedListIncluded === true,
+        errorMessage: `This lightning page has the Notes and Attachments related list in it. Please consider using the Files related list instead.`,
+        badField: 'isAttachmentRelatedListIncluded',
+        applicable: [ SFDC_LightningPage ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

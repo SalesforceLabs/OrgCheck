@@ -77,6 +77,42 @@ export class SFDC_LightningPage extends DataWithDependencies {
      */
     description;
     
+
+    /**
+     * @description Number of related lists on this page
+     * @type {number}
+     * @public
+     */
+    nbRelatedLists;
+
+    /**
+     * @description Indicates if the attachment related list is directly included on this page
+     * @type {boolean}
+     * @public
+     */
+    isAttachmentRelatedListIncluded;
+
+    /**
+     * @description Indicates if the related list from the page layout is included on this page
+     * @type {boolean}
+     * @public
+     */
+    isRelatedListFromPageLayoutIncluded;
+
+    /**
+     * @description Number of components on this page
+     * @type {number}
+     * @public
+     */ 
+    nbComponents;
+
+    /**
+     * @description Number of fields used on this page
+     * @type {number}
+     * @public
+     */
+    nbFields;
+
     /**
      * @description Setup URL of this item
      * @type {string}
