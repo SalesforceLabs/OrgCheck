@@ -107,4 +107,11 @@ export class SFDC_Profile extends Data {
      * @public
      */
     importantPermissions;
+
+    /**
+     * @description True if this profile is admin-like (has some powerful permissions)
+     * @type {boolean}
+     * @public
+     */
+    isAdminLike;
 }

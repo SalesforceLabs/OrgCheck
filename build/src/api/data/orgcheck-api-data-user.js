@@ -83,6 +83,20 @@ export class SFDC_User extends Data {
     aggregateImportantPermissions;
 
     /**
+     * @description Is this user admin-like (has some powerful permissions)
+     * @type {boolean}
+     * @public
+     */
+    isAdminLike;
+
+    /**
+     * @description Does this user have MFA bypass activated
+     * @type {boolean}
+     * @public
+     */
+    hasMfaByPass;
+
+    /**
      * @description List of permission set ids assigned to this user
      * @type {Array<string>}
      * @public
@@ -95,4 +109,25 @@ export class SFDC_User extends Data {
      * @public
      */
     permissionSetRefs;
+
+    /**
+     * @description Number of direct login without using MFA
+     * @type {number}
+     * @public
+     */
+    nbDirectLoginWithoutMFA;
+
+    /**
+     * @description Number of direct login with using MFA
+     * @type {number}
+     * @public
+     */
+    nbDirectLoginWithMFA;
+
+    /**
+     * @description Number of indirect login via SSO
+     * @type {number}
+     * @public
+     */
+    nbSSOLogin;
 }

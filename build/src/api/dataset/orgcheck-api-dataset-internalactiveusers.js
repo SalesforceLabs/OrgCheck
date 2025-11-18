@@ -27,13 +27,24 @@ export class DatasetInternalActiveUsers extends Dataset {
                     'AND ContactId = NULL ' + // only internal users
                     'AND Profile.Id != NULL ' // we do not want the Automated Process users!
         }, {
-            string: 'SELECT Id, AssigneeId, PermissionSetId ' +
+            string: 'SELECT Id, AssigneeId, PermissionSetId, PermissionSet.IsOwnedByProfile, ' +
+                        'PermissionSet.PermissionsModifyAllData, ' +
+                        'PermissionSet.PermissionsViewAllData, ' +
+                        'PermissionSet.PermissionsManageUsers, ' +
+                        'PermissionSet.PermissionsCustomizeApplication, ' +
+                        'PermissionSet.PermissionsBypassMFAForUiLogins ' +
                     'FROM PermissionSetAssignment ' +
                     'WHERE Assignee.IsActive = true ' +
-                    'AND PermissionSet.IsOwnedByProfile = false ' +
                     'AND Assignee.ContactId = NULL ' +
                     'AND Assignee.Profile.Id != NULL',
             queryMoreField: 'Id'
+        }, {
+            string: 'SELECT UserId, LoginType, AuthMethodReference, Status, Count(Id) CntLogin ' +
+                    'FROM LoginHistory ' +
+                    `WHERE LoginType = 'Application' ` +
+                    `OR LoginType LIKE '%SSO%' ` +
+                    `GROUP BY UserId, LoginType, AuthMethodReference, Status ` +
+                    'ORDER BY UserId'
         }], logger);
 
         // Init the factory and records
@@ -42,6 +53,7 @@ export class DatasetInternalActiveUsers extends Dataset {
         // Create the map
         const userRecords = results[0];
         const assignmentRecords = results[1];
+        const loginRecords = results[2];
         logger?.log(`Parsing ${userRecords.length} users...`);
         const users = new Map(await Processor.map(userRecords, async (/** @type {any} */ record) => {
         
@@ -60,6 +72,11 @@ export class DatasetInternalActiveUsers extends Dataset {
                     lastPasswordChange: record.LastPasswordChangeDate,
                     profileId: sfdcManager.caseSafeId(record.ProfileId),
                     permissionSetIds: [],
+                    isAdminLike: false,
+                    hasMfaByPass: false,
+                    nbDirectLoginWithMFA: 0,
+                    nbDirectLoginWithoutMFA: 0,
+                    nbSSOLogin: 0,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.USER)
                 }
             });
@@ -75,7 +92,49 @@ export class DatasetInternalActiveUsers extends Dataset {
             const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
             const user = users.get(assigneeId);
             if (user) {
-                user.permissionSetIds.push(permissionSetId);
+                // Add permission set id to the user (only persets or PSGs)
+                if (record.PermissionSet?.IsOwnedByProfile === false) {
+                    // IsOwnedByProfile === false means it's a PermSet or PSG (not a Profile)
+                    user.permissionSetIds.push(permissionSetId);
+                }
+                // Check for admin-like permissions for this user via this Permission Set / PSG / Profile
+                if (record.PermissionSet?.PermissionsModifyAllData === true ||
+                    record.PermissionSet?.PermissionsViewAllData === true ||
+                    record.PermissionSet?.PermissionsManageUsers === true ||
+                    record.PermissionSet?.PermissionsCustomizeApplication === true) {
+                    user.isAdminLike = true;                    
+                }
+                // Check user has MFA bypass via this Permission Set / PSG / Profile
+                if (record.PermissionSet?.PermissionsBypassMFAForUiLogins === true) {
+                    user.hasMfaByPass = true;
+                }
+            }
+        });
+
+        // Now process the user logins aggregates
+        logger?.log(`Parsing ${loginRecords.length} user logins aggregates...`);
+        await Processor.forEach(loginRecords, (/** @type {any} */ record) => {
+
+            // Only successful logins are interesting
+            if (record.Status === 'Success') { // filter not possible in SOQL!
+                const userId = sfdcManager.caseSafeId(record.UserId);
+                const user = users.get(userId);
+                if (user) {
+                    // depending on the login access (direct or sso)
+                    if (record.LoginType === 'Application') {
+                        // Direct login access via browser
+                        if (record.AuthMethodReference) {
+                            // MFA used from Salesforce
+                            user.nbDirectLoginWithMFA += record.CntLogin;
+                        } else {
+                            // No MFA used from Salesforce
+                            user.nbDirectLoginWithoutMFA += record.CntLogin;
+                        }
+                    } else {
+                        // SSO login access via IDP
+                        user.nbSSOLogin += record.CntLogin;
+                    }
+                }
             }
         });
 
