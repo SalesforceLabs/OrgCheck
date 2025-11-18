@@ -10,7 +10,7 @@ import { loadScript } from 'lightning/platformResourceLoader';
 const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
 const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
-const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 5;
+const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
 const MAIN_TABS = {
     HOME: 'home',
     ORG: 'organization',
@@ -2719,7 +2719,7 @@ export default class OrgcheckApp extends LightningElement {
         if (data) {
             const hardCodedURLsViewData = [];
             const sheets = [];
-            data?.filter((item) => item?.hadError === false).forEach((item, alias) => {
+            data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
                 const itemName = transfomer.label ?? `[${alias}]`;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
@@ -2727,6 +2727,7 @@ export default class OrgcheckApp extends LightningElement {
                 const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];
                 hardCodedURLsViewData.push({
                     type: itemName,
+                    hadError: item?.hadError,
                     countAll: item?.countAll,
                     countBad: item?.countBad,
                     items: item?.data?.filter((d, i) => i < MAX_ITEMS_IN_HARDCODED_URLS_LIST).map(d => {
@@ -2762,12 +2763,13 @@ export default class OrgcheckApp extends LightningElement {
 
     hardCodedURLsViewTableDefinition = {
         columns: [
-            { label: 'Type', type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Bad', type: ocui.ColumnType.NUM, data: { value: 'countBad' }},
-            { label: 'Total', type: ocui.ColumnType.NUM, data: { value: 'countAll' }},
+            { label: 'Type',      type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Had Issue', type: ocui.ColumnType.CHK, data: { value: 'hadError' }},
+            { label: 'Bad',       type: ocui.ColumnType.NUM, data: { value: 'countBad' }},
+            { label: 'Total',     type: ocui.ColumnType.NUM, data: { value: 'countAll' }},
             { label: `First ${MAX_ITEMS_IN_HARDCODED_URLS_LIST} items...`, type: ocui.ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
         ],
-        orderIndex: 1,
+        orderIndex: 2,
         orderSort: ocui.SortOrder.DESC
     }
 
