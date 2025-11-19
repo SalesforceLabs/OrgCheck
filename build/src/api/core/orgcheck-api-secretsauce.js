@@ -704,6 +704,14 @@ const ALL_SCORE_RULES = [
         badField: 'isAttachmentRelatedListIncluded',
         applicable: [ SFDC_LightningPage ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    } , {
+        id: 74,
+        description: 'User with debug mode enabled',
+        formula: (/** @type {SFDC_User} */ d) => d?.hasDebugMode === true,
+        errorMessage: `This user has the debug mode enabled. Please disable it for better performance and user adoption.`,
+        badField: 'hasDebugMode',
+        applicable: [ SFDC_User ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

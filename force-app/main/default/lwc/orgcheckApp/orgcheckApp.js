@@ -1862,6 +1862,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Last login',             type: ocui.ColumnType.DTM,  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
             { label: 'Failed logins',          type: ocui.ColumnType.NUM,  data: { value: 'numberFailedLogins' }},
             { label: 'Has MFA by-pass?',       type: ocui.ColumnType.CHK,  data: { value: 'hasMfaByPass' }},
+            { label: 'Has Debug mode?',        type: ocui.ColumnType.CHK,  data: { value: 'hasDebugMode' }},
             { label: '#SF Logins w/o MFA',     type: ocui.ColumnType.NUM,  data: { value: 'nbDirectLoginWithoutMFA' }},
             { label: '#SF Logins w/ MFA',      type: ocui.ColumnType.NUM,  data: { value: 'nbDirectLoginWithMFA' }},
             { label: '#SSO Logins',            type: ocui.ColumnType.NUM,  data: { value: 'nbSSOLogin' }},

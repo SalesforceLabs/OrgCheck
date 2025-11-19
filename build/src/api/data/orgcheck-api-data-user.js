@@ -97,6 +97,13 @@ export class SFDC_User extends Data {
     hasMfaByPass;
 
     /**
+     * @description Does this user have debug mode activated
+     * @type {boolean}
+     * @public
+     */
+    hasDebugMode;
+
+    /**
      * @description List of permission set ids assigned to this user
      * @type {Array<string>}
      * @public

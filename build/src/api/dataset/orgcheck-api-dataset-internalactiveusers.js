@@ -21,7 +21,7 @@ export class DatasetInternalActiveUsers extends Dataset {
         logger?.log(`Querying REST API about internal active User in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             string: 'SELECT Id, Name, ProfileId, LastLoginDate, LastPasswordChangeDate, NumberOfFailedLogins, ' +
-                        'UserPreferencesLightningExperiencePreferred ' +
+                        'UserPreferencesLightningExperiencePreferred, UserPreferencesUserDebugModePref ' +
                     'FROM User ' +
                     'WHERE IsActive = true ' + // we only want active users
                     'AND ContactId = NULL ' + // only internal users
@@ -68,12 +68,13 @@ export class DatasetInternalActiveUsers extends Dataset {
                     name: record.Name,
                     lastLogin: record.LastLoginDate,
                     numberFailedLogins: record.NumberOfFailedLogins,
-                    onLightningExperience: record.UserPreferencesLightningExperiencePreferred,
+                    onLightningExperience: record.UserPreferencesLightningExperiencePreferred === true,
                     lastPasswordChange: record.LastPasswordChangeDate,
                     profileId: sfdcManager.caseSafeId(record.ProfileId),
                     permissionSetIds: [],
                     isAdminLike: false,
                     hasMfaByPass: false,
+                    hasDebugMode: record.UserPreferencesUserDebugModePref === true,
                     nbDirectLoginWithMFA: 0,
                     nbDirectLoginWithoutMFA: 0,
                     nbSSOLogin: 0,
