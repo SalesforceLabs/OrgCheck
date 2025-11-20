@@ -18,7 +18,7 @@ export class SFDC_Document extends Data {
     id;
 
     /**
-     * @description Unique identifier of this document in the org.
+     * @description Name of the document.
      * @type {string}
      * @public
      */

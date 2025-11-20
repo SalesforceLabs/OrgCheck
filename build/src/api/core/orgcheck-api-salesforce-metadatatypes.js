@@ -16,6 +16,7 @@ export class SalesforceMetadataTypes {
     static get CUSTOM_SETTING() { return 'CustomSetting'; }
     static get CUSTOM_SITE() { return 'CustomSite'; }
     static get CUSTOM_TAB() { return 'CustomTab'; }
+    static get DASHBOARD() { return 'Dashboard'; }
     static get DOCUMENT() { return 'Document'; }
     static get EXTERNAL_OBJECT() { return 'ExternalObject'; }
     static get EMAIL_TEMPLATE() { return 'EmailTemplate'; }
@@ -35,6 +36,7 @@ export class SalesforceMetadataTypes {
     static get PUBLIC_GROUP() { return 'PublicGroup'; }
     static get QUEUE() { return 'Queue'; }
     static get RECORD_TYPE() { return 'RecordType'; }
+    static get REPORT() { return 'Report'; }
     static get ROLE() { return 'UserRole'; }
     static get TECHNICAL_GROUP() { return 'TechnicalGroup'; }
     static get STANDARD_FIELD() { return 'StandardField'; }

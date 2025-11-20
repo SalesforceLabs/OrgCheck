@@ -13,6 +13,7 @@ export class RecipeAliases {
     static get CUSTOM_FIELDS() { return 'custom-fields'; }
     static get CUSTOM_LABELS() { return 'custom-labels'; }
     static get CUSTOM_TABS() { return 'custom-tabs'; }
+    static get DASHBOARDS() { return 'dashboards'; }
     static get DOCUMENTS() { return 'documents'; }
     static get EMAIL_TEMPLATES() { return 'email-templates'; }
     static get FIELD_PERMISSIONS() { return 'field-permissions'; }
@@ -41,6 +42,7 @@ export class RecipeAliases {
     static get PUBLIC_GROUPS() { return 'public-groups'; }
     static get QUEUES() { return 'queues'; }
     static get RECORD_TYPES() { return 'record-types'; }
+    static get REPORTS() { return 'reports'; }
     static get STATIC_RESOURCES() { return 'static-resources'; }
     static get USER_ROLES() { return 'user-roles'; }
     static get VALIDATION_RULES() { return 'validation-rules'; }

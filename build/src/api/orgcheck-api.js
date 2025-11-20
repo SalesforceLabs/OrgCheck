@@ -1,11 +1,15 @@
 import { BasicLoggerIntf, LoggerIntf } from './core/orgcheck-api-logger';
+import { CompressorIntf } from './core/orgcheck-api-compressor';
 import { DataCacheItem, DataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
 import { DataCacheManager } from './core/orgcheck-api-cachemanager-impl';
+import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
 import { DataMatrix } from './core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { DatasetManager } from './core/orgcheck-api-datasetmanager-impl';
 import { DatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
+import { EncoderIntf } from './core/orgcheck-api-encoder';
 import { Logger } from './core/orgcheck-api-logger-impl';
+import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
 import { RecipeAliases } from './core/orgcheck-api-recipes-aliases';
 import { RecipeManager } from './core/orgcheck-api-recipemanager-impl';
 import { RecipeManagerIntf } from './core/orgcheck-api-recipemanager';
@@ -15,11 +19,16 @@ import { SalesforceUsageInformation } from './core/orgcheck-api-salesforce-watch
 import { SecretSauce } from './core/orgcheck-api-secretsauce';
 import { SFDC_ApexClass } from './data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from './data/orgcheck-api-data-apextrigger';
+import { SFDC_Browser } from './data/orgcheck-api-data-browser';
+import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
 import { SFDC_CustomLabel } from './data/orgcheck-api-data-customlabel';
 import { SFDC_Document } from './data/orgcheck-api-data-document';
+import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
 import { SFDC_Field } from './data/orgcheck-api-data-field';
 import { SFDC_Flow } from './data/orgcheck-api-data-flow';
 import { SFDC_Group } from './data/orgcheck-api-data-group';
+import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
+import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
 import { SFDC_LightningAuraComponent } from './data/orgcheck-api-data-lightningauracomponent';
 import { SFDC_LightningPage } from './data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from './data/orgcheck-api-data-lightningwebcomponent';
@@ -33,25 +42,18 @@ import { SFDC_PermissionSetLicense } from './data/orgcheck-api-data-permissionse
 import { SFDC_Profile } from './data/orgcheck-api-data-profile';
 import { SFDC_ProfilePasswordPolicy } from './data/orgcheck-api-data-profilepasswordpolicy';
 import { SFDC_ProfileRestrictions } from './data/orgcheck-api-data-profilerestrictions';
-import { SFDC_User } from './data/orgcheck-api-data-user';
 import { SFDC_RecordType } from './data/orgcheck-api-data-recordtype';
+import { SFDC_Report } from './data/orgcheck-api-data-report';
+import { SFDC_StaticResource } from './data/orgcheck-api-data-staticresource';
+import { SFDC_User } from './data/orgcheck-api-data-user';
 import { SFDC_UserRole } from './data/orgcheck-api-data-userrole';
 import { SFDC_ValidationRule } from './data/orgcheck-api-data-validationrule';
 import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcecomponent';
 import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
-import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
-import { SFDC_CollaborationGroup } from './data/orgcheck-api-data-collaborationgroup';
-import { SFDC_HomePageComponent } from './data/orgcheck-api-data-homepagecomponent';
-import { SFDC_EmailTemplate } from './data/orgcheck-api-data-emailtemplate';
-import { SFDC_KnowledgeArticle } from './data/orgcheck-api-data-knowledgearticle';
-import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
-import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
+import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
 import { StorageIntf } from './core/orgcheck-api-storage';
-import { EncoderIntf } from './core/orgcheck-api-encoder';
-import { CompressorIntf } from './core/orgcheck-api-compressor';
-import { SFDC_StaticResource } from './data/orgcheck-api-data-staticresource';
-import { SFDC_Browser } from './data/orgcheck-api-data-browser';
+import { SFDC_Dashboard } from './orgcheck-api-main';
 
 /**
  * @description Org Check API main class
@@ -1267,6 +1269,46 @@ export class API {
      */
     removeAllValidationRulesFromCache() {
         this._recipeManager.clean(RecipeAliases.VALIDATION_RULES);
+    }
+
+    /**
+     * @description Get information about dashboards
+     * @returns {Promise<Array<SFDC_Dashboard>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getDashboards() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.DASHBOARDS));
+    }
+    
+    /**
+     * @description Remove all the cached information about dashboards
+     * @public
+     */
+    removeAllDashboardsFromCache() {
+        this._recipeManager.clean(RecipeAliases.DASHBOARDS);
+    }
+
+    /**
+     * @description Get information about reports
+     * @returns {Promise<Array<SFDC_Report>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getReports() {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.REPORTS));
+    }
+    
+    /**
+     * @description Remove all the cached information about reports
+     * @public
+     */
+    removeAllReportsFromCache() {
+        this._recipeManager.clean(RecipeAliases.REPORTS);
     }
 
     /**

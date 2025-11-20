@@ -2,9 +2,11 @@ import { DataWithDependencies } from './orgcheck-api-data';
 import { ScoreRule } from './orgcheck-api-datafactory';
 import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
+import { SFDC_Browser } from '../data/orgcheck-api-data-browser';
 import { SFDC_CollaborationGroup } from '../data/orgcheck-api-data-collaborationgroup';
 import { SFDC_CustomLabel } from '../data/orgcheck-api-data-customlabel';
 import { SFDC_CustomTab } from '../data/orgcheck-api-data-customtab';
+import { SFDC_Dashboard } from '../data/orgcheck-api-data-dashboard';
 import { SFDC_Document } from '../data/orgcheck-api-data-document';
 import { SFDC_EmailTemplate } from '../data/orgcheck-api-data-emailtemplate';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
@@ -12,10 +14,12 @@ import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
 import { SFDC_Flow } from '../data/orgcheck-api-data-flow';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 import { SFDC_HomePageComponent } from '../data/orgcheck-api-data-homepagecomponent';
+import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
 import { SFDC_LightningAuraComponent } from '../data/orgcheck-api-data-lightningauracomponent';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
 import { SFDC_LightningWebComponent } from '../data/orgcheck-api-data-lightningwebcomponent';
 import { SFDC_Limit } from '../data/orgcheck-api-data-limit';
+import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_PageLayout } from '../data/orgcheck-api-data-pagelayout';
 import { SFDC_PermissionSet } from '../data/orgcheck-api-data-permissionset';
 import { SFDC_PermissionSetLicense } from '../data/orgcheck-api-data-permissionsetlicense';
@@ -23,6 +27,8 @@ import { SFDC_Profile } from '../data/orgcheck-api-data-profile';
 import { SFDC_ProfilePasswordPolicy } from '../data/orgcheck-api-data-profilepasswordpolicy';
 import { SFDC_ProfileRestrictions } from '../data/orgcheck-api-data-profilerestrictions';
 import { SFDC_RecordType } from '../data/orgcheck-api-data-recordtype';
+import { SFDC_Report } from '../data/orgcheck-api-data-report';
+import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
 import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_UserRole } from '../data/orgcheck-api-data-userrole';
 import { SFDC_ValidationRule } from '../data/orgcheck-api-data-validationrule';
@@ -30,10 +36,6 @@ import { SFDC_VisualForceComponent } from '../data/orgcheck-api-data-visualforce
 import { SFDC_VisualForcePage } from '../data/orgcheck-api-data-visualforcepage';
 import { SFDC_WebLink } from '../data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow.js';
-import { SFDC_KnowledgeArticle } from '../data/orgcheck-api-data-knowledgearticle';
-import { SFDC_StaticResource } from '../data/orgcheck-api-data-staticresource';
-import { SFDC_Object } from '../data/orgcheck-api-data-object';
-import { SFDC_Browser } from '../data/orgcheck-api-data-browser';
 
 /**
  * @description Checks if the difference bewteen the given current version and the api version is more than three years (or more if specified)
@@ -159,10 +161,10 @@ const ALL_SCORE_RULES = [
     }, {
         id: 6,
         description: 'No description',
-        formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate | SFDC_StaticResource } */ d) => IS_EMPTY(d?.description),
+        formula: (/** @type { SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForcePage | SFDC_VisualForceComponent | SFDC_Workflow | SFDC_WebLink | SFDC_FieldSet | SFDC_ValidationRule | SFDC_Document | SFDC_CustomTab | SFDC_EmailTemplate | SFDC_StaticResource | SFDC_Report | SFDC_Dashboard } */ d) => IS_EMPTY(d?.description),
         errorMessage: `This component does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
-        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate, SFDC_StaticResource ],
+        applicable: [ SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForcePage, SFDC_VisualForceComponent, SFDC_Workflow, SFDC_WebLink, SFDC_FieldSet, SFDC_ValidationRule, SFDC_Document, SFDC_CustomTab, SFDC_EmailTemplate, SFDC_StaticResource, SFDC_Report, SFDC_Dashboard ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
         id: 7,

@@ -13,6 +13,7 @@ export class DatasetAliases {
     static get CUSTOMTABS() { return 'custom-tabs'; }
     static get COLLABORATIONGROUPS() { return 'collaboration-groups'; }
     static get DOCUMENTS() { return 'documents'; }
+    static get DASHBOARDS() { return 'dashboards'; }
     static get EMAILTEMPLATES() { return 'email-templates'; }
     static get FIELDPERMISSIONS() { return 'field-permissions'; }
     static get FLOWS() { return 'flows'; }
@@ -35,6 +36,7 @@ export class DatasetAliases {
     static get PROFILERESTRICTIONS() { return 'profile-restrictions'; }
     static get PROFILES() { return 'profiles'; }
     static get RECORDTYPES () { return 'record-types'; }
+    static get REPORTS() { return 'reports'; }
     static get STATICRESOURCES() { return 'static-resources'; }
     static get USERROLES() { return 'user-roles'; }
     static get INTERNALACTIVEUSERS() { return 'internal-active-users'; }

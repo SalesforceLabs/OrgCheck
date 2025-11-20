@@ -12,16 +12,17 @@ const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
 const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
 const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
 const MAIN_TABS = {
+    AUTOMATION: 'automation',
+    ANALYTICS: 'analytics',
+    BOXES: 'boxes',
+    CODE: 'code',
+    DATAMODEL: 'datamodel',
     HOME: 'home',
     ORG: 'organization',
-    CODE: 'code',
-    VISUAL: 'visual',
-    DATAMODEL: 'datamodel',
+    OTHERS: 'others',
     SECURITY: 'security',
-    AUTOMATION: 'automation',
     SETTING: 'setting',
-    BOXES: 'boxes',
-    OTHERS: 'others'
+    VISUAL: 'visual'
 };
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
@@ -510,6 +511,7 @@ export default class OrgcheckApp extends LightningElement {
         'custom-labels':             { label: '🏷️ Custom Labels',              tab: MAIN_TABS.SETTING,         data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
         'custom-tabs':               { label: '🥠 Custom Tabs',                tab: MAIN_TABS.VISUAL,          data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }},
         'documents':                 { label: '🚧 Documents',                  tab: MAIN_TABS.SETTING,         data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }},
+        'dashboards':                { label: '🌲 Dashboards',                 tab: MAIN_TABS.ANALYTICS,       data: 'dashboardsTableData',                   remove: () => { this._api?.removeAllDashboardsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getDashboards(); }},
         'email-templates':           { label: '🌇 Email Templates',            tab: MAIN_TABS.SETTING,         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
         'field-permissions':         { label: '🚧 Field Level Securities',     tab: MAIN_TABS.SECURITY,        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
         'flows':                     { label: '🏎️ Flows',                      tab: MAIN_TABS.AUTOMATION,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
@@ -534,6 +536,7 @@ export default class OrgcheckApp extends LightningElement {
         'public-groups':             { label: '🐘 Public Groups',              tab: MAIN_TABS.BOXES,           data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
         'queues':                    { label: '🦒 Queues',                     tab: MAIN_TABS.BOXES,           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
         'record-types':              { label: '🏏 Record Types',               tab: MAIN_TABS.DATAMODEL,       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        'reports':                   { label: '🌳 Reports',                    tab: MAIN_TABS.ANALYTICS,       data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }},
         'static-resources':          { label: '🗿 Static Resources',           tab: MAIN_TABS.SETTING,         data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }},
         'user-roles':                { label: '🦓 Internal Role Listing',      tab: MAIN_TABS.BOXES,           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
         'user-roles-hierarchy':      { label: '🐙 Internal Role Explorer',     tab: MAIN_TABS.BOXES,           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
@@ -1547,6 +1550,54 @@ export default class OrgcheckApp extends LightningElement {
         orderIndex: 1,
         orderSort: ocui.SortOrder.DESC
     };
+
+        /**
+     * @description Table definition for dashboards
+     * @type {ocui.Table}
+     */
+    dashboardsTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'title' }},
+            { label: 'Title',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'title' }},
+            { label: 'Developer Name',  type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
+            { label: 'Last viewed',     type: ocui.ColumnType.DTM, data: { value: 'lastViewedDate' }},
+            { label: 'Last referenced', type: ocui.ColumnType.DTM, data: { value: 'lastReferencedDate' }},
+            { label: 'Refreshed',       type: ocui.ColumnType.DTM, data: { value: 'resultRefreshedDate' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
+
+    /**
+     * @description Table definition for reports
+     * @type {ocui.Table}
+     */
+    reportsTableDefinition = {
+        columns: [
+            { label: '#',               type: ocui.ColumnType.IDX },
+            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
+            { label: 'Developer Name',  type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
+            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
+            { label: 'Format',          type: ocui.ColumnType.TXT, data: { value: 'format' }},
+            { label: 'Last run',        type: ocui.ColumnType.DTM, data: { value: 'lastRunDate' }},
+            { label: 'Last viewed',     type: ocui.ColumnType.DTM, data: { value: 'lastViewedDate' }},
+            { label: 'Last referenced', type: ocui.ColumnType.DTM, data: { value: 'lastReferencedDate' }},
+            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
+            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
+            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
+            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    }
 
     /**
      * @description Table definition for lightning aura components
@@ -2587,6 +2638,18 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array<ocapi.SFDC_Document>}
      */
     documentsTableData;
+
+    /**
+     * @description Data table for dashboards
+     * @type {Array<ocapi.SFDC_Dashboard>}
+     */
+    dashboardsTableData;
+
+    /**
+     * @description Data table for reports
+     * @type {Array<ocapi.SFDC_Report>}
+     */
+    reportsTableData;
 
     /** 
      * @description Data table for lightning aura components 

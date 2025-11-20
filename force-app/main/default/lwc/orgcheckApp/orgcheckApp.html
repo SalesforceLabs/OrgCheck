@@ -756,6 +756,28 @@
                     </lightning-tab>
                 </lightning-tabset>
             </lightning-tab>
+            <lightning-tab value="analytics" label="⛰️ Analytics" onactive={handleMainTabActivation}>
+                <lightning-layout>
+                    <lightning-layout-item>
+                        <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="reports,dashboards"></lightning-button>
+                    </lightning-layout-item>
+                </lightning-layout>
+                <lightning-tabset active-tab-value={selectedSubTab}>
+                    <lightning-tab value="summary-08" label="Summary" onactive={handleSubTabActivation}>
+                        <h1 class="slds-text-heading_large">⛰️ Welcome in the Analytics world!</h1>
+                        <ul class="slds-list_dotted">
+                            <li><b>🌳 Reports</b>: List all reports in the org</li>
+                            <li><b>🌲 Dashboards</b>: List all dashboards in the org</li>
+                        </ul>
+                    </lightning-tab>
+                    <lightning-tab value="reports" label="🌳 Reports" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no Report to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={reportsTableDefinition} rows={reportsTableData} show-export-button export-basename="Reports"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                    <lightning-tab value="dashboards" label="🌲 Dashboards" onactive={handleSubTabActivation}>
+                        <c-orgcheck-extended-datatable empty-message="There is no Dashboard to show." show-search show-statistics onviewscore={handleViewScore} is-sticky-headers is-infinite-scrolling infinite-scrolling-initial-nb-rows=25 infinite-scrolling-additional-nb-rows=100 table-definition={dashboardsTableDefinition} rows={dashboardsTableData} show-export-button export-basename="Dashboards"></c-orgcheck-extended-datatable>
+                    </lightning-tab>
+                </lightning-tabset>
+            </lightning-tab>
         </template>
     </lightning-tabset>
 </template>
