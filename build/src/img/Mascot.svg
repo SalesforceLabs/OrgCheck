@@ -41,7 +41,7 @@
      id="layer1"
      transform="translate(-14.22596,-16.610137)">
     <g
-       id="g17"
+       id="cape-back"
        inkscape:label="Cape-Back"
        transform="translate(14.22596,16.610137)">
       <path
@@ -49,50 +49,50 @@
          fill="#6c2221"
          stroke="#000000"
          stroke-width="2"
-         id="path833"
+         id="cape-back-1"
          sodipodi:nodetypes="ccccc"
          style="display:inline"
          transform="translate(-14.22596,-16.610137)"
          inkscape:label="Cape-Back1" />
     </g>
     <g
-       id="g15"
+       id="body"
        inkscape:label="Body">
       <path
          d="m 95.074852,92.460657 c -9.544,24.931003 -35.153,68.212003 -42.517,89.559003 4.633,11.272 35.352,20.864 45.432,9.354 9.684998,-14.585 10.119998,-65.384 6.549998,-93.650003 -3.298,-2.828 -8.517998,-5.146 -9.463998,-5.264"
          fill="#559bbe"
          stroke="#000000"
          stroke-width="2"
-         id="path835"
+         id="body-1"
          style="display:inline"
          inkscape:label="Body1" />
       <path
          d="m 53.562852,181.77766 c 1.13,3.293 6.898,7.298 8.666,8.115 -2.702,-4.04 14.431,-46.328 29.204,-65.913 15.052998,-18.314 7.862,47.38 -0.234,70.54 2.893,-1.037 5.39,-2.267 7.09,-5.447 7.889998,-14.763 8.814998,-58.518 4.599998,-99.907006 C 84.845852,119.15066 66.865852,148.54966 53.562852,181.77766 Z"
          fill="#4883a1"
-         id="path837"
+         id="body-shadow"
          style="display:inline"
          inkscape:label="BodyShadow" />
     </g>
     <g
-       id="g18"
-       inkscape:label="Cape-Front">
+       id="cape-front"
+       inkscape:label="CapeFront">
       <path
          d="m 108.41285,202.60866 c 7.074,-24.94 11.48,-89.321 -8.922998,-107.779003 -7.068,29.243003 -32.162,46.444003 -42.842,61.605003 -10.68,15.16 -12.427,53.568 -10.518,56.607 -9.785,-8.062 -27.092,-13.327 -30.658,-29.385 -4.627,-15.204 59.692,-72.712 79.603,-91.196003 30.994998,4.598 29.848998,76.834003 13.336998,110.149003"
          fill="#e6655e"
          stroke="#000000"
          stroke-width="2"
-         id="path839"
+         id="cape-front-1"
          style="display:inline"
-         inkscape:label="Cape-Front1" />
+         inkscape:label="CapeFront1" />
       <path
          d="m 90.814852,113.38066 c -4.217,-3.37 0.903,-10.933 -8.359,-5.844 -2.278,6.682 -46.117,39.207 -47.32,53.415 -1.205,14.207 0.547,17.196 6.274,13.793 5.726,-3.403 12.87,-16.707 12.87,-16.707 -4.989,12.938 -10.118,25.98 -9.707,52.525 -10.687,-7.125 -24.402,-12.877 -28.348,-27.706 5.005,-25.427 61.279,-70 78.85,-90.397003 l 3.046,6.415 z"
          fill="#d25d56"
-         id="path841"
+         id="cape-shadow"
          style="display:inline"
          inkscape:label="CapeShadow" />
     </g>
     <g
-       id="g16"
+       id="head"
        inkscape:label="Head"
        style="display:inline">
       <path
@@ -100,41 +100,41 @@
          fill="#e9e6d0"
          stroke="#000000"
          stroke-width="2"
-         id="path843"
+         id="skin"
          sodipodi:nodetypes="cccc"
          inkscape:label="Skin" />
       <path
          d="m 84.190852,67.981656 c -1.677,26.026001 33.435998,30.474001 63.681998,24.000001 0.993,2.95 0.816,0.32 2.446,3.083 -6.666,1.75 -24.414,4.93 -37.22,4.817 -7.245,-0.065 -14.367998,-2.996 -21.144998,-6.595 -8.486,-5.831003 -11.133,-19.014001 -7.763,-25.305001 z"
          fill="#aba898"
-         id="path845"
+         id="head-shadow"
          inkscape:label="HeadShadow" />
       <path
          d="m 117.31325,52.346454 c -37.952994,10.251 -23.520398,43.528203 -23.516398,43.536203 0.446,2.922 18.682998,7.065003 19.270998,5.016003 -9.072,-12.562006 3.809,-36.858004 20.153,-43.665004 1.649,-2.676 -12.6756,-6.093202 -15.9076,-4.887202 z"
          stroke="#000000"
          stroke-width="2"
-         id="path847"
+         id="mask"
          sodipodi:nodetypes="ccccc"
          inkscape:label="Mask" />
       <g
-         id="g19"
+         id="nose"
          inkscape:label="Nose">
         <path
            d="m 157.42285,64.955656 c -18.969,3.986 -13.311,26.102001 -9.631,31.448001 14.085,-3.32 27.85,-13.748003 20.701,-27.925001 z"
            fill="#2c2c2c"
            stroke="#000000"
            stroke-width="2"
-           id="path849"
+           id="nose-2"
            sodipodi:nodetypes="cccc"
            inkscape:label="Nose2" />
         <path
            d="m 149.51585,70.564656 c 1.891,-3.31 3.499,-3.165 7.01,-4.653 3.93,0.448 7.083,1.89 11.012,3.298 1.11,0.484 2.574,3.984 1.906,6.95 -6.574,-2.647 -12.93,-5.354 -19.928,-5.595 z"
            fill="#bbbbbb"
-           id="path851"
+           id="nose-1"
            sodipodi:nodetypes="ccccc"
            inkscape:label="Nose1" />
       </g>
       <g
-         id="g859"
+         id="right-ear"
          transform="translate(14.434852,16.610656)"
          inkscape:label="RightEar">
         <path
@@ -142,21 +142,21 @@
            fill="#e9e6d0"
            stroke="#000000"
            stroke-width="1.948"
-           id="path853"
+           id="right-ear-3"
            inkscape:label="RightEar3" />
         <path
            fill="#e9e6d0"
            d="m 70.62,45.14 3.528,3.611 -3.206,1.252 -3.528,-3.612 z"
-           id="path855"
+           id="right-ear-2"
            inkscape:label="RightEar2" />
         <path
            d="m 39.072,28.988 c 10.77,4.045 22.585,8.805 32.778,19.183 L 70.592,49.63 C 65.95,44.926 55.493,38.44 53.706,37.679 40.899,32.219 36.386,31.209 39.072,28.988 Z"
            fill="#aba898"
-           id="path857"
+           id="right-ear-1"
            inkscape:label="RightEar1" />
       </g>
       <g
-         id="g867"
+         id="left-ear"
          transform="translate(14.434852,16.610656)"
          inkscape:label="LeftEar">
         <path
@@ -164,7 +164,7 @@
            fill="#e9e6d0"
            stroke="#000000"
            stroke-width="2"
-           id="path861-7"
+           id="left-ear-3"
            inkscape:label="LeftEar3" />
         <rect
            width="3.993"
@@ -174,37 +174,37 @@
            transform="matrix(0.14446,0.98951,-0.9581,0.28644,-27.736,-31.785)"
            ry="0"
            fill="#e9e6d0"
-           id="rect863"
+           id="left-ear-2"
            inkscape:label="LeftEar2" />
         <path
            d="m 75.35,2.35 c 6.805,9.275 13.847,19.933 16.707,34.196 l -1.929,0.168 C 88.813,30.237 83.93,19.243 82.85,17.627 75.113,6.053 71.886,2.741 75.35,2.35 Z"
            fill="#aba898"
-           id="path865"
+           id="left-ear-1"
            inkscape:label="LeftEar1" />
       </g>
       <g
-         id="g871"
+         id="left-eye"
          transform="translate(14.434852,16.610656)"
          inkscape:label="LeftEye">
         <path
            d="m 105.598,45.775 c -1.17,-3.298 -1.669,-6.895 -0.118,-7.784 2.985,-0.418 5.467,2.862 5.467,2.862 -0.81,1.652 -2.73,3.625 -5.349,4.922 z"
            fill="#ffffff"
-           id="path869"
+           id="left-eye-1"
            inkscape:label="LeftEye1" />
       </g>
       <g
-         id="g875"
+         id="right-eye"
          transform="translate(14.434852,16.610656)"
          inkscape:label="RightEye">
         <path
            d="m 87.168,47.952 c 5.713,-2.352 10.89,-1.164 16.313,-0.59 -0.972,2.68 -3.828,5 -7.64,7.74 -4.94,0.791 -9.238,-3.284 -8.673,-7.15 z"
            fill="#ffffff"
-           id="path873"
+           id="right-eye-1"
            inkscape:label="RightEye1" />
       </g>
     </g>
     <g
-       id="g4"
+       id="version"
        transform="matrix(0.58580989,0,0,0.58580989,69.408976,73.924765)"
        style="display:inline"
        inkscape:label="Version">
