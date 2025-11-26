@@ -3,16 +3,19 @@ List of usefull commands for packaging
 ============================================================
 
 ## list all available packages
-sf package list --target-dev-hub vfinet.devhub@salesforce.com | grep -v Deprecated
+sf package list --target-dev-hub vfinet.devhub@salesforce.com
+
+## list all available packages with extra information (including 1gp/2gp conversion)
+sf package list --target-dev-hub vfinet.devhub@salesforce.com --verbose
 
 ## list all available versions
-sf package version list --target-dev-hub vfinet.devhub@salesforce.com | grep -v Deprecated
+sf package version list --target-dev-hub vfinet.devhub@salesforce.com 
 
 ## create version for unlocked package
 sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package "Org Check (unlocked)" --installation-key-bypass --code-coverage --wait 10
 
-## create version for managed package
-sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package "Org Check" --installation-key-bypass --code-coverage --wait 10
+## create version for 2gp managed package (use when 1gp to 2gp is fully done)
+## sf package version create --target-dev-hub vfinet.devhub@salesforce.com --package "Org Check" --installation-key-bypass --code-coverage --wait 10
 
 ## Promote or delete versions
 sf package version promote --target-dev-hub vfinet.devhub@salesforce.com --package xxxxxx
