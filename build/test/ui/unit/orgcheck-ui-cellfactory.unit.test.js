@@ -1,5 +1,5 @@
 import { CellFactory } from "../../../src/ui/orgcheck-ui-table-cell";
-import { ColumnType, TableColumnWithModifiers } from "../../../src/ui/orgcheck-ui-table-column";
+import { ColumnType } from "../../../src/ui/orgcheck-ui-table-column";
 
 describe('tests.api.unit.CellFactory', () => {
 
@@ -19,7 +19,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row) => {
                 expect(row).toBeDefined();
@@ -45,7 +45,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -73,7 +73,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -100,7 +100,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -126,7 +126,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -152,7 +152,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -206,7 +206,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -232,7 +232,7 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
@@ -264,20 +264,18 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(4);
-            tableRows.forEach((row, i) => {
+            tableRows.forEach((row/*, i*/) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
-                if (row.data.values) {
-                    expect(Array.isArray(row.data.values)).toBeTruthy();
-                    row.data.values.forEach((item) => {
-                        expect(item).toBeDefined();
-                        expect(item.data).toBeDefined();
-                        expect(typeof item.data).toBe('string');
-                        expect(item.data.length).toBeGreaterThan(10);
-                    });
-                }
+                expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
+                row.data.values?.forEach((item) => {
+                    expect(item).toBeDefined();
+                    expect(item.data).toBeDefined();
+                    expect(typeof item.data).toBe('string');
+                    expect(item.data.length).toBeGreaterThan(10);
+                });
                 expect(row.typeofobjects).toBeTruthy();
             });
         });
@@ -298,19 +296,17 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(3);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
-                if (row.data.values) {
-                    expect(Array.isArray(row.data.values)).toBeTruthy();
-                    row.data.values.forEach((item, j) => {
-                        expect(item).toBeDefined();
-                        expect(typeof item.data).toBe('string');
-                        expect(item.data).toBe(data[i].annotations[j]);
-                    });
-                }
+                expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
+                row.data.values?.forEach((item, j) => {
+                    expect(item).toBeDefined();
+                    expect(typeof item.data).toBe('string');
+                    expect(item.data).toBe(data[i].annotations[j]);
+                });
                 expect(row.typeoftexts).toBeTruthy();
             });
         });
@@ -337,21 +333,19 @@ describe('tests.api.unit.CellFactory', () => {
             const tableRows = data.map((row) => {
                 return CellFactory.create(column, row);
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(4);
             tableRows.forEach((row, i) => {
                 expect(row).toBeDefined();
                 expect(row.data).toBeDefined();
-                if (row.data.values) {
-                    expect(Array.isArray(row.data.values)).toBeTruthy();
-                    row.data.values.forEach((item, j) => {
-                        expect(item).toBeDefined();
-                        expect(item.data).toBeDefined();
-                        expect(typeof item.data).toBe('object');
-                        expect(item.data.label).toBe(data[i].assigneeProfileRefs[j].name);
-                        expect(item.data.value).toBe(data[i].assigneeProfileRefs[j].url);
-                    });
-                }
+                expect(row.data.values ? Array.isArray(row.data.values) : true).toBeTruthy();
+                row.data.values?.forEach((item, j) => {
+                    expect(item).toBeDefined();
+                    expect(item.data).toBeDefined();
+                    expect(typeof item.data).toBe('object');
+                    expect(item.data.label).toBe(data[i].assigneeProfileRefs[j].name);
+                    expect(item.data.value).toBe(data[i].assigneeProfileRefs[j].url);
+                });
                 expect(row.typeofids).toBeTruthy();
             });
         });
@@ -386,74 +380,62 @@ describe('tests.api.unit.CellFactory', () => {
                     return CellFactory.create(column, row);
                 });
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(10);
             tableRows.forEach((row, i) => {
                 expect(row[0].data.value).toBe(data[i].propertyA);
                 expect(row[1].data.value).toBe(data[i].propertyB);
                 expect(row[2].data.value).toBe(data[i].propertyC);
-                switch (i) {
-                    case 0: { // none of the properties will be decorated
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 1: { // none of the properties will be decorated -- note: propA = min, not <
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 2: { // propA will be decorated (because < min), not the other props
-                        expect(row[0].decoration).toBe(columns[0].modifier.valueBeforeMin);
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 3: { // propA will be decorated (because not defined), not the other props
-                        expect(row[0].decoration).toBe(columns[0].modifier.valueIfEmpty);
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 4: { // none of the properties will be decorated -- note: propB = max, not >
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 5: { // propB will be decorated (because > max), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBe(columns[1].modifier.valueAfterMax);
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 6: { // none of the properties will be decorated -- note: propC = min, not <
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 7: { // none of the properties will be decorated -- note: propC = max, not >
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 8: { // propC will be decorated (because > max), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBe(columns[2].modifier.valueAfterMax);
-                        break;
-                    }
-                    case 9: { // propB will be decorated (because < min), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBe(columns[2].modifier.valueBeforeMin);
-                        break;
-                    }
-                }   
+
+                // i==0: none of the properties will be decorated
+                expect(i === 0 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 0 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 0 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==1: none of the properties will be decorated -- note: propA = min, not <
+                expect(i === 1 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 1 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 1 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==2: propA will be decorated (because < min), not the other props
+                expect(i === 2 ? row[0].decoration === columns[0].modifier.valueBeforeMin : true).toBeTruthy();
+                expect(i === 2 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 2 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==3: propA will be decorated (because not defined), not the other props
+                expect(i === 3 ? row[0].decoration === columns[0].modifier.valueIfEmpty : true).toBeTruthy();
+                expect(i === 3 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 3 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==4: none of the properties will be decorated -- note: propB = max, not >
+                expect(i === 4 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 4 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 4 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==5: propB will be decorated (because > max), not the other props
+                expect(i === 5 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 5 ? row[1].decoration === columns[1].modifier.valueAfterMax : true).toBeTruthy();
+                expect(i === 5 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==6: none of the properties will be decorated -- note: propC = min, not <
+                expect(i === 6 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 6 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 6 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==7: none of the properties will be decorated -- note: propC = max, not >
+                expect(i === 7 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 7 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 7 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==8: propC will be decorated (because > max), not the other props
+                expect(i === 8 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 8 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 8 ? row[2].decoration === columns[2].modifier.valueAfterMax : true).toBeTruthy();
+
+                // i==9: propB will be decorated (because < min), not the other props
+                expect(i === 9 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 9 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 9 ? row[2].decoration === columns[2].modifier.valueBeforeMin : true).toBeTruthy();
             });
         });
     }); 
@@ -486,69 +468,57 @@ describe('tests.api.unit.CellFactory', () => {
                     return CellFactory.create(column, row);
                 });
             });
-            expect(tableRows).not.toBeNull;
+            expect(tableRows).not.toBeNull();
             expect(tableRows.length).toBe(9);
             tableRows.forEach((row, i) => {
                 expect(row[0].data.value).toBe(data[i].propertyA);
                 expect(row[1].data.value).toBe(data[i].propertyB);
                 expect(row[1].isPreformatted).toBeTruthy();
                 expect(row[2].data.value).toBe(data[i].propertyC);
-                switch (i) {
-                    case 0: { // none of the properties will be decorated
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 1: { // none of the properties will be decorated -- note: propA.length = maximumLength, not >
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 2: { // propA will be decorated (because length > max), not the other props
-                        expect(row[0].decoration).toBe('text56789A'); // and not text56789Az which is 11-character long
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 3: { // propA will be decorated (because length = 0), not the other props
-                        expect(row[0].decoration).toBe(columns[0].modifier.valueIfEmpty);
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 4: { // propA will be decorated (because undefined), not the other props
-                        expect(row[0].decoration).toBe(columns[0].modifier.valueIfEmpty);
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 5: { // none of the properties will be decorated -- note: propB.length = maximumLength, not >
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 6: { // propB will be decorated (because length > max), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBe('text5678'); // and not text5678x which is 9-character long
-                        expect(row[2].decoration).toBeUndefined();
-                        break;
-                    }
-                    case 7: { // propC will be decorated (because length = 0), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBe(columns[2].modifier.valueIfEmpty);
-                        break;
-                    }
-                    case 8: { // propC will be decorated (because undefined), not the other props
-                        expect(row[0].decoration).toBeUndefined();
-                        expect(row[1].decoration).toBeUndefined();
-                        expect(row[2].decoration).toBe(columns[2].modifier.valueIfEmpty);
-                        break;
-                    }
-                }
+                // i==0: none of the properties will be decorated
+                expect(i === 0 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 0 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 0 ? row[2].decoration : undefined).toBeUndefined();
+                        
+                // i==1: none of the properties will be decorated -- note: propA.length = maximumLength, not >
+                expect(i === 1 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 1 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 1 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==2: propA will be decorated (because length > max), not the other props
+                expect(i === 2 ? row[0].decoration === 'text56789A' : true).toBeTruthy(); // and not text56789Az which is 11-character long
+                expect(i === 2 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 2 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==3: propA will be decorated (because length = 0), not the other props
+                expect(i === 3 ? row[0].decoration === columns[0].modifier.valueIfEmpty : true).toBeTruthy();
+                expect(i === 3 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 3 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==4: propA will be decorated (because undefined), not the other props
+                expect(i === 4 ? row[0].decoration === columns[0].modifier.valueIfEmpty : true).toBeTruthy();
+                expect(i === 4 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 4 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==5: none of the properties will be decorated -- note: propB.length = maximumLength, not >
+                expect(i === 5 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 5 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 5 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==6: propB will be decorated (because length > max), not the other props
+                expect(i === 6 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 6 ? row[1].decoration === 'text5678' : true).toBeTruthy(); // and not text5678x which is 9-character long
+                expect(i === 6 ? row[2].decoration : undefined).toBeUndefined();
+
+                // i==7: propC will be decorated (because length = 0), not the other props
+                expect(i === 7 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 7 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 7 ? row[2].decoration === columns[2].modifier.valueIfEmpty : true).toBeTruthy();
+
+                // i==8: propC will be decorated (because undefined), not the other props
+                expect(i === 8 ? row[0].decoration : undefined).toBeUndefined();
+                expect(i === 8 ? row[1].decoration : undefined).toBeUndefined();
+                expect(i === 8 ? row[2].decoration === columns[2].modifier.valueIfEmpty : true).toBeTruthy();
             });
         });
     });

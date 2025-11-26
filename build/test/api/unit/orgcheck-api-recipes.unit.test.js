@@ -45,7 +45,7 @@ class SimpleLoggerMock extends SimpleLoggerIntf {
 }
 
 describe('tests.api.unit.Recipes', () => {
-  describe('Basic test for all recipes', () => {
+  describe('checks if all recipes are working fine', () => {
     [
       /*  1 */ RecipeApexClasses,
       /*  2 */ RecipeApexTriggers,
@@ -86,11 +86,11 @@ describe('tests.api.unit.Recipes', () => {
       /* 37 */ RecipeWebLinks,
       /* 38 */ RecipeWorkflows
     ].forEach((recipeClass, index) => {
-      expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
-      const recipe = new recipeClass();
-      const logger = new SimpleLoggerMock();
-      expect(recipe instanceof Recipe).toBeTruthy();
-      it(`checks if the recipe "${recipe.constructor.name}" extracts and transforms correctly`, async () => {
+      it(`checks if the recipe "${recipeClass.name}" extracts and transforms correctly`, async () => {
+        expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
+        const recipe = new recipeClass();
+        const logger = new SimpleLoggerMock();
+        expect(recipe instanceof Recipe).toBeTruthy();
         const datasets = recipe.extract(logger, new Map());
         expect(datasets).toBeDefined();
         expect(datasets instanceof Array).toBeTruthy();

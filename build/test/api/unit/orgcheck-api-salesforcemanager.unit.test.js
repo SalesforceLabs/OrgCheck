@@ -14,11 +14,18 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   it('checks if the salesforce manager implementation runs soqlQuery correctly with a wrong query', async () => {
+    let hadError = false;
+    let err;
     try {
-      const results = await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=100# #Wait900ms# #RaiseError#' }]);
+      await manager.soqlQuery([{ string: 'SELECT Id FROM Account #Records=100# #Wait900ms# #Error=Error raised by the query#' }]);      
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toBe('Error raised by the query');
+      hadError = true;
+      err = error;
+    } finally {
+      expect(hadError).toBeTruthy();
+      expect(err).toBeDefined();
+      expect(err.contextInformation).toBeDefined();
+      expect(err.contextInformation.Cause).toBe('Error raised by the query');
     }
   });
 
@@ -36,15 +43,22 @@ describe('tests.api.unit.SalesforceManager', () => {
   });
 
   it('checks if the salesforce manager implementation runs soqlQuery correctly with multiple good queries and one wrong query', async () => {
+    let hadError = false;
+    let err;
     try {
-      const results = await manager.soqlQuery([
+      await manager.soqlQuery([
         { string: 'SELECT Id FROM Account #Records=10# #Wait500ms#' },
-        { string: 'SELECT Id FROM Account #Records=100# #Wait900ms#  #RaiseError#' },
+        { string: 'SELECT Id FROM Account #Records=100# #Wait900ms#  #Error=Error raised by the query#' },
         { string: 'SELECT Id FROM Account #Records=1000# #Wait900ms#' }
       ]);
     } catch (error) {
-      expect(error).toBeDefined();
-      expect(error.message).toBe('Error raised by the query');
+      hadError = true;
+      err = error;
+    } finally {
+      expect(hadError).toBeTruthy();
+      expect(err).toBeDefined();
+      expect(err.contextInformation).toBeDefined();
+      expect(err.contextInformation.Cause).toBe('Error raised by the query');
     }
   });
 

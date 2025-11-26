@@ -10,16 +10,16 @@ export const ProfilePasswordPolicy_Member2__Profile = 'profile2';
 export class SalesforceManagerMock extends SalesforceManagerIntf {
   get apiVersion() { return 53; }
   caseSafeId(id) { return id; }
-  setupUrl(id, type, parentId, parentType) { return null; }
-  getObjectType(objectName, isCustomSetting) { return null; }
+  setupUrl(/*id, type, parentId, parentType*/) { return null; }
+  getObjectType(/*objectName, isCustomSetting*/) { return null; }
   get dailyApiRequestLimitInformation() { return null; }
-  async soqlQuery(queries, logger) { return queries.map((e) => { return []; }); }
-  async dependenciesQuery(ids, logger) { return { records: [], errors: [] }; }
-  async readMetadata(metadatas, logger) { return new Map(); }
-  async readMetadataAtScale(type, ids, byPasses, logger) { return []; }
-  async describeGlobal(logger) { return null; }
-  async describe(sobjectDevName, logger) { return {}; }
-  async recordCount(sobjectDevName, logger) { return 0; }
+  async soqlQuery(queries/*, logger*/) { return queries.map((/*e*/) => { return []; }); }
+  async dependenciesQuery(/*ids, logger*/) { return { records: [], errors: [] }; }
+  async readMetadata(/*metadatas, logger*/) { return new Map(); }
+  async readMetadataAtScale(/*type, ids, byPasses, logger*/) { return []; }
+  async describeGlobal(/*logger*/) { return null; }
+  async describe(/*sobjectDevName, logger*/) { return {}; }
+  async recordCount(/*sobjectDevName, logger*/) { return 0; }
 }
 
 export class JsForceMetadataMock {
@@ -34,7 +34,7 @@ export class JsForceMetadataMock {
     }
     throw new Error('Need implt.');
   }
-  async read(type, members) {
+  async read(type/*, members*/) {
     if (type === ProfilePasswordPolicy) {
       return [
         {"fullName":"test36_profilePasswordPolicy1677694498243","forgotPasswordRedirect":false,"lockoutInterval":60,"maxLoginAttempts":5,"minimumPasswordLength":8,"minimumPasswordLifetime":true,"obscure":true,"passwordComplexity":1,"passwordExpiration":90,"passwordHistory":3,"passwordQuestion":1,"profile":ProfilePasswordPolicy_Member1__Profile},
@@ -57,7 +57,7 @@ export class JsForceConnectionMock {
     this.metadata = new JsForceMetadataMock();
   }
 
-  queryMore(url, options) {
+  queryMore(url/*, options*/) {
     const matchRemaining = url.match(/#Remaining=(?<remaining>[0-9]*)#/);
     const remaining = Number.parseInt(matchRemaining.groups.remaining);
     const matchFields = url.match(/#Fields=(?<fields>.*)#/);
@@ -77,7 +77,7 @@ export class JsForceConnectionMock {
   /** @type {number} */
   nbRecordsSoFarForCustomQueryMore = 0;
 
-  async query(string, options) { 
+  async query(string/*, options*/) { 
 
     const matchWait = string.match(/#Wait=(?<wait>[0-9]*)#/);
     if (matchWait) {
@@ -144,18 +144,18 @@ export const JsForceMock = {
 }
 
 export class CacheManagerMock extends DataCacheManagerIntf {
-    has(key) { return false; }
-    get(key) { return ''; }
-    set(key, value) { }
+    has(/*key*/) { return false; }
+    get(/*key*/) { return ''; }
+    set(/*key, value*/) { }
     details() { return []; }
-    remove(key) { }
+    remove(/*key*/) { }
     clear() {};
 }
 
 export class LoggerMock extends LoggerIntf {
-  log(sectionName, message) { }
-  ended(sectionName, message) { }
-  failed(sectionName, error) { }
+  log(/*sectionName, message*/) { }
+  ended(/*sectionName, message*/) { }
+  failed(/*sectionName, error*/) { }
   toSimpleLogger() { return { log: () => {}, debug: () => {} }; }
 }
 

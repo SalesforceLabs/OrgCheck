@@ -46,6 +46,8 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.0.1",
     "eslint-plugin-jsdoc": "^51.3.4",
+    "glob": "^10.5.0",
+    "js-yaml": "^4.1.1",
     "jest": "^30.0.4",
     "rollup": "^4.44.2",
     "rollup-plugin-copy": "^3.5.0",

@@ -6,6 +6,8 @@ describe('tests.api.unit.RecipeManager', () => {
     const manager = new RecipeManager(
       new DatasetManagerMock(),
       new LoggerMock()
-    );      
+    ); 
+    expect(manager).toBeDefined();     
+    expect(manager instanceof RecipeManager).toBeTruthy();     
   });
 });
