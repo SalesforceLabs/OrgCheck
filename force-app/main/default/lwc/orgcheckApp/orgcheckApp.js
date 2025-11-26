@@ -1551,7 +1551,7 @@ export default class OrgcheckApp extends LightningElement {
         orderSort: ocui.SortOrder.DESC
     };
 
-        /**
+    /**
      * @description Table definition for dashboards
      * @type {ocui.Table}
      */

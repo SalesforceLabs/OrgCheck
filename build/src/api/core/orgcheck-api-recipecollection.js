@@ -36,6 +36,13 @@ export class DataCollectionStatistics {
     hadError = false;
 
     /** 
+     * @description Last error message if any
+     * @type {string}
+     * @public
+     */
+    lastErrorMessage;
+
+    /** 
      * @description Number of all records
      * @type {number}
      * @default 0

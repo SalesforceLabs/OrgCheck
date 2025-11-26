@@ -1,3 +1,6 @@
 engines:
   eslint:
     eslint_config_file: ./eslint.config.js
+    disable_lwc_base_config: true
+  flow:
+    disable_engine: true
