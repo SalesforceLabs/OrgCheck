@@ -78,7 +78,17 @@
 
                             <!-- TYPE ID: link, opens the asset of the row in a new tab -->
                             <template lwc:elseif={cell.typeofid}>
-                                <lightning-formatted-url label={cell.data.label} value={cell.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon>
+                                <template lwc:if={cell.data.decoration}>
+                                    {cell.data.decoration}
+                                </template>
+                                <template lwc:else>
+                                    <template lwc:if={cell.data.value}> <!-- we check if there is a link -->
+                                        <lightning-formatted-url label={cell.data.label} value={cell.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon>
+                                    </template>
+                                    <template lwc:else> <!-- at least if the link is blank we show the label in a raw format -->
+                                        {cell.data.label}
+                                    </template>
+                                </template>
                             </template>
 
                             <!-- TYPE IDS: array of links (see ID for each element) -->
@@ -90,7 +100,12 @@
                                             - {item.decoration}<br key={item.key} />
                                         </template>
                                         <template lwc:else>
-                                            - <lightning-formatted-url key={item.key} label={item.data.label} value={item.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
+                                            <template lwc:if={item.data.value}> <!-- we check if there is a link -->
+                                                - <lightning-formatted-url key={item.key} label={item.data.label} value={item.data.value} target="_blank"></lightning-formatted-url>&nbsp;<lightning-icon key={item.key} icon-name="utility:new_window" size="x-small" alternative-text="New window" title="New window"></lightning-icon><br key={item.key} />
+                                            </template>
+                                            <template lwc:else> <!-- at least if the link is blank we show the label in a raw format -->
+                                                - {item.data.label}<br key={item.key} />
+                                            </template>
                                         </template>
                                     </template>
                                 </template></template>
