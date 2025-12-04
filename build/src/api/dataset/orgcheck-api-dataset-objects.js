@@ -78,6 +78,12 @@ export class DatasetObjects extends Dataset {
                         'FROM ValidationRule ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+            }, {
+                // Get the number of all the apex triggers per object
+                string: 'SELECT EntityDefinitionId, COUNT(Id) NbTriggers ' + // EntityDefinitionId = EntityDefinition.DurableId
+                        'FROM ApexTrigger ' +
+                        'GROUP BY EntityDefinitionId',
+                tooling: true,
             }], logger)
         ]);
 
@@ -88,6 +94,7 @@ export class DatasetObjects extends Dataset {
         const nbRecordTypesPerEntity = results[1][3];
         const nbWorkflowRulesPerEntity = results[1][4];
         const nbValidationRulesPerEntity = results[1][5];
+        const nbTriggersPerEntityStatus = results[1][6];
 
         const entitiesByName = {};
         const qualifiedApiNames = await Processor.map(
@@ -102,12 +109,14 @@ export class DatasetObjects extends Dataset {
         const nbRecordTypesByDurableId = {};
         const nbWorkflowRulesByName = {};
         const nbValidationRulesByDurableId = {};
+        const nbTriggersByDurableId = {};
         await Promise.all([
             Processor.forEach(nbCustomFieldsPerEntity, (/** @type {any} */ recordCount) => nbCustomFieldsByDurableId[recordCount.EntityDefinitionId] = recordCount.NbCustomFields),
             Processor.forEach(nbPageLayoutsPerEntity, (/** @type {any} */ recordCount) => nbPageLayoutsByDurableId[recordCount.EntityDefinitionId] = recordCount.NbPageLayouts),
             Processor.forEach(nbRecordTypesPerEntity, (/** @type {any} */ recordCount) => nbRecordTypesByDurableId[recordCount.EntityDefinitionId] = recordCount.NbRecordTypes),
             Processor.forEach(nbWorkflowRulesPerEntity, (/** @type {any} */ recordCount) => nbWorkflowRulesByName[recordCount.TableEnumOrId] = recordCount.NbWorkflowRules),
-            Processor.forEach(nbValidationRulesPerEntity, (/** @type {any} */ recordCount) => nbValidationRulesByDurableId[recordCount.EntityDefinitionId] = recordCount.NbValidationRules)
+            Processor.forEach(nbValidationRulesPerEntity, (/** @type {any} */ recordCount) => nbValidationRulesByDurableId[recordCount.EntityDefinitionId] = recordCount.NbValidationRules),
+            Processor.forEach(nbTriggersPerEntityStatus, (/** @type {any} */ recordCount) => nbTriggersByDurableId[recordCount.EntityDefinitionId] = recordCount.NbTriggers)
         ]) 
 
         // Create the map
@@ -137,6 +146,7 @@ export class DatasetObjects extends Dataset {
                         nbRecordTypes: nbRecordTypesByDurableId[durableId] ?? 0,
                         nbWorkflowRules: nbWorkflowRulesByName[object.name] ?? 0,
                         nbValidationRules: nbValidationRulesByDurableId[durableId] ?? 0,
+                        nbApexTriggers: nbTriggersByDurableId[durableId] ?? 0,
                         url: sfdcManager.setupUrl(durableId, type)
                     }
                 });

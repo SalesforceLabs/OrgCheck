@@ -1,6 +1,5 @@
 import { Dataset } from '../core/orgcheck-api-dataset';
 import { Processor } from '../core/orgcheck-api-processor';
-import { SFDC_ApexTrigger } from '../data/orgcheck-api-data-apextrigger';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_FieldSet } from '../data/orgcheck-api-data-fieldset';
@@ -73,6 +72,12 @@ export class DatasetObject extends Dataset {
                         `WHERE EntityDefinition.QualifiedApiName = '${fullObjectApiName}' ` +
                         (packageName ? `AND EntityDefinition.NamespacePrefix = '${packageName}' ` : ''),
                 queryMoreField: 'DurableId' // FieldDefinition does not support calling QueryMore, use the custom instead
+            }, {
+                string: 'SELECT TableEnumOrId, Id ' + // TableEnumOrId = EntityDefinition.QualifiedApiName
+                        'FROM WorkflowRule ' +
+                        `WHERE TableEnumOrId = '${fullObjectApiName}' ` +
+                        (packageName ? `AND EntityDefinition.NamespacePrefix = '${packageName}' ` : ''),
+                tooling: true,
             }], logger),
             sfdcManager.recordCount(fullObjectApiName, logger)
         ]);
@@ -82,14 +87,16 @@ export class DatasetObject extends Dataset {
         const sobjectDescribed = results[0]; 
         const sobjectType = sfdcManager.getObjectType(sobjectDescribed.name, sobjectDescribed.customSetting);
 
-        // the second promise was two soql queries on EntityDefinition and on FieldDefinition
+        // the second promise was three soql queries on EntityDefinition, on FieldDefinition and on WorkflowRule
         // so the first query response should be an EntityDefinition record corresponding to the object we want.
         const entity = results[1][0][0];
         if (!entity) { // If that entity was not found in the tooling API
             throw new TypeError(`No entity definition record found for: ${fullObjectApiName}`)
         }
-        // and the second query response should be a list of FieldDefinition records corresponding to the fields of the object
+        // the second query response should be a list of FieldDefinition records corresponding to the fields of the object
         const fields = results[1][1]; 
+        // and the third query response should be a list of WorkflowRule records corresponding to the workflows of the object
+        const workflowRules = results[1][2];
                 
         // the third promise is the number of records!!
         const recordCount = results[2]; 
@@ -140,10 +147,17 @@ export class DatasetObject extends Dataset {
         );
 
         // apex triggers
-        /** @type {Array<SFDC_ApexTrigger>} */
+        /** @type {Array<string>} */
         const apexTriggerIds = await Processor.map(
             entity.ApexTriggers?.records, 
             (/** @type {any} */ t) => sfdcManager.caseSafeId(t.Id)
+        );
+
+        // workflow rules
+        /** @type {Array<string>} */
+        const workflowRuleIds = await Processor.map(
+            workflowRules, 
+            (/** @type {any} */ wr) => sfdcManager.caseSafeId(wr.Id)
         );
 
         // field sets
@@ -286,15 +300,22 @@ export class DatasetObject extends Dataset {
                 externalSharingModel: entity.ExternalSharingModel,
                 internalSharingModel: entity.InternalSharingModel,
                 apexTriggerIds: apexTriggerIds,
+                nbApexTriggers: apexTriggerIds.length ?? 0,
                 fieldSets: fieldSets,
                 limits: limits,
                 layouts: layouts,
+                nbPageLayouts: layouts.length ?? 0,
                 validationRules: validationRules,
+                nbValidationRules: validationRules.length ?? 0,
                 webLinks: webLinks,
                 standardFields: standardFields,
                 customFieldIds: customFieldIds,
+                nbCustomFields: customFieldIds.length ?? 0,
                 recordTypes: recordTypes,
+                nbRecordTypes: recordTypes.length ?? 0,
                 relationships: relationships,
+                workflowRuleIds: workflowRuleIds,
+                nbWorkflowRules: workflowRuleIds.length ?? 0,
                 recordCount: recordCount,
                 url: sfdcManager.setupUrl(entity.Id, sobjectType)
             }

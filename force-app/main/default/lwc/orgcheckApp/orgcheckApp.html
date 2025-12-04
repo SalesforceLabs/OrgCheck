@@ -268,17 +268,18 @@
                             </lightning-layout>
                             <div class="slds-text-body_small">
                                 <span> | </span>
-                                <span lwc:if={objectData.apexTriggerRefs.length}><a href="#apexTriggers">Apex Triggers ({objectData.apexTriggerRefs.length})</a> | </span>
-                                <span lwc:if={objectData.fieldSets.length}><a href="#fieldSets">Field Sets ({objectData.fieldSets.length})</a> | </span>
-                                <span lwc:if={objectData.layouts.length}><a href="#layouts">Page Layout ({objectData.layouts.length})</a> | </span>
-                                <span lwc:if={objectData.flexiPages.length}><a href="#flexiPages">Lightning Pages ({objectData.flexiPages.length})</a> | </span>
-                                <span lwc:if={objectData.limits.length}><a href="#limits">Limits ({objectData.limits.length})</a> | </span>
-                                <span lwc:if={objectData.validationRules.length}><a href="#validationRules">Validation Rules ({objectData.validationRules.length})</a> | </span>
-                                <span lwc:if={objectData.webLinks.length}><a href="#webLinks">Web Links ({objectData.webLinks.length})</a> | </span>
-                                <span lwc:if={objectData.customFieldRefs.length}><a href="#customFields">Custom Fields ({objectData.customFieldRefs.length})</a> | </span>
-                                <span lwc:if={objectData.standardFields.length}><a href="#standardFields">Standard Fields ({objectData.standardFields.length})</a> | </span>
-                                <span lwc:if={objectData.recordTypes.length}><a href="#recordTypes">Record Types ({objectData.recordTypes.length})</a> | </span>
-                                <span lwc:if={objectData.relationships.length}><a href="#relationships">Relationships ({objectData.relationships.length})</a> | </span>
+                                <span lwc:if={objectData.apexTriggerRefs.length}><a href="#apexTriggers-0">Apex Triggers ({objectData.apexTriggerRefs.length})</a> | </span>
+                                <span lwc:if={objectData.workflowRuleRefs.length}><a href="#workflowRules-0">Workflow Rules ({objectData.workflowRuleRefs.length})</a> | </span>
+                                <span lwc:if={objectData.fieldSets.length}><a href="#fieldSets-0">Field Sets ({objectData.fieldSets.length})</a> | </span>
+                                <span lwc:if={objectData.layouts.length}><a href="#layouts-0">Page Layout ({objectData.layouts.length})</a> | </span>
+                                <span lwc:if={objectData.flexiPages.length}><a href="#flexiPages-0">Lightning Pages ({objectData.flexiPages.length})</a> | </span>
+                                <span lwc:if={objectData.limits.length}><a href="#limits-0">Limits ({objectData.limits.length})</a> | </span>
+                                <span lwc:if={objectData.validationRules.length}><a href="#validationRules-0">Validation Rules ({objectData.validationRules.length})</a> | </span>
+                                <span lwc:if={objectData.webLinks.length}><a href="#webLinks-0">Web Links ({objectData.webLinks.length})</a> | </span>
+                                <span lwc:if={objectData.customFieldRefs.length}><a href="#customFields-0">Custom Fields ({objectData.customFieldRefs.length})</a> | </span>
+                                <span lwc:if={objectData.standardFields.length}><a href="#standardFields-0">Standard Fields ({objectData.standardFields.length})</a> | </span>
+                                <span lwc:if={objectData.recordTypes.length}><a href="#recordTypes-0">Record Types ({objectData.recordTypes.length})</a> | </span>
+                                <span lwc:if={objectData.relationships.length}><a href="#relationships-0">Relationships ({objectData.relationships.length})</a> | </span>
                             </div>
                             <br />
                     
@@ -324,6 +325,21 @@
                                     infinite-scrolling-initial-nb-rows=25
                                     infinite-scrolling-additional-nb-rows=100
                                    table-definition={apexTriggersInObjectTableDefinition} rows={objectData.apexTriggerRefs}></c-orgcheck-extended-datatable>
+                                <br /><br />
+                            </template>
+
+                            <!-- WORKFLOW RULES SECTION -->
+                            <template lwc:if={objectData.workflowRuleRefs.length}>
+                                <h1 class="slds-text-heading_medium"><a id="workflowRules"></a>Workflow Rules</h1>
+                                <c-orgcheck-extended-datatable
+                                    dont-use-all-space
+                                    onviewscore={handleViewScore} 
+                                    show-search
+                                    show-statistics
+                                    is-infinite-scrolling
+                                    infinite-scrolling-initial-nb-rows=25
+                                    infinite-scrolling-additional-nb-rows=100
+                                   table-definition={workflowsInObjectTableDefinition} rows={objectData.workflowRuleRefs}></c-orgcheck-extended-datatable>
                                 <br /><br />
                             </template>
                             

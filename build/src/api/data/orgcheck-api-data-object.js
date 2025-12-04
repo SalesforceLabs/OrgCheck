@@ -10,6 +10,7 @@ import { SFDC_PageLayout } from './orgcheck-api-data-pagelayout';
 import { SFDC_RecordType } from './orgcheck-api-data-recordtype';
 import { SFDC_ValidationRule } from './orgcheck-api-data-validationrule';
 import { SFDC_WebLink } from './orgcheck-api-data-weblink';
+import { SFDC_Workflow } from './orgcheck-api-data-workflow';
 
 /**
  * @description Representation of as SObject in Org Check
@@ -156,6 +157,13 @@ export class SFDC_Object extends Data {
      * @public
      */
     apexTriggerRefs;
+
+    /**
+     * @description Number of apex triggers (active or not) for this object
+     * @type {number}
+     * @public
+     */
+    nbApexTriggers;
     
     /**
      * @description List of field Sets for this object
@@ -254,6 +262,20 @@ export class SFDC_Object extends Data {
      * @public
      */
     nbRecordTypes;
+
+    /**
+     * @description List of Workflow Rules ids for this object
+     * @type {Array<string>}
+     * @public
+     */
+    workflowRuleIds;
+    
+    /**
+     * @description Corresponding Workflow Rules references fot this object
+     * @type {Array<SFDC_Workflow>}
+     * @public
+     */
+    workflowRuleRefs;
 
     /**
      * @description Number of workflow rules for this object

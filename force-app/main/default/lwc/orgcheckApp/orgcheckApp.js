@@ -2180,6 +2180,7 @@ export default class OrgcheckApp extends LightningElement {
             { label: 'Page layouts',     type: ocui.ColumnType.NUM, data: { value: 'nbPageLayouts' }},
             { label: 'Record types',     type: ocui.ColumnType.NUM, data: { value: 'nbRecordTypes' }},
             { label: 'Workflows',        type: ocui.ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
+            { label: 'Apex Triggers',    type: ocui.ColumnType.NUM, data: { value: 'nbApexTriggers' }},
             { label: 'Validation Rules', type: ocui.ColumnType.NUM, data: { value: 'nbValidationRules' }},
             { label: 'Internal OWD',     type: ocui.ColumnType.TXT, data: { value: 'internalSharingModel' }},
             { label: 'External OWD',     type: ocui.ColumnType.TXT, data: { value: 'externalSharingModel' }}
@@ -2318,6 +2319,28 @@ export default class OrgcheckApp extends LightningElement {
      * @type {ocui.Table}
      */
     workflowsTableDefinition = {
+        columns: [
+            { label: '#',                 type: ocui.ColumnType.IDX },
+            { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
+            { label: 'Name',              type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
+            { label: 'Is Active',         type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
+            { label: 'Has Actions',       type: ocui.ColumnType.CHK,  data: { value: 'hasAction' }},
+            { label: 'Direct Actions',    type: ocui.ColumnType.OBJS, data: { values: 'actions', template: (r) => `${r.name} (${r.type})` }},
+            { label: 'Empty Timetrigger', type: ocui.ColumnType.OBJS, data: { values: 'emptyTimeTriggers', template: (r) => `${r.field} after ${r.delay*1}` }},
+            { label: 'Future Actions',    type: ocui.ColumnType.OBJS, data: { values: 'futureActions', template: (r) => `${r.field} after ${r.delay*1}: ${r.name} (${r.type})` }},
+            { label: 'Created date',      type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
+            { label: 'Modified date',     type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
+            { label: 'Description',       type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
+        ],
+        orderIndex: 1,
+        orderSort: ocui.SortOrder.DESC
+    };
+
+    /**
+     * @description Table definition for workflows in an object
+     * @type {ocui.Table}
+     */
+    workflowsInObjectTableDefinition = {
         columns: [
             { label: '#',                 type: ocui.ColumnType.IDX },
             { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},

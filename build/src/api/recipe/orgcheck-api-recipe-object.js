@@ -10,6 +10,7 @@ import { SFDC_Field } from '../data/orgcheck-api-data-field';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 import { SFDC_ObjectType } from '../data/orgcheck-api-data-objecttype';
 import { SFDC_LightningPage } from '../data/orgcheck-api-data-lightningpage';
+import { SFDC_Workflow } from '../data/orgcheck-api-data-workflow';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
 export class RecipeObject extends Recipe {
@@ -30,6 +31,7 @@ export class RecipeObject extends Recipe {
             ),
             DatasetAliases.OBJECTTYPES,
             DatasetAliases.APEXTRIGGERS,
+            DatasetAliases.WORKFLOWS,
             DatasetAliases.LIGHTNINGPAGES,
             new DatasetRunInformation(
                 DatasetAliases.CUSTOMFIELDS,
@@ -53,6 +55,7 @@ export class RecipeObject extends Recipe {
         const /** @type {Map<string, SFDC_ObjectType>} */ types = data.get(DatasetAliases.OBJECTTYPES);
         const /** @type {SFDC_Object} */ object = data.get(DatasetAliases.OBJECT);
         const /** @type {Map<string, SFDC_ApexTrigger>} */ apexTriggers = data.get(DatasetAliases.APEXTRIGGERS);
+        const /** @type {Map<string, SFDC_Workflow>} */ workflowRules = data.get(DatasetAliases.WORKFLOWS);
         const /** @type {Map<string, SFDC_LightningPage>} */ pages = data.get(DatasetAliases.LIGHTNINGPAGES);
         const /** @type {Map<string, SFDC_Field>} */ customFields = data.get(DatasetAliases.CUSTOMFIELDS);
 
@@ -60,6 +63,7 @@ export class RecipeObject extends Recipe {
         if (!types) throw new Error(`RecipeObject: Data from dataset alias 'OBJECTTYPES' was undefined.`);
         if (!object) throw new Error(`RecipeObject: Data from dataset alias 'OBJECT' was undefined.`);
         if (!apexTriggers) throw new Error(`RecipeObject: Data from dataset alias 'APEXTRIGGERS' was undefined.`);
+        if (!workflowRules) throw new Error(`RecipeObject: Data from dataset alias 'WORKFLOWS' was undefined.`);
         if (!pages) throw new Error(`RecipeObject: Data from dataset alias 'LIGHTNINGPAGES' was undefined.`);
         if (!customFields) throw new Error(`RecipeObject: Data from dataset alias 'CUSTOMFIELDS' was undefined.`);
 
@@ -75,6 +79,11 @@ export class RecipeObject extends Recipe {
                     return apexTrigger;
                 },
                 (/** @type {string} */ id) => apexTriggers.has(id)
+            ),
+            Processor.map( // returns workflowRuleRefs
+                object.workflowRuleIds,
+                (/** @type {string} */ id) => workflowRules.get(id),
+                (/** @type {string} */ id) => workflowRules.has(id)
             ),
             Processor.forEach(pages, (/** @type {SFDC_LightningPage} */ page) => {
                 if (page.objectId === object.id) {
@@ -92,7 +101,8 @@ export class RecipeObject extends Recipe {
             )
         ]);
         object.apexTriggerRefs = result[0];
-        object.customFieldRefs = result[2];
+        object.workflowRuleRefs = result[1];
+        object.customFieldRefs = result[3];
 
         // Return data
         return object;
