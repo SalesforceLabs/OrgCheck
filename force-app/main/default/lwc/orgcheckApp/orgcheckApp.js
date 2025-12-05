@@ -27,13 +27,16 @@ const MAIN_TABS = {
 Object.freeze(MAIN_TABS);
 const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
 Object.freeze(MAIN_TABS_VALUES);
-const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => {
+const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => { 
     if (input === undefined || input === null) throw new Error('Input is undefined or null');
-    if (typeof input !== 'string') throw new Error('Input is not a string');
-    const sanitizedInput = '*'.concat(input).replace(/[^a-zA-Z]/g, '')
-    if (MAIN_TABS_VALUES.indexOf(sanitizedInput) === -1) throw new Error(`Input <${sanitizedInput}> is not a valid main tab value`);
-    return sanitizedInput;
-}
+    if (typeof input !== 'string') throw new Error('Input is not a string'); 
+    const normalized = input.trim().toLowerCase(); 
+    if (MAIN_TABS_VALUES.includes(normalized) === false) { 
+        throw new Error(`Input <${input}> is not a valid main tab value`);
+    } 
+    return normalized;
+};
+
 
 export default class OrgcheckApp extends LightningElement {
 
