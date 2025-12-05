@@ -484,7 +484,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     get isThereAnyApexUncompiled() {
-        return this.selectedSubTab === 'apex-recompilation-needed' && this.apexUncompiledTableData?.length > 0 || false;
+        return this.selectedSubTab === 'apex-uncompiled' && this.apexUncompiledTableData?.length > 0 || false;
     }
 
     /**
