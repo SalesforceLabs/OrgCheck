@@ -37,7 +37,6 @@ const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => {
     return normalized;
 };
 
-
 export default class OrgcheckApp extends LightningElement {
 
     /**
@@ -215,11 +214,25 @@ export default class OrgcheckApp extends LightningElement {
     _api;
 
     /**
-     * @description Flag to render only once the component
+     * @description This flag prevents double initialization of the API + UI flow
      * @type {boolean}
      * @private
      */
-    _hasRenderOnce = false;
+    _hasInitialized = false;
+
+    /**
+     * @description This flag checks that the children components are ready
+     * @type {boolean}
+     * @private
+     */
+    _childrenReady = false;
+
+    /**
+     * @description This flag checks that the third party libraries were loaded correctly
+     * @type {boolean}
+     * @private
+     */
+    _thirdPartyLibsReady = false;
 
     /**
      * @description Spinner component
@@ -242,24 +255,171 @@ export default class OrgcheckApp extends LightningElement {
      */
     _filters;
 
+
+    
+    /**
+     * @description Connected callback - initial setup
+     * @public
+     */
+    connectedCallback() { 
+        // Set initial state and safe defaults 
+        this.tabLoading = false; 
+        this.useOrgCheckInThisOrgConfirmed = false; 
+        this.useOrgCheckInThisOrgNeedConfirmation = false; 
+        this.useOrgCheckManuallyAccepted = false;
+        // If you need to precreate the API object shell without DOM, you can, but do not call spinner/modal here. 
+        // Leave real API instantiation to a dedicated method invoked once both preconditions are true. 
+    }
+
     /**
      * @description After the component is fully load let's init some elements and the api
      * @public
-     * @async
      */
-    async renderedCallback() {
-        if (this._hasRenderOnce === false && this.accessToken) {
-            this._hasRenderOnce = true;
-            this._spinner = this.template.querySelector('c-orgcheck-spinner');
-            this._modal = this.template.querySelector('c-orgcheck-modal');
-            this._filters = this.template.querySelector('c-orgcheck-global-filters');
-            await this._loadAPI();
-            await this._loadBasicInformationIfAccepted();
+    renderedCallback() { 
+        // Wire child refs if not wired 
+        if (!this._spinner) this._spinner = this.template.querySelector('c-orgcheck-spinner'); 
+        if (!this._modal) this._modal = this.template.querySelector('c-orgcheck-modal'); 
+        if (!this._filters) this._filters = this.template.querySelector('c-orgcheck-global-filters');
+        // Set children ready flag
+        if (this._spinner && this._modal && this._filters && !this._childrenReady) this._childrenReady = true;
+        // Kick off initial flow once when both accessToken is present and children are ready. 
+        if (!this._hasInitialized && this._childrenReady && this.accessToken) {
+            this._hasInitialized = true; 
+            // Defer heavy work to a microtask to avoid re-entrancy in rendering
+            Promise.resolve().then(() => this._initApi()); 
         }
     }
 
+    /**
+     * @description Initialize the Org Check API mostly
+     * @private
+     * @async
+     */
+    async _initApi() {
 
+        // Load the third party scripts
+        await Promise.all([
+            loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
+            loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
+        ]);
 
+        // Load the Org Check API
+        this._api = new ocapi.API(
+            // -----------------------
+            // ACCESS TOKEN of the current user
+            this.accessToken, 
+            // -----------------------
+            // JsForce instance
+            // @ts-ignore 
+            jsforce, 
+            // -----------------------
+            // Local Storage methods
+            // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
+            {
+                /**
+                 * @description Set an item in the local storage
+                 * @param {string} key - The key to set
+                 * @param {string} value - The value to set
+                 */
+                setItem: (key, value) => { this.localStorage.setItem(key, value); },
+                /**
+                 * @description Get an item from the local storage
+                 * @param {string} key - The key to set
+                 * @returns {string} The stored value for the given key
+                 */
+                getItem: (key) => { return this.localStorage.getItem(key); },
+                /**
+                 * @description Removes an item from the local storage
+                 * @param {string} key - The key to remove
+                 */
+                removeItem: (key) => { this.localStorage.removeItem(key); },
+                /**
+                 * @description Get all the keys in the storage
+                 * @returns {Array<string>} List of keys
+                 */
+                keys: () => {  
+                    const keys = []; 
+                    for (let i = 0; i < this.localStorage.length; i++) {
+                        keys.push(this.localStorage.key(i)); 
+                    }
+                    return keys; }
+            },
+            // -----------------------
+            // Encoding methods
+            { 
+                /** 
+                 * @description Encoding method
+                 * @param {string} data - Input data
+                 * @returns {Uint8Array} Output data
+                 */ 
+                encode: (data) => { return this.textEncoder.encode(data); }, 
+                /** 
+                 * @description Decoding method
+                 * @param {Uint8Array} data - Input data
+                 * @returns {string} Output data
+                 */ 
+                decode: (data) => { return this.textDecoder.decode(data); }
+            },            
+            // -----------------------
+            // Compression methods
+            { 
+                /** 
+                 * @description Compress method
+                 * @param {Uint8Array} data - Input data
+                 * @returns {Uint8Array} Output data
+                 */ 
+                compress:   (data) => { 
+                    // @ts-ignore
+                    return fflate.zlibSync(data, { level: 9 }); 
+                },
+                /** 
+                 * @description Decompress method
+                 * @param {Uint8Array} data - Input data
+                 * @returns {Uint8Array} Output data
+                 */ 
+                // @ts-ignore
+                decompress: (data) => { 
+                    // @ts-ignore
+                    return fflate.unzlibSync(data); 
+                }
+            },
+            // -----------------------
+            // Log methods -- delegation to the UI spinner
+            {
+                /**
+                 * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+                 */
+                isConsoleFallback: () => { return true; },
+                /**
+                 * @description Standard log method
+                 * @param {string} section - The section name
+                 * @param {string} message - The message to log
+                 */ 
+                log: (section, message) => { this._spinner?.sectionLog(section, message); },
+                /**
+                 * @description Log method when task is ended
+                 * @param {string} section - The section name
+                 * @param {string} message - The message to log
+                 */ 
+                ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
+                /**
+                 * @description Log method when task has just failed
+                 * @param {string} section - The section name
+                 * @param {string | Error} error - The error to log
+                 */ 
+                failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
+            }
+        );
+ 
+        // Get the score rules matrix once here
+        this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
+
+        // Update the cache information when we are finish loading everything
+        this._updateCacheInformation();
+
+        // Load basic information if the user has already accepted the terms
+        await this._loadBasicInformationIfAccepted();
+    }
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -273,13 +433,13 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     get namespace() {
-        if (this._filters.isSelectedPackageAny === true) {
+        if (this._filters?.isSelectedPackageAny === true) {
             return '*';
         }
-        if (this._filters.isSelectedPackageNo === true) {
+        if (this._filters?.isSelectedPackageNo === true) {
             return '';
         }
-        return this._filters.selectedPackage;
+        return this._filters?.selectedPackage;
     }
 
     /**
@@ -288,10 +448,10 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     get objectType() {
-        if (this._filters.isSelectedSObjectTypeAny === true) {
+        if (this._filters?.isSelectedSObjectTypeAny === true) {
             return '*';
         }
-        return this._filters.selectedSObjectType;
+        return this._filters?.selectedSObjectType;
     }
 
     /**
@@ -300,12 +460,12 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     get object() {
-        if (this._filters.isSelectedSObjectApiNameAny === true) {
+        if (this._filters?.isSelectedSObjectApiNameAny === true) {
             this.isObjectSpecified = false;
             return '*';
         }
         this.isObjectSpecified = true;
-        return this._filters.selectedSObjectApiName;
+        return this._filters?.selectedSObjectApiName;
     }
 
 
@@ -340,156 +500,9 @@ export default class OrgcheckApp extends LightningElement {
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
-    // Org Check API loading, calls and update limit info in the UI
+    // Wrapper part between the Org Check API and the UI
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
-
-    /**
-     * @description Load the Org Check API (and it dependencies) only the first time
-     * @param {any} [logger] - The logger
-     * @private
-     * @async
-     */ 
-    async _loadAPI(logger) {
-        // SHOULD CATCH ERROR with specific error message
-
-        // Init of the Org Check api (only once!)
-        if (this._api) return;
-
-        try {                
-            // Load JS dependencies
-            logger?.log('Loading JsForce and FFLate libraries...');
-            await Promise.all([
-                loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
-                loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
-            ]);
-        } catch(e) {
-            this._showError('Error while loading third party scripts in <code>_loadAPI</code>', e);
-            return;
-        }
-
-        try {                
-            // Create the Org Check API
-            logger?.log('Loading Org Check library...')
-
-            // @ts-ignore
-            this._api = new ocapi.API(
-                // -----------------------
-                // ACCESS TOKEN of the current user
-                this.accessToken, 
-                // -----------------------
-                // JsForce instance
-                // @ts-ignore 
-                jsforce, 
-                // -----------------------
-                // Local Storage methods
-                // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
-                {
-                    /**
-                     * @description Set an item in the local storage
-                     * @param {string} key - The key to set
-                     * @param {string} value - The value to set
-                     */
-                    setItem: (key, value) => { this.localStorage.setItem(key, value); },
-                    /**
-                     * @description Get an item from the local storage
-                     * @param {string} key - The key to set
-                     * @returns {string} The stored value for the given key
-                     */
-                    getItem: (key) => { return this.localStorage.getItem(key); },
-                    /**
-                     * @description Removes an item from the local storage
-                     * @param {string} key - The key to remove
-                     */
-                    removeItem: (key) => { this.localStorage.removeItem(key); },
-                    /**
-                     * @description Get all the keys in the storage
-                     * @returns {Array<string>} List of keys
-                     */
-                    keys: () => {  
-                        const keys = []; 
-                        for (let i = 0; i < this.localStorage.length; i++) {
-                            keys.push(this.localStorage.key(i)); 
-                        }
-                        return keys; }
-                },
-                // -----------------------
-                // Encoding methods
-                { 
-                    /** 
-                     * @description Encoding method
-                     * @param {string} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    encode: (data) => { return this.textEncoder.encode(data); }, 
-                    /** 
-                     * @description Decoding method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {string} Output data
-                     */ 
-                    decode: (data) => { return this.textDecoder.decode(data); }
-                },            
-                // -----------------------
-                // Compression methods
-                { 
-                    /** 
-                     * @description Compress method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    compress:   (data) => { 
-                        // @ts-ignore
-                        return fflate.zlibSync(data, { level: 9 }); 
-                    },
-                    /** 
-                     * @description Decompress method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    // @ts-ignore
-                    decompress: (data) => { 
-                        // @ts-ignore
-                        return fflate.unzlibSync(data); 
-                    }
-                },
-                // -----------------------
-                // Log methods -- delegation to the UI spinner
-                {
-                    /**
-                     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
-                     */
-                    isConsoleFallback: () => { return true; },
-                    /**
-                     * @description Standard log method
-                     * @param {string} section - The section name
-                     * @param {string} message - The message to log
-                     */ 
-                    log: (section, message) => { this._spinner.sectionLog(section, message); },
-                    /**
-                     * @description Log method when task is ended
-                     * @param {string} section - The section name
-                     * @param {string} message - The message to log
-                     */ 
-                    ended: (section, message) => { this._spinner.sectionEnded(section, message); },
-                    /**
-                     * @description Log method when task has just failed
-                     * @param {string} section - The section name
-                     * @param {string | Error} error - The error to log
-                     */ 
-                    failed: (section, error) => { this._spinner.sectionFailed(section, error); }
-                }
-            );
-
-            // Set the score rules for information
-            this._internalAllScoreRulesDataMatrix = this._api.getAllScoreRulesAsDataMatrix();
-
-            // Set the initial cache just after loading the api ;)
-            this._updateCacheInformation();
-
-        } catch(e) {
-            this._showError('Error while loading Org Check library in <code>_loadAPI</code>', e);
-        }
-    }
 
     _aliasNone = () => '';
     _aliasNamespace = () => `${this.namespace}`;
@@ -500,9 +513,10 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description List of internal transformers to get data from the API
+     * @type {any}
      * @private
      */
-    _internalTransformers = {
+    _internalTransformers = Object.freeze({
         'apex-classes':              { label: '❤️‍🔥 Apex Classes',               tab: MAIN_TABS.CODE,            data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }},
         'apex-tests':                { label: '🚒 Apex Unit Tests',            tab: MAIN_TABS.CODE,            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
         'apex-triggers':             { label: '🧨 Apex Triggers',              tab: MAIN_TABS.CODE,            data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
@@ -548,9 +562,14 @@ export default class OrgcheckApp extends LightningElement {
         'visualforce-pages':         { label: '🥖 Visualforce Pages',          tab: MAIN_TABS.VISUAL,          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
         'web-links':                 { label: '🏑 Web Links',                  tab: MAIN_TABS.DATAMODEL,       data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
         'workflows':                 { label: '🚗 Workflows',                  tab: MAIN_TABS.AUTOMATION,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }}
-    }
+    });
 
-    _subTabsValidValues = Object.keys(this._internalTransformers);
+    /**
+     * @description List of expected sub tab values (from the UI)
+     * @type {ReadonlyArray<string>}
+     * @private
+     */
+    _subTabsValidValues = Object.freeze(Object.keys(this._internalTransformers));
 
     /**
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
@@ -605,16 +624,14 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     _updateLimits() {
         // SHOULD NOT CATCH ERROR, this will be catched by the caller
-        if (this._api) {
-            const dailyApiInformation = this._api.dailyApiRequestLimitInformation;
-            if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
-                if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
-                else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
-                else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
-                this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;    
-            } else {
-                this.orgLimit = undefined;
-            }
+        const dailyApiInformation = this._api?.dailyApiRequestLimitInformation;
+        if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
+            if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
+            else if (dailyApiInformation.isYellowZone === true) this.themeForOrgLimit = 'slds-theme_warning';
+            else /* if (dailyApiInformation.isRedZone === true) */ this.themeForOrgLimit = 'slds-theme_error';
+            this.orgLimit = `Daily API Request Limit: ${dailyApiInformation.currentUsagePercentage}%`;    
+        } else {
+            this.orgLimit = undefined;
         }
     }
 
@@ -624,7 +641,7 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     _updateCacheInformation() {
         // SHOULD NOT CATCH ERROR, this will be catched by the caller
-        this.cacheManagerData = this._api.getCacheInformation();
+        this.cacheManagerData = this._api?.getCacheInformation();
     }
 
     /**
@@ -634,14 +651,14 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     async _checkTermsAcceptance() {
         // SHOULD NOT CATCH ERROR, this will be catched by the caller
-        if (await this._api.checkUsageTerms()) {
+        if (await this._api?.checkUsageTerms()) {
             this.useOrgCheckInThisOrgNeedConfirmation = false;
             this.useOrgCheckInThisOrgConfirmed = true;
         } else {
             this.useOrgCheckInThisOrgNeedConfirmation = true;
             this.useOrgCheckInThisOrgConfirmed = false;
         }
-        this.useOrgCheckManuallyAccepted = this._api.wereUsageTermsAcceptedManually();
+        this.useOrgCheckManuallyAccepted = this._api?.wereUsageTermsAcceptedManually();
     }
 
     /**
@@ -653,7 +670,6 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     async _loadBasicInformationIfAccepted(logger) {
         // SHOULD NOT CATCH ERROR, this will be catched by the caller
-        if (this._api === undefined) return;
 
         // Check for acceptance
         await this._checkTermsAcceptance();
@@ -661,11 +677,11 @@ export default class OrgcheckApp extends LightningElement {
 
         // Check basic permission for the current user
         logger?.log('Checking if current user has enough permission...')
-        await this._api.checkCurrentUserPermissions(); // if no perm this throws an error
+        await this._api?.checkCurrentUserPermissions(); // if no perm this throws an error
 
         // Information about the org
         logger?.log('Information about the org...');
-        const orgInfo = await this._api.getOrganizationInformation();
+        const orgInfo = await this._api?.getOrganizationInformation();
         this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
         this.orgType = orgInfo.type;
         this.isOrgProduction = orgInfo.isProduction;
@@ -693,28 +709,28 @@ export default class OrgcheckApp extends LightningElement {
         // SHOULD NOT CATCH ERROR, this will be catched by the caller
 
         logger?.log('Hide the filter panel...');
-        this._filters.hide();
+        this._filters?.hide();
 
         if (forceRefresh === true) {
             logger?.log('Clean data from cache (if any)...');
-            this._api.removeAllObjectsFromCache();
-            this._api.removeAllPackagesFromCache();
+            this._api?.removeAllObjectsFromCache();
+            this._api?.removeAllPackagesFromCache();
         }
 
         logger?.log('Get packages, types and objects from the org...');
         const filtersData = await Promise.all([
-            this._api.getPackages(),
-            this._api.getObjectTypes(),
-            this._api.getObjects(this.namespace, this.objectType)
+            this._api?.getPackages(),
+            this._api?.getObjectTypes(),
+            this._api?.getObjects(this.namespace, this.objectType)
         ])
 
         logger?.log('Loading data in the drop boxes...');
-        this._filters.updatePackageOptions(filtersData[0]);
-        this._filters.updateSObjectTypeOptions(filtersData[1]);
-        this._filters.updateSObjectApiNameOptions(filtersData[2]);
+        this._filters?.updatePackageOptions(filtersData[0]);
+        this._filters?.updateSObjectTypeOptions(filtersData[1]);
+        this._filters?.updateSObjectApiNameOptions(filtersData[2]);
 
         logger?.log('Showing the filter panel...');
-        this._filters.show();
+        this._filters?.show();
 
         logger?.log('Update the daily API limit informations...');
         this._updateLimits();
@@ -726,20 +742,19 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _updateCurrentTab() {
-        if (this._hasRenderOnce === false) return;
         const TAB_SECTION = `Tab "${this.selectedSubTab}"`;
         this.tabLoading = true;
         try {
-            this._spinner.open();
-            this._spinner.sectionLog(TAB_SECTION, `C'est parti!`);
+            this._spinner?.open();
+            this._spinner?.sectionLog(TAB_SECTION, `C'est parti!`);
             switch (this.selectedSubTab) {
                 case 'welcome': this._updateCacheInformation(); break;
                 default:        await this._updateData(this.selectedSubTab);
             }
-            this._spinner.sectionEnded(TAB_SECTION, `Done.`);
-            this._spinner.close(0);
+            this._spinner?.sectionEnded(TAB_SECTION, `Done.`);
+            this._spinner?.close(0);
         } catch (error) {
-            this._spinner.sectionFailed(TAB_SECTION, error);
+            this._spinner?.sectionFailed(TAB_SECTION, error);
         } finally {
             this._updateLimits();
             this.tabLoading = false;
@@ -798,7 +813,7 @@ export default class OrgcheckApp extends LightningElement {
             // @ts-ignore
             if (checkbox.checked === true) {
                 // yes it is!
-                this._api.acceptUsageTermsManually();
+                this._api?.acceptUsageTermsManually();
                 await this._loadBasicInformationIfAccepted();
             }
             // do nothing if it is not checked.
@@ -878,11 +893,9 @@ export default class OrgcheckApp extends LightningElement {
      */
     async handleRemoveAllCache() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        // if the api is not loaded yet ignore that call
-        if (!this._api) return;
         try {
             // try to call the corresponding API method
-            this._api.removeAllFromCache(); // may throw an error
+            this._api?.removeAllFromCache(); // may throw an error
             // and reload
             window.location.reload();
         } catch (e) {
@@ -897,12 +910,10 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     handleLogCacheItem(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        // if the api is not loaded yet ignore that call
-        if (!this._api) return;
         // Get attribute data-item-name
         const itemName = event?.target?.getAttribute('data-item-name');
         // Get the data from cache
-        const cacheData = this._api.getCacheData(itemName);
+        const cacheData = this._api?.getCacheData(itemName);
         // Dump the cache in the dialogBox
         let htmlContent = '';
         if (cacheData === null || cacheData === undefined) {
@@ -932,31 +943,27 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     handleViewScore(event) {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
-        // if the api is not loaded yet ignore that call
-        if (!this._api) return;
-        // if event is undefined ignore that call
-        if (!event) return;
         // The event should contain a detail property
         // @ts-ignore
-        const detail = event.detail; // not throwing any error
-        // if detail is undefined ignore that call
-        if (!detail) return;
-        try {
-            // prepare the modal content
-            let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
-                              `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
-            detail.reasonIds?.forEach((/** @type {number} */ id) => {
-                const reason = ocapi.SecretSauce.GetScoreRule(id); // may throw an error
-                if (reason) {
-                    htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
-                }
-            });
-            htmlContent += '</ul>';
-            // show the modal
-            this._openModal(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
-        } catch (e) {
-            // in case ocapi.SecretSauce.GetScoreRule threw an error!
-            this._showError('Error while handleViewScore', e);
+        const detail = event?.detail;
+        if (detail) {
+            try {
+                // prepare the modal content
+                let htmlContent = `The component <code><b>${detail.whatName}</b></code> (<code>${detail.whatId}</code>) has a `+
+                                `score of <b><code>${detail.score}</code></b> because of the following reasons:<br /><ul>`;
+                detail.reasonIds?.forEach((/** @type {number} */ id) => {
+                    const reason = ocapi.SecretSauce.GetScoreRule(id); // may throw an error
+                    if (reason) {
+                        htmlContent += `<li><b>${reason.description}</b>: <i>${reason.errorMessage}</i></li>`;
+                    }
+                });
+                htmlContent += '</ul>';
+                // show the modal
+                this._openModal(`Understand the Score of "${detail.whatName}" (${detail.whatId})`, htmlContent);
+            } catch (e) {
+                // in case ocapi.SecretSauce.GetScoreRule threw an error!
+                this._showError('Error while handleViewScore', e);
+           }
         }
     }
 
@@ -969,12 +976,12 @@ export default class OrgcheckApp extends LightningElement {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             const LOG_SECTION = 'RUN ALL TESTS';
-            this._spinner.open();
-            this._spinner.sectionLog(LOG_SECTION, 'Launching...');
+            this._spinner?.open();
+            this._spinner?.sectionLog(LOG_SECTION, 'Launching...');
             try {
-                const asyncApexJobId = await this._api.runAllTestsAsync();
-                this._spinner.sectionEnded(LOG_SECTION, 'Done!');
-                this._spinner.close(0);
+                const asyncApexJobId = await this._api?.runAllTestsAsync();
+                this._spinner?.sectionEnded(LOG_SECTION, 'Done!');
+                this._spinner?.close(0);
 
                 let htmlContent = 'We asked Salesforce to run all the test classes in your org.<br /><br />';
                 htmlContent += 'For more information about the success of these tests, you can:<br /><ul>';
@@ -983,7 +990,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._openModal('Asynchronous Run All Test Asked', htmlContent);
 
             } catch (error) {
-                this._spinner.sectionFailed(LOG_SECTION, error);
+                this._spinner?.sectionFailed(LOG_SECTION, error);
             }
         } catch (e) {
             this._showError('Error while handleClickRunAllTests', e);
@@ -1015,21 +1022,21 @@ export default class OrgcheckApp extends LightningElement {
     async handleClickRecompile() {
         // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
-            this._spinner.open();
+            this._spinner?.open();
             const LOG_SECTION = 'RECOMPILE';
             const apexClassNamesById = new Map();
-            this._spinner.sectionLog(LOG_SECTION, 'Processing...');
+            this._spinner?.sectionLog(LOG_SECTION, 'Processing...');
             this.apexUncompiledTableData.slice(0, 25).forEach(c => {
-                this._spinner.sectionLog(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
+                this._spinner?.sectionLog(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
                 apexClassNamesById.set(c.id, c.name);
             });
-            const responses = await this._api.compileClasses(Array.from(apexClassNamesById.keys()));
-            this._spinner.sectionLog(LOG_SECTION, 'Done');
+            const responses = await this._api?.compileClasses(Array.from(apexClassNamesById.keys()));
+            this._spinner?.sectionLog(LOG_SECTION, 'Done');
             responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
                 const classId = cr.referenceId.substring(0, 15);
                 const className = apexClassNamesById.get(cr.referenceId);
                 if (cr.body.success === true) {
-                    this._spinner.sectionEnded(`${LOG_SECTION}-${classId}`, `Recompilation requested for class: ${className}`);
+                    this._spinner?.sectionEnded(`${LOG_SECTION}-${classId}`, `Recompilation requested for class: ${className}`);
                 } else {
                     let reasons = [];
                     if (cr.body && Array.isArray(cr.body)) {
@@ -1037,10 +1044,10 @@ export default class OrgcheckApp extends LightningElement {
                     } else if (cr.errors && Array.isArray(cr.errors)) {
                         reasons = cr.errors;
                     }
-                    this._spinner.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons?.map(e => JSON.stringify(e)).join(', ')}`);
+                    this._spinner?.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons?.map(e => JSON.stringify(e)).join(', ')}`);
                 }
             }));
-            this._spinner.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
+            this._spinner?.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
         } catch (e) {
             this._showError('Error while handleClickRecompile', e);
         }
