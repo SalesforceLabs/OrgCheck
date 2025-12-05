@@ -575,12 +575,11 @@ export default class OrgcheckApp extends LightningElement {
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
      * @param {string} recipe - The alias of the alias to use
      * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
-     * @param {boolean} [lazyRefresh] - Is it a lazey refresh or not (true by default)
+     * @param {boolean} [lazyRefresh] - Is it a lazy refresh or not (true by default)
      * @private
      * @async
      */ 
     async _updateData(recipe, forceRefresh=false, lazyRefresh=true) {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         const transformer = this._internalTransformers[recipe]; 
         if (transformer) {
             if (forceRefresh === true) {
@@ -623,7 +622,6 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateLimits() {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         const dailyApiInformation = this._api?.dailyApiRequestLimitInformation;
         if (dailyApiInformation && dailyApiInformation.currentUsagePercentage) {
             if (dailyApiInformation.isGreenZone === true) this.themeForOrgLimit = 'slds-theme_success';
@@ -640,7 +638,6 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _updateCacheInformation() {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         this.cacheManagerData = this._api?.getCacheInformation();
     }
 
@@ -650,7 +647,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _checkTermsAcceptance() {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
         if (await this._api?.checkUsageTerms()) {
             this.useOrgCheckInThisOrgNeedConfirmation = false;
             this.useOrgCheckInThisOrgConfirmed = true;
@@ -669,8 +665,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _loadBasicInformationIfAccepted(logger) {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
-
         // Check for acceptance
         await this._checkTermsAcceptance();
         if (this.useOrgCheckInThisOrgConfirmed === false) return;
@@ -706,8 +700,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */ 
     async _loadFilters(forceRefresh=false, logger) {
-        // SHOULD NOT CATCH ERROR, this will be catched by the caller
-
         logger?.log('Hide the filter panel...');
         this._filters?.hide();
 
@@ -777,7 +769,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersValidated() {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         await this._updateCurrentTab(); // this method does not throw any error so it is safe to just call it
     }
 
@@ -787,7 +778,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleFiltersRefreshed() {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             await this._loadFilters(true);
         } catch(e) {
@@ -803,7 +793,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleClickUsageAcceptance(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         // The source of the event is the acceptance checkbox
         const checkbox = event?.target;
         // do nothing if we did not find the checkbox (weird!!)
@@ -829,7 +818,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleMainTabActivation(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is the main tab
             const mainTab = event.target;
@@ -870,7 +858,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleSubTabActivation(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is a sub tab
             const subTab = event?.target; // not throwing any error
@@ -892,7 +879,6 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async handleRemoveAllCache() {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // try to call the corresponding API method
             this._api?.removeAllFromCache(); // may throw an error
@@ -909,7 +895,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     handleLogCacheItem(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         // Get attribute data-item-name
         const itemName = event?.target?.getAttribute('data-item-name');
         // Get the data from cache
@@ -942,7 +927,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     handleViewScore(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         // The event should contain a detail property
         // @ts-ignore
         const detail = event?.detail;
@@ -973,7 +957,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRunAllTests() {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             const LOG_SECTION = 'RUN ALL TESTS';
             this._spinner?.open();
@@ -1004,7 +987,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRefreshCurrentTab(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // @ts-ignore
             const recipes = event.target.getAttribute('data-recipes')?.split(',');
@@ -1020,7 +1002,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     async handleClickRecompile() {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             this._spinner?.open();
             const LOG_SECTION = 'RECOMPILE';
@@ -1059,7 +1040,6 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */
     handleOpenSubTab(event) {
-        // HANDLERS SHOULD CATCH ERROR and show them in the error modal
         try {
             // The source of the event is a button with a specific attribute
             const button = event?.target; // not throwing any error
@@ -1068,7 +1048,7 @@ export default class OrgcheckApp extends LightningElement {
             const tab = button.getAttribute('data-tab');
             // Split the tab value into two elements one for the main tab and the other for the sub tab
             const elements = tab.split(':');
-            // call the naviagtion method
+            // call the navigation method
             this._navigateToTab( elements[0], elements[1] );
         } catch (e) {
             this._showError('Error while handleOpenSubTab', e);
@@ -1111,7 +1091,7 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */ 
     _showError(title, error) {
-        const htmlContent = `<font color="red">Sorry! An error occured while processing... <br /><br />`+
+        const htmlContent = `<font color="red">Sorry! An error occurred while processing... <br /><br />`+
                             `Please create an issue on <a href="https://github.com/SalesforceLabs/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
                             `along with the context, a screenshot and the following error. <br /><br /> `+
                             `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
