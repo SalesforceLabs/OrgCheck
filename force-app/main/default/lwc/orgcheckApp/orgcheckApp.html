@@ -160,7 +160,7 @@
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="global-view"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset active-tab-value={selectedSubTaDataModel}>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-00" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">🗺️ Welcome in the Global View of your Salesforce organization!</h1>
                         <ul class="slds-list_dotted">
@@ -236,7 +236,7 @@
                         <lightning-button label="Refresh" title="Refresh the data used in this tab..." variant="brand-outline"  class="slds-var-m-left_x-small"  icon-name="utility:refresh" onclick={handleClickRefreshCurrentTab} data-recipes="object,objects,custom-fields,page-layouts,validation-rules,record-types,weblinks"></lightning-button>
                     </lightning-layout-item>
                 </lightning-layout>
-                <lightning-tabset active-tab-value={selectedSubTaDataModel}>
+                <lightning-tabset active-tab-value={selectedSubTab}>
                     <lightning-tab value="summary-01" label="Summary" onactive={handleSubTabActivation}>
                         <h1 class="slds-text-heading_large">⚽ Welcome in the Data model world!</h1>
                         <ul class="slds-list_dotted">
