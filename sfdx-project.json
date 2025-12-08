@@ -5,7 +5,7 @@
       "default": false,
       "package": "Org Check",
       "versionName": "Nitrogen",
-      "versionNumber": "7.1.0.NEXT",
+      "versionNumber": "7.2.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.",
       "ancestorVersion": "HIGHEST"
     },
@@ -14,7 +14,7 @@
       "default": true,
       "package": "Org Check (unlocked)",
       "versionName": "Nitrogen",
-      "versionNumber": "7.1.0.NEXT",
+      "versionNumber": "7.2.0.NEXT",
       "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
     }
   ],
@@ -27,6 +27,7 @@
     "Org Check (unlocked)": "0Ho2X000000KyjaSAC",
     "Org Check (unlocked)@6.4.0-1": "04tKB000000DVKUYA4",
     "Org Check (unlocked)@7.0.0-1": "04tKB000000DXXNYA4",
-    "Org Check (unlocked)@7.1.0-1": "04tKB000000DXXcYAO"
+    "Org Check (unlocked)@7.1.0-1": "04tKB000000DXXcYAO",
+    "Org Check (unlocked)@7.2.0-1": "04tKB000000DY8wYAG"
   }
 }
