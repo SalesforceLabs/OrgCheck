@@ -1067,7 +1067,9 @@ export default class OrgcheckApp extends LightningElement {
             htmlContent += '</ul>';
         } else if (Array.isArray(cacheData)) {
             htmlContent += `<b>Type:</b> Array<br /><br /><b>Size:</b> ${cacheData.length}<br /><br /><b>Content:</b><ul>`;
-            cacheData.forEach((value, index) => console.error(`<li><b>INDEX:</b> ${index}, <b>VALUE:</b> ${JSON.stringify(value)}</li>`))
+            cacheData.forEach((value, index) => {
+                htmlContent += `<li><b>INDEX:</b> ${index}, <b>VALUE:</b> ${JSON.stringify(value)}</li>`;
+            });
             htmlContent += '</ul>';
         } else {
             htmlContent += `<b>Type:</b> ${typeof cacheData}<br /><br /><b>Content:</b><br />`;
@@ -1887,7 +1889,7 @@ export default class OrgcheckApp extends LightningElement {
             }
             data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
-                const itemName = SUB_TABS.get(alias).tab.title;
+                const itemName = SUB_TABS.get(alias)?.tab?.title ?? alias;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 const definitionTable = this[definitionName];
                 globalViewData.push({
@@ -1927,7 +1929,7 @@ export default class OrgcheckApp extends LightningElement {
             const sheets = [];
             data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
-                const itemName = SUB_TABS.get(alias).tab.title;
+                const itemName = SUB_TABS.get(alias)?.tab?.title ?? alias;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 const definitionTable = this[definitionName];
                 const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];

@@ -821,8 +821,8 @@ export class TableDefinitions {
             { label: 'View All Data from',     type: ColumnType.URLS, data: { values: 'aggregateImportantPermissions.viewAllData', value: 'url', label: 'name' }},
             { label: 'Manage Users',           type: ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.manageUsers' }},
             { label: 'Manage Users from',      type: ColumnType.URLS, data: { values: 'aggregateImportantPermissions.manageUsers', value: 'url', label: 'name' }},
-            { label: 'Customize App.',         type: ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.manageUsers' }},
-            { label: 'Customize App. from',    type: ColumnType.URLS, data: { values: 'aggregateImportantPermissions.manageUsers', value: 'url', label: 'name' }},
+            { label: 'Customize App.',         type: ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.customizeApplication' }},
+            { label: 'Customize App. from',    type: ColumnType.URLS, data: { values: 'aggregateImportantPermissions.customizeApplication', value: 'url', label: 'name' }},
             { label: 'Profile',                type: ColumnType.URL,  data: { value: 'profileRef.url', label: 'profileRef.name' }},
             { label: 'Permission Sets',        type: ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }}
         ],
