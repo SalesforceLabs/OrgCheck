@@ -9,11 +9,6 @@ export default [
             {
                 file: './build/dist/orgcheck/orgcheck-ui.js',
                 format: 'es',
-                name: 'OrgCheckUI'
-            },
-            {
-                file: './build/dist/orgcheck/orgcheck-ui.min.js',
-                format: 'cjs',
                 name: 'OrgCheckUI',
                 plugins: [terser()]
             }
@@ -39,11 +34,6 @@ export default [
             {
                 file: './build/dist/orgcheck/orgcheck-api.js',
                 format: 'es',
-                name: 'OrgCheckAPI'
-            },
-            {
-                file: './build/dist/orgcheck/orgcheck-api.min.js',
-                format: 'cjs',
                 name: 'OrgCheckAPI',
                 plugins: [terser()]
             }

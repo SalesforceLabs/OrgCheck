@@ -9,7 +9,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for field sets (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Field sets table definition
      */ 
     static get FieldSets() { return {
         columns: [
@@ -23,7 +23,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for page layouts (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Page layouts table definition
      */
     static get Layouts() { return {
         columns: [
@@ -37,7 +37,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for object limits (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Object limits table definition
      */
     static get Limits() { return {
         columns: [
@@ -56,7 +56,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for validation rules
-     * @returns {Table}
+     * @returns {Table} Validation rules table definition
      */
     static get ValidationRules() { return {
         columns: [
@@ -80,7 +80,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for validation rules (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Validation rules table definition
      */
     static get ValidationRulesInObject() { return {
         columns: [
@@ -101,7 +101,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for web links (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Web links table definition
      */
     static get WebLinksInObject() { return {
         columns: [
@@ -123,7 +123,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for web links (for all objects)
-     * @returns {Table}
+     * @returns {Table} Web links table definition
      */
     static get WebLinks() { return {
         columns: [
@@ -151,7 +151,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for static resources
-     * @returns {Table}
+     * @returns {Table} Static resources table definition
      */
     static get StaticResources() { return {
         columns: [
@@ -173,7 +173,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for record types (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Record types table definition
      */
     static get RecordTypesInObject() { return {
         columns: [
@@ -192,7 +192,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for record types for all objects
-     * @returns {Table}
+     * @returns {Table} Record types table definition
      */
     static get RecordTypes() { return {
         columns: [
@@ -214,7 +214,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for sobject relationships (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Relationships table definition
      */
     static get Relationships() { return {
         columns: [
@@ -231,7 +231,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for chatter groups
-     * @returns {Table}
+     * @returns {Table} Chatter groups table definition
      */
     static get ChatterGroups() { return {
         columns: [
@@ -248,7 +248,7 @@ export class TableDefinitions {
 
     /**
      * @description Data definition for browsers
-     * @returns {Table}
+     * @returns {Table} Browsers table definition
      */
     static get Browsers() { return {
         columns: [
@@ -265,7 +265,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for custom fields
-     * @returns {Table}
+     * @returns {Table} Custom fields table definition
      */
     static get CustomFields() { return {
         columns: [
@@ -305,7 +305,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for custom fields (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Custom fields table definition
      */
     static get CustomFieldsInObject() { return {
         columns: [
@@ -342,7 +342,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for standard fields (specific to the current selected object)
-     * @returns {Table}
+     * @returns {Table} Standard fields table definition
      */
     static get StandardFieldsInObject() { return {
         columns: [
@@ -370,7 +370,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for custom labels
-     * @returns {Table}
+     * @returns {Table} Custom labels table definition
      */
     static get CustomLabels() { return {
         columns: [
@@ -398,7 +398,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for custom tabs
-     * @returns {Table}
+     * @returns {Table} Custom tabs table definition
      */
     static get CustomTabs() { return {
         columns: [
@@ -422,7 +422,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for documents
-     * @returns {Table}
+     * @returns {Table} Documents table definition
      */
     static get Documents() { return {
         columns: [
@@ -444,7 +444,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for dashboards
-     * @returns {Table}
+     * @returns {Table} Dashboards table definition
      */
     static get Dashboards() { return {
         columns: [
@@ -468,7 +468,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for reports
-     * @returns {Table}
+     * @returns {Table} Reports table definition
      */
     static get Reports() { return {
         columns: [
@@ -492,7 +492,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for lightning aura components
-     * @returns {Table}
+     * @returns {Table} Aura components table definition
      */
     static get AuraComponents() { return {
         columns: [
@@ -514,7 +514,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for lightning pages
-     * @returns {Table}
+     * @returns {Table} Lightning pages table definition
      */
     static get FlexiPages() { return {
         columns: [
@@ -542,7 +542,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for lightning pages within an SObject
-     * @returns {Table}
+     * @returns {Table} Lightning pages table definition
      */
     static get FlexiPagesInObject() { return {
         columns: [
@@ -569,7 +569,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for knowledge articles
-     * @returns {Table}
+     * @returns {Table} Knowledge articles table definition
      */ 
     static get KnowledgeArticles() { return {
         columns: [
@@ -589,7 +589,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for lightning web components
-     * @returns {Table}
+     * @returns {Table} Lightning web components table definition
      */
     static get LightningWebComponents() { return {
         columns: [
@@ -611,7 +611,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for page layouts
-     * @returns {Table}
+     * @returns {Table} Page layouts table definition
      */
     static get PageLayouts() { return {
         columns: [
@@ -637,7 +637,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for permission sets
-     * @returns {Table}
+     * @returns {Table} Permission sets table definition
      */
     static get PermissionSets() { return {
         columns: [
@@ -671,7 +671,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for permission set licenses
-     * @returns {Table}
+     * @returns {Table} Permission set licenses table definition
      */
     static get PermissionSetLicenses() { return {
         columns: [
@@ -696,7 +696,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for profiles
-     * @returns {Table}
+     * @returns {Table} Profiles table definition
      */
     static get Profiles() { return {
         columns: [
@@ -726,7 +726,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for profile restrictions
-     * @returns {Table}
+     * @returns {Table} Profile restrictions table definition
      */
     static get ProfileRestrictions() { return {
         columns: [
@@ -745,7 +745,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for profiles password policies
-     * @returns {Table}
+     * @returns {Table} Profile password policies table definition
      */
     static get ProfilePasswordPolicies() { return {
         columns: [
@@ -768,7 +768,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for public groups
-     * @returns {Table}
+     * @returns {Table} Public groups table definition
      */
     static get PublicGroups() { return {
         columns: [
@@ -788,13 +788,13 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for queues
-     * @returns {Table}
+     * @returns {Table} Queues table definition
      */
     static get Queues() { return TableDefinitions.PublicGroups; }
 
     /**
      * @description Table definition for active internal users
-     * @returns {Table}
+     * @returns {Table} Active internal users table definition
      */
     static get Users() { return {
         columns: [
@@ -832,7 +832,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for visualforce components
-     * @returns {Table}
+     * @returns {Table} Visualforce components table definition
      */
     static get VisualForceComponents() { return {
         columns: [
@@ -856,7 +856,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for visualforce pages
-     * @returns {Table}
+     * @returns {Table} Visualforce pages table definition
      */
     static get VisualForcePages() { return {
         columns: [
@@ -881,7 +881,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for apex classes (compiled and not tests)
-     * @returns {Table}
+     * @returns {Table} Apex classes table definition
      */
     static get ApexClasses() { return {
         columns: [
@@ -920,7 +920,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for uncompiled apex classes
-     * @returns {Table}
+     * @returns {Table} Uncompiled apex classes table definition
      */    
     static get ApexUncompiledClasses() { return {
         columns: [
@@ -944,7 +944,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for apex triggers
-     * @returns {Table}
+     * @returns {Table} Apex triggers table definition
      */
     static get ApexTriggers() { return {
         columns: [
@@ -979,7 +979,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for apex triggers within SObject
-     * @returns {Table}
+     * @returns {Table} Apex triggers in SObject table definition
      */
     static get ApexTriggersInObject() { return {
         columns: [
@@ -1012,7 +1012,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for apex classes that are tests
-     * @returns {Table}
+     * @returns {Table} Apex test classes table definition
      */
     static get ApexTests() { return {
         columns: [
@@ -1055,7 +1055,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for SObjects
-     * @returns {Table}
+     * @returns {Table} SObjects table definition
      */
     static get Objects() { return {
         columns: [
@@ -1079,7 +1079,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for flows
-     * @returns {Table}
+     * @returns {Table} Flows table definition
      */
     static get Flows() { return {
         columns: [
@@ -1118,7 +1118,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for email templates
-     * @returns {Table}
+     * @returns {Table} Email templates table definition
      */ 
     static get EmailTemplates() { return {
         columns: [
@@ -1145,7 +1145,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for home page components
-     * @returns {Table}
+     * @returns {Table} Home page components table definition
      */ 
     static get HomePageComponents() { return {
         columns: [
@@ -1168,7 +1168,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for process builders
-     * @returns {Table}
+     * @returns {Table} Process builders table definition
      */
     static get ProcessBuilders() { return {
         columns: [
@@ -1204,7 +1204,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for workflows
-     * @returns {Table}
+     * @returns {Table} Workflows table definition
      */
     static get Workflows() { return {
         columns: [
@@ -1226,7 +1226,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for workflows in an object
-     * @returns {Table}
+     * @returns {Table} Workflows in SObject table definition
      */
     static get WorkflowsInObject() { return {
         columns: [
@@ -1248,7 +1248,7 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for roles
-     * @returns {Table}
+     * @returns {Table} Roles table definition
      */
     static get Roles() { return {
         columns: [
@@ -1266,8 +1266,8 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for object permissions
-     * @param {DataMatrix} dataMatrix
-     * @returns {Table}
+     * @param {DataMatrix} dataMatrix - matrix containing dynamic column headers and the data
+     * @returns {Table} Object permissions table definition
      */
     static ObjectPermissions(dataMatrix) {
         /** @type {Table} */
@@ -1300,8 +1300,8 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for application permissions
-     * @param {DataMatrix} dataMatrix
-     * @returns {Table}
+     * @param {DataMatrix} dataMatrix - matrix containing dynamic column headers and the data
+     * @returns {Table} Application permissions table definition
      */
     static AppPermissions(dataMatrix) {
         /** @type {Table} */
@@ -1336,8 +1336,8 @@ export class TableDefinitions {
     
     /**
      * @description Table definition for field permissions
-     * @param {DataMatrix} dataMatrix
-     * @returns {Table}
+     * @param {DataMatrix} dataMatrix - matrix containing dynamic column headers and the data
+     * @returns {Table} Field permissions table definition
      */
     static FieldPermissions(dataMatrix) {
         /** @type {Table} */
@@ -1370,8 +1370,8 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for score rules
-     * @param {DataMatrix} dataMatrix
-     * @returns {Table}
+     * @param {DataMatrix} dataMatrix - matrix containing dynamic column headers and the data
+     * @returns {Table} Score rules table definition
      */
     static ScoreRules(dataMatrix) {
         /** @type {Table} */
@@ -1400,8 +1400,8 @@ export class TableDefinitions {
 
     /**
      * @description Table definition for hardcoded url view
-     * @param {number} nbMaxItems
-     * @returns {Table}
+     * @param {number} nbMaxItems - number of items to show in the URLs column
+     * @returns {Table} Hardcoded URLs table definition
      */
     static HardCodedURLsView(nbMaxItems) { return {
         columns: [
