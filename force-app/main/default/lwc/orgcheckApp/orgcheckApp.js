@@ -679,7 +679,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description List of internal transformers to get data from the API
-     * @type {Map<string, {data: string, remove: Function, getAlias: Function, get: Function}>}
+     * @type {Map<string, {data: string, remove: Function, getAlias: Function, get: Function, lastAlias?: string}>}
      * @private
      */
     _internalTransformers = new Map([
@@ -1870,7 +1870,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Global View data from API
-     * @type {Map}
+     * @param {Map} data - The data from the API
      */ 
     set _internalGlobalViewDataFromAPI(data) {
         if (data) {
@@ -1932,7 +1932,9 @@ export default class OrgcheckApp extends LightningElement {
                 const transfomer = this._internalTransformers.get(alias);
                 const itemName = SUB_TABS.get(alias)?.tab?.title ?? alias;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
+                /** @type {ocui.Table} */
                 const definitionTable = this[definitionName];
+                /** @type {ocui.TableColumnWithData} */
                 const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];
                 hardCodedURLsViewData.push({
                     type: itemName,
@@ -1946,10 +1948,12 @@ export default class OrgcheckApp extends LightningElement {
                         };
                     })
                 });
-                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data?.filter(d => d?.length > 0 || false), itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+                if (item?.data?.length > 0) {
+                    sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+                }
             });
-            this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort as the data will be shown in an extendetible table (which will be sorted by countBad desc by default)
-            this.hardCodedURLsViewItemsExport = sheets;
+            this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort
+            this.hardCodedURLsViewItemsExport = sheets.sort((a, b) => (a?.rows?.length ?? 0) < (b?.rows?.length ?? 0) ? 1 : -1 ); // sorted by Nb Rows
             this.showhardCodedURLsViewExportButton = true;
         } else {
             this.hardCodedURLsViewData = [];
