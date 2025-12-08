@@ -1953,7 +1953,7 @@ export default class OrgcheckApp extends LightningElement {
                 }
             });
             this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort
-            this.hardCodedURLsViewItemsExport = sheets.sort((a, b) => (a?.rows?.length ?? 0) < (b?.rows?.length ?? 0) ? 1 : -1 ); // sorted by Nb Rows
+            this.hardCodedURLsViewItemsExport = sheets.sort((a, b) => { return (a?.rows?.length ?? 0) < (b?.rows?.length ?? 0) ? 1 : -1; }); // sorted by Nb Rows
             this.showhardCodedURLsViewExportButton = true;
         } else {
             this.hardCodedURLsViewData = [];

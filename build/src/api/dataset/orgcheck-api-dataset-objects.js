@@ -54,36 +54,42 @@ export class DatasetObjects extends Dataset {
                         'FROM CustomField ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }, {
                 // Get the number of page layouts per object
                 string: 'SELECT EntityDefinitionId, COUNT(Id) NbPageLayouts ' + // EntityDefinitionId = EntityDefinition.DurableId
                         'FROM Layout ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }, {
                 // Get the number of record types per object
                 string: 'SELECT EntityDefinitionId, COUNT(Id) NbRecordTypes ' + // EntityDefinitionId = EntityDefinition.DurableId
                         'FROM RecordType ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }, {
                 // Get the number of workflow rules per object
                 string: 'SELECT TableEnumOrId, COUNT(Id) NbWorkflowRules ' + // TableEnumOrId = EntityDefinition.QualifiedApiName
                         'FROM WorkflowRule ' +
                         'GROUP BY TableEnumOrId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }, {
                 // Get the number of validation rules per object
                 string: 'SELECT EntityDefinitionId, COUNT(Id) NbValidationRules ' + // EntityDefinitionId = EntityDefinition.DurableId
                         'FROM ValidationRule ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }, {
                 // Get the number of all the apex triggers per object
                 string: 'SELECT EntityDefinitionId, COUNT(Id) NbTriggers ' + // EntityDefinitionId = EntityDefinition.DurableId
                         'FROM ApexTrigger ' +
                         'GROUP BY EntityDefinitionId',
                 tooling: true,
+                queryMoreField: 'CreatedDate' // entityDef does not support calling QueryMore, use the custom instead
             }], logger)
         ]);
 
@@ -104,19 +110,22 @@ export class DatasetObjects extends Dataset {
                 return record.QualifiedApiName;
             }
         );
-        const nbCustomFieldsByDurableId = {};
-        const nbPageLayoutsByDurableId = {};
-        const nbRecordTypesByDurableId = {};
-        const nbWorkflowRulesByName = {};
-        const nbValidationRulesByDurableId = {};
-        const nbTriggersByDurableId = {};
+        const counters = new Map();
+        const SetCounter = (durableId, counterName, value) => {
+            const key = `${durableId}-${counterName}`;
+            if (counters.has(key) === false) {
+                counters.set(key, value);
+            } else {
+                counters.set(key, counters.get(key) + value);
+            }
+        }
         await Promise.all([
-            Processor.forEach(nbCustomFieldsPerEntity, (/** @type {any} */ recordCount) => nbCustomFieldsByDurableId[recordCount.EntityDefinitionId] = recordCount.NbCustomFields),
-            Processor.forEach(nbPageLayoutsPerEntity, (/** @type {any} */ recordCount) => nbPageLayoutsByDurableId[recordCount.EntityDefinitionId] = recordCount.NbPageLayouts),
-            Processor.forEach(nbRecordTypesPerEntity, (/** @type {any} */ recordCount) => nbRecordTypesByDurableId[recordCount.EntityDefinitionId] = recordCount.NbRecordTypes),
-            Processor.forEach(nbWorkflowRulesPerEntity, (/** @type {any} */ recordCount) => nbWorkflowRulesByName[recordCount.TableEnumOrId] = recordCount.NbWorkflowRules),
-            Processor.forEach(nbValidationRulesPerEntity, (/** @type {any} */ recordCount) => nbValidationRulesByDurableId[recordCount.EntityDefinitionId] = recordCount.NbValidationRules),
-            Processor.forEach(nbTriggersPerEntityStatus, (/** @type {any} */ recordCount) => nbTriggersByDurableId[recordCount.EntityDefinitionId] = recordCount.NbTriggers)
+            Processor.forEach(nbCustomFieldsPerEntity, (/** @type {any} */ r) => SetCounter(r.EntityDefinitionId, 'cf', r.NbCustomFields)),
+            Processor.forEach(nbPageLayoutsPerEntity, (/** @type {any} */ r) => SetCounter(r.EntityDefinitionId, 'pl', r.NbPageLayouts)),
+            Processor.forEach(nbRecordTypesPerEntity, (/** @type {any} */ r) => SetCounter(r.EntityDefinitionId, 'rt', r.NbRecordTypes)),
+            Processor.forEach(nbWorkflowRulesPerEntity, (/** @type {any} */ r) => SetCounter(r.TableEnumOrId, 'wf', r.NbWorkflowRules)),
+            Processor.forEach(nbValidationRulesPerEntity, (/** @type {any} */ r) => SetCounter(r.EntityDefinitionId, 'vr', r.NbValidationRules)),
+            Processor.forEach(nbTriggersPerEntityStatus, (/** @type {any} */ r) => SetCounter(r.EntityDefinitionId, 'ap', r.NbTriggers))
         ]) 
 
         // Create the map
@@ -141,12 +150,12 @@ export class DatasetObjects extends Dataset {
                         typeId: type,
                         externalSharingModel: entity.ExternalSharingModel,
                         internalSharingModel: entity.InternalSharingModel,
-                        nbCustomFields: nbCustomFieldsByDurableId[durableId] ?? 0,
-                        nbPageLayouts: nbPageLayoutsByDurableId[durableId] ?? 0,
-                        nbRecordTypes: nbRecordTypesByDurableId[durableId] ?? 0,
-                        nbWorkflowRules: nbWorkflowRulesByName[object.name] ?? 0,
-                        nbValidationRules: nbValidationRulesByDurableId[durableId] ?? 0,
-                        nbApexTriggers: nbTriggersByDurableId[durableId] ?? 0,
+                        nbCustomFields: counters.get(`${durableId}-cf`) ?? 0,
+                        nbPageLayouts: counters.get(`${durableId}-pl`) ?? 0,
+                        nbRecordTypes: counters.get(`${durableId}-rt`) ?? 0,
+                        nbWorkflowRules: counters.get(`${object.name}-wf`) ?? 0,
+                        nbValidationRules: counters.get(`${durableId}-vr`) ?? 0,
+                        nbApexTriggers: counters.get(`${durableId}-at`) ?? 0,
                         url: sfdcManager.setupUrl(durableId, type)
                     }
                 });

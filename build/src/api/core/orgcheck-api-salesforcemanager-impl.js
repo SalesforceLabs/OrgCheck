@@ -334,6 +334,20 @@ export class SalesforceManager extends SalesforceManagerIntf {
         const indexOfGroupByStatment = query.indexOf(' GROUP BY ');
         const isWhereStatmentAlreadyUsed = query.indexOf(' WHERE ') !== -1;
         const isAggregateQuery = indexOfGroupByStatment !== -1;
+        // Make sure the field used for the queryMore is not used in the group by statement:
+        if (isAggregateQuery && field && query.toLowerCase().indexOf(field.toLowerCase(), indexOfGroupByStatment) !== -1) {
+            throw new SalesforceError(
+                `The field <${field}> used for the custom queryMore cannot be used in the GROUP BY clause of the query <${query}>`,
+                'CustomQueryMoreFieldInGroupBy',
+                { 
+                    'SoqlQuery': query ?? '(empty)',
+                    'Tooling': useTooling,
+                    'Field': field ?? '(empty)',
+                    'Cause': `Field used in GROUP BY`,
+                    'Where': 'SalesforceManagerImpl.soqlQuery/_customSOQLQuery'
+                }
+            );
+        }
         // Alternative method to queryMore based on ID ordering (inspired by Maroun IMAD!)
         const doNextQuery = async (/** @type {string} */ startingValue) => {
             if (!startingValue && isAggregateQuery === false) {
