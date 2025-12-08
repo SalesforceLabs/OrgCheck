@@ -6,35 +6,179 @@ import * as ocapi from './libs/orgcheck-api.js';
 import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
+import { TableDefinitions } from './subs/tableDefinitions.js';
 
-const PAGELAYOUT = ocapi.SalesforceMetadataTypes.PAGE_LAYOUT;
-const APEXCLASS = ocapi.SalesforceMetadataTypes.APEX_CLASS;
-const FLOWVERSION = ocapi.SalesforceMetadataTypes.FLOW_VERSION;
 const MAX_ITEMS_IN_HARDCODED_URLS_LIST = 15;
-const MAIN_TABS = {
-    AUTOMATION: 'automation',
-    ANALYTICS: 'analytics',
-    BOXES: 'boxes',
-    CODE: 'code',
-    DATAMODEL: 'datamodel',
-    HOME: 'home',
-    ORG: 'organization',
-    OTHERS: 'others',
-    SECURITY: 'security',
-    SETTING: 'setting',
-    VISUAL: 'visual'
+
+/**
+ * @description Application navigation in tabs and subtabs
+ * @constant
+ */
+const APPLICATION_NAVIGATION = {
+    HOME: { 
+        key:   'home', 
+        title: 'Home',
+        tabs: { 
+            WELCOME:       { key: 'welcome', title : '👋 Welcome!' },
+            CACHE:         { key: 'metadata-cache', title: '🛠️ Metadata Cache' },
+            HELP:          { key: 'help', title: '⁉️ Score explanation' }
+        }
+    },
+    ORG: { 
+        key:   'organization', 
+        title: '🗺️ Salesforce Organization',
+        tabs: { 
+            INDEX0:        { key: 'summary-00', title: 'Summary' },
+            GLOBAL_VIEW:   { key: 'global-view', title: '🏞️ Overview' },
+            URL_VIEW:      { key: 'hard-coded-urls-view', title: '🏖️ Hard-coded URLs' },
+        }
+    },
+    DATAMODEL: { 
+        key:   'datamodel', 
+        title: '⚽ Data model',
+        tabs: { 
+            INDEX1:        { key: 'summary-01', title: 'Summary' },
+            SOBJ_DESC:     { key: 'object', title: '🎳 Object Documentation' },
+            SOBJECTS:      { key: 'objects', title: '🏉 Objects' },
+            CUSTOM_FIELDS: { key: 'custom-fields', title: '🏈 Custom Fields' },
+            LAYOUTS:       { key: 'page-layouts', title: '🏓 Page Layouts' },
+            VRS:           { key: 'validation-rules', title: '🎾 Validation Rules' },
+            RTS:           { key: 'record-types', title: '🏏 Record Types' },
+            WEB_LINKS:     { key: 'web-links', title: '🏑 Web Links' },
+        }
+    },
+    SECURITY: { 
+        key:   'security', 
+        title: '👮 Security and Access',
+        tabs: { 
+            INDEX2:        { key: 'summary-02', title: 'Summary' },
+            USERS:         { key: 'internal-active-users', title: '👥 Active Internal Users' },
+            PROFILES:      { key: 'profiles', title: '🚓 Profiles' },
+            PSETS:         { key: 'permission-sets', title: '🚔 Permission Sets' },
+            PSLS:          { key: 'permission-set-licenses', title: '🚔 Permission Set Licenses' },
+            PROFILE_RSTRS: { key: 'profile-restrictions', title: '🚸 Profile Restrictions' },
+            PROFILE_PWDS:  { key: 'profile-password-policies', title: '⛖ Profile Password Policies' },
+            CRUDS:         { key: 'object-permissions', title: '🚦 Object Permissions' },
+            FLSS:          { key: 'field-permissions', title: '🚧 Field Level Securities' },
+            APP_PERMS:     { key: 'app-permissions', title: '⛕ Application Permissions' },
+            BROWSERS:      { key: 'browsers', title: '🌐 Browsers' },
+        }
+    },
+    BOXES: { 
+        key:   'boxes', 
+        title: '🐇 Boxes',
+        tabs: { 
+            INDEX3:        { key: 'summary-03', title: 'Summary' },
+            ROLES_GRAPH:   { key: 'user-roles-hierarchy', title: '🐙 Internal Role Explorer' },
+            ROLES:         { key: 'user-roles', title: '🦓 Internal Role Listing' },
+            PGS:           { key: 'public-groups', title: '🐘 Public Groups' },
+            QUEUES:        { key: 'queues', title: '🦒 Queues' },
+            CHT_GROUPS:    { key: 'collaboration-groups', title: '🦙 Chatter Groups' },
+        }
+    },
+    AUTOMATION: { 
+        key:   'automation', 
+        title: '🤖 Automations',
+        tabs: { 
+            INDEX4:        { key: 'summary-04', title: 'Summary' },
+            FLOWS:         { key: 'flows', title: '🏎️ Flows' },
+            PBS:           { key: 'process-builders',  title: '🛺 Process Builders' },
+            WORKFLOWS:     { key: 'workflows', title: '🚗 Workflows' },
+        }
+    },
+    SETTING: { 
+        key:   'setting', 
+        title: '🎁 Setting',
+        tabs: {
+            INDEX5:        { key: 'summary-05', title: 'Summary' },
+            LABELS:        { key: 'custom-labels', title: '🏷️ Custom Labels' },
+            DOCUMENTS:     { key: 'documents', title: '🍱 Documents' },
+            EMAIL_TPLS:    { key: 'email-templates', title: '🌇 Email Templates' },
+            ARTICLES:      { key: 'knowledge-articles', title: '📚 Knowledge Articles' },
+            SRS:           { key: 'static-resources', title: '🗿 Static Resources' },
+        }
+    },
+    VISUAL: { 
+        key:   'visual', 
+        title: '🥐 User Interface',
+        tabs: { 
+            INDEX6:        { key: 'summary-06', title: 'Summary' },
+            VFPS:          { key: 'visualforce-pages', title: '🥖 Visualforce Pages' },
+            VFCS:          { key: 'visualforce-components', title: '🍞 Visualforce Components' },
+            LG_PAGES:      { key: 'lightning-pages', title: '🎂 Lightning Pages' },
+            AURAS:         { key: 'lightning-aura-components', title: '🧁 Lightning Aura Components' },
+            LWCS:          { key: 'lightning-web-components', title: '🍰 Lightning Web Components' },
+            HOME_PAGES:    { key: 'home-page-components', title: '🍩 Home Page Components' },
+            TABS:          { key: 'custom-tabs', title: '🥠 Custom Tabs' },
+        }
+    },
+    CODE: { 
+        key:   'code', 
+        title: '🔥 Programmatic',
+        tabs: {
+            INDEX7:        { key: 'summary-07', title: 'Summary' },
+            CLASSES:       { key: 'apex-classes', title: '❤️‍🔥 Apex Classes' },
+            UNCOMPILEDS:   { key: 'apex-uncompiled', title: '🌋 Apex Classes That Need Recompilation' },
+            TRIGGERS:      { key: 'apex-triggers', title: '🧨 Apex Triggers' },
+            TESTS:         { key: 'apex-tests', title: '🚒 Apex Unit Tests' },
+        }
+    },
+    ANALYTICS: { 
+        key:   'analytics', 
+        title: '⛰️ Analytics',
+        tabs: {
+            INDEX8:        { key: 'summary-08', title: 'Summary' },
+            REPORTS:       { key: 'reports', title: '🌳 Reports' }, 
+            DASHBOARDS:    { key: 'dashboards', title: '🌲 Dashboards' },
+        }
+    },
 };
-Object.freeze(MAIN_TABS);
-const MAIN_TABS_VALUES = Object.values(MAIN_TABS);
+Object.freeze(APPLICATION_NAVIGATION);
+
+/**
+ * @description Keys of the main tabs in the application
+ * @type {Array<string>}
+ * @constant
+ */
+const MAIN_TABS_VALUES = Object.values(APPLICATION_NAVIGATION).map(tab => tab.key);
 Object.freeze(MAIN_TABS_VALUES);
-const SANITIZE_MAIN_TAB_INPUT = (/** @type {string} */ input) => { 
+
+/**
+ * @description Sub tabs by key
+ * @type {Map<string, {tab: {key: string, title: string}, mainTabKey: string}>}
+ * @constant
+ */
+const SUB_TABS = new Map();
+
+/**
+ * @description Sub tab keys by main tab key
+ * @type {Map<string, Array<string>>}
+ * @constant
+ */
+const SUB_TABS_BY_MAIN_TAB_KEY = new Map();
+
+Object.values(APPLICATION_NAVIGATION).forEach(mTab => Object.values(mTab.tabs).forEach(sTab => {
+    SUB_TABS.set(sTab.key, { tab: sTab, mainTabKey: mTab.key });
+    if (SUB_TABS_BY_MAIN_TAB_KEY.has(mTab.key) === false) SUB_TABS_BY_MAIN_TAB_KEY.set(mTab.key, []);
+    SUB_TABS_BY_MAIN_TAB_KEY.get(mTab.key).push(sTab.key);
+}));
+Object.freeze(SUB_TABS);
+Object.freeze(SUB_TABS_BY_MAIN_TAB_KEY);
+
+/**
+ * @description Sanitize and validate main tab input
+ * @param {string} input - The input main tab value
+ * @returns {string} The sanitized main tab value
+ * @throws {Error} If the input is not a valid main tab value
+ */
+const SANITIZE_MAIN_TAB_INPUT = (input) => { 
     if (input === undefined || input === null) throw new Error('Input is undefined or null');
     if (typeof input !== 'string') throw new Error('Input is not a string'); 
-    const normalized = input.trim().toLowerCase(); 
-    if (MAIN_TABS_VALUES.includes(normalized) === false) { 
+    const sanitizedInput = input.trim().toLowerCase();
+    if (MAIN_TABS_VALUES.includes(sanitizedInput) === false) { 
         throw new Error(`Input <${input}> is not a valid main tab value`);
     } 
-    return normalized;
+    return sanitizedInput;
 };
 
 export default class OrgcheckApp extends LightningElement {
@@ -297,128 +441,150 @@ export default class OrgcheckApp extends LightningElement {
      */
     async _initApi() {
 
-        // Load the third party scripts
-        await Promise.all([
-            loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
-            loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
-        ]);
+        try {
+            // Show spinner
+            this._spinner?.open();
+            this._spinner?.sectionLog('Initialize the Org Check API', `C'est parti...`);
 
-        // Load the Org Check API
-        this._api = new ocapi.API(
-            // -----------------------
-            // ACCESS TOKEN of the current user
-            this.accessToken, 
-            // -----------------------
-            // JsForce instance
-            // @ts-ignore 
-            jsforce, 
-            // -----------------------
-            // Local Storage methods
-            // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
-            {
-                /**
-                 * @description Set an item in the local storage
-                 * @param {string} key - The key to set
-                 * @param {string} value - The value to set
-                 */
-                setItem: (key, value) => { this.localStorage.setItem(key, value); },
-                /**
-                 * @description Get an item from the local storage
-                 * @param {string} key - The key to set
-                 * @returns {string} The stored value for the given key
-                 */
-                getItem: (key) => { return this.localStorage.getItem(key); },
-                /**
-                 * @description Removes an item from the local storage
-                 * @param {string} key - The key to remove
-                 */
-                removeItem: (key) => { this.localStorage.removeItem(key); },
-                /**
-                 * @description Get all the keys in the storage
-                 * @returns {Array<string>} List of keys
-                 */
-                keys: () => {  
-                    const keys = []; 
-                    for (let i = 0; i < this.localStorage.length; i++) {
-                        keys.push(this.localStorage.key(i)); 
-                    }
-                    return keys; }
-            },
-            // -----------------------
-            // Encoding methods
-            { 
-                /** 
-                 * @description Encoding method
-                 * @param {string} data - Input data
-                 * @returns {Uint8Array} Output data
-                 */ 
-                encode: (data) => { return this.textEncoder.encode(data); }, 
-                /** 
-                 * @description Decoding method
-                 * @param {Uint8Array} data - Input data
-                 * @returns {string} Output data
-                 */ 
-                decode: (data) => { return this.textDecoder.decode(data); }
-            },            
-            // -----------------------
-            // Compression methods
-            { 
-                /** 
-                 * @description Compress method
-                 * @param {Uint8Array} data - Input data
-                 * @returns {Uint8Array} Output data
-                 */ 
-                compress:   (data) => { 
-                    // @ts-ignore
-                    return fflate.zlibSync(data, { level: 9 }); 
+            // Load the third party scripts
+            this._spinner?.sectionLog('Third party librairies', `Start loading...`);
+            await Promise.all([
+                loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
+                loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
+            ]);
+            this._spinner?.sectionEnded('Third party librairies', `Done.`);
+
+            // Load the Org Check API
+            this._spinner?.sectionLog('Load Org Check API', `Start loading...`);
+            this._api = new ocapi.API(
+                // -----------------------
+                // ACCESS TOKEN of the current user
+                this.accessToken, 
+                // -----------------------
+                // JsForce instance
+                // @ts-ignore 
+                jsforce, 
+                // -----------------------
+                // Local Storage methods
+                // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
+                {
+                    /**
+                     * @description Set an item in the local storage
+                     * @param {string} key - The key to set
+                     * @param {string} value - The value to set
+                     */
+                    setItem: (key, value) => { this.localStorage.setItem(key, value); },
+                    /**
+                     * @description Get an item from the local storage
+                     * @param {string} key - The key to set
+                     * @returns {string} The stored value for the given key
+                     */
+                    getItem: (key) => { return this.localStorage.getItem(key); },
+                    /**
+                     * @description Removes an item from the local storage
+                     * @param {string} key - The key to remove
+                     */
+                    removeItem: (key) => { this.localStorage.removeItem(key); },
+                    /**
+                     * @description Get all the keys in the storage
+                     * @returns {Array<string>} List of keys
+                     */
+                    keys: () => {  
+                        const keys = []; 
+                        for (let i = 0; i < this.localStorage.length; i++) {
+                            keys.push(this.localStorage.key(i)); 
+                        }
+                        return keys; }
                 },
-                /** 
-                 * @description Decompress method
-                 * @param {Uint8Array} data - Input data
-                 * @returns {Uint8Array} Output data
-                 */ 
-                // @ts-ignore
-                decompress: (data) => { 
+                // -----------------------
+                // Encoding methods
+                { 
+                    /** 
+                     * @description Encoding method
+                     * @param {string} data - Input data
+                     * @returns {Uint8Array} Output data
+                     */ 
+                    encode: (data) => { return this.textEncoder.encode(data); }, 
+                    /** 
+                     * @description Decoding method
+                     * @param {Uint8Array} data - Input data
+                     * @returns {string} Output data
+                     */ 
+                    decode: (data) => { return this.textDecoder.decode(data); }
+                },            
+                // -----------------------
+                // Compression methods
+                { 
+                    /** 
+                     * @description Compress method
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
+                     */ 
+                    compress:   (data) => { 
+                        // @ts-ignore
+                        return fflate.zlibSync(data, { level: 9 }); 
+                    },
+                    /** 
+                     * @description Decompress method
+                     * @param {Uint8Array} data - Input data
+                     * @returns {Uint8Array} Output data
+                     */ 
                     // @ts-ignore
-                    return fflate.unzlibSync(data); 
+                    decompress: (data) => { 
+                        // @ts-ignore
+                        return fflate.unzlibSync(data); 
+                    }
+                },
+                // -----------------------
+                // Log methods -- delegation to the UI spinner
+                {
+                    /**
+                     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+                     */
+                    isConsoleFallback: () => { return true; },
+                    /**
+                     * @description Standard log method
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
+                     */ 
+                    log: (section, message) => { this._spinner?.sectionLog(section, message); },
+                    /**
+                     * @description Log method when task is ended
+                     * @param {string} section - The section name
+                     * @param {string} message - The message to log
+                     */ 
+                    ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
+                    /**
+                     * @description Log method when task has just failed
+                     * @param {string} section - The section name
+                     * @param {string | Error} error - The error to log
+                     */ 
+                    failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
                 }
-            },
-            // -----------------------
-            // Log methods -- delegation to the UI spinner
-            {
-                /**
-                 * @returns {boolean} true if this logger is a console fallback logger, false otherwise
-                 */
-                isConsoleFallback: () => { return true; },
-                /**
-                 * @description Standard log method
-                 * @param {string} section - The section name
-                 * @param {string} message - The message to log
-                 */ 
-                log: (section, message) => { this._spinner?.sectionLog(section, message); },
-                /**
-                 * @description Log method when task is ended
-                 * @param {string} section - The section name
-                 * @param {string} message - The message to log
-                 */ 
-                ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
-                /**
-                 * @description Log method when task has just failed
-                 * @param {string} section - The section name
-                 * @param {string | Error} error - The error to log
-                 */ 
-                failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
-            }
-        );
- 
-        // Get the score rules matrix once here
-        this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
+            );
+            this._spinner?.sectionEnded('Load Org Check API', `Done.`);
 
-        // Update the cache information when we are finish loading everything
-        this._updateCacheInformation();
+            // Some other stuff to do
+            this._spinner?.sectionLog('Additional steps', `Starting...`);
 
-        // Load basic information if the user has already accepted the terms
-        await this._loadBasicInformationIfAccepted();
+            // Get the score rules matrix once here
+            this._spinner?.sectionLog('Additional steps', `Get the score rules matrix...`);
+            this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
+
+            // Update the cache information when we are finish loading everything
+            this._spinner?.sectionLog('Additional steps', `Update the cache information when we are finish loading everything...`);
+            this._updateCacheInformation();
+
+            // Load basic information if the user has already accepted the terms
+            this._spinner?.sectionLog('Additional steps', `Load basic information if the user has already accepted the terms...`);
+            await this._loadBasicInformationIfAccepted();
+
+            this._spinner?.sectionEnded('Additional steps', `Done.`);
+            this._spinner?.sectionEnded('Initialize the Org Check API', 'Done');
+
+        } catch (error) {
+            this._spinner?.sectionFailed('Initialize the Org Check API', error);
+        }
     }
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -484,7 +650,7 @@ export default class OrgcheckApp extends LightningElement {
      * @public
      */ 
     get isThereAnyApexUncompiled() {
-        return this.selectedSubTab === 'apex-uncompiled' && this.apexUncompiledTableData?.length > 0 || false;
+        return this.selectedSubTab === APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key && this.apexUncompiledTableData?.length > 0 || false;
     }
 
     /**
@@ -513,63 +679,56 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description List of internal transformers to get data from the API
-     * @type {any}
+     * @type {Object<string, {data: string, remove: Function, lastAlias?: string, getAlias: Function, get: Function}>}
      * @private
      */
     _internalTransformers = Object.freeze({
-        'apex-classes':              { label: '❤️‍🔥 Apex Classes',               tab: MAIN_TABS.CODE,            data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }},
-        'apex-tests':                { label: '🚒 Apex Unit Tests',            tab: MAIN_TABS.CODE,            data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
-        'apex-triggers':             { label: '🧨 Apex Triggers',              tab: MAIN_TABS.CODE,            data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
-        'apex-uncompiled':           { label: '🌋 Apex Uncompiled',            tab: MAIN_TABS.CODE,            data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
-        'app-permissions':           { label: '⛕ Application Permissions',    tab: MAIN_TABS.SECURITY,        data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,      get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
-        'browsers':                  { label: '🌐 Browsers Used in Org',       tab: MAIN_TABS.SECURITY,        data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }},
-        'collaboration-groups':      { label: '🦙 Chatter Groups',             tab: MAIN_TABS.BOXES,           data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }},
-        'custom-fields':             { label: '🏈 Custom Fields',              tab: MAIN_TABS.DATAMODEL,       data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
-        'custom-labels':             { label: '🏷️ Custom Labels',              tab: MAIN_TABS.SETTING,         data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
-        'custom-tabs':               { label: '🥠 Custom Tabs',                tab: MAIN_TABS.VISUAL,          data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }},
-        'documents':                 { label: '🚧 Documents',                  tab: MAIN_TABS.SETTING,         data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }},
-        'dashboards':                { label: '🌲 Dashboards',                 tab: MAIN_TABS.ANALYTICS,       data: 'dashboardsTableData',                   remove: () => { this._api?.removeAllDashboardsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getDashboards(); }},
-        'email-templates':           { label: '🌇 Email Templates',            tab: MAIN_TABS.SETTING,         data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
-        'field-permissions':         { label: '🚧 Field Level Securities',     tab: MAIN_TABS.SECURITY,        data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
-        'flows':                     { label: '🏎️ Flows',                      tab: MAIN_TABS.AUTOMATION,      data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
-        'global-view':               { label: '🏞️ Overview',                   tab: MAIN_TABS.ORG,             data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
-        'hard-coded-urls-view':      { label: '🏖️ Hard-coded URLs',            tab: MAIN_TABS.ORG,             data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
-        'home-page-components':      { label: '🍩 Home Page Components',       tab: MAIN_TABS.VISUAL,          data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
-        'internal-active-users':     { label: '👥 Active Internal Users',      tab: MAIN_TABS.SECURITY,        data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
-        'knowledge-articles':        { label: '📚 Knowledge Articles',         tab: MAIN_TABS.SETTING,         data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
-        'lightning-aura-components': { label: '🧁 Lightning Aura Components',  tab: MAIN_TABS.VISUAL,          data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
-        'lightning-pages':           { label: '🎂 Lightning Pages',            tab: MAIN_TABS.VISUAL,          data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }},
-        'lightning-web-components':  { label: '🍰 Lightning Web Components',   tab: MAIN_TABS.VISUAL,          data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
-        'object':                    { label: '🎳 Object Documentation',       tab: MAIN_TABS.DATAMODEL,       data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
-        'object-permissions':        { label: '🚦 Object Permissions',         tab: MAIN_TABS.SECURITY,        data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
-        'objects':                   { label: '🏉 Objects',                    tab: MAIN_TABS.DATAMODEL,       data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
-        'page-layouts':              { label: '🏓 Page Layouts',               tab: MAIN_TABS.SECURITY,        data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
-        'permission-sets':           { label: '🚔 Permission Sets',            tab: MAIN_TABS.SECURITY,        data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }},
-        'permission-set-licenses':   { label: '🚔 Permission Set Licenses',    tab: MAIN_TABS.SECURITY,        data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }},
-        'process-builders':          { label: '🛺 Process Builders',           tab: MAIN_TABS.AUTOMATION,      data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getProcessBuilders(); }},
-        'profile-password-policies': { label: '⛖ Profile Password Policies',  tab: MAIN_TABS.SECURITY,        data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }},
-        'profile-restrictions':      { label: '🚸 Profile Restrictions',       tab: MAIN_TABS.SECURITY,        data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }},
-        'profiles':                  { label: '🚓 Profiles',                   tab: MAIN_TABS.SECURITY,        data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }},
-        'public-groups':             { label: '🐘 Public Groups',              tab: MAIN_TABS.BOXES,           data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
-        'queues':                    { label: '🦒 Queues',                     tab: MAIN_TABS.BOXES,           data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
-        'record-types':              { label: '🏏 Record Types',               tab: MAIN_TABS.DATAMODEL,       data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
-        'reports':                   { label: '🌳 Reports',                    tab: MAIN_TABS.ANALYTICS,       data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }},
-        'static-resources':          { label: '🗿 Static Resources',           tab: MAIN_TABS.SETTING,         data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }},
-        'user-roles':                { label: '🦓 Internal Role Listing',      tab: MAIN_TABS.BOXES,           data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
-        'user-roles-hierarchy':      { label: '🐙 Internal Role Explorer',     tab: MAIN_TABS.BOXES,           data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
-        'validation-rules':          { label: '🎾 Validation Rules',           tab: MAIN_TABS.DATAMODEL,       data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
-        'visualforce-components':    { label: '🍞 Visualforce Components',     tab: MAIN_TABS.VISUAL,          data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
-        'visualforce-pages':         { label: '🥖 Visualforce Pages',          tab: MAIN_TABS.VISUAL,          data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
-        'web-links':                 { label: '🏑 Web Links',                  tab: MAIN_TABS.DATAMODEL,       data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
-        'workflows':                 { label: '🚗 Workflows',                  tab: MAIN_TABS.AUTOMATION,      data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }}
+        [APPLICATION_NAVIGATION.SECURITY.tabs.APP_PERMS.key]:      { data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }},
+        [APPLICATION_NAVIGATION.SETTING.tabs.ARTICLES.key]:        { data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.AURAS.key]:            { data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.BROWSERS.key]:       { data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }},
+        [APPLICATION_NAVIGATION.BOXES.tabs.CHT_GROUPS.key]:        { data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }},
+        [APPLICATION_NAVIGATION.CODE.tabs.CLASSES.key]:            { data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.CRUDS.key]:          { data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.CUSTOM_FIELDS.key]: { data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }},
+        [APPLICATION_NAVIGATION.ANALYTICS.tabs.DASHBOARDS.key]:    { data: 'dashboardsTableData',                   remove: () => { this._api?.removeAllDashboardsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getDashboards(); }},
+        [APPLICATION_NAVIGATION.SETTING.tabs.DOCUMENTS.key]:       { data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }},
+        [APPLICATION_NAVIGATION.SETTING.tabs.EMAIL_TPLS.key]:      { data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }},
+        [APPLICATION_NAVIGATION.AUTOMATION.tabs.FLOWS.key]:        { data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.FLSS.key]:           { data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }},
+        [APPLICATION_NAVIGATION.ORG.tabs.GLOBAL_VIEW.key]:         { data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.HOME_PAGES.key]:       { data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }},
+        [APPLICATION_NAVIGATION.SETTING.tabs.LABELS.key]:          { data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.LAYOUTS.key]:       { data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.LG_PAGES.key]:         { data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.LWCS.key]:             { data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }},
+        [APPLICATION_NAVIGATION.AUTOMATION.tabs.PBS.key]:          { data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getProcessBuilders(); }},
+        [APPLICATION_NAVIGATION.BOXES.tabs.PGS.key]:               { data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_PWDS.key]:   { data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_RSTRS.key]:  { data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.PROFILES.key]:       { data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.PSETS.key]:          { data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.PSLS.key]:           { data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }},
+        [APPLICATION_NAVIGATION.BOXES.tabs.QUEUES.key]:            { data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }},
+        [APPLICATION_NAVIGATION.ANALYTICS.tabs.REPORTS.key]:       { data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }},
+        [APPLICATION_NAVIGATION.BOXES.tabs.ROLES.key]:             { data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }},
+        [APPLICATION_NAVIGATION.BOXES.tabs.ROLES_GRAPH.key]:       { data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.RTS.key]:           { data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJ_DESC.key]:     { data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJECTS.key]:      { data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }},
+        [APPLICATION_NAVIGATION.SETTING.tabs.SRS.key]:             { data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.TABS.key]:             { data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }},
+        [APPLICATION_NAVIGATION.CODE.tabs.TESTS.key]:              { data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }},
+        [APPLICATION_NAVIGATION.CODE.tabs.TRIGGERS.key]:           { data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }},
+        [APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key]:        { data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }},
+        [APPLICATION_NAVIGATION.ORG.tabs.URL_VIEW.key]:            { data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }},
+        [APPLICATION_NAVIGATION.SECURITY.tabs.USERS.key]:          { data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.VFCS.key]:             { data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }},
+        [APPLICATION_NAVIGATION.VISUAL.tabs.VFPS.key]:             { data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.VRS.key]:           { data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }},
+        [APPLICATION_NAVIGATION.DATAMODEL.tabs.WEB_LINKS.key]:     { data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }},
+        [APPLICATION_NAVIGATION.AUTOMATION.tabs.WORKFLOWS.key]:    { data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }}
     });
-
-    /**
-     * @description List of expected sub tab values (from the UI)
-     * @type {ReadonlyArray<string>}
-     * @private
-     */
-    _subTabsValidValues = Object.freeze(Object.keys(this._internalTransformers));
 
     /**
      * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
@@ -830,13 +989,10 @@ export default class OrgcheckApp extends LightningElement {
             // Get the active tab value of this sub tab set (it should be the last activated sub tab)
             // NOTE: the previous value could be the one from the previous tab opened ONLY IF the next tab was not yet rendered
             const subTabActivated = subTabSet?.activeTabValue;
-            // Get the list of sub tabs
-            // @ts-ignore
-            const subTabs = mainTab.querySelectorAll('lightning-tab');
-            // Get the list of tabs' name
-            const subTabsAvailable = Array.from(subTabs)?.map(t => t.value).filter(v => this._subTabsValidValues.includes(v));
+            // Get the list of subtabs' name for the main tab selected
+            const subTabsAvailable = SUB_TABS_BY_MAIN_TAB_KEY.get(this.selectedMainTab); 
 
-            if (subTabsAvailable.includes(this.selectedSubTab)) {
+            if (subTabSet && subTabsAvailable.includes(this.selectedSubTab)) {
                 // If the sub tab was specifically set align it with the sub tab
                 subTabSet.activeTabValue = this.selectedSubTab;
             } else if (subTabsAvailable.includes(subTabActivated)) {
@@ -1112,1363 +1268,331 @@ export default class OrgcheckApp extends LightningElement {
      * @description Table definition for field sets (specific to the current selected object)
      * @type {ocui.Table}
      */ 
-    fieldSetsTableDefinition = {
-        columns: [
-            { label: '#',           type: ocui.ColumnType.IDX },
-            { label: 'Label',       type: ocui.ColumnType.URL, data: { value: 'url', label: 'label' }},
-            { label: 'Description', type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
-    };
+    fieldSetsTableDefinition = TableDefinitions.FieldSets;
 
     /**
      * @description Table definition for page layouts (specific to the current selected object)
      * @type {ocui.Table}
      */
-    layoutsTableDefinition = {
-        columns: [
-            { label: '#',     type: ocui.ColumnType.IDX },
-            { label: 'Label', type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',  type: ocui.ColumnType.TXT, data: { value: 'type' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
-    };
+    layoutsTableDefinition = TableDefinitions.Layouts;
 
     /**
      * @description Table definition for object limits (specific to the current selected object)
      * @type {ocui.Table}
      */
-    limitsTableDefinition = {
-        columns: [
-            { label: '#',         type: ocui.ColumnType.IDX },
-            { label: 'Score',     type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'label' }},
-            { label: 'Label',     type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Type',      type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Max',       type: ocui.ColumnType.NUM, data: { value: 'max' }},
-            { label: 'Used',      type: ocui.ColumnType.NUM, data: { value: 'used' }},
-            { label: 'Used (%)',  type: ocui.ColumnType.PRC, data: { value: 'usedPercentage' }},
-            { label: 'Remaining', type: ocui.ColumnType.NUM, data: { value: 'remaining' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    limitsTableDefinition = TableDefinitions.Limits;
 
     /**
      * @description Table definition for validation rules
      * @type {ocui.Table}
      */
-    validationRulesTableDefinition = {
-        columns: [
-            { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Object API Name',  type: ocui.ColumnType.TXT, data: { value: 'objectId' }}, 
-            { label: 'Object Name',      type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'N/A' }}, 
-            { label: 'Object Type',      type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }, modifier: { valueIfEmpty: 'N/A' }},
-            { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
-            { label: 'Error Message',    type: ocui.ColumnType.TXT, data: { value: 'errorMessage' }},
-            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    validationRulesTableDefinition = TableDefinitions.ValidationRules;
 
     /**
      * @description Table definition for validation rules (specific to the current selected object)
      * @type {ocui.Table}
      */
-    validationRulesInObjectTableDefinition = {
-        columns: [
-            { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Is Active',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Display On Field', type: ocui.ColumnType.TXT, data: { value: 'errorDisplayField' }},
-            { label: 'Error Message',    type: ocui.ColumnType.TXT, data: { value: 'errorMessage' }},
-            { label: 'Description',      type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    validationRulesInObjectTableDefinition = TableDefinitions.ValidationRulesInObject;
 
     /**
      * @description Table definition for web links (specific to the current selected object)
      * @type {ocui.Table}
      */
-    webLinksInObjectTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Type',           type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Behavior',       type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
-            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    webLinksInObjectTableDefinition = TableDefinitions.WebLinksInObject;
     
     /**
      * @description Table definition for web links (for all objects)
      * @type {ocui.Table}
      */
-    webLinksTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'In this object',  type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
-            { label: 'Object Type',     type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
-            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Behavior',        type: ocui.ColumnType.TXT, data: { value: 'behavior' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Ref. in Layout?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    webLinksTableDefinition = TableDefinitions.WebLinks;
 
     /**
      * @description Table definition for static resources
      * @type {ocui.Table}
      */
-    staticResourcesTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Content Type',    type: ocui.ColumnType.TXT, data: { value: 'contentType' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    staticResourcesTableDefinition = TableDefinitions.StaticResources;
 
     /**
      * @description Table definition for record types (specific to the current selected object)
      * @type {ocui.Table}
      */
-    recordTypesInObjectTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
-            { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
-            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
-            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    recordTypesInObjectTableDefinition = TableDefinitions.RecordTypesInObject;
 
     /**
      * @description Table definition for record types for all objects
      * @type {ocui.Table}
      */
-    recordTypesTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name', type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
-            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'In this object', type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }}, 
-            { label: 'Object Type',    type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }},
-            { label: 'Is Active',      type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Is Available',   type: ocui.ColumnType.CHK, data: { value: 'isAvailable' }},
-            { label: 'Is Default',     type: ocui.ColumnType.CHK, data: { value: 'isDefault' }},
-            { label: 'Is Master',      type: ocui.ColumnType.CHK, data: { value: 'isMaster' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    recordTypesTableDefinition = TableDefinitions.RecordTypes;
 
     /**
      * @description Table definition for sobject relationships (specific to the current selected object)
      * @type {ocui.Table}
      */
-    relationshipsTableDefinition = {
-        columns: [
-            { label: '#',                    type: ocui.ColumnType.IDX },
-            { label: 'Name',                 type: ocui.ColumnType.TXT, data: { value: 'name' }},
-            { label: 'Field Name',           type: ocui.ColumnType.TXT, data: { value: 'fieldName' }},
-            { label: 'Child Object',         type: ocui.ColumnType.TXT, data: { value: 'childObject' }},
-            { label: 'Is Cascade Delete',    type: ocui.ColumnType.CHK, data: { value: 'isCascadeDelete' }},
-            { label: 'Is Restricted Delete', type: ocui.ColumnType.CHK, data: { value: 'isRestrictedDelete' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.ASC
-    };
+    relationshipsTableDefinition = TableDefinitions.Relationships
 
     /**
      * @description Table definition for chatter groups
      * @type {ocui.Table}
      */
-    chatterGroupsTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Group',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    chatterGroupsTableDefinition = TableDefinitions.ChatterGroups;
 
     /**
      * @description Data definition for browsers
      * @type {ocui.Table}
      */
-    browsersTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Full name',           type: ocui.ColumnType.TXT, data: { value: 'fullName' }},
-            { label: 'Name',                type: ocui.ColumnType.TXT, data: { value: 'name' }},
-            { label: 'Version',             type: ocui.ColumnType.NUM, data: { value: 'version' }},
-            { label: '#Application Logins', type: ocui.ColumnType.NUM, data: { value: 'nbApplicationLogin' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    browsersTableDefinition = TableDefinitions.Browsers;
 
     /**
      * @description Table definition for custom fields
      * @type {ocui.Table}
      */
-    customFieldsTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Object API Name',     type: ocui.ColumnType.TXT, data: { value: 'objectId' }}, 
-            { label: 'Object Name',         type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'N/A' }}, 
-            { label: 'Object Type',         type: ocui.ColumnType.TXT, data: { value: 'objectRef.typeRef.label' }, modifier: { valueIfEmpty: 'N/A' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
-            { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
-            { label: 'Encrypted?',          type: ocui.ColumnType.CHK, data: { value: 'isEncrypted' }},
-            { label: 'External?',           type: ocui.ColumnType.CHK, data: { value: 'isExternalId' }},
-            { label: 'Indexed?',            type: ocui.ColumnType.CHK, data: { value: 'isIndexed' }},
-            { label: 'Restricted?',         type: ocui.ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
-            { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
-            { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }},
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }},
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }},
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    customFieldsTableDefinition = TableDefinitions.CustomFields;
 
     /**
      * @description Table definition for custom fields (specific to the current selected object)
      * @type {ocui.Table}
      */
-    customFieldsInObjectTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
-            { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
-            { label: 'Encrypted?',          type: ocui.ColumnType.CHK, data: { value: 'isEncrypted' }},
-            { label: 'External?',           type: ocui.ColumnType.CHK, data: { value: 'isExternalId' }},
-            { label: 'Indexed?',            type: ocui.ColumnType.CHK, data: { value: 'isIndexed' }},
-            { label: 'Restricted?',         type: ocui.ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
-            { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
-            { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'Hardcoded URLs',      type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',       type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}` }}, 
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}` }}, 
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}` }}, 
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    customFieldsInObjectTableDefinition = TableDefinitions.CustomFieldsInObject;
 
     /**
      * @description Table definition for standard fields (specific to the current selected object)
      * @type {ocui.Table}
      */
-    standardFieldsInObjectTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }}, 
-            { label: 'Field',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Length',              type: ocui.ColumnType.TXT, data: { value: 'length' }},
-            { label: 'Unique?',             type: ocui.ColumnType.CHK, data: { value: 'isUnique' }},
-            { label: 'Encrypted?',          type: ocui.ColumnType.CHK, data: { value: 'isEncrypted' }},
-            { label: 'External?',           type: ocui.ColumnType.CHK, data: { value: 'isExternalId' }},
-            { label: 'Indexed?',            type: ocui.ColumnType.CHK, data: { value: 'isIndexed' }},
-            { label: 'Restricted?',         type: ocui.ColumnType.CHK, data: { value: 'isRestrictedPicklist' }},
-            { label: 'Tooltip',             type: ocui.ColumnType.TXT, data: { value: 'tooltip' }, modifier: { maximumLength: 45, valueIfEmpty: 'No tooltip.' }},
-            { label: 'Formula',             type: ocui.ColumnType.TXT, data: { value: 'formula' }, modifier: { maximumLength: 100 , preformatted: true }},
-            { label: 'Default Value',       type: ocui.ColumnType.TXT, data: { value: 'defaultValue' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
-
+    standardFieldsInObjectTableDefinition = TableDefinitions.StandardFieldsInObject;
     /**
      * @description Table definition for custom labels
      * @type {ocui.Table}
      */
-    customLabelsTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Label',               type: ocui.ColumnType.TXT, data: { value: 'label' }},
-            { label: 'Category',            type: ocui.ColumnType.TXT, data: { value: 'category' }},
-            { label: 'Language',            type: ocui.ColumnType.TXT, data: { value: 'language' }},
-            { label: 'Protected?',          type: ocui.ColumnType.CHK, data: { value: 'isProtected' }},
-            { label: 'Using',               type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',       type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Ref. in Layout?',     type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${PAGELAYOUT}`}},
-            { label: 'Ref. in Apex Class?', type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${APEXCLASS}`}},
-            { label: 'Ref. in Flow?',       type: ocui.ColumnType.NUM, data: { value: `dependencies.referencedByTypes.${FLOWVERSION}`}},
-            { label: 'Dependencies',        type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Value',               type: ocui.ColumnType.TXT, data: { value: 'value'}, modifier: { maximumLength: 45, preformatted: true }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    customLabelsTableDefinition = TableDefinitions.CustomLabels;
 
     /**
      * @description Table definition for custom tabs
      * @type {ocui.Table}
      */
-    customTabsTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    customTabsTableDefinition = TableDefinitions.CustomTabs;
 
     /**
      * @description Table definition for documents
      * @type {ocui.Table}
      */
-    documentsTableDefinition = {
-        columns: [
-            { label: '#',                   type: ocui.ColumnType.IDX },
-            { label: 'Score',               type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',             type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Folder',              type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
-            { label: 'Document URL',        type: ocui.ColumnType.TXT, data: { value: 'documentUrl' }},
-            { label: 'Size (bytes)',        type: ocui.ColumnType.NUM, data: { value: 'size' }},
-            { label: 'Type',                type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Created date',        type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',       type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',         type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    documentsTableDefinition = TableDefinitions.Documents;
 
     /**
      * @description Table definition for dashboards
      * @type {ocui.Table}
      */
-    dashboardsTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'title' }},
-            { label: 'Title',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'title' }},
-            { label: 'Developer Name',  type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Last viewed',     type: ocui.ColumnType.DTM, data: { value: 'lastViewedDate' }},
-            { label: 'Last referenced', type: ocui.ColumnType.DTM, data: { value: 'lastReferencedDate' }},
-            { label: 'Refreshed',       type: ocui.ColumnType.DTM, data: { value: 'resultRefreshedDate' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    dashboardsTableDefinition = TableDefinitions.Dashboards;
 
     /**
      * @description Table definition for reports
      * @type {ocui.Table}
      */
-    reportsTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',  type: ocui.ColumnType.TXT, data: { value: 'developerName' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Format',          type: ocui.ColumnType.TXT, data: { value: 'format' }},
-            { label: 'Last run',        type: ocui.ColumnType.DTM, data: { value: 'lastRunDate' }},
-            { label: 'Last viewed',     type: ocui.ColumnType.DTM, data: { value: 'lastViewedDate' }},
-            { label: 'Last referenced', type: ocui.ColumnType.DTM, data: { value: 'lastReferencedDate' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    reportsTableDefinition = TableDefinitions.Reports;
 
     /**
      * @description Table definition for lightning aura components
      * @type {ocui.Table}
      */
-    auraComponentsTableDefinition = {
-        columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    auraComponentsTableDefinition = TableDefinitions.AuraComponents;
 
     /**
      * @description Table definition for lightning pages
      * @type {ocui.Table}
      */
-    flexiPagesTableDefinition = {
-        columns: [
-            { label: '#',                  type: ocui.ColumnType.IDX },
-            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Object',             type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
-            { label: '#Components',        type: ocui.ColumnType.NUM, data: { value: 'nbComponents' }},
-            { label: '#Fields',            type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
-            { label: '#Related Lists',     type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
-            { label: 'Attachment List?',   type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
-            { label: 'Lists from Layout?', type: ocui.ColumnType.CHK, data: { value: 'isRelatedListFromPageLayoutIncluded' }},
-            { label: 'Using',              type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',      type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',       type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',        type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    flexiPagesTableDefinition = TableDefinitions.FlexiPages;
 
     /**
      * @description Table definition for lightning pages within an SObject
      * @type {ocui.Table}
      */
-    flexiPagesInObjectTableDefinition = {
-        columns: [
-            { label: '#',                  type: ocui.ColumnType.IDX },
-            { label: 'Score',              type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',               type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Type',               type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Package',            type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: '#Components',        type: ocui.ColumnType.NUM, data: { value: 'nbComponents' }},
-            { label: '#Fields',            type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
-            { label: '#Related Lists',     type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
-            { label: 'Attachment List?',   type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
-            { label: 'Lists from Layout?', type: ocui.ColumnType.CHK, data: { value: 'isRelatedListFromPageLayoutIncluded' }},
-            { label: 'Using',              type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',      type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',       type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',       type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',      type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',        type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    flexiPagesInObjectTableDefinition = TableDefinitions.FlexiPagesInObject;
     
     /**
      * @description Table definition for knowledge articles
      * @type {ocui.Table}
      */ 
-    knowledgeArticlesTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'versionId', name: 'number' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'number' }},
-            { label: 'Title',          type: ocui.ColumnType.TXT, data: { value: 'title' }},
-            { label: 'Status',         type: ocui.ColumnType.TXT, data: { value: 'status' }},
-            { label: 'Url Name',       type: ocui.ColumnType.TXT, data: { value: 'urlName' }},
-            { label: 'Hardcoded URL?', type: ocui.ColumnType.CHK, data: { value: 'isHardCodedURL' }},
-            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    knowledgeArticlesTableDefinition = TableDefinitions.KnowledgeArticles;
 
     /**
      * @description Table definition for lightning web components
      * @type {ocui.Table}
      */
-    lightningWebComponentsTableDefinition = {
-        columns: [
-            { label: '#',             type: ocui.ColumnType.IDX },
-            { label: 'Score',         type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',          type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',   type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }}, 
-            { label: 'Package',       type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Using',         type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in', type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',  type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',  type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date', type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',   type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    lightningWebComponentsTableDefinition = TableDefinitions.LightningWebComponents;
 
 
     /**
      * @description Table definition for page layouts
      * @type {ocui.Table}
      */
-    pageLayoutsTableDefinition = {
-        columns: [
-            { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',             type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Type',             type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Object',           type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'Not related to an object.' }},
-            { label: 'Assignment Count', type: ocui.ColumnType.NUM, data: { value: 'profileAssignmentCount' }},
-            { label: '#Fields',          type: ocui.ColumnType.NUM, data: { value: 'nbFields' }},
-            { label: '#Related Lists',   type: ocui.ColumnType.NUM, data: { value: 'nbRelatedLists' }},
-            { label: 'Attachment List?', type: ocui.ColumnType.CHK, data: { value: 'isAttachmentRelatedListIncluded' }},
-            { label: 'Created date',     type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',    type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',            type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',    type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Dependencies',     type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    pageLayoutsTableDefinition = TableDefinitions.PageLayouts;
 
     /**
      * @description Table definition for permission sets
      * @type {ocui.Table}
      */
-    permissionSetsTableDefinition = {
-        columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Is Group?',              type: ocui.ColumnType.CHK,  data: { value: 'isGroup' }},
-            { label: 'Custom',                 type: ocui.ColumnType.CHK,  data: { value: 'isCustom' }},
-            { label: '#FLSs',                  type: ocui.ColumnType.NUM,  data: { value: 'nbFieldPermissions' }},
-            { label: '#Object CRUDs',          type: ocui.ColumnType.NUM,  data: { value: 'nbObjectPermissions' }},
-            { label: 'Is Admin-like?',         type: ocui.ColumnType.CHK,  data: { value: 'isAdminLike' }},
-            { label: 'Api Enabled',            type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.apiEnabled' }},
-            { label: 'View Setup',             type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.viewSetup' }},
-            { label: 'Modify All Data',        type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.modifyAllData' }},
-            { label: 'View All Data',          type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.viewAllData' }},
-            { label: 'Manage Users',           type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.manageUsers' }},
-            { label: 'Customize Application',  type: ocui.ColumnType.CHK,  data: { value: 'importantPermissions.customizeApplication' }},
-            { label: 'License',                type: ocui.ColumnType.TXT,  data: { value: 'license' }},
-            { label: 'Package',                type: ocui.ColumnType.TXT,  data: { value: 'package' }},
-            { label: '#Active users',          type: ocui.ColumnType.NUM,  data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user', valueIfEmpty: '' }},
-            { label: 'Contains',               type: ocui.ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }},
-            { label: 'Included in',            type: ocui.ColumnType.URLS, data: { values: 'permissionSetGroupRefs', value: 'url', label: 'name' }},
-            { label: 'All groups are empty?',  type: ocui.ColumnType.CHK,  data: { value: 'allIncludingGroupsAreEmpty' }},
-            { label: 'Created date',           type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',          type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
-            { label: 'Description',            type: ocui.ColumnType.TXT,  data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    permissionSetsTableDefinition = TableDefinitions.PermissionSets;
 
     /**
      * @description Table definition for permission set licenses
      * @type {ocui.Table}
      */
-    permissionSetLicensesTableDefinition = {
-        columns: [
-            { label: '#',                     type: ocui.ColumnType.IDX },
-            { label: 'Score',                 type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                  type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Total',                 type: ocui.ColumnType.NUM,  data: { value: 'totalCount' }},
-            { label: 'Used',                  type: ocui.ColumnType.NUM,  data: { value: 'usedCount' }},
-            { label: 'Used (%)',              type: ocui.ColumnType.PRC,  data: { value: 'usedPercentage' }},
-            { label: 'Remaining',             type: ocui.ColumnType.NUM,  data: { value: 'remainingCount' }},
-            { label: 'Users Really Assigned', type: ocui.ColumnType.NUM,  data: { value: 'distinctActiveAssigneeCount' }},
-            { label: 'Permission Sets',       type: ocui.ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }},
-            { label: 'Status',                type: ocui.ColumnType.TXT,  data: { value: 'status' }},
-            { label: 'Expiration Date',       type: ocui.ColumnType.DTM,  data: { value: 'expirationDate' }},
-            { label: 'For Integration?',      type: ocui.ColumnType.CHK,  data: { value: 'isAvailableForIntegrations' }},
-            { label: 'Created date',          type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',         type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    permissionSetLicensesTableDefinition = TableDefinitions.PermissionSetLicenses;
 
     /**
      * @description Table definition for profiles
      * @type {ocui.Table}
      */
-    profilesTableDefinition = {
-        columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Custom',                 type: ocui.ColumnType.CHK, data: { value: 'isCustom' }},
-            { label: '#FLSs',                  type: ocui.ColumnType.NUM, data: { value: 'nbFieldPermissions' }},
-            { label: '#Object CRUDs',          type: ocui.ColumnType.NUM, data: { value: 'nbObjectPermissions' }},
-            { label: 'Is Admin-like?',         type: ocui.ColumnType.CHK, data: { value: 'isAdminLike' }},
-            { label: 'Api Enabled',            type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.apiEnabled' }},
-            { label: 'View Setup',             type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.viewSetup' }},
-            { label: 'Modify All Data',        type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.modifyAllData' }},
-            { label: 'View All Data',          type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.viewAllData' }},
-            { label: 'Manage Users',           type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.manageUsers' }},
-            { label: 'Customize Application',  type: ocui.ColumnType.CHK, data: { value: 'importantPermissions.customizeApplication' }},
-            { label: 'License',                type: ocui.ColumnType.TXT, data: { value: 'license' }},
-            { label: 'Package',                type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: '#Active users',          type: ocui.ColumnType.NUM, data: { value: 'memberCounts' }, modifier: { minimum: 1, valueBeforeMin: 'No active user!', valueIfEmpty: '' }},
-            { label: 'Created date',           type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',          type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',            type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    profilesTableDefinition = TableDefinitions.Profiles;
 
     /**
      * @description Table definition for profile restrictions
      * @type {ocui.Table}
      */
-    profileRestrictionsTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'profileRef.id', name: 'profileRef.name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL,  data: { value: 'profileRef.url', label: 'profileRef.name' }},
-            { label: 'Custom',          type: ocui.ColumnType.CHK,  data: { value: 'profileRef.isCustom' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT,  data: { value: 'profileRef.package' }},
-            { label: 'Ip Ranges',       type: ocui.ColumnType.OBJS, data: { values: 'ipRanges', template: (r) => `${r.description}: from ${r.startAddress} to ${r.endAddress} --> ${r.difference*1} address(es)` }},
-            { label: 'Login Hours',     type: ocui.ColumnType.OBJS, data: { values: 'loginHours', template: (r) => `${r.day} from ${r.fromTime} to ${r.toTime} --> ${r.difference*1} minute(s)` }},
-            { label: 'Description',     type: ocui.ColumnType.TXT,  data: { value: 'profileRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    profileRestrictionsTableDefinition = TableDefinitions.ProfileRestrictions;
 
     /**
      * @description Table definition for profiles password policies
      * @type {ocui.Table}
      */
-    profilePasswordPoliciesTableDefinition = {
-        columns: [
-            { label: '#',                                         type: ocui.ColumnType.IDX },
-            { label: 'Score',                                     type: ocui.ColumnType.SCR, data: { value: 'score', id: 'profileName', name: 'profileName' }},
-            { label: 'Name',                                      type: ocui.ColumnType.TXT, data: { value: 'profileName' }},
-            { label: 'User password expires in',                  type: ocui.ColumnType.NUM, data: { value: 'passwordExpiration' }},
-            { label: 'Enforce password history',                  type: ocui.ColumnType.NUM, data: { value: 'passwordHistory' }},
-            { label: 'Minimum password length',                   type: ocui.ColumnType.NUM, data: { value: 'minimumPasswordLength' }},
-            { label: 'Level of complexity (/5)',                  type: ocui.ColumnType.NUM, data: { value: 'passwordComplexity' }},
-            { label: 'Question can contain password',             type: ocui.ColumnType.CHK, data: { value: 'passwordQuestion' }},
-            { label: 'Maximum Login Attempts',                    type: ocui.ColumnType.NUM, data: { value: 'maxLoginAttempts' }},
-            { label: 'Lockout period',                            type: ocui.ColumnType.NUM, data: { value: 'lockoutInterval' }},
-            { label: 'Require minimum one day password lifetime', type: ocui.ColumnType.CHK, data: { value: 'minimumPasswordLifetime' }},
-            { label: 'Security Question Hidden',                  type: ocui.ColumnType.CHK, data: { value: 'obscure' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    profilePasswordPoliciesTableDefinition = TableDefinitions.ProfilePasswordPolicies;
 
     /**
      * @description Table definition for public groups
      * @type {ocui.Table}
      */
-    publicGroupsTableDefinition = {
-        columns: [
-            { label: '#',                       type: ocui.ColumnType.IDX },
-            { label: 'Score',                   type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                    type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',          type: ocui.ColumnType.TXT,  data: { value: 'developerName' }},
-            { label: 'With bosses?',            type: ocui.ColumnType.CHK,  data: { value: 'includeBosses' }},
-            { label: '#Explicit members',       type: ocui.ColumnType.NUM,  data: { value: 'nbDirectMembers' }},
-            { label: 'Explicit groups (links)', type: ocui.ColumnType.URLS, data: { values: 'directGroupRefs', value: 'url', label: 'name' }},
-            { label: 'Explicit groups (info)',  type: ocui.ColumnType.OBJS, data: { values: 'directGroupRefs', template: (g) => `${g.name} (${g.type}${g.includeBosses?' with bosses':''}${g.includeSubordinates?' with subordinates':''})` }},
-            { label: 'Explicit users',          type: ocui.ColumnType.URLS, data: { values: 'directUserRefs', value: 'url', label: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    publicGroupsTableDefinition = TableDefinitions.PublicGroups;
 
     /**
      * @description Table definition for queues
      * @type {ocui.Table}
      */
-    queuesTableDefinition = this.publicGroupsTableDefinition;
+    queuesTableDefinition = TableDefinitions.Queues;
 
     /**
      * @description Table definition for active internal users
      * @type {ocui.Table}
      */
-    usersTableDefinition = {
-        columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'User Name',              type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Under LEX?',             type: ocui.ColumnType.CHK,  data: { value: 'onLightningExperience' }},
-            { label: 'Last login',             type: ocui.ColumnType.DTM,  data: { value: 'lastLogin' }, modifier: { valueIfEmpty: 'Never logged!' }},
-            { label: 'Failed logins',          type: ocui.ColumnType.NUM,  data: { value: 'numberFailedLogins' }},
-            { label: 'Has MFA by-pass?',       type: ocui.ColumnType.CHK,  data: { value: 'hasMfaByPass' }},
-            { label: 'Has Debug mode?',        type: ocui.ColumnType.CHK,  data: { value: 'hasDebugMode' }},
-            { label: '#SF Logins w/o MFA',     type: ocui.ColumnType.NUM,  data: { value: 'nbDirectLoginWithoutMFA' }},
-            { label: '#SF Logins w/ MFA',      type: ocui.ColumnType.NUM,  data: { value: 'nbDirectLoginWithMFA' }},
-            { label: '#SSO Logins',            type: ocui.ColumnType.NUM,  data: { value: 'nbSSOLogin' }},
-            { label: 'Password change',        type: ocui.ColumnType.DTM,  data: { value: 'lastPasswordChange' }},
-            { label: 'Is Admin-like?',         type: ocui.ColumnType.CHK,  data: { value: 'isAdminLike' }},
-            { label: 'Api Enabled',            type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.apiEnabled' }},
-            { label: 'Api Enabled from',       type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.apiEnabled', value: 'url', label: 'name' }},
-            { label: 'View Setup',             type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.viewSetup' }},
-            { label: 'View Setup from',        type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.viewSetup', value: 'url', label: 'name' }},
-            { label: 'Modify All Data',        type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.modifyAllData' }},
-            { label: 'Modify All Data from',   type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.modifyAllData', value: 'url', label: 'name' }},
-            { label: 'View All Data',          type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.viewAllData' }},
-            { label: 'View All Data from',     type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.viewAllData', value: 'url', label: 'name' }},
-            { label: 'Manage Users',           type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.manageUsers' }},
-            { label: 'Manage Users from',      type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.manageUsers', value: 'url', label: 'name' }},
-            { label: 'Customize App.',         type: ocui.ColumnType.CHK,  data: { value: 'aggregateImportantPermissions.manageUsers' }},
-            { label: 'Customize App. from',    type: ocui.ColumnType.URLS, data: { values: 'aggregateImportantPermissions.manageUsers', value: 'url', label: 'name' }},
-            { label: 'Profile',                type: ocui.ColumnType.URL,  data: { value: 'profileRef.url', label: 'profileRef.name' }},
-            { label: 'Permission Sets',        type: ocui.ColumnType.URLS, data: { values: 'permissionSetRefs', value: 'url', label: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    usersTableDefinition = TableDefinitions.Users;
 
     /**
      * @description Table definition for visualforce components
      * @type {ocui.Table}
      */
-    visualForceComponentsTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',  type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description'}, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    visualForceComponentsTableDefinition = TableDefinitions.VisualForceComponents;
 
     /**
      * @description Table definition for visualforce pages
      * @type {ocui.Table}
      */
-    visualForcePagesTableDefinition = {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Mobile',         type: ocui.ColumnType.CHK, data: { value: 'isMobileReady' }},
-            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',  type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Description',    type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    visualForcePagesTableDefinition = TableDefinitions.VisualForcePages;
 
     /**
      * @description Table definition for apex classes (compiled and not tests)
      * @type {ocui.Table}
      */
-    apexClassesTableDefinition = {
-        columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'API Version',            type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',                type: ocui.ColumnType.TXT,  data: { value: 'package' }},
-            { label: 'Class',                  type: ocui.ColumnType.CHK,  data: { value: 'isClass' }},
-            { label: 'Abst.',                  type: ocui.ColumnType.CHK,  data: { value: 'isAbstract' }},
-            { label: 'Intf.',                  type: ocui.ColumnType.CHK,  data: { value: 'isInterface' }},
-            { label: 'Enum',                   type: ocui.ColumnType.CHK,  data: { value: 'isEnum' }},
-            { label: 'Schdl.',                 type: ocui.ColumnType.CHK,  data: { value: 'isSchedulable' }},
-            { label: 'Access',                 type: ocui.ColumnType.TXT,  data: { value: 'specifiedAccess' }},
-            { label: 'Implements',             type: ocui.ColumnType.TXTS, data: { values: 'interfaces' }},
-            { label: 'Extends',                type: ocui.ColumnType.TXT,  data: { value: 'extends' }},
-            { label: 'Size',                   type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'Hardcoded URLs',         type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',          type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Methods',                type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
-            { label: 'Inner Classes',          type: ocui.ColumnType.NUM,  data: { value: 'innerClassesCount' }},
-            { label: 'Annotations',            type: ocui.ColumnType.TXTS, data: { values: 'annotations' }},
-            { label: 'Sharing',                type: ocui.ColumnType.TXT,  data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
-            { label: 'Scheduled',              type: ocui.ColumnType.CHK,  data: { value: 'isScheduled' }},
-            { label: 'Coverage (>75%)',        type: ocui.ColumnType.PRC,  data: { value: 'coverage' }, modifier: { valueIfEmpty: 'No coverage!' }},
-            { label: 'Editable Related Tests', type: ocui.ColumnType.URLS, data: { values: 'relatedTestClassRefs', value: 'url', label: 'name' }},
-            { label: 'Using',                  type: ocui.ColumnType.NUM,  data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',          type: ocui.ColumnType.NUM,  data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',           type: ocui.ColumnType.DEP,  data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',           type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',          type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    apexClassesTableDefinition = TableDefinitions.ApexClasses;
 
     /**
      * @description Table definition for uncompiled apex classes
      * @type {ocui.Table}
      */    
-    apexUncompiledTableDefinition = {
-        columns: [
-            { label: '#',                      type: ocui.ColumnType.IDX },
-            { label: 'Score',                  type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                   type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'API Version',            type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',                type: ocui.ColumnType.TXT,  data: { value: 'package' }},
-            { label: 'Size',                   type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'Coverage (>75%)',        type: ocui.ColumnType.PRC,  data: { value: 'coverage' }, modifier: { valueIfEmpty: 'No coverage!' }},
-            { label: 'Editable Related Tests', type: ocui.ColumnType.URLS, data: { values: 'relatedTestClassRefs', value: 'url', label: 'name' }},
-            { label: 'Using',                  type: ocui.ColumnType.NUM,  data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',          type: ocui.ColumnType.NUM,  data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',           type: ocui.ColumnType.DEP,  data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',           type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',          type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    apexUncompiledTableDefinition = TableDefinitions.ApexUncompiledClasses;
 
     /**
      * @description Table definition for apex triggers
      * @type {ocui.Table}
      */
-    apexTriggersTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',     type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Size',            type: ocui.ColumnType.NUM, data: { value: 'length' }},
-            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Object API Name', type: ocui.ColumnType.TXT, data: { value: 'objectId' }}, 
-            { label: 'Object Name',     type: ocui.ColumnType.URL, data: { value: 'objectRef.url', label: 'objectRef.name' }, modifier: { valueIfEmpty: 'N/A' }}, 
-            { label: 'Active?',         type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Has SOQL?',       type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
-            { label: 'Has DML?',        type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
-            { label: '*Insert',         type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
-            { label: 'Insert*',         type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
-            { label: '*Update',         type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
-            { label: 'Update*',         type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
-            { label: '*Delete',         type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
-            { label: 'Delete*',         type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
-            { label: 'Undelete',        type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    apexTriggersTableDefinition = TableDefinitions.ApexTriggers;
 
     /**
      * @description Table definition for apex triggers within SObject
      * @type {ocui.Table}
      */
-    apexTriggersInObjectTableDefinition =  {
-        columns: [
-            { label: '#',              type: ocui.ColumnType.IDX },
-            { label: 'Score',          type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',           type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',    type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',        type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Size',           type: ocui.ColumnType.NUM, data: { value: 'length' }},
-            { label: 'Hardcoded URLs', type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Active?',        type: ocui.ColumnType.CHK, data: { value: 'isActive' }},
-            { label: 'Has SOQL?',      type: ocui.ColumnType.CHK, data: { value: 'hasSOQL' }},
-            { label: 'Has DML?',       type: ocui.ColumnType.CHK, data: { value: 'hasDML' }},
-            { label: '*Insert',        type: ocui.ColumnType.CHK, data: { value: 'beforeInsert' }},
-            { label: 'Insert*',        type: ocui.ColumnType.CHK, data: { value: 'afterInsert' }},
-            { label: '*Update',        type: ocui.ColumnType.CHK, data: { value: 'beforeUpdate' }},
-            { label: 'Update*',        type: ocui.ColumnType.CHK, data: { value: 'afterUpdate' }},
-            { label: '*Delete',        type: ocui.ColumnType.CHK, data: { value: 'beforeDelete' }},
-            { label: 'Delete*',        type: ocui.ColumnType.CHK, data: { value: 'afterDelete' }},
-            { label: 'Undelete',       type: ocui.ColumnType.CHK, data: { value: 'afterUndelete' }},
-            { label: 'Using',          type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',   type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',   type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',  type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    apexTriggersInObjectTableDefinition = TableDefinitions.ApexTriggersInObject;
 
     /**
      * @description Table definition for apex classes that are tests
      * @type {ocui.Table}
      */
-    apexTestsTableDefinition = {
-        columns: [
-            { label: '#',                           type: ocui.ColumnType.IDX },
-            { label: 'Score',                       type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                        type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'API Version',                 type: ocui.ColumnType.NUM,  data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',                     type: ocui.ColumnType.TXT,  data: { value: 'package' }},
-            { label: 'Size',                        type: ocui.ColumnType.NUM,  data: { value: 'length' }},
-            { label: 'Hardcoded URLs',              type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',               type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'See All Data',                type: ocui.ColumnType.CHK,  data: { value: 'isTestSeeAllData' }},
-            { label: 'Nb Asserts',                  type: ocui.ColumnType.NUM,  data: { value: 'nbSystemAsserts' }, modifier: { valueIfEmpty: 'No direct usage of Assert.Xxx() or System.assertXxx().' }},
-            { label: 'Methods',                     type: ocui.ColumnType.NUM,  data: { value: 'methodsCount' }},
-            { label: 'Latest Run Date',             type: ocui.ColumnType.DTM,  data: { value: 'lastTestRunDate' }},
-            { label: 'Runtime',                     type: ocui.ColumnType.NUM,  data: { value: 'testMethodsRunTime' }},
-            { label: 'Passed (but long) methods',   type: ocui.ColumnType.OBJS, data: { values: 'testPassedButLongMethods', template: (r) => 
-                `${r.methodName} (Runtime: ${r.runtime*1} ms`+
-                // see https://developer.salesforce.com/docs/atlas.en-us.api_tooling.meta/api_tooling/tooling_api_objects_apextestresultlimits.htm
-                (r.cpuConsumption > 0 ? `, CPU: ${r.cpuConsumption*1} ms`: '') +  // The amount of CPU used during the test run, in milliseconds.
-                (r.asyncCallsConsumption > 0 ? `, Async Calls: ${r.asyncCallsConsumption}`: '') + // The number of asynchronous calls made during the test run.
-                (r.soslConsumption > 0 ? `, SOSL: ${r.soslConsumption}`: '') + // The number of SOSL queries made during the test run.
-                (r.soqlConsumption > 0 ? `, SOQL: ${r.soqlConsumption}`: '') + // The number of SOQL queries made during the test run.
-                (r.queryRowsConsumption > 0 ? `, Query Rows: ${r.queryRowsConsumption}`: '') + // The number of rows queried during the test run.
-                (r.dmlRowsConsumption > 0 ? `, Dml Rows: ${r.dmlRowsConsumption}`: '') + // The number of rows accessed by DML statements during the test run.
-                (r.dmlConsumption > 0 ? `, Dml: ${r.dmlConsumption}`:'') + // The number of DML statements made during the test run.
-            ')' }},
-            { label: 'Failed methods',              type: ocui.ColumnType.OBJS, data: { values: 'testFailedMethods', template: (r) => `${r.methodName} (${r.stacktrace})` }},
-            { label: 'Inner Classes',               type: ocui.ColumnType.NUM,  data: { value: 'innerClassesCount' }},
-            { label: 'Sharing',                     type: ocui.ColumnType.TXT,  data: { value: 'specifiedSharing' }, modifier: { valueIfEmpty: 'Not specified.' }},
-            { label: 'Covering (editable classes)', type: ocui.ColumnType.URLS, data: { values: 'relatedClassRefs', value: 'url', label: 'name' }},
-            { label: 'Using',                       type: ocui.ColumnType.NUM,  data: { value: 'dependencies.using.length' }},
-            { label: 'Dependencies',                type: ocui.ColumnType.DEP,  data: { value: 'dependencies', id: 'id', name: 'name' }},
-            { label: 'Created date',                type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',               type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    apexTestsTableDefinition = TableDefinitions.ApexTests;
 
     /**
      * @description Table definition for SObjects
      * @type {ocui.Table}
      */
-    objectsTableDefinition = {
-        columns: [
-            { label: '#',                type: ocui.ColumnType.IDX },
-            { label: 'Score',            type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Label',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'label' }},
-            { label: 'Name',             type: ocui.ColumnType.TXT, data: { value: 'name' }},
-            { label: 'Package',          type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Custom fields',    type: ocui.ColumnType.NUM, data: { value: 'nbCustomFields' }},
-            { label: 'Page layouts',     type: ocui.ColumnType.NUM, data: { value: 'nbPageLayouts' }},
-            { label: 'Record types',     type: ocui.ColumnType.NUM, data: { value: 'nbRecordTypes' }},
-            { label: 'Workflows',        type: ocui.ColumnType.NUM, data: { value: 'nbWorkflowRules' }},
-            { label: 'Apex Triggers',    type: ocui.ColumnType.NUM, data: { value: 'nbApexTriggers' }},
-            { label: 'Validation Rules', type: ocui.ColumnType.NUM, data: { value: 'nbValidationRules' }},
-            { label: 'Internal OWD',     type: ocui.ColumnType.TXT, data: { value: 'internalSharingModel' }},
-            { label: 'External OWD',     type: ocui.ColumnType.TXT, data: { value: 'externalSharingModel' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    objectsTableDefinition = TableDefinitions.Objects;
 
     /**
      * @description Table definition for flows
      * @type {ocui.Table}
      */
-    flowsTableDefinition = {
-        columns: [
-            { label: '#',                                                 type: ocui.ColumnType.IDX },
-            { label: 'Score',                                             type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                                              type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',                                       type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Type',                                              type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Number of versions',                                type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
-            { label: 'Current Version (called `it` in the next columns)', type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
-            { label: 'Is it Active?',                                     type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
-            { label: 'Is it the Latest?',                                 type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
-            { label: 'Its SObject',                                       type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.sobject' }},
-            { label: 'Its trigger type',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.triggerType' }},
-            { label: 'Its record trigger type',                           type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.recordTriggerType' }},
-            { label: 'Its Running Mode',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-            { label: 'Its API Version',                                   type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: '# Nodes',                                           type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
-            { label: '# DML Create Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
-            { label: '# DML Delete Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
-            { label: '# DML Update Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
-            { label: '# Screen Nodes',                                    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
-            { label: 'Its created date',                                  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
-            { label: 'Its modified date',                                 type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
-            { label: 'Its description',                                   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Flow created date',                                 type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Flow modified date',                                type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Flow description',                                  type: ocui.ColumnType.TXT, data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Using',                                             type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',                                     type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',                                      type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    flowsTableDefinition = TableDefinitions.Flows;
 
     /**
      * @description Table definition for email templates
      * @type {ocui.Table}
      */ 
-    emailTemplatesTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',     type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'UI Type',         type: ocui.ColumnType.TXT, data: { value: 'uiType' }},
-            { label: 'Type',            type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Folder',          type: ocui.ColumnType.TXT, data: { value: 'folderName' }},
-            { label: 'Is Active',       type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
-            { label: 'Last Used',       type: ocui.ColumnType.DTM,  data: { value: 'lastUsedDate' }, modifier: { valueIfEmpty: 'Never used!' }},
-            { label: 'Used',            type: ocui.ColumnType.NUM,  data: { value: 'timesUsed' }},
-            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
-            { label: 'Description',     type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    }
+    emailTemplatesTableDefinition = TableDefinitions.EmailTemplates;
 
     /**
      * @description Table definition for home page components
      * @type {ocui.Table}
      */ 
-    homePageComponentsTableDefinition = {
-        columns: [
-            { label: '#',               type: ocui.ColumnType.IDX },
-            { label: 'Score',           type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',            type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Package',         type: ocui.ColumnType.TXT, data: { value: 'package' }},
-            { label: 'Is Body Empty?',  type: ocui.ColumnType.CHK, data: { value: 'isBodyEmpty' }},
-            { label: 'Hardcoded URLs',  type: ocui.ColumnType.TXTS, data: { values: 'hardCodedURLs' }},
-            { label: 'Hardcoded IDs',   type: ocui.ColumnType.TXTS, data: { values: 'hardCodedIDs' }},
-            { label: 'Created date',    type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Modified date',   type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',           type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',   type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }}, 
-            { label: 'Dependencies',    type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'id', name: 'name' }},
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    homePageComponentsTableDefinition = TableDefinitions.HomePageComponents;
 
     /**
      * @description Table definition for process builders
      * @type {ocui.Table}
      */
-    processBuildersTableDefinition = {
-        columns: [
-            { label: '#',                                                 type: ocui.ColumnType.IDX },
-            { label: 'Score',                                             type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                                              type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'API Version',                                       type: ocui.ColumnType.NUM, data: { value: 'apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: 'Number of versions',                                type: ocui.ColumnType.NUM, data: { value: 'versionsCount' }},
-            { label: 'Current Version (called `it` in the next columns)', type: ocui.ColumnType.URL, data: { value: 'currentVersionRef.url', label: 'currentVersionRef.name' }},
-            { label: 'Is it Active?',                                     type: ocui.ColumnType.CHK, data: { value: 'isVersionActive' }},
-            { label: 'Is it the Latest?',                                 type: ocui.ColumnType.CHK, data: { value: 'isLatestCurrentVersion' }},
-            { label: 'Its SObject',                                       type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.sobject' }},
-            { label: 'Its trigger type',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.triggerType' }},
-            { label: 'Its Running Mode',                                  type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.runningMode' }, modifier: { valueIfEmpty: 'No mode specified.' }},
-            { label: 'Its API Version',                                   type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.apiVersion' }, modifier: { valueIfEmpty: 'No version.' }},
-            { label: '# Nodes',                                           type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.totalNodeCount' }},
-            { label: '# DML Create Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlCreateNodeCount' }},
-            { label: '# DML Delete Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
-            { label: '# DML Update Nodes',                                type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
-            { label: '# Screen Nodes',                                    type: ocui.ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
-            { label: 'Its created date',                                  type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
-            { label: 'Its modified date',                                 type: ocui.ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
-            { label: 'Its description',                                   type: ocui.ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},
-            { label: 'Process created date',                              type: ocui.ColumnType.DTM, data: { value: 'createdDate' }},
-            { label: 'Process modified date',                             type: ocui.ColumnType.DTM, data: { value: 'lastModifiedDate' }},
-            { label: 'Using',                                             type: ocui.ColumnType.NUM, data: { value: 'dependencies.using.length' }},
-            { label: 'Referenced in',                                     type: ocui.ColumnType.NUM, data: { value: 'dependencies.referenced.length' }, modifier: { minimum: 1, valueBeforeMin: 'Not referenced anywhere.', valueIfEmpty: 'N/A' }},
-            { label: 'Dependencies',                                      type: ocui.ColumnType.DEP, data: { value: 'dependencies', id: 'currentVersionId', name: 'name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    processBuildersTableDefinition = TableDefinitions.ProcessBuilders;
     
     /**
      * @description Table definition for workflows
      * @type {ocui.Table}
      */
-    workflowsTableDefinition = {
-        columns: [
-            { label: '#',                 type: ocui.ColumnType.IDX },
-            { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',              type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Is Active',         type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
-            { label: 'Has Actions',       type: ocui.ColumnType.CHK,  data: { value: 'hasAction' }},
-            { label: 'Direct Actions',    type: ocui.ColumnType.OBJS, data: { values: 'actions', template: (r) => `${r.name} (${r.type})` }},
-            { label: 'Empty Timetrigger', type: ocui.ColumnType.OBJS, data: { values: 'emptyTimeTriggers', template: (r) => `${r.field} after ${r.delay*1}` }},
-            { label: 'Future Actions',    type: ocui.ColumnType.OBJS, data: { values: 'futureActions', template: (r) => `${r.field} after ${r.delay*1}: ${r.name} (${r.type})` }},
-            { label: 'Created date',      type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',     type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
-            { label: 'Description',       type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    workflowsTableDefinition = TableDefinitions.Workflows;
 
     /**
      * @description Table definition for workflows in an object
      * @type {ocui.Table}
      */
-    workflowsInObjectTableDefinition = {
-        columns: [
-            { label: '#',                 type: ocui.ColumnType.IDX },
-            { label: 'Score',             type: ocui.ColumnType.SCR,  data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',              type: ocui.ColumnType.URL,  data: { value: 'url', label: 'name' }},
-            { label: 'Is Active',         type: ocui.ColumnType.CHK,  data: { value: 'isActive' }},
-            { label: 'Has Actions',       type: ocui.ColumnType.CHK,  data: { value: 'hasAction' }},
-            { label: 'Direct Actions',    type: ocui.ColumnType.OBJS, data: { values: 'actions', template: (r) => `${r.name} (${r.type})` }},
-            { label: 'Empty Timetrigger', type: ocui.ColumnType.OBJS, data: { values: 'emptyTimeTriggers', template: (r) => `${r.field} after ${r.delay*1}` }},
-            { label: 'Future Actions',    type: ocui.ColumnType.OBJS, data: { values: 'futureActions', template: (r) => `${r.field} after ${r.delay*1}: ${r.name} (${r.type})` }},
-            { label: 'Created date',      type: ocui.ColumnType.DTM,  data: { value: 'createdDate' }},
-            { label: 'Modified date',     type: ocui.ColumnType.DTM,  data: { value: 'lastModifiedDate' }},
-            { label: 'Description',       type: ocui.ColumnType.TXT,  data: { value: 'description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    workflowsInObjectTableDefinition = TableDefinitions.WorkflowsInObject;
 
     /**
      * @description Table definition for roles
      * @type {ocui.Table}
      */
-    rolesTableDefinition = {
-        columns: [
-            { label: '#',                           type: ocui.ColumnType.IDX },
-            { label: 'Score',                       type: ocui.ColumnType.SCR, data: { value: 'score', id: 'id', name: 'name' }},
-            { label: 'Name',                        type: ocui.ColumnType.URL, data: { value: 'url', label: 'name' }},
-            { label: 'Developer Name',              type: ocui.ColumnType.TXT, data: { value: 'apiname' }},
-            { label: 'Number of active members',    type: ocui.ColumnType.NUM, data: { value: 'activeMembersCount' }},
-            { label: 'Level',                       type: ocui.ColumnType.NUM, data: { value: 'level' }},
-            { label: 'Parent',                      type: ocui.ColumnType.URL, data: { value: 'parentRef.url', label: 'parentRef.name' }}
-        ],
-        orderIndex: 1,
-        orderSort: ocui.SortOrder.DESC
-    };
+    rolesTableDefinition = TableDefinitions.Roles;
 
     /**
      * @description Table definition for object permissions
      * @type {ocui.Table}
      */
-    get objectPermissionsTableDefinition() {
-        /** @type {ocui.Table} */
-        const table = {
-            columns: [
-                { label: 'Parent',  type: ocui.ColumnType.URL, data: { value: 'header.url', label: 'header.name' }},
-                { label: 'Package', type: ocui.ColumnType.TXT, data: { value: 'header.package' }},
-                { label: 'Type',    type: ocui.ColumnType.TXT, data: { value: 'header.type' }},
-                { label: 'Custom',  type: ocui.ColumnType.CHK, data: { value: 'header.isCustom' }}
-            ],
-            orderIndex: 1,
-            orderSort: ocui.SortOrder.ASC
-        };
-        if (this._internalObjectPermissionsDataMatrix) {
-            this._internalObjectPermissionsDataMatrix.columnHeaders // returns an array of string representing Object Api names
-                .sort()
-                .forEach((/** @type {string} */ objectApiName) => {
-                    table.columns.push({ label: objectApiName, type: ocui.ColumnType.TXT, data: { value: `data.${objectApiName}` }, orientation: ocui.Orientation.VERTICAL });
-                });
-        }
-        return table;
-    }
-
+    get objectPermissionsTableDefinition() { return TableDefinitions.ObjectPermissions(this._internalObjectPermissionsDataMatrix); }
+ 
     /**
      * @description Table definition for application permissions
      * @type {ocui.Table}
      */
-    get appPermissionsTableDefinition() {
-        /** @type {ocui.Table} */
-        const table = {
-            columns: [
-                { label: 'Parent',  type: ocui.ColumnType.URL, data: { value: 'header.url', label: 'header.name' }},
-                { label: 'Package', type: ocui.ColumnType.TXT, data: { value: 'header.package' }},
-                { label: 'Type',    type: ocui.ColumnType.TXT, data: { value: 'header.type' }},
-                { label: 'Custom',  type: ocui.ColumnType.CHK, data: { value: 'header.isCustom' }}
-            ],
-            orderIndex: 1,
-            orderSort: ocui.SortOrder.ASC
-        };
-        if (this._internalAppPermissionsDataMatrix) {
-            this._internalAppPermissionsDataMatrix.columnHeaders // returns an array of Object like {id: string, label: string} representing an Application
-                .sort((/** @type {{id: string, label: string}} */ a, /** @type {{id: string, label: string}} */b) => { 
-                    return a.label < b.label ? -1: 1; 
-                })
-                .forEach((/** @type {{id: string, label: string}} */ app) => {
-                    table.columns.push({ label: app.label, type: ocui.ColumnType.TXT, data: { value: `data.${app.id}` }, orientation: ocui.Orientation.VERTICAL });
-                });
-        }
-        return table;
-    }
+    get appPermissionsTableDefinition() { return TableDefinitions.AppPermissions(this._internalAppPermissionsDataMatrix); }
     
     /**
      * @description Table definition for field permissions
      * @type {ocui.Table}
      */
-    get fieldPermissionsTableDefinition() {
-        /** @type {ocui.Table} */
-        const table = {
-            columns: [
-                { label: 'Parent',  type: ocui.ColumnType.URL, data: { value: 'header.url', label: 'header.name' }},
-                { label: 'Package', type: ocui.ColumnType.TXT, data: { value: 'header.package' }},
-                { label: 'Type',    type: ocui.ColumnType.TXT, data: { value: 'header.type' }},
-                { label: 'Custom',  type: ocui.ColumnType.CHK, data: { value: 'header.isCustom' }}
-            ],
-            orderIndex: 1,
-            orderSort: ocui.SortOrder.ASC
-        };
-        if (this._internalFieldPermissionsDataMatrix) {
-            this._internalFieldPermissionsDataMatrix.columnHeaders // returns an array of string representing Field Api names
-                .sort()
-                .forEach((/** @type {string} */ fieldApiName) => {
-                    table.columns.push({ label: fieldApiName, type: ocui.ColumnType.TXT, data: { value: `data.${fieldApiName}` }, orientation: ocui.Orientation.VERTICAL });
-                });
-        }
-        return table;
-    }
+    get fieldPermissionsTableDefinition() { return TableDefinitions.FieldPermissions(this._internalFieldPermissionsDataMatrix); }
 
     /**
      * @description Table definition for score rules
      * @type {ocui.Table}
      */
-    get scoreRulesTableDefinition() {
-        /** @type {ocui.Table} */
-        const table = {
-            columns: [
-                { label: 'Rules (or reason why metadata is bad)', type: ocui.ColumnType.TXT, data: { value: 'header.description' }}
-            ],
-            orderIndex: 0,
-            orderSort: ocui.SortOrder.ASC
-        };
-        if (this._internalAllScoreRulesDataMatrix) {
-            this._internalAllScoreRulesDataMatrix.columnHeaders // returns an array of string representing the static 'label' of the org check class
-                .sort()
-                .forEach((/** @type {string} */ classLabel) => {
-                    table.columns.push({ label: classLabel, type: ocui.ColumnType.CHK, data: { value: `data.${classLabel}` }, orientation: ocui.Orientation.VERTICAL });
-                });
-        }
-        return table;
-    };
+    get scoreRulesTableDefinition() { return TableDefinitions.ScoreRules(this._internalAllScoreRulesDataMatrix); }
     
+    /**
+     * @description Table definition for hard coded urls view
+     */
+    hardCodedURLsViewTableDefinition = TableDefinitions.HardCodedURLsView(MAX_ITEMS_IN_HARDCODED_URLS_LIST);
+
 
     // ----------------------------------------------------------------------------------------------------------------
     // ----------------------------------------------------------------------------------------------------------------
@@ -2551,7 +1675,7 @@ export default class OrgcheckApp extends LightningElement {
      * @description Representation of an export for SObject Description data
      * @type {Array<ocui.ExportedTable>}
      */
-    get objectInformationExportSource() {
+    get objectInformationExportSource() { 
         /** @type {Array<ocui.ExportedTable>} */
         const sheets = [];
         sheets.push({ 
@@ -2573,17 +1697,17 @@ export default class OrgcheckApp extends LightningElement {
                 [ 'External Sharing', this.objectData.externalSharingModel ]
             ]
         });
-        sheets.push(ocui.RowsFactory.createAndExport(this.standardFieldsInObjectTableDefinition, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.customFieldsInObjectTableDefinition, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.apexTriggersTableDefinition, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.fieldSetsTableDefinition, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.layoutsTableDefinition, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.flexiPagesInObjectTableDefinition, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.limitsTableDefinition, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.validationRulesInObjectTableDefinition, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.webLinksTableDefinition, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.recordTypesTableDefinition, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
-        sheets.push(ocui.RowsFactory.createAndExport(this.relationshipsTableDefinition, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.StandardFieldsInObject, this.objectData.standardFields, 'Standard Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.CustomFieldsInObject, this.objectData.customFieldRefs, 'Custom Fields', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.ApexTriggersInObject, this.objectData.apexTriggerRefs, 'Apex Triggers', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.FieldSets, this.objectData.fieldSets, 'Field Sets', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Layouts, this.objectData.layouts, 'Page Layouts', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.FlexiPagesInObject, this.objectData.flexiPages, 'Lightning Pages', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Limits, this.objectData.limits, 'Limits', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.ValidationRulesInObject, this.objectData.validationRules, 'Validation Rules', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.WebLinksInObject, this.objectData.webLinks, 'Web Links', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.RecordTypesInObject, this.objectData.recordTypes, 'Record Types', ocapi.SecretSauce.GetScoreRuleDescription));
+        sheets.push(ocui.RowsFactory.createAndExport(TableDefinitions.Relationships, this.objectData.relationships, 'Relationships', ocapi.SecretSauce.GetScoreRuleDescription));
         return sheets;
     }
 
@@ -2763,7 +1887,7 @@ export default class OrgcheckApp extends LightningElement {
             }
             data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
-                const itemName = transfomer.label ?? `[${alias}]`;
+                const itemName = SUB_TABS.get(alias).tab.title;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 const definitionTable = this[definitionName];
                 globalViewData.push({
@@ -2771,7 +1895,7 @@ export default class OrgcheckApp extends LightningElement {
                     label: itemName,
                     hadError: item?.hadError,
                     class: `slds-box viewCard ${item?.hadError === true ? 'viewCard-error' : (item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data')}`,
-                    tab: `${transfomer.tab}:${alias}`,
+                    tab: SUB_TABS.get(alias).mainTabKey,
                     tableDefinition: ruleTableDefinition,
                     tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
                 });
@@ -2795,7 +1919,7 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Hard-coded URLS View data from API
-     * @type {Map}
+     * @param {Map} data - The data from the API
      */ 
     set _internalHardCodedURLsViewDataFromAPI(data) {
         if (data) {
@@ -2803,7 +1927,7 @@ export default class OrgcheckApp extends LightningElement {
             const sheets = [];
             data?.forEach((item, alias) => {
                 const transfomer = this._internalTransformers[alias];
-                const itemName = transfomer.label ?? `[${alias}]`;
+                const itemName = SUB_TABS.get(alias).tab.title;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 const definitionTable = this[definitionName];
                 const firstUrlColumn = definitionTable.columns.filter(c => c.type === ocui.ColumnType.URL)[0];
@@ -2819,7 +1943,7 @@ export default class OrgcheckApp extends LightningElement {
                         };
                     })
                 });
-                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data.filter(d => d?.length > 0 || false), itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data?.filter(d => d?.length > 0 || false), itemName, ocapi.SecretSauce.GetScoreRuleDescription));
             });
             this.hardCodedURLsViewData = hardCodedURLsViewData; // no need to sort as the data will be shown in an extendetible table (which will be sorted by countBad desc by default)
             this.hardCodedURLsViewItemsExport = sheets;
@@ -2842,18 +1966,6 @@ export default class OrgcheckApp extends LightningElement {
      * @type {Array}
      */
     hardCodedURLsViewData;
-
-    hardCodedURLsViewTableDefinition = {
-        columns: [
-            { label: 'Type',      type: ocui.ColumnType.TXT, data: { value: 'type' }},
-            { label: 'Had Issue', type: ocui.ColumnType.CHK, data: { value: 'hadError' }},
-            { label: 'Bad',       type: ocui.ColumnType.NUM, data: { value: 'countBad' }},
-            { label: 'Total',     type: ocui.ColumnType.NUM, data: { value: 'countAll' }},
-            { label: `First ${MAX_ITEMS_IN_HARDCODED_URLS_LIST} items...`, type: ocui.ColumnType.URLS, data: { values: 'items', value: 'url', label: 'name' }}
-        ],
-        orderIndex: 2,
-        orderSort: ocui.SortOrder.DESC
-    }
 
     /**
      * @description Data table for validation rules

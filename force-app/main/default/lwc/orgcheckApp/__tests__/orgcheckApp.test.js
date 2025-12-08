@@ -41,7 +41,7 @@ describe('c-orgcheck-app', () => {
     // Wait for the DOM to be updated
     await Promise.resolve().then(() => {
       // Main tab should have been updated to something defined
-      expect(mainTab.activeTabValue).not.toBeUndefined(); 
+      expect(mainTab.activeTabValue).toBeDefined(); 
       // 'home' is the value of the first tab which is copied in the mainTab active tab value
       expect(mainTab.activeTabValue).toBe('home'); 
     });
