@@ -13,14 +13,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install Salesforce CLI
-      run: |
-        mkdir sfdx
-        wget -qO- https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz | tar xJ -C sfdx --strip-components 1
-        echo $(realpath sfdx/bin) >> $GITHUB_PATH
+      uses: salesforcecli/action-setup@v2
+      with: 
+        install: "sf"
     - name: Authenticate Dev Hub
       run: |
         echo ${{ secrets.SFDX_AUTH_URL }} > sfdx_auth
-        sfdx force:auth:sfdxurl:store -f sfdx_auth -d
+        sf org login sfdx-url -f sfdx_auth -d -a
     - name: Set up Python
       uses: actions/setup-python@v1
       with:

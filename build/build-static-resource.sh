@@ -22,18 +22,18 @@ NoColor='\033[0m'
 ### Dependency and other checkings
 ### --------------------------------------------------------------------------------------------
 
-echo "${Green}Making sure you have a Salesforce org set up with sfdx locally${NoColor}"
-if [ $(sfdx force:auth:list --json | wc -l) -le 4 ]; then 
-    echo -e "${Red}There is no Salesforce Org authentified with sfdx yet.${NoColor}"
-    echo -e "${LightRed}Please register one with (for example) $ sfdx force:auth:web:login${NoColor}"; 
+echo "${Green}Making sure you have a Salesforce org set up with Salesforce CLI locally${NoColor}"
+if [ $(sf auth list --json | wc -l) -le 4 ]; then 
+    echo -e "${Red}There is no Salesforce Org authentified with Salesforce CLI yet.${NoColor}"
+    echo -e "${LightRed}Please register one with (for example) $ sf org login web${NoColor}"; 
     exit 2; 
 fi
 echo ""
 
 echo "${Green}Making sure one of them are the default one${NoColor}"
-if [ $(sfdx config:get defaultusername --json | grep 'value' | wc -l) -eq 0 ]; then 
-    echo -e "${Red}There is no Salesforce Default Username defined with sfdx yet.${NoColor}"
-    echo -e "${LightRed}Please register one with $ sfdx config:set defaultusername=<username>${NoColor}"; 
+if [ $(sf config get target-org --json | grep 'value' | wc -l) -eq 0 ]; then 
+    echo -e "${Red}There is no Salesforce Default Username defined with Salesforce CLI yet.${NoColor}"
+    echo -e "${LightRed}Please register one with $ sf config set target-org <username>${NoColor}"; 
     exit 3; 
 fi
 echo ""
@@ -73,11 +73,11 @@ echo ""
 ### --------------------------------------------------------------------------------------------
 ### If everything is OK push the resulting built items into dev org
 ### --------------------------------------------------------------------------------------------
-echo "${Green}Deploying StaticResource to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
+echo "${Green}Deploying StaticResource to default org (username=$(sf config get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
 sf project deploy start --metadata StaticResource --ignore-conflicts  
 
 ### --------------------------------------------------------------------------------------------
 ### Update the LWC component that have a dependency with Org Check libraries
 ### --------------------------------------------------------------------------------------------
-echo "${Green}Deploying LWC with Org Check libraries to default org (username=$(sfdx config:get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
+echo "${Green}Deploying LWC with Org Check libraries to default org (username=$(sf config get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
 sf project deploy start --metadata LightningComponentBundle --ignore-conflicts  
