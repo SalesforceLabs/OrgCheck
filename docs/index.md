@@ -36,7 +36,7 @@ You will need org Check to verify some things in your organisation like:
 - No custom object will be added, no external connection, all stays in your browser and your org.
 - The app is free of use: open sourced and available on the AppExchange (thanks to the great program called **Salesforce Labs** at Salesforce).
 - Please use [this deck](http://sfdc.co/OrgCheck-Presentation) with your colleagues, company or customers to present the application before installing it and using it for your org.
-- Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at https://github.com/SalesforceLabs/OrgCheck/issues.
+- Keep in mind that Org Check is not a Salesforce product. It has not been officially tested or documented by Salesforce. Also Salesforce support is not available for Org Check. Support is based on open source participation and requests are managed (as we can) via GitHub at (https://github.com/SalesforceLabs/OrgCheck/issues).
 
 
 ## Frequently Asked Question by Security
@@ -51,7 +51,7 @@ You will need org Check to verify some things in your organisation like:
 
 - You install this application directly in the org you want to analyse from the AppExchange.
 - Then, you navigate through the tabs in the app to discover some bad practices in the org.
-- Any issues installing the application? Please, visit our ([Installation FAQ](installation)!
+- Any issues installing the application? Please, visit our [Installation FAQ](installation)!
 
 
 ## How to get help and support?
