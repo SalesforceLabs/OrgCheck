@@ -11,7 +11,7 @@
     "lint:ui": "eslint build/src/ui",
     "lint:lwc": "eslint force-app/main/default/lwc",
     "lint:test": "eslint build/test",
-    "build:js": "rollup --config; rollup --config;",
+    "build:js": "rollup --config;",
     "build:lwc:app": "sf project deploy start --metadata LightningComponentBundle:orgcheckApp",
     "build:sr": "./build/build-static-resource.sh",
     "scan:api": "sf code-analyzer run --target ./build/src/api --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
@@ -48,7 +48,7 @@
     "eslint-plugin-jsdoc": "^51.3.4",
     "glob": "^10.5.0",
     "js-yaml": "^4.1.1",
-    "jest": "^30.0.4",
+    "jest": "^29.7.0",
     "rollup": "^4.44.2",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-delete": "^3.0.1"
