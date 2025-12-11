@@ -26,43 +26,37 @@ export class DatasetPermissionSets extends Dataset {
                         'CreatedDate, LastModifiedDate ' +
                     'FROM PermissionSet ' +
                     'WHERE IsOwnedByProfile = FALSE '+
-                    'ORDER BY Id '+
-                    'LIMIT 2000'
+                    'ORDER BY Id '
         }, {
             byPasses: ['INVALID_TYPE'], // in some org PermissionSetGroup is not defined!
             string: 'SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description ' +
                     'FROM PermissionSet ' +
                     'WHERE PermissionSetGroupId != null '+
-                    'ORDER BY Id '+
-                    'LIMIT 2000'
+                    'ORDER BY Id'
         }, {
             string: 'SELECT ParentId, COUNT(SobjectType) CountObject '+ 
                     'FROM ObjectPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
-                    'GROUP BY ParentId '+
-                    'ORDER BY ParentId '+
-                    'LIMIT 2000'
+                    'GROUP BY ParentId ',
+            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT ParentId, COUNT(Field) CountField '+ 
                     'FROM FieldPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
-                    'GROUP BY ParentId '+
-                    'ORDER BY ParentId '+
-                    'LIMIT 2000'
+                    'GROUP BY ParentId ',
+            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT PermissionSetId, COUNT(Id) CountAssignment '+ 
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = FALSE '+
-                    'AND Assignee.IsActive = TRUE '+
-                    'GROUP BY PermissionSetId '+
-                    'ORDER BY PermissionSetId '+
-                    'LIMIT 2000'
+                    'AND Assignee.IsActive = TRUE ' +
+                    'GROUP BY PermissionSetId ',
+            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT PermissionSetGroupId, PermissionSetId ' + 
                     'FROM PermissionSetGroupComponent ' +
                     'WHERE PermissionSet.IsOwnedByProfile = FALSE ' +
-                    'ORDER BY PermissionSetGroupId '+
-                    'LIMIT 2000'
+                    'ORDER BY PermissionSetGroupId '
         }], logger);
 
         // All salesforce records
@@ -96,7 +90,7 @@ export class DatasetPermissionSets extends Dataset {
                     license: (record.License ? record.License.Name : ''),
                     isCustom: record.IsCustom,
                     package: (record.NamespacePrefix || ''),
-                    memberCounts: 0, // default value, may be changed in second SOQL
+                    memberCounts: 0, // default value, may be changed in further SOQL
                     allIncludingGroupsAreEmpty: false, // default value
                     permissionSetIds: [],
                     permissionSetGroupIds: [],
@@ -104,8 +98,8 @@ export class DatasetPermissionSets extends Dataset {
                     type: (isPermissionSetGroup ? 'Permission Set Group' : 'Permission Set'),
                     createdDate: record.CreatedDate, 
                     lastModifiedDate: record.LastModifiedDate,
-                    nbFieldPermissions: 0,
-                    nbObjectPermissions: 0,
+                    nbFieldPermissions: 0, // default value, may be changed in further SOQL
+                    nbObjectPermissions: 0, // default value, may be changed in further SOQL
                     importantPermissions: {
                         apiEnabled: record.PermissionsApiEnabled === true,
                         viewSetup: record.PermissionsViewSetup === true, 
@@ -147,21 +141,21 @@ export class DatasetPermissionSets extends Dataset {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
-                    permissionSet.nbObjectPermissions = record.CountObject;
+                    permissionSet.nbObjectPermissions += record.CountObject;
                 }
             }),
             Processor.forEach(fieldPermissionRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.ParentId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
-                    permissionSet.nbFieldPermissions = record.CountField;    
+                    permissionSet.nbFieldPermissions += record.CountField;    
                 }
             }),
             Processor.forEach(userAssignmentRecords, (/** @type {any} */ record) => {
                 const permissionSetId = sfdcManager.caseSafeId(record.PermissionSetId);
                 if (permissionSets.has(permissionSetId)) {
                     const permissionSet = permissionSets.get(permissionSetId);
-                    permissionSet.memberCounts = record.CountAssignment;    
+                    permissionSet.memberCounts += record.CountAssignment;    
                 }
             })
         ]);

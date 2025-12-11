@@ -22,8 +22,8 @@ export class DatasetBrowsers extends Dataset {
             string: 'SELECT Browser, COUNT(Id) CntBrowser ' +
                     'FROM LoginHistory ' +
                     `WHERE LoginType = 'Application' `+
-                    'GROUP BY Browser ' +
-                    'ORDER BY COUNT(Id) DESC'
+                    'GROUP BY Browser ',
+            queryMoreField: 'LoginTime' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);
 
         // Init the factory and records
@@ -33,27 +33,33 @@ export class DatasetBrowsers extends Dataset {
         const browserRecords = results[0];
 
         logger?.log(`Parsing ${browserRecords.length} browsers...`);
-        const browsers = new Map(await Processor.map(browserRecords, (/** @type {any} */ record) => {
+        const browsers = new Map();
+        await Processor.forEach(browserRecords, (/** @type {any} */ record) => {
 
             const browserElements = record.Browser.split(' ', 2);
             const name = browserElements && browserElements.length > 0 ? browserElements[0] : record.Browser;
             const versionAsText = browserElements && browserElements.length > 1 ? browserElements[1] : '';
             const version = Number.parseInt(versionAsText, 10) ?? NaN;
 
-            // Create the instance
-            /** @type {SFDC_Browser} */
-            const browser = browserDataFactory.createWithScore({
-                properties: {
-                    fullName: record.Browser,
-                    name: name,
-                    version: version,
-                    nbApplicationLogin: record.CntBrowser                 
-                }
-            });
-
-            // Add it to the map  
-            return [ browser.name, browser ];
-        }));
+            if (browsers.has(name)) {
+                /** @type {SFDC_Browser} */
+                const browser = browsers.get(name);
+                // Update the number of logins
+                browser.nbApplicationLogin += record.CntBrowser;
+            } else {
+                /** @type {SFDC_Browser} */
+                const browser = browserDataFactory.create({
+                    properties: {
+                        fullName: record.Browser,
+                        name: name,
+                        version: version,
+                        nbApplicationLogin: record.CntBrowser                 
+                    }
+                });
+                // Add it to the map  
+                browsers.set(name, browser);
+            }
+        });
 
         // Return data as map
         logger?.log(`Done`);

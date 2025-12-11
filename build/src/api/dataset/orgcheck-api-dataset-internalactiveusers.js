@@ -36,15 +36,14 @@ export class DatasetInternalActiveUsers extends Dataset {
                     'FROM PermissionSetAssignment ' +
                     'WHERE Assignee.IsActive = true ' +
                     'AND Assignee.ContactId = NULL ' +
-                    'AND Assignee.Profile.Id != NULL',
-            queryMoreField: 'Id'
+                    'AND Assignee.Profile.Id != NULL'
         }, {
-            string: 'SELECT UserId, LoginType, AuthMethodReference, Status, Count(Id) CntLogin ' +
+            string: 'SELECT UserId, LoginType, AuthMethodReference, Status, COUNT(Id) CntLogin ' +
                     'FROM LoginHistory ' +
                     `WHERE LoginType = 'Application' ` +
                     `OR LoginType LIKE '%SSO%' ` +
-                    `GROUP BY UserId, LoginType, AuthMethodReference, Status ` +
-                    'ORDER BY UserId'
+                    `GROUP BY UserId, LoginType, AuthMethodReference, Status `,
+            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);
 
         // Init the factory and records
