@@ -947,8 +947,8 @@ export class SalesforceManager extends SalesforceManagerIntf {
     /**
      * @see SalesforceManagerIntf.compileClasses
      * @param {Array<string>} apexClassIds - List of Apex Class IDs
-     * @param {SimpleLoggerIntf} logger - Logger
-     * @returns {Promise<Array<any>>} List of records
+     * @param {SimpleLoggerIntf} [logger] - Logger to use
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
      * @throws {SalesforceError} If an error occurs during the query
      * @public
      * @async
@@ -1007,9 +1007,34 @@ export class SalesforceManager extends SalesforceManagerIntf {
                 headers: { 'Content-Type': 'application/json' }
             });    
         });
-        const finalResult = await Promise.all(promises);
+        const responses = await Promise.all(promises);
         // Here the call has been made, so we can check if we have reached the limit of Salesforce API usage
         this._watchDog?.afterRequest(); // if limit has been reached, an error will be thrown here
+        // Map the responses to finalResult
+        /** @type {Map<string, { isSuccess: boolean, reasons?: Array<string>}>} */
+        const finalResult = new Map();
+        responses?.forEach(response => 
+            response.compositeResponse?.filter(compositeResponse => compositeResponse?.referenceId?.startsWith('01p'))
+                .forEach(compositeResponse => {
+                    const classId = compositeResponse?.referenceId?.substring(0, 15);
+                    if (compositeResponse?.body?.success === true) {
+                        logger?.log(`Recompilation requested for classId ${classId}`);
+                        finalResult.set(classId, { isSuccess: true });
+                    } else {
+                        let reasons;
+                        if (compositeResponse?.body && Array.isArray(compositeResponse?.body)) {
+                            reasons = compositeResponse.body;
+                        } else if (compositeResponse?.errors && Array.isArray(compositeResponse?.errors)) {
+                            reasons = compositeResponse.errors;
+                        } else {
+                            reasons = [ 'Unknown error during recompilation' ];
+                        }
+                        logger?.log(`Errors for classId ${classId}: ${reasons?.map(reason => JSON.stringify(reason)).join(', ')}`);
+                        finalResult.set(classId, { isSuccess: false, reasons: reasons } );
+                    }
+                })
+        );
+
         // return the final result as it is
         logger?.log(`Done compiling all classes in this org.`);
         return finalResult;

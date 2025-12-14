@@ -212,12 +212,12 @@ export class API {
     /**
      * @description Compile the given list of Apex Classes and return the status of the compilation
      * @param {Array<string>} apexClassIds - the list of Apex Class Ids to compile
-     * @returns {Promise<Array<any>>} The list of compilation results, each result is an object with the following properties:
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
      * @async
      * @public
      */
     async compileClasses(apexClassIds) {
-        return this._sfdcManager.compileClasses(apexClassIds, this._logger.toSimpleLogger(`Compile ${apexClassIds.length} class(es)`));
+        return this._sfdcManager.compileClasses(apexClassIds);
     }
 
     /**

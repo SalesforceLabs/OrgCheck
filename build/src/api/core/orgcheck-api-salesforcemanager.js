@@ -242,8 +242,8 @@ export class SalesforceManagerIntf {
     /**
      * @description Method to run compile given apex classes
      * @param {Array<string>} apexClassIds - List of apex class ids to compile
-     * @param {SimpleLoggerIntf} logger - Logger to use
-     * @returns {Promise<Array<any>>} Result of the compilation from tooling api
+     * @param {SimpleLoggerIntf} [logger] - Logger to use
+     * @returns {Promise<Map<string, { isSuccess: boolean, reasons?: Array<string>}>>} List of results by Apex Class ID
      * @throws {SalesforceError} If an error occurs during the query
      * @async
      * @public

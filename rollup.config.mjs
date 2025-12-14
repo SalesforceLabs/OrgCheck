@@ -13,9 +13,10 @@ export default [
                 plugins: [terser()]
             }
         ],
+        overwrite: true,
         plugins: [
             del({ targets: [ 
-                './force-app/main/default/lwc/**/libs/orgcheck-ui.**js',
+                './force-app/main/default/lwc/**/libs/orgcheck-ui.js',
         ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-ui.js', 
@@ -25,7 +26,8 @@ export default [
                     './force-app/main/default/lwc/orgcheckExportButton/libs',
                     './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
                 ],
-                rename: 'orgcheck-ui.js'
+                rename: 'orgcheck-ui.js',
+                overwrite: true
             }]})
         ]
     }, {
@@ -38,9 +40,10 @@ export default [
                 plugins: [terser()]
             }
         ],
+        overwrite: true,
         plugins: [
             del({ targets: [ 
-                './force-app/main/default/lwc/**/libs/orgcheck-api.**js' 
+                './force-app/main/default/lwc/**/libs/orgcheck-api.js' 
             ]}),
             copy({ targets: [{ 
                 src: './build/dist/orgcheck/orgcheck-api.js', 
@@ -50,7 +53,8 @@ export default [
                     './force-app/main/default/lwc/orgcheckDependencyLink/libs',
                     './force-app/main/default/lwc/orgcheckDependencyViewer/libs'
                 ],
-                rename: 'orgcheck-api.js'
+                rename: 'orgcheck-api.js',
+                overwrite: true
             }]})
         ]
     }

@@ -1167,27 +1167,35 @@ export default class OrgcheckApp extends LightningElement {
             const apexClassNamesById = new Map();
             this._spinner?.sectionLog(LOG_SECTION, 'Processing...');
             this.apexUncompiledTableData.slice(0, 25).forEach(c => {
-                this._spinner?.sectionLog(`${LOG_SECTION}-${c.id}`, `Asking to recompile class: ${c.name}`);
-                apexClassNamesById.set(c.id, c.name);
+                const classId = c.id.substring(0, 15);
+                const className = c.name;
+                this._spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
+                apexClassNamesById.set(classId, className);
             });
-            const responses = await this._api?.compileClasses(Array.from(apexClassNamesById.keys()));
-            this._spinner?.sectionLog(LOG_SECTION, 'Done');
-            responses.forEach(r => r.compositeResponse?.filter(cr => cr.referenceId?.startsWith('01p')).forEach(cr => {
-                const classId = cr.referenceId.substring(0, 15);
-                const className = apexClassNamesById.get(cr.referenceId);
-                if (cr.body.success === true) {
-                    this._spinner?.sectionEnded(`${LOG_SECTION}-${classId}`, `Recompilation requested for class: ${className}`);
+            /** @type Map<string, {isSuccess: boolean, reasons?: Array<string>}> */
+            const responses = await this._api?.compileClasses(Array.from(apexClassNamesById.keys()), );
+            this._spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
+            let noError = true;
+            responses.forEach((result, id) => {
+                const name = apexClassNamesById.get(id.substring(0, 15));
+                if (result.isSuccess === true) {
+                    this._spinner?.sectionEnded(`${LOG_SECTION}-${id}`, `Recompilation requested for class: ${name} (${id})`);
                 } else {
-                    let reasons = [];
-                    if (cr.body && Array.isArray(cr.body)) {
-                        reasons = cr.body;
-                    } else if (cr.errors && Array.isArray(cr.errors)) {
-                        reasons = cr.errors;
-                    }
-                    this._spinner?.sectionFailed(`${LOG_SECTION}-${classId}`, `Errors for class ${className}: ${reasons?.map(e => JSON.stringify(e)).join(', ')}`);
+                    this._spinner?.sectionFailed(`${LOG_SECTION}-${id}`, `Errors for class ${name} (${id}): ${result.reasons.join(', ')}`);
+                    noError = false;
                 }
-            }));
-            this._spinner?.sectionEnded(LOG_SECTION, 'Please hit the Refresh button (in Org Check) to get the latest data from your Org.  By the way, in the future, if you need to recompile ALL the classes, go to "Setup > Custom Code > Apex Classes" and click on the link "Compile all classes".');
+            });
+            if (noError === true) {
+                this._spinner?.sectionEnded(LOG_SECTION, 'Done!');
+                this._openModal('Recompilation Requested Successfully',
+                    'Please hit the Refresh button (in Org Check) to get the latest data '+
+                    'from your Org.  By the way, in the future, if you need to '+
+                    'recompile ALL the classes, go to "Setup > Custom '+
+                    'Code > Apex Classes" and click on the link "Compile all classes".'
+                );
+            } else {
+                this._spinner?.sectionFailed(LOG_SECTION, 'Done but with errors');
+            }
         } catch (e) {
             this._showError('Error while handleClickRecompile', e);
         }
@@ -1251,7 +1259,8 @@ export default class OrgcheckApp extends LightningElement {
      */ 
     _showError(title, error) {
         const htmlContent = `<font color="red">Sorry! An error occurred while processing... <br /><br />`+
-                            `Please create an issue on <a href="https://github.com/SalesforceLabs/OrgCheck/issues" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
+                            `Please review our <a href="http://sfdc.co/OrgCheck-FAQ" target="_blank" rel="external noopener noreferrer">Org Check FAQ</a> and try to resolve this issue in your Org based on our community's feedback. <br /><br /> `+
+                            `If the FAQ is not helping, consider creating an issue on <a href="http://sfdc.co/OrgCheck-Backlog" target="_blank" rel="external noopener noreferrer">Org Check Issues tracker</a> `+
                             `along with the context, a screenshot and the following error. <br /><br /> `+
                             `<ul><li>Message: <code>${error?.message}</code></li><li>Stack: <code>${error?.stack}</code></li><li>Error as JSON: <code>${JSON.stringify(error)}</code></li></ul></font>`                                
         this._openModal(title, htmlContent);
