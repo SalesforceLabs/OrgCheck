@@ -44,14 +44,14 @@ export class DatasetPermissionSets extends Dataset {
                     'FROM FieldPermissions '+
                     'WHERE Parent.IsOwnedByProfile = FALSE '+
                     'GROUP BY ParentId ',
-            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
+            queryMoreField: 'SystemModstamp' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT PermissionSetId, COUNT(Id) CountAssignment '+ 
                     'FROM PermissionSetAssignment '+
                     'WHERE PermissionSet.IsOwnedByProfile = FALSE '+
                     'AND Assignee.IsActive = TRUE ' +
                     'GROUP BY PermissionSetId ',
-            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
+            queryMoreField: 'SystemModstamp' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT PermissionSetGroupId, PermissionSetId ' + 
                     'FROM PermissionSetGroupComponent ' +

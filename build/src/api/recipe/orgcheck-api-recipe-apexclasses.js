@@ -8,7 +8,45 @@ import { SFDC_ApexClass } from '../data/orgcheck-api-data-apexclass';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 import { OrgCheckGlobalParameter } from '../core/orgcheck-api-globalparameter';
 
-export class RecipeApexClasses extends Recipe {
+const REGULAR_FILTER = (/** @type {SFDC_ApexClass} */ ac) => ac.isTest === false && ac.needsRecompilation === false;
+const TEST_FILTER = (/** @type {SFDC_ApexClass} */ ac) => ac.isTest === true && ac.needsRecompilation === false;
+const UNCOMPILED_FILTER = (/** @type {SFDC_ApexClass} */ ac) => ac.needsRecompilation === true;
+
+const TESTS_TYPE = 'tests';
+const UNCOMPILED_TYPE = 'uncompiled';
+const REGULAR_TYPE = 'regular';
+
+class AbstractRecipeApexClasses extends Recipe {
+
+    /**
+     * @description Function to filter the apex classes
+     * @type {Function}
+     * @private
+     */ 
+    _filterFunction;
+
+    /**
+     * @description Constructor letting us choose the type of apex classes to check
+     * @param {string} type - Type of apex classes to check
+     * @public
+     */ 
+    constructor(type) {
+        super();
+        switch (type) {
+            case TESTS_TYPE: {
+                this._filterFunction = TEST_FILTER; 
+                break;
+            }
+            case UNCOMPILED_TYPE: {
+                this._filterFunction = UNCOMPILED_FILTER; 
+                break;
+            }
+            case REGULAR_TYPE: 
+            default: {
+                this._filterFunction = REGULAR_FILTER; 
+            }
+        }
+    }
 
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
@@ -52,12 +90,30 @@ export class RecipeApexClasses extends Recipe {
             apexClass.relatedTestClassRefs = results[0];
             apexClass.relatedClassRefs = results[1];
             // Filter data
-            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || apexClass.package === namespace) && apexClass.isTest === false && apexClass.needsRecompilation === false) {
+            if ((namespace === OrgCheckGlobalParameter.ALL_VALUES || apexClass.package === namespace) && this._filterFunction(apexClass)) {
                 array.push(apexClass);
             }
         });
 
         // Return data
         return array;
+    }
+}
+
+export class RecipeApexClasses extends AbstractRecipeApexClasses {
+    constructor() {
+        super(REGULAR_TYPE);
+    }
+}
+
+export class RecipeApexTests extends AbstractRecipeApexClasses {
+    constructor() {
+        super(TESTS_TYPE);
+    }
+}
+
+export class RecipeApexUncompiled extends AbstractRecipeApexClasses {
+    constructor() {
+        super(UNCOMPILED_TYPE);
     }
 }

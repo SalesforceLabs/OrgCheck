@@ -13,7 +13,6 @@ export default [
                 plugins: [terser()]
             }
         ],
-        overwrite: true,
         plugins: [
             del({ targets: [ 
                 './force-app/main/default/lwc/**/libs/orgcheck-ui.js',
@@ -40,7 +39,6 @@ export default [
                 plugins: [terser()]
             }
         ],
-        overwrite: true,
         plugins: [
             del({ targets: [ 
                 './force-app/main/default/lwc/**/libs/orgcheck-api.js' 

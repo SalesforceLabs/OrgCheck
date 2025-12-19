@@ -905,7 +905,7 @@ export class API {
     removeAllApexClassesFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_CLASSES);
     }
-    
+
     /**
      * @description Get information about Apex Tests (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex tests
@@ -930,29 +930,6 @@ export class API {
     }
 
     /**
-     * @description Get information about Apex triggers (filtered out by namespace/pakage)
-     * @param {string} namespace - the namespace of the package to filter the apex triggers
-     * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
-     * @throws Exception from recipe manager
-     * @async
-     * @public
-     */
-    async getApexTriggers(namespace) {
-        // @ts-ignore
-        return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
-            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
-        ])));
-    }
-
-    /**
-     * @description Remove all the cached information about apex triggers
-     * @public
-     */
-    removeAllApexTriggersFromCache() {
-        this._recipeManager.clean(RecipeAliases.APEX_TRIGGERS);
-    }
-
-    /**
      * @description Get information about Apex Uncompiled Classes (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the apex uncompiled classes
      * @returns {Promise<Array<SFDC_ApexClass>>} List of items to return
@@ -973,6 +950,29 @@ export class API {
      */
     removeAllApexUncompiledFromCache() {
         this._recipeManager.clean(RecipeAliases.APEX_UNCOMPILED);
+    }
+
+    /**
+     * @description Get information about Apex triggers (filtered out by namespace/pakage)
+     * @param {string} namespace - the namespace of the package to filter the apex triggers
+     * @returns {Promise<Array<SFDC_ApexTrigger>>} List of items to return
+     * @throws Exception from recipe manager
+     * @async
+     * @public
+     */
+    async getApexTriggers(namespace) {
+        // @ts-ignore
+        return (await this._recipeManager.run(RecipeAliases.APEX_TRIGGERS, new Map([
+            [ OrgCheckGlobalParameter.PACKAGE_NAME, namespace ]
+        ])));
+    }
+
+    /**
+     * @description Remove all the cached information about apex triggers
+     * @public
+     */
+    removeAllApexTriggersFromCache() {
+        this._recipeManager.clean(RecipeAliases.APEX_TRIGGERS);
     }
 
     /**

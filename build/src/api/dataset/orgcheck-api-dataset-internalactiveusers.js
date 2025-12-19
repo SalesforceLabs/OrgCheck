@@ -43,7 +43,7 @@ export class DatasetInternalActiveUsers extends Dataset {
                     `WHERE LoginType = 'Application' ` +
                     `OR LoginType LIKE '%SSO%' ` +
                     `GROUP BY UserId, LoginType, AuthMethodReference, Status `,
-            queryMoreField: 'CreatedDate' // aggregate does not support calling QueryMore, use the custom instead
+            queryMoreField: 'LoginTime' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);
 
         // Init the factory and records

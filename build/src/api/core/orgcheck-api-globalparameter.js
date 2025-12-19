@@ -3,6 +3,13 @@ const SOBJECT_NAME = 'sobject';
 const PACKAGE_NAME = 'namespace';
 const SOBJECT_TYPE_NAME = 'sobjecttype';
 const SYSTEM_PERMISSIONS_LIST = 'permissions';
+const APEX_CLASS_TYPE = 'apexclasstype';
+const APEX_CLASS_TYPE_REGULAR = 'apexregular';
+const APEX_CLASS_TYPE_TEST = 'apextest';
+const APEX_CLASS_TYPE_UNCOMPILED = 'apexuncompiled';
+const GROUP_TYPE = 'grouptype';
+const GROUP_TYPE_PG = 'publicgroup';
+const GROUP_TYPE_QUEUE = 'queue';
 
 export class OrgCheckGlobalParameter {
 
@@ -39,6 +46,55 @@ export class OrgCheckGlobalParameter {
      * @static
      */
     static get SYSTEM_PERMISSIONS_LIST() { return SYSTEM_PERMISSIONS_LIST; }
+
+    /**
+     * @description Key to represent a type of an Apex class
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get APEX_CLASS_TYPE() { return APEX_CLASS_TYPE; }
+
+    /**
+     * @description Key to represent a type of a regular Apex class
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get APEX_CLASS_TYPE_REGULAR() { return APEX_CLASS_TYPE_REGULAR; }
+
+    /**
+     * @description Key to represent a type of an Apex class test
+     * @returns {string} The value of the constant
+     * @static
+     */
+    static get APEX_CLASS_TYPE_TEST() { return APEX_CLASS_TYPE_TEST; }
+
+    /**
+     * @description Key to represent a type of an Apex uncompiled class
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get APEX_CLASS_TYPE_UNCOMPILED() { return APEX_CLASS_TYPE_UNCOMPILED; }
+
+    /**
+     * @description Key to represent a type of a group
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get GROUP_TYPE() { return GROUP_TYPE; }
+
+    /**
+     * @description Key to represent the value of the public group type
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get GROUP_TYPE_PG() { return GROUP_TYPE_PG; }
+
+    /**
+     * @description Key to represent the value of the queue type
+     * @returns {string} The value of the constant
+     * @static
+     */ 
+    static get GROUP_TYPE_QUEUE() { return GROUP_TYPE_QUEUE; }
 
     /**
      * @description Get the SObject name from the parameters
@@ -82,5 +138,27 @@ export class OrgCheckGlobalParameter {
      */
     static getSystemPermissionsList(parameters) {
         return parameters?.get(SYSTEM_PERMISSIONS_LIST) ?? [];
+    }
+
+    /**
+     * @description Get the Apex class type from the parameters
+     * @param {Map<string, string>} parameters - Map of parameters
+     * @returns {string} The Apex class type or ALL_VALUES if not specified
+     * @static
+     * @public
+     */
+    static getApexClassType(parameters) {
+        return parameters?.get(APEX_CLASS_TYPE) ?? ALL_VALUES;
+    }
+
+    /**
+     * @description Get the Group type from the parameters
+     * @param {Map<string, string>} parameters - Map of parameters
+     * @returns {string} The Group type or ALL_VALUES if not specified
+     * @static
+     * @public
+     */
+    static getGroupType(parameters) {
+        return parameters?.get(GROUP_TYPE) ?? ALL_VALUES;
     }
 }

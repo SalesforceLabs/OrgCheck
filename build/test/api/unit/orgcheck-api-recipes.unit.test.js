@@ -1,5 +1,6 @@
 import { Recipe } from '../../../src/api/core/orgcheck-api-recipe';
-import { RecipeApexClasses } from "../../../src/api/recipe/orgcheck-api-recipe-apexclasses";
+import { RecipeCollection } from '../../../src/api/core/orgcheck-api-recipecollection';
+import { RecipeApexClasses, RecipeApexTests, RecipeApexUncompiled } from "../../../src/api/recipe/orgcheck-api-recipe-apexclasses";
 import { RecipeApexTriggers } from "../../../src/api/recipe/orgcheck-api-recipe-apextriggers";
 import { RecipeAppPermissions } from "../../../src/api/recipe/orgcheck-api-recipe-apppermissions";
 import { RecipeCollaborationGroups } from "../../../src/api/recipe/orgcheck-api-recipe-collaborationgroups";
@@ -29,8 +30,9 @@ import { RecipeProcessBuilders } from "../../../src/api/recipe/orgcheck-api-reci
 import { RecipeProfilePasswordPolicies } from "../../../src/api/recipe/orgcheck-api-recipe-profilepasswordpolicies";
 import { RecipeProfileRestrictions } from "../../../src/api/recipe/orgcheck-api-recipe-profilerestrictions";
 import { RecipeProfiles } from "../../../src/api/recipe/orgcheck-api-recipe-profiles";
-import { RecipePublicGroups } from "../../../src/api/recipe/orgcheck-api-recipe-publicgroups";
-import { RecipeQueues } from "../../../src/api/recipe/orgcheck-api-recipe-queues";
+import { RecipeGroups, RecipePublicGroups, RecipeQueues } from "../../../src/api/recipe/orgcheck-api-recipe-groups";
+import { RecipeGlobalView } from "../../../src/api/recipecollection/orgcheck-api-recipe-globalview";
+import { RecipeHardcodedURLsView } from "../../../src/api/recipecollection/orgcheck-api-recipe-hardcodedurlsview";
 import { RecipeUserRoles } from "../../../src/api/recipe/orgcheck-api-recipe-userroles";
 import { RecipeValidationRules } from "../../../src/api/recipe/orgcheck-api-recipe-validationrules";
 import { RecipeVisualForceComponents } from "../../../src/api/recipe/orgcheck-api-recipe-visualforcecomponents";
@@ -47,44 +49,46 @@ class SimpleLoggerMock extends SimpleLoggerIntf {
 describe('tests.api.unit.Recipes', () => {
   describe('checks if all recipes are working fine', () => {
     [
-      /*  1 */ RecipeApexClasses,
-      /*  2 */ RecipeApexTriggers,
-      /*  3 */ RecipeAppPermissions,
-      /*  4 */ RecipeCollaborationGroups,
-      /*  5 */ RecipeCurrentUserPermissions,
-      /*  6 */ RecipeCustomFields,
-      /*  7 */ RecipeCustomLabels,
-      /*  8 */ RecipeCustomTabs,
-      /*  9 */ RecipeDocuments,
-      /* 10 */ RecipeEmailTemplates,
-      /* 11 */ RecipeFieldPermissions,
-      /* 12 */ RecipeFlows,
-      /* 13 */ RecipeHomePageComponents,
-      /* 14 */ RecipeInternalActiveUsers,
-      /* 15 */ RecipeLightningAuraComponents,
-      /* 16 */ RecipeLightningPages,
-      /* 17 */ RecipeLightningWebComponents,
-      /* 18 */ RecipeObject,
-      /* 19 */ RecipeObjectPermissions,
-      /* 20 */ RecipeObjects,
-      /* 21 */ RecipeObjectTypes,
-      /* 22 */ RecipeOrganization,
-      /* 23 */ RecipePackages,
-      /* 24 */ RecipePageLayouts,
-      /* 25 */ RecipePermissionSetLicenses,
-      /* 26 */ RecipePermissionSets,
-      /* 27 */ RecipeProcessBuilders,
-      /* 28 */ RecipeProfilePasswordPolicies,
-      /* 29 */ RecipeProfileRestrictions,
-      /* 30 */ RecipeProfiles,
-      /* 31 */ RecipePublicGroups,
-      /* 32 */ RecipeQueues,
-      /* 33 */ RecipeUserRoles,
-      /* 34 */ RecipeValidationRules,
-      /* 35 */ RecipeVisualForceComponents,
-      /* 36 */ RecipeVisualForcePages,
-      /* 37 */ RecipeWebLinks,
-      /* 38 */ RecipeWorkflows
+      RecipeApexClasses,
+      RecipeApexTests,
+      RecipeApexTriggers,
+      RecipeApexUncompiled,
+      RecipeAppPermissions,
+      RecipeCollaborationGroups,
+      RecipeCurrentUserPermissions,
+      RecipeCustomFields,
+      RecipeCustomLabels,
+      RecipeCustomTabs,
+      RecipeDocuments,
+      RecipeEmailTemplates,
+      RecipeFieldPermissions,
+      RecipeFlows,
+      RecipeHomePageComponents,
+      RecipeInternalActiveUsers,
+      RecipeLightningAuraComponents,
+      RecipeLightningPages,
+      RecipeLightningWebComponents,
+      RecipeObject,
+      RecipeObjectPermissions,
+      RecipeObjects,
+      RecipeObjectTypes,
+      RecipeOrganization,
+      RecipePackages,
+      RecipePageLayouts,
+      RecipePermissionSetLicenses,
+      RecipePermissionSets,
+      RecipeProcessBuilders,
+      RecipeProfilePasswordPolicies,
+      RecipeProfileRestrictions,
+      RecipeProfiles,
+      RecipePublicGroups,
+      RecipeQueues,
+      RecipeUserRoles,
+      RecipeValidationRules,
+      RecipeVisualForceComponents,
+      RecipeVisualForcePages,
+      RecipeWebLinks,
+      RecipeWorkflows
     ].forEach((recipeClass, index) => {
       it(`checks if the recipe "${recipeClass.name}" extracts and transforms correctly`, async () => {
         expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
@@ -101,6 +105,28 @@ describe('tests.api.unit.Recipes', () => {
         });
         const results = await recipe.transform(data, logger, new Map());
         expect(results).toBeDefined();
+      });
+    });
+  });
+
+    describe('checks if all recipe collections are working fine', () => {
+    [
+      RecipeGlobalView,
+      RecipeHardcodedURLsView
+    ].forEach((recipeClass, index) => {
+      it(`checks if the recipe collection "${recipeClass.name}" extracts and transforms correctly`, async () => {
+        expect(`${index+1}: ${typeof recipeClass}`).toBe(`${index+1}: function`);
+        const recipe = new recipeClass();
+        const logger = new SimpleLoggerMock();
+        expect(recipe instanceof RecipeCollection).toBeTruthy();
+        const datasets = recipe.extract(logger, new Map());
+        expect(datasets).toBeDefined();
+        expect(datasets instanceof Array).toBeTruthy();
+        expect(datasets.length).toBeDefined();
+        datasets.forEach((dataset) => {
+          expect(dataset).toBeDefined();
+          expect(typeof dataset).toBe('string');
+        });
       });
     });
   });

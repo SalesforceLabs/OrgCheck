@@ -53,7 +53,6 @@ export class RecipeGlobalView extends RecipeCollection {
         ];
     }
 
-
     /**
      * @description Filter the data items by score rule ids
      * @param {SimpleLoggerIntf} _logger - Logger

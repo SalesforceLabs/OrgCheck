@@ -8,8 +8,41 @@ import { SFDC_User } from '../data/orgcheck-api-data-user';
 import { SFDC_Group } from '../data/orgcheck-api-data-group';
 import { DataMatrix } from '../core/orgcheck-api-data-matrix';
 
-export class RecipeQueues extends Recipe {
+const QUEUE_FILTER = (/** @type {SFDC_Group} */ g) => g.isQueue === true; 
+const PUBLICGROUP_FILTER = (/** @type {SFDC_Group} */ g) => g.isPublicGroup === true;
 
+const QUEUE_TYPE = 'queue';
+const PUBLICGROUP_TYPE = 'publicgroup';
+
+class AbstractRecipeGroups extends Recipe {
+
+
+    /**
+     * @description Function to filter the apex classes
+     * @type {Function}
+     * @private
+     */ 
+    _filterFunction;
+
+    /**
+     * @description Constructor letting us choose the type of apex classes to check
+     * @param {string} type - Type of apex classes to check
+     * @public
+     */ 
+    constructor(type) {
+        super();
+        switch (type) {
+            case QUEUE_TYPE: {
+                this._filterFunction = QUEUE_FILTER; 
+                break;
+            }
+            case PUBLICGROUP_TYPE: 
+            default: {
+                this._filterFunction = PUBLICGROUP_FILTER; 
+            }
+        }
+    }
+    
     /**
      * @description List all dataset aliases (or datasetRunInfos) that this recipe is using
      * @param {SimpleLoggerIntf} _logger - Logger
@@ -30,7 +63,7 @@ export class RecipeQueues extends Recipe {
      */
     async transform(data, _logger) {
 
-        // Get data
+        // Get data and parameters
         const /** @type {Map<string, SFDC_Group>} */ groups = data.get(DatasetAliases.PUBLIC_GROUPS_AND_QUEUES);
         const /** @type {Map<string, SFDC_User>} */ users = data.get(DatasetAliases.INTERNALACTIVEUSERS);
 
@@ -54,12 +87,24 @@ export class RecipeQueues extends Recipe {
                 (/** @type {string} */ id) => groups.has(id)
             );
             // Filter data
-            if (group.isQueue === true) {
+            if (this._filterFunction(group) === true) {
                 array.push(group);
             }
         });
 
         // Return data
         return array;
+    }
+}
+
+export class RecipeQueues extends AbstractRecipeGroups {
+    constructor() {
+        super(QUEUE_TYPE);
+    }
+}
+
+export class RecipePublicGroups extends AbstractRecipeGroups {
+    constructor() {
+        super(PUBLICGROUP_TYPE);
     }
 }

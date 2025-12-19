@@ -11,8 +11,9 @@
     "lint:ui": "eslint build/src/ui",
     "lint:lwc": "eslint force-app/main/default/lwc",
     "lint:test": "eslint build/test",
-    "build:js": "rollup --config",
+    "build:js": "rollup --config && rollup --config",
     "build:lwc:app": "sf project deploy start --metadata LightningComponentBundle:orgcheckApp",
+    "build:lwc:all": "sf project deploy start --metadata LightningComponentBundle",
     "build:sr": "./build/build-static-resource.sh",
     "scan:api": "sf code-analyzer run --target ./build/src/api --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
     "scan:ui": "sf code-analyzer run --target ./build/src/ui --output-file /tmp/orgcheck-ui-scan.html; open /tmp/orgcheck-ui-scan.html",
@@ -23,7 +24,8 @@
     "test:coverage": "sfdx-lwc-jest --coverage",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:debug": "sfdx-lwc-jest --debug",
-    "test:unit:watch": "sfdx-lwc-jest --watch"
+    "test:unit:watch": "sfdx-lwc-jest --watch",
+    "sanity:check": "yarn lint:api && yarn lint:ui && yarn lint:lwc && yarn test:unit && yarn scan:api && yarn scan:ui && yarn scan:lwc"
   },
   "repository": {
     "type": "git",

@@ -14,9 +14,7 @@ export class RecipeHardcodedURLsView extends RecipeCollection {
     extract(_logger) {
         return [
             RecipeAliases.APEX_CLASSES,
-            RecipeAliases.APEX_TESTS,
             RecipeAliases.APEX_TRIGGERS,
-            RecipeAliases.APEX_UNCOMPILED,
             RecipeAliases.COLLABORATION_GROUPS,
             RecipeAliases.CUSTOM_FIELDS,
             RecipeAliases.CUSTOM_TABS,

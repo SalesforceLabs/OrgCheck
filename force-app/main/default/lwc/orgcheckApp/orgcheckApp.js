@@ -29,8 +29,8 @@ const APPLICATION_NAVIGATION = {
         title: '🗺️ Salesforce Organization',
         tabs: { 
             INDEX0:        { key: 'summary-00', title: 'Summary' },
-            GLOBAL_VIEW:   { key: 'global-view', title: '🏞️ Overview' },
-            URL_VIEW:      { key: 'hard-coded-urls-view', title: '🏖️ Hard-coded URLs' },
+            GLOBAL_VIEW:   { key: 'global-view', title: '🏞️ Overview', recipe: ocapi.RecipeAliases.GLOBAL_VIEW },
+            URL_VIEW:      { key: 'hard-coded-urls-view', title: '🏖️ Hard-coded URLs', recipe: ocapi.RecipeAliases.HARDCODED_URLS_VIEW },
         }
     },
     DATAMODEL: { 
@@ -38,13 +38,13 @@ const APPLICATION_NAVIGATION = {
         title: '⚽ Data model',
         tabs: { 
             INDEX1:        { key: 'summary-01', title: 'Summary' },
-            SOBJ_DESC:     { key: 'object', title: '🎳 Object Documentation' },
-            SOBJECTS:      { key: 'objects', title: '🏉 Objects' },
-            CUSTOM_FIELDS: { key: 'custom-fields', title: '🏈 Custom Fields' },
-            LAYOUTS:       { key: 'page-layouts', title: '🏓 Page Layouts' },
-            VRS:           { key: 'validation-rules', title: '🎾 Validation Rules' },
-            RTS:           { key: 'record-types', title: '🏏 Record Types' },
-            WEB_LINKS:     { key: 'web-links', title: '🏑 Web Links' },
+            SOBJ_DESC:     { key: 'object', title: '🎳 Object Documentation', recipe: ocapi.RecipeAliases.OBJECT },
+            SOBJECTS:      { key: 'objects', title: '🏉 Objects', recipe: ocapi.RecipeAliases.OBJECTS },
+            CUSTOM_FIELDS: { key: 'custom-fields', title: '🏈 Custom Fields', recipe: ocapi.RecipeAliases.CUSTOM_FIELDS },
+            LAYOUTS:       { key: 'page-layouts', title: '🏓 Page Layouts', recipe: ocapi.RecipeAliases.PAGE_LAYOUTS },
+            VRS:           { key: 'validation-rules', title: '🎾 Validation Rules', recipe: ocapi.RecipeAliases.VALIDATION_RULES },
+            RTS:           { key: 'record-types', title: '🏏 Record Types', recipe: ocapi.RecipeAliases.RECORD_TYPES },
+            WEB_LINKS:     { key: 'web-links', title: '🏑 Web Links', recipe: ocapi.RecipeAliases.WEBLINKS },
         }
     },
     SECURITY: { 
@@ -52,16 +52,16 @@ const APPLICATION_NAVIGATION = {
         title: '👮 Security and Access',
         tabs: { 
             INDEX2:        { key: 'summary-02', title: 'Summary' },
-            USERS:         { key: 'internal-active-users', title: '👥 Active Internal Users' },
-            PROFILES:      { key: 'profiles', title: '🚓 Profiles' },
-            PSETS:         { key: 'permission-sets', title: '🚔 Permission Sets' },
-            PSLS:          { key: 'permission-set-licenses', title: '🚔 Permission Set Licenses' },
-            PROFILE_RSTRS: { key: 'profile-restrictions', title: '🚸 Profile Restrictions' },
-            PROFILE_PWDS:  { key: 'profile-password-policies', title: '⛖ Profile Password Policies' },
-            CRUDS:         { key: 'object-permissions', title: '🚦 Object Permissions' },
-            FLSS:          { key: 'field-permissions', title: '🚧 Field Level Securities' },
-            APP_PERMS:     { key: 'app-permissions', title: '⛕ Application Permissions' },
-            BROWSERS:      { key: 'browsers', title: '🌐 Browsers' },
+            USERS:         { key: 'internal-active-users', title: '👥 Active Internal Users', recipe: ocapi.RecipeAliases.INTERNAL_ACTIVE_USERS },
+            PROFILES:      { key: 'profiles', title: '🚓 Profiles', recipe: ocapi.RecipeAliases.PROFILES },
+            PSETS:         { key: 'permission-sets', title: '🚔 Permission Sets', recipe: ocapi.RecipeAliases.PERMISSION_SETS },
+            PSLS:          { key: 'permission-set-licenses', title: '🚔 Permission Set Licenses', recipe: ocapi.RecipeAliases.PERMISSION_SET_LICENSES },
+            PROFILE_RSTRS: { key: 'profile-restrictions', title: '🚸 Profile Restrictions', recipe: ocapi.RecipeAliases.PROFILE_RESTRICTIONS },
+            PROFILE_PWDS:  { key: 'profile-password-policies', title: '⛖ Profile Password Policies', recipe: ocapi.RecipeAliases.PROFILE_PWD_POLICIES },
+            CRUDS:         { key: 'object-permissions', title: '🚦 Object Permissions', recipe: ocapi.RecipeAliases.OBJECT_PERMISSIONS },
+            FLSS:          { key: 'field-permissions', title: '🚧 Field Level Securities', recipe: ocapi.RecipeAliases.FIELD_PERMISSIONS },
+            APP_PERMS:     { key: 'app-permissions', title: '⛕ Application Permissions', recipe: ocapi.RecipeAliases.APP_PERMISSIONS },
+            BROWSERS:      { key: 'browsers', title: '🌐 Browsers', recipe: ocapi.RecipeAliases.BROWSERS },
         }
     },
     BOXES: { 
@@ -70,10 +70,10 @@ const APPLICATION_NAVIGATION = {
         tabs: { 
             INDEX3:        { key: 'summary-03', title: 'Summary' },
             ROLES_GRAPH:   { key: 'user-roles-hierarchy', title: '🐙 Internal Role Explorer' },
-            ROLES:         { key: 'user-roles', title: '🦓 Internal Role Listing' },
-            PGS:           { key: 'public-groups', title: '🐘 Public Groups' },
-            QUEUES:        { key: 'queues', title: '🦒 Queues' },
-            CHT_GROUPS:    { key: 'collaboration-groups', title: '🦙 Chatter Groups' },
+            ROLES:         { key: 'user-roles', title: '🦓 Internal Role Listing', recipe: ocapi.RecipeAliases.USER_ROLES },
+            PGS:           { key: 'public-groups', title: '🐘 Public Groups', recipe: ocapi.RecipeAliases.PUBLIC_GROUPS },
+            QUEUES:        { key: 'queues', title: '🦒 Queues', recipe: ocapi.RecipeAliases.QUEUES },
+            CHT_GROUPS:    { key: 'collaboration-groups', title: '🦙 Chatter Groups', recipe: ocapi.RecipeAliases.COLLABORATION_GROUPS },
         }
     },
     AUTOMATION: { 
@@ -81,9 +81,9 @@ const APPLICATION_NAVIGATION = {
         title: '🤖 Automations',
         tabs: { 
             INDEX4:        { key: 'summary-04', title: 'Summary' },
-            FLOWS:         { key: 'flows', title: '🏎️ Flows' },
-            PBS:           { key: 'process-builders',  title: '🛺 Process Builders' },
-            WORKFLOWS:     { key: 'workflows', title: '🚗 Workflows' },
+            FLOWS:         { key: 'flows', title: '🏎️ Flows', recipe: ocapi.RecipeAliases.FLOWS },
+            PBS:           { key: 'process-builders',  title: '🛺 Process Builders', recipe: ocapi.RecipeAliases.PROCESS_BUILDERS },
+            WORKFLOWS:     { key: 'workflows', title: '🚗 Workflows', recipe: ocapi.RecipeAliases.WORKFLOWS },
         }
     },
     SETTING: { 
@@ -91,11 +91,11 @@ const APPLICATION_NAVIGATION = {
         title: '🎁 Setting',
         tabs: {
             INDEX5:        { key: 'summary-05', title: 'Summary' },
-            LABELS:        { key: 'custom-labels', title: '🏷️ Custom Labels' },
-            DOCUMENTS:     { key: 'documents', title: '🍱 Documents' },
-            EMAIL_TPLS:    { key: 'email-templates', title: '🌇 Email Templates' },
-            ARTICLES:      { key: 'knowledge-articles', title: '📚 Knowledge Articles' },
-            SRS:           { key: 'static-resources', title: '🗿 Static Resources' },
+            LABELS:        { key: 'custom-labels', title: '🏷️ Custom Labels', recipe: ocapi.RecipeAliases.CUSTOM_LABELS },
+            DOCUMENTS:     { key: 'documents', title: '🍱 Documents', recipe: ocapi.RecipeAliases.DOCUMENTS },
+            EMAIL_TPLS:    { key: 'email-templates', title: '🌇 Email Templates', recipe: ocapi.RecipeAliases.EMAIL_TEMPLATES },
+            ARTICLES:      { key: 'knowledge-articles', title: '📚 Knowledge Articles', recipe: ocapi.RecipeAliases.KNOWLEDGE_ARTICLES },
+            SRS:           { key: 'static-resources', title: '🗿 Static Resources', recipe: ocapi.RecipeAliases.STATIC_RESOURCES },
         }
     },
     VISUAL: { 
@@ -103,13 +103,13 @@ const APPLICATION_NAVIGATION = {
         title: '🥐 User Interface',
         tabs: { 
             INDEX6:        { key: 'summary-06', title: 'Summary' },
-            VFPS:          { key: 'visualforce-pages', title: '🥖 Visualforce Pages' },
-            VFCS:          { key: 'visualforce-components', title: '🍞 Visualforce Components' },
-            LG_PAGES:      { key: 'lightning-pages', title: '🎂 Lightning Pages' },
-            AURAS:         { key: 'lightning-aura-components', title: '🧁 Lightning Aura Components' },
-            LWCS:          { key: 'lightning-web-components', title: '🍰 Lightning Web Components' },
-            HOME_PAGES:    { key: 'home-page-components', title: '🍩 Home Page Components' },
-            TABS:          { key: 'custom-tabs', title: '🥠 Custom Tabs' },
+            VFPS:          { key: 'visualforce-pages', title: '🥖 Visualforce Pages', recipe: ocapi.RecipeAliases.VISUALFORCE_PAGES },
+            VFCS:          { key: 'visualforce-components', title: '🍞 Visualforce Components', recipe: ocapi.RecipeAliases.VISUALFORCE_COMPONENTS },
+            LG_PAGES:      { key: 'lightning-pages', title: '🎂 Lightning Pages', recipe: ocapi.RecipeAliases.LIGHTNING_PAGES },
+            AURAS:         { key: 'lightning-aura-components', title: '🧁 Lightning Aura Components', recipe: ocapi.RecipeAliases.LIGHTNING_AURA_COMPONENTS },
+            LWCS:          { key: 'lightning-web-components', title: '🍰 Lightning Web Components', recipe: ocapi.RecipeAliases.LIGHTNING_WEB_COMPONENTS },
+            HOME_PAGES:    { key: 'home-page-components', title: '🍩 Home Page Components', recipe: ocapi.RecipeAliases.HOME_PAGE_COMPONENTS },
+            TABS:          { key: 'custom-tabs', title: '🥠 Custom Tabs', recipe: ocapi.RecipeAliases.CUSTOM_TABS },
         }
     },
     CODE: { 
@@ -117,10 +117,10 @@ const APPLICATION_NAVIGATION = {
         title: '🔥 Programmatic',
         tabs: {
             INDEX7:        { key: 'summary-07', title: 'Summary' },
-            CLASSES:       { key: 'apex-classes', title: '❤️‍🔥 Apex Classes' },
-            UNCOMPILEDS:   { key: 'apex-uncompiled', title: '🌋 Apex Classes That Need Recompilation' },
-            TRIGGERS:      { key: 'apex-triggers', title: '🧨 Apex Triggers' },
-            TESTS:         { key: 'apex-tests', title: '🚒 Apex Unit Tests' },
+            CLASSES:       { key: 'apex-classes', title: '❤️‍🔥 Apex Classes', recipe: ocapi.RecipeAliases.APEX_CLASSES },
+            UNCOMPILEDS:   { key: 'apex-uncompiled', title: '🌋 Apex Classes That Need Recompilation', recipe: ocapi.RecipeAliases.APEX_UNCOMPILED },
+            TRIGGERS:      { key: 'apex-triggers', title: '🧨 Apex Triggers', recipe: ocapi.RecipeAliases.APEX_TRIGGERS },
+            TESTS:         { key: 'apex-tests', title: '🚒 Apex Unit Tests', recipe: ocapi.RecipeAliases.APEX_TESTS },
         }
     },
     ANALYTICS: { 
@@ -128,8 +128,8 @@ const APPLICATION_NAVIGATION = {
         title: '⛰️ Analytics',
         tabs: {
             INDEX8:        { key: 'summary-08', title: 'Summary' },
-            REPORTS:       { key: 'reports', title: '🌳 Reports' }, 
-            DASHBOARDS:    { key: 'dashboards', title: '🌲 Dashboards' },
+            REPORTS:       { key: 'reports', title: '🌳 Reports', recipe: ocapi.RecipeAliases.REPORTS }, 
+            DASHBOARDS:    { key: 'dashboards', title: '🌲 Dashboards', recipe: ocapi.RecipeAliases.DASHBOARDS },
         }
     },
 };
@@ -157,13 +157,24 @@ const SUB_TABS = new Map();
  */
 const SUB_TABS_BY_MAIN_TAB_KEY = new Map();
 
+/**
+ * @description Sub tab keys by their corresponding recipe
+ * @type {Map<string, string>}
+ * @constant
+ */
+const RECIPE_TO_SUB_TAB = new Map();
+
 Object.values(APPLICATION_NAVIGATION).forEach(mTab => Object.values(mTab.tabs).forEach(sTab => {
-    SUB_TABS.set(sTab.key, { tab: sTab, mainTabKey: mTab.key });
+    SUB_TABS.set(sTab.key, { tab: { key: sTab.key, title: sTab.title }, mainTabKey: mTab.key });
     if (SUB_TABS_BY_MAIN_TAB_KEY.has(mTab.key) === false) SUB_TABS_BY_MAIN_TAB_KEY.set(mTab.key, []);
     SUB_TABS_BY_MAIN_TAB_KEY.get(mTab.key).push(sTab.key);
+    if (sTab.recipe) {
+        RECIPE_TO_SUB_TAB.set(sTab.recipe, sTab.key);
+    }
 }));
 Object.freeze(SUB_TABS);
 Object.freeze(SUB_TABS_BY_MAIN_TAB_KEY);
+Object.freeze(RECIPE_TO_SUB_TAB);
 
 /**
  * @description Sanitize and validate main tab input
@@ -683,87 +694,87 @@ export default class OrgcheckApp extends LightningElement {
      * @private
      */
     _internalTransformers = new Map([
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.APP_PERMS.key,        { data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.ARTICLES.key,          { data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.AURAS.key,              { data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.BROWSERS.key,         { data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.CHT_GROUPS.key,          { data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.CLASSES.key,              { data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.CRUDS.key,            { data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.CUSTOM_FIELDS.key,   { data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }} ],
         [ APPLICATION_NAVIGATION.ANALYTICS.tabs.DASHBOARDS.key,      { data: 'dashboardsTableData',                   remove: () => { this._api?.removeAllDashboardsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getDashboards(); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.DOCUMENTS.key,         { data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.EMAIL_TPLS.key,        { data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.ANALYTICS.tabs.REPORTS.key,         { data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }} ],
         [ APPLICATION_NAVIGATION.AUTOMATION.tabs.FLOWS.key,          { data: 'flowsTableData',                        remove: () => { this._api?.removeAllFlowsFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getFlows(); }} ],
-        [ APPLICATION_NAVIGATION.SECURITY.tabs.FLSS.key,             { data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.ORG.tabs.GLOBAL_VIEW.key,           { data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.HOME_PAGES.key,         { data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.LABELS.key,            { data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.LAYOUTS.key,         { data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.LG_PAGES.key,           { data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.LWCS.key,               { data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.AUTOMATION.tabs.PBS.key,            { data: 'processBuildersTableData',              remove: () => { this._api?.removeAllProcessBuildersFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getProcessBuilders(); }} ],
+        [ APPLICATION_NAVIGATION.AUTOMATION.tabs.WORKFLOWS.key,      { data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }} ],
+        [ APPLICATION_NAVIGATION.BOXES.tabs.CHT_GROUPS.key,          { data: 'chatterGroupsTableData',                remove: () => { this._api?.removeAllChatterGroupsFromCache(); },            getAlias: this._aliasNone,          get: async () => { return this._api?.getChatterGroups(); }} ],
         [ APPLICATION_NAVIGATION.BOXES.tabs.PGS.key,                 { data: 'publicGroupsTableData',                 remove: () => { this._api?.removeAllPublicGroupsFromCache(); },             getAlias: this._aliasNone,          get: async () => { return this._api?.getPublicGroups(); }} ],
+        [ APPLICATION_NAVIGATION.BOXES.tabs.QUEUES.key,              { data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }} ],
+        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES.key,               { data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }} ],
+        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES_GRAPH.key,         { data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }} ],
+        [ APPLICATION_NAVIGATION.CODE.tabs.CLASSES.key,              { data: 'apexClassesTableData',                  remove: () => { this._api?.removeAllApexClassesFromCache(); },              getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexClasses(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.CODE.tabs.TESTS.key,                { data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.CODE.tabs.TRIGGERS.key,             { data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key,          { data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.CUSTOM_FIELDS.key,   { data: 'customFieldsTableData',                 remove: () => { this._api?.removeAllCustomFieldsFromCache(); },             getAlias: this._aliasAll,           get: async () => { return this._api?.getCustomFields(this.namespace, this.objectType, this.object); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.LAYOUTS.key,         { data: 'pageLayoutsTableData',                  remove: () => { this._api?.removeAllPageLayoutsFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getPageLayouts(this.namespace, this.objectType, this.object); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.RTS.key,             { data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJ_DESC.key,       { data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJECTS.key,        { data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.VRS.key,             { data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }} ],
+        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.WEB_LINKS.key,       { data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }} ],
+        [ APPLICATION_NAVIGATION.ORG.tabs.GLOBAL_VIEW.key,           { data: '_internalGlobalViewDataFromAPI',        remove: () => { this._api?.removeGlobalViewFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getGlobalView(); }} ],
+        [ APPLICATION_NAVIGATION.ORG.tabs.URL_VIEW.key,              { data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }} ],
+        [ APPLICATION_NAVIGATION.SECURITY.tabs.APP_PERMS.key,        { data: '_internalAppPermissionsDataMatrix',     remove: () => { this._api?.removeAllAppPermissionsFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApplicationPermissionsPerParent(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.SECURITY.tabs.BROWSERS.key,         { data: 'browsersTableData',                     remove: () => { this._api?.removeAllBrowsersFromCache(); },                 getAlias: this._aliasNone,          get: async () => { return this._api?.getBrowsers(); }} ],
+        [ APPLICATION_NAVIGATION.SECURITY.tabs.CRUDS.key,            { data: '_internalObjectPermissionsDataMatrix',  remove: () => { this._api?.removeAllObjectPermissionsFromCache(); },        getAlias: this._aliasNamespace,     get: async () => { return this._api?.getObjectPermissionsPerParent(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.SECURITY.tabs.FLSS.key,             { data: '_internalFieldPermissionsDataMatrix',   remove: () => { this._api?.removeAllFieldPermissionsFromCache(); },         getAlias: this._aliasObjNamespace,  get: async () => { return this._api?.getFieldPermissionsPerParent(this.object, this.namespace); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_PWDS.key,     { data: 'profilePasswordPoliciesTableData',      remove: () => { this._api?.removeAllProfilePasswordPoliciesFromCache(); },  getAlias: this._aliasNone,          get: async () => { return this._api?.getProfilePasswordPolicies(); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILE_RSTRS.key,    { data: 'profileRestrictionsTableData',          remove: () => { this._api?.removeAllProfileRestrictionsFromCache(); },      getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfileRestrictions(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.PROFILES.key,         { data: 'profilesTableData',                     remove: () => { this._api?.removeAllProfilesFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getProfiles(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.PSETS.key,            { data: 'permissionSetsTableData',               remove: () => { this._api?.removeAllPermSetsFromCache(); },                 getAlias: this._aliasNamespace,     get: async () => { return this._api?.getPermissionSets(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.PSLS.key,             { data: 'permissionSetLicensesTableData',        remove: () => { this._api?.removeAllPermSetLicensesFromCache(); },          getAlias: this._aliasNone,          get: async () => { return this._api?.getPermissionSetLicenses(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.QUEUES.key,              { data: 'queuesTableData',                       remove: () => { this._api?.removeAllQueuesFromCache(); },                   getAlias: this._aliasNone,          get: async () => { return this._api?.getQueues(); }} ],
-        [ APPLICATION_NAVIGATION.ANALYTICS.tabs.REPORTS.key,         { data: 'reportsTableData',                      remove: () => { this._api?.removeAllReportsFromCache(); },                  getAlias: this._aliasNone,          get: async () => { return this._api?.getReports(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES.key,               { data: 'rolesTableData',                        remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRoles(); }} ],
-        [ APPLICATION_NAVIGATION.BOXES.tabs.ROLES_GRAPH.key,         { data: 'rolesTree',                             remove: () => { this._api?.removeAllRolesFromCache(); },                    getAlias: this._aliasNone,          get: async () => { return this._api?.getRolesTree(); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.RTS.key,             { data: 'recordTypesTableData',                  remove: () => { this._api?.removeAllRecordTypesFromCache(); },              getAlias: this._aliasAll,           get: async () => { return this._api?.getRecordTypes(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJ_DESC.key,       { data: 'objectData',                            remove: () => { this._api?.removeObjectFromCache(this.object); },           getAlias: this._aliasObject,        get: async () => { return this.object !== '*' ? this._api?.getObject(this.object) : undefined; }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.SOBJECTS.key,        { data: 'objectsTableData',                      remove: () => { this._api?.removeAllObjectsFromCache(); },                  getAlias: this._aliasTypeNamespace, get: async () => { return this._api?.getObjects(this.namespace, this.objectType); }} ],
-        [ APPLICATION_NAVIGATION.SETTING.tabs.SRS.key,               { data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.VISUAL.tabs.TABS.key,               { data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.TESTS.key,                { data: 'apexTestsTableData',                    remove: () => { this._api?.removeAllApexTestsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTests(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.TRIGGERS.key,             { data: 'apexTriggersTableData',                 remove: () => { this._api?.removeAllApexTriggersFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexTriggers(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.CODE.tabs.UNCOMPILEDS.key,          { data: 'apexUncompiledTableData',               remove: () => { this._api?.removeAllApexUncompiledFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getApexUncompiled(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.ORG.tabs.URL_VIEW.key,              { data: '_internalHardCodedURLsViewDataFromAPI', remove: () => { this._api?.removeHardcodedURLsFromCache(); },               getAlias: this._aliasNone,          get: async () => { return this._api?.getHardcodedURLsView(); }} ],
         [ APPLICATION_NAVIGATION.SECURITY.tabs.USERS.key,            { data: 'usersTableData',                        remove: () => { this._api?.removeAllActiveUsersFromCache(); },              getAlias: this._aliasNone,          get: async () => { return this._api?.getActiveUsers(); }} ],
+        [ APPLICATION_NAVIGATION.SETTING.tabs.ARTICLES.key,          { data: 'knowledgeArticlesTableData',            remove: () => { this._api?.removeAllKnowledgeArticlesFromCache(); },        getAlias: this._aliasNone,          get: async () => { return this._api?.getKnowledgeArticles(); }} ],
+        [ APPLICATION_NAVIGATION.SETTING.tabs.DOCUMENTS.key,         { data: 'documentsTableData',                    remove: () => { this._api?.removeAllDocumentsFromCache(); },                getAlias: this._aliasNamespace,     get: async () => { return this._api?.getDocuments(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.SETTING.tabs.EMAIL_TPLS.key,        { data: 'emailTemplatesTableData',               remove: () => { this._api?.removeAllEmailTemplatesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getEmailTemplates(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.SETTING.tabs.LABELS.key,            { data: 'customLabelsTableData',                 remove: () => { this._api?.removeAllCustomLabelsFromCache(); },             getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomLabels(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.SETTING.tabs.SRS.key,               { data: 'staticResourcesTableData',              remove: () => { this._api?.removeAllStaticResourcesFromCache(); },          getAlias: this._aliasNamespace,     get: async () => { return this._api?.getStaticResources(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.VISUAL.tabs.AURAS.key,              { data: 'auraComponentsTableData',               remove: () => { this._api?.removeAllLightningAuraComponentsFromCache(); },  getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningAuraComponents(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.VISUAL.tabs.HOME_PAGES.key,         { data: 'homePageComponentsTableData',           remove: () => { this._api?.removeAllHomePageComponentsFromCache(); },       getAlias: this._aliasNone,          get: async () => { return this._api?.getHomePageComponents(); }} ],
+        [ APPLICATION_NAVIGATION.VISUAL.tabs.LG_PAGES.key,           { data: 'flexiPagesTableData',                   remove: () => { this._api?.removeAllLightningPagesFromCache(); },           getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningPages(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.VISUAL.tabs.LWCS.key,               { data: 'lightningWebComponentsTableData',       remove: () => { this._api?.removeAllLightningWebComponentsFromCache(); },   getAlias: this._aliasNamespace,     get: async () => { return this._api?.getLightningWebComponents(this.namespace); }} ],
+        [ APPLICATION_NAVIGATION.VISUAL.tabs.TABS.key,               { data: 'customTabsTableData',                   remove: () => { this._api?.removeAllCustomTabsFromCache(); },               getAlias: this._aliasNamespace,     get: async () => { return this._api?.getCustomTabs(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.VISUAL.tabs.VFCS.key,               { data: 'visualForceComponentsTableData',        remove: () => { this._api?.removeAllVisualForceComponentsFromCache(); },    getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForceComponents(this.namespace); }} ],
         [ APPLICATION_NAVIGATION.VISUAL.tabs.VFPS.key,               { data: 'visualForcePagesTableData',             remove: () => { this._api?.removeAllVisualForcePagesFromCache(); },         getAlias: this._aliasNamespace,     get: async () => { return this._api?.getVisualForcePages(this.namespace); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.VRS.key,             { data: 'validationRulesTableData',              remove: () => { this._api?.removeAllValidationRulesFromCache(); },          getAlias: this._aliasAll,           get: async () => { return this._api?.getValidationRules(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.DATAMODEL.tabs.WEB_LINKS.key,       { data: 'webLinksTableData',                     remove: () => { this._api?.removeAllWeblinksFromCache(); },                 getAlias: this._aliasAll,           get: async () => { return this._api?.getWeblinks(this.namespace, this.objectType, this.object); }} ],
-        [ APPLICATION_NAVIGATION.AUTOMATION.tabs.WORKFLOWS.key,      { data: 'workflowsTableData',                    remove: () => { this._api?.removeAllWorkflowsFromCache(); },                getAlias: this._aliasNone,          get: async () => { return this._api?.getWorkflows(); }} ]
     ]);
 
 
     /**
-     * @description Call a specific Recipe from the API given a recipe name (does not have to be the internal name, up to the UI)
-     * @param {string} recipe - The alias of the alias to use
+     * @description Call a specific method of the API given a tab name
+     * @param {string} tabValue - The value of the tab to use
      * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
      * @param {boolean} [lazyRefresh] - Is it a lazy refresh or not (true by default)
      * @private
      * @async
      */ 
-    async _updateData(recipe, forceRefresh=false, lazyRefresh=true) {
-        const transformer = this._internalTransformers.get(recipe); 
+    async _updateData(tabValue, forceRefresh=false, lazyRefresh=true) {
+        const transformer = this._internalTransformers.get(tabValue); 
         if (transformer) {
             if (forceRefresh === true) {
-                // Call the remove cache from the API for this recipe
+                // Call the remove cache from the API for this tabValue
                 transformer.remove();
             }
             // IF we set the lazy refresh to TRUE THEN
-            //     Only update the data if the current tab ("this.selectedSubTab") is the one we are looking for ("recipe")
+            //     Only update the data if the current tab ("this.selectedSubTab") is the one we are looking for ("tabValue")
             // ELSE
             //     Update the data whatever the current tab is.
             // The IF statement could be like: 
-            //     (lazyRefresh === true && recipe === this.selectedSubTab) || lazyRefresh === false
+            //     (lazyRefresh === true && tabValue === this.selectedSubTab) || lazyRefresh === false
             // Let's do some Bool logic!!
             // The previous IF statement is equivalent to:
-            //     NOT(  NOT( (lazyRefresh === true && recipe === this.selectedSubTab)     ||  lazyRefresh === false )  )
-            //     NOT(  NOT(lazyRefresh === true && recipe === this.selectedSubTab)       &&  NOT(lazyRefresh === false)  )
-            //     NOT(  NOT(lazyRefresh === true && recipe === this.selectedSubTab)       &&  lazyRefresh === true  )
-            //     NOT( (NOT(lazyRefresh === true) || NOT(recipe === this.selectedSubTab)) &&  lazyRefresh === true  )
-            //     NOT( (    lazyRefresh === false ||     recipe !== this.selectedSubTab ) &&  lazyRefresh === true  )
-            //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (recipe !== this.selectedSubTab &&  lazyRefresh === true ) )
-            //     NOT( (                    false                      ) || (recipe !== this.selectedSubTab &&  lazyRefresh === true ) )
-            //     NOT( (recipe !== this.selectedSubTab && lazyRefresh === true )
+            //     NOT(  NOT( (lazyRefresh === true && tabValue === this.selectedSubTab)     ||  lazyRefresh === false )  )
+            //     NOT(  NOT(lazyRefresh === true && tabValue === this.selectedSubTab)       &&  NOT(lazyRefresh === false)  )
+            //     NOT(  NOT(lazyRefresh === true && tabValue === this.selectedSubTab)       &&  lazyRefresh === true  )
+            //     NOT( (NOT(lazyRefresh === true) || NOT(tabValue === this.selectedSubTab)) &&  lazyRefresh === true  )
+            //     NOT( (    lazyRefresh === false ||     tabValue !== this.selectedSubTab ) &&  lazyRefresh === true  )
+            //     NOT( (lazyRefresh === false &&  lazyRefresh === true ) || (tabValue !== this.selectedSubTab &&  lazyRefresh === true ) )
+            //     NOT( (                    false                      ) || (tabValue !== this.selectedSubTab &&  lazyRefresh === true ) )
+            //     NOT( (tabValue !== this.selectedSubTab && lazyRefresh === true )
             // This is magic! ;)
-            if (!(recipe !== this.selectedSubTab && lazyRefresh === true)) {
+            if (!(tabValue !== this.selectedSubTab && lazyRefresh === true)) {
                 // "Alias" means the filter combinaison used to gather the data (obviously if the alias changed, the data will change as well)
                 const alias = transformer.getAlias();
                 // If you forced the refresh the data should be retrieved even if the alias is the same
@@ -1163,7 +1174,8 @@ export default class OrgcheckApp extends LightningElement {
     async handleClickRecompile() {
         try {
             this._spinner?.open();
-            const LOG_SECTION = 'RECOMPILE';
+            const LOG_SECTION = 'RECOMPILE'
+            /** @type {Map<string, string>} */;
             const apexClassNamesById = new Map();
             this._spinner?.sectionLog(LOG_SECTION, 'Processing...');
             this.apexUncompiledTableData.slice(0, 25).forEach(c => {
@@ -1172,7 +1184,7 @@ export default class OrgcheckApp extends LightningElement {
                 this._spinner?.sectionLog(`${LOG_SECTION}-${classId}`, `Asking to recompile class: ${className}`);
                 apexClassNamesById.set(classId, className);
             });
-            /** @type Map<string, {isSuccess: boolean, reasons?: Array<string>}> */
+            /** @type {Map<string, {isSuccess: boolean, reasons?: Array<string>}>} */
             const responses = await this._api?.compileClasses(Array.from(apexClassNamesById.keys()), );
             this._spinner?.sectionLog(LOG_SECTION, 'We got the response from the server...');
             let noError = true;
@@ -1897,9 +1909,10 @@ export default class OrgcheckApp extends LightningElement {
                 orderIndex: 0,
                 orderSort: ocui.SortOrder.DESC
             }
-            data?.forEach((item, alias) => {
-                const transfomer = this._internalTransformers.get(alias);
-                const itemName = SUB_TABS.get(alias)?.tab?.title ?? alias;
+            data?.forEach((item, recipe) => {
+                const tabValue = RECIPE_TO_SUB_TAB.get(recipe);
+                const transfomer = this._internalTransformers.get(tabValue);
+                const itemName = SUB_TABS.get(tabValue)?.tab?.title ?? tabValue;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 const definitionTable = this[definitionName];
                 globalViewData.push({
@@ -1907,7 +1920,7 @@ export default class OrgcheckApp extends LightningElement {
                     label: itemName,
                     hadError: item?.hadError,
                     class: `slds-box viewCard ${item?.hadError === true ? 'viewCard-error' : (item?.countBad === 0 ? 'viewCard-no-bad-data' : 'viewCard-some-bad-data')}`,
-                    tab: SUB_TABS.get(alias).mainTabKey,
+                    tab: SUB_TABS.get(tabValue).mainTabKey,
                     tableDefinition: ruleTableDefinition,
                     tableData: item?.countBadByRule?.map((c) => { return { name: `${c.ruleName}`,  value: c.count }}) ?? []
                 });
@@ -1937,9 +1950,10 @@ export default class OrgcheckApp extends LightningElement {
         if (data) {
             const hardCodedURLsViewData = [];
             const sheets = [];
-            data?.forEach((item, alias) => {
-                const transfomer = this._internalTransformers.get(alias);
-                const itemName = SUB_TABS.get(alias)?.tab?.title ?? alias;
+            data?.forEach((item, recipe) => {
+                const tabValue = RECIPE_TO_SUB_TAB.get(recipe);
+                const transfomer = this._internalTransformers.get(tabValue);
+                const itemName = SUB_TABS.get(tabValue)?.tab?.title ?? tabValue;
                 const definitionName = transfomer.data.replace(/Data$/, 'Definition');
                 /** @type {ocui.Table} */
                 const definitionTable = this[definitionName];

@@ -75,9 +75,3 @@ echo ""
 ### --------------------------------------------------------------------------------------------
 echo "${Green}Deploying StaticResource to default org (username=$(sf config get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
 sf project deploy start --metadata StaticResource --ignore-conflicts  
-
-### --------------------------------------------------------------------------------------------
-### Update the LWC component that have a dependency with Org Check libraries
-### --------------------------------------------------------------------------------------------
-echo "${Green}Deploying LWC with Org Check libraries to default org (username=$(sf config get target-org --json | grep value | cut -d'"' -f4))${NoColor}"
-sf project deploy start --metadata LightningComponentBundle --ignore-conflicts  
