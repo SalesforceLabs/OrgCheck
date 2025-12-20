@@ -1,10 +1,10 @@
 ---
 layout: default
 title: Installation FAQ
-permalink: /installation/
+permalink: /faq/
 ---
 
-# Installation FAQ
+# Frequent Asked Questions (FAQ) about Org Check
 
 
 ## Question 1: How do I install Org Check?

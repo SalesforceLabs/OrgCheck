@@ -18,7 +18,7 @@
 - [Website](https://SalesforceLabs.github.io/OrgCheck/)
 - [LinkedIn](https://www.linkedin.com/company/orgchecksfdc/)
 - [AppExchange](https://sfdc.co/OrgCheck-InstallToday-AppExchange)
-- [Installation Guide](https://SalesforceLabs.github.io/OrgCheck/installation/)
+- [FAQ](https://SalesforceLabs.github.io/OrgCheck/faq/)
 
 
 ## Have valuable feedback?

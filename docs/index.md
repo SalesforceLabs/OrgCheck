@@ -51,7 +51,7 @@ You will need org Check to verify some things in your organisation like:
 
 - You install this application directly in the org you want to analyse from the AppExchange.
 - Then, you navigate through the tabs in the app to discover some bad practices in the org.
-- Any issues installing the application? Please, visit our [Installation FAQ](installation)!
+- Any issues installing the application? Please, visit our [FAQ](faq)!
 
 
 ## How to get help and support?
