@@ -539,7 +539,10 @@ export class SalesforceManager extends SalesforceManagerIntf {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         // Now we can start, log some message
-        logger?.log(`Starting to call Tooling API for dependency API call of ${ids.length} item(s)...`);
+        logger?.log(`Starting to call Tooling API for dependency API call of ${ids?.length ?? 0} item(s)...`);
+        // if no ids then just return empty structure and basta!
+        if ((ids?.length ?? 0) === 0) return { records: [], errors: [] };
+        // Let's start with ids
         const bodies = [];
         let currentBody;
         for (let i = 0; i < ids.length; i += MAX_IDS_IN_DAPI_REQUEST_SIZE) {
