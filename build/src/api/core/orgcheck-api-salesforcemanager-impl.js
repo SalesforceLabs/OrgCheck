@@ -763,6 +763,8 @@ export class SalesforceManager extends SalesforceManagerIntf {
         // Let's start to check if we are 'allowed' to use the Salesforce API...
         this._watchDog?.beforeRequest(); // if limit has been reached, an error will be thrown here
         logger?.log(`Reading metadata at scale for type=${type} and ${ids?.length ?? 0} id(s).`);
+        // if no ids then just return empty array and basta!
+        if ((ids?.length ?? 0) === 0) return [];
         /** @type {Array<any>} */
         const bodies = [];
         /** @type {any} */
