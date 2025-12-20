@@ -137,6 +137,28 @@ export class JsForceConnectionMock {
   }
 
   get tooling() { return this; }
+
+  async request(options) {
+    if (options.url === '/composite' || options.url === '/tooling/composite') {
+      const requests = JSON.parse(options.body).compositeRequest;
+      return {
+        compositeResponse: requests.map((request) => { 
+          const matchURL = request.url.match(/\/sobjects\/(?<type>.*)\/(?<id>.*)$/);
+          return { 
+            httpStatusCode: 200, 
+            body: { 
+              attributes: {
+                type: matchURL.groups.type,
+                url: `/services/data/v65.0/tooling/sobjects/${matchURL.groups.type}/${matchURL.groups.id}`
+              },
+              Id: `${matchURL.groups.id}` 
+            }
+          }
+        })
+      }
+    }
+    throw new Error('Not mocked yet');
+  }
 }
 
 export const JsForceMock = {

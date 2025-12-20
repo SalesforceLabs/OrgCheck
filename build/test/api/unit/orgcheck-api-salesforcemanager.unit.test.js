@@ -120,4 +120,11 @@ describe('tests.api.unit.SalesforceManager', () => {
     expect(policies instanceof Array).toBeTruthy();
     expect(policies.length).toBe(4);
   });
+
+  it('checks if the salesforce manager implementation runs readMetadataAtScale correctly', async () => {
+    const results = await manager.readMetadataAtScale('PageLayout', ['A','B','C'], [], logger.toSimpleLogger());
+    expect(results).toBeDefined();
+    expect(results instanceof Array).toBeTruthy();
+    expect(results.length).toBe(3);
+  });
 });
