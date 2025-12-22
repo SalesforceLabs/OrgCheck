@@ -40,8 +40,8 @@ export class DatasetInternalActiveUsers extends Dataset {
         }, {
             string: 'SELECT UserId, LoginType, AuthMethodReference, Status, COUNT(Id) CntLogin ' +
                     'FROM LoginHistory ' +
-                    `WHERE LoginType = 'Application' ` +
-                    `OR LoginType LIKE '%SSO%' ` +
+                    `WHERE (LoginType = 'Application' ` + // Adding parenthesis because we have a OR here
+                    `OR LoginType LIKE '%SSO%') ` +       // and the option 'queryMoreField' will add a final AND
                     `GROUP BY UserId, LoginType, AuthMethodReference, Status `,
             queryMoreField: 'LoginTime' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);

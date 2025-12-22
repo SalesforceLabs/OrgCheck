@@ -5,19 +5,6 @@ import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Object } from '../data/orgcheck-api-data-object';
 
-const WHERE_CLAUSE_SOBJECTS = (prefix) => {
-    return `WHERE ${prefix}KeyPrefix <> null ` +
-           `AND ${prefix}DeveloperName <> null ` +
-           `AND (NOT(${prefix}KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
-                // 00a	*Comment for custom objects
-                // 017	*History for custom objects
-                // 02c	*Share for custom objects
-                // 0D5	*Feed for custom objects
-                // 1CE	*Event for custom objects
-           `AND (NOT(${prefix}QualifiedApiName like '%_hd'))`;
-                // We want to filter out trending historical objects
-}
-
 export class DatasetObjects extends Dataset {
 
     /**
@@ -45,7 +32,16 @@ export class DatasetObjects extends Dataset {
                 string: 'SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ' +
                             'ExternalSharingModel, InternalSharingModel ' +
                         'FROM EntityDefinition ' +
-                        WHERE_CLAUSE_SOBJECTS(''),
+                        `WHERE KeyPrefix <> null ` +
+                        `AND DeveloperName <> null ` +
+                        `AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) `+
+                                // 00a	*Comment for custom objects
+                                // 017	*History for custom objects
+                                // 02c	*Share for custom objects
+                                // 0D5	*Feed for custom objects
+                                // 1CE	*Event for custom objects
+                        `AND (NOT(QualifiedApiName like '%_hd'))`,
+                                // We want to filter out trending historical objects
                 tooling: true, // Using Tooling to get the Activity object
                 queryMoreField: 'DurableId' // entityDef does not support calling QueryMore, use the custom instead
             }, {
