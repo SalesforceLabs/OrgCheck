@@ -714,6 +714,216 @@ const ALL_SCORE_RULES = [
         badField: 'hasDebugMode',
         applicable: [ SFDC_User ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    },
+    // Lightning Flow Scanner Rules (IDs 100-125)
+    {
+        id: 100,
+        description: '[LFS] Inactive Flow',
+        formula: () => false, // Applied by LFS scanner
+        errorMessage: `This flow is inactive. Consider activating it or removing it from your org.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 101,
+        description: '[LFS] Process Builder',
+        formula: () => false,
+        errorMessage: `Time to migrate this process builder to flow!`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 102,
+        description: '[LFS] Missing Flow Description',
+        formula: () => false,
+        errorMessage: `This flow does not have a description. Add documentation about its purpose and usage.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.DOCUMENTATION
+    }, {
+        id: 103,
+        description: '[LFS] Outdated API Version',
+        formula: () => false,
+        errorMessage: `The API version of this flow is outdated. Update it to the newest version.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.API_VERSION
+    }, {
+        id: 104,
+        description: '[LFS] Unsafe Running Context',
+        formula: () => false,
+        errorMessage: `This flow runs in System Mode without Sharing, which can lead to unsafe data access.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.SECURITY
+    }, {
+        id: 105,
+        description: '[LFS] SOQL Query In Loop',
+        formula: () => false,
+        errorMessage: `This flow has SOQL queries inside loops. Consolidate queries at the end of the flow to avoid governor limits.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 106,
+        description: '[LFS] DML Statement In Loop',
+        formula: () => false,
+        errorMessage: `This flow has DML operations inside loops. Consolidate DML at the end to avoid governor limits.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 107,
+        description: '[LFS] Action Calls In Loop',
+        formula: () => false,
+        errorMessage: `This flow has action calls inside loops. Bulkify apex calls using collection variables.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 108,
+        description: '[LFS] Hardcoded Id',
+        formula: () => false,
+        errorMessage: `This flow contains hardcoded IDs which are org-specific. Use variables or merge fields instead.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.HARDCODED_ID
+    }, {
+        id: 109,
+        description: '[LFS] Hardcoded Url',
+        formula: () => false,
+        errorMessage: `This flow contains hardcoded URLs. Use $API formulas or custom labels instead.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.HARDCODED_URL
+    }, {
+        id: 110,
+        description: '[LFS] Missing Null Handler',
+        formula: () => false,
+        errorMessage: `This flow has Get Records operations without null checks. Use decision elements to validate results.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 111,
+        description: '[LFS] Missing Fault Path',
+        formula: () => false,
+        errorMessage: `This flow has DML or action operations without fault handlers. Add fault paths for better error handling.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 112,
+        description: '[LFS] Recursive After Update',
+        formula: () => false,
+        errorMessage: `This after-update flow modifies the same record that triggered it, risking recursion. Use before-save flows instead.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 113,
+        description: '[LFS] Duplicate DML Operation',
+        formula: () => false,
+        errorMessage: `This flow allows navigation back after DML operations, which may cause duplicate changes.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 114,
+        description: '[LFS] Get Record All Fields',
+        formula: () => false,
+        errorMessage: `This flow uses Get Records with "all fields". Specify only needed fields for better performance.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 115,
+        description: '[LFS] Record ID as String',
+        formula: () => false,
+        errorMessage: `This flow uses a String recordId variable. Modern flows can receive the entire record object, eliminating Get Records queries.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 116,
+        description: '[LFS] Unconnected Element',
+        formula: () => false,
+        errorMessage: `This flow has unconnected elements that are not in use. Remove them to maintain clarity.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 117,
+        description: '[LFS] Unused Variable',
+        formula: () => false,
+        errorMessage: `This flow has unused variables. Remove them to maintain efficiency.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.USELESS
+    }, {
+        id: 118,
+        description: '[LFS] Copy API Name',
+        formula: () => false,
+        errorMessage: `This flow has elements with copy-paste naming patterns like "Copy_X_Of_Element". Update API names for readability.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.DOCUMENTATION
+    }, {
+        id: 119,
+        description: '[LFS] Cyclomatic Complexity',
+        formula: () => false,
+        errorMessage: `This flow has high cyclomatic complexity. Consider breaking it into subflows or multiple trigger-ordered flows.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 120,
+        description: '[LFS] Same Record Field Updates',
+        formula: () => false,
+        errorMessage: `This before-save flow uses Update Records on $Record. Use direct assignment instead for better performance.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 121,
+        description: '[LFS] Missing Trigger Order',
+        formula: () => false,
+        errorMessage: `This record-triggered flow doesn't have a trigger order specified. Set explicit execution priority.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 122,
+        description: '[LFS] Missing Metadata Description',
+        formula: () => false,
+        errorMessage: `This flow has elements or variables without descriptions. Add documentation for better maintainability.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.DOCUMENTATION
+    }, {
+        id: 123,
+        description: '[LFS] Missing Filter Record Trigger',
+        formula: () => false,
+        errorMessage: `This record-triggered flow lacks filters on changed fields or entry conditions, causing unnecessary executions.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 124,
+        description: '[LFS] Transform Instead of Loop',
+        formula: () => false,
+        errorMessage: `This flow uses Loop + Assignment which could be replaced with Transform element (10x faster).`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
+    }, {
+        id: 125,
+        description: '[LFS] Missing Auto Layout',
+        formula: () => false,
+        errorMessage: `This flow doesn't use Auto-Layout mode. Enable it to keep your flow organized automatically.`,
+        badField: 'lfs_violation',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
 ];
 Object.freeze(ALL_SCORE_RULES);

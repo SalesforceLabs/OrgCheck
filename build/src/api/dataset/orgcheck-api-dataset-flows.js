@@ -5,6 +5,7 @@ import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
+import { LFSScanner } from '../scanner/orgcheck-api-lfs-scanner';
 
 export class DatasetFlows extends Dataset {
 
@@ -159,6 +160,21 @@ export class DatasetFlows extends Dataset {
             // Set reference only to the active flow
             flowDefinition.currentVersionRef = activeFlowVersion;
         });
+
+        // Scan flows with Lightning Flow Scanner
+        logger?.log(`Scanning ${records.length} flows with Lightning Flow Scanner...`);
+        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager);
+
+        // Apply LFS violations to flow definitions
+        if (lfsViolations.size > 0) {
+            logger?.log(`Applying ${lfsViolations.size} LFS violation sets to flow definitions...`);
+            await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition) => {
+                const violations = lfsViolations.get(flowDefinition.currentVersionId);
+                if (violations) {
+                    LFSScanner.applyViolations(flowDefinition, violations);
+                }
+            });
+        }
 
         // Compute the score of all definitions
         await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));
