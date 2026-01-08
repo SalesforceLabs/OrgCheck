@@ -21,14 +21,16 @@ export class DatasetFlows extends Dataset {
         logger?.log(`Querying Tooling API about FlowDefinition in the org...`);            
         const results = await sfdcManager.soqlQuery([{
             // List all FlowDefinition (on top of flow verions)
-            string: 'SELECT Id, MasterLabel, DeveloperName, ApiVersion, Description, ActiveVersionId, ' +
+            string: 'SELECT Id, DeveloperName, ApiVersion, Description, ActiveVersionId, ' +
                         'LatestVersionId, CreatedDate, LastModifiedDate ' +
                     'FROM FlowDefinition',
             tooling: true
         }, {
-            // List all Flow (attached to a FlowDefintion)
-            string: 'SELECT Id, DefinitionId, Status, ProcessType '+
-                    'FROM Flow where DefinitionId <> null',
+            // Count of versions per definition
+            string: 'SELECT DefinitionId, COUNT(Id) NbVersions ' + 
+                    'FROM Flow ' +
+                    'GROUP BY DefinitionId',
+            queryMoreField: 'CreatedDate',
             tooling: true
         }], logger);
             
@@ -36,7 +38,7 @@ export class DatasetFlows extends Dataset {
         const flowDefinitionDataFactory = dataFactory.getInstance(SFDC_Flow);
         const flowVersionDataFactory = dataFactory.getInstance(SFDC_FlowVersion);
         const flowDefRecords = results[0];
-        const flowRecords = results[1];
+        const flowVersionsByDefRecords = results[1];
         
         // Then retreive dependencies
         logger?.log(`Retrieving dependencies of ${flowDefRecords.length} flow versions...`);
@@ -74,7 +76,7 @@ export class DatasetFlows extends Dataset {
                     isLatestCurrentVersion: activeVersionId === latestVersionId,
                     isVersionActive: activeVersionId ? true : false,
                     versionsCount: 0,
-                    description: record.Description,
+                    description: record.Description, // could be null from FlowDefinition (but not empty in the Setup UI where they show the latest active version description)
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_DEFINITION)
@@ -91,8 +93,8 @@ export class DatasetFlows extends Dataset {
         }));
 
         // Add count of Flow verions (whatever they are active or not)
-        logger?.log(`Parsing ${flowRecords.length} flow versions...`);
-        await Processor.forEach(flowRecords, (/** @type {any} */ record) => {
+        logger?.log(`Parsing ${flowVersionsByDefRecords.length} flow versions...`);
+        await Processor.forEach(flowVersionsByDefRecords, (/** @type {any} */ record) => {
                 
             // Get the ID15s of the parent flow definition
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
@@ -100,9 +102,11 @@ export class DatasetFlows extends Dataset {
             // Get the parent Flow definition
             const flowDefinition = flowDefinitions.get(parentId);
 
-            // Add to the version counter (whatever the status);
-            flowDefinition.versionsCount++;
-            flowDefinition.type = record.ProcessType;
+            // Add to the version counter to the definition
+            if (flowDefinition) {
+                // Using += because using custom queryMore could return multiple batches
+                flowDefinition.versionsCount += record.NbVersions;
+            }
         });
 
         // Get information about the previous identified active flows using metadata api
@@ -158,6 +162,12 @@ export class DatasetFlows extends Dataset {
 
             // Set reference only to the active flow
             flowDefinition.currentVersionRef = activeFlowVersion;
+
+            // Set some fields (type and description) from the active version to the definition level
+            flowDefinition.type = activeFlowVersion.type;
+            if (!flowDefinition.description) {
+                flowDefinition.description = activeFlowVersion.description;
+            }
         });
 
         // Compute the score of all definitions
