@@ -279,11 +279,9 @@ export class API {
         if (perms.get('ModifyAllData') === false || perms.get('AuthorApex')       === false ||
             perms.get('ApiEnabled')    === false || perms.get('InstallPackaging') === false) {
                 throw (new TypeError(
-                    'Current User Permission Access is not enough to run the application <br /><br />'+
-                    `- <b>Modify All Data</b> (Create, edit, and delete all organization data, regardless of sharing settings) [PermissionsModifyAllData] is set to ${perms.get('PermissionsModifyAllData')} <br />`+
-                    `- <b>Author Apex</b> (Create Apex classes and triggers) [PermissionsAuthorApex] is set to ${perms.get('PermissionsAuthorApex')} <br />`+
-                    `- <b>API Enabled</b> (Access any Salesforce.com API) [PermissionsApiEnabled] is set to ${perms.get('PermissionsApiEnabled')} <br />`+
-                    `- <b>Download AppExchange Packages</b> (Install or uninstall AppExchange packages as system administrators) [PermissionsInstallPackaging] is set to ${perms.get('PermissionsInstallPackaging')} <br />`
+                    'Current User Permission Access is not enough to run the application. '+
+                    'Please make sure to assign ALL the following permissions to the current user: '+
+                    `Modify All Data, Author Apex, API Enabled and Download AppExchange Packages.`
                 ));
         }
         return true;

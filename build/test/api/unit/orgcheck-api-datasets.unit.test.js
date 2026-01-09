@@ -328,32 +328,32 @@ describe('tests.api.unit.Datasets', () => {
     const dataset = new DatasetCurrentUserPermissions();  
     it('checks if this dataset class runs correctly', async () => {
       const sfdcManager = new SfdcManagerMock();
-      sfdcManager.addSoqlQueryResponse('SELECT PermissionsA FROM UserPermissionAccess', [{ PermissionsA: true }]);
-      sfdcManager.addSoqlQueryResponse('SELECT PermissionsB FROM UserPermissionAccess', [{ PermissionsB: false }]);
-      sfdcManager.addSoqlQueryResponse('SELECT PermissionsC FROM UserPermissionAccess', [{ PermissionsC: false }]);
+      sfdcManager.addSoqlQueryResponse('SELECT PermissionsA FROM UserPermissionAccess', [{ attributes: {}, PermissionsA: true }]);
+      sfdcManager.addSoqlQueryResponse('SELECT PermissionsB FROM UserPermissionAccess', [{ attributes: {}, PermissionsB: false }]);
+      sfdcManager.addSoqlQueryResponse('SELECT PermissionsC FROM UserPermissionAccess', [{ attributes: {}, PermissionsC: false }]);
       const dataFactory = new DataFactoryMock();
       const logger = new SimpleLoggerMock();
       const parameters = new Map([ ['permissions', ['A', 'B', 'c']] ]); // note the case difference on c!
       const results = await dataset.run(sfdcManager, dataFactory, logger, parameters);
       expect(results).toBeDefined();
       expect(results instanceof Map).toBeTruthy();
-      expect(results.size).toBe(3); // we only asked for 3 permissions a, b and c (not d!)
+      expect(results.size).toBe(2); // a and b are present, c is ignored because not the same case
       // PermissionsA is returned by Mock SOQL + the name matches the first parameters (capital A after "Permissions")
-      expect(results.has('PermissionsA')).toBeTruthy(); // the key is present in the result map
-      expect(results.get('PermissionsA')).toBeTruthy(); // and the value is true (value comes from Mock SOQL)
+      expect(results.has('A')).toBeTruthy(); // the key is present in the result map
+      expect(results.get('A')).toBeTruthy(); // and the value is true (value comes from Mock SOQL)
       // PermissionsB is returned by Mock SOQL + the name matches the second parameters (capital B after "Permissions")
-      expect(results.has('PermissionsB')).toBeTruthy(); // the key is present in the result map
-      expect(results.get('PermissionsB')).toBeFalsy(); // and the value is false (value comes from Mock SOQL)
+      expect(results.has('B')).toBeTruthy(); // the key is present in the result map
+      expect(results.get('B')).toBeFalsy(); // and the value is false (value comes from Mock SOQL)
       // PermissionsC is returned by Mock SOQL + BUT the name DOES NOT matches the third `parameters` map (lower c after "Permissions")
-      expect(results.has('PermissionsC')).toBeFalsy(); // the key is therefore NOT present in the result map
-      expect(results.get('PermissionsC')).toBeUndefined();  // Getting this key results of an undefined value
+      expect(results.has('C')).toBeFalsy(); // the key is therefore NOT present in the result map
+      expect(results.get('C')).toBeUndefined();  // Getting this key results of an undefined value
       // Permissionsc is NOT returned by Mock SOQL + BUT the name matches the third parameters (lower c after "Permissions")
-      expect(results.has('Permissionsc')).toBeTruthy(); // the key is present in the result map
-      expect(results.get('Permissionsc')).toBeUndefined();  // Getting this key results of an undefined value because Mock SOQL did not return it
+      expect(results.has('c')).toBeFalsy(); // the key is not even present in the result map
+      expect(results.get('c')).toBeUndefined();  // Getting this key results of an undefined value because Mock SOQL did not return it
     });
     it('checks if this dataset class runs correctly when one of the permission is not defined in the org', async () => {
       const sfdcManager = new SfdcManagerMock();
-      sfdcManager.addSoqlQueryResponse('SELECT PermissionsA FROM UserPermissionAccess', [{ PermissionsA: true }]);
+      sfdcManager.addSoqlQueryResponse('SELECT PermissionsA FROM UserPermissionAccess', [{ attributes: {}, PermissionsA: true }]);
       sfdcManager.addSoqlQueryResponse('SELECT PermissionsZ FROM UserPermissionAccess', []); // PermissionsZ is an invalid field for this org but as we byPass 'INVALID_FIELD', the manager return an empty array
       const dataFactory = new DataFactoryMock();
       const logger = new SimpleLoggerMock();

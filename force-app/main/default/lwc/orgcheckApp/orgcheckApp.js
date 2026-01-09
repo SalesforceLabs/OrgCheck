@@ -451,150 +451,165 @@ export default class OrgcheckApp extends LightningElement {
      * @async
      */
     async _initApi() {
-
+        const SECTION_01 = 'Initialize the Org Check API';
+        const SECTION_02 = 'Third party librairies';
+        const SECTION_03 = 'Load Org Check API'; 
+        const SECTION_04 = 'Additional steps';
         try {
             // Show spinner
             this._spinner?.open();
-            this._spinner?.sectionLog('Initialize the Org Check API', `C'est parti...`);
+            this._spinner?.sectionLog(SECTION_01, `C'est parti...`);
 
             // Load the third party scripts
-            this._spinner?.sectionLog('Third party librairies', `Start loading...`);
-            await Promise.all([
-                loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
-                loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
-            ]);
-            this._spinner?.sectionEnded('Third party librairies', `Done.`);
+            this._spinner?.sectionLog(SECTION_02, `Start loading...`);
+            try {
+                await Promise.all([
+                    loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
+                    loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
+                ]);
+                this._spinner?.sectionEnded(SECTION_02, `Done.`);
+            } catch (error) {
+                this._spinner?.sectionFailed(SECTION_02, error);
+                throw new Error(`Error while loading third party libraries`);
+            }
 
             // Load the Org Check API
-            this._spinner?.sectionLog('Load Org Check API', `Start loading...`);
-            this._api = new ocapi.API(
-                // -----------------------
-                // ACCESS TOKEN of the current user
-                this.accessToken, 
-                // -----------------------
-                // JsForce instance
-                // @ts-ignore 
-                jsforce, 
-                // -----------------------
-                // Local Storage methods
-                // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
-                {
-                    /**
-                     * @description Set an item in the local storage
-                     * @param {string} key - The key to set
-                     * @param {string} value - The value to set
-                     */
-                    setItem: (key, value) => { this.localStorage.setItem(key, value); },
-                    /**
-                     * @description Get an item from the local storage
-                     * @param {string} key - The key to set
-                     * @returns {string} The stored value for the given key
-                     */
-                    getItem: (key) => { return this.localStorage.getItem(key); },
-                    /**
-                     * @description Removes an item from the local storage
-                     * @param {string} key - The key to remove
-                     */
-                    removeItem: (key) => { this.localStorage.removeItem(key); },
-                    /**
-                     * @description Get all the keys in the storage
-                     * @returns {Array<string>} List of keys
-                     */
-                    keys: () => {  
-                        const keys = []; 
-                        for (let i = 0; i < this.localStorage.length; i++) {
-                            keys.push(this.localStorage.key(i)); 
-                        }
-                        return keys; }
-                },
-                // -----------------------
-                // Encoding methods
-                { 
-                    /** 
-                     * @description Encoding method
-                     * @param {string} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    encode: (data) => { return this.textEncoder.encode(data); }, 
-                    /** 
-                     * @description Decoding method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {string} Output data
-                     */ 
-                    decode: (data) => { return this.textDecoder.decode(data); }
-                },            
-                // -----------------------
-                // Compression methods
-                { 
-                    /** 
-                     * @description Compress method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    compress:   (data) => { 
-                        // @ts-ignore
-                        return fflate.zlibSync(data, { level: 9 }); 
+            this._spinner?.sectionLog(SECTION_03, `Start loading...`);
+            try {
+                this._api = new ocapi.API(
+                    // -----------------------
+                    // ACCESS TOKEN of the current user
+                    this.accessToken, 
+                    // -----------------------
+                    // JsForce instance
+                    // @ts-ignore 
+                    jsforce, 
+                    // -----------------------
+                    // Local Storage methods
+                    // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
+                    {
+                        /**
+                         * @description Set an item in the local storage
+                         * @param {string} key - The key to set
+                         * @param {string} value - The value to set
+                         */
+                        setItem: (key, value) => { this.localStorage.setItem(key, value); },
+                        /**
+                         * @description Get an item from the local storage
+                         * @param {string} key - The key to set
+                         * @returns {string} The stored value for the given key
+                         */
+                        getItem: (key) => { return this.localStorage.getItem(key); },
+                        /**
+                         * @description Removes an item from the local storage
+                         * @param {string} key - The key to remove
+                         */
+                        removeItem: (key) => { this.localStorage.removeItem(key); },
+                        /**
+                         * @description Get all the keys in the storage
+                         * @returns {Array<string>} List of keys
+                         */
+                        keys: () => {  
+                            const keys = []; 
+                            for (let i = 0; i < this.localStorage.length; i++) {
+                                keys.push(this.localStorage.key(i)); 
+                            }
+                            return keys; }
                     },
-                    /** 
-                     * @description Decompress method
-                     * @param {Uint8Array} data - Input data
-                     * @returns {Uint8Array} Output data
-                     */ 
-                    // @ts-ignore
-                    decompress: (data) => { 
+                    // -----------------------
+                    // Encoding methods
+                    { 
+                        /** 
+                         * @description Encoding method
+                         * @param {string} data - Input data
+                         * @returns {Uint8Array} Output data
+                         */ 
+                        encode: (data) => { return this.textEncoder.encode(data); }, 
+                        /** 
+                         * @description Decoding method
+                         * @param {Uint8Array} data - Input data
+                         * @returns {string} Output data
+                         */ 
+                        decode: (data) => { return this.textDecoder.decode(data); }
+                    },            
+                    // -----------------------
+                    // Compression methods
+                    { 
+                        /** 
+                         * @description Compress method
+                         * @param {Uint8Array} data - Input data
+                         * @returns {Uint8Array} Output data
+                         */ 
+                        compress:   (data) => { 
+                            // @ts-ignore
+                            return fflate.zlibSync(data, { level: 9 }); 
+                        },
+                        /** 
+                         * @description Decompress method
+                         * @param {Uint8Array} data - Input data
+                         * @returns {Uint8Array} Output data
+                         */ 
                         // @ts-ignore
-                        return fflate.unzlibSync(data); 
+                        decompress: (data) => { 
+                            // @ts-ignore
+                            return fflate.unzlibSync(data); 
+                        }
+                    },
+                    // -----------------------
+                    // Log methods -- delegation to the UI spinner
+                    {
+                        /**
+                         * @returns {boolean} true if this logger is a console fallback logger, false otherwise
+                         */
+                        isConsoleFallback: () => { return true; },
+                        /**
+                         * @description Standard log method
+                         * @param {string} section - The section name
+                         * @param {string} message - The message to log
+                         */ 
+                        log: (section, message) => { this._spinner?.sectionLog(section, message); },
+                        /**
+                         * @description Log method when task is ended
+                         * @param {string} section - The section name
+                         * @param {string} message - The message to log
+                         */ 
+                        ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
+                        /**
+                         * @description Log method when task has just failed
+                         * @param {string} section - The section name
+                         * @param {string | Error} error - The error to log
+                         */ 
+                        failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
                     }
-                },
-                // -----------------------
-                // Log methods -- delegation to the UI spinner
-                {
-                    /**
-                     * @returns {boolean} true if this logger is a console fallback logger, false otherwise
-                     */
-                    isConsoleFallback: () => { return true; },
-                    /**
-                     * @description Standard log method
-                     * @param {string} section - The section name
-                     * @param {string} message - The message to log
-                     */ 
-                    log: (section, message) => { this._spinner?.sectionLog(section, message); },
-                    /**
-                     * @description Log method when task is ended
-                     * @param {string} section - The section name
-                     * @param {string} message - The message to log
-                     */ 
-                    ended: (section, message) => { this._spinner?.sectionEnded(section, message); },
-                    /**
-                     * @description Log method when task has just failed
-                     * @param {string} section - The section name
-                     * @param {string | Error} error - The error to log
-                     */ 
-                    failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
-                }
-            );
-            this._spinner?.sectionEnded('Load Org Check API', `Done.`);
+                );
+                this._spinner?.sectionEnded(SECTION_03, `Done.`);
+            } catch (error) {
+                this._spinner?.sectionFailed(SECTION_03, error);
+                throw new Error(`Error while loading Org Check api`);
+            }
 
             // Some other stuff to do
-            this._spinner?.sectionLog('Additional steps', `Starting...`);
+            this._spinner?.sectionLog(SECTION_04, `Starting...`);
+            try {
+                // Get the score rules matrix once here
+                this._spinner?.sectionLog(SECTION_04, `Get the score rules matrix...`);
+                this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
+                // Update the cache information when we are finish loading everything
+                this._spinner?.sectionLog(SECTION_04, `Update the cache information when we are finish loading everything...`);
+                this._updateCacheInformation();
+                // Load basic information if the user has already accepted the terms
+                this._spinner?.sectionLog(SECTION_04, `Load basic information if the user has already accepted the terms...`);
+                await this._loadBasicInformationIfAccepted();
+                this._spinner?.sectionEnded(SECTION_04, `Done.`);
+            } catch (error) {
+                this._spinner?.sectionFailed(SECTION_04, error);
+                throw new Error(`Error while processing additional steps`);
+            }
 
-            // Get the score rules matrix once here
-            this._spinner?.sectionLog('Additional steps', `Get the score rules matrix...`);
-            this._internalAllScoreRulesDataMatrix = this._api?.getAllScoreRulesAsDataMatrix();
-
-            // Update the cache information when we are finish loading everything
-            this._spinner?.sectionLog('Additional steps', `Update the cache information when we are finish loading everything...`);
-            this._updateCacheInformation();
-
-            // Load basic information if the user has already accepted the terms
-            this._spinner?.sectionLog('Additional steps', `Load basic information if the user has already accepted the terms...`);
-            await this._loadBasicInformationIfAccepted();
-
-            this._spinner?.sectionEnded('Additional steps', `Done.`);
-            this._spinner?.sectionEnded('Initialize the Org Check API', 'Done');
+            this._spinner?.sectionEnded(SECTION_01, 'Done');
 
         } catch (error) {
-            this._spinner?.sectionFailed('Initialize the Org Check API', error);
+            this._spinner?.sectionFailed(SECTION_01, error);
         }
     }
 
@@ -830,22 +845,26 @@ export default class OrgcheckApp extends LightningElement {
 
     /**
      * @description Load basic information to use the app (including the filters)
-     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @throws {Error} If the current user has not enough permissions to run the app (please display the error it has information about missing permissions)
      * @private
      * @async
      */ 
-    async _loadBasicInformationIfAccepted(logger) {
+    async _loadBasicInformationIfAccepted() {
         // Check for acceptance
+        console?.log('Checking if the terms are accepted...')
         await this._checkTermsAcceptance();
-        if (this.useOrgCheckInThisOrgConfirmed === false) return;
+        if (this.useOrgCheckInThisOrgConfirmed === false) {
+            console?.log('The use of Org Check in this org was not confirmed. Stopping...');
+            return;
+        }
+        console?.log('The use of Org Check in this org was confirmed. Continuing...');
 
         // Check basic permission for the current user
-        logger?.log('Checking if current user has enough permission...')
+        console?.log('Checking if current user has enough permission...')
         await this._api?.checkCurrentUserPermissions(); // if no perm this throws an error
 
         // Information about the org
-        logger?.log('Information about the org...');
+        console?.log('Information about the org...');
         const orgInfo = await this._api?.getOrganizationInformation();
         this.orgName = orgInfo.name + ' (' + orgInfo.id + ')';
         this.orgType = orgInfo.type;
@@ -855,47 +874,46 @@ export default class OrgcheckApp extends LightningElement {
         else this.themeForOrgType = 'slds-theme_success';
         
         // Data for the filters
-        logger?.log('Load filters...');
+        console?.log('Load filters...');
         await this._loadFilters();
 
         // Update daily API limit information
-        logger?.log('Update the daily API limit informations...');
+        console?.log('Update the daily API limit informations...');
         this._updateLimits();
     }
 
     /**
      * @description Load the list of values for the filter
      * @param {boolean} [forceRefresh] - Do we force the refresh or not (false by default)
-     * @param {ocapi.LoggerIntf} [logger] - The logger
      * @private
      * @async
      */ 
-    async _loadFilters(forceRefresh=false, logger) {
-        logger?.log('Hide the filter panel...');
+    async _loadFilters(forceRefresh=false) {
+        console?.log('Hide the filter panel...');
         this._filters?.hide();
 
         if (forceRefresh === true) {
-            logger?.log('Clean data from cache (if any)...');
+            console?.log('Clean data from cache (if any)...');
             this._api?.removeAllObjectsFromCache();
             this._api?.removeAllPackagesFromCache();
         }
 
-        logger?.log('Get packages, types and objects from the org...');
+        console?.log('Get packages, types and objects from the org...');
         const filtersData = await Promise.all([
             this._api?.getPackages(),
             this._api?.getObjectTypes(),
             this._api?.getObjects(this.namespace, this.objectType)
         ])
 
-        logger?.log('Loading data in the drop boxes...');
+        console?.log('Loading data in the drop boxes...');
         this._filters?.updatePackageOptions(filtersData[0]);
         this._filters?.updateSObjectTypeOptions(filtersData[1]);
         this._filters?.updateSObjectApiNameOptions(filtersData[2]);
 
-        logger?.log('Showing the filter panel...');
+        console?.log('Showing the filter panel...');
         this._filters?.show();
 
-        logger?.log('Update the daily API limit informations...');
+        console?.log('Update the daily API limit informations...');
         this._updateLimits();
     }
 

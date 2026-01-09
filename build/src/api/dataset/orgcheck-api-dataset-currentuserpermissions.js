@@ -28,18 +28,26 @@ export class DatasetCurrentUserPermissions extends Dataset {
 
         // First SOQL query
         logger?.log(`Querying REST API about UserPermissionAccess in the org...`);   
-        const permissionFieldsAsInSOQL = permissionFields.map(p => `Permissions${p}`);
         const results = await sfdcManager.soqlQuery(
-            permissionFieldsAsInSOQL.map(field => { return {
-                string: `SELECT ${field} FROM UserPermissionAccess LIMIT 1`,
+            permissionFields.map(field => { return {
+                string: `SELECT Permissions${field} FROM UserPermissionAccess LIMIT 1`,
                 byPasses: ['INVALID_FIELD'] // in case the permission does not exist in this SFDC version
             }; }), logger);
         logger?.log(`Parsing the results...`);    
         const permissionsMap = new Map();
-        results.forEach((records, queryIndex) => {
-            if (queryIndex < permissionFieldsAsInSOQL.length) {
-                const field = permissionFieldsAsInSOQL[queryIndex];
-                permissionsMap.set(field, records?.length === 1 ? records[0][field] : undefined);
+        results.forEach((records) => {
+            if (records.length === 1) {
+                const record = records[0];
+                if (record) {
+                    const soqlFields = Object.keys(record).filter((key) => key.startsWith('Permissions'));
+                    if (soqlFields.length === 1) {
+                        const soqlField = soqlFields[0];
+                        if (soqlField) {
+                            const field = soqlField.substring('Permissions'.length);
+                            permissionsMap.set(field, record[soqlField]);
+                        }
+                    }
+                }
             }
         });
 
