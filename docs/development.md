@@ -65,7 +65,7 @@ You need two developer orgs:
 2. Search for **Namespace Registries**.
 3. Click **Link** and sign in to your Namespace Org.
 
-## Step 3: Update Project Definition
+## Step 4: Update Project Definition
 
 Create a fresh `sfdx-project.json` file with your namespace:
 
@@ -84,20 +84,23 @@ Create a fresh `sfdx-project.json` file with your namespace:
 ```
 Replace `<namespace>` with your actual namespace.
 
-## Step 4: Rename the Force-App Folder
-
-Rename the `force-app` folder to match your namespace name.
-
 ## Step 5: Create the Package
 
 > Pre-requisite: `sf plugins install @salesforce/plugin-packaging`
 Create the package using the Salesforce CLI:
 
 ```bash
-sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <yourdevhuborgalias>
+sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
 ```
 
-## Step 6: Create the Static Resource
+## Step 6: Create the JavaScript files
+
+Use `yarn build:js` to generate the necessary JavaScript files:
+```bash
+yarn install && yarn build:js
+```
+
+## Step 7: Create the Static Resource
 
 Use `build-static-resource.sh` (bash) or `build-static-resource.ps1`(powershell) to generate a Static resource at: force-app/main/default/staticresources/OrgCheck_SR.resource
 
@@ -105,7 +108,7 @@ Use `build-static-resource.sh` (bash) or `build-static-resource.ps1`(powershell)
 build/build-static-resource.sh
 ```
 
-## Step 6: Create a Package Version
+## Step 8: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
@@ -115,7 +118,7 @@ sf package version create --package "Org Check" --installation-key-bypass --wait
 
 Note the **Subscriber Package Version Id** from the output.
 
-## Step 7: Optional - Create a Scratch Org
+## Step 9: Optional - Create a Scratch Org
 
 If you want to use a scratch org, create it using:
 
@@ -123,12 +126,12 @@ If you want to use a scratch org, create it using:
 sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
-## Step 8: Deploy the Package
+## Step 10: Deploy the Package
 
 Deploy the package to your org using the **Subscriber Package Version Id**.
 
 ```bash
-sf package install --package 04tDn0000011NpHIAU -u <scratchorgalias> -w 10
+sf package install --package <subscriberpackageversionid> -u <scratchorgalias> -w 10
 ```
 
 Alternatively, you can use the corresponding **alias** of the version id, which has been generated for you (on step 7) in the sfdx-project.json under the section **packageAliases**.
