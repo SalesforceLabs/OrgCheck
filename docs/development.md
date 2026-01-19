@@ -46,37 +46,40 @@ git config --global user.email "<Your Email>"
 You need two developer orgs:
 
 1. **Dev Hub Org**: Enable Unlocked Packages and Second-Generation Managed Packages settings.
-2. **Namespace Org**: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.
+2. **Namespace Org**: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.(Not available in a Dev Hub Org)
 
-### Connect Dev Hub Org
+### Set up a Namespace for Packages
 
-Log in to your Dev Hub org and enable the necessary settings.
+1. Go to **Setup**.
+2. Search for **Package Manager**.
+3. Click **Edit** next to **Namespace Settings**.
+4. Enter a Namespace Prefix.
+5. Check Availability and Confirm. 
 
 ### Link Namespace in Dev Hub Org
 
+> Pre-requisite: Enable Unlocked Packages and Second-Generation Managed Packages
+
+1. Log in to your **Dev Hub**.
 1. Go to **App Launcher**.
 2. Search for **Namespace Registries**.
 3. Click **Link** and sign in to your Namespace Org.
 
 ## Step 3: Update Project Definition
 
-Edit the `sfdx-project.json` file to specify the namespace:
+Create a fresh `sfdx-project.json` file with your namespace:
 
 ```json
 {
   "packageDirectories": [
     {
-      "path": "<namespace>",
-      "default": true,
-      "package": "<namespace>",
-      "versionName": "Beryllium",
-      "versionNumber": "4.3.2.NEXT",
-      "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
+      "path": "force-app",
+      "default": true
     }
   ],
-  "namespace": "<namespace>",
+  "namespace": "<yournamespace>",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "62.0"
+  "sourceApiVersion": "64.0"
 }
 ```
 Replace `<namespace>` with your actual namespace.
@@ -87,20 +90,27 @@ Rename the `force-app` folder to match your namespace name.
 
 ## Step 5: Create the Package
 
+> Pre-requisite: `sf plugins install @salesforce/plugin-packaging`
 Create the package using the Salesforce CLI:
 
 ```bash
-sf package create --name <namespace> --package-type Unlocked --path <namespace> --target-dev-hub <devhubalias>
+sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <yourdevhuborgalias>
 ```
 
-Note the generated **Package Id**.
+## Step 6: Create the Static Resource
+
+Use `build-static-resource.sh` (bash) or `build-static-resource.ps1`(powershell) to generate a Static resource at: force-app/main/default/staticresources/OrgCheck_SR.resource
+
+```bash
+build/build-static-resource.sh
+```
 
 ## Step 6: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
 ```bash
-sf package version create --package <namespace> --installation-key-bypass --wait 10 --target-dev-hub <devhubalias>
+sf package version create --package "Org Check" --installation-key-bypass --wait 10 --target-dev-hub <devhubalias>
 ```
 
 Note the **Subscriber Package Version Id** from the output.
