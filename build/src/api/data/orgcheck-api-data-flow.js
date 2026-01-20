@@ -249,4 +249,11 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      * @public
      */
     recordTriggerType;
+
+    /**
+     * @description LFS Violations (list of rule names) for this flow version
+     * @type {Array<string>}
+     * @public
+     */
+    lfsViolations;
 }
