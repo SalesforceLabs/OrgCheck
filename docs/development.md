@@ -87,7 +87,13 @@ Replace `<namespace>` with your actual namespace.
 ## Step 5: Create the Package
 
 > Pre-requisite: `sf plugins install @salesforce/plugin-packaging`
-Create the package using the Salesforce CLI:
+Create an Unlocked package based on OrgCheck using the Salesforce CLI(Recommended for debugging):
+
+```bash
+sf package create --name "Org Check Unlocked" --package-type Unlocked --path force-app --target-dev-hub <devhubalias>
+```
+
+Alternatively, you can also create and test the OrgCheck App as a Managed package:
 
 ```bash
 sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
