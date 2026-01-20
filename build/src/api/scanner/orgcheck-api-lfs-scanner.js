@@ -52,8 +52,11 @@ export class LFSScanner {
 
             const { Flow, scan } = lfsCore;
 
+            // Filter out records with null metadata (can happen with UNKNOWN_EXCEPTION errors)
+            const validFlowRecords = flowRecords.filter(record => record.Metadata != null);
+
             // Convert flow records to LFS format
-            const lfsFlows = flowRecords.map(record => ({
+            const lfsFlows = validFlowRecords.map(record => ({
                 uri: record.Id,
                 flow: new Flow(record.FullName, record.Metadata)
             }));
