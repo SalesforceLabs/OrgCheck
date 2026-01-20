@@ -1,7 +1,8 @@
-/*global jsforce, fflate*/
+/*global jsforce, fflate, lightningflowscanner*/
 
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
+import LFSCoreStaticResource from '@salesforce/resourceUrl/LFS_Core';
 import * as ocapi from './libs/orgcheck-api.js';
 import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
@@ -465,7 +466,8 @@ export default class OrgcheckApp extends LightningElement {
             try {
                 await Promise.all([
                     loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
-                    loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
+                    loadScript(this, OrgCheckStaticResource + '/js/fflate.js'),
+                    loadScript(this, LFSCoreStaticResource)
                 ]);
                 this._spinner?.sectionEnded(SECTION_02, `Done.`);
             } catch (error) {
