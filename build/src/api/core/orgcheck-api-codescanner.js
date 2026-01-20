@@ -3,7 +3,7 @@ const REGEX_APEXCODE_ISENUM = new RegExp("(?:public|global)\\s+(?:enum)\\s+\\w+\
 const REGEX_APEXCODE_ISTESTSEEALLDATA = new RegExp("@IsTest\\s*\\(.*SeeAllData=true.*\\)", 'i');
 const REGEX_APEXCODE_TESTNBASSERTS = new RegExp("(System.assert(Equals|NotEquals|)\\s*\\(|Assert\\.[a-zA-Z]*\\s*\\()", 'ig');
 const REGEX_APEXCODE_HASSOQL = new RegExp("\\[\\s*(?:SELECT|FIND)");
-const REGEX_APEXCODE_HASDML = new RegExp("(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
+const REGEX_APEXCODE_HASDML = new RegExp("\\b(?:insert|update|delete)\\s*(?:\\s\\w+|\\(|\\[)");
 const REGEX_ALLCODE_COMMENTS_AND_NEWLINES = new RegExp('(\\/\\*[\\s\\S]*?\\*\\/|\\/\\/.*\\n|\\/\\/[^\\n]*|\\n)', 'gi');
 const REGEX_XML_COMMENTS_AND_NEWLINES = new RegExp('(<!--[\\s\\S]*?-->|\\n)', 'gi');
 const REGEX_HARDCODEDURLS = new RegExp("([A-Za-z0-9-]{1,63}\\.)+[A-Za-z]{2,6}", 'ig');
