@@ -20,11 +20,20 @@ export class LFSScanner {
 
             const { Flow, scan } = lfsCore;
 
+console.warn('scanFlows: --------------------------');;
+console.warn(`scanFlows: flowRecords(size)=${flowRecords.length}`);
+console.warn(`scanFlows: flowRecords(json)=${JSON.stringify(flowRecords)}`);
+flowRecords.forEach((record, index) => {
+    console.warn(`scanFlows: flowRecords[${index}]: Id=${record.Id}, FullName=${record.FullName}, Metadata=${JSON.stringify(record.Metadata)}`);
+})
+console.warn('scanFlows: --------------------------');
+
             // Convert flow records to LFS format
-            const lfsFlows = flowRecords.map(record => ({
-                uri: record.Id,
-                flow: new Flow(record.FullName, record.Metadata)
-            }));
+            const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
+                .map(record => ({
+                    uri: record.Id,
+                    flow: new Flow(record.FullName, record.Metadata)
+                }));
 
             // Scan flows
             const scanResults = scan(lfsFlows);
