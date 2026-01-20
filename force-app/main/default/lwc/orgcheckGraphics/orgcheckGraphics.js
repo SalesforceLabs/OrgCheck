@@ -27,13 +27,6 @@ export default class OrgcheckGraphics extends LightningElement {
   _data;
 
   /**
-   * @description Fiilter to use to render the graphic
-   * @type {any}
-   * @private
-   */
-  _filter;
-
-  /**
    * @description Called when it's about to render the component
    * @public
    */
@@ -45,8 +38,7 @@ export default class OrgcheckGraphics extends LightningElement {
         .then(() => {
           this._apiInitialized = true;
           // @ts-ignore
-          this._api = window?.d3; 
-
+          this._api = window?.d3 ?? null;
           // draw graph now
           this._drawGraph();
         })

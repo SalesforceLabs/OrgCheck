@@ -22,11 +22,7 @@ export * from './core/orgcheck-api-salesforcemanager.js';
 export * from './core/orgcheck-api-secretsauce.js';
 export * from './core/orgcheck-api-globalparameter.js';
 export * from './core/orgcheck-api-compressor.js';
-export * from './core/orgcheck-api-encoder.js';
 export * from './core/orgcheck-api-storage.js';
-
-// Exception !
-export { DataCacheManagerSetup } from './core/orgcheck-api-cachemanager-impl.js';
 
 // Data classes
 export * from './data/orgcheck-api-data-apexclass.js';

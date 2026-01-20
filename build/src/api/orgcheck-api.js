@@ -1,5 +1,4 @@
 import { BasicLoggerIntf, LoggerIntf } from './core/orgcheck-api-logger';
-import { CompressorIntf } from './core/orgcheck-api-compressor';
 import { DataCacheItem, DataCacheManagerIntf } from './core/orgcheck-api-cachemanager';
 import { DataCacheManager } from './core/orgcheck-api-cachemanager-impl';
 import { DataCollectionStatistics } from './core/orgcheck-api-recipecollection';
@@ -7,7 +6,6 @@ import { DataMatrix } from './core/orgcheck-api-data-matrix';
 import { DataMatrixFactory } from './core/orgcheck-api-data-matrix-factory';
 import { DatasetManager } from './core/orgcheck-api-datasetmanager-impl';
 import { DatasetManagerIntf } from './core/orgcheck-api-datasetmanager';
-import { EncoderIntf } from './core/orgcheck-api-encoder';
 import { Logger } from './core/orgcheck-api-logger-impl';
 import { OrgCheckGlobalParameter } from './core/orgcheck-api-globalparameter';
 import { RecipeAliases } from './core/orgcheck-api-recipes-aliases';
@@ -52,8 +50,9 @@ import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcec
 import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
 import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
-import { StorageIntf } from './core/orgcheck-api-storage';
 import { SFDC_Dashboard } from './orgcheck-api-main';
+import { Storage } from './core/orgcheck-api-storage-impl';
+import { Compressor } from './core/orgcheck-api-compressor-impl';
 
 /**
  * @description Org Check API main class
@@ -122,21 +121,36 @@ export class API {
 
     /**
      * @description Org Check constructor
-     * @param {string} accessToken - the access token to use to connect to Salesforce
-     * @param {any} jsConnectionFactory - the connection factory to use to create a Salesforce connection
-     * @param {StorageIntf} jsLocalStorage - the local storage to use to store the cache
-     * @param {EncoderIntf} jsEncoding - the encoding to use to encode the cache
-     * @param {CompressorIntf} jsCompressing - the compression to use to compress the cache
-     * @param {BasicLoggerIntf} loggerSetup - the logger setup to use to log information
-     */
-    constructor(accessToken, jsConnectionFactory, jsLocalStorage, jsEncoding, jsCompressing, loggerSetup) {
-        this._logger = new Logger(loggerSetup);
-        this._sfdcManager = new SalesforceManager(jsConnectionFactory, accessToken); 
-        this._cacheManager = new DataCacheManager({
-            compression: jsCompressing,
-            encoding:    jsEncoding,
-            storage:     jsLocalStorage
-        });
+     * @param {{logSettings: BasicLoggerIntf, salesforce: {connection: {useJsForce: boolean, mockImpl?: any}, authentication: any}, storage: {compression: {useFflate: boolean, mockImpl?: any}, encoding: {useFflate: boolean, mockImpl?: any}, localImpl: any}}} setup - the setup object to configure the Org Check API
+     */    
+    constructor(setup) {
+        
+        // --------------------
+        // Logger
+        // --------------------
+        this._logger = new Logger(setup?.logSettings);
+
+        // --------------------
+        // Salesforce Manager
+        // --------------------
+        if (setup?.salesforce?.connection?.useJsForce === true) {
+            // @ts-ignore 
+            this._sfdcManager = new SalesforceManager(window?.jsforce ?? null, setup?.salesforce?.authentication);
+        } else {
+            this._sfdcManager = new SalesforceManager(setup?.salesforce?.connection?.mockImpl, {});
+        }
+        
+        // --------------------
+        // Cache Manager
+        // --------------------
+        this._cacheManager = new DataCacheManager(
+            setup?.storage?.compression?.useFflate === true ? new Compressor() : setup?.storage?.compression?.mockImpl,
+            new Storage(setup?.storage?.localImpl)
+        );
+
+        // --------------------
+        // Other
+        // --------------------
         this._datasetManager = new DatasetManager(this._sfdcManager, this._cacheManager, this._logger);
         this._recipeManager = new RecipeManager(this._datasetManager, this._logger);
         this._usageTermsAcceptedManually = false;

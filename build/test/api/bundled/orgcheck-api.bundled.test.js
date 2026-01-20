@@ -32,12 +32,7 @@ const StorageMock = {
   length: () => localStorageMock.size
 }
 
-const EncoderMock = {
-  encode: (t) => { return t; },
-  decode: (t) => { return t; }
-}
-
-const CompressionMock = {
+const CompressorMock = {
   zlibSync: (t) => { return t; },
   unzlibSync: (t) => { return t; }
 }
@@ -53,15 +48,19 @@ const LoggerMock = {
 describe('tests.api.bundled.API', () => {
   describe('Test API once it has been bundled', () => {
 
-    const api = new API('ACCESS_TOKEN', JsForceMock, StorageMock, EncoderMock, CompressionMock, LoggerMock);
-    
+    const api = new API({ 
+      salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock }},
+      storage: { localImpl: StorageMock, compression: { useFflate: false, mockImpl: CompressorMock }},
+      logSettings: LoggerMock
+    });
+
     it('should be instantiable', () => {
       expect(api).not.toBeNull();
     });
 
     it('should be ok to call all getters', async () => {
       expect(await api.getActiveUsers()).toBeDefined();
-      expect(await api.getAllScoreRulesAsDataMatrix()).toBeDefined();
+      expect(api.getAllScoreRulesAsDataMatrix()).toBeDefined();
       expect(await api.getApexClasses()).toBeDefined();
       expect(await api.getApexTests()).toBeDefined();
       expect(await api.getApexTriggers()).toBeDefined();

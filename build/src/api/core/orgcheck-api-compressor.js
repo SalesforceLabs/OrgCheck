@@ -1,19 +1,19 @@
+/* eslint-disable jsdoc/require-returns-check */ 
 export class CompressorIntf {
 
     /**
-     * @description Compress function
-     * @type {Function}
-     * @param {Uint8Array} data - Input data
-     * @returns {Uint8Array} Output data
+     * @description Encode and compress function
+     * @param {string} data - Input data
+     * @throws {Error} Not implemented yet
+     * @returns {string} Output data in hexadecimal format
      */
-    compress;
+    compress(data) { throw new Error(`Method compress(data=${data}) not implemented yet.`); }
 
     /**
      * @description Decompress function
-     * @type {Function}
-     * @param {Uint8Array} data - Input data
-     * @returns {Uint8Array} Output data
+     * @param {string} data - Input data in hexadecimal format
+     * @throws {Error} Not implemented yet
+     * @returns {string} Output data
      */
-    decompress;
+    decompress(data) { throw new Error(`Method decompress(data=${data}) not implemented yet.`); }
 }
-
