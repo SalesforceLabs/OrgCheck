@@ -114,12 +114,19 @@ export class DatasetFlows extends Dataset {
         logger?.log(`Calling Tooling API Composite to get more information about these ${activeFlowIds.length} flow versions...`);
         const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], logger); // There are GACKs throwing that errors for some flows!
 
+        // Scan flow versions with Lightning Flow Scanner
+        logger?.log(`Scanning ${records.length} flows with Lightning Flow Scanner...`);
+        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager.caseSafeId);
+        logger?.log(`LFS gave us ${lfsViolations.size} violations.`);
+
+        // Lets parse the flow versions by ourselves
         logger?.log(`Parsing ${records.length} flow versions from Tooling API...`);
         await Processor.forEach(records, (/** @type {any} */ record)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
+            const violations = lfsViolations.get(id) ?? [];
 
             // Create the instance
             /** @type {SFDC_FlowVersion} */
@@ -148,6 +155,7 @@ export class DatasetFlows extends Dataset {
                     runningMode: record.RunInMode,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
+                    lfsViolations: violations,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
@@ -170,22 +178,6 @@ export class DatasetFlows extends Dataset {
                 flowDefinition.description = activeFlowVersion.description;
             }
         });
-
-        // Scan flows with Lightning Flow Scanner
-        logger?.log(`Scanning ${records.length} flows with Lightning Flow Scanner...`);
-        const lfsViolations = await LFSScanner.scanFlows(records);
-        logger?.log(`LFS gave us ${lfsViolations.size} violations.`);
-        lfsViolations.forEach((/** @type {Array<string>} */ violations, /** @type {string} */ flowVersionId) => {
-            logger?.log(`flowVersionId=${flowVersionId} => ${violations.join(', ')}.`);
-        });
-        if (lfsViolations.size > 0) {
-            await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition) => {
-                const violations = lfsViolations.get(flowDefinition.currentVersionId);
-                if (violations) {
-                    flowDefinition.currentVersionRef.lfsViolations = violations;
-                }
-            });
-        }
 
         // Compute the score of all definitions
         await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition) => flowDefinitionDataFactory.computeScore(flowDefinition));

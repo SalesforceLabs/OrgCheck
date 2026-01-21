@@ -38,9 +38,10 @@ export class LFSScanner {
     /**
      * @description Scan flows using Lightning Flow Scanner
      * @param {Array<any>} flowRecords - Flow metadata records from Tooling API
+     * @param {Function} CaseSafeId - Function to convert 18-char IDs to 15-char
      * @returns {Promise<Map<string, Array<any>>>} Map of flow version ID to LFS violations
      */
-    static async scanFlows(flowRecords) {
+    static async scanFlows(flowRecords, CaseSafeId) {
         try {
             // @ts-ignore
             const lfsCore = window?.lightningflowscanner ?? null;
@@ -52,23 +53,12 @@ export class LFSScanner {
 
             const { Flow, scan } = lfsCore;
 
-            // Filter out records with null metadata (can happen with UNKNOWN_EXCEPTION errors)
-            const validFlowRecords = flowRecords.filter(record => record.Metadata != null);
-
             // Convert flow records to LFS format
-            // Normalize metadata to match LFS expectations (Tooling API vs XML parser differences)
-            const lfsFlows = [];
-            for (const record of validFlowRecords) {
-                try {
-                    const normalizedMetadata = this.normalizeMetadata(record.Metadata);
-                    const flow = new Flow(record.FullName, normalizedMetadata);
-                    // Use 15-char ID to match flowDefinition.currentVersionId format
-                    const flowId15 = sfdcManager.caseSafeId(record.Id);
-                    lfsFlows.push({ uri: flowId15, flow });
-                } catch (flowError) {
-                    console.error(`LFS: Error creating Flow for ${record.FullName}:`, flowError?.message || flowError);
-                }
-            }
+            const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
+                .map(record => ({
+                    uri: CaseSafeId(record.Id),
+                    flow: new Flow(record.FullName, this.normalizeMetadata(record.Metadata))
+                }));
 
             // Scan flows
             const scanResults = scan(lfsFlows);
