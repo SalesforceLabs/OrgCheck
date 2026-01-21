@@ -4,6 +4,38 @@
 export class LFSScanner {
 
     /**
+     * @description Normalize flow metadata from Tooling API format to LFS-compatible format.
+     * The Tooling API returns null for empty node types, while LFS (which uses XML parser)
+     * expects those properties to simply be missing. This also handles null elements in arrays.
+     * @param {any} metadata - Flow metadata from Tooling API
+     * @returns {any} Normalized metadata compatible with LFS
+     */
+    static normalizeMetadata(metadata) {
+        if (metadata == null) return null;
+        if (typeof metadata !== 'object') return metadata;
+        if (Array.isArray(metadata)) {
+            // Filter out null/undefined elements and normalize each remaining element
+            return metadata
+                .filter(item => item != null)
+                .map(item => this.normalizeMetadata(item));
+        }
+        // For objects, recursively normalize and remove null/undefined properties
+        const normalized = {};
+        for (const key in metadata) {
+            const value = metadata[key];
+            if (value != null) {
+                const normalizedValue = this.normalizeMetadata(value);
+                // Only include non-null normalized values
+                // Also skip empty arrays as LFS doesn't expect them
+                if (normalizedValue != null && !(Array.isArray(normalizedValue) && normalizedValue.length === 0)) {
+                    normalized[key] = normalizedValue;
+                }
+            }
+        }
+        return normalized;
+    }
+
+    /**
      * @description Scan flows using Lightning Flow Scanner
      * @param {Array<any>} flowRecords - Flow metadata records from Tooling API
      * @returns {Promise<Map<string, Array<any>>>} Map of flow version ID to LFS violations
@@ -20,20 +52,23 @@ export class LFSScanner {
 
             const { Flow, scan } = lfsCore;
 
-console.warn('scanFlows: --------------------------');;
-console.warn(`scanFlows: flowRecords(size)=${flowRecords.length}`);
-console.warn(`scanFlows: flowRecords(json)=${JSON.stringify(flowRecords)}`);
-flowRecords.forEach((record, index) => {
-    console.warn(`scanFlows: flowRecords[${index}]: Id=${record.Id}, FullName=${record.FullName}, Metadata=${JSON.stringify(record.Metadata)}`);
-})
-console.warn('scanFlows: --------------------------');
+            // Filter out records with null metadata (can happen with UNKNOWN_EXCEPTION errors)
+            const validFlowRecords = flowRecords.filter(record => record.Metadata != null);
 
             // Convert flow records to LFS format
-            const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
-                .map(record => ({
-                    uri: record.Id,
-                    flow: new Flow(record.FullName, record.Metadata)
-                }));
+            // Normalize metadata to match LFS expectations (Tooling API vs XML parser differences)
+            const lfsFlows = [];
+            for (const record of validFlowRecords) {
+                try {
+                    const normalizedMetadata = this.normalizeMetadata(record.Metadata);
+                    const flow = new Flow(record.FullName, normalizedMetadata);
+                    // Use 15-char ID to match flowDefinition.currentVersionId format
+                    const flowId15 = sfdcManager.caseSafeId(record.Id);
+                    lfsFlows.push({ uri: flowId15, flow });
+                } catch (flowError) {
+                    console.error(`LFS: Error creating Flow for ${record.FullName}:`, flowError?.message || flowError);
+                }
+            }
 
             // Scan flows
             const scanResults = scan(lfsFlows);

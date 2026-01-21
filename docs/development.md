@@ -46,66 +46,85 @@ git config --global user.email "<Your Email>"
 You need two developer orgs:
 
 1. **Dev Hub Org**: Enable Unlocked Packages and Second-Generation Managed Packages settings.
-2. **Namespace Org**: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.
+2. **Namespace Org**: A single DevHub can link multiple namespaces, but a packaging project must be linked to one Namespace Org.(Not available in a Dev Hub Org)
 
-### Connect Dev Hub Org
+### Set up a Namespace for Packages
 
-Log in to your Dev Hub org and enable the necessary settings.
+1. Go to **Setup**.
+2. Search for **Package Manager**.
+3. Click **Edit** next to **Namespace Settings**.
+4. Enter a Namespace Prefix.
+5. Check Availability and Confirm. 
 
 ### Link Namespace in Dev Hub Org
 
+> Pre-requisite: Enable Unlocked Packages and Second-Generation Managed Packages
+
+1. Log in to your **Dev Hub**.
 1. Go to **App Launcher**.
 2. Search for **Namespace Registries**.
 3. Click **Link** and sign in to your Namespace Org.
 
-## Step 3: Update Project Definition
+## Step 4: Update Project Definition
 
-Edit the `sfdx-project.json` file to specify the namespace:
+Create a fresh `sfdx-project.json` file with your namespace:
 
 ```json
 {
   "packageDirectories": [
     {
-      "path": "<namespace>",
-      "default": true,
-      "package": "<namespace>",
-      "versionName": "Beryllium",
-      "versionNumber": "4.3.2.NEXT",
-      "versionDescription": "Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt."
+      "path": "force-app",
+      "default": true
     }
   ],
-  "namespace": "<namespace>",
+  "namespace": "<yournamespace>",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "62.0"
+  "sourceApiVersion": "64.0"
 }
 ```
 Replace `<namespace>` with your actual namespace.
 
-## Step 4: Rename the Force-App Folder
-
-Rename the `force-app` folder to match your namespace name.
-
 ## Step 5: Create the Package
 
-Create the package using the Salesforce CLI:
+> Pre-requisite: `sf plugins install @salesforce/plugin-packaging`
+Create an Unlocked package based on OrgCheck using the Salesforce CLI(Recommended for debugging):
 
 ```bash
-sf package create --name <namespace> --package-type Unlocked --path <namespace> --target-dev-hub <devhubalias>
+sf package create --name "Org Check Unlocked" --package-type Unlocked --path force-app --target-dev-hub <devhubalias>
 ```
 
-Note the generated **Package Id**.
+Alternatively, you can also create and test the OrgCheck App as a Managed package:
 
-## Step 6: Create a Package Version
+```bash
+sf package create --name "Org Check" --package-type Managed --path force-app --target-dev-hub <devhubalias>
+```
+
+## Step 6: Create the JavaScript files
+
+Use `yarn build:js` to generate the necessary JavaScript files:
+```bash
+yarn install && yarn build:js
+```
+
+## Step 7: Create the Static Resource
+
+Use `build-static-resource.sh` (bash) or `build-static-resource.ps1`(powershell) to generate a Static resource at: force-app/main/default/staticresources/OrgCheck_SR.resource
+
+```bash
+build/build-static-resource.sh
+```
+
+## Step 8: Create a Package Version
 
 Create a package version with the generated **Package Id**:
 
 ```bash
-sf package version create --package <namespace> --installation-key-bypass --wait 10 --target-dev-hub <devhubalias>
+sf package version create --package "Org Check" --installation-key-bypass --wait 10 --target-dev-hub <devhubalias>
 ```
 
 Note the **Subscriber Package Version Id** from the output.
 
-## Step 7: Optional - Create a Scratch Org
+## Step 9: Optional - Create a Scratch Org
 
 If you want to use a scratch org, create it using:
 
@@ -113,12 +132,12 @@ If you want to use a scratch org, create it using:
 sf org create scratch --definition-file orgs/dev.json --alias <scratchorgalias> --target-dev-hub <devhubalias> --wait 10
 ```
 
-## Step 8: Deploy the Package
+## Step 10: Deploy the Package
 
 Deploy the package to your org using the **Subscriber Package Version Id**.
 
 ```bash
-sf package install --package 04tDn0000011NpHIAU -u <scratchorgalias> -w 10
+sf package install --package <subscriberpackageversionid> -u <scratchorgalias> -w 10
 ```
 
 Alternatively, you can use the corresponding **alias** of the version id, which has been generated for you (on step 7) in the sfdx-project.json under the section **packageAliases**.
