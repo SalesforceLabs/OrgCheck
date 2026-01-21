@@ -173,15 +173,16 @@ export class DatasetFlows extends Dataset {
 
         // Scan flows with Lightning Flow Scanner
         logger?.log(`Scanning ${records.length} flows with Lightning Flow Scanner...`);
-        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager);
-
-        // Apply LFS violations to flow definitions
+        const lfsViolations = await LFSScanner.scanFlows(records);
+        logger?.log(`LFS gave us ${lfsViolations.size} violations.`);
+        lfsViolations.forEach((/** @type {Array<string>} */ violations, /** @type {string} */ flowVersionId) => {
+            logger?.log(`flowVersionId=${flowVersionId} => ${violations.join(', ')}.`);
+        });
         if (lfsViolations.size > 0) {
-            logger?.log(`Applying ${lfsViolations.size} LFS violation sets to flow definitions...`);
             await Processor.forEach(flowDefinitions, (/** @type {SFDC_Flow} */ flowDefinition) => {
                 const violations = lfsViolations.get(flowDefinition.currentVersionId);
                 if (violations) {
-                    LFSScanner.applyViolations(flowDefinition, violations);
+                    flowDefinition.currentVersionRef.lfsViolations = violations;
                 }
             });
         }

@@ -7,11 +7,11 @@ const JsForceMock = {
     Connection: JsForceConnectionMock
 }
 
-const LocalStorageMock = {};
+const StorageMock = {};
 
-const EncodingMock = {};
+const CompressorMock = {};
 
-const CompressMock = {};
+const LoggerMock = {}
 
 describe('orgcheck-api-scorerules', () => {
 
@@ -21,7 +21,14 @@ describe('orgcheck-api-scorerules', () => {
         SecretSauce.AllScoreRules.forEach((/** @type {ScoreRule} */ rule) => rule.applicable.forEach((item) => disctinctItems.add(item)));
         const numberOfItemsAccrossAllRules = SecretSauce.AllScoreRules.reduce((acc, /** @type {ScoreRule} */ rule) => { return acc + rule.applicable.length; }, 0)
 
-        const api = new API('ACCESSTOKEN', JsForceMock, LocalStorageMock, EncodingMock, CompressMock);
+        const api = new API({ 
+            salesforce: { connection: { useJsForce: false, mockImpl: JsForceMock }},
+            storage: { localImpl: StorageMock, compression: { useFflate: false, mockImpl: CompressorMock }},
+            logSettings: LoggerMock
+        });
+
+
+
         /** @type {DataMatrix} */
         const matrix = api.getAllScoreRulesAsDataMatrix();
         expect(matrix).toBeDefined();

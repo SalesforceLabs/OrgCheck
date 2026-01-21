@@ -1102,6 +1102,7 @@ export class TableDefinitions {
             { label: '# DML Delete Nodes',                                type: ColumnType.NUM, data: { value: 'currentVersionRef.dmlDeleteNodeCount' }},
             { label: '# DML Update Nodes',                                type: ColumnType.NUM, data: { value: 'currentVersionRef.dmlUpdateNodeCount' }},
             { label: '# Screen Nodes',                                    type: ColumnType.NUM, data: { value: 'currentVersionRef.screenNodeCount' }},
+            { label: 'Its LFS Violations',                                type: ColumnType.TXTS, data: { values: 'currentVersionRef.lfsViolations' }},
             { label: 'Its created date',                                  type: ColumnType.DTM, data: { value: 'currentVersionRef.createdDate' }},
             { label: 'Its modified date',                                 type: ColumnType.DTM, data: { value: 'currentVersionRef.lastModifiedDate' }},
             { label: 'Its description',                                   type: ColumnType.TXT, data: { value: 'currentVersionRef.description' }, modifier: { maximumLength: 45, valueIfEmpty: 'No description.' }},

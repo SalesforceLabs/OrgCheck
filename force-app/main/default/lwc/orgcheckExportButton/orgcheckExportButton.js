@@ -33,7 +33,7 @@ export default class OrgcheckExportButton extends LightningElement {
                 .then(() => {
                     this._apiInitialized = true;
                     // @ts-ignore
-                    this._api = window?.XLSX; 
+                    this._api = window?.XLSX ?? null;
                 })
                 .catch((e) => {
                     console.error(e);

@@ -1,28 +1,6 @@
 import { DataCacheItem, DataCacheManagerIntf, MetadataItemInCache, DataItemInCache } from "./orgcheck-api-cachemanager";
 import { CompressorIntf } from "./orgcheck-api-compressor";
-import { EncoderIntf } from "./orgcheck-api-encoder";
 import { StorageIntf } from "./orgcheck-api-storage";
-
-export class DataCacheManagerSetup {
-
-    /**
-     * @description Compression set of functions
-     * @type {CompressorIntf}
-     */
-    compression;
-
-    /**
-     * @description Encoding set of functions
-     * @type {EncoderIntf}
-     */
-    encoding;
-
-    /**
-     * @description Storage set of functions
-     * @type {StorageIntf}
-     */
-    storage;
-}
 
 /** 
  * @description Cache Manager class implementation
@@ -30,76 +8,27 @@ export class DataCacheManagerSetup {
 export class DataCacheManager extends DataCacheManagerIntf {
 
     /**
-     * @description Function to compress binary data
-     * @type {Function}
-     * @private
+     * @description Compression to use before storing the data
+     * @type {CompressorIntf}
      */
-    _compress;
-    
-    /**
-     * @description Function to decompress binary data
-     * @type {Function}
-     * @private
-     */
-    _decompress;
+    _compressor;
 
     /**
-     * @description Function to encore string to binary data
-     * @type {Function}
-     * @private
+     * @description Storage to save/retrieve the data
+     * @type {StorageIntf}
      */
-    _encode;
-    
-    /**
-     * @description Function to decode binary data to string
-     * @type {Function}
-     * @private
-     */
-    _decode;
-
-    /**
-     * @description Function to store an "item" in the storage with a given "key"
-     * @type {Function}
-     * @private
-     */
-    _storageSetItem;
-
-    /**
-     * @description Function to retrieve an "item" in the storage from a given "key"
-     * @type {Function}
-     * @private
-     */
-    _storageGetItem;
-
-    /**
-     * @description Function to remove an "item" in the storage from a given "key"
-     * @type {Function}
-     * @private
-     */
-    _storageRemoveItem;
-
-    /**
-     * @description Function to retrieve all the keys in the storage
-     * @type {Function}
-     * @private
-     */
-    _storageKeys;
+    _storage;
 
     /**
      * @description Cache Manager constructor
-     * @param {DataCacheManagerSetup} setup - the setup for the cache manager 
+     * @param {CompressorIntf} compressor - the compressor to use before storing the data
+     * @param {StorageIntf} storage - the storage to save/retrieve the data
      * @public
      */
-    constructor(setup) {
+    constructor(compressor, storage) {
         super();
-        this._compress = setup.compression.compress;
-        this._decompress = setup.compression.decompress;
-        this._encode = setup.encoding.encode;
-        this._decode = setup.encoding.decode;
-        this._storageSetItem = setup.storage.setItem;
-        this._storageGetItem = setup.storage.getItem;
-        this._storageRemoveItem = setup.storage.removeItem;
-        this._storageKeys = setup.storage.keys;
+        this._compressor = compressor;
+        this._storage = storage;
     }
 
     /**
@@ -116,8 +45,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
         const metadataEntry = this._getEntryFromCache(metadataPhysicalKey);
         if (metadataEntry === null) {
             // making sure the metadata and related data are removed from local storage if necessary
-            this._storageRemoveItem(metadataPhysicalKey);
-            this._storageRemoveItem(dataPhysicalKey);  
+            this._storage.removeItem(metadataPhysicalKey);
+            this._storage.removeItem(dataPhysicalKey);  
             // return null as the metadata is not in the cache
             return null;
         }
@@ -127,13 +56,13 @@ export class DataCacheManager extends DataCacheManagerIntf {
         if (dataEntry === null) {
             // here the metadata is in the cache but the data is not -- strange!
             // let's correct this by removing the metadata and return null
-            this._storageRemoveItem(metadataPhysicalKey);
+            this._storage.removeItem(metadataPhysicalKey);
             return null;
         }
         // Make sure the metadata is up to date with the data
         metadataEntry.length = dataEntry.content?.length ?? 0;
         // ... and is saved!
-        this._setItemToCache(metadataPhysicalKey, JSON.stringify(metadataEntry));
+        this._storage.setItem(metadataPhysicalKey, JSON.stringify(metadataEntry));
         // if the data is a map
         if (metadataEntry.type === 'map') {
             try {
@@ -142,8 +71,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
             } catch (error) {
                 console.error(`Error occured when trying to create a map for key ${key}. We just removed the key from the cache.`, error);
                 // something went wrong when trying to create the map, so destroying everything!
-                this._storageRemoveItem(metadataPhysicalKey);
-                this._storageRemoveItem(dataPhysicalKey);  
+                this._storage.removeItem(metadataPhysicalKey);
+                this._storage.removeItem(dataPhysicalKey);  
                 // return null as the metadata is not in the cache anymore
                 return null;
             }
@@ -162,8 +91,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
         const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
         const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
         if (value === null) {
-            this._storageRemoveItem(metadataPhysicalKey);
-            this._storageRemoveItem(dataPhysicalKey);
+            this._storage.removeItem(metadataPhysicalKey);
+            this._storage.removeItem(dataPhysicalKey);
         } else {
             const now = Date.now();
             /** @type {MetadataItemInCache} */
@@ -184,8 +113,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
             } catch(_error) { 
                 // Not able to store in local store that amount of data.
                 // Making sure to clean both cache entries to be consistent
-                this._storageRemoveItem(metadataPhysicalKey);
-                this._storageRemoveItem(dataPhysicalKey);
+                this._storage.removeItem(metadataPhysicalKey);
+                this._storage.removeItem(dataPhysicalKey);
             }
         }
     }
@@ -195,7 +124,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @returns {Array<DataCacheItem>} an array of objects that contains the name, the type, the size and the creation date of each entry.
      */
     details() {
-        return this._storageKeys()
+        return this._storage.keys()
             .filter((/** @type {string} */ key) => key.startsWith(METADATA_CACHE_PREFIX))
             .map((/** @type {string} */ key) => {
                 /** @type {MetadataItemInCache} */
@@ -215,8 +144,8 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @public
      */
     remove(key) {
-        this._storageRemoveItem(GENERATE_PHYSICAL_KEY_DATA(key));
-        this._storageRemoveItem(GENERATE_PHYSICAL_KEY_METADATA(key));
+        this._storage.removeItem(GENERATE_PHYSICAL_KEY_DATA(key));
+        this._storage.removeItem(GENERATE_PHYSICAL_KEY_METADATA(key));
     }
 
     /**
@@ -225,9 +154,9 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @public
      */
     clear() {
-        return this._storageKeys()
+        return this._storage.keys()
             .filter((/** @type {string} */ key) => key.startsWith(CACHE_PREFIX))
-            .forEach((/** @type {string} */ key) => this._storageRemoveItem(key));
+            .forEach((/** @type {string} */ key) => this._storage.removeItem(key));
     }
 
     /**
@@ -241,18 +170,14 @@ export class DataCacheManager extends DataCacheManagerIntf {
      * @private
      */
     _setItemToCache = (key, stringValue) => {
-        let encodedValue, compressedValue, hexValue;
+        let hexValue;
         try {
-            encodedValue = this._encode(stringValue);
-            compressedValue = this._compress(encodedValue);
-            hexValue = FROM_BUFFER_TO_HEX(compressedValue);
-            this._storageSetItem(key, hexValue);
+            hexValue = this._compressor.compress(stringValue);
+            this._storage.setItem(key, hexValue);
         } catch (error) {
             throw new Error(
                 `Error occured when trying to save the value for key ${key} with: `+
                     `hexValue.length=${hexValue?.length || 'N/A'}, `+
-                    `compressedValue.length=${compressedValue?.length || 'N/A'}, `+
-                    `encodedValue.length=${encodedValue?.length || 'N/A'}. `+
                     `Initiale error message was ${error.message}`
             );
         }
@@ -267,12 +192,9 @@ export class DataCacheManager extends DataCacheManagerIntf {
     _getEntryFromCache = (key) => {
         let entryFromStorage = null;
         try {
-            const hexValue = this._storageGetItem(key);
+            const hexValue = this._storage.getItem(key);
             if (hexValue) {
-                const bufferValue = FROM_HEX_TO_BUFFER(hexValue);
-                const uncompressedValue = this._decompress(bufferValue);
-                const decodedValue = this._decode(uncompressedValue);
-                entryFromStorage = decodedValue;
+                entryFromStorage = this._compressor.decompress(hexValue);
             }
         } catch (error) {
             console.error(`Error occured when trying to get the value for key ${key}`, error);
@@ -346,50 +268,3 @@ const GENERATE_LOGICAL_KEY = (key) => {
  * @type {number} 
  */
 const NB_MILLISEC_IN_ONE_DAY = 1000*60*60*24;
-
-/**
- * @description Helper for conversion
- * @type {string[]}
- * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
- */
-const LUT_HEX_4b = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
-
-/**
- * @description Helper for conversion
- * @type {string[]}  
- * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
- */
-const LUT_HEX_8b = new Array(0x100);
-for (let n = 0; n < 0x100; n++) {
-  LUT_HEX_8b[n] = `${LUT_HEX_4b[(n >>> 4) & 0xF]}${LUT_HEX_4b[n & 0xF]}`;
-}
-
-/**
- * @description Binary array to Hexadecimal string
- * @type {Function}
- * @param {Uint8Array} buffer - the binary array to convert to hexadecimal string
- * @returns {string} the hexadecimal string representation of the binary array
- * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
- */
-const FROM_BUFFER_TO_HEX = (buffer) => {
-  let out = '';
-  for (let idx = 0, edx = buffer.length; idx < edx; idx++) {
-    out += LUT_HEX_8b[buffer[idx]];
-  }
-  return out;
-}
-
-/**
- * @description Hexadecimal string to Binary array
- * @type {Function}
- * @param {string} hex - the hexadecimal string to convert to binary array
- * @returns {Uint8Array} the binary array representation of the hexadecimal string
- * @see https://www.xaymar.com/articles/2020/12/08/fastest-uint8array-to-hex-string-conversion-in-javascript/
- */
-const FROM_HEX_TO_BUFFER = (hex) => {
-    const arr = [];
-    for (let i = 0; i < hex.length; i += 2) {
-        arr.push(parseInt(hex.substring(i, i+2), 16));
-    }
-    return new Uint8Array(arr);
-}

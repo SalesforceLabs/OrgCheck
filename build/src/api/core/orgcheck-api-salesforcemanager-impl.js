@@ -83,21 +83,32 @@ export class SalesforceManager extends SalesforceManagerIntf {
     /**
      * @description Construct the connection manager from a ConnectionFactory (like JSForce) and a VFP accesstoken
      * @param {any} jsConnectionFactory - Connection factory to inject
-     * @param {string} accessToken - Current user access token
+     * @param {{accessToken?: string, clientId?: string, clientSecret?: string, redirectUri?: string}} authenticationOptions - Authentication options to use
      * @public
      */
-    constructor(jsConnectionFactory, accessToken) {
+    constructor(jsConnectionFactory, authenticationOptions) {
 
         super();
         
         this._apiVersion = SecretSauce.CurrentApiVersion;
         
-        // Create a JsForce Connection to the current salesforce org
-        const jsConnection = new jsConnectionFactory.Connection({
-            accessToken: accessToken,
+        // Connection options
+        const jsConnectionOptions = {
             version: this._apiVersion + '.0',
             maxRequest: 15 // making sure we set it to a reasonable value = 15
-        });
+        }
+        if (authenticationOptions?.accessToken) {
+            jsConnectionOptions.accessToken = authenticationOptions.accessToken;
+        } else {
+            jsConnectionOptions.oauth2 = {
+                clientId: authenticationOptions?.clientId,
+                clientSecret: authenticationOptions?.clientSecret,
+                redirectUri: authenticationOptions?.redirectUri
+            }
+        }
+
+        // Create a JsForce Connection to the current salesforce org
+        const jsConnection = new jsConnectionFactory.Connection(jsConnectionOptions);
 
         // Create the WatchDog instance which knows how to retrieve the API Usage from the connection
         this._watchDog = new SalesforceWatchDog(
