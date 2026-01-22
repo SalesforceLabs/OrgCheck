@@ -1,5 +1,3 @@
-/*global jsforce, fflate*/
-
 import { LightningElement, api } from 'lwc';
 import OrgCheckStaticResource from '@salesforce/resourceUrl/OrgCheck_SR';
 import * as ocapi from './libs/orgcheck-api.js';
@@ -465,7 +463,8 @@ export default class OrgcheckApp extends LightningElement {
             try {
                 await Promise.all([
                     loadScript(this, OrgCheckStaticResource + '/js/jsforce.js'),
-                    loadScript(this, OrgCheckStaticResource + '/js/fflate.js')
+                    loadScript(this, OrgCheckStaticResource + '/js/fflate.js'),
+                    loadScript(this, OrgCheckStaticResource + '/js/lfs.js')
                 ]);
                 this._spinner?.sectionEnded(SECTION_02, `Done.`);
             } catch (error) {
@@ -476,88 +475,44 @@ export default class OrgcheckApp extends LightningElement {
             // Load the Org Check API
             this._spinner?.sectionLog(SECTION_03, `Start loading...`);
             try {
-                this._api = new ocapi.API(
-                    // -----------------------
-                    // ACCESS TOKEN of the current user
-                    this.accessToken, 
-                    // -----------------------
-                    // JsForce instance
-                    // @ts-ignore 
-                    jsforce, 
-                    // -----------------------
-                    // Local Storage methods
-                    // Note: LWC Security avoid passing localStorage methods direclty to a third party library :D
-                    {
-                        /**
-                         * @description Set an item in the local storage
-                         * @param {string} key - The key to set
-                         * @param {string} value - The value to set
-                         */
-                        setItem: (key, value) => { this.localStorage.setItem(key, value); },
-                        /**
-                         * @description Get an item from the local storage
-                         * @param {string} key - The key to set
-                         * @returns {string} The stored value for the given key
-                         */
-                        getItem: (key) => { return this.localStorage.getItem(key); },
-                        /**
-                         * @description Removes an item from the local storage
-                         * @param {string} key - The key to remove
-                         */
-                        removeItem: (key) => { this.localStorage.removeItem(key); },
-                        /**
-                         * @description Get all the keys in the storage
-                         * @returns {Array<string>} List of keys
-                         */
-                        keys: () => {  
-                            const keys = []; 
-                            for (let i = 0; i < this.localStorage.length; i++) {
-                                keys.push(this.localStorage.key(i)); 
-                            }
-                            return keys; }
-                    },
-                    // -----------------------
-                    // Encoding methods
-                    { 
-                        /** 
-                         * @description Encoding method
-                         * @param {string} data - Input data
-                         * @returns {Uint8Array} Output data
-                         */ 
-                        encode: (data) => { return this.textEncoder.encode(data); }, 
-                        /** 
-                         * @description Decoding method
-                         * @param {Uint8Array} data - Input data
-                         * @returns {string} Output data
-                         */ 
-                        decode: (data) => { return this.textDecoder.decode(data); }
-                    },            
-                    // -----------------------
-                    // Compression methods
-                    { 
-                        /** 
-                         * @description Compress method
-                         * @param {Uint8Array} data - Input data
-                         * @returns {Uint8Array} Output data
-                         */ 
-                        compress:   (data) => { 
-                            // @ts-ignore
-                            return fflate.zlibSync(data, { level: 9 }); 
+                this._api = new ocapi.API({
+                    salesforce: {
+                        authentication: {
+                            // -- Using given session information to authenticate ----
+                            accessToken: this.accessToken
+                            // -- Using connected app information to authenticate ----
+                            // clientId: null,
+                            // clientSecret: null,
+                            // redirectUri: null
                         },
-                        /** 
-                         * @description Decompress method
-                         * @param {Uint8Array} data - Input data
-                         * @returns {Uint8Array} Output data
-                         */ 
-                        // @ts-ignore
-                        decompress: (data) => { 
-                            // @ts-ignore
-                            return fflate.unzlibSync(data); 
+                        connection: {
+                            // -- Using jsforce instance ----
+                            useJsForce: true,
+                            // -- Using mock implementation ----
+                            // useJsForce: false,
+                            // mockImpl: { ... }
                         }
                     },
-                    // -----------------------
+                    storage: { 
+                        // -- Provide a Storage instance to use to store data ----
+                        localImpl: this.localStorage,
+                        compression: {
+                            // -- Using fflate instance ----
+                            useFflate: true,
+                            // -- Using mock implementation ----
+                            // useFflate: false,
+                            // mockImpl: { ... }
+                        },
+                        encoding: {
+                            // -- Using fflate instance ----
+                            useFflate: true,
+                            // -- Using mock implementation ----
+                            // useFflate: false,
+                            // mockImpl: { ... }
+                        }
+                    },
                     // Log methods -- delegation to the UI spinner
-                    {
+                    logSettings: {
                         /**
                          * @returns {boolean} true if this logger is a console fallback logger, false otherwise
                          */
@@ -581,7 +536,7 @@ export default class OrgcheckApp extends LightningElement {
                          */ 
                         failed: (section, error) => { this._spinner?.sectionFailed(section, error); }
                     }
-                );
+                });
                 this._spinner?.sectionEnded(SECTION_03, `Done.`);
             } catch (error) {
                 this._spinner?.sectionFailed(SECTION_03, error);

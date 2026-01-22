@@ -5,6 +5,7 @@ import { Processor } from '../core/orgcheck-api-processor';
 import { SalesforceMetadataTypes } from '../core/orgcheck-api-salesforce-metadatatypes';
 import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
+import { LFSScanner } from '../scanner/orgcheck-api-lfs-scanner';
 
 export class DatasetFlows extends Dataset {
 
@@ -113,12 +114,19 @@ export class DatasetFlows extends Dataset {
         logger?.log(`Calling Tooling API Composite to get more information about these ${activeFlowIds.length} flow versions...`);
         const records = await sfdcManager.readMetadataAtScale('Flow', activeFlowIds, [ 'UNKNOWN_EXCEPTION' ], logger); // There are GACKs throwing that errors for some flows!
 
+        // Scan flow versions with Lightning Flow Scanner
+        logger?.log(`Scanning ${records.length} flows with Lightning Flow Scanner...`);
+        const lfsViolations = await LFSScanner.scanFlows(records, sfdcManager.caseSafeId);
+        logger?.log(`LFS gave us ${lfsViolations.size} violations.`);
+
+        // Lets parse the flow versions by ourselves
         logger?.log(`Parsing ${records.length} flow versions from Tooling API...`);
         await Processor.forEach(records, (/** @type {any} */ record)=> {
 
             // Get the ID15s of this flow version and parent flow definition
             const id = sfdcManager.caseSafeId(record.Id);
             const parentId = sfdcManager.caseSafeId(record.DefinitionId);
+            const violations = lfsViolations.get(id) ?? [];
 
             // Create the instance
             /** @type {SFDC_FlowVersion} */
@@ -147,6 +155,7 @@ export class DatasetFlows extends Dataset {
                     runningMode: record.RunInMode,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
+                    lfsViolations: violations,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
