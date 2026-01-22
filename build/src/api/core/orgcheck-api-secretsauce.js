@@ -721,7 +721,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Inactive Flow',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('InactiveFlow') || false,
         errorMessage: `This flow is inactive. Consider activating it or removing it from your org.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
@@ -729,7 +729,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Process Builder',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('ProcessBuilder') || false,
         errorMessage: `Time to migrate this process builder to flow!`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
@@ -737,7 +737,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Flow Description',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('FlowDescription') || false,
         errorMessage: `This flow does not have a description. Add documentation about its purpose and usage.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
@@ -745,7 +745,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Outdated API Version',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('APIVersion') || false,
         errorMessage: `The API version of this flow is outdated. Update it to the newest version.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.API_VERSION
     }, {
@@ -753,7 +753,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Unsafe Running Context',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('UnsafeRunningContext') || false,
         errorMessage: `This flow runs in System Mode without Sharing, which can lead to unsafe data access.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.SECURITY
     }, {
@@ -761,7 +761,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] SOQL Query In Loop',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('SOQLQueryInLoop') || false,
         errorMessage: `This flow has SOQL queries inside loops. Consolidate queries at the end of the flow to avoid governor limits.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -769,7 +769,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] DML Statement In Loop',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('DMLStatementInLoop') || false,
         errorMessage: `This flow has DML operations inside loops. Consolidate DML at the end to avoid governor limits.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -777,7 +777,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Action Calls In Loop',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('ActionCallsInLoop') || false,
         errorMessage: `This flow has action calls inside loops. Bulkify apex calls using collection variables.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -785,7 +785,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Hardcoded Id',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedId') || false,
         errorMessage: `This flow contains hardcoded IDs which are org-specific. Use variables or merge fields instead.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_ID
     }, {
@@ -793,7 +793,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Hardcoded Url',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('HardcodedUrl') || false,
         errorMessage: `This flow contains hardcoded URLs. Use $API formulas or custom labels instead.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.HARDCODED_URL
     }, {
@@ -801,7 +801,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Null Handler',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('MissingNullHandler') || false,
         errorMessage: `This flow has Get Records operations without null checks. Use decision elements to validate results.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -809,7 +809,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Fault Path',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('MissingFaultPath') || false,
         errorMessage: `This flow has DML or action operations without fault handlers. Add fault paths for better error handling.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -817,7 +817,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Recursive After Update',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('RecursiveAfterUpdate') || false,
         errorMessage: `This after-update flow modifies the same record that triggered it, risking recursion. Use before-save flows instead.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -825,7 +825,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Duplicate DML Operation',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('DuplicateDMLOperation') || false,
         errorMessage: `This flow allows navigation back after DML operations, which may cause duplicate changes.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -833,7 +833,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Get Record All Fields',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('GetRecordAllFields') || false,
         errorMessage: `This flow uses Get Records with "all fields". Specify only needed fields for better performance.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -841,7 +841,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Record ID as String',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('RecordIdAsString') || false,
         errorMessage: `This flow uses a String recordId variable. Modern flows can receive the entire record object, eliminating Get Records queries.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -849,7 +849,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Unconnected Element',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('UnconnectedElement') ||  false,
         errorMessage: `This flow has unconnected elements that are not in use. Remove them to maintain clarity.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
@@ -857,7 +857,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Unused Variable',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('UnusedVariable') || false,
         errorMessage: `This flow has unused variables. Remove them to maintain efficiency.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USELESS
     }, {
@@ -865,7 +865,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Copy API Name',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('CopyAPIName') || false,
         errorMessage: `This flow has elements with copy-paste naming patterns like "Copy_X_Of_Element". Update API names for readability.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
@@ -873,7 +873,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Cyclomatic Complexity',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('CyclomaticComplexity') || false,
         errorMessage: `This flow has high cyclomatic complexity. Consider breaking it into subflows or multiple trigger-ordered flows.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -881,7 +881,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Same Record Field Updates',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('SameRecordFieldUpdates') || false,
         errorMessage: `This before-save flow uses Update Records on $Record. Use direct assignment instead for better performance.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -889,7 +889,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Trigger Order',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('TriggerOrder') || false,
         errorMessage: `This record-triggered flow doesn't have a trigger order specified. Set explicit execution priority.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -897,7 +897,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Metadata Description',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('MissingMetadataDescription') || false,
         errorMessage: `This flow has elements or variables without descriptions. Add documentation for better maintainability.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
@@ -905,7 +905,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Filter Record Trigger',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('MissingFilterRecordTrigger') || false,
         errorMessage: `This record-triggered flow lacks filters on changed fields or entry conditions, causing unnecessary executions.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -913,7 +913,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Transform Instead of Loop',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('TransformInsteadOfLoop') || false,
         errorMessage: `This flow uses Loop + Assignment which could be replaced with Transform element (10x faster).`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
     }, {
@@ -921,7 +921,7 @@ const ALL_SCORE_RULES = [
         description: '[LFS] Missing Auto Layout',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('AutoLayout') || false,
         errorMessage: `This flow doesn't use Auto-Layout mode. Enable it to keep your flow organized automatically.`,
-        badField: 'lfs_violation',
+        badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
     }
