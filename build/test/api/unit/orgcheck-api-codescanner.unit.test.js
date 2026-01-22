@@ -197,6 +197,70 @@ describe('tests.api.unit.CodeScanner', () => {
       expect(hasDML).toBeDefined();
       expect(hasDML).toBe(true);
     });
+
+    it('checks if the source code contains a DML update statement', () => {
+      expect(CodeScanner.HasDMLFromApexCode('update accounts;')).toBe(true);
+    });
+
+    it('checks if the source code contains a DML delete statement', () => {
+      expect(CodeScanner.HasDMLFromApexCode('delete accounts;')).toBe(true);
+    });
+
+    it('checks if Database.insert is detected as DML', () => {
+      expect(CodeScanner.HasDMLFromApexCode('Database.insert(accounts);')).toBe(true);
+    });
+
+    it('checks if Database.update is detected as DML', () => {
+      expect(CodeScanner.HasDMLFromApexCode('Database.update(accounts);')).toBe(true);
+    });
+
+    it('checks if Database.delete is detected as DML', () => {
+      expect(CodeScanner.HasDMLFromApexCode('Database.delete(accounts);')).toBe(true);
+    });
+
+    it('checks if trigger handler methods are NOT detected as DML (false positive fix)', () => {
+      // This is a trigger that delegates to a handler - no actual DML in this code
+      const triggerCode = `trigger crm_AccountTrigger on Account (before insert, before update, before delete, after insert, after update, after delete, after undelete) {
+        crm_AccountTriggerHandler accountTriggerHandler = new crm_AccountTriggerHandler();
+        if (Trigger.isBefore && Trigger.isInsert) {
+            accountTriggerHandler.beforeInsert(Trigger.new);
+        }
+        if (Trigger.isBefore && Trigger.isUpdate) {
+            accountTriggerHandler.beforeUpdate(Trigger.old, Trigger.new, Trigger.oldMap, Trigger.newMap);
+        }
+        if (Trigger.isBefore && Trigger.isDelete) {
+            accountTriggerHandler.beforeDelete(Trigger.old, Trigger.oldMap);
+        }
+        if (Trigger.isAfter && Trigger.isInsert) {
+            accountTriggerHandler.afterInsert(Trigger.new, Trigger.newMap);
+        }
+        if (Trigger.isAfter && Trigger.isUpdate) {
+            accountTriggerHandler.afterUpdate(Trigger.old, Trigger.new, Trigger.oldMap, Trigger.newMap);
+        }
+        if (Trigger.isAfter && Trigger.isDelete) {
+            accountTriggerHandler.afterDelete(Trigger.old, Trigger.oldMap);
+        }
+        if (Trigger.isAfter && Trigger.isUndelete) {
+            accountTriggerHandler.afterUndelete(Trigger.new, Trigger.newMap);
+        }
+      }`;
+      expect(CodeScanner.HasDMLFromApexCode(triggerCode)).toBe(false);
+    });
+
+    it('checks that method names containing insert/update/delete keywords are NOT detected as DML', () => {
+      expect(CodeScanner.HasDMLFromApexCode('handler.beforeInsert(records);')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('handler.afterInsert(records);')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('handler.beforeUpdate(records);')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('handler.afterUpdate(records);')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('handler.beforeDelete(records);')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('handler.afterDelete(records);')).toBe(false);
+    });
+
+    it('checks if code with no DML returns false', () => {
+      expect(CodeScanner.HasDMLFromApexCode('String s = "hello";')).toBe(false);
+      expect(CodeScanner.HasDMLFromApexCode('Account a = new Account();')).toBe(false);
+    });
+
   });
 
 });
