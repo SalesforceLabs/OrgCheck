@@ -55,10 +55,14 @@ export class LFSScanner {
 
             // Convert flow records to LFS format
             const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
-                .map(record => ({
-                    uri: CaseSafeId(record.Id),
-                    flow: new Flow(record.FullName, this.normalizeMetadata(record.Metadata))
-                }));
+                .map(record => {
+                    /** @type {string} */
+                    const id15 = CaseSafeId(record.Id);
+                    return {
+                        uri: id15,
+                        flow: new Flow(id15, this.normalizeMetadata(record.Metadata))
+                    };
+                });
 
             // Scan flows
             const scanResults = scan(lfsFlows);
