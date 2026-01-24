@@ -90,7 +90,7 @@ export class DataCacheManager extends DataCacheManagerIntf {
     set(key, value) {
         const metadataPhysicalKey = GENERATE_PHYSICAL_KEY_METADATA(key);
         const dataPhysicalKey = GENERATE_PHYSICAL_KEY_DATA(key);
-        if (value === null) {
+        if (value === null || value === undefined) {
             this._storage.removeItem(metadataPhysicalKey);
             this._storage.removeItem(dataPhysicalKey);
         } else {
