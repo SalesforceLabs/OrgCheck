@@ -1,7 +1,7 @@
-import { CellFactory } from "../../../src/ui/orgcheck-ui-table-cell";
-import { ColumnType } from "../../../src/ui/orgcheck-ui-table-column";
+import { CellFactory } from "../../../src/ui/table/orgcheck-ui-table-cell";
+import { ColumnType } from "../../../src/ui/table/orgcheck-ui-table-column";
 
-describe('tests.api.unit.CellFactory', () => {
+describe('tests.ui.unit.CellFactory', () => {
 
     describe('Test Cell Factory with only one index column type (see ColumnType.IDX)', () => {
 

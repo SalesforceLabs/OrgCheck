@@ -4,9 +4,6 @@ import * as ocui from './libs/orgcheck-ui.js';
 // @ts-ignore
 import { loadScript } from 'lightning/platformResourceLoader';
 
-const TITLE_MAX_SIZE = 31;
-const CELL_MAX_SIZE = 32767;
-
 export default class OrgcheckExportButton extends LightningElement {
 
     /**
@@ -17,13 +14,6 @@ export default class OrgcheckExportButton extends LightningElement {
     _apiInitialized = false;
 
     /**
-     * @description Excel API used to generate documents
-     * @type {any}
-     * @private
-     */ 
-    _api;
-
-    /**
      * @description Called when it's about to render the component
      */
     renderedCallback() {
@@ -32,8 +22,6 @@ export default class OrgcheckExportButton extends LightningElement {
             loadScript(this, OrgCheckStaticResource + '/js/xlsx.js')
                 .then(() => {
                     this._apiInitialized = true;
-                    // @ts-ignore
-                    this._api = window?.XLSX ?? null;
                 })
                 .catch((e) => {
                     console.error(e);
@@ -97,74 +85,16 @@ export default class OrgcheckExportButton extends LightningElement {
     async handleClickExportXLS() {
         this.isExporting = true;
         try {
-            await this._exportAsXls();
+            const url = URL.createObjectURL(ocui.Exporter.exportAsXls(this.source));
+            const a = this.template.querySelector('a');
+            a.href = url;
+            a.download = `${this.basename}.xlsx`; // Filename Here
+            a.click(); // Downloaded file*/
+            URL.revokeObjectURL(url);
         } catch(error) {
             console.error(error, JSON.stringify(error), error.stack);
         } finally {
             this.isExporting = false;
         }
-    }
-
-    async _exportAsXls() {
-        const workbook = this._createTheWorkBook();
-        const url = this._generateTheFileAsURL(workbook);
-        const a = this.template.querySelector('a');
-        a.href = url;
-        a.download = `${this.basename}.xlsx`; // Filename Here
-        a.click(); // Downloaded file*/
-        this._releaseTheURL(url);
-    }
-
-    /**
-     * @description Internal method to create an Excel Workbook using the API
-     * @returns {any} The workbook
-     * @private
-     */ 
-    _createTheWorkBook() {
-        const workbook = this._api.utils.book_new();
-        (Array.isArray(this.source) ? this.source : [ this.source ]).forEach(item => {
-            const datasheet = [ item.columns ].concat(
-                item.rows.map(row => 
-                    row.map(cell => {
-                        if (typeof cell === 'string' && cell.length > CELL_MAX_SIZE) return cell?.substring(0, CELL_MAX_SIZE);
-                        return cell;
-                    })
-                )
-            );
-            const worksheet = this._api.utils.aoa_to_sheet(datasheet);
-            worksheet['!cols'] = item.columns.map((c, i) => { 
-                const maxWidth = datasheet.reduce((prev, curr) => {
-                    if (typeof curr[i] === 'string') return Math.max(prev, curr[i]?.length);
-                    return prev;
-                }, 10);
-                return maxWidth ? { wch: maxWidth } : {};
-            });
-            const sheetName = `${item.header} (${item.rows.length})`.substring(0, TITLE_MAX_SIZE); // Cannot exceed 31 characters!
-            this._api.utils.book_append_sheet(workbook, worksheet, sheetName);
-        });
-        return workbook;
-    }
-
-    /**
-     * @description Internal method to create an Excel Workbook using the API
-     * @param {any} workbook - The workbook definition
-     * @returns {string} The file as an object URL
-     * @private
-     */ 
-    _generateTheFileAsURL(workbook) {
-        const workfile = this._api.write(workbook, { bookType: 'xlsx', type: 'binary' });
-        const workfileAsBuffer = new ArrayBuffer(workfile.length)
-        const workfileAsBufferView = new Uint8Array(workfileAsBuffer)
-        for (let i = 0; i < workfile.length; i++) workfileAsBufferView[i] = workfile.charCodeAt(i) & 0xff
-        return URL.createObjectURL(new Blob([workfileAsBuffer], { type: 'application/octet-stream' }));
-    }
-
-    /**
-     * @description Internal method to release the URL created by _generateTheFileAsURL
-     * @param {string} url - The url to release
-     * @private
-     */ 
-    _releaseTheURL(url) {
-        URL.revokeObjectURL(url);
     }
 }
