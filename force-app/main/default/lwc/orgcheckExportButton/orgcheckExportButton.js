@@ -85,7 +85,7 @@ export default class OrgcheckExportButton extends LightningElement {
     async handleClickExportXLS() {
         this.isExporting = true;
         try {
-            const url = URL.createObjectURL(ocui.Exporter.exportAsXls(this.source));
+            const url = URL.createObjectURL(new Blob([ocui.Exporter.exportAsXls(this.source)], { type: 'application/octet-stream' }));
             const a = this.template.querySelector('a');
             a.href = url;
             a.download = `${this.basename}.xlsx`; // Filename Here

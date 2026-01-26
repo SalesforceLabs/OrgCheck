@@ -76,11 +76,18 @@ export class SFDC_User extends Data {
     profileRef;
 
     /**
-     * @description List of sensible system permissions for this users (like view all etc.)
-     * @type {any}
+     * @description Set of sensible system permissions granted to this users (like view all etc.)
+     * @type {{apiEnabled: boolean, viewSetup: boolean, modifyAllData: boolean, viewAllData: boolean, manageUsers: boolean, customizeApplication: boolean}}
      * @public
      */
-    aggregateImportantPermissions;
+    importantPermissions;
+
+    /**
+     * @description Set of sensible system permissions along with the Profile or PermSet that grants them to this users (like view all etc.)
+     * @type {{apiEnabled: Array<SFDC_Profile>, viewSetup: Array<SFDC_Profile>, modifyAllData: Array<SFDC_Profile>, viewAllData: Array<SFDC_Profile>, manageUsers: Array<SFDC_Profile>, customizeApplication: Array<SFDC_Profile>}}
+     * @public
+     */
+    importantPermissionsGrantedBy;
 
     /**
      * @description Is this user admin-like (has some powerful permissions)

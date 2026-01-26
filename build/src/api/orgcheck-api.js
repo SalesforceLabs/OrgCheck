@@ -135,7 +135,7 @@ export class API {
         // --------------------
         if (setup?.salesforce?.connection?.useJsForce === true) {
             // @ts-ignore 
-            this._sfdcManager = new SalesforceManager(window?.jsforce ?? null, setup?.salesforce?.authentication);
+            this._sfdcManager = new SalesforceManager(globalThis?.jsforce ?? null, setup?.salesforce?.authentication);
         } else {
             this._sfdcManager = new SalesforceManager(setup?.salesforce?.connection?.mockImpl, {});
         }

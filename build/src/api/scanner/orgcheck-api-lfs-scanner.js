@@ -44,7 +44,7 @@ export class LFSScanner {
     static async scanFlows(flowRecords, CaseSafeId) {
         try {
             // @ts-ignore
-            const lfsCore = window?.lightningflowscanner ?? null;
+            const lfsCore = globalThis?.lightningflowscanner ?? null;
 
             if (!lfsCore) {
                 // console.warn('LFS_Core.js not available, skipping LFS scanning');

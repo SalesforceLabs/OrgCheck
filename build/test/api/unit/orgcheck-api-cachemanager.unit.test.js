@@ -4,6 +4,7 @@ import { StorageIntf } from "../../../src/api/core/orgcheck-api-storage";
 import { DataCacheManager } from "../../../src/api/core/orgcheck-api-cachemanager-impl";
 import { Compressor } from "../../../src/api/core/orgcheck-api-compressor-impl";
 import { Storage } from "../../../src/api/core/orgcheck-api-storage-impl";
+import fflate from "fflate";
 
 class CompressorMock extends CompressorIntf {
   compress(/** @type {string} */ d) { return `[${d}]`; }
@@ -77,7 +78,7 @@ describe('tests.api.unit.DataCacheManager', () => {
   });
 
   it('checks if the compression implementation runs correctly', async () => {
-    window.fflate = require("fflate");
+    globalThis.fflate = fflate;
     const compressor = new Compressor();
     const compressed = compressor.compress('This is a test string');
     expect(compressed).toBe('78DA0BC9C82C5600A2448592D4E21285E292A2CCBC7400514907AD');

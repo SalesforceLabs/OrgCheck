@@ -34,6 +34,7 @@ $RECYCLE.BIN/
 
 #Others
 package-lock.json
+yarn.lock
 
 #org check generated files
 build/dist/*/*.js

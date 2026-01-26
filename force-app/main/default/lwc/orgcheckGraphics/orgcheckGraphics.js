@@ -38,7 +38,7 @@ export default class OrgcheckGraphics extends LightningElement {
         .then(() => {
           this._apiInitialized = true;
           // @ts-ignore
-          this._api = window?.d3 ?? null;
+          this._api = globalThis?.d3 ?? null;
           // draw graph now
           this._drawGraph();
         })

@@ -261,8 +261,8 @@ describe('c-orgcheck-app', () => {
             const objectProperties = Object.keys(new SFDC_User());
             // Properties used in the app in the corresponding TableDefintion
             const expectedProperties = [ 'url', 'score', 'id', 'name', 'onLightningExperience', 'lastLogin', 'numberFailedLogins', 'isAdminLike',
-                'lastPasswordChange', 'aggregateImportantPermissions', 'profileRef', 'permissionSetRefs', 'hasMfaByPass', 'nbDirectLoginWithMFA', 
-                'nbDirectLoginWithoutMFA', 'nbSSOLogin', 'hasDebugMode' ];
+                'lastPasswordChange', 'importantPermissions', 'importantPermissionsGrantedBy', 'profileRef', 'permissionSetRefs', 'hasMfaByPass', 
+                'nbDirectLoginWithMFA', 'nbDirectLoginWithoutMFA', 'nbSSOLogin', 'hasDebugMode' ];
             // Calculate the expected fields that are not in the object
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties

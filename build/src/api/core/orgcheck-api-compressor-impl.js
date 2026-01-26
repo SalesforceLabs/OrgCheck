@@ -15,7 +15,7 @@ export class Compressor extends CompressorIntf {
     constructor() {
         super();
         // @ts-ignore
-        this._api = window?.fflate ?? null;
+        this._api = globalThis?.fflate ?? null;
         if (!this._api) throw new Error("fflate library not found");
     }
 

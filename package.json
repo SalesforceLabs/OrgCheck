@@ -44,6 +44,7 @@
     "@salesforce/eslint-config-lwc": "^4.0.0",
     "@salesforce/eslint-plugin-lightning": "^2.0.0",
     "@salesforce/sfdx-lwc-jest": "^7.0.1",
+    "baseline-browser-mapping": "^2.9.18",
     "eslint": "^9.24.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.0.1",
@@ -54,6 +55,7 @@
     "js-yaml": "^4.1.1",
     "rollup": "^4.44.2",
     "rollup-plugin-copy": "^3.5.0",
-    "rollup-plugin-delete": "^3.0.1"
+    "rollup-plugin-delete": "^3.0.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }

@@ -103,7 +103,7 @@ export class SFDC_Profile extends Data {
 
     /**
      * @description Number of sensitive system permissions in this profile (like view all data etc..)
-     * @type {any}
+     * @type {{apiEnabled: boolean, viewSetup: boolean, modifyAllData: boolean, viewAllData: boolean, manageUsers: boolean, customizeApplication: boolean}}
      * @public
      */
     importantPermissions;

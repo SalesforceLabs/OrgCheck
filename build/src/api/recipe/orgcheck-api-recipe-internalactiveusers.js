@@ -53,20 +53,32 @@ export class RecipeInternalActiveUsers extends Recipe {
                 (/** @type {string} */ id) => permissionSets.get(id),
                 (/** @type {string} */ id) => permissionSets.has(id)
             );
-            user.aggregateImportantPermissions = {};
+            user.importantPermissionsGrantedBy = {
+                apiEnabled: [],
+                viewSetup: [],
+                modifyAllData: [], 
+                viewAllData: [],
+                manageUsers: [], 
+                customizeApplication: []
+            };
             if (user.profileRef?.importantPermissions) {
                 Object.keys(user.profileRef.importantPermissions)
                     .filter((permName) => user.profileRef.importantPermissions[permName] === true)
-                    .forEach((permName) => { user.aggregateImportantPermissions[permName] = [ user.profileRef ]; });
+                    .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(user.profileRef));
             }
             await Processor.forEach(user.permissionSetRefs, (/** @type {SFDC_PermissionSet} */ permissionSet) => {
                 Object.keys(permissionSet.importantPermissions)
                     .filter((permName) => permissionSet.importantPermissions[permName] === true)
-                    .forEach((permName) => { 
-                        if (!user.aggregateImportantPermissions[permName]) user.aggregateImportantPermissions[permName] = []; 
-                        user.aggregateImportantPermissions[permName].push(permissionSet);
-                    });
+                    .forEach((permName) => user.importantPermissionsGrantedBy[permName].push(permissionSet));
             });
+            user.importantPermissions = {
+                apiEnabled: user.importantPermissionsGrantedBy.apiEnabled.length > 0,
+                viewSetup: user.importantPermissionsGrantedBy.viewSetup.length > 0,
+                modifyAllData: user.importantPermissionsGrantedBy.modifyAllData.length > 0,
+                viewAllData: user.importantPermissionsGrantedBy.viewAllData.length > 0,
+                manageUsers: user.importantPermissionsGrantedBy.manageUsers.length > 0,
+                customizeApplication: user.importantPermissionsGrantedBy.customizeApplication.length > 0
+            };
         });
         // Return data
         return [... users.values()];
