@@ -369,7 +369,7 @@ describe('c-orgcheck-app', () => {
             expect(expectedProperties.filter((p) => objectProperties.includes(p) === false)).toStrictEqual([]);
             // Calculate the fields that are in the object but not in the expected properties
             expect(objectProperties.filter((p) => expectedProperties.includes(p) === false).sort()).toStrictEqual([ 'badFields', 'badReasonIds', 
-                'currentVersionId', 'isProcessBuilder' ].sort());
+                'currentVersionId', 'isProcessBuilder', 'isScreenFlow' ].sort());
         });
 
         it('Should have correct table definition for workflows', () => {

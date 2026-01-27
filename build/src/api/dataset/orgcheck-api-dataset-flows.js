@@ -152,6 +152,8 @@ export class DatasetFlows extends Dataset {
                     isActive: record.Status === 'Active',
                     description: record.Description,
                     type: record.ProcessType,
+                    isProcessBuilder: record.ProcessType === 'Workflow',
+                    isScreenFlow: record.ProcessType === 'Flow',
                     runningMode: record.RunInMode,
                     createdDate: record.CreatedDate,
                     lastModifiedDate: record.LastModifiedDate,
@@ -159,7 +161,7 @@ export class DatasetFlows extends Dataset {
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.FLOW_VERSION)
                 }
             });
-            if (activeFlowVersion.type === 'Workflow') {
+            if (activeFlowVersion.isProcessBuilder === true) {
                 record.Metadata.processMetadataValues?.forEach((/** @type {any} */ m) => {
                     if (m.name === 'ObjectType') activeFlowVersion.sobject = m.value.stringValue;
                     if (m.name === 'TriggerType') activeFlowVersion.triggerType = m.value.stringValue;
@@ -174,6 +176,8 @@ export class DatasetFlows extends Dataset {
 
             // Set some fields (type and description) from the active version to the definition level
             flowDefinition.type = activeFlowVersion.type;
+            flowDefinition.isProcessBuilder = activeFlowVersion.isProcessBuilder;
+            flowDefinition.isScreenFlow = activeFlowVersion.isScreenFlow;
             if (!flowDefinition.description) {
                 flowDefinition.description = activeFlowVersion.description;
             }

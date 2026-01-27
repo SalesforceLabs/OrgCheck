@@ -39,7 +39,7 @@ export class RecipeFlows extends Recipe {
         /** @type {Array<SFDC_Flow>} */
         const array = [];
         await Processor.forEach(flows, (/** @type {SFDC_Flow} */ flow) => {
-            if (flow.type !== 'Workflow') {
+            if (flow.isProcessBuilder === false) {
                 array.push(flow);
             }
         });

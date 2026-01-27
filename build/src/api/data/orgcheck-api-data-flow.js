@@ -98,6 +98,13 @@ export class SFDC_Flow extends DataWithDependencies {
     isProcessBuilder;
     
     /**
+     * @description Is this a screen flow or not?
+     * @type {boolean}
+     * @public
+     */
+    isScreenFlow;
+
+    /**
      * @description Date/Time when this item was created in the org. Information stored as a Unix timestamp.
      * @type {number}
      * @public
@@ -208,6 +215,20 @@ export class SFDC_FlowVersion extends DataWithoutScoring {
      */
     type;
     
+    /**
+     * @description Is this a PB or not?
+     * @type {boolean}
+     * @public
+     */
+    isProcessBuilder;
+
+    /**
+     * @description Is this a screen flow or not?
+     * @type {boolean}
+     * @public
+     */
+    isScreenFlow;
+
     /**
      * @description Running mode of this flow version
      * @type {string}

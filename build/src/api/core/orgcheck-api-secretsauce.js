@@ -113,10 +113,10 @@ const ALL_SCORE_RULES = [
     { 
         id: 0,
         description: 'Not referenced anywhere',
-        formula: (/** @type {SFDC_CustomLabel | SFDC_Flow | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_StaticResource} */ d) => d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
+        formula: (/** @type {SFDC_CustomLabel | SFDC_LightningPage | SFDC_LightningAuraComponent | SFDC_LightningWebComponent | SFDC_VisualForceComponent | SFDC_VisualForcePage | SFDC_StaticResource} */ d) => d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
         errorMessage: `This component is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
         badField: 'dependencies.referenced.length',
-        applicable: [ SFDC_CustomLabel, SFDC_Flow, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_StaticResource ],
+        applicable: [ SFDC_CustomLabel, SFDC_LightningPage, SFDC_LightningAuraComponent, SFDC_LightningWebComponent, SFDC_VisualForceComponent, SFDC_VisualForcePage, SFDC_StaticResource ],
         category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }, {
         id: 1,
@@ -409,7 +409,7 @@ const ALL_SCORE_RULES = [
     }, {
         id: 37,
         description: 'Migrate this process builder',
-        formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.type === 'Workflow',
+        formula: (/** @type {SFDC_Flow} */ d) => d?.isProcessBuilder === true,
         errorMessage: `Time to migrate this process builder to flow!`,
         badField: 'name',
         applicable: [ SFDC_Flow ],
@@ -417,9 +417,9 @@ const ALL_SCORE_RULES = [
     }, {
         id: 38,
         description: 'No description for the current version of a flow',
-        formula: (/** @type {SFDC_Flow} */ d) => IS_EMPTY(d.currentVersionRef?.description),
-        errorMessage: `This flow's current version does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
-        badField: 'currentVersionRef.description',
+        formula: (/** @type {SFDC_Flow} */ d) => IS_EMPTY(d?.description),
+        errorMessage: `This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
+        badField: 'description',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
@@ -537,7 +537,7 @@ const ALL_SCORE_RULES = [
     }, {
         id: 53,
         description: 'No description for this flow',
-        formula: (/** @type { SFDC_Flow } */ d) => d?.type !== 'Workflow' && IS_EMPTY(d?.description),
+        formula: (/** @type { SFDC_Flow } */ d) => d?.isProcessBuilder === false && IS_EMPTY(d?.description),
         errorMessage: `This flow does not have a description. Best practices force you to use the Description field to give some informative context about why and how it is used/set/govern.`,
         badField: 'description',
         applicable: [ SFDC_Flow ],
@@ -924,6 +924,15 @@ const ALL_SCORE_RULES = [
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.USER_ADOPTION
+    },
+    { 
+        id: 126,
+        description: 'Not referenced anywhere for flow (excluding Screen Flows)',
+        formula: (/** @type {SFDC_Flow } */ d) => d?.isScreenFlow === false &&d?.dependencies?.hadError === false && IS_EMPTY(d.dependencies?.referenced), 
+        errorMessage: `This flow is not referenced anywhere (as we were told by the Dependency API). Please review the need to keep it in your org.`,
+        badField: 'dependencies.referenced.length',
+        applicable: [ SFDC_Flow ],
+        category: SCORE_RULE_CATEGORIES.DEPENDENCY
     }
 ];
 Object.freeze(ALL_SCORE_RULES);
