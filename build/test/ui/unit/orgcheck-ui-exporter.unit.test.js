@@ -89,35 +89,42 @@ describe('tests.ui.unit.Exporter', () => {
             }));
         });
 
-        it('checks if exporter handles well string, empty values, boolean, and arrays', async () => {
-            const buffer = Exporter.exportAsXls({
+        it('checks if exporter throws exception in case of numbers or decimals in a cell', async () => {
+            expect(() => Exporter.exportAsXls({
                 header: 'Test Table',
-                columns: [ 'Type', 'Value', 'ExpectedValue' ],
+                columns: [ 'Type', 'Value' ],
                 rows: [
-                    [ 'string', 'Cell 1-2', 'Cell 1-2' ],
-                    [ 'emptyString', '', '' ],
-                    [ 'number', 12345, '12345' ],
-                    [ 'booleanTrue', true, 'true' ],
-                    [ 'booleanFalse', false, 'false' ],
-                    [ 'null', null, '' ],
-                    [ 'undefined', undefined, ''],
-                    [ 'arrayOfNumbers', [1, 2, 3], `[1, 2, 3]` ],
-                    [ 'arrayOfStrings', ['4', '2', '3'], `[4, 2, 3]`],
-                    [ 'arrayOfBooleans', [true, true, false], `[true, true, false]` ]
+                    [ 'string', 'that should be OK!' ],
+                    [ 'number', 123456 ] // This should cause an exception
                 ]
-            });
-            expect(buffer).toBeDefined();
-            expect(buffer).toBeInstanceOf(ArrayBuffer);
-            expect(buffer.byteLength).toBeGreaterThan(0);
-            const workbook = XLSX.read(buffer, { type: 'binary' });
-            expect(workbook).toBeDefined();
-            expect(workbook.SheetNames.length).toBe(1);
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            data.shift(); // remove the headers
-            data.forEach((row) => {
-                expect(row[1]).toBe(row[2]);
-            });
+            })).toThrowError();
+            expect(() => Exporter.exportAsXls({
+                header: 'Test Table',
+                columns: [ 'Type', 'Value' ],
+                rows: [
+                    [ 'string', 'that should be OK!' ],
+                    [ 'decimal', 1234.56 ] // This should cause an exception
+                ]
+            })).toThrowError();
+        });
+
+        it('checks if exporter throws exception in case of booleans in a cell', async () => {
+            expect(() => Exporter.exportAsXls({
+                header: 'Test Table',
+                columns: [ 'Type', 'Value' ],
+                rows: [
+                    [ 'string', 'that should be OK!' ],
+                    [ 'boolean', true ] // This should cause an exception
+                ]
+            })).toThrowError();
+            expect(() => Exporter.exportAsXls({
+                header: 'Test Table',
+                columns: [ 'Type', 'Value' ],
+                rows: [
+                    [ 'string', 'that should be OK!' ],
+                    [ 'boolean', false ] // This should cause an exception
+                ]
+            })).toThrowError();
         });
 
         it('checks if exporter throws exception in case of object in a cell', async () => {
@@ -125,7 +132,27 @@ describe('tests.ui.unit.Exporter', () => {
                 header: 'Test Table',
                 columns: [ 'Type', 'Value' ],
                 rows: [
-                    [ 'object', { key: 'value', name: 'test' } ]
+                    [ 'string', 'that should be OK!' ],
+                    [ 'object', { key: 'value', name: 'test', expected: 'That should throw an exception, we do not accept objects in cells' } ]
+                ]
+            })).toThrowError();
+            expect(() => Exporter.exportAsXls({
+                header: 'Test Table',
+                columns: [ 'Type', 'Value' ],
+                rows: [
+                    [ 'string', 'that should be OK!' ],
+                    [ 'object', null ]
+                ]
+            })).toThrowError();
+        });
+
+        it('checks if exporter throws exception in case of undefined in a cell', async () => {
+            expect(() => Exporter.exportAsXls({
+                header: 'Test Table',
+                columns: [ 'Type', 'Value' ],
+                rows: [
+                    [ 'string', 'that should be OK!' ],
+                    [ 'undefined', undefined ]
                 ]
             })).toThrowError();
         });

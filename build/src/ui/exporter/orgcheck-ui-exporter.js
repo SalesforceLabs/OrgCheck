@@ -2,20 +2,7 @@ import { ExportedTable } from "../table/orgcheck-ui-table";
 
 const TITLE_MAX_SIZE = 31;
 const CELL_MAX_SIZE = 32767;
-const CELL_ALLOWED_PRIMARY_TYPES = [ 'string', 'number', 'boolean' ];
 const TRUNCATE_MSG = '... (truncated)';
-
-const MAP_CELL_TO_STRING = (/** @type {any} */ cell) => {
-    if (cell === null || cell === undefined) return '';
-    if (CELL_ALLOWED_PRIMARY_TYPES.includes(typeof cell) === false) {
-        throw new Error(`Cell type is not supported for XLS export (type: ${typeof cell}, supported primary types: ${CELL_ALLOWED_PRIMARY_TYPES.join(',')}), value: ${cell}`);
-    }
-    return `${cell}`;
-}
-
-const TRUNCATE_CELL_CONTENT = (/** @type {string} */ str) => {
-    return str.length > CELL_MAX_SIZE ? (str?.substring(0, CELL_MAX_SIZE-TRUNCATE_MSG.length) + TRUNCATE_MSG) : str;
-}
 
 export class Exporter {
 
@@ -34,10 +21,20 @@ export class Exporter {
         const workbook = xlsx.utils.book_new();
         (Array.isArray(source) ? source : [ source ]).forEach(/** @param {ExportedTable} item - information about a data exportable */ item => {
             const datasheet = [ item.columns ].concat(
-                item.rows.map(row => 
-                    row.map(cell => 
-                        TRUNCATE_CELL_CONTENT(Array.isArray(cell) ? `[${cell.map(MAP_CELL_TO_STRING).join(', ')}]` : MAP_CELL_TO_STRING(cell))
-                    )
+                item.rows.map((row, i) => 
+                    row.map((cell, j) => {
+                        // Important: At this point, all cells (in the source) SHOULD be strings -- ready to be exported.
+                        // Not objects, not arrays, not booleans nor numbers.
+                        // Not even null/undefined -- they must be empty strings. (reminder: typeof null is "object"!!)
+                        // so in short, ONLY strings!!
+                        // For any string transformation, please refer to RowsFactory.export() method
+                        if (typeof cell != 'string') {
+                            throw new Error(`Invalid cell type at row ${i+1}, column ${item.columns[j]} (${j+1}) of table "${item.header}": expected string but got ${typeof cell}`);
+                        }
+                        // Excel has a max cell size of 32,767 characters
+                        if (cell.length > CELL_MAX_SIZE) return cell.substring(0, CELL_MAX_SIZE-TRUNCATE_MSG.length) + TRUNCATE_MSG;
+                        return cell;
+                    })
                 )
             );
             const worksheet = xlsx.utils.aoa_to_sheet(datasheet);

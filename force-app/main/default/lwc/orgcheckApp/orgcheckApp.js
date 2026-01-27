@@ -1869,9 +1869,6 @@ export default class OrgcheckApp extends LightningElement {
     set _internalGlobalViewDataFromAPI(data) {
         if (data) {
             const globalViewData = [];
-            const sheets = [];
-            sheets.push({ header: 'Statistics (Good and Bad)', columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], rows: [] });
-            sheets.push({ header: 'Statistics (Reasons)', columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], rows: [] });
             const goodAndBadRows = [];
             const rulesRows = [];
             const ruleTableDefinition = {
@@ -1882,6 +1879,7 @@ export default class OrgcheckApp extends LightningElement {
                 orderIndex: 0,
                 orderSort: ocui.SortOrder.DESC
             }
+            const detailsSheets = [];
             data?.forEach((item, recipe) => {
                 const tabValue = RECIPE_TO_SUB_TAB.get(recipe);
                 const transfomer = this._internalTransformers.get(tabValue);
@@ -1901,11 +1899,28 @@ export default class OrgcheckApp extends LightningElement {
                 item?.countBadByRule?.forEach((c) => {
                     rulesRows.push([ itemName, c.ruleName, c.count ]);
                 });
-                sheets.push(ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription));
+                detailsSheets.push({
+                    countBad: item?.countBad,
+                    exportedTable: ocui.RowsFactory.createAndExport(definitionTable, item?.data, itemName, ocapi.SecretSauce.GetScoreRuleDescription)
+                });
             });
-            sheets[0].rows = goodAndBadRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
-            sheets[1].rows = rulesRows.sort((a, b) => { return a[2] < b[2] ? 1 : -1 }) // Index=2 sorted by Bad count
-            this.globalViewData = globalViewData.sort((a, b) => { return a.countBad < b. countBad ? 1 : -1 });
+            const sheets = [];
+            sheets.push({ 
+                header: 'Statistics (Good and Bad)', 
+                columns: [ 'Type of items', 'Count of good items', 'Count of bad items' ], 
+                rows: goodAndBadRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
+                                    .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
+            });
+            sheets.push({ 
+                header: 'Statistics (Reasons)', 
+                columns: [ 'Type of items', 'Why are they considered bad?', 'Count of bad items' ], 
+                rows: rulesRows.sort((a, b) => (a[2] < b[2] ? 1 : -1)) // Index=2 sorted by Bad count
+                               .map(r => ([r[0], `${r[1]}`, `${r[2]}`]) ) // converting numbers to strings
+            });
+            // Sorting the details sheets by count of bad items descending (bad items on top)
+            detailsSheets.sort((a, b) => (a.countBad < b.countBad ? 1 : -1)).forEach(s => sheets.push(s.exportedTable));
+            // Sorting the global view data by count of bad items descending (bad items on top)
+            this.globalViewData = globalViewData.sort((a, b) => (a.countBad < b.countBad ? 1 : -1));
             this.globalViewItemsExport = sheets;
             this.showGlobalViewExportButton = true;
         } else {

@@ -159,6 +159,12 @@ export class RowsFactory {
                     break; 
                 }
                 //---
+                // In case we have the dependency column, then we want to export only the list of items that are USED and REFENRECED
+                case ColumnType.DEP: {
+                    exportedRows.columns.push(`List of used`, `List of referenced`); 
+                    break; 
+                }
+                //---
                 // And for the rest, we only need one column
                 default: { 
                     exportedRows.columns.push(column.label); 
@@ -170,25 +176,31 @@ export class RowsFactory {
         rows.forEach((row) => {
 
             // Add the row in the first table
+            /** @type {Array<string>} */
             const exportRow = [];
             row.cells?.forEach((cell) => {
-                if (cell.typeofindex === true) { // for INDEX typed cell, we set the row's index
-                    exportRow.push(row.index);
-                } else if (cell.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
-                    exportRow.push(row.score, ARRAY_TO_STRING(row.badReasonIds?.map((id) => badScoreLabelById(id))));
-                } else if (cell.typeofid === true) { // for URL typed cell, we set the label and then the URL
-                    exportRow.push(cell.data.label, cell.data.value);
-                } else if (cell.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
+                if (cell?.typeofindex === true) { // for INDEX typed cell, we set the row's index
+                    exportRow.push(`${row?.index}`);
+                } else if (cell?.typeofscore === true) { // for SCORE typed cell, we set the row's score and we add a JSON representation of the list of bad reason Ids
+                    exportRow.push(`${row?.score}`, ARRAY_TO_STRING(row?.badReasonIds?.map((id) => badScoreLabelById(id))));
+                } else if (cell?.typeofid === true) { // for URL typed cell, we set the label and then the URL
+                    exportRow.push(`${cell?.data?.label}`, `${cell.data?.value}`);
+                } else if (cell?.typeofids === true) { // for multiple URLs typed cell, we set a JSON representation of the labels and then a JSON representation of the URLs
                     exportRow.push(
-                        ARRAY_TO_STRING(cell.data.values?.map(v => v.data.label)), 
-                        ARRAY_TO_STRING(cell.data.values?.map(v => v.data.value))
+                        ARRAY_TO_STRING(cell.data?.values?.map(v => `${v.data?.label}`)), 
+                        ARRAY_TO_STRING(cell.data?.values?.map(v => `${v.data?.value}`))
                     );
-                } else if (cell.typeofobjects === true || cell.typeofobjects === true) { 
+                } else if (cell?.typeofdependencies === true) { // for DEPENDENCIES typed cell, we set a JSON representation of the USING and REFERENCED items
+                    exportRow.push(
+                        ARRAY_TO_STRING(cell.data?.value?.using?.map(v => `${v?.name} (${v?.type} - ${v?.id})`)),
+                        ARRAY_TO_STRING(cell.data?.value?.referenced?.map(v => `${v?.name} (${v?.type} - ${v?.id})`))
+                    );
+                } else if (cell?.typeofobjects === true || cell?.typeoftexts === true) { 
                     // for multiple Objects typed cell, we previously used a template function to decorate the object into an array of strings
                     // for multiple Texts typed cell, we have already an array of strings
-                    exportRow.push(ARRAY_TO_STRING(cell.data.values?.map(v => v.data)));
-                } else { // for any other type use data.value
-                    exportRow.push(cell.data.value ?? '');
+                    exportRow.push(ARRAY_TO_STRING(cell?.data?.values?.map(v => `${v.data}`)));
+                } else { // for any other type use data?.value
+                    exportRow.push(`${cell?.data?.value ?? ''}`);
                 }
             });
             exportedRows.rows.push(exportRow);
@@ -228,5 +240,5 @@ const ARRAY_MATCHER = (array, s) => {
 }
 
 const ARRAY_TO_STRING = (array) => {
-    return JSON.stringify(array);
+    return array ? JSON.stringify(array) : '';
 };
