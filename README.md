@@ -1,4 +1,4 @@
-<div align="center">
+
   <img src="docs/assets/pngs/Logo+Mascot-v3.png" width="256" alt="Org Check Logo" />
   <h1>Org Check Salesforce Application</h1>
   <p>
