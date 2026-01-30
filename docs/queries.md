@@ -4,6 +4,9 @@ title: List of queries by datasets
 permalink: /queries/
 ---
 
+## Dataset database access matrix
+
+
 | Dataset | /tooling/query  | /query | /search | /tooling/sobjects | /metadata | /limits/recordCount | /sobjects | Source code |
 | ---     | ---          | ---  | ---  | ---               | ---      | ---    | ---      | ---         |
 | Apex Classes  | ApexClass <br /> AsyncApexJob <br /> ApexTestResult <br />  ApexCodeCoverage <br /> ApexCodeCoverageAggregate <br /> MetadataComponentDependency&nbsp;<sup>1</sup> | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apexclasses.js) |
@@ -52,3 +55,164 @@ permalink: /queries/
 
 ---
 1: Combined with /tooling/composite
+
+## Detailed Queries Per Dataset
+
+This section provides a detailed breakdown of all queries performed by each dataset, including SOQL queries, Metadata API calls, and Tooling API calls with their characteristics.
+
+### Apex Classes
+- SOQL Query: `SELECT Id, Name, ApiVersion, NamespacePrefix, Body, LengthWithoutComments, SymbolTable, CreatedDate, LastModifiedDate FROM ApexClass WHERE ManageableState IN ('installedEditable', 'unmanaged') ORDER BY Id` (Tooling API)
+- SOQL Query: `SELECT ApexClassId FROM AsyncApexJob WHERE JobType = 'ScheduledApex' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+- SOQL Query: `SELECT ApexClassId, MethodName, ApexTestRunResult.CreatedDate, RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) FROM ApexTestResult WHERE (Outcome != 'Pass' OR RunTime > 20000) AND ApexTestRunResult.Status = 'Completed' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName` (Tooling API)
+- SOQL Query Batch: `SELECT ApexClassOrTriggerId, ApexTestClassId FROM ApexCodeCoverage WHERE ApexClassOrTriggerId IN (<subsetIds>) AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged') GROUP BY ApexClassOrTriggerId, ApexTestClassId` (Tooling API)
+- SOQL Query Batch: `SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate WHERE ApexClassOrTriggerId IN (<subsetIds>)` (Tooling API)
+
+### Apex Triggers
+- SOQL Query: `SELECT Id, Name, ApiVersion, Status, NamespacePrefix, Body, UsageBeforeInsert, UsageAfterInsert, UsageBeforeUpdate, UsageAfterUpdate, UsageBeforeDelete, UsageAfterDelete, UsageAfterUndelete, UsageIsBulk, LengthWithoutComments, EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate FROM ApexTrigger WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+
+### Applications
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem` (REST API)
+
+### Application Permissions
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem` (REST API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM SetupEntityAccess` (REST API)
+
+### Browsers
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Browser` (REST API)
+
+### Chatter Groups
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM CollaborationGroup` (REST API)
+
+### Current User Permissions
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserPermissionAccess` (REST API)
+
+### Custom Fields
+- SOQL Query: `SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix FROM CustomField WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+- Metadata API Call: `readMetadataAtScale('CustomField', <customFieldIds>, ['INVALID_CROSS_REFERENCE_KEY'])`
+
+### Custom Labels
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value, CreatedDate, LastModifiedDate FROM ExternalString WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+
+### Custom Tabs
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM CustomTab` (Tooling API)
+
+### Dashboards
+- SOQL Query: `SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate, Type, LastViewedDate, LastReferencedDate, DashboardResultRefreshedDate FROM Dashboard` (REST API)
+
+### Documents
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Document` (REST API)
+
+### Email Templates
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EmailTemplate` (REST API)
+
+### Field Permissions
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldPermissions` (REST API)
+
+### Flow and Process Builder
+- SOQL Query: `SELECT Id, DeveloperName, ApiVersion, Description, ActiveVersionId, LatestVersionId, CreatedDate, LastModifiedDate FROM FlowDefinition` (Tooling API)
+- SOQL Query: `SELECT DefinitionId, COUNT(Id) NbVersions FROM Flow GROUP BY DefinitionId` (Tooling API)
+- Metadata API Call: `readMetadataAtScale('Flow', <flowIds>, ['UNKNOWN_EXCEPTION'])`
+
+### Public Groups and Queues
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Group` (REST API)
+
+### Homepage Components
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Homepagecomponent` (Tooling API)
+
+### Internal Active Users
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM User` (REST API)
+
+### Knowledge Articles
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM KnowledgeArticleVersion` (REST API)
+
+### Aura Components
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle` (Tooling API)
+
+### Lightning Pages
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FlexiPage` (Tooling API)
+
+### LWCs
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle` (Tooling API)
+
+### SObject
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EntityDefinition` (Tooling API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldDefinition` (Tooling API)
+
+### SObject permissions
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectPermissions` (REST API)
+
+### SObjects
+- SOQL Query: `SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ExternalSharingModel, InternalSharingModel FROM EntityDefinition WHERE KeyPrefix <> null AND DeveloperName <> null AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) AND (NOT(QualifiedApiName like '%_hd'))` (Tooling API)
+- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbCustomFields FROM CustomField GROUP BY EntityDefinitionId` (Tooling API)
+- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbPageLayouts FROM Layout GROUP BY EntityDefinitionId` (Tooling API)
+- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbRecordTypes FROM RecordType GROUP BY EntityDefinitionId` (Tooling API)
+- SOQL Query: `SELECT TableEnumOrId, COUNT(Id) NbWorkflowRules FROM WorkflowRule GROUP BY TableEnumOrId` (Tooling API)
+- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbValidationRules FROM ValidationRule GROUP BY EntityDefinitionId` (Tooling API)
+- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbTriggers FROM ApexTrigger GROUP BY EntityDefinitionId` (Tooling API)
+
+### Object Types
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectType` (REST API)
+
+### Organization Information
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization` (REST API)
+
+### Packages
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM InstalledSubscriberPackage` (REST API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization` (REST API)
+
+### Page Layouts
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Layout` (Tooling API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfileLayout` (Tooling API)
+
+### Permission Set Licenses
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetLicense` (REST API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSet` (REST API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetAssignment` (REST API)
+
+### Permission Sets
+- SOQL Query: `SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE IsOwnedByProfile = FALSE` (REST API)
+- SOQL Query: `SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description FROM PermissionSet WHERE PermissionSetGroupId != null` (REST API)
+- SOQL Query: `SELECT ParentId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = FALSE GROUP BY ParentId` (REST API)
+- SOQL Query: `SELECT ParentId, COUNT(Field) CountField FROM FieldPermissions WHERE Parent.IsOwnedByProfile = FALSE GROUP BY ParentId` (REST API)
+- SOQL Query: `SELECT PermissionSetId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = FALSE AND Assignee.IsActive = TRUE GROUP BY PermissionSetId` (REST API)
+- SOQL Query: `SELECT PermissionSetGroupId, PermissionSetId FROM PermissionSetGroupComponent WHERE PermissionSet.IsOwnedByProfile = FALSE` (REST API)
+
+### Profile Password Policies
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfilePasswordPolicy` (REST API)
+
+### Profile Restrictions
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile` (REST API)
+
+### Profiles
+- SOQL Query: `SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE isOwnedByProfile = TRUE ORDER BY ProfileId` (REST API)
+- SOQL Query: `SELECT Parent.ProfileId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId` (REST API)
+- SOQL Query: `SELECT Parent.ProfileId, COUNT(Field) CountField FROM FieldPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId` (REST API)
+- SOQL Query: `SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = TRUE AND Assignee.IsActive = TRUE GROUP BY PermissionSet.ProfileId` (REST API)
+
+### Record Types
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM RecordType` (REST API)
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile` (REST API)
+
+### Reports
+- SOQL Query: `SELECT Id, Name, DeveloperName, Description, Format, FolderName, NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, LastViewedDate, LastReferencedDate FROM Report` (REST API)
+
+### Static Resources
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM StaticResource` (REST API)
+
+### User Roles
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserRole` (REST API)
+
+### Validation Rules
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ValidationRule` (REST API)
+
+### Visualforce Components
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexComponent` (Tooling API)
+
+### Visualforce Pages
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexPage` (Tooling API)
+
+### Web Links
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WebLink` (Tooling API)
+
+### Workflows
+- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WorkflowRule` (Tooling API)
