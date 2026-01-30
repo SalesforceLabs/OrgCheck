@@ -3,6 +3,8 @@
 
 @import "{{ site.theme }}";
 
+/*
+
 .wrapper {
     width: 90%;
 }
@@ -22,6 +24,13 @@ section {
     padding-bottom: 50px;
 }
 
+@media print, screen and (max-width: 960px) {
+    header, section, footer {
+    }
+}
+
 footer {
     width: 20%;
 }
+
+*/
