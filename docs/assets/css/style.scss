@@ -22,6 +22,13 @@ section {
     padding-bottom: 50px;
 }
 
+@media print, screen and (max-width: 960px) {
+    header, section, footer {
+        float: none;
+        width: auto;
+    }
+}
+
 footer {
     width: 20%;
 }
