@@ -4,29 +4,27 @@ title: List of queries by datasets
 permalink: /queries/
 ---
 
-## Dataset database access matrix
-
-## Detailed Queries Per Dataset
+# Queries Per Dataset
 
 This section provides a detailed breakdown of all queries performed by each dataset, including SOQL queries, Metadata API calls, Tooling API calls, SOSL queries, and other database access methods with their characteristics.
 
-### Apex Classes
-## Tooling SOQL Queries
-**ApexClass**
+## Apex Classes
+### Tooling SOQL Queries
+**Query on ApexClass**
 ```
 SELECT Id, Name, ApiVersion, NamespacePrefix, Body, LengthWithoutComments, SymbolTable, CreatedDate, LastModifiedDate
 FROM ApexClass
 WHERE ManageableState IN ('installedEditable', 'unmanaged') 
 ORDER BY Id
 ```
-**AsyncApexJob**
+**Query on AsyncApexJob**
 ```
 SELECT ApexClassId
 FROM AsyncApexJob
 WHERE JobType = 'ScheduledApex'
 AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged')
 ```
-**ApexTestResult**
+**Query on ApexTestResult**
 ```
 SELECT ApexClassId, MethodName, ApexTestRunResult.CreatedDate, RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1)
 FROM ApexTestResult
@@ -35,7 +33,7 @@ AND ApexTestRunResult.Status = 'Completed'
 AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged')
 ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName
 ```
-**ApexCodeCoverage**
+**Query on ApexCodeCoverage**
 This query is run in batches with 500 apex class ids max (see `subsetIds`).
 ```
 SELECT ApexClassOrTriggerId, ApexTestClassId 
@@ -44,14 +42,14 @@ WHERE ApexClassOrTriggerId IN (<subsetIds>)
 AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged')
 GROUP BY ApexClassOrTriggerId, ApexTestClassId 
 ```
-**ApexCodeCoverageAggregate**
+**Query on ApexCodeCoverageAggregate**
 This query is run in batches with 500 apex class ids max (see `subsetIds`).
 ```
 SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage
 FROM ApexCodeCoverageAggregate 
 WHERE ApexClassOrTriggerId IN (<subsetIds>)
 ```
-**MetadataComponentDependency**
+**Query on MetadataComponentDependency**
 This query is run in batches with 100 apex class ids max (see `subsetIds`).
 ```
 SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType
@@ -60,15 +58,15 @@ WHERE RefMetadataComponentId IN (<subsetIds>)
 OR MetadataComponentId IN (<subsetIds>)
 ```
 
-### Apex Triggers
-## Tooling SOQL Queries
-**ApexTrigger**
+## Apex Triggers
+### Tooling SOQL Queries
+**Query on ApexTrigger**
 ```
 SELECT Id, Name, ApiVersion, Status, NamespacePrefix, Body, UsageBeforeInsert, UsageAfterInsert, UsageBeforeUpdate, UsageAfterUpdate, UsageBeforeDelete, UsageAfterDelete, UsageAfterUndelete, UsageIsBulk, LengthWithoutComments, EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate 
 FROM ApexTrigger 
 WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
-**MetadataComponentDependency**
+**Query on MetadataComponentDependency**
 This query is run in batches with 100 apex trigger ids max (see `subsetIds`).
 ```
 SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType
@@ -76,6 +74,10 @@ FROM MetadataComponentDependency
 WHERE RefMetadataComponentId IN (<subsetIds>)
 OR MetadataComponentId IN (<subsetIds>)
 ```
+
+
+--- 
+
 
 ### Applications
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem`
