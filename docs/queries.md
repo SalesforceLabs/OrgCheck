@@ -58,17 +58,17 @@ permalink: /queries/
 
 ## Detailed Queries Per Dataset
 
-This section provides a detailed breakdown of all queries performed by each dataset, including SOQL queries, Metadata API calls, and Tooling API calls with their characteristics.
+This section provides a detailed breakdown of all queries performed by each dataset, including SOQL queries, Metadata API calls, Tooling API calls, SOSL queries, and other database access methods with their characteristics.
 
 ### Apex Classes
-- SOQL Query: `SELECT Id, Name, ApiVersion, NamespacePrefix, Body, LengthWithoutComments, SymbolTable, CreatedDate, LastModifiedDate FROM ApexClass WHERE ManageableState IN ('installedEditable', 'unmanaged') ORDER BY Id` (Tooling API)
-- SOQL Query: `SELECT ApexClassId FROM AsyncApexJob WHERE JobType = 'ScheduledApex' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
-- SOQL Query: `SELECT ApexClassId, MethodName, ApexTestRunResult.CreatedDate, RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) FROM ApexTestResult WHERE (Outcome != 'Pass' OR RunTime > 20000) AND ApexTestRunResult.Status = 'Completed' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName` (Tooling API)
-- SOQL Query Batch: `SELECT ApexClassOrTriggerId, ApexTestClassId FROM ApexCodeCoverage WHERE ApexClassOrTriggerId IN (<subsetIds>) AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged') GROUP BY ApexClassOrTriggerId, ApexTestClassId` (Tooling API)
-- SOQL Query Batch: `SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate WHERE ApexClassOrTriggerId IN (<subsetIds>)` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, ApiVersion, NamespacePrefix, Body, LengthWithoutComments, SymbolTable, CreatedDate, LastModifiedDate FROM ApexClass WHERE ManageableState IN ('installedEditable', 'unmanaged') ORDER BY Id`
+- Tooling SOQL Query: `SELECT ApexClassId FROM AsyncApexJob WHERE JobType = 'ScheduledApex' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged')`
+- Tooling SOQL Query: `SELECT ApexClassId, MethodName, ApexTestRunResult.CreatedDate, RunTime, Outcome, StackTrace, (SELECT Cpu, AsyncCalls, Sosl, Soql, QueryRows, DmlRows, Dml FROM ApexTestResults LIMIT 1) FROM ApexTestResult WHERE (Outcome != 'Pass' OR RunTime > 20000) AND ApexTestRunResult.Status = 'Completed' AND ApexClass.ManageableState IN ('installedEditable', 'unmanaged') ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName`
+- SOQL Query Batch: `SELECT ApexClassOrTriggerId, ApexTestClassId FROM ApexCodeCoverage WHERE ApexClassOrTriggerId IN (<subsetIds>) AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged') GROUP BY ApexClassOrTriggerId, ApexTestClassId`
+- SOQL Query Batch: `SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage FROM ApexCodeCoverageAggregate WHERE ApexClassOrTriggerId IN (<subsetIds>)`
 
 ### Apex Triggers
-- SOQL Query: `SELECT Id, Name, ApiVersion, Status, NamespacePrefix, Body, UsageBeforeInsert, UsageAfterInsert, UsageBeforeUpdate, UsageAfterUpdate, UsageBeforeDelete, UsageAfterDelete, UsageAfterUndelete, UsageIsBulk, LengthWithoutComments, EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate FROM ApexTrigger WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, ApiVersion, Status, NamespacePrefix, Body, UsageBeforeInsert, UsageAfterInsert, UsageBeforeUpdate, UsageAfterUpdate, UsageBeforeDelete, UsageAfterDelete, UsageAfterUndelete, UsageIsBulk, LengthWithoutComments, EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate FROM ApexTrigger WHERE ManageableState IN ('installedEditable', 'unmanaged')`
 
 ### Applications
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem` (REST API)
@@ -87,7 +87,7 @@ This section provides a detailed breakdown of all queries performed by each data
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserPermissionAccess` (REST API)
 
 ### Custom Fields
-- SOQL Query: `SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix FROM CustomField WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix FROM CustomField WHERE ManageableState IN ('installedEditable', 'unmanaged')`
 - Metadata API Call: `readMetadataAtScale('CustomField', <customFieldIds>, ['INVALID_CROSS_REFERENCE_KEY'])`
 
 ### Custom Labels
@@ -109,8 +109,8 @@ This section provides a detailed breakdown of all queries performed by each data
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldPermissions` (REST API)
 
 ### Flow and Process Builder
-- SOQL Query: `SELECT Id, DeveloperName, ApiVersion, Description, ActiveVersionId, LatestVersionId, CreatedDate, LastModifiedDate FROM FlowDefinition` (Tooling API)
-- SOQL Query: `SELECT DefinitionId, COUNT(Id) NbVersions FROM Flow GROUP BY DefinitionId` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, DeveloperName, ApiVersion, Description, ActiveVersionId, LatestVersionId, CreatedDate, LastModifiedDate FROM FlowDefinition`
+- Tooling SOQL Query: `SELECT DefinitionId, COUNT(Id) NbVersions FROM Flow GROUP BY DefinitionId`
 - Metadata API Call: `readMetadataAtScale('Flow', <flowIds>, ['UNKNOWN_EXCEPTION'])`
 
 ### Public Groups and Queues
@@ -123,32 +123,32 @@ This section provides a detailed breakdown of all queries performed by each data
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM User` (REST API)
 
 ### Knowledge Articles
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM KnowledgeArticleVersion` (REST API)
+- SOSL Query: `FIND { .salesforce.com OR .force.* } IN ALL FIELDS RETURNING KnowledgeArticleVersion (Id, KnowledgeArticleId, ArticleNumber, CreatedDate, LastModifiedDate, PublishStatus, Title, UrlName )` (REST API)
 
 ### Aura Components
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle`
 
 ### Lightning Pages
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FlexiPage` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FlexiPage`
 
 ### LWCs
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle`
 
 ### SObject
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EntityDefinition` (Tooling API)
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldDefinition` (Tooling API)
+- Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EntityDefinition`
+- Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldDefinition`
 
 ### SObject permissions
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectPermissions` (REST API)
 
 ### SObjects
-- SOQL Query: `SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ExternalSharingModel, InternalSharingModel FROM EntityDefinition WHERE KeyPrefix <> null AND DeveloperName <> null AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) AND (NOT(QualifiedApiName like '%_hd'))` (Tooling API)
-- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbCustomFields FROM CustomField GROUP BY EntityDefinitionId` (Tooling API)
-- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbPageLayouts FROM Layout GROUP BY EntityDefinitionId` (Tooling API)
-- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbRecordTypes FROM RecordType GROUP BY EntityDefinitionId` (Tooling API)
-- SOQL Query: `SELECT TableEnumOrId, COUNT(Id) NbWorkflowRules FROM WorkflowRule GROUP BY TableEnumOrId` (Tooling API)
-- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbValidationRules FROM ValidationRule GROUP BY EntityDefinitionId` (Tooling API)
-- SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbTriggers FROM ApexTrigger GROUP BY EntityDefinitionId` (Tooling API)
+- Tooling SOQL Query: `SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ExternalSharingModel, InternalSharingModel FROM EntityDefinition WHERE KeyPrefix <> null AND DeveloperName <> null AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) AND (NOT(QualifiedApiName like '%_hd'))`
+- Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbCustomFields FROM CustomField GROUP BY EntityDefinitionId`
+- Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbPageLayouts FROM Layout GROUP BY EntityDefinitionId`
+- Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbRecordTypes FROM RecordType GROUP BY EntityDefinitionId`
+- Tooling SOQL Query: `SELECT TableEnumOrId, COUNT(Id) NbWorkflowRules FROM WorkflowRule GROUP BY TableEnumOrId`
+- Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbValidationRules FROM ValidationRule GROUP BY EntityDefinitionId`
+- Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbTriggers FROM ApexTrigger GROUP BY EntityDefinitionId`
 
 ### Object Types
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectType` (REST API)
