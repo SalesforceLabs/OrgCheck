@@ -40,6 +40,12 @@
       </header>
       <section>
 
+        {% for page in site.pages %}
+          }<a href="{{ page.url }}">{{ page.title }}</a> |
+        {% endfor %}
+        <hr noshade="true" />
+        <br />
+
       {{ content }}
 
       </section>

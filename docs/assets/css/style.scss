@@ -3,34 +3,22 @@
 
 @import "{{ site.theme }}";
 
-/*
-
 .wrapper {
-    width: 90%;
+    width: 100%;
 }
 
 header {
-    width: 20%;
-    background: unset;
+    width: 200px;
+}
+
+footer {
+    width: 200px;
+}
+
+section {
+    width: calc(100% - 250px);
 }
 
 header > h1 {
     display: none;
 }
-
-section {
-    width: 70%;
-    float: right;
-    padding-bottom: 50px;
-}
-
-@media print, screen and (max-width: 960px) {
-    header, section, footer {
-    }
-}
-
-footer {
-    width: 20%;
-}
-
-*/
