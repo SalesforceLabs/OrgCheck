@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Code scan reports
+title: Security review
 permalink: /reports/
 ---
 

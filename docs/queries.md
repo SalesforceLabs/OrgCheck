@@ -8,7 +8,7 @@ permalink: /queries/
 
 This section provides a detailed breakdown of all queries performed by each dataset, including SOQL queries, Metadata API calls, Tooling API calls, SOSL queries, and other database access methods with their characteristics.
 
-## Apex Classes
+## Queries permformed by the Apex Classes dataset
 ### Tooling SOQL Queries
 **Query on ApexClass**
 ```
@@ -49,16 +49,21 @@ SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage
 FROM ApexCodeCoverageAggregate 
 WHERE ApexClassOrTriggerId IN (<subsetIds>)
 ```
+### Tooling Composite + Tooling SOQL
 **Query on MetadataComponentDependency**
-This query is run in batches with 100 apex class ids max (see `subsetIds`).
+This query is run with composite using batch size=500.
+Each SOQL query can max maximum 100 ids.
+Below is an example of such a composite query:
 ```
-SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType
-FROM MetadataComponentDependency
-WHERE RefMetadataComponentId IN (<subsetIds>)
-OR MetadataComponentId IN (<subsetIds>)
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds1>) OR MetadataComponentId IN (<subsetIds1>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds2>) OR MetadataComponentId IN (<subsetIds2>)' }, 
+    ...
+]
 ```
 
-## Apex Triggers
+## Queries permformed by the Apex Triggers dataset
 ### Tooling SOQL Queries
 **Query on ApexTrigger**
 ```
@@ -66,91 +71,180 @@ SELECT Id, Name, ApiVersion, Status, NamespacePrefix, Body, UsageBeforeInsert, U
 FROM ApexTrigger 
 WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
+### Tooling Composite + Tooling SOQL
 **Query on MetadataComponentDependency**
-This query is run in batches with 100 apex trigger ids max (see `subsetIds`).
+This query is run with composite using batch size=500.
+Each SOQL query can max maximum 100 ids.
+Below is an example of such a composite query:
 ```
-SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType
-FROM MetadataComponentDependency
-WHERE RefMetadataComponentId IN (<subsetIds>)
-OR MetadataComponentId IN (<subsetIds>)
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds1>) OR MetadataComponentId IN (<subsetIds1>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds2>) OR MetadataComponentId IN (<subsetIds2>)' }, 
+    ...
+]
 ```
 
+## Queries permformed by the Applications dataset
+### SOQL Queries
+**Query on AppMenuItem**
+```
+SELECT ApplicationId, Name, Label, NamespacePrefix
+FROM AppMenuItem
+WHERE Type = 'TabSet'
+```
 
---- 
+## Queries permformed by the Application Permissions dataset
+### SOQL Queries
+**Query on AppMenuItem**
+```
+SELECT ApplicationId, IsAccessible, IsVisible
+FROM AppMenuItem
+WHERE Type = 'TabSet'
+```
+**Query on SetupEntityAccess**
+```
+SELECT SetupEntityId, ParentId, Parent.IsOwnedByProfile, Parent.ProfileId
+FROM SetupEntityAccess
+WHERE SetupEntityType = 'TabSet'
+```
+
+## Queries permformed by the Browsers dataset
+### SOQL Queries
+**Query on LoginHistory**
+```
+SELECT Browser, COUNT(Id) CntBrowser
+FROM LoginHistory
+WHERE LoginType = 'Application'
+GROUP BY Browser
+```
+
+## Queries permformed by the Chatter Groups dataset
+### SOQL Queries
+**Query on CollaborationGroup**
+if Chatter is not enabled in the Org, you will get an `INVALID_TYPE` error (which is logical).
+```
+SELECT Id, InformationBody, Description, Name, CreatedDate, LastModifiedDate
+FROM CollaborationGroup
+```
+
+## Queries permformed by the Current User Permissions dataset
+### SOQL Queries
+**Queries on UserPermissionAccess**
+We perform an SOQL by permission we are interested in (see `field`). In some case, if the permission is not available in the org, we assume `false`and it does not block us from getting the other permissions.
+```
+SELECT Permissions<field> FROM UserPermissionAccess
+```
+
+## Queries permformed by the Custom Fields dataset
+### Tooling SOQL Queries
+**Query on CustomField**
+```
+SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix 
+FROM CustomField 
+WHERE ManageableState IN ('installedEditable', 'unmanaged')`
+```
+### Tooling Composite + Tooling SOQL
+**Query on MetadataComponentDependency**
+This query is run with composite using batch size=500.
+Each SOQL query can max maximum 100 ids.
+Below is an example of such a composite query:
+```
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds1>) OR MetadataComponentId IN (<subsetIds1>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT MetadataComponentId, MetadataComponentName, MetadataComponentType, RefMetadataComponentId, RefMetadataComponentName, RefMetadataComponentType FROM MetadataComponentDependency WHERE RefMetadataComponentId IN (<subsetIds2>) OR MetadataComponentId IN (<subsetIds2>)' }, 
+    ...
+]
+```
+### Tooling Composite + Tooling SObjects Record describe
+**Query on CustomField**
+This query is run with composite using batch size=1000.
+Each Record describe is about a unique id (obviously).
+Below is an example of such a composite query:
+```
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v<version>/tooling/sobjects/CustomField/<id1>' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/sobjects/CustomField/<id2>' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/sobjects/CustomField/<id3>' }, 
+    ...
+]
+```
+
+-----
 
 
-### Applications
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem`
 
-### Application Permissions
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AppMenuItem`
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM SetupEntityAccess`
-
-### Browsers
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Browser`
-
-### Chatter Groups
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM CollaborationGroup`
-
-### Current User Permissions
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserPermissionAccess`
-
-### Custom Fields
-- Tooling SOQL Query: `SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting, EntityDefinition.KeyPrefix FROM CustomField WHERE ManageableState IN ('installedEditable', 'unmanaged')`
-- Metadata API Call: `readMetadataAtScale('CustomField', <customFieldIds>, ['INVALID_CROSS_REFERENCE_KEY'])`
-
-### Custom Labels
+## Queries permformed by the Custom Labels dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Category, IsProtected, Language, MasterLabel, Value, CreatedDate, LastModifiedDate FROM ExternalString WHERE ManageableState IN ('installedEditable', 'unmanaged')` (Tooling API)
 
-### Custom Tabs
+## Queries permformed by the Custom Tabs dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM CustomTab` (Tooling API)
 
-### Dashboards
+## Queries permformed by the Dashboards dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate, Type, LastViewedDate, LastReferencedDate, DashboardResultRefreshedDate FROM Dashboard`
 
-### Documents
+## Queries permformed by the Documents dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Document`
 
-### Email Templates
+## Queries permformed by the Email Templates dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EmailTemplate`
 
-### Field Permissions
+## Queries permformed by the Field Permissions dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldPermissions`
 
-### Flow and Process Builder
+## Queries permformed by the Flow and Process Builder dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT Id, DeveloperName, ApiVersion, Description, ActiveVersionId, LatestVersionId, CreatedDate, LastModifiedDate FROM FlowDefinition`
 - Tooling SOQL Query: `SELECT DefinitionId, COUNT(Id) NbVersions FROM Flow GROUP BY DefinitionId`
 - Metadata API Call: `readMetadataAtScale('Flow', <flowIds>, ['UNKNOWN_EXCEPTION'])`
 
-### Public Groups and Queues
+## Queries permformed by the Public Groups and Queues dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Group`
 
-### Homepage Components
+## Queries permformed by the Homepage Components dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Homepagecomponent` (Tooling API)
 
-### Internal Active Users
+## Queries permformed by the Internal Active Users dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM User`
 
-### Knowledge Articles
+## Queries permformed by the Knowledge Articles dataset
+### Tooling SOQL Queries
 - SOSL Query: `FIND { .salesforce.com OR .force.* } IN ALL FIELDS RETURNING KnowledgeArticleVersion (Id, KnowledgeArticleId, ArticleNumber, CreatedDate, LastModifiedDate, PublishStatus, Title, UrlName )`
 
-### Aura Components
+## Queries permformed by the Aura Components dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM AuraDefinitionBundle`
 
-### Lightning Pages
+## Queries permformed by the Lightning Pages dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FlexiPage`
 
-### LWCs
+## Queries permformed by the LWCs dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM LightningComponentBundle`
 
-### SObject
+## Queries permformed by the SObject dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EntityDefinition`
 - Tooling SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldDefinition`
 
-### SObject permissions
+## Queries permformed by the SObject permissions dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectPermissions`
 
-### SObjects
+## Queries permformed by the SObjects dataset
+### Tooling SOQL Queries
 - Tooling SOQL Query: `SELECT DurableId, NamespacePrefix, DeveloperName, QualifiedApiName, ExternalSharingModel, InternalSharingModel FROM EntityDefinition WHERE KeyPrefix <> null AND DeveloperName <> null AND (NOT(KeyPrefix IN ('00a', '017', '02c', '0D5', '1CE'))) AND (NOT(QualifiedApiName like '%_hd'))`
 - Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbCustomFields FROM CustomField GROUP BY EntityDefinitionId`
 - Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbPageLayouts FROM Layout GROUP BY EntityDefinitionId`
@@ -159,26 +253,32 @@ OR MetadataComponentId IN (<subsetIds>)
 - Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbValidationRules FROM ValidationRule GROUP BY EntityDefinitionId`
 - Tooling SOQL Query: `SELECT EntityDefinitionId, COUNT(Id) NbTriggers FROM ApexTrigger GROUP BY EntityDefinitionId`
 
-### Object Types
+## Queries permformed by the Object Types dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ObjectType`
 
-### Organization Information
+## Queries permformed by the Organization Information dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization`
 
-### Packages
+## Queries permformed by the Packages dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM InstalledSubscriberPackage`
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization`
 
-### Page Layouts
+## Queries permformed by the Page Layouts dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Layout` (Tooling API)
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfileLayout` (Tooling API)
 
-### Permission Set Licenses
+## Queries permformed by the Permission Set Licenses dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetLicense`
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSet`
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetAssignment`
 
-### Permission Sets
+## Queries permformed by the Permission Sets dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE IsOwnedByProfile = FALSE`
 - SOQL Query: `SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description FROM PermissionSet WHERE PermissionSetGroupId != null`
 - SOQL Query: `SELECT ParentId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = FALSE GROUP BY ParentId`
@@ -186,42 +286,54 @@ OR MetadataComponentId IN (<subsetIds>)
 - SOQL Query: `SELECT PermissionSetId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = FALSE AND Assignee.IsActive = TRUE GROUP BY PermissionSetId`
 - SOQL Query: `SELECT PermissionSetGroupId, PermissionSetId FROM PermissionSetGroupComponent WHERE PermissionSet.IsOwnedByProfile = FALSE`
 
-### Profile Password Policies
+## Queries permformed by the Profile Password Policies dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfilePasswordPolicy`
 
-### Profile Restrictions
+## Queries permformed by the Profile Restrictions dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile`
 
-### Profiles
+## Queries permformed by the Profiles dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE isOwnedByProfile = TRUE ORDER BY ProfileId`
 - SOQL Query: `SELECT Parent.ProfileId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId`
 - SOQL Query: `SELECT Parent.ProfileId, COUNT(Field) CountField FROM FieldPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId`
 - SOQL Query: `SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = TRUE AND Assignee.IsActive = TRUE GROUP BY PermissionSet.ProfileId`
 
-### Record Types
+## Queries permformed by the Record Types dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM RecordType`
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile`
 
-### Reports
+## Queries permformed by the Reports dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, DeveloperName, Description, Format, FolderName, NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, LastViewedDate, LastReferencedDate FROM Report`
 
-### Static Resources
+## Queries permformed by the Static Resources dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM StaticResource`
 
-### User Roles
+## Queries permformed by the User Roles dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserRole`
 
-### Validation Rules
+## Queries permformed by the Validation Rules dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, EntityDefinition.QualifiedApiName, NamespacePrefix, CreatedDate, LastModifiedDate FROM ValidationRule`
 
-### Visualforce Components
+## Queries permformed by the Visualforce Components dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexComponent` (Tooling API)
 
-### Visualforce Pages
+## Queries permformed by the Visualforce Pages dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexPage` (Tooling API)
 
-### Web Links
+## Queries permformed by the Web Links dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WebLink` (Tooling API)
 
-### Workflows
+## Queries permformed by the Workflows dataset
+### Tooling SOQL Queries
 - SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WorkflowRule` (Tooling API)

@@ -22,3 +22,9 @@ section {
 header > h1 {
     display: none;
 }
+
+@media print, screen and (max-width: 960px) {
+    section {
+        width: 100% !important;
+    }
+}

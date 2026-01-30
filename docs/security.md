@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Frequently Asked Question by Security
+title: Security Questions
 permalink: /security/
 ---
 

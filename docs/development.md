@@ -1,6 +1,6 @@
 ---
 layout: default
-title: How to setup your own environment to modify the application and propose a PR to the project?
+title: Development guide
 permalink: /development/
 ---
 

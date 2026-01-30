@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Want to see a preview of the application?
+title: Preview
 permalink: /preview/
 ---
 
