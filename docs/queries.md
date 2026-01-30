@@ -10,11 +10,13 @@ permalink: /queries/
 | Apex Triggers | ApexTrigger <br /> MetadataComponentDependency&nbsp;<sup>1</sup> | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apextriggers.js) | 
 | Applications  | | AppMenuItem | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-applications.js) |
 | Application Permissions | | AppMenuItem <br /> SetupEntityAccess | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-apppermissions.js) | 
+| Browsers | | Browser | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-browsers.js) |
 | Chatter Groups | | CollaborationGroup | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-collaborationgroups.js) |
 | Current User Permissions | | UserPermissionAccess | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js) |
 | Custom Fields | CustomField <br /> MetadataComponentDependency&nbsp;<sup>1</sup> | | | CustomField&nbsp;<sup>1</sup> | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customfields.js) |
 | Custom Labels | ExternalString <br /> MetadataComponentDependency&nbsp;<sup>1</sup> | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customlabels.js) |
 | Custom Tabs | CustomTab <br /> MetadataComponentDependency&nbsp;<sup>1</sup> | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-customtabs.js) |
+| Dashboards | | Dashboard | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-dashboards.js) |
 | Documents | | Document | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-documents.js) |
 | Email Templates | | EmailTemplate | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-emailtemplates.js) |
 | Field Permissions | | FieldPermissions | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-fieldpermissions.js) |
@@ -29,6 +31,7 @@ permalink: /queries/
 | SObject | EntityDefinition <br /> FieldDefinition | | | | | Specific SObject | Specific SObject | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-object.js) |
 | SObject permissions | | ObjectPermissions | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objectpermissions.js) |
 | SObjects | EntityDefinition | | | | | | All SObjects | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objects.js) |
+| Object Types | | ObjectType | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objecttypes.js) |
 | Organization Information | | Organization | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-organization.js) |
 | Packages | InstalledSubscriberPackage | Organization | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-packages.js) |
 | Page Layouts | Layout <br /> ProfileLayout | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-pagelayouts.js) |
@@ -38,6 +41,7 @@ permalink: /queries/
 | Profile Restrictions | | Profile | | | Profile | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-profilerestrictions.js) |
 | Profiles | | PermissionSet <br /> ObjectPermissions <br /> FieldPermissions <br /> PermissionSetAssignment | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-profiles.js) |
 | Record Types | | RecordType <br /> Profile | | | Profile | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-recordtypes.js) |
+| Reports | | Report | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-reports.js) |
 | Static Resources | MetadataComponentDependency&nbsp;<sup>1</sup> | StaticResource | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-staticresources.js) |
 | User Roles | | UserRole | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-userroles.js) |
 | Validation Rules | ValidationRule | | | | | | | [source](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-validationrules.js) |
