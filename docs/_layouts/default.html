@@ -41,7 +41,9 @@
       <section>
 
         {% for page in site.pages %}
-          <a href=".{{ page.url }}">{{ page.title | truncate: 20 }}</a> |
+        {% if page.title != "" %}
+          <a href="{{ page.url | relative_url }}">{{ page.title | truncate: 20 }}</a> |
+        {% endif %}
         {% endfor %}
         <hr noshade="true" />
         <br />

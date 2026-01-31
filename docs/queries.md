@@ -1,6 +1,6 @@
 ---
 layout: default
-title: List of queries by datasets
+title: Queries
 permalink: /queries/
 ---
 
