@@ -41,7 +41,7 @@
       <section>
 
         {% for page in site.pages %}
-          <a href="{{ page.url }}">{{ page.title | truncate: 20 }}</a> |
+          <a href=".{{ page.url }}">{{ page.title | truncate: 20 }}</a> |
         {% endfor %}
         <hr noshade="true" />
         <br />
