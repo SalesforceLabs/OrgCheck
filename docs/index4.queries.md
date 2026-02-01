@@ -222,7 +222,9 @@ POST /tooling/composite
    }, 
    ...
 ]
-```### Tooling Composite + Tooling SObjects Record describe
+```
+
+### Tooling Composite + Tooling SObjects Record describe
 **Query on CustomField**
 This query is run with composite using batch size=1000.
 Each Record describe is about a unique id (obviously).
