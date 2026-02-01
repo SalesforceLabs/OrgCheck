@@ -61,8 +61,8 @@ Below is an example of such a composite query:
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds1>)+OR+MetadataComponentId+IN+(<subsetIds1>)' }, 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds2>)+OR+MetadataComponentId+IN+(<subsetIds2>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)+OR+MetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)+OR+MetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)' }, 
     ...
 ]
 ```
@@ -87,8 +87,8 @@ Below is an example of such a composite query:
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds1>)+OR+MetadataComponentId+IN+(<subsetIds1>)' }, 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds2>)+OR+MetadataComponentId+IN+(<subsetIds2>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)+OR+MetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)+OR+MetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)' }, 
     ...
 ]
 ```
@@ -167,8 +167,8 @@ Below is an example of such a composite query:
 ```
 POST /tooling/composite
 [ 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds1>)+OR+MetadataComponentId+IN+(<subsetIds1>)' }, 
-    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds2>)+OR+MetadataComponentId+IN+(<subsetIds2>)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)+OR+MetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)' }, 
+    { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)+OR+MetadataComponentId+IN+('xyz000000000101','xyz000000000102',...)' }, 
     ...
 ]
 ```
@@ -202,39 +202,73 @@ This query is executed via the Tooling composite API to retrieve dependencies of
 ```
 POST /tooling/composite
 [
-  { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+(<subsetIds1>)+OR+MetadataComponentId+IN+(<subsetIds1>)' },
+  { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)+OR+MetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)' },
   ...
 ]
 ```
 
-
------
-
-
 ## Queries permformed by the Custom Tabs dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-customtabs.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM CustomTab` (Tooling API)
+**Query on CustomTab**
+```
+SELECT Id, DeveloperName, Type, Url, CreatedDate, Description, 
+       LastModifiedDate, NamespacePrefix
+FROM CustomTab
+WHERE ManageableState IN ('installedEditable', 'unmanaged')
+```
+### Tooling Composite + Tooling SOQL
+**Query on MetadataComponentDependency**
+Dependencies for custom tabs are retrieved via the Tooling composite API using the Ids from the CustomTab query. Batches up to 500 ids, with up to 100 ids per SOQL call in each composite request.
+```
+POST /tooling/composite
+[
+  { method: 'GET', url: '/services/data/v<version>/tooling/query?q=SELECT+MetadataComponentId,+MetadataComponentName,+MetadataComponentType,+RefMetadataComponentId,+RefMetadataComponentName,+RefMetadataComponentType+FROM+MetadataComponentDependency+WHERE+RefMetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)+OR+MetadataComponentId+IN+('xyz000000000001','xyz000000000002',...)' },
+  ...
+]
+```
 
 ## Queries permformed by the Dashboards dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-dashboards.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, Description, CreatedDate, LastModifiedDate, Type, LastViewedDate, LastReferencedDate, DashboardResultRefreshedDate FROM Dashboard`
+### SOQL Queries
+**Query on Dashboard**
+```
+SELECT Id, FolderName, FolderId, Title, DeveloperName, NamespacePrefix, 
+       Description, CreatedDate, LastModifiedDate, 
+       Type, LastViewedDate, LastReferencedDate, 
+       DashboardResultRefreshedDate
+FROM Dashboard
+```
 
 ## Queries permformed by the Documents dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-documents.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Document`
+### SOQL Queries
+**Query on Document**
+```
+SELECT Id, Name, Url, BodyLength, ContentType, CreatedDate, Description,
+   DeveloperName, Folder.Name, Folder.Id, LastModifiedDate, NamespacePrefix
+FROM Document
+```
 
 ## Queries permformed by the Email Templates dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-emailtemplates.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM EmailTemplate`
+### SOQL Queries
+**Query on EmailTemplate**
+```
+SELECT Id, Name, ApiVersion, IsActive, HtmlValue, Body, Markup, CreatedDate, 
+       LastModifiedDate, FolderId, FolderName, Description, LastUsedDate, 
+       TimesUsed, UiType, TemplateType, NamespacePrefix
+FROM EmailTemplate
+```
 
 ## Queries permformed by the Field Permissions dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-fieldpermissions.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM FieldPermissions`
+**Query on FieldPermissions**
+```
+SELECT Id, ParentId, SobjectType, Field, PermissionsEdit, PermissionsRead, CreatedDate, LastModifiedDate
+FROM FieldPermissions
+```
 
 ## Queries permformed by the Flow and Process Builder dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-flows.js

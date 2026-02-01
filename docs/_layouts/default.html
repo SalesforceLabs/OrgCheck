@@ -40,9 +40,14 @@
       </header>
       <section>
 
-        {% for page in site.pages %}
-        {% if page.title != null %}
-          <a href="{{ page.url | relative_url }}">{{ page.title | truncate: 20 }}</a> |
+        Quick access: | 
+        {% for p in site.pages %}
+        {% if p.title != null %}
+          {% if p.title == page.title %}
+            <strong>{{ p.title | truncate: 20 }}</strong> |
+          {% else %}
+            <a href="{{ p.url | relative_url }}">{{ p.title | truncate: 20 }}</a> |
+          {% endif %}
         {% endif %}
         {% endfor %}
         <hr noshade="true" />
