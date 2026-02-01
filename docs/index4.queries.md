@@ -483,7 +483,8 @@ Source: build/src/api/dataset/orgcheck-api-dataset-lighntingwebcomponents.js
 ### Tooling SOQL Queries
 **Query on LightningComponentBundle**
 ```
-SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+SELECT Id, MasterLabel, ApiVersion, NamespacePrefix, Description, 
+   CreatedDate, LastModifiedDate 
 FROM LightningComponentBundle 
 WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
@@ -544,100 +545,297 @@ Source: build/src/api/dataset/orgcheck-api-dataset-objecttypes.js
 ### In-memory Data
 This dataset does not perform any database query. It returns predefined object types in memory.
 
-## Queries performed by the Organization Information dataset (still under construction)
+## Queries performed by the Organization Information dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-organization.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization`
+### SOQL Queries
+**Query on Organization**
+```
+SELECT Id, Name, IsSandbox, OrganizationType, TrialExpirationDate, NamespacePrefix 
+FROM Organization 
+LIMIT 1
+```
 
-## Queries performed by the Packages dataset (still under construction)
+## ## Queries performed by the Packages dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-packages.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM InstalledSubscriberPackage`
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Organization`
+**Query on InstalledSubscriberPackage**
+```
+SELECT Id, SubscriberPackage.NamespacePrefix, SubscriberPackage.Name 
+FROM InstalledSubscriberPackage 
+```
+**Query on Organization**
+```
+SELECT NamespacePrefix FROM Organization LIMIT 1
+```
 
-## Queries performed by the Page Layouts dataset (still under construction)
+## ## Queries performed by the Page Layouts dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-pagelayouts.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Layout` (Tooling API)
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfileLayout` (Tooling API)
+**Query on Layout**
+```
+SELECT Id, Name, NamespacePrefix, LayoutType, EntityDefinition.DurableId, 
+   EntityDefinition.QualifiedApiName, CreatedDate, LastModifiedDate 
+FROM Layout 
+```
+**Query on ProfileLayout**
+```
+SELECT LayoutId, COUNT(ProfileId) CountAssignment 
+FROM ProfileLayout 
+WHERE Profile.Name != null 
+GROUP BY LayoutId 
+```
 
-## Queries performed by the Permission Set Licenses dataset (still under construction)
+## ## Queries performed by the Permission Set Licenses dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-permissionsetlicenses.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetLicense`
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSet`
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM PermissionSetAssignment`
+### SOQL Queries
+**Query on PermissionSetLicense**
+```
+SELECT Id, MasterLabel, CreatedDate, LastModifiedDate, TotalLicenses, Status, 
+   ExpirationDate, UsedLicenses, IsAvailableForIntegrations 
+FROM PermissionSetLicense 
+```
+**Query on PermissionSet**
+```
+SELECT Id, LicenseId 
+FROM PermissionSet 
+WHERE IsOwnedByProfile = false 
+AND LicenseId <> NULL 
+```
+**Query on PermissionSetAssignment**
+```
+SELECT AssigneeId, PermissionSet.LicenseId 
+FROM PermissionSetAssignment 
+WHERE Assignee.IsActive = TRUE 
+AND PermissionSet.LicenseId <> NULL 
+AND PermissionSet.IsOwnedByProfile = FALSE 
+ORDER BY PermissionSetId 
+```
 
-## Queries performed by the Permission Sets dataset (still under construction)
+## Queries performed by the Permission Sets dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-permissionsets.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE IsOwnedByProfile = FALSE`
-- SOQL Query: `SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description FROM PermissionSet WHERE PermissionSetGroupId != null`
-- SOQL Query: `SELECT ParentId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = FALSE GROUP BY ParentId`
-- SOQL Query: `SELECT ParentId, COUNT(Field) CountField FROM FieldPermissions WHERE Parent.IsOwnedByProfile = FALSE GROUP BY ParentId`
-- SOQL Query: `SELECT PermissionSetId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = FALSE AND Assignee.IsActive = TRUE GROUP BY PermissionSetId`
-- SOQL Query: `SELECT PermissionSetGroupId, PermissionSetId FROM PermissionSetGroupComponent WHERE PermissionSet.IsOwnedByProfile = FALSE`
+### SOQL Queries
+**Query on PermissionSet**
+```
+SELECT Id, Name, Description, IsCustom, License.Name, NamespacePrefix, Type, 
+   PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, 
+   PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, 
+   CreatedDate, LastModifiedDate 
+FROM PermissionSet 
+WHERE IsOwnedByProfile = FALSE 
+ORDER BY Id
+```
+**Query on PermissionSet**
+```
+SELECT Id, PermissionSetGroupId, PermissionSetGroup.Description 
+FROM PermissionSet 
+WHERE PermissionSetGroupId != null 
+ORDER BY Id
+```
+**Query on ObjectPermissions**
+```
+SELECT ParentId, COUNT(SobjectType) CountObject 
+FROM ObjectPermissions 
+WHERE Parent.IsOwnedByProfile = FALSE 
+GROUP BY ParentId 
+```
+**Query on FieldPermissions**
+```
+SELECT ParentId, COUNT(Field) CountField 
+FROM FieldPermissions 
+WHERE Parent.IsOwnedByProfile = FALSE 
+GROUP BY ParentId 
+```
+**Query on PermissionSetAssignment**
+```
+SELECT PermissionSetId, COUNT(Id) CountAssignment 
+FROM PermissionSetAssignment 
+WHERE PermissionSet.IsOwnedByProfile = FALSE 
+AND Assignee.IsActive = TRUE 
+GROUP BY PermissionSetId 
+```
+**Query on PermissionSetGroupComponent**
+```
+SELECT PermissionSetGroupId, PermissionSetId 
+FROM PermissionSetGroupComponent 
+WHERE PermissionSet.IsOwnedByProfile = FALSE 
+ORDER BY PermissionSetGroupId 
+```
 
-## Queries performed by the Profile Password Policies dataset (still under construction)
+## Queries performed by the Profile Password Policies dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-profilepasswordpolicies.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ProfilePasswordPolicy`
-
-## Queries performed by the Profile Restrictions dataset (still under construction)
+### Metadata API Calls
+**Query on ProfilePasswordPolicy**
+This dataset uses the Metadata API to retrieve ProfilePasswordPolicy metadata.
+```
+readMetadata({
+    type: 'ProfilePasswordPolicy',
+    members: [ '*' ]
+})
+```
+## Queries performed by the Profile Restrictions dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-profilerestrictions.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile`
+### SOQL Queries
+**Query on Profile**
+```
+SELECT Id FROM Profile
+```
+### Tooling Composite + Tooling SObjects Record describe
+Note: This type of access is performed by the method we call `readMetadataAtScale()`. 
+**Query on Profile**
+This query is run with composite using batch size=1000.
+Each Record describe is about a unique id (obviously).
+Below is an example of such a composite query (version and id in `url` will vary):
+```
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000003' }, 
+    ...
+]
+```
 
-## Queries performed by the Profiles dataset (still under construction)
+## Queries performed by the Profiles dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-profiles.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, PermissionsManageUsers, PermissionsCustomizeApplication, CreatedDate, LastModifiedDate FROM PermissionSet WHERE isOwnedByProfile = TRUE ORDER BY ProfileId`
-- SOQL Query: `SELECT Parent.ProfileId, COUNT(SobjectType) CountObject FROM ObjectPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId`
-- SOQL Query: `SELECT Parent.ProfileId, COUNT(Field) CountField FROM FieldPermissions WHERE Parent.IsOwnedByProfile = TRUE GROUP BY Parent.ProfileId`
-- SOQL Query: `SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment FROM PermissionSetAssignment WHERE PermissionSet.IsOwnedByProfile = TRUE AND Assignee.IsActive = TRUE GROUP BY PermissionSet.ProfileId`
-
-## Queries performed by the Record Types dataset (still under construction)
+### SOQL Queries
+**Query on PermissionSet**
+```
+SELECT ProfileId, Profile.Name, Profile.Description, IsCustom, License.Name, NamespacePrefix, 
+   PermissionsApiEnabled, PermissionsViewSetup, PermissionsModifyAllData, PermissionsViewAllData, 
+   PermissionsManageUsers, PermissionsCustomizeApplication, 
+   CreatedDate, LastModifiedDate 
+FROM PermissionSet 
+WHERE isOwnedByProfile = TRUE 
+ORDER BY ProfileId
+```
+**Query on ObjectPermissions**
+```
+SELECT Parent.ProfileId, COUNT(SobjectType) CountObject 
+FROM ObjectPermissions 
+WHERE Parent.IsOwnedByProfile = TRUE 
+GROUP BY Parent.ProfileId 
+```
+**Query on FieldPermissions**
+```
+SELECT Parent.ProfileId, COUNT(Field) CountField 
+FROM FieldPermissions 
+WHERE Parent.IsOwnedByProfile = TRUE 
+GROUP BY Parent.ProfileId 
+```
+**Query on PermissionSetAssignment**
+```
+SELECT PermissionSet.ProfileId, COUNT(Id) CountAssignment 
+FROM PermissionSetAssignment 
+WHERE PermissionSet.IsOwnedByProfile = TRUE 
+AND Assignee.IsActive = TRUE 
+GROUP BY PermissionSet.ProfileId 
+```
+## Queries performed by the Record Types dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-recordtypes.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM RecordType`
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM Profile`
+### SOQL Queries
+**Query on RecordType**
+```
+SELECT DeveloperName, NamespacePrefix, Id, Name, SobjectType, IsActive 
+FROM RecordType
+```
+**Query on Profile**
+```
+SELECT Id FROM Profile
+```
+### Tooling Composite + Tooling SObjects Record describe
+Note: This type of access is performed by the method we call `readMetadataAtScale()`. 
+**Query on Profile**
+This query is run with composite using batch size=1000.
+Each Record describe is about a unique id (obviously).
+Below is an example of such a composite query (version and id in `url` will vary):
+```
+POST /tooling/composite
+[ 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000001' }, 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000002' }, 
+    { method: 'GET', url: '/services/data/v60.0/tooling/sobjects/Profile/xyz000000000003' }, 
+    ...
+]
+```
 
-## Queries performed by the Reports dataset (still under construction)
+## Queries performed by the Reports dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-reports.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, DeveloperName, Description, Format, FolderName, NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, LastViewedDate, LastReferencedDate FROM Report`
-
-## Queries performed by the Static Resources dataset (still under construction)
+### SOQL Queries
+**Query on Report**
+```
+SELECT Id, Description, DeveloperName, FolderName, Format, Name, 
+   NamespacePrefix, CreatedDate, LastModifiedDate, LastRunDate, 
+   LastViewedDate, LastReferencedDate 
+FROM Report
+```
+## Queries performed by the Static Resources dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-staticresources.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM StaticResource`
-
-## Queries performed by the User Roles dataset (still under construction)
+### SOQL Queries
+**Query on StaticResource**
+```
+SELECT Id, Name, ContentType, CreatedDate, LastModifiedDate, 
+   Description, NamespacePrefix 
+FROM StaticResource
+```
+### Tooling API Calls
+**Query on Dependencies**
+This dataset uses the Tooling API to retrieve dependencies for static resources.
+```
+dependenciesQuery(<resourceIds>)
+```
+## Queries performed by the User Roles dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-userroles.js
-### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM UserRole`
+### SOQL Queries
+**Query on UserRole**
+```
+SELECT Id, DeveloperName, Name, ParentRoleId, 
+   (SELECT Id FROM Users WHERE IsActive = true AND ContactId = NULL AND Profile.Id != NULL) 
+FROM UserRole 
+WHERE PortalType = 'None'
+```
 
-## Queries performed by the Validation Rules dataset (still under construction)
+## Queries performed by the Validation Rules dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-validationrules.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, EntityDefinition.QualifiedApiName, NamespacePrefix, CreatedDate, LastModifiedDate FROM ValidationRule`
+**Query on ValidationRule**
+```
+SELECT Id, Active, Description, ErrorDisplayField, ErrorMessage, ValidationName, 
+   EntityDefinition.QualifiedApiName, NamespacePrefix, CreatedDate, LastModifiedDate 
+FROM ValidationRule
+```
 
-## Queries performed by the Visualforce Components dataset (still under construction)
+## Queries performed by the Visualforce Components dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-visualforcecomponents.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexComponent` (Tooling API)
+**Query on ApexComponent**
+```
+SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+FROM ApexComponent
+```
 
-## Queries performed by the Visualforce Pages dataset (still under construction)
+## Queries performed by the Visualforce Pages dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-visualforcepages.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM ApexPage` (Tooling API)
+**Query on ApexPage**
+```
+SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+FROM ApexPage
+```
 
-## Queries performed by the Web Links dataset (still under construction)
+## Queries performed by the Web Links dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-weblinks.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WebLink` (Tooling API)
+**Query on WebLink**
+```
+SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+FROM WebLink
+```
 
-## Queries performed by the Workflows dataset (still under construction)
+## Queries performed by the Workflows dataset
 Source: build/src/api/dataset/orgcheck-api-dataset-workflows.js
 ### Tooling SOQL Queries
-- SOQL Query: `SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate FROM WorkflowRule` (Tooling API)
+**Query on WorkflowRule**
+```
+SELECT Id, Name, NamespacePrefix, Description, CreatedDate, LastModifiedDate 
+FROM WorkflowRule
+```
