@@ -8,7 +8,7 @@ permalink: /diagrams/
 
 ## Class Diagram
 
-```mermaid
+<div class="mermaid" markdown="0" >
 classDiagram
 
 namespace orgcheck.api.core {
@@ -294,4 +294,8 @@ API *-- DatasetManagerIntf : composition
 API *-- DataFactoryIntf : composition
 API *-- SalesforceManagerIntf : composition
 API *-- LoggerIntf : composition
-```
+</div>
+
+
+
+
