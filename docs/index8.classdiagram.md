@@ -9,7 +9,7 @@ mermaid: true
 
 ## Class Diagram
 
-<div class="mermaid">
+```mermaid
 classDiagram
 
 namespace OrgCheckApiCore {
@@ -295,4 +295,7 @@ API *-- DatasetManagerIntf : composition
 API *-- DataFactoryIntf : composition
 API *-- SalesforceManagerIntf : composition
 API *-- LoggerIntf : composition
-</div>
+
+```
+
+
