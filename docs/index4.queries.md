@@ -48,7 +48,7 @@ ORDER BY ApexClassId, ApexTestRunResult.CreatedDate desc, MethodName
 ```
 
 #### Query on ApexCodeCoverage
-This query is run in batches with 500 apex class ids max (see `subsetIds`).
+This query is run in batches with 500 apex class IDs max (see `subsetIds`).
 ```
 SELECT ApexClassOrTriggerId, ApexTestClassId 
 FROM ApexCodeCoverage 
@@ -58,7 +58,7 @@ GROUP BY ApexClassOrTriggerId, ApexTestClassId
 ```
 
 #### Query on ApexCodeCoverageAggregate
-This query is run in batches with 500 apex class ids max (see `subsetIds`).
+This query is run in batches with 500 apex class IDs max (see `subsetIds`).
 ```
 SELECT ApexClassOrTriggerId, NumLinesCovered, NumLinesUncovered, Coverage
 FROM ApexCodeCoverageAggregate 
@@ -69,8 +69,8 @@ WHERE ApexClassOrTriggerId IN (<subsetIds>)
 
 #### Query on MetadataComponentDependency
 This query is run with composite using batch size=500.
-Each SOQL query can max maximum 100 ids.
-Below is an example of such a composite query (version and ids in `url` will vary):
+Each SOQL query can include a maximum of 100 IDs.
+Below is an example of such a composite query (version and IDs in `url` will vary):
 ```
 POST /tooling/composite
 [ 
@@ -118,8 +118,8 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 #### Query on MetadataComponentDependency
 This query is run with composite using batch size=500.
-Each SOQL query can max maximum 100 ids.
-Below is an example of such a composite query (version and ids in `url` will vary):
+Each SOQL query can include a maximum of 100 IDs.
+Below is an example of such a composite query (version and IDs in `url` will vary):
 ```
 POST /tooling/composite
 [ 
@@ -222,7 +222,7 @@ Source: [build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js](h
 
 #### Query on UserPermissionAccess
 We perform an SOQL by permission we are interested in (see `field`). In some case, if
- the permission is not available in the org, we assume `false`and it does not block 
+ the permission is not available in the org, we assume `false` and it does not block 
  us from getting the other permissions.
 ```
 SELECT Permissions<field> 
@@ -249,8 +249,8 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 #### Query on MetadataComponentDependency
 This query is run with composite using batch size=500.
-Each SOQL query can max maximum 100 ids.
-Below is an example of such a composite query (version and ids in `url` will vary):
+Each SOQL query can include a maximum of 100 IDs.
+Below is an example of such a composite query (version and IDs in `url` will vary):
 ```
 POST /tooling/composite
 [ 
@@ -313,9 +313,9 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 #### Query on MetadataComponentDependency
 This query is executed via the Tooling composite API to retrieve dependencies of 
-all custom labels returned by the initial query. The composite batches ids (up to 
-500 per batch) and may split into multiple SOQL calls (up to 100 ids per call).
-Below is an example of such a composite query (version and ids in `url` will vary):
+all custom labels returned by the initial query. The composite batches IDs (up to 
+500 per batch) and may split into multiple SOQL calls (up to 100 IDs per call).
+Below is an example of such a composite query (version and IDs in `url` will vary):
 ```
 POST /tooling/composite
 [ 
@@ -361,9 +361,9 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 #### Query on MetadataComponentDependency
 Dependencies for custom tabs are retrieved via the Tooling composite API using the 
-Ids from the CustomTab query. Batches up to 500 ids, with up to 100 ids per SOQL 
+Ids from the CustomTab query. Batches up to 500 IDs, with up to 100 IDs per SOQL 
 call in each composite request.
-Below is an example of such a composite query (version and ids in `url` will vary):
+Below is an example of such a composite query (version and IDs in `url` will vary):
 ```
 POST /tooling/composite
 [ 
