@@ -13,7 +13,7 @@
     {% if page.mermaid %}
     <script type="text/javascript" src="https://unpkg.com/mermaid@8.0.0-rc.8/dist/mermaid.min.js"></script>
     <script>
-      $(document).ready(function() { 
+      document.addEventListener("DOMContentLoaded", function(event) { 
         mermaid.initialize({ theme: 'forest' }); 
       });
     </script>
