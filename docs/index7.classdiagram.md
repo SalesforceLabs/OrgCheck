@@ -332,3 +332,5 @@ classDiagram
     API --> DataFactoryIntf : uses
     API --> SalesforceManagerIntf : uses
     API --> LoggerIntf : uses
+```
+
