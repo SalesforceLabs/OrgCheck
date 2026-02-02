@@ -279,7 +279,6 @@ namespace OrgCheckApi {
 }
 
 DatasetManagerIntf <|-- DatasetManager : implements
-DatasetIntf <|-- DatasetManager  : extends
 DataFactoryIntf <|-- DataFactory : implements
 DataFactoryInstanceIntf <|-- DataFactoryInstance : implements
 DataCacheManagerIntf <|-- DataCacheManager : implements
