@@ -86,7 +86,7 @@ Source: [build/src/api/dataset/orgcheck-api-dataset-documents.js](https://github
 - **Field**: `Url`
 - **SOQL**: `SELECT Id, Url FROM Document`
 
-#### 12.
+#### 12. Knowledge Article Dataset
 Source: [build/src/api/dataset/orgcheck-api-dataset-knowledgearticles.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-knowledgearticles.js)
 - **Entity**: `KnowledgeArticleVersion`
 - **Fields**: all fields
