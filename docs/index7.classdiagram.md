@@ -12,7 +12,7 @@ mermaid: true
 <div class="mermaid">
 classDiagram
 
-namespace orgcheck.api.core {
+namespace OrgCheckApiCore {
 
     class DatasetManagerIntf {
         <<interface>>
@@ -148,7 +148,7 @@ namespace orgcheck.api.core {
     }
 }
 
-namespace orgcheck.api.data {
+namespace OrgCheckApiData {
 
     class SFDC_ApexClass {
         +id string
@@ -204,14 +204,14 @@ namespace orgcheck.api.data {
     }
 }
 
-namespace orgcheck.api.dataset {
+namespace OrgCheckApiDataset {
 
     class DatasetApexClasses {
         +run(sfdcManager, dataFactory, logger) Map~string, SFDC_ApexClass~
     }
 }
 
-namespace orgcheck.api {
+namespace OrgCheckApi {
 
     class API {
         +version string
