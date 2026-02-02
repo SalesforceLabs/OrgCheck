@@ -1,6 +1,7 @@
 remote_theme: pages-themes/minimal@v0.2.0
 plugins:
 - jekyll-remote-theme
+- jekyll-mermaid 
 
 title: Org Check
 description: Org Check is an easy-to-install and easy-to-use Salesforce application in order to quickly analyze your org and its technical debt.
