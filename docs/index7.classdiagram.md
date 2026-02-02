@@ -10,21 +10,21 @@ permalink: /diagrams/
 
 ```mermaid
 classDiagram
-    %% Core classes
+namespace Core {
     class DatasetManagerIntf {
         <<interface>>
-        +run(datasets) Promise~Map~string, any~~
+        +run(datasets) Map~string, any~
         +clean(datasets)
     }
     
     class DatasetManager {
-        +run(datasets) Promise~Map~string, any~~
+        +run(datasets) Map~string, any~
         +clean(datasets)
     }
     
     class Dataset {
         <<abstract>>
-        +run(sfdcManager, dataFactory, logger, parameters) Promise~Map~string, Data | DataWithoutScoring~~
+        +run(sfdcManager, dataFactory, logger, parameters) Map~string, Data | DataWithoutScoring~
     }
     
     class DataFactoryIntf {
@@ -98,16 +98,16 @@ classDiagram
         +setupUrl(id, type, parentId, parentType) string
         +getObjectType(apiName, isCustomSetting) string
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
-        +soqlQuery(queries, logger) Promise~Array~Array~any~~
-        +soslQuery(queries, logger) Promise~Array~Array~any~~
-        +dependenciesQuery(ids, logger) Promise~{ records: Array~any~, errors: Array~string~ }~
-        +readMetadata(metadatas, logger) Promise~Map~string, Array~any~~
-        +readMetadataAtScale(type, ids, byPasses, logger) Promise~Array~any~~
-        +describeGlobal(logger) Promise~Array~any~~
-        +describe(sobjectDevName, logger) Promise~any~~
-        +recordCount(sobjectDevName, logger) Promise~number~~
-        +runAllTests(logger) Promise~string~~
-        +compileClasses(apexClassIds, logger) Promise~Map~string, { isSuccess: boolean, reasons?: Array~string~ }~~
+        +soqlQuery(queries, logger) Array~Array~any~
+        +soslQuery(queries, logger) Array~Array~any~
+        +dependenciesQuery(ids, logger) { records: Array~any~, errors: Array~string~ }~
+        +readMetadata(metadatas, logger) Map~string, Array~any~
+        +readMetadataAtScale(type, ids, byPasses, logger) Array~any~
+        +describeGlobal(logger) Array~any~
+        +describe(sobjectDevName, logger) any~
+        +recordCount(sobjectDevName, logger) number~
+        +runAllTests(logger) string~
+        +compileClasses(apexClassIds, logger) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
     }
     
     class SalesforceManager {
@@ -116,16 +116,16 @@ classDiagram
         +setupUrl(id, type, parentId, parentType) string
         +getObjectType(apiName, isCustomSetting) string
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
-        +soqlQuery(queries, logger) Promise~Array~Array~any~~
-        +soslQuery(queries, logger) Promise~Array~Array~any~~
-        +dependenciesQuery(ids, logger) Promise~{ records: Array~any~, errors: Array~string~ }~
-        +readMetadata(metadatas, logger) Promise~Map~string, Array~any~~
-        +readMetadataAtScale(type, ids, byPasses, logger) Promise~Array~any~~
-        +describeGlobal(logger) Promise~Array~any~~
-        +describe(sobjectDevName, logger) Promise~any~~
-        +recordCount(sobjectDevName, logger) Promise~number~~
-        +runAllTests(logger) Promise~string~~
-        +compileClasses(apexClassIds, logger) Promise~Map~string, { isSuccess: boolean, reasons?: Array~string~ }~~
+        +soqlQuery(queries, logger) Array~Array~any~
+        +soslQuery(queries, logger) Array~Array~any~
+        +dependenciesQuery(ids, logger) { records: Array~any~, errors: Array~string~ }~
+        +readMetadata(metadatas, logger) Map~string, Array~any~
+        +readMetadataAtScale(type, ids, byPasses, logger) Array~any~
+        +describeGlobal(logger) Array~any~
+        +describe(sobjectDevName, logger) any~
+        +recordCount(sobjectDevName, logger) number~
+        +runAllTests(logger) string~
+        +compileClasses(apexClassIds, logger) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
     }
     
     class Data {
@@ -144,8 +144,9 @@ classDiagram
     class DataWithoutScoring {
         <<abstract>>
     }
-    
-    %% Data classes
+}
+
+namespace Data {
     class SFDC_ApexClass {
         +id string
         +name string
@@ -197,14 +198,16 @@ classDiagram
         +queryRowsConsumption number
         +dmlRowsConsumption number
         +dmlConsumption number
-    }
-    
-    %% Dataset classes
+    }    
+}
+
+namespace Dataset {
     class DatasetApexClasses {
-        +run(sfdcManager, dataFactory, logger) Promise~Map~string, SFDC_ApexClass~~
+        +run(sfdcManager, dataFactory, logger) Map~string, SFDC_ApexClass~
     }
-    
-    %% API class
+}
+
+namespace OrgCheck {
     class API {
         +version string
         +salesforceApiVersion number
@@ -213,108 +216,107 @@ classDiagram
         +getCacheData(itemName) any
         +getAllScoreRulesAsDataMatrix() DataMatrix
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
-        +runAllTestsAsync() Promise~string~
-        +compileClasses(apexClassIds) Promise~Map~string, { isSuccess: boolean, reasons?: Array~string~ }~~
-        +getOrganizationInformation() Promise~SFDC_Organization~
-        +checkUsageTerms() Promise~boolean~
+        +runAllTestsAsync() string~
+        +compileClasses(apexClassIds) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
+        +getOrganizationInformation() SFDC_Organization~
+        +checkUsageTerms() boolean~
         +wereUsageTermsAcceptedManually() boolean
         +acceptUsageTermsManually()
-        +checkCurrentUserPermissions() Promise~boolean~
-        +getPackages() Promise~Array~SFDC_Package~~
-        +removeAllPackagesFromCache()
-        +getPageLayouts(namespace, sobjectType, sobject) Promise~Array~SFDC_PageLayout~~
-        +removeAllPageLayoutsFromCache()
-        +getObjectTypes() Promise~Array~SFDC_ObjectType~~
-        +getObjects(namespace, sobjectType) Promise~Array~SFDC_Object~~
-        +removeAllObjectsFromCache()
-        +getObject(sobject) Promise~SFDC_Object~
-        +removeObjectFromCache(sobject)
-        +getObjectPermissionsPerParent(namespace) Promise~DataMatrix~
-        +removeAllObjectPermissionsFromCache()
-        +getApplicationPermissionsPerParent(namespace) Promise~DataMatrix~
-        +removeAllAppPermissionsFromCache()
-        +getKnowledgeArticles() Promise~Array~SFDC_KnowledgeArticle~~
-        +removeAllKnowledgeArticlesFromCache()
-        +getChatterGroups() Promise~Array~SFDC_CollaborationGroup~~
-        +removeAllChatterGroupsFromCache()
-        +getCustomFields(namespace, sobjectType, sobject) Promise~Array~SFDC_Field~~
-        +removeAllCustomFieldsFromCache()
-        +getPermissionSets(namespace) Promise~Array~SFDC_PermissionSet~~
-        +removeAllPermSetsFromCache()
-        +getPermissionSetLicenses() Promise~Array~SFDC_PermissionSetLicense~~
-        +removeAllPermSetLicensesFromCache()
-        +getProfiles(namespace) Promise~Array~SFDC_Profile~~
-        +removeAllProfilesFromCache()
-        +getProfileRestrictions(namespace) Promise~Array~SFDC_ProfileRestrictions~~
-        +removeAllProfileRestrictionsFromCache()
-        +getProfilePasswordPolicies() Promise~Array~SFDC_ProfilePasswordPolicy~~
-        +removeAllProfilePasswordPoliciesFromCache()
-        +getActiveUsers() Promise~Array~SFDC_User~~
+        +checkCurrentUserPermissions() boolean~
+        +getActiveUsers() Array~SFDC_User~
+        +getApexClasses(namespace) Array~SFDC_ApexClass~
+        +getApexTests(namespace) Array~SFDC_ApexClass~
+        +getApexTriggers(namespace) Array~SFDC_ApexTrigger~
+        +getApexUncompiled(namespace) Array~SFDC_ApexClass~
+        +getApplicationPermissionsPerParent(namespace) DataMatrix~
+        +getBrowsers() Array~SFDC_Browser~
+        +getChatterGroups() Array~SFDC_CollaborationGroup~
+        +getCustomFields(namespace, sobjectType, sobject) Array~SFDC_Field~
+        +getCustomLabels(namespace) Array~SFDC_CustomLabel~
+        +getCustomTabs(namespace) Array~SFDC_CustomLabel~
+        +getDashboards() Array~SFDC_Dashboard~
+        +getDocuments(namespace) Array~SFDC_Document~
+        +getEmailTemplates(namespace) Array~SFDC_EmailTemplate~
+        +getFieldPermissionsPerParent(sobject, namespace) DataMatrix~
+        +getFlows() Array~SFDC_Flow~
+        +getGlobalView() Map~string, DataCollectionStatistics~
+        +getHardcodedURLsView() Map~string, DataCollectionStatistics~
+        +getHomePageComponents() Array~SFDC_HomePageComponent~
+        +getKnowledgeArticles() Array~SFDC_KnowledgeArticle~
+        +getLightningAuraComponents(namespace) Array~SFDC_LightningAuraComponent~
+        +getLightningPages(namespace) Array~SFDC_LightningPage~
+        +getLightningWebComponents(namespace) Array~SFDC_LightningWebComponent~
+        +getObject(sobject) SFDC_Object~
+        +getObjectPermissionsPerParent(namespace) DataMatrix~
+        +getObjects(namespace, sobjectType) Array~SFDC_Object~
+        +getObjectTypes() Array~SFDC_ObjectType~
+        +getPackages() Array~SFDC_Package~
+        +getPageLayouts(namespace, sobjectType, sobject) Array~SFDC_PageLayout~
+        +getPermissionSetLicenses() Array~SFDC_PermissionSetLicense~
+        +getPermissionSets(namespace) Array~SFDC_PermissionSet~
+        +getProcessBuilders() Array~SFDC_Flow~
+        +getProfilePasswordPolicies() Array~SFDC_ProfilePasswordPolicy~
+        +getProfileRestrictions(namespace) Array~SFDC_ProfileRestrictions~
+        +getProfiles(namespace) Array~SFDC_Profile~
+        +getPublicGroups() Array~SFDC_Group~
+        +getQueues() Array~SFDC_Group~
+        +getRecordTypes(namespace, sobjectType, sobject) Array~SFDC_RecordType~
+        +getReports() Array~SFDC_Report~
+        +getRoles() Array~SFDC_UserRole~
+        +getRolesTree() SFDC_UserRole~
+        +getStaticResources(namespace) Array~SFDC_StaticResource~
+        +getValidationRules(namespace, sobjectType, sobject) Array~SFDC_ValidationRule~
+        +getVisualForceComponents(namespace) Array~SFDC_VisualForceComponent~
+        +getVisualForcePages(namespace) Array~SFDC_VisualForcePage~
+        +getWeblinks(namespace, sobjectType, sobject) Array~SFDC_WebLink~
+        +getWorkflows() Array~SFDC_Workflow~
         +removeAllActiveUsersFromCache()
-        +getBrowsers() Promise~Array~SFDC_Browser~~
-        +removeAllBrowsersFromCache()
-        +getCustomLabels(namespace) Promise~Array~SFDC_CustomLabel~~
-        +removeAllCustomLabelsFromCache()
-        +getCustomTabs(namespace) Promise~Array~SFDC_CustomLabel~~
-        +removeAllCustomTabsFromCache()
-        +getDocuments(namespace) Promise~Array~SFDC_Document~~
-        +removeAllDocumentsFromCache()
-        +getLightningWebComponents(namespace) Promise~Array~SFDC_LightningWebComponent~~
-        +removeAllLightningWebComponentsFromCache()
-        +getLightningAuraComponents(namespace) Promise~Array~SFDC_LightningAuraComponent~~
-        +removeAllLightningAuraComponentsFromCache()
-        +getLightningPages(namespace) Promise~Array~SFDC_LightningPage~~
-        +removeAllLightningPagesFromCache()
-        +getVisualForceComponents(namespace) Promise~Array~SFDC_VisualForceComponent~~
-        +removeAllVisualForceComponentsFromCache()
-        +getVisualForcePages(namespace) Promise~Array~SFDC_VisualForcePage~~
-        +removeAllVisualForcePagesFromCache()
-        +getPublicGroups() Promise~Array~SFDC_Group~~
-        +removeAllPublicGroupsFromCache()
-        +getQueues() Promise~Array~SFDC_Group~~
-        +removeAllQueuesFromCache()
-        +getApexClasses(namespace) Promise~Array~SFDC_ApexClass~~
         +removeAllApexClassesFromCache()
-        +getApexTests(namespace) Promise~Array~SFDC_ApexClass~~
         +removeAllApexTestsFromCache()
-        +getApexUncompiled(namespace) Promise~Array~SFDC_ApexClass~~
-        +removeAllApexUncompiledFromCache()
-        +getApexTriggers(namespace) Promise~Array~SFDC_ApexTrigger~~
         +removeAllApexTriggersFromCache()
-        +getRoles() Promise~Array~SFDC_UserRole~~
-        +removeAllRolesFromCache()
-        +getRolesTree() Promise~SFDC_UserRole~
-        +getStaticResources(namespace) Promise~Array~SFDC_StaticResource~~
-        +removeAllStaticResourcesFromCache()
-        +getWeblinks(namespace, sobjectType, sobject) Promise~Array~SFDC_WebLink~~
-        +removeAllWeblinksFromCache()
-        +getWorkflows() Promise~Array~SFDC_Workflow~~
-        +removeAllWorkflowsFromCache()
-        +getRecordTypes(namespace, sobjectType, sobject) Promise~Array~SFDC_RecordType~~
-        +removeAllRecordTypesFromCache()
-        +getFieldPermissionsPerParent(sobject, namespace) Promise~DataMatrix~
-        +removeAllFieldPermissionsFromCache()
-        +getFlows() Promise~Array~SFDC_Flow~~
-        +removeAllFlowsFromCache()
-        +getEmailTemplates(namespace) Promise~Array~SFDC_EmailTemplate~~
-        +removeAllEmailTemplatesFromCache()
-        +getHomePageComponents() Promise~Array~SFDC_HomePageComponent~~
-        +removeAllHomePageComponentsFromCache()
-        +getProcessBuilders() Promise~Array~SFDC_Flow~~
-        +removeAllProcessBuildersFromCache()
-        +getValidationRules(namespace, sobjectType, sobject) Promise~Array~SFDC_ValidationRule~~
-        +removeAllValidationRulesFromCache()
-        +getDashboards() Promise~Array~SFDC_Dashboard~~
+        +removeAllApexUncompiledFromCache()
+        +removeAllAppPermissionsFromCache()
+        +removeAllBrowsersFromCache()
+        +removeAllChatterGroupsFromCache()
+        +removeAllCustomFieldsFromCache()
+        +removeAllCustomLabelsFromCache()
+        +removeAllCustomTabsFromCache()
         +removeAllDashboardsFromCache()
-        +getReports() Promise~Array~SFDC_Report~~
+        +removeAllDocumentsFromCache()
+        +removeAllEmailTemplatesFromCache()
+        +removeAllFieldPermissionsFromCache()
+        +removeAllFlowsFromCache()
+        +removeAllHomePageComponentsFromCache()
+        +removeAllKnowledgeArticlesFromCache()
+        +removeAllLightningAuraComponentsFromCache()
+        +removeAllLightningPagesFromCache()
+        +removeAllLightningWebComponentsFromCache()
+        +removeAllObjectPermissionsFromCache()
+        +removeAllObjectsFromCache()
+        +removeAllPackagesFromCache()
+        +removeAllPageLayoutsFromCache()
+        +removeAllPermSetLicensesFromCache()
+        +removeAllPermSetsFromCache()
+        +removeAllProcessBuildersFromCache()
+        +removeAllProfilePasswordPoliciesFromCache()
+        +removeAllProfileRestrictionsFromCache()
+        +removeAllProfilesFromCache()
+        +removeAllPublicGroupsFromCache()
+        +removeAllQueuesFromCache()
+        +removeAllRecordTypesFromCache()
         +removeAllReportsFromCache()
-        +getGlobalView() Promise~Map~string, DataCollectionStatistics~~
+        +removeAllRolesFromCache()
+        +removeAllStaticResourcesFromCache()
+        +removeAllValidationRulesFromCache()
+        +removeAllVisualForceComponentsFromCache()
+        +removeAllVisualForcePagesFromCache()
+        +removeAllWeblinksFromCache()
+        +removeAllWorkflowsFromCache()
         +removeGlobalViewFromCache()
-        +getHardcodedURLsView() Promise~Map~string, DataCollectionStatistics~~
         +removeHardcodedURLsFromCache()
+        +removeObjectFromCache(sobject)
     }
     
-    %% Relationships
     DatasetManager --> DatasetManagerIntf : implements
     Dataset --> DatasetManagerIntf : extends
     DataFactory --> DataFactoryIntf : implements
@@ -332,5 +334,6 @@ classDiagram
     API --> DataFactoryIntf : uses
     API --> SalesforceManagerIntf : uses
     API --> LoggerIntf : uses
+}
 ```
 
