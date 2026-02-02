@@ -10,6 +10,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
     <![endif]-->
     {% include head-custom.html %}
+    {% if page.mermaid %}
+    <script type="text/javascript" src="https://unpkg.com/mermaid@11.12.2/dist/mermaid.core.mjs"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function(event) { 
+        mermaid.initialize({ theme: 'forest' }); 
+      });
+    </script>
+    {% endif %}
   </head>
   <body>
     <div class="wrapper">
