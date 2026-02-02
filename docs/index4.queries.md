@@ -219,15 +219,14 @@ FROM CollaborationGroup
 Source: [build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-currentuserpermissions.js)
 
 ### SOQL Queries
-##---
 
-
-## Queries on UserPermissionAccess
+#### Query on UserPermissionAccess
 We perform an SOQL by permission we are interested in (see `field`). In some case, if
  the permission is not available in the org, we assume `false`and it does not block 
  us from getting the other permissions.
 ```
-SELECT Permissions<field> FROM UserPermissionAccess
+SELECT Permissions<field> 
+FROM UserPermissionAccess
 ```
 
 ---
@@ -243,7 +242,7 @@ Source: [build/src/api/dataset/orgcheck-api-dataset-customfields.js](https://git
 SELECT Id, EntityDefinition.QualifiedApiName, EntityDefinition.IsCustomSetting,
    EntityDefinition.KeyPrefix 
 FROM CustomField 
-WHERE ManageableState IN ('installedEditable', 'unmanaged')`
+WHERE ManageableState IN ('installedEditable', 'unmanaged')
 ```
 
 ### Tooling Composite + Tooling SOQL
@@ -579,7 +578,7 @@ RETURNING KnowledgeArticleVersion (Id, KnowledgeArticleId, ArticleNumber,
 
 
 ## Queries performed by the Aura Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lighntingauracomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lighntingauracomponents.js)
+Source: [build/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningauracomponents.js)
 
 ### Tooling SOQL Queries
 
@@ -595,7 +594,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the Lightning Pages dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lighntingpages.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lighntingpages.js)
+Source: [build/src/api/dataset/orgcheck-api-dataset-lightningpages.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningpages.js)
 
 ### Tooling SOQL Queries
 
@@ -611,7 +610,7 @@ WHERE ManageableState IN ('installedEditable', 'unmanaged')
 
 
 ## Queries performed by the Lightning Web Components dataset
-Source: [build/src/api/dataset/orgcheck-api-dataset-lighntingwebcomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lighntingwebcomponents.js)
+Source: [build/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-lightningwebcomponents.js)
 
 ### Tooling SOQL Queries
 
@@ -739,7 +738,7 @@ GROUP BY EntityDefinitionId
 
 ## Queries performed by the Object Types dataset
 Source: [build/src/api/dataset/orgcheck-api-dataset-objecttypes.js](https://github.com/SalesforceLabs/OrgCheck/blob/main/build/src/api/dataset/orgcheck-api-dataset-objecttypes.js)
-<br />
+
 Not accessing any data
 
 ---

@@ -11,9 +11,9 @@ import { DatasetDocuments } from '../../../src/api/dataset/orgcheck-api-dataset-
 import { DatasetFieldPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-fieldpermissions';
 import { DatasetFlows } from '../../../src/api/dataset/orgcheck-api-dataset-flows';
 import { DatasetGroups } from '../../../src/api/dataset/orgcheck-api-dataset-groups';
-import { DatasetLightningAuraComponents } from '../../../src/api/dataset/orgcheck-api-dataset-lighntingauracomponents';
-import { DatasetLightningPages } from '../../../src/api/dataset/orgcheck-api-dataset-lighntingpages';
-import { DatasetLightningWebComponents } from '../../../src/api/dataset/orgcheck-api-dataset-lighntingwebcomponents';
+import { DatasetLightningAuraComponents } from '../../../src/api/dataset/orgcheck-api-dataset-lightningauracomponents';
+import { DatasetLightningPages } from '../../../src/api/dataset/orgcheck-api-dataset-lightningpages';
+import { DatasetLightningWebComponents } from '../../../src/api/dataset/orgcheck-api-dataset-lightningwebcomponents';
 import { DatasetObject } from '../../../src/api/dataset/orgcheck-api-dataset-object';
 import { DatasetObjectPermissions } from '../../../src/api/dataset/orgcheck-api-dataset-objectpermissions';
 import { DatasetObjects } from '../../../src/api/dataset/orgcheck-api-dataset-objects';
