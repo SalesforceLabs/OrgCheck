@@ -10,7 +10,9 @@ permalink: /diagrams/
 
 ```mermaid
 classDiagram
-namespace Core {
+
+namespace orgcheck.api.core {
+
     class DatasetManagerIntf {
         <<interface>>
         +run(datasets) Map~string, any~
@@ -100,14 +102,14 @@ namespace Core {
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
         +soqlQuery(queries, logger) Array~Array~any~
         +soslQuery(queries, logger) Array~Array~any~
-        +dependenciesQuery(ids, logger) { records: Array~any~, errors: Array~string~ }~
+        +dependenciesQuery(ids, logger) any
         +readMetadata(metadatas, logger) Map~string, Array~any~
         +readMetadataAtScale(type, ids, byPasses, logger) Array~any~
         +describeGlobal(logger) Array~any~
         +describe(sobjectDevName, logger) any~
         +recordCount(sobjectDevName, logger) number~
         +runAllTests(logger) string~
-        +compileClasses(apexClassIds, logger) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
+        +compileClasses(apexClassIds, logger) Map~string, any~
     }
     
     class SalesforceManager {
@@ -118,16 +120,15 @@ namespace Core {
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
         +soqlQuery(queries, logger) Array~Array~any~
         +soslQuery(queries, logger) Array~Array~any~
-        +dependenciesQuery(ids, logger) { records: Array~any~, errors: Array~string~ }~
+        +dependenciesQuery(ids, logger) any
         +readMetadata(metadatas, logger) Map~string, Array~any~
         +readMetadataAtScale(type, ids, byPasses, logger) Array~any~
         +describeGlobal(logger) Array~any~
         +describe(sobjectDevName, logger) any~
         +recordCount(sobjectDevName, logger) number~
         +runAllTests(logger) string~
-        +compileClasses(apexClassIds, logger) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
+        +compileClasses(apexClassIds, logger) Map~string, any~
     }
-    
     class Data {
         <<abstract>>
         +label() string
@@ -146,7 +147,8 @@ namespace Core {
     }
 }
 
-namespace Data {
+namespace orgcheck.api.data {
+
     class SFDC_ApexClass {
         +id string
         +name string
@@ -198,16 +200,18 @@ namespace Data {
         +queryRowsConsumption number
         +dmlRowsConsumption number
         +dmlConsumption number
-    }    
+    }
 }
 
-namespace Dataset {
+namespace orgcheck.api.dataset {
+
     class DatasetApexClasses {
         +run(sfdcManager, dataFactory, logger) Map~string, SFDC_ApexClass~
     }
 }
 
-namespace OrgCheck {
+namespace orgcheck.api {
+
     class API {
         +version string
         +salesforceApiVersion number
@@ -217,7 +221,7 @@ namespace OrgCheck {
         +getAllScoreRulesAsDataMatrix() DataMatrix
         +dailyApiRequestLimitInformation() SalesforceUsageInformation
         +runAllTestsAsync() string~
-        +compileClasses(apexClassIds) Map~string, { isSuccess: boolean, reasons?: Array~string~ }~
+        +compileClasses(apexClassIds) Map~string, any~
         +getOrganizationInformation() SFDC_Organization~
         +checkUsageTerms() boolean~
         +wereUsageTermsAcceptedManually() boolean
@@ -270,70 +274,24 @@ namespace OrgCheck {
         +getVisualForcePages(namespace) Array~SFDC_VisualForcePage~
         +getWeblinks(namespace, sobjectType, sobject) Array~SFDC_WebLink~
         +getWorkflows() Array~SFDC_Workflow~
-        +removeAllActiveUsersFromCache()
-        +removeAllApexClassesFromCache()
-        +removeAllApexTestsFromCache()
-        +removeAllApexTriggersFromCache()
-        +removeAllApexUncompiledFromCache()
-        +removeAllAppPermissionsFromCache()
-        +removeAllBrowsersFromCache()
-        +removeAllChatterGroupsFromCache()
-        +removeAllCustomFieldsFromCache()
-        +removeAllCustomLabelsFromCache()
-        +removeAllCustomTabsFromCache()
-        +removeAllDashboardsFromCache()
-        +removeAllDocumentsFromCache()
-        +removeAllEmailTemplatesFromCache()
-        +removeAllFieldPermissionsFromCache()
-        +removeAllFlowsFromCache()
-        +removeAllHomePageComponentsFromCache()
-        +removeAllKnowledgeArticlesFromCache()
-        +removeAllLightningAuraComponentsFromCache()
-        +removeAllLightningPagesFromCache()
-        +removeAllLightningWebComponentsFromCache()
-        +removeAllObjectPermissionsFromCache()
-        +removeAllObjectsFromCache()
-        +removeAllPackagesFromCache()
-        +removeAllPageLayoutsFromCache()
-        +removeAllPermSetLicensesFromCache()
-        +removeAllPermSetsFromCache()
-        +removeAllProcessBuildersFromCache()
-        +removeAllProfilePasswordPoliciesFromCache()
-        +removeAllProfileRestrictionsFromCache()
-        +removeAllProfilesFromCache()
-        +removeAllPublicGroupsFromCache()
-        +removeAllQueuesFromCache()
-        +removeAllRecordTypesFromCache()
-        +removeAllReportsFromCache()
-        +removeAllRolesFromCache()
-        +removeAllStaticResourcesFromCache()
-        +removeAllValidationRulesFromCache()
-        +removeAllVisualForceComponentsFromCache()
-        +removeAllVisualForcePagesFromCache()
-        +removeAllWeblinksFromCache()
-        +removeAllWorkflowsFromCache()
-        +removeGlobalViewFromCache()
-        +removeHardcodedURLsFromCache()
-        +removeObjectFromCache(sobject)
     }
-    
-    DatasetManager --> DatasetManagerIntf : implements
-    Dataset --> DatasetManagerIntf : extends
-    DataFactory --> DataFactoryIntf : implements
-    DataFactoryInstance --> DataFactoryInstanceIntf : implements
-    DataCacheManager --> DataCacheManagerIntf : implements
-    Logger --> LoggerIntf : implements
-    Logger --> BasicLoggerIntf : implements
-    SalesforceManager --> SalesforceManagerIntf : implements
-    DataWithDependencies --> Data : extends
-    DataWithoutScoring --> Data : extends
-    SFDC_ApexClass --> DataWithDependencies : extends
-    SFDC_ApexTestMethodResult --> DataWithoutScoring : extends
-    DatasetApexClasses --> Dataset : extends
-    API --> DatasetManagerIntf : uses
-    API --> DataFactoryIntf : uses
-    API --> SalesforceManagerIntf : uses
-    API --> LoggerIntf : uses
 }
-```
 
+DatasetManagerIntf <|-- DatasetManager : implements
+DatasetIntf <|-- DatasetManager  : extends
+DataFactoryIntf <|-- DataFactory : implements
+DataFactoryInstanceIntf <|-- DataFactoryInstance : implements
+DataCacheManagerIntf <|-- DataCacheManager : implements
+LoggerIntf <|-- Logger : implements
+Logger <|-- BasicLoggerIntf : implements
+SalesforceManagerIntf <|-- SalesforceManager : implements
+DataWithDependencies <|-- Data : extends
+DataWithoutScoring <|-- Data : extends
+DataWithDependencies <|-- SFDC_ApexClass : extends
+DataWithoutScoring <|-- SFDC_ApexTestMethodResult : extends
+Dataset <|-- DatasetApexClasses : extends
+API *-- DatasetManagerIntf : composition
+API *-- DataFactoryIntf : composition
+API *-- SalesforceManagerIntf : composition
+API *-- LoggerIntf : composition
+```
