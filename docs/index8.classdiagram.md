@@ -10,10 +10,6 @@ mermaid: true
 ## Overview
 
 ```mermaid
----
-config:
-  layout: tidy-tree
----
 classDiagram
 API *-- RecipeManagerIntf : composition
 API *-- DatasetManagerIntf : composition
