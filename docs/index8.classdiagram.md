@@ -5,7 +5,3 @@ permalink: /diagrams/
 mermaid: true
 ---
 
-# Diagrams
-
-## Class Diagram
-
