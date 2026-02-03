@@ -17,9 +17,10 @@ API *-- SalesforceManagerIntf : composition
 API *-- DataCacheManagerIntf : composition
 API *-- LoggerIntf : composition
 DataCacheManager --|> DataCacheManagerIntf : implements
-DataItemInCache --|> ItemInCache : implements
-MetadataItemInCache --|> ItemInCache : implements
+DataCacheManagerIntf --> DataCacheItem : uses
 Compressor --|> CompressorIntf : implements
+DataCacheManagerIntf --> CompressorIntf : uses
+DataCacheManagerIntf --> StorageIntf : uses
 DataWithDependencies --|> Data : implements
 DataFactory --|> DataFactoryIntf : implements
 DataFactoryInstance --|> DataFactoryInstanceIntf : implements
