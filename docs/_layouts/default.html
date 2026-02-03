@@ -12,7 +12,7 @@
     {% include head-custom.html %}
     {% if page.mermaid %}
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11.12.2/dist/mermaid.min.js"></script>
-    <script>
+    <script type="module">
       mermaid.initialize({ 
         theme: 'forest',
         startOnLoad: false 
