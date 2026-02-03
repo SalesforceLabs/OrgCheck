@@ -60,7 +60,8 @@ classDiagram
         +removeAllPackagesFromCache()
         +getPageLayouts(string namespace, string sobjectType, string sobject) Array~SFDC_PageLayout~
         +removeAllPageLayoutsFromCache()
-        ...
+        +get...()
+        +removeAll...FromCache()
     }
 
 API *-- RecipeManagerIntf : composition
