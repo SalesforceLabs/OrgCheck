@@ -50,7 +50,7 @@ import { SFDC_VisualForceComponent } from './data/orgcheck-api-data-visualforcec
 import { SFDC_VisualForcePage } from './data/orgcheck-api-data-visualforcepage';
 import { SFDC_WebLink } from './data/orgcheck-api-data-weblink';
 import { SFDC_Workflow } from './data/orgcheck-api-data-workflow';
-import { SFDC_Dashboard } from './orgcheck-api-main';
+import { SFDC_CustomTab, SFDC_Dashboard } from './orgcheck-api-main';
 import { Storage } from './core/orgcheck-api-storage-impl';
 import { Compressor } from './core/orgcheck-api-compressor-impl';
 
@@ -697,7 +697,7 @@ export class API {
     /**
      * @description Get information about custom tabs (filtered out by namespace/pakage)
      * @param {string} namespace - the namespace of the package to filter the custom tabs
-     * @returns {Promise<Array<SFDC_CustomLabel>>} List of items to return
+     * @returns {Promise<Array<SFDC_CustomTab>>} List of items to return
      * @throws Exception from recipe manager
      * @async
      * @public
