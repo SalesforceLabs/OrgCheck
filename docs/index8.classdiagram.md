@@ -7,6 +7,31 @@ mermaid: true
 
 # Org Check classes and diagrams
 
+## Overview
+
+```mermaid
+classDiagram
+API *-- RecipeManagerIntf : composition
+API *-- DatasetManagerIntf : composition
+API *-- SalesforceManagerIntf : composition
+API *-- DataCacheManagerIntf : composition
+API *-- LoggerIntf : composition
+DataCacheManager --|> DataCacheManagerIntf : implements
+DataItemInCache --|> ItemInCache : implements
+MetadataItemInCache --|> ItemInCache : implements
+Compressor --|> CompressorIntf : implements
+DataWithDependencies --|> Data : implements
+DataFactory --|> DataFactoryIntf : implements
+DataFactoryInstance --|> DataFactoryInstanceIntf : implements
+DatasetManager --|> DatasetManagerIntf : implements
+Logger --|> LoggerIntf : implements
+LoggerIntf --|> BasicLoggerIntf : implements
+RecipeManager --|> RecipeManagerIntf : implements
+SalesforceManager --|> SalesforceManagerIntf : implements
+SalesforceError --|> Error : implements
+Storage --|> StorageIntf : implements
+```
+
 ## Starting point: the API class!
 
 The starting point in the Org Check api is the `API` class (how original!) located in the 
@@ -38,11 +63,11 @@ classDiagram
         ...
     }
 
-API *-- RecipeManagerIntf : Composition
-API *-- DatasetManagerIntf : Composition
-API *-- SalesforceManagerIntf : Composition
-API *-- DataCacheManagerIntf : Composition
-API *-- LoggerIntf : Composition
+API *-- RecipeManagerIntf : composition
+API *-- DatasetManagerIntf : composition
+API *-- SalesforceManagerIntf : composition
+API *-- DataCacheManagerIntf : composition
+API *-- LoggerIntf : composition
 ```
 
 ### Creation of an instance of the API class
