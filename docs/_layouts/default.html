@@ -14,7 +14,10 @@
     <script type="module" src="https://unpkg.com/mermaid@11.12.2/dist/mermaid.core.mjs"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function(event) { 
-        mermaid.initialize({ theme: 'forest' }); 
+        mermaid.initialize({ 
+          theme: 'forest',
+          querySelector: '.language-mermaid'         
+        });
       });
     </script>
     {% endif %}
