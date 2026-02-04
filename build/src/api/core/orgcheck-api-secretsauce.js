@@ -869,26 +869,10 @@ const ALL_SCORE_RULES = [
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.DOCUMENTATION
     }, {
-        id: 119,
-        description: '[LFS] Cyclomatic Complexity',
-        formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('CyclomaticComplexity') || false,
-        errorMessage: `This flow has high cyclomatic complexity. Consider breaking it into subflows or multiple trigger-ordered flows.`,
-        badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
-        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
-    }, {
         id: 120,
         description: '[LFS] Same Record Field Updates',
         formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('SameRecordFieldUpdates') || false,
         errorMessage: `This before-save flow uses Update Records on $Record. Use direct assignment instead for better performance.`,
-        badField: 'currentVersionRef.lfsViolations',
-        applicable: [ SFDC_Flow ],
-        category: SCORE_RULE_CATEGORIES.CODE_QUALITY
-    }, {
-        id: 121,
-        description: '[LFS] Missing Trigger Order',
-        formula: (/** @type {SFDC_Flow} */ d) => d?.currentVersionRef?.lfsViolations?.includes('TriggerOrder') || false,
-        errorMessage: `This record-triggered flow doesn't have a trigger order specified. Set explicit execution priority.`,
         badField: 'currentVersionRef.lfsViolations',
         applicable: [ SFDC_Flow ],
         category: SCORE_RULE_CATEGORIES.CODE_QUALITY
