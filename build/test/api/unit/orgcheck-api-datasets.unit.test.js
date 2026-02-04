@@ -609,4 +609,52 @@ describe('tests.api.unit.Datasets', () => {
     });
   });
 
+    describe('Specific test for DatasetInternalActiveUsers', () => {  
+    const dataset = new DatasetInternalActiveUsers();
+    it('checks if this dataset class runs correctly', async () => {
+      const sfdcManager = new SfdcManagerMock();
+      sfdcManager.addSoqlQueryResponse('FROM User ', [
+        { Id: '001', Name: 'User is OK', ProfileId: '001', LastLoginDate: new Date(), LastPasswordChangeDate: new Date(), NumberOfFailedLogins: 0, UserPreferencesLightningExperiencePreferred: true, UserPreferencesUserDebugModePref: false },
+        { Id: '002', Name: 'User never logged', ProfileId: '001', LastLoginDate: null, LastPasswordChangeDate: new Date(), NumberOfFailedLogins: 0, UserPreferencesLightningExperiencePreferred: true, UserPreferencesUserDebugModePref: false },
+        { Id: '003', Name: 'User never changed pwd', ProfileId: '001', LastLoginDate: new Date(), LastPasswordChangeDate: null, NumberOfFailedLogins: 0, UserPreferencesLightningExperiencePreferred: true, UserPreferencesUserDebugModePref: false },
+        { Id: '004', Name: 'User has failed logins', ProfileId: '001', LastLoginDate: new Date(), LastPasswordChangeDate: new Date(), NumberOfFailedLogins: 5, UserPreferencesLightningExperiencePreferred: true, UserPreferencesUserDebugModePref: false },
+        { Id: '005', Name: 'User is still under classic', ProfileId: '001', LastLoginDate: new Date(), LastPasswordChangeDate: new Date(), NumberOfFailedLogins: 0, UserPreferencesLightningExperiencePreferred: false, UserPreferencesUserDebugModePref: false },
+        { Id: '006', Name: 'User has debug mode on', ProfileId: '001', LastLoginDate: new Date(), LastPasswordChangeDate: new Date(), NumberOfFailedLogins: 0, UserPreferencesLightningExperiencePreferred: true, UserPreferencesUserDebugModePref: true },
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM LoginHistory ', [
+        { UserId: '001', LoginType: 'Application', Status: 'Success', CntLogins: 92 }, // nbDirectLoginWithoutMFA += 92 for user 001
+        { UserId: '001', LoginType: 'Application', Status: 'Failure', CntLogins: 12 },
+        { UserId: '001', LoginType: 'zz SSO 1', Status: 'Success', CntLogins: 4 }, // nbSSOLogins += 4 for user 001
+        { UserId: '001', LoginType: 'zz SSO 2', Status: 'Success', CntLogins: 9 }, // nbSSOLogins += 9 for user 001
+        { UserId: '001', LoginType: 'zz SSO 2', Status: 'Failure', CntLogins: 1 },
+        { UserId: '002', LoginType: 'Application', Status: 'Success', CntLogins: 1 }, // nbDirectLoginsWithoutMFA += 1 for user 002
+        { UserId: '002', LoginType: 'zz SSO 1', Status: 'Failure', CntLogins: 1 }, 
+        { UserId: '002', LoginType: 'zz SSO 2', Status: 'Success', CntLogins: 2 } // nbSSOLogins += 2 for user 002
+      ]);
+      sfdcManager.addSoqlQueryResponse('FROM VerificationHistory ', [ 
+        { UserId: '001', Policy: 'TwoFactorAuthentication', CntVerifications: 91 }, // nbDirectLoginsWithMFA += 91 for user 001
+        { UserId: '001', Policy: 'other', CntVerifications: 21 },
+        { UserId: '002', Policy: 'TwoFactorAuthentication', CntVerifications: 0 }, // nbDirectLoginsWithMFA += 0 for user 002
+        { UserId: '002', Policy: 'other', CntVerifications: 0 },
+      ]);
+      const dataFactory = new DataFactoryMock();
+      const logger = new SimpleLoggerMock();
+      const results = await dataset.run(sfdcManager, dataFactory, logger);
+      expect(results).toBeDefined();
+      expect(results instanceof Map).toBeTruthy();
+      expect(results.size).toBe(6);
+      expect(results.get('002').lastLogin).toBe(null);
+      expect(results.get('005').onLightningExperience).toBe(false);
+      expect(results.get('006').hasDebugMode).toBe(true);
+      expect(results.get('001').nbDirectLogins).toBe(92);
+      expect(results.get('001').nbDirectLoginsWithMFA).toBe(91);
+      expect(results.get('001').nbDirectLoginsWithoutMFA).toBe(21);
+      expect(results.get('001').nbSSOLogins).toBe(13);
+      expect(results.get('002').nbDirectLogins).toBe(1);
+      expect(results.get('002').nbDirectLoginsWithMFA).toBe(0);
+      expect(results.get('002').nbDirectLoginsWithoutMFA).toBe(0);
+      expect(results.get('002').nbSSOLogins).toBe(2);
+    });
+  });
+
 });

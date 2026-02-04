@@ -38,12 +38,20 @@ export class DatasetInternalActiveUsers extends Dataset {
                     'AND Assignee.ContactId = NULL ' +
                     'AND Assignee.Profile.Id != NULL'
         }, {
-            string: 'SELECT UserId, LoginType, AuthMethodReference, Status, COUNT(Id) CntLogin ' +
+            string: 'SELECT UserId, Status, LoginType, COUNT(Id) CntLogins ' +
                     'FROM LoginHistory ' +
-                    `WHERE (LoginType = 'Application' ` + // Adding parenthesis because we have a OR here
-                    `OR LoginType LIKE '%SSO%') ` +       // and the option 'queryMoreField' will add a final AND
-                    `GROUP BY UserId, LoginType, AuthMethodReference, Status `,
+                    `WHERE (LoginType = 'Application' OR LoginType LIKE '%SSO%') ` + // the option 'queryMoreField' will add a final AND so that's why we have parenthesis here around the OR statement
+                    'GROUP BY UserId, Status, LoginType ' +
+                    'ORDER BY UserId, Status, LoginType ',
             queryMoreField: 'LoginTime' // aggregate does not support calling QueryMore, use the custom instead
+        }, {
+            string: 'SELECT UserId, Policy, COUNT(Id) CntVerifications ' +
+                    'FROM VerificationHistory ' +
+                    `WHERE Activity = 'Login' ` +
+                    `AND Status IN ('AutomatedSuccess', 'Succeeded') ` +
+                    `AND (LoginHistory.LoginType = 'Application')` +
+                    'GROUP BY UserId, Policy ',
+            queryMoreField: 'VerificationTime' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);
 
         // Init the factory and records
@@ -53,6 +61,7 @@ export class DatasetInternalActiveUsers extends Dataset {
         const userRecords = results[0];
         const assignmentRecords = results[1];
         const loginRecords = results[2];
+        const verifRecords = results[3];
         logger?.log(`Parsing ${userRecords.length} users...`);
         const users = new Map(await Processor.map(userRecords, async (/** @type {any} */ record) => {
         
@@ -74,9 +83,10 @@ export class DatasetInternalActiveUsers extends Dataset {
                     isAdminLike: false,
                     hasMfaByPass: false,
                     hasDebugMode: record.UserPreferencesUserDebugModePref === true,
-                    nbDirectLoginWithMFA: 0,
-                    nbDirectLoginWithoutMFA: 0,
-                    nbSSOLogin: 0,
+                    nbDirectLogins: 0,
+                    nbDirectLoginsWithMFA: 0,
+                    nbDirectLoginsWithoutMFA: 0,
+                    nbSSOLogins: 0,
                     url: sfdcManager.setupUrl(id, SalesforceMetadataTypes.USER)
                 }
             });
@@ -123,17 +133,27 @@ export class DatasetInternalActiveUsers extends Dataset {
                     // depending on the login access (direct or sso)
                     if (record.LoginType === 'Application') {
                         // Direct login access via browser
-                        if (record.AuthMethodReference) {
-                            // MFA used from Salesforce
-                            user.nbDirectLoginWithMFA += record.CntLogin;
-                        } else {
-                            // No MFA used from Salesforce
-                            user.nbDirectLoginWithoutMFA += record.CntLogin;
-                        }
+                        user.nbDirectLogins += record.CntLogins;
                     } else {
                         // SSO login access via IDP
-                        user.nbSSOLogin += record.CntLogin;
+                        user.nbSSOLogins += record.CntLogins;
                     }
+                }
+            }
+        });
+
+        // Now process the user verifications aggregates
+        logger?.log(`Parsing ${verifRecords.length} user verifications aggregates...`);
+        await Processor.forEach(verifRecords, (/** @type {any} */ record) => {
+
+            const userId = sfdcManager.caseSafeId(record.UserId);
+            const user = users.get(userId);
+            if (user) {
+                // If MFA is used for internal logins
+                if (record.Policy === 'TwoFactorAuthentication') {
+                    user.nbDirectLoginsWithMFA += record.CntVerifications;
+                } else {
+                    user.nbDirectLoginsWithoutMFA += record.CntVerifications;
                 }
             }
         });

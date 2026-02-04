@@ -125,23 +125,30 @@ export class SFDC_User extends Data {
     permissionSetRefs;
 
     /**
-     * @description Number of direct login without using MFA
+     * @description Number of direct logins to salesforce
      * @type {number}
      * @public
      */
-    nbDirectLoginWithoutMFA;
+    nbDirectLogins;
 
     /**
-     * @description Number of direct login with using MFA
+     * @description Number of direct logins without using MFA
      * @type {number}
      * @public
      */
-    nbDirectLoginWithMFA;
+    nbDirectLoginsWithoutMFA;
 
     /**
-     * @description Number of indirect login via SSO
+     * @description Number of direct logins with using MFA
      * @type {number}
      * @public
      */
-    nbSSOLogin;
+    nbDirectLoginsWithMFA;
+
+    /**
+     * @description Number of indirect logins via SSO
+     * @type {number}
+     * @public
+     */
+    nbSSOLogins;
 }

@@ -693,7 +693,7 @@ const ALL_SCORE_RULES = [
     }, {
         id: 72,
         description: 'User is logging directly without MFA',
-        formula: (/** @type {SFDC_User} */ d) => d.nbDirectLoginWithoutMFA > 0 && d.hasMfaByPass !== true,
+        formula: (/** @type {SFDC_User} */ d) => d.nbDirectLoginsWithoutMFA > 0 && d.hasMfaByPass !== true,
         errorMessage: `This user is logging in directly to Salesforce without using MFA (Multi-Factor Authentication). And this user has not the MFA bypass enabled. Please work with your user to make them use MFA for better security.`,
         badField: 'nbDirectLoginWithoutMFA',
         applicable: [ SFDC_User ],
