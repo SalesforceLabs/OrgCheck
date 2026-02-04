@@ -13,26 +13,26 @@ This document explains the column definitions for each table in the OrgCheck app
 
 | Letter | Sections |
 | ------ | -------- |
-| A | [ApexClasses](#ApexClasses), [ApexTriggers](#ApexTriggers), [AuraComponents](#AuraComponents) |
-| C | [ChatterGroups](#ChatterGroups), [CustomFields](#CustomFields), [CustomFieldsInObject](#CustomFieldsInObject), [CustomLabels](#CustomLabels), [CustomTabs](#CustomTabs) |
-| D | [Dashboards](#Dashboards), [Documents](#Documents) |
-| E | [EmailTemplates](#EmailTemplates)
-| F | [FieldSets](#FieldSets), [Flows](#Flows), [FlexiPagesInObject](#FlexiPagesInObject) |
-| H | [HomePageComponents](#HomePageComponents) |
-| K | [KnowledgeArticles](#KnowledgeArticles) |
-| L | [Layouts](#Layouts), [LightningWebComponents](#LightningWebComponents), [Limits](#Limits) |
+| A | [ApexClasses](#apexclasses), [ApexTriggers](#apextriggers), [AuraComponents](#auracomponents) |
+| C | [ChatterGroups](#chattergroups), [CustomFields](#customfields), [CustomFieldsInObject](#customfieldsinobject), [CustomLabels](#customlabels), [CustomTabs](#customtabs) |
+| D | [Dashboards](#dashboards), [Documents](#documents) |
+| E | [EmailTemplates](#emailtemplates)
+| F | [FieldSets](#fieldsets), [Flows](#flows), [FlexiPagesInObject](#flexipagesinobject) |
+| H | [HomePageComponents](#homepagecomponents) |
+| K | [KnowledgeArticles](#knowledgearticles) |
+| L | [Layouts](#layouts), [LightningWebComponents](#lightningwebcomponents), [Limits](#limits) |
 | O | [Objects](#Objects) |
-| P | [Pages](#Pages), [PermissionSets](#PermissionSets), [ProcessBuilders](#ProcessBuilders), [Profiles](#Profiles) |
-| R | [RecordTypes](#RecordTypes), [RecordTypesInObject](#RecordTypesInObject), [Reports](#Reports), [Roles](#Roles) |
-| S | [StaticResources](#StaticResources) |
-| U | [Users](#Users) |
-| V | [ValidationRules](#ValidationRules) |
-| W | [Workflows](#Workflows) |
+| P | [Pages](#pages), [PermissionSets](#permissionsets), [ProcessBuilders](#processbuilders), [Profiles](#profiles) |
+| R | [RecordTypes](#recordtypes), [RecordTypesInObject](#recordtypesinobject), [Reports](#reports), [Roles](#roles) |
+| S | [StaticResources](#staticresources) |
+| U | [Users](#users) |
+| V | [ValidationRules](#validationrules) |
+| W | [Workflows](#workflows) |
 
 
 
 ## ApexClasses
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -66,7 +66,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Modified date | Date Time | Date when the Apex class was last modified |
 
 ## ApexTriggers
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -96,7 +96,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Modified date | Date Time | Date when the Apex trigger was last modified |
 
 ## AuraComponents
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -113,7 +113,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the Aura component |
 
 ## ChatterGroups
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -125,7 +125,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Hardcoded IDs | List of strings | List of hardcoded IDs |
 
 ## CustomFields
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -160,7 +160,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the custom field |
 
 ## CustomFieldsInObject
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -192,7 +192,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the custom field |
 
 ## CustomLabels
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -215,7 +215,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Value | String | Value of the custom label |
 
 ## CustomTabs
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -234,7 +234,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the custom tab |
 
 ## Dashboards
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -253,7 +253,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Folder | String | Folder containing the dashboard |
 
 ## Documents
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -270,7 +270,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the document |
 
 ## EmailTemplates
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -292,7 +292,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the email template |
 
 ## FieldSets
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -301,7 +301,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the field set |
 
 ## Flows
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -336,7 +336,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Dependencies | Link | Link to the dependencies modal |
 
 ## FlexiPagesInObject
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -358,7 +358,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the flexi page |
 
 ## HomePageComponents
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -376,7 +376,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Dependencies | Link | Link to the dependencies modal |
 
 ## KnowledgeArticles
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -391,7 +391,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Modified date | Date Time | Date when the knowledge article was last modified |
 
 ## Layouts
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -400,7 +400,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Type | String | Type of the page layout |
 
 ## LightningWebComponents
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -417,7 +417,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the Lightning web component |
 
 ## Limits
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -431,7 +431,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Remaining | Numeric | Remaining value |
 
 ## Objects
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -450,7 +450,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | External OWD | String | External organization-wide default |
 
 ## Pages
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -473,7 +473,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the page |
 
 ## PermissionSets
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -502,7 +502,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the permission set |
 
 ## ProcessBuilders
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -534,7 +534,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Dependencies | Link | Link to the dependencies modal |
 
 ## Profiles
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -559,7 +559,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the profile |
 
 ## RecordTypes
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -576,7 +576,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Is Master | Boolean | Indicates if the record type is master |
 
 ## RecordTypesInObject
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -590,7 +590,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Is Master | Boolean | Indicates if the record type is master |
 
 ## Reports
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -609,7 +609,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Folder | String | Folder containing the report |
 
 ## Roles
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -622,7 +622,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Parent | Link | Link to the parent role |
 
 ## StaticResources
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -639,7 +639,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Description | String | Description of the static resource |
 
 ## Users
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -672,7 +672,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Permission Sets | List of URLs | Links to permission sets |
 
 ## ValidationRules
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
@@ -691,7 +691,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Modified date | Date Time | Date when the validation rule was last modified |
 
 ## Workflows
-[Back to top](#Table%20of%20Contents)
+[Back to top](#table-of-contents)
 
 | Column Label | Column Type | Description |
 |--------------|-------------|-------------|
