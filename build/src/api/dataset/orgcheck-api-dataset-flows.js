@@ -7,6 +7,18 @@ import { SalesforceManagerIntf } from '../core/orgcheck-api-salesforcemanager';
 import { SFDC_Flow, SFDC_FlowVersion } from '../data/orgcheck-api-data-flow';
 import { LFSScanner } from '../scanner/orgcheck-api-lfs-scanner';
 
+// Limited list of known types of Flow ProcessType
+// see all the list at https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_visual_workflow.htm
+const PROCESSTYPE_TRANSLATION = { 
+    'ApprovalWorkflow': 'Approval Workflow',
+    'AutoLaunchedFlow': 'Auto-Launched Flow',
+    'Flow': 'Screen Flow',
+    'InvocableProcess': 'Invocable Process',
+    'LoginFlow': 'Login Flow',
+    'Survey': 'Survey',
+    'Workflow': 'Process Builder'
+};
+
 export class DatasetFlows extends Dataset {
 
     /**
@@ -151,7 +163,7 @@ export class DatasetFlows extends Dataset {
                     recordTriggerType: record.Metadata.start?.recordTriggerType || '',
                     isActive: record.Status === 'Active',
                     description: record.Description,
-                    type: record.ProcessType,
+                    type: PROCESSTYPE_TRANSLATION[record.ProcessType] || `Other (${record.ProcessType})`,
                     isProcessBuilder: record.ProcessType === 'Workflow',
                     isScreenFlow: record.ProcessType === 'Flow',
                     runningMode: record.RunInMode,

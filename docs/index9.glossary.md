@@ -309,7 +309,7 @@ This document explains the column definitions for each table in the OrgCheck app
 | Score | Score | Score assigned to the flow |
 | Name | Link | Link to the flow |
 | API Version | Numeric | API version of the flow |
-| Type | String | Type of the flow |
+| Type | String | Type of the flow (Approval Workflow, Auto-Launched Flow, Screen Flow, Invocable Process, Login Flow, Survey, Process Builder or Other |
 | Number of versions | Numeric | Number of versions |
 | Current Version | Link | Link to the current version |
 | Is it Active? | Boolean | Indicates if the current version is active |
