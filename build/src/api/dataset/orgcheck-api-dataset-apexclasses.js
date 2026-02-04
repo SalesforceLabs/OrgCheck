@@ -70,7 +70,7 @@ export class DatasetApexClasses extends Dataset {
                         `WHERE ApexClassOrTriggerId IN (${subsetIds}) `+
                         `AND ApexTestClass.ManageableState IN ('installedEditable', 'unmanaged') `+
                         'GROUP BY ApexClassOrTriggerId, ApexTestClassId ',
-                queryMoreField: 'CreatedDate',
+                queryMoreField: 'CreatedDate', 
                 tooling: true
             });
             apexCodeCoverageAggQueries.push({

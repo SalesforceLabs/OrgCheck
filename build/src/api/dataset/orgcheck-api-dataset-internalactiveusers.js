@@ -41,15 +41,14 @@ export class DatasetInternalActiveUsers extends Dataset {
             string: 'SELECT UserId, Status, LoginType, COUNT(Id) CntLogins ' +
                     'FROM LoginHistory ' +
                     `WHERE (LoginType = 'Application' OR LoginType LIKE '%SSO%') ` + // the option 'queryMoreField' will add a final AND so that's why we have parenthesis here around the OR statement
-                    'GROUP BY UserId, Status, LoginType ' +
-                    'ORDER BY UserId, Status, LoginType ',
+                    'GROUP BY UserId, Status, LoginType ',
             queryMoreField: 'LoginTime' // aggregate does not support calling QueryMore, use the custom instead
         }, {
             string: 'SELECT UserId, Policy, COUNT(Id) CntVerifications ' +
                     'FROM VerificationHistory ' +
                     `WHERE Activity = 'Login' ` +
                     `AND Status IN ('AutomatedSuccess', 'Succeeded') ` +
-                    `AND (LoginHistory.LoginType = 'Application')` +
+                    `AND (LoginHistory.LoginType = 'Application') ` +
                     'GROUP BY UserId, Policy ',
             queryMoreField: 'VerificationTime' // aggregate does not support calling QueryMore, use the custom instead
         }], logger);
