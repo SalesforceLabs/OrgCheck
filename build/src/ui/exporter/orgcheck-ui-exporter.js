@@ -12,7 +12,7 @@ export class Exporter {
      */
     static exportAsXls(source) {
         // @ts-ignore
-        const xlsx = globalThis?.XLSX ?? null;
+        const xlsx = window?.XLSX ?? globalThis?.XLSX ?? null;
         if (!xlsx) {
             throw new Error('XLSX not available, skipping XLS export');
         }

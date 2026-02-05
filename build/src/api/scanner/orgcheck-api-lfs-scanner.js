@@ -42,38 +42,33 @@ export class LFSScanner {
      * @returns {Promise<Map<string, Array<any>>>} Map of flow version ID to LFS violations
      */
     static async scanFlows(flowRecords, CaseSafeId) {
+        let results = new Map();
         try {
             // @ts-ignore
-            const lfsCore = globalThis?.lightningflowscanner ?? null;
+            const lfsCore = window?.lightningflowscanner ?? globalThis?.lightningflowscanner ?? null;
+            if (lfsCore) {
+                // Convert flow records to LFS format
+                const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
+                    .map(record => {
+                        /** @type {string} */
+                        const id15 = CaseSafeId(record.Id);
+                        return {
+                            uri: id15,
+                            flow: new lfsCore.Flow(id15, this.normalizeMetadata(record.Metadata))
+                        };
+                    });
 
-            if (!lfsCore) {
-                // console.warn('LFS_Core.js not available, skipping LFS scanning');
-                return new Map();
+                // Scan flows
+                const scanResults = lfsCore.scan(lfsFlows);
+
+                // Map results: flowVersionId -> violations
+                results = this.mapResults(scanResults);
             }
 
-            const { Flow, scan } = lfsCore;
-
-            // Convert flow records to LFS format
-            const lfsFlows = flowRecords.filter(record => record.Metadata) // only if flows have metadata!
-                .map(record => {
-                    /** @type {string} */
-                    const id15 = CaseSafeId(record.Id);
-                    return {
-                        uri: id15,
-                        flow: new Flow(id15, this.normalizeMetadata(record.Metadata))
-                    };
-                });
-
-            // Scan flows
-            const scanResults = scan(lfsFlows);
-
-            // Map results: flowVersionId -> violations
-            return this.mapResults(scanResults);
-
         } catch (error) {
-            console.error('Error scanning flows with LFS: ', error?.message || JSON.stringify(error));
-            return new Map();
+            console.info(`Error scanning flows with LFS: returning an empty map (error: ${error?.message})`);
         }
+        return results;
     }
 
     /**

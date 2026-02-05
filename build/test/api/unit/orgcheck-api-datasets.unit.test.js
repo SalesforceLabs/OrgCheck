@@ -116,6 +116,12 @@ class SimpleLoggerMock extends SimpleLoggerIntf {
 describe('tests.api.unit.Datasets', () => {
 
   describe('Basic test for all datasets', () => {
+    // Mocking Lightning Flow Scanner to avoid errors in tests for datasets that do
+    //  not use it, but still test that the integration does not cause issues
+    window.lightningflowscanner = {
+      Flow: function() { return {}; },
+      scan: function() { return [];}
+    }; 
     [
       DatasetApexClasses, DatasetApexTriggers, DatasetAppPermissions, 
       DatasetCurrentUserPermissions, DatasetCustomFields, 

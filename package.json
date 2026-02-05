@@ -18,6 +18,7 @@
     "scan:api": "sf code-analyzer run --target ./build/src/api --output-file /tmp/orgcheck-api-scan.html; open /tmp/orgcheck-api-scan.html",
     "scan:ui": "sf code-analyzer run --target ./build/src/ui --output-file /tmp/orgcheck-ui-scan.html; open /tmp/orgcheck-ui-scan.html",
     "scan:lwc": "sf code-analyzer run --target './force-app/main/default/lwc/*/*.js' --output-file /tmp/orgcheck-lwc-scan.html; open /tmp/orgcheck-lwc-scan.html",
+    "scan:securityreview": "sf code-analyzer run --rule-selector AppExchange --rule-selector Recommended:Security --output-file /tmp/orgcheck-security-scan.html; open /tmp/orgcheck-security-scan.html",
     "sf:open": "sf force org open",
     "sf:clean": "sf project deploy start --metadata-dir manifest/destructive",
     "git:clean": "git remote update origin --prune; git branch -vv | grep 'gone]' | awk '{print $1}' | xargs git branch -D ",
