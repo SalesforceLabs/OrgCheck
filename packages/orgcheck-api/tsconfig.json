@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "esModuleInterop": true,
+        "lib": [ 
+            "ES2021.String" // string.prototype.replaceAll is only available in ES2021 and later
+        ],
+        "baseUrl": "./",
+        "paths": {
+            "tslib" : ["node_modules/tslib/tslib.d.ts"]
+        },
+    },
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ],
+}
